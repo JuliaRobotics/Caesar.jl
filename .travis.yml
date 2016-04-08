@@ -1,0 +1,11 @@
+language: julia
+os:
+  - linux
+julia:
+  - release
+  - nightly
+notifications:
+  email: false
+
+after_success:
+  - julia -e 'cd(Pkg.dir("Caesar")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
