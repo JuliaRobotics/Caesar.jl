@@ -1,6 +1,9 @@
 julia 0.4
 Gadfly
+Colors
 PyCall
+JLD
+HDF5
 iSAM
 RoME
 PyLCM
