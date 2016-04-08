@@ -1,8 +1,13 @@
 module Caesar
 
-using Gadfly, RoME, iSAM #, PyLCM
+using
+  IncrementalInference,
+  RoME,
+  Gadfly,
+  Colors,
+  JLD,
+  HDF5
 
-using JLD, HDF5
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
 
 export
@@ -21,9 +26,13 @@ export
   progressExamplePlot,
   plotTrckStep
 
+
+
+
+include("VictoriaParkTypes.jl")
+# using VictoriaParkTypes
 include("VictoriaParkSystem.jl")
 include("VicPrkEstimator.jl")
-
 
 
 end

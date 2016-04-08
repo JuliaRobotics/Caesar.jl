@@ -75,7 +75,7 @@ end
 
 
 
-function processTreeTrackersUpdates!(instSys::InSituSystem, lsrFeats::Dict{Int64,VictoriaParkTypes.LaserFeatures},
+function processTreeTrackersUpdates!(instSys::InSituSystem, lsrFeats::Dict{Int64,LaserFeatures},
                                     Ts::Float64, b1Dxb::Array{Float64,1}, DBG=Union{}; dbgflag=true)
   propAllTrackers!(instSys.trackers, b1Dxb, [0.05;0.05;0.004])
   newlsridx, Ta = getFeatsAtT(lsrFeats, Ts, prev=instSys.lstlaseridx)
@@ -93,7 +93,7 @@ function processTreeTrackersUpdates!(instSys::InSituSystem, lsrFeats::Dict{Int64
   nothing
 end
 
-function advOdoByRules(DRS::Array{Float64,2}, lsrFeats::Dict{Int64,VictoriaParkTypes.LaserFeatures};
+function advOdoByRules(DRS::Array{Float64,2}, lsrFeats::Dict{Int64,LaserFeatures};
                         distrule=20.0, timerule=30.0, yawrule=pi/3.0, trkfeats=true)
   # DBG = Dict{Int,Dict{Int64,Array{BallTreeDensity,1}}}()
   # DBG = Dict{Int,Dict{Int64,Feature}}()

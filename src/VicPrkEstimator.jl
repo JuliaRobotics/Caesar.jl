@@ -1,9 +1,9 @@
-include("../datasets/Vic120MM.jl")
+# include("../datasets/Vic120MM.jl")
 
 
 
 function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
-                    lcmode=:mmodal, lsrNoise=diagm([0.1;1.0]), N::Int=100)
+                    lcmode=:mmodal, lsrNoise=diagm([0.1;1.0]), N::Int=100, MM=Union{})
     I = intersect(keys(f[idx-1]),keys(f[idx]))
     for i in I
       pfez = f[idx-1][i]
@@ -48,7 +48,7 @@ end
 function appendFactorGraph!(fg::FactorGraph, d, f;
                   toT=Inf, fgpdf=false, lcmode=:mmodal,
                   lsrNoise=diagm([0.1;1.0]), P0=diagm([0.01;0.01;0.001]), Podo=diagm([0.5;0.5;0.005]),
-                  idx::Int=1, N::Int=100)
+                  idx::Int=1, N::Int=100, MM=Union{})
 
   len = length(d)
   T = d[idx][4]
@@ -72,7 +72,7 @@ function appendFactorGraph!(fg::FactorGraph, d, f;
     vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N)
 
     # add landmarks
-    addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N)
+    addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
     prevn = nextn
   end
   if fgpdf   writeGraphPdf(fg); end
@@ -90,7 +90,7 @@ function doBatchRun(d, f; toT=30)
   return fg, tree, p
 end
 
-function saveImgSeq(d::Dict{Int64,Dict{Int64,Feature}}, lsrFeats::Dict{Int64,VictoriaParkTypes.LaserFeatures}; from::Int=1,to::Int=10,step::Int=1)
+function saveImgSeq(d::Dict{Int64,Dict{Int64,Feature}}, lsrFeats::Dict{Int64,LaserFeatures}; from::Int=1,to::Int=10,step::Int=1)
   for i in from:step:to
     p = drawFeatTrackers(d[i], lsrFeats[i].feats);
     Gadfly.draw(PNG(string("imgs/img",i,".png"),35cm,25cm),p)
