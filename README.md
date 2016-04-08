@@ -1,5 +1,6 @@
-# Caesar.jl
-Robot toolkit: Towards non-parametric and parametric navigation solutions.
+# Caesar.jl: towards non-parametric / parametric navigation solutions
+
+A modern robotic toolkit for localization and mapping.
 
 Introduction
 ------------
