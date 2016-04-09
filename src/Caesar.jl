@@ -24,7 +24,10 @@ export
   processTreeTrackersUpdates!,
   advOdoByRules,
   progressExamplePlot,
-  plotTrckStep
+  plotTrckStep,
+
+  # servers
+  tcpStringSLAMServer
 
 
 
@@ -33,6 +36,8 @@ include("VictoriaParkTypes.jl")
 # using VictoriaParkTypes
 include("VictoriaParkSystem.jl")
 include("VicPrkEstimator.jl")
+
+include("SlamServer.jl")
 
 
 end
