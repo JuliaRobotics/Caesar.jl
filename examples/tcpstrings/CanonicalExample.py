@@ -16,7 +16,7 @@ npslam.addOdo([47.5, 0, -np.pi/2], noise=bonoi) #x4
 
 npslam.drawFactorGraphpdf()
 print npslam.ls()
-npslam.redrawAll(pname='initp',posec='b',lname='landminit',landmc='r')
+npslam.redrawAll()
 npslam.batchSolve()
 npslam.redrawAll()
 
@@ -26,6 +26,7 @@ npslam.addLandmBRMM([-np.pi/2,5.0], npslam.getID('x5'), to1=npslam.getID('l1'), 
 
 npslam.drawFactorGraphpdf()
 print npslam.ls()
+npslam.redrawAll(pname='initp',posec='b',lname='landminit',landmc='r')
 npslam.batchSolve()
 npslam.redrawAll()
 

@@ -25,6 +25,7 @@ export
   advOdoByRules,
   progressExamplePlot,
   plotTrckStep,
+  SLAMWrapper,
 
   # servers
   tcpStringSLAMServer
