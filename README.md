@@ -10,4 +10,4 @@ This is a research and development driven project and intended to reduce the bar
 Future targets
 --------------
 
-Hybrid parametric and non-parametric optimization. Incrementalized update rules and properly marginalized 'forgetting' for sliding window type operation.
+Hybrid parametric and non-parametric optimization. Incrementalized update rules and properly marginalized 'forgetting' for sliding window type operation. We defined interprocess interface for multi-language front-end development.
