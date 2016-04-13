@@ -49,7 +49,7 @@ function parseOdo!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   cov[3,1] = parse(Float64,sp2[8])
   cov[3,2] = parse(Float64,sp2[10])
   addOdoFG!(slam.fg, n, DX, cov)
-  nothing
+  return n
 end
 
 function parseAddLandmBR!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
@@ -60,6 +60,7 @@ function parseAddLandmBR!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1
   cov = diagm([parse(Float64,sp2[5]);parse(Float64,sp2[7])])
   cov[1,2] = parse(Float64,sp2[6])
   cov[2,1] = parse(Float64,sp2[6])
+  lm = ASCIIString("")
   if !haskey(slam.fg.v, lmid)
     slam.lndmidx += 1
     lm = ASCIIString(string('l',slam.lndmidx))
@@ -68,7 +69,7 @@ function parseAddLandmBR!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1
     lm = ASCIIString(slam.fg.v[lmid].label)
     addBRFG!(slam.fg, pose, lm, zbr, cov)
   end
-  nothing
+  return lm
 end
 
 function parseLandmBRMM!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})

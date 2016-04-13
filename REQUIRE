@@ -1,6 +1,7 @@
 julia 0.4
 IncrementalInference
 RoME
+KernelDensityEstimate
 Gadfly
 Colors
 JLD

@@ -3,6 +3,7 @@ module Caesar
 using
   IncrementalInference,
   RoME,
+  KernelDensityEstimate,
   Gadfly,
   Colors,
   JLD,

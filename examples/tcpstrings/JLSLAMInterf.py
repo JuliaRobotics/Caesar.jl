@@ -8,7 +8,7 @@ from bot_geometry.quaternion import Quaternion
 from bot_externals.draw_utils import publish_pose_list, publish_sensor_frame, publish_cloud, \
     publish_line_segments
 
-def triggerPose(Dx, dt, distrule=5.0, rotrule=np.pi/3, timerule=30):
+def triggerPose(Dx, dt, distrule=3.0, rotrule=np.pi/3, timerule=30):
     dist = npla.norm(Dx.tvec)
     rotang = 2.0*np.arccos(Dx.quat[3])
     if dist >= distrule:
@@ -19,16 +19,17 @@ def triggerPose(Dx, dt, distrule=5.0, rotrule=np.pi/3, timerule=30):
         return 3
 
 def advOdoByRules(slam, prevpose, dx=None, newpose=None, previ=0, i=0):
+    psname = ''
     if not dx and not newpose:
         raise 'advOdoByRule -- is not going to work without dx or newpose'
     if not dx:
         dx = prevpose.inverse().oplus(newpose)
     if triggerPose(dx, i-previ, timerule=600):
         meas = dx.to_roll_pitch_yaw_x_y_z()
-        slam.addOdo([meas[3],meas[4],meas[2]])
+        psname = slam.addOdo([meas[3],meas[4],meas[2]])
         slam.redrawAll()
-        return newpose, i
-    return prevpose, previ
+        return newpose, i, psname
+    return prevpose, previ, psname
 
 
 def readlines(sock, recv_buffer=4096, delim='\n'):
@@ -106,7 +107,7 @@ class NPSLAMWrapper(object):
             publish_line_segments(lname, DV.T, DT.T, c=lc[0], frame_id=frame_id)
 
 
-    def addOdo(self, z, frm=None, to=None, noise=np.array([0.1, 0, 0, 0.05, 0, 0.05]) ):
+    def addOdo(self, z, frm=None, to=None, noise=np.array([0.08, 0, 0, 0.03, 0, 0.03]) ):
         frmid = frm
         if not frm:
             frmid = self.lastposeid
@@ -117,10 +118,10 @@ class NPSLAMWrapper(object):
             self.lastposeid += 2
             to = self.lastposeid
         # next pose
-        self.sendCmd('ODOMETRY '+str(frmid)+' '+str(to)+' '+str(z[0])+' '+str(z[1])+' '+str(z[2])
+        pn = self.sendCmd('ODOMETRY '+str(frmid)+' '+str(to)+' '+str(z[0])+' '+str(z[1])+' '+str(z[2])
                      +' '+str(noise[0])+' '+str(noise[1])+' '+str(noise[2])+' '+str(noise[3])
                      +' '+str(noise[4])+' '+str(noise[5]))
-        return self.lastposeid
+        return pn#self.lastposeid
 
     def addLandmBR(self, z, frmid, to=None, noise=[0.05, 0, 0.5]):
         if not frmid:
@@ -133,8 +134,8 @@ class NPSLAMWrapper(object):
         print 'to is', to
         sendstr = 'LANDMBR '+str(frmid)+' '+str(to)+' '+str(z[0])+' '+str(z[1])+' '+str(noise[0])+' '+str(noise[1])+' '+str(noise[2])
         print sendstr
-        self.sendCmd(sendstr)
-        return self.lastlndmkid
+        retn = self.sendCmd(sendstr)
+        return retn#self.lastlndmkid
 
     def addLandmBRMM(self, z, frmid, to1=None, to2=None, w=[0.5,0.5],noise=[0.05, 0, 0.5]):
         if not frmid:
@@ -148,6 +149,9 @@ class NPSLAMWrapper(object):
 
     def init(self):
         self.sendCmd('INIT')
+
+    def close(self):
+        self.sendCmd('QUIT')
 
     def reset(self):
         self.sendCmd('RESET')
