@@ -8,7 +8,7 @@ from bot_geometry.quaternion import Quaternion
 from bot_externals.draw_utils import publish_pose_list, publish_sensor_frame, publish_cloud, \
     publish_line_segments
 
-def triggerPose(Dx, dt, distrule=3.0, rotrule=np.pi/3, timerule=30):
+def triggerPose(Dx, dt, distrule=1.5, rotrule=np.pi/6, timerule=30):
     dist = npla.norm(Dx.tvec)
     rotang = 2.0*np.arccos(Dx.quat[3])
     if dist >= distrule:
@@ -123,7 +123,7 @@ class NPSLAMWrapper(object):
                      +' '+str(noise[4])+' '+str(noise[5]))
         return pn#self.lastposeid
 
-    def addLandmBR(self, z, frmid, to=None, noise=[0.05, 0, 0.5]):
+    def addLandmBR(self, z, frmid=None, to=None, noise=[0.05, 0, 0.3]):
         if not frmid:
             frmid = self.lastposeid
         if not to:
@@ -131,13 +131,12 @@ class NPSLAMWrapper(object):
                 self.lastlndmkid += 1
             self.lastlndmkid += 2
             to = self.lastlndmkid
-        print 'to is', to
         sendstr = 'LANDMBR '+str(frmid)+' '+str(to)+' '+str(z[0])+' '+str(z[1])+' '+str(noise[0])+' '+str(noise[1])+' '+str(noise[2])
         print sendstr
         retn = self.sendCmd(sendstr)
         return retn#self.lastlndmkid
 
-    def addLandmBRMM(self, z, frmid, to1=None, to2=None, w=[0.5,0.5],noise=[0.05, 0, 0.5]):
+    def addLandmBRMM(self, z, frmid, to1=None, to2=None, w=[0.5,0.5],noise=[0.05, 0, 0.3]):
         if not frmid:
             frmid = self.lastposeid
         if not to1 and not to2:
@@ -145,7 +144,13 @@ class NPSLAMWrapper(object):
             return
         sendstr = 'LANDMBRMM '+str(frmid)+' '+str(to1)+' '+str(w[0])+' '+str(to2)+' '+str(w[1])+' '+str(z[0])+' '+str(z[1])+' '+str(noise[0])+' '+str(noise[1])+' '+str(noise[2])
         print sendstr
-        self.sendCmd(sendstr)
+        return self.sendCmd(sendstr)
+
+    def addLandmBRAuto(self, z, frmid=None, noise=[0.05, 0, 0.3]):
+        if not frmid:
+            frmid = self.lastposeid
+        sendstr = 'LANDMBRAUTO '+str(frmid)+' '+str(z[0])+' '+str(z[1])+' '+str(noise[0])+' '+str(noise[1])+' '+str(noise[2])
+        return self.sendCmd(sendstr)
 
     def init(self):
         self.sendCmd('INIT')
@@ -168,7 +173,9 @@ class NPSLAMWrapper(object):
         return poses, landm
 
     def getID(self, lbl):
+        # print 'getID', lbl
         idt = self.sendCmd('GETID '+lbl)
+        # print 'and get back idt=', idt
         return int(idt)
 
     def drawFactorGraphpdf(self):

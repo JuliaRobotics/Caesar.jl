@@ -90,8 +90,25 @@ function parseLandmBRMM!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1}
   # function addMMBRFG!(fg::FactorGraph, pose::ASCIIString,
   #                   lm::Array{ASCIIString,1}, br::Array{Float64,1},
   #                   cov::Array{Float64,2}; w=[0.5;0.5])
-  nothing
+  return "$(lm1), $(lm2)"
 end
+
+function parseLandmBRAuto!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+  poseid = floor(Int,parse(Float64, sp2[1]))
+  pose = ASCIIString(slam.fg.v[poseid].label)
+  zbr = [parse(Float64,sp2[2]);parse(Float64,sp2[3])]
+  cov = diagm([parse(Float64,sp2[4]);parse(Float64,sp2[6])])
+  cov[1,2] = parse(Float64,sp2[5])
+  cov[2,1] = parse(Float64,sp2[5])
+  lm = ASCIIString("")
+
+  vlm, flm = addAutoLandmBR!(slam.fg, pose, zbr, cov)
+
+  println("parseLandmBRAuto! -- added $(vlm.label)")
+
+  return vlm.label
+end
+
 
 function parseLandmarkXY!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   pose = slam.fg.v[map(Int, sp2[1])].label
@@ -162,6 +179,8 @@ function parseTCP!(slam::SLAMWrapper, line::ASCIIString)
       f = parseLandmarkXY!
     elseif cmd == "LANDMBRMM"
       f = parseLandmBRMM!
+    elseif cmd == "LANDMBRAUTO"
+      f = parseLandmBRAuto!
     elseif cmd == "BATCHSOLVE"
       f = batchSolve!
     elseif cmd == "GETPARTICLES"
