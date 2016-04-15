@@ -8,7 +8,7 @@ from bot_geometry.quaternion import Quaternion
 from bot_externals.draw_utils import publish_pose_list, publish_sensor_frame, publish_cloud, \
     publish_line_segments
 
-def triggerPose(Dx, dt, distrule=1.5, rotrule=np.pi/6, timerule=30):
+def triggerPose(Dx, dt, distrule=1.5, rotrule=np.pi/4, timerule=30):
     dist = npla.norm(Dx.tvec)
     rotang = 2.0*np.arccos(Dx.quat[3])
     if dist >= distrule:
