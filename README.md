@@ -21,9 +21,9 @@ Requires
 Major features
 --------------
 
-A SLAM server over tcp
+A multicore SLAM server over tcp
 
-    julia045 -p10 -e "using Caesar; tcpStringSLAMServer()"
+    julia -p10 -e "using Caesar; tcpStringSLAMServer()"
 
 Future targets
 --------------
