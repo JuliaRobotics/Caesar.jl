@@ -1,10 +1,6 @@
 
 # BearingRangeTrackingServer
 
-
-
-
-
 function parseProcTracking!(instSys::InSituSystem, d::Dict{AbstractString, Any})
     # parameters
     lsrnoise = []
