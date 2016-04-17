@@ -29,6 +29,12 @@ end
 
 
 function parseInit!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+  if length(sp2) == 3
+    println("parseInit! -- received initialization point $(sp2) NOT CURRENTLY USED")
+    x0 = parse(Float64,sp2[1])
+    y0 = parse(Float64,sp2[2])
+    th0 = parse(Float64,sp2[2])
+  end
   prevn = initFactorGraph!(slam.fg)
   println("init done")
   nothing
@@ -221,5 +227,6 @@ function tcpStringSLAMServer(;port::Int=60001)
      end
      println("connection lost")
   end
+  !loop ? close(server) : nothing
   nothing
 end

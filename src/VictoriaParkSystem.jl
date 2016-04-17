@@ -84,7 +84,7 @@ function processTreeTrackersUpdates!(instSys::InSituSystem, lsrFeats::Dict{Int64
     instSys.lstlaseridx = newlsridx
     bfts = lsrFeats[instSys.lstlaseridx].feats
     hardassc = assocMeasWFeats!(instSys.trackers, bfts)
-    measUpdateTrackers!(instSys.trackers, hardassc, [0.5;0.05])
+    measUpdateTrackers!(instSys.trackers, hardassc, [0.5;0.05]) # TODO, noise here is not in polar coords!! something wrong
     if dbgflag
       DBG[instSys.lstlaseridx] = deepcopy(instSys.trackers)
     end

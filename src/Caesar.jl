@@ -7,7 +7,8 @@ using
   Gadfly,
   Colors,
   JLD,
-  HDF5
+  HDF5,
+  JSON
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
 
@@ -29,7 +30,8 @@ export
   SLAMWrapper,
 
   # servers
-  tcpStringSLAMServer
+  tcpStringSLAMServer,
+  tcpStringBRTrackingServer
 
 
 
@@ -40,6 +42,6 @@ include("VictoriaParkSystem.jl")
 include("VicPrkEstimator.jl")
 
 include("SlamServer.jl")
-
+include("BearingRangeTrackingServer.jl")
 
 end
