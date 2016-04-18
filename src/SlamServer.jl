@@ -228,5 +228,5 @@ function tcpStringSLAMServer(;port::Int=60001)
      println("connection lost")
   end
   !loop ? close(server) : nothing
-  nothing
+  return slam001
 end

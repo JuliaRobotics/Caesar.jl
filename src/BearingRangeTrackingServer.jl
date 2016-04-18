@@ -82,5 +82,5 @@ function tcpStringBRTrackingServer(;port::Int=60002)
      println("connection lost, loop=$(loop)")
   end
   !loop ? close(server) : nothing
-  nothing
+  return instSys
 end
