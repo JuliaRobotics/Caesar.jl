@@ -48,4 +48,7 @@ class BayesFeatureTracking(object):
         d['BRfeats'] = r
         resp = self.sendDictJSON(d)
         retd = json.loads(resp)
-        print 'response', retd
+        return retd
+
+	def emptyFnc(self):
+		print 'hello'

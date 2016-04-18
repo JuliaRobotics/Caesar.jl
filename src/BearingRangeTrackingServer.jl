@@ -4,7 +4,6 @@
 function parseProcTracking!(instSys::InSituSystem, d::Dict{AbstractString, Any})
     # parameters
     lsrnoise = []
-    @show "parseProcTracking!", d
 
     # unpack the data
     b1Dxb = Array{Float64,1}(d["dx"])
@@ -14,7 +13,6 @@ function parseProcTracking!(instSys::InSituSystem, d::Dict{AbstractString, Any})
     for i in 1:len, j in 1:3
       bfts[j,i] = Float64(lsrFeats[i][j])
     end
-    @show bfts
     # do the work
     propAllTrackers!(instSys.trackers, b1Dxb, [0.05;0.05;0.004])
     hardassc = assocMeasWFeats!(instSys.trackers, bfts)
@@ -23,10 +21,11 @@ function parseProcTracking!(instSys::InSituSystem, d::Dict{AbstractString, Any})
     # pack outgoing data
     od = Dict{Int64,Array{Float64,1}}()
     for t in instSys.trackers
-      m = getKDEMax(t[2].bel)
+      m = getKDEMean(t[2].bel) #getKDEMax
       od[t[1]] = cart2pol(m, [1.0;1.0])[1]
-      println("tracker $(t[1]), pol=$(od[t[1]])")
+      # println("tracker $(t[1]), pol=$(od[t[1]])")
     end
+    println("tracking $(length(instSys.trackers)) feats")
     rmsg = json(od)
     return rmsg # json(current tracked feature jsoned dict)
 end
