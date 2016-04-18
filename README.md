@@ -16,7 +16,7 @@ Installation (unregistered package)
 Requires
 
     RoME, IncrementalInference # unregistered packages
-    KernelDensityEstimate, Graphs, GraphViz, Gadfly, NLsolve, Distributions, DataFrames # registered packages
+    KernelDensityEstimate, Graphs, GraphViz, Gadfly, NLsolve, Distributions, DataFrames, JSON # registered packages
 
 Major features
 --------------
@@ -24,6 +24,10 @@ Major features
 A multicore SLAM server over tcp
 
     julia -p10 -e "using Caesar; tcpStringSLAMServer()"
+    
+A multicore Bayes 2D feature tracking server over tcp
+
+    julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
 
 Future targets
 --------------
