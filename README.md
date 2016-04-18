@@ -16,7 +16,7 @@ Installation (unregistered package)
 Requires
 
     RoME, IncrementalInference # unregistered packages
-    KernelDensityEstimate, Graphs, GraphViz, Gadfly, NLsolve, Distributions, DataFrames # registered packages
+    KernelDensityEstimate, Graphs, GraphViz, Gadfly, NLsolve, Distributions, DataFrames, JSON # registered packages
 
 Major features
 --------------
