@@ -16,7 +16,7 @@ function parseProcTracking!(instSys::InSituSystem, d::Dict{AbstractString, Any})
     # do the work
     propAllTrackers!(instSys.trackers, b1Dxb, [0.05;0.05;0.004])
     hardassc = assocMeasWFeats!(instSys.trackers, bfts)
-    measUpdateTrackers!(instSys.trackers, hardassc, [0.5;0.05])
+    measUpdateTrackers!(instSys.trackers, hardassc, [0.4;0.02])
 
     # pack outgoing data
     od = Dict{Int64,Array{Float64,1}}()

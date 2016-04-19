@@ -146,7 +146,7 @@ class NPSLAMWrapper(object):
         print sendstr
         return self.sendCmd(sendstr)
 
-    def addLandmBRAuto(self, z, frmid=None, noise=[0.05, 0, 0.3]):
+    def addLandmBRAuto(self, z, frmid=None, noise=[0.02, 0, 0.3]):
         if not frmid:
             frmid = self.lastposeid
         sendstr = 'LANDMBRAUTO '+str(frmid)+' '+str(z[0])+' '+str(z[1])+' '+str(noise[0])+' '+str(noise[1])+' '+str(noise[2])
