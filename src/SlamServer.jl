@@ -102,13 +102,14 @@ end
 function parseLandmBRAuto!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   poseid = floor(Int,parse(Float64, sp2[1]))
   pose = ASCIIString(slam.fg.v[poseid].label)
-  zbr = [parse(Float64,sp2[2]);parse(Float64,sp2[3])]
-  cov = diagm([parse(Float64,sp2[4]);parse(Float64,sp2[6])])
-  cov[1,2] = parse(Float64,sp2[5])
-  cov[2,1] = parse(Float64,sp2[5])
+  lmid = sp2[2] != "*" ? floor(Int,parse(Float64, sp2[2])) : -1
+  zbr = [parse(Float64,sp2[3]);parse(Float64,sp2[4])]
+  cov = diagm([parse(Float64,sp2[5]);parse(Float64,sp2[7])])
+  cov[1,2] = parse(Float64,sp2[6])
+  cov[2,1] = parse(Float64,sp2[6])
   lm = ASCIIString("")
 
-  vlm, flm = addAutoLandmBR!(slam.fg, pose, zbr, cov)
+  vlm, flm, slam.lndmidx = addAutoLandmBR!(slam.fg, pose, lmid, zbr, cov, slam.lndmidx)
 
   println("parseLandmBRAuto! -- added $(vlm.label)")
 
@@ -159,6 +160,11 @@ function parseGetID(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   return "$(id)"
 end
 
+function parseGetNextID(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+  id = slam.fg.id + 1
+  return "$(id)"
+end
+
 function parseReset(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   warn("parseReset -- resetting factor graph")
   slam = SLAMWrapper(emptyFactorGraph(), Union{}, 0)
@@ -195,6 +201,8 @@ function parseTCP!(slam::SLAMWrapper, line::ASCIIString)
       f = parseLS
     elseif cmd == "GETID"
       f = parseGetID
+    elseif cmd == "GETNEXTID"
+      f = parseGetNextID
     elseif cmd == "DRAWFGPDF"
       f = parseDotFG
     elseif cmd == "RESET"

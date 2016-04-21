@@ -123,20 +123,22 @@ class NPSLAMWrapper(object):
                      +' '+str(noise[4])+' '+str(noise[5]))
         return pn#self.lastposeid
 
-    def addLandmBR(self, z, frmid=None, to=None, noise=[0.05, 0, 0.3]):
+    def addLandmBR(self, z, frmid=None, to=None, noise=[0.02, 0, 0.4]):
         if not frmid:
             frmid = self.lastposeid
+        # if not to:
+        #     while self.lastlndmkid < self.lastposeid:
+        #         self.lastlndmkid += 1
+        #     self.lastlndmkid += 2
+        #     to = self.lastlndmkid
         if not to:
-            while self.lastlndmkid < self.lastposeid:
-                self.lastlndmkid += 1
-            self.lastlndmkid += 2
-            to = self.lastlndmkid
+            to = self.getNextID()
         sendstr = 'LANDMBR '+str(frmid)+' '+str(to)+' '+str(z[0])+' '+str(z[1])+' '+str(noise[0])+' '+str(noise[1])+' '+str(noise[2])
         print sendstr
         retn = self.sendCmd(sendstr)
         return retn#self.lastlndmkid
 
-    def addLandmBRMM(self, z, frmid, to1=None, to2=None, w=[0.5,0.5],noise=[0.05, 0, 0.3]):
+    def addLandmBRMM(self, z, frmid, to1=None, to2=None, w=[0.5,0.5],noise=[0.02, 0, 0.4]):
         if not frmid:
             frmid = self.lastposeid
         if not to1 and not to2:
@@ -146,10 +148,12 @@ class NPSLAMWrapper(object):
         print sendstr
         return self.sendCmd(sendstr)
 
-    def addLandmBRAuto(self, z, frmid=None, noise=[0.02, 0, 0.3]):
+    def addLandmBRAuto(self, z, frmid=None, to=None, noise=[0.02, 0, 0.4]):
         if not frmid:
             frmid = self.lastposeid
-        sendstr = 'LANDMBRAUTO '+str(frmid)+' '+str(z[0])+' '+str(z[1])+' '+str(noise[0])+' '+str(noise[1])+' '+str(noise[2])
+        if not to:
+            to = '*'
+        sendstr = 'LANDMBRAUTO '+str(frmid)+' '+str(to)+' '+str(z[0])+' '+str(z[1])+' '+str(noise[0])+' '+str(noise[1])+' '+str(noise[2])
         return self.sendCmd(sendstr)
 
     def init(self):
@@ -176,6 +180,10 @@ class NPSLAMWrapper(object):
         # print 'getID', lbl
         idt = self.sendCmd('GETID '+lbl)
         # print 'and get back idt=', idt
+        return int(idt)
+
+    def getNextID(self):
+        idt = self.sendCmd('GETNEXTID')
         return int(idt)
 
     def drawFactorGraphpdf(self):
