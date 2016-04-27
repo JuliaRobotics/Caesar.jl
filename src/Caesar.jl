@@ -31,7 +31,11 @@ export
 
   # servers
   tcpStringSLAMServer,
-  tcpStringBRTrackingServer
+  tcpStringBRTrackingServer,
+
+  # save and load data
+  saveSlam,
+  loadSlam
 
 
 
@@ -43,5 +47,7 @@ include("VicPrkEstimator.jl")
 
 include("SlamServer.jl")
 include("BearingRangeTrackingServer.jl")
+
+include("DataUtils.jl")
 
 end

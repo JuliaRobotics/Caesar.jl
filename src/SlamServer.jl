@@ -8,7 +8,7 @@ nprocs() > 1 ? thxl = 2 : nothing
 type SLAMWrapper
   fg::FactorGraph
   tree
-  lndmidx::Int # TODO -- move this to FactorGraph type
+  lndmidx::Int
 end
 
 function prepString(arr::Array{Float64,2})
@@ -220,9 +220,11 @@ function parseTCP!(slam::SLAMWrapper, line::ASCIIString)
 end
 
 
-function tcpStringSLAMServer(;port::Int=60001)
+function tcpStringSLAMServer(;slamdata=Union{},port::Int=60001)
   println("Empty slam object created")
-  slam001 = SLAMWrapper(emptyFactorGraph(), Union{}, 0)
+  if slamdata == Union{}
+    slamdata = SLAMWrapper(emptyFactorGraph(), Union{}, 0)
+  end
 
   println("Listenting on $(port)")
   server = listen(port)
@@ -230,11 +232,11 @@ function tcpStringSLAMServer(;port::Int=60001)
   while loop
    sock = accept(server)
      while isopen(sock)
-         loop, retstr = parseTCP!(slam001, readline(sock)[1:(end-1)])
+         loop, retstr = parseTCP!(slamdata, readline(sock)[1:(end-1)])
          loop ? (isopen(sock) ? println(sock, retstr) : nothing) : close(sock)
      end
      println("connection lost")
   end
   !loop ? close(server) : nothing
-  return slam001
+  return slamdata
 end
