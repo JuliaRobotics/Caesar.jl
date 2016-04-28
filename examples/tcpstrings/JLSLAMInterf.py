@@ -8,7 +8,7 @@ from bot_geometry.quaternion import Quaternion
 from bot_externals.draw_utils import publish_pose_list, publish_sensor_frame, publish_cloud, \
     publish_line_segments
 
-def triggerPose(Dx, dt, distrule=1.5, rotrule=np.pi/4, timerule=30):
+def triggerPose(Dx, dt, distrule=1.0, rotrule=np.pi/4, timerule=30):
     dist = npla.norm(Dx.tvec)
     rotang = 2.0*np.arccos(Dx.quat[3])
     if dist >= distrule:
@@ -28,7 +28,7 @@ def advOdoByRules(slam, prevpose, dx=None, newpose=None, previ=0, i=0, OFsum=-1)
         if OFsum != -1:
             print 'Optical flow sum', OFsum
         meas = dx.to_roll_pitch_yaw_x_y_z()
-        if OFsum == -1 or OFsum > 300000:
+        if OFsum == -1 or OFsum > 150000:
             mlst = [meas[3],meas[4],meas[2]]
         else:
             print 'Looks like the robot is not moving!'
@@ -130,7 +130,7 @@ class NPSLAMWrapper(object):
                      +' '+str(noise[4])+' '+str(noise[5]))
         return pn#self.lastposeid
 
-    def addLandmBR(self, z, frmid=None, to=None, noise=[0.02, 0, 0.4]):
+    def addLandmBR(self, z, frmid=None, to=None, noise=[0.02, 0, 0.5]):
         if not frmid:
             frmid = self.lastposeid
         # if not to:
@@ -145,7 +145,7 @@ class NPSLAMWrapper(object):
         retn = self.sendCmd(sendstr)
         return retn#self.lastlndmkid
 
-    def addLandmBRMM(self, z, frmid, to1=None, to2=None, w=[0.5,0.5],noise=[0.02, 0, 0.4]):
+    def addLandmBRMM(self, z, frmid, to1=None, to2=None, w=[0.5,0.5],noise=[0.02, 0, 0.5]):
         if not frmid:
             frmid = self.lastposeid
         if not to1 and not to2:
@@ -155,7 +155,7 @@ class NPSLAMWrapper(object):
         print sendstr
         return self.sendCmd(sendstr)
 
-    def addLandmBRAuto(self, z, frmid=None, to=None, noise=[0.02, 0, 0.4]):
+    def addLandmBRAuto(self, z, frmid=None, to=None, noise=[0.02, 0, 0.5]):
         if not frmid:
             frmid = self.lastposeid
         if not to:
