@@ -5,7 +5,7 @@ function saveSlam(slamwrapper::SLAMWrapper; filename::AbstractString="tempSlam.j
   warn("Saving factor graph and landmark index -- unresolved issue with saving current tree, but can be reccomputed from factor graph with IncrementalInference.wipeBuildNewTree!(...).")
   saveslam.tree = Union{}
   jldopen(filename,"w") do file
-    write(file, "slam", slam)
+    write(file, "slam", saveslam)
   end
   nothing
 end
