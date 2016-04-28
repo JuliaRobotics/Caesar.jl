@@ -18,15 +18,22 @@ def triggerPose(Dx, dt, distrule=1.5, rotrule=np.pi/4, timerule=30):
     if dt >= timerule:
         return 3
 
-def advOdoByRules(slam, prevpose, dx=None, newpose=None, previ=0, i=0):
+def advOdoByRules(slam, prevpose, dx=None, newpose=None, previ=0, i=0, OFsum=-1):
     psname = ''
     if not dx and not newpose:
         raise 'advOdoByRule -- is not going to work without dx or newpose'
     if not dx:
         dx = prevpose.inverse().oplus(newpose)
     if triggerPose(dx, i-previ, timerule=600):
+        if OFsum != -1:
+            print 'Optical flow sum', OFsum
         meas = dx.to_roll_pitch_yaw_x_y_z()
-        psname = slam.addOdo([meas[3],meas[4],meas[2]])
+        if OFsum == -1 or OFsum > 300000:
+            mlst = [meas[3],meas[4],meas[2]]
+        else:
+            print 'Looks like the robot is not moving!'
+            mlst = [0.0,0.0,meas[2]]
+        psname = slam.addOdo(mlst)
         slam.redrawAll()
         return newpose, i, psname
     return prevpose, previ, psname
