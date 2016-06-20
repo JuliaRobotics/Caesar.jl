@@ -11,8 +11,8 @@ function saveSlam(slamwrapper::SLAMWrapper; filename::AbstractString="tempSlam.j
 end
 
 function loadSlam(; filename::AbstractString="tempSlam.jld")
-  slam = jldopen(filename,"r") do file
+  d = jldopen(filename,"r") do file
     read(file, "slam", slam)
   end
-  return slam
+  return d
 end
