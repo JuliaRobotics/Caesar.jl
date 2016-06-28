@@ -47,3 +47,9 @@ catch e
 end
 
 @test pass
+
+
+
+println("[TEST] CloudGraphs API calls")
+
+include("TestCloudGraphsAPIUsage.jl")
