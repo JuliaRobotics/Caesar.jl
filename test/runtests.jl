@@ -1,4 +1,5 @@
 using Caesar, IncrementalInference, RoME, HDF5, JLD
+using CloudGraphs
 using Base.Test
 
 global pass=false
@@ -38,7 +39,7 @@ try
      push!(FG,deepcopy(fg));
      push!(TREE,deepcopy(tree));
   end
-  
+
   global pass=true
 catch e
   global pass=false
