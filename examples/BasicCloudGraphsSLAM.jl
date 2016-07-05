@@ -1,6 +1,6 @@
 # a basic create robot type node example
 
-using IncrementalInference, CloudGraphs, Graphs
+using IncrementalInference, CloudGraphs, Caesar
 
 # switch IncrementalInference to use CloudGraphs (Neo4j) data layer
 # Caesar.useCloudGraphsDataLayer()
