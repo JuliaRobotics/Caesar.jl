@@ -15,9 +15,9 @@ using
 export
   # Victoria Park example -- batch
   loadVicPrkDataset,
-  addLandmarksFactoGraph!,
-  appendFactorGraph!,
-  doBatchRun,
+  # addLandmarksFactoGraph!,
+  # appendFactorGraph!,
+  # doBatchRun,
   # insitu component
   InSituSystem,
   makeInSituSys,
@@ -40,10 +40,10 @@ export
 
 
 
-include("VictoriaParkTypes.jl")
+# include("VictoriaParkTypes.jl")
 # using VictoriaParkTypes
 include("VictoriaParkSystem.jl")
-include("VicPrkEstimator.jl")
+# include("VicPrkEstimator.jl")
 
 include("SlamServer.jl")
 include("BearingRangeTrackingServer.jl")
