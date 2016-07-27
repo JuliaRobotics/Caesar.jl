@@ -5,7 +5,7 @@ function MMwithRedirects(mm::Dict{Int64,Int64})
   for m in mm
     finID = m[2]
     while true
-      if !haskey(mm, finID)
+      if haskey(mm, finID)
         finID = mm[finID]
       else
         break;
@@ -360,6 +360,7 @@ MM[1019] = 20
 MM[1018] = 22
 
 # submaps from [3080;2550], spread=100
+# upper left corner loop closures
 MM[3176] = 2645
 MM[3164] = 2628
 MM[3180] = 2644
@@ -393,6 +394,33 @@ MM[2480] = 164
 MM[2471] = 162
 MM[2489] = 165
 MM[2481] = 167
+
+
+## post 4:50PM, from submaps [100;2900], spread=100
+MM[2852] = 138
+MM[2849] = 126
+MM[2847] = 134
+MM[2837] = 132
+MM[2840] = 135
+MM[2820] = 139
+MM[2838] = 189
+MM[2813] = 144
+MM[2824] = 164
+MM[2809] = 162
+MM[2801] = 193
+MM[2816] = 165
+MM[2863] = 125
+MM[2866] = 121
+MM[2853] = 116
+MM[2874] = 6
+MM[2864] = 5
+MM[2869] = 3
+MM[2868] = 2
+
+MM[2892] = 48
+MM[2899] = 36
+MM[2896] = 45
+MM[2889] = 26
 
 
 # Unsure associations
