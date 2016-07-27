@@ -1,5 +1,21 @@
 #MM dictionary
 
+function MMwithRedirects(mm::Dict{Int64,Int64})
+  mmr = Dict{Int64,Int64}()
+  for m in mm
+    finID = m[2]
+    while true
+      if !haskey(mm, finID)
+        finID = mm[finID]
+      else
+        break;
+      end
+    end
+    mmr[m[1]] = deepcopy(finID)
+  end
+  return mmr
+end
+
 # point to the first instance in the map which may be the same feature
 MM = Dict{Int64,Int64}()
 
@@ -343,7 +359,6 @@ MM[935] = 149
 MM[1019] = 20
 MM[1018] = 22
 
-
 # submaps from [3080;2550], spread=100
 MM[3176] = 2645
 MM[3164] = 2628
@@ -363,6 +378,22 @@ MM[3141] = 2610
 MM[3139] = 2608
 MM[3153] = 2614
 MM[3137] = 2606
+
+
+## post 3:20PM, from submaps [100;2550;3080], spread=100
+MM[2463] = 138
+MM[2455] = 126
+MM[2466] = 134
+MM[2456] = 132
+MM[2464] = 135
+MM[2467] = 139
+MM[2477] = 187
+MM[2469] = 144
+MM[2480] = 164
+MM[2471] = 162
+MM[2489] = 165
+MM[2481] = 167
+
 
 # Unsure associations
 # MM[923] = 139 # ref 924
