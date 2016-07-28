@@ -559,12 +559,36 @@ MM[1733] = 681
 
 MM[1803] = 695
 
+
+#from submaps [400;600;800], spread=100
+MM[800] = 381
+MM[757] = 652
+MM[788] = 652
+MM[758] = 670
+
+#from submaps [400;600;2100]
+# from submaps [650;2150], spread=100
+MM[2094] = 658
+MM[2098] = 629
+MM[2109] = 654
+MM[2092] = 633
+
+MM[2132] = 687
+MM[2170] = 686
+MM[2128] = 676
+MM[2136] = 684
+MM[2127] = 670
+MM[2137] = 683
+
+MM[2086] = 627
+
 # Unsure associations
 # MM[923] = 139 # ref 924
 # MM[990] = 18
 # MM[1298] = 654
 # MM[1153] = 754
 # MM[2934] = 68
+# MM[2147] = 694
 
 
 # purposeful bad associates, multimodal constraints
