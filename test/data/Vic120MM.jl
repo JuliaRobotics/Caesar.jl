@@ -627,7 +627,7 @@ function MMRandErrs(MM::Dict{Int64,Int64};frac=0.1)
   while length(p) <= clen    p = union(p, allkeys[rand(1:len)]); end
   for i in 1:(clen2-1)
     temp = MMr[p[clen2+i]]
-    MMr[p[clen2+1]] = MMr[p[i]]
+    MMr[p[clen2+i]] = MMr[p[i]]
     MMr[p[i]] = temp
   end
   return MMr
