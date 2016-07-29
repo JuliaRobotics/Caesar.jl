@@ -605,11 +605,35 @@ MM[2086] = 627
 
 #outrageous
 # MM[210] = 100
+# MM[2658] = 706
+# MM[2616] = 693
+# MM[2755] = 664
+# MM[2720] = 773
+# MM[2796] = 715
+# MM[2607] = 633
+# MM[2778] = 600
 
-MM[2658] = 706
-MM[2616] = 693
-MM[2755] = 664
-MM[2720] = 773
-MM[2796] = 715
-MM[2607] = 633
-MM[2778] = 600
+# randomly permute some fraction of initially correct loop closures
+function MMRandErrs(MM::Dict{Int64,Int64};frac=0.1)
+  MMr = Dict{Int64, Int64}()
+
+  allkeys = collect(keys(MM))
+  len = length(allkeys)
+  clen = round(Int, frac*len)
+  clen2 = round(Int, 0.5*clen)
+  p = Int[]
+
+  for m in MM    MMr[m[1]] = m[2]; end
+  while length(p) <= clen    p = union(p, allkeys[rand(1:len)]); end
+  for i in 1:(clen2-1)
+    temp = MMr[p[clen2+i]]
+    MMr[p[clen2+1]] = MMr[p[i]]
+    MMr[p[i]] = temp
+  end
+  return MMr
+end
+
+function showMMpermutes(MMr, MMe)
+  for m in MMr  if MMe[m[1]] != m[2]   @show m[1], m[2], MMe[m[1]] end end
+  nothing
+end
