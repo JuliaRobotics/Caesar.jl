@@ -619,17 +619,38 @@ function MMRandErrs(MM::Dict{Int64,Int64};frac=0.1)
 
   allkeys = collect(keys(MM))
   len = length(allkeys)
-  clen = round(Int, frac*len)
-  clen2 = round(Int, 0.5*clen)
-  p = Int[]
+  @show clen = round(Int, frac*len)
+  @show clen2 = round(Int, 0.5*clen)
+  p1 = Dict{Int,Void}()
+  p2 = Dict{Int,Void}()
 
   for m in MM    MMr[m[1]] = m[2]; end
-  while length(p) <= clen    p = union(p, allkeys[rand(1:len)]); end
-  for i in 1:(clen2-1)
-    temp = MMr[p[clen2+i]]
-    MMr[p[clen2+i]] = MMr[p[i]]
-    MMr[p[i]] = temp
+
+  while length(p1) < clen2 && length(p2) < clen2
+    prop1 = allkeys[rand(1:len)]
+    if !haskey(p1, prop1) && !haskey(p2, prop1)
+      for i in 1:100
+        prop2 = allkeys[rand(1:len)]
+        # want to try MMr[prop1] = MMr[prop2] & MMr[prop2] = MMr[prop1]
+        mm1 = MMr[prop1]
+        mm2 = MMr[prop2]
+        # @show !haskey(p2, prop2), !haskey(p1, prop2), prop1 > mm2, prop2 > mm1
+        if !haskey(p2, prop2) && !haskey(p1, prop2) && prop1 > mm2 && prop2 > mm1
+          p1[prop1] = nothing
+          p2[prop2] = nothing
+          MMr[prop1] = mm2
+          MMr[prop2] = mm1
+          break
+        end
+      end
+    end
   end
+
+  # for i in 1:(clen2-1)
+  #   temp = MMr[p[clen2+i]]
+  #   MMr[p1[clen2+i]] = MMr[p1[i]]
+  #   MMr[p1[i]] = temp
+  # end
   return MMr
 end
 
@@ -637,3 +658,35 @@ function showMMpermutes(MMr, MMe)
   for m in MMr  if MMe[m[1]] != m[2]   @show m[1], m[2], MMe[m[1]] end end
   nothing
 end
+
+
+function testMMRandErr(MM::Dict{Int64,Int64};frac::Float64=0.1)
+  MMe = MMRandErrs(MM,frac=frac)
+  fi = map(Int, [m[2] == MMe[m[1]] for m in MM])
+  @show sum(fi.==0)/(sum(fi.==1)+0.0+sum(fi.==0))
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
