@@ -34,8 +34,10 @@ isamdict, fgu = doISAMSolve(d,f,toT=T, savejld=false, MM=MMe, retfg=true, port1=
 fg = emptyFactorGraph();
 idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:mmodal, MM=MMe);
 tree = prepBatchTree!(fg, ordering=:qr,drawpdf=true);
-@time inferOverTree!(fg,tree, N=100);
+inferOverTree!(fg,tree, N=100);
 fg1 = deepcopy(fg)
-@time inferOverTree!(fg,tree, N=100);
+tic()
+inferOverTree!(fg,tree, N=100);
+comptime = toc()
 fg2 = fg
-@save "results/fgT$(T)_$(ARGS[3])_perErr$(ARGS[2]).jld" fg1 fg2 isamdict fgu MM MMr MMe T frac
+@save "results/fgT$(T)_$(ARGS[3])_perErr$(ARGS[2]).jld" fg1 fg2 isamdict fgu MM MMr MMe T frac comptime
