@@ -36,8 +36,16 @@ idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:mmodal, MM=MMe);
 tree = prepBatchTree!(fg, ordering=:qr,drawpdf=true);
 inferOverTree!(fg,tree, N=100);
 fg1 = deepcopy(fg)
+@save "results/fgT$(T)_$(ARGS[3])_perErr$(ARGS[2]).jld" fg1 isamdict fgu MM MMr MMe T frac
+
 tic()
 inferOverTree!(fg,tree, N=100);
 comptime = toc()
-fg2 = fg
+fg2 = deepcopy(fg)
 @save "results/fgT$(T)_$(ARGS[3])_perErr$(ARGS[2]).jld" fg1 fg2 isamdict fgu MM MMr MMe T frac comptime
+
+tic()
+inferOverTree!(fg,tree, N=100);
+comptime = toc()
+fg3 = fg
+@save "results/fgT$(T)_$(ARGS[3])_perErr$(ARGS[2]).jld" fg1 fg2 fg3 isamdict fgu MM MMr MMe T frac comptime
