@@ -112,6 +112,7 @@ function allOdo(DRS::Array{Float64,2})
   return odo
 end
 
+# Victoria park using a different easier car model
 vc(v::Float64, alpha::Float64; L=2.80381, H=0.828329 ) = v./(1.0-tan(alpha)*H/L)
 ve(v::Float64, alpha::Float64; L=2.80381, H=0.828329 ) = v.*(1.0-tan(alpha).*H/L)
 dPhi(v::Float64, alpha::Float64; L=2.80381) = 1.0*v*tan(alpha)/L

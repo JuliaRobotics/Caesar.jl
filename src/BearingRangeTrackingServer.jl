@@ -1,7 +1,7 @@
 
 # BearingRangeTrackingServer
 
-function parseProcTracking!(instSys::InSituSystem, d::Dict{AbstractString, Any})
+function parseProcTracking!(instSys::InSituSystem, d::Dict{UTF8String, Any})
     # parameters
     lsrnoise = []
 
@@ -31,7 +31,7 @@ function parseProcTracking!(instSys::InSituSystem, d::Dict{AbstractString, Any})
 end
 
 
-function parseTCP!(insitu::InSituSystem, line::AbstractString)
+function parseTCP!(insitu::InSituSystem, line::ASCIIString)
     # sp = split(line,' ')
     # cmd = sp[1]
 
@@ -76,7 +76,8 @@ function tcpStringBRTrackingServer(;port::Int=60002)
   while loop
    sock = accept(server)
      while isopen(sock)
-         loop, retstr = parseTCP!(instSys, readline(sock)[1:(end-1)])
+         gotline = readline(sock)[1:(end-1)]
+         loop, retstr = parseTCP!(instSys, gotline)
          loop ? ( isopen(sock) ? println(sock, retstr) : nothing ) : close(sock)
      end
      println("connection lost, loop=$(loop)")

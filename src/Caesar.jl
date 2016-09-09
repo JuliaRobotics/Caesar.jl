@@ -19,6 +19,8 @@ export
   # appendFactorGraph!,
   # doBatchRun,
   # insitu component
+  GenericInSituSystem,
+  makeGenericInSituSys,
   InSituSystem,
   makeInSituSys,
   triggerPose,
@@ -26,6 +28,7 @@ export
   processTreeTrackersUpdates!,
   advOdoByRules,
   progressExamplePlot,
+  plotPoseDict,
   plotTrckStep,
   SLAMWrapper,
 
@@ -37,10 +40,13 @@ export
   saveSlam,
   loadSlam
 
+  # shouldnt be here
+  # wrapRad
 
 
 
-# include("VictoriaParkTypes.jl")
+
+include("VictoriaParkTypes.jl")
 # using VictoriaParkTypes
 include("VictoriaParkSystem.jl")
 # include("VicPrkEstimator.jl")

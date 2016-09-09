@@ -175,6 +175,9 @@ class NPSLAMWrapper(object):
     def batchSolve(self):
         self.sendCmd('BATCHSOLVE')
 
+    def setReadyForSolve(self):
+        self.sendCmd('SETALLREADY')
+
     def ls(self, poses=True,landmarks=True):
         retstrs = (self.sendCmd('LS')).split(';')
         poses = retstrs[0].split(',')

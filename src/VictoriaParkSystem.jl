@@ -19,7 +19,8 @@ function triggerPose(x, xprev, Tnow, Tprev,
   return 0
 end
 
-type InSituSystem
+type GenericInSituSystem{T}
+  xprev::Array{Float64,1}
   x::Array{Float64,1}
   dOdo::Dict{Int64,Array{Float64,1}}
   FeatAssc::Dict{Int64, Dict{Int64,Array{Float64,1}}}
@@ -29,8 +30,10 @@ type InSituSystem
   wTbk1::Array{Float64,2}
   bk1Tbk::Array{Float64,2}
   lstlaseridx::Int64
-  trackers::Dict{Int64,Feature}
+  trackers::Dict{Int64,T}
 end
+
+typealias InSituSystem GenericInSituSystem{Feature}
 
 function makeInSituSys(x::Array{Float64,1}, bfts0::Array{Float64,2})
   dOdo = Dict{Int64,Array{Float64,1}}()
@@ -45,6 +48,7 @@ function makeInSituSys(x::Array{Float64,1}, bfts0::Array{Float64,2})
   trackers = initTrackersFrom(bfts0)
   return InSituSystem(
   x,
+  x,
   dOdo,
   FeatAssc,
   Tprev,
@@ -57,10 +61,39 @@ function makeInSituSys(x::Array{Float64,1}, bfts0::Array{Float64,2})
   )
 end
 
-function poseTrigAndAdd!(instSys::InSituSystem, Ts::Float64,
-                        distrule::Float64, timerule::Float64, yawrule::Float64)
-  rule = triggerPose(instSys.x, zeros(3), Ts, instSys.Tprev, distrule, timerule, yawrule)
-  if rule != 0
+
+function makeGenericInSituSys(x::Array{Float64,1})
+  dOdo = Dict{Int64,Array{Float64,1}}()
+  FeatAssc = Dict{Int64, Dict{Int64,Array{Float64,1}}}()
+  Tprev = 0.0
+  T0 = 0.0
+  wTbk1 = SE2(x)
+  bk1Tbk = SE2(zeros(3))
+  poseid = 1
+  dOdo[poseid] = [x[1];x[2];x[3];T0;0]
+  lstlaseridx = 1
+  trackers = Dict{Int64,Any}()
+  return GenericInSituSystem{Any}(
+  x,
+  x,
+  dOdo,
+  FeatAssc,
+  Tprev,
+  T0,
+  poseid,
+  wTbk1,
+  bk1Tbk,
+  lstlaseridx,
+  trackers
+  )
+end
+
+# doesn't work in full general case yet, still requires reset to zero at each new pose
+function poseTrigAndAdd!(instSys::GenericInSituSystem, Ts::Float64,
+                        distrule::Float64, timerule::Float64, yawrule::Float64;
+                        xprev=zeros(3), auxtrig::Bool=false)
+  rule = triggerPose(instSys.x, xprev, Ts, instSys.Tprev, distrule, timerule, yawrule)
+  if rule != 0 || auxtrig
     instSys.bk1Tbk = SE2(instSys.x)
     n = [instSys.x;[Ts;rule]]
     instSys.poseid +=1
@@ -73,6 +106,14 @@ function poseTrigAndAdd!(instSys::InSituSystem, Ts::Float64,
   return false
 end
 
+function poseTrigAndAdd!(instSys::InSituSystem, Ts::Float64,
+                        distrule::Float64, timerule::Float64, yawrule::Float64;
+                        xprev=zeros(3), auxtrig::Bool=false)
+
+  error(" Yeah dehann, do it properly")
+
+
+end
 
 
 function processTreeTrackersUpdates!(instSys::InSituSystem, lsrFeats::Dict{Int64,LaserFeatures},
@@ -166,15 +207,16 @@ function progressExamplePlot(dOdo, lsrFeats; toT=Inf)
       # lstlaseridx, Ta = getFeatsAtT(lsrFeats, T, prev=lstlaseridx)
       # bfts = lsrFeats[lstlaseridx].feats
       fe = lsrFeats[idx]
-      bfts = zeros(3,length(fe))
-      lbls = ASCIIString[]
-      k = collect(keys(fe))
-      for i in 1:length(fe)
-        bfts[1:length(fe[k[i]]),i] = fe[k[i]]
-        push!(lbls, "l$(k[i])")
-      end
+      if length(lsrFeats[idx]) > 0
+        bfts = zeros(3,length(fe))
+        lbls = ASCIIString[]
+        k = collect(keys(fe))
+        for i in 1:length(fe)
+          bfts[1:length(fe[k[i]]),i] = fe[k[i]]
+          push!(lbls, "l$(k[i])")
+        end
 
-      if size(bfts,2) > 0
+
         if bfts[1,1] != 0.0 && bfts[2,1] != 0.0 && bfts[3,1] != 0.0
           wfts = rotateFeatsToWorld(bfts, pose)
           for i in 1:size(wfts,2)
@@ -191,13 +233,16 @@ function progressExamplePlot(dOdo, lsrFeats; toT=Inf)
         T = dOdo[idx][4]
       end
     end
+
     p = plotPoseDict(dOdo,to=idx-1)
-    l = Gadfly.layer(x=WFTSX, y=WFTSY, label=WLBLS, Geom.label, Geom.point, Gadfly.Theme(default_color=colorant"red"))
-    push!(p.layers, l[1])
-    l2 = Gadfly.layer(x=WFTSX, y=WFTSY, Geom.point, Gadfly.Theme(default_color=colorant"red"))
-    push!(p.layers, l2[1])
-    for i in 1:length(lastX)
-      push!(p.layers, Gadfly.layer(x=[lastpose[1];lastX[i]], y=[lastpose[2];lastY[i]], Geom.line, Gadfly.Theme(default_color=colorant"magenta"))[1])
+    if length(WFTSX) > 0
+      l = Gadfly.layer(x=WFTSX, y=WFTSY, label=WLBLS, Geom.label, Geom.point, Gadfly.Theme(default_color=colorant"red"))
+      push!(p.layers, l[1])
+      l2 = Gadfly.layer(x=WFTSX, y=WFTSY, Geom.point, Gadfly.Theme(default_color=colorant"red"))
+      push!(p.layers, l2[1])
+      for i in 1:length(lastX)
+        push!(p.layers, Gadfly.layer(x=[lastpose[1];lastX[i]], y=[lastpose[2];lastY[i]], Geom.line, Gadfly.Theme(default_color=colorant"magenta"))[1])
+      end
     end
     p
 end
