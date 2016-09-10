@@ -50,7 +50,8 @@ end
 
 function parseAddLandmBR!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   poseid = floor(Int,parse(Float64, sp2[1]))
-  pose = ASCIIString(slam.fg.v[poseid].label)
+  pose = ASCIIString(getVert(slam.fg,poseid).label)
+  # pose = ASCIIString(slam.fg.v[poseid].label)
   lmid = floor(Int,parse(Float64, sp2[2]))
   zbr = [parse(Float64,sp2[3]);parse(Float64,sp2[4])]
   cov = diagm([parse(Float64,sp2[5]);parse(Float64,sp2[7])])
@@ -62,7 +63,8 @@ function parseAddLandmBR!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1
     lm = ASCIIString(string('l',slam.lndmidx))
     projNewLandm!(slam.fg, pose, lm, zbr, cov, ready=USEREADY)
   else
-    lm = ASCIIString(slam.fg.v[lmid].label)
+    lm = ASCIIString(getVert(slam.fg,lmid).label)
+    # lm = ASCIIString(slam.fg.v[lmid].label)
     addBRFG!(slam.fg, pose, lm, zbr, cov, ready=USEREADY)
   end
   return lm
@@ -70,7 +72,8 @@ end
 
 function parseLandmBRMM!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   poseid = floor(Int,parse(Float64, sp2[1]))
-  pose = ASCIIString(slam.fg.v[poseid].label)
+  pose = ASCIIString(getVert(slam.fg, poseid).label)
+  # pose = ASCIIString(slam.fg.v[poseid].label)
   lm1id = floor(Int,parse(Float64, sp2[2]))
   w1 = parse(Float64, sp2[3])
   lm2id = floor(Int,parse(Float64, sp2[4]))
@@ -80,8 +83,10 @@ function parseLandmBRMM!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1}
   cov[1,2] = parse(Float64,sp2[9])
   cov[2,1] = parse(Float64,sp2[9])
   # TODO --do the tests here
-  lm1 = ASCIIString(slam.fg.v[lm1id].label)
-  lm2 = ASCIIString(slam.fg.v[lm2id].label)
+  lm1 = ASCIIString(getVert(slam.fg,lm1id).label)
+  lm2 = ASCIIString(getVert(slam.fg,lm2id).label)
+  # lm1 = ASCIIString(slam.fg.v[lm1id].label)
+  # lm2 = ASCIIString(slam.fg.v[lm2id].label)
   addMMBRFG!(slam.fg, pose, [lm1;lm2], zbr, cov, w=[w1;w2], ready=USEREADY)
   # function addMMBRFG!(fg::FactorGraph, pose::ASCIIString,
   #                   lm::Array{ASCIIString,1}, br::Array{Float64,1},
@@ -91,7 +96,8 @@ end
 
 function parseLandmBRAuto!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   poseid = floor(Int,parse(Float64, sp2[1]))
-  pose = ASCIIString(slam.fg.v[poseid].label)
+  pose = ASCIIString(getVert(slam.fg,poseid).label)
+  # pose = ASCIIString(slam.fg.v[poseid].label)
   lmid = sp2[2] != "*" ? floor(Int,parse(Float64, sp2[2])) : -1
   zbr = [parse(Float64,sp2[3]);parse(Float64,sp2[4])]
   cov = diagm([parse(Float64,sp2[5]);parse(Float64,sp2[7])])
@@ -108,7 +114,8 @@ end
 
 
 function parseLandmarkXY!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
-  pose = slam.fg.v[map(Int, sp2[1])].label
+  pose = getVert(slam.fg, map(Int, sp2[1]) ).label
+  # pose = slam.fg.v[map(Int, sp2[1])].label
   lmid = map(Int, sp2[2])
   zxy = [map(Float64,sp[3]);map(Float64,sp[4])]
   cov = diagm([map(Float64,sp[5]);map(Float64,sp[7])])
@@ -127,8 +134,9 @@ function batchSolve!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
 end
 
 function parseGetparticles(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
-  id = slam.fg.IDs[sp2[1]]
-  val = getVal(slam.fg.v[id])
+  val = getVal(slam.fg, ASCIIString(sp2[1]))
+  # id = slam.fg.IDs[sp2[1]]
+  # val = getVal(slam.fg.v[id])
   retstr = prepString(val)
   return retstr
 end

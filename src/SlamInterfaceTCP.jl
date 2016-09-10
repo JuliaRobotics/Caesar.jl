@@ -3,7 +3,7 @@ using IncrementalInference
 using RoME
 using CloudGraphs
 
-dbaddress = "mrg-liljon.csail.mit.edu"
+@show dbaddress = ARGS[1]
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, "", "", "localhost", 27017, false, "", "");
 cloudGraph = connect(configuration);
 
