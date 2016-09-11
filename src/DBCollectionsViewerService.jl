@@ -57,13 +57,16 @@ while true
 			end
 			bedu.publish_cloud("posePts", LD,c=C, frame_id="origin")
 			# draw pose MAP triads
-			Xpp,Ypp, Thpp, LBLS = get2DPoseMax(fg)
+			# Xpp,Ypp, Thpp, LBLS = get2DPoseMax(fg)
 			poses = []
-			for i in 1:length(Xpp)
-				posei = bgrt.RigidTransform[:from_angle_axis](Thpp[i],[0;0;1],[Xpp[i];Ypp[i];0])
+			# for i in 1:length(Xpp)
+			for x in xx
+				# posei = bgrt.RigidTransform[:from_angle_axis](Thpp[i],[0;0;1],[Xpp[i];Ypp[i];0])
+				X = getVert(fg,x).attributes["MAP_est"]
+				posei = bgrt.RigidTransform[:from_angle_axis](X[3],[0;0;1],[X[1];X[2];0])
 				push!(poses, posei)
 			end
-			bedu.publish_pose_list("MAPposes",poses, frame_id="origin",texts=LBLS)
+			bedu.publish_pose_list("MAPposes",poses, frame_id="origin",texts=xx)
 
 			#if new pose
 				# fetch depth cloud from mongo for pose
