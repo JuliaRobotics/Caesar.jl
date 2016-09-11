@@ -64,6 +64,12 @@ while true
 				push!(poses, posei)
 			end
 			bedu.publish_pose_list("MAPposes",poses, frame_id="origin",texts=LBLS)
+
+			#if new pose
+				# fetch depth cloud from mongo for pose
+				# publish to viewer via Sudeeps python code
+
+
 			# now do landmarks
 			LD = Array{Array{Float64,1},1}()
 			C = Vector{ASCIIString}()

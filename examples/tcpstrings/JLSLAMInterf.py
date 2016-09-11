@@ -34,7 +34,7 @@ def advOdoByRules(slam, prevpose, dx=None, newpose=None, previ=0, i=0, OFsum=-1)
             print 'Looks like the robot is not moving!'
             mlst = [0.0,0.0,meas[2]]
         psname = slam.addOdo(mlst)
-        slam.redrawAll()
+        # slam.redrawAll()
         return newpose, i, psname
     return prevpose, previ, psname
 
