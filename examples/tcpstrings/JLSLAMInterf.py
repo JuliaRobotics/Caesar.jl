@@ -3,9 +3,9 @@ import sys
 import numpy as np
 from numpy import linalg as npla
 
-from bot_geometry.rigid_transform import RigidTransform, Pose
-from bot_geometry.quaternion import Quaternion
-from bot_externals.draw_utils import publish_pose_list, publish_sensor_frame, publish_cloud, \
+from pybot.geometry.rigid_transform import RigidTransform, Pose
+from pybot.geometry.quaternion import Quaternion
+from pybot.externals.lcm.draw_utils import publish_pose_list, publish_sensor_frame, publish_cloud, \
     publish_line_segments
 
 def triggerPose(Dx, dt, distrule=1.0, rotrule=np.pi/4, timerule=30):
@@ -27,7 +27,7 @@ def advOdoByRules(slam, prevpose, dx=None, newpose=None, previ=0, i=0, OFsum=-1)
     if triggerPose(dx, i-previ, timerule=600):
         if OFsum != -1:
             print 'Optical flow sum', OFsum
-        meas = dx.to_roll_pitch_yaw_x_y_z()
+        meas = dx.to_rpyxyz()
         if OFsum == -1 or OFsum > 150000:
             mlst = [meas[3],meas[4],meas[2]]
         else:
@@ -103,7 +103,7 @@ class NPSLAMWrapper(object):
             for v in V:
                 tt = np.zeros((d,N))
                 for i in range(0,N):
-                    t = Pose.from_rigid_transform(0,RigidTransform(xyzw=Quaternion.from_roll_pitch_yaw(0,0,v[2,i]).to_xyzw(), tvec=[v[0,i], v[1,i], 0]))
+                    t = Pose.from_rigid_transform(0,RigidTransform(xyzw=Quaternion.from_rpy(0,0,v[2,i]).to_xyzw(), tvec=[v[0,i], v[1,i], 0]))
                     pert = Pose.from_rigid_transform(0,RigidTransform(tvec=[ll,0,0]))
                     tv = (t.oplus(pert)).tvec
                     tt[0:2,i] = tv[0:2]
