@@ -140,7 +140,7 @@ while true
           fid = open("temprgb.png","w")
           write(fid, rgbpng)
           close(fid)
-          bgr = opencv.imread("temprgb.png")
+          rgb = opencv.imread("temprgb.png")
           # cv2.cvtColor(im,im,cv2.COLOR_BGR2RGB)
           # rgb = bgr[:,:,[3;2;1]]
           # publish to viewer via Sudeeps python code
