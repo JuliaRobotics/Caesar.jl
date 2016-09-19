@@ -180,6 +180,28 @@ function parseSetReady!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   nothing
 end
 
+function parseMongoFileSave(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+  id = slam.fg.IDs[sp2[1]]
+  cgid = slam.fg.cgIDs[id]
+  cv = CloudGraphs.get_vertex(slam.fg.cg, cgid)
+  # for f in sp2[2:end]
+  	fid = open(sp2[2],"r")
+  	imageData = readbytes(fid) # imageData::Vector{UInt8}
+  	close(fid)
+	  bdei = CloudGraphs.BigDataElement("keyframe-image", imageData)
+    push!(cv.bigData.dataElements, bdei);
+
+    fid = open(sp2[3],"r")
+  	imageData = readbytes(fid) # imageData::Vector{UInt8}
+  	close(fid)
+	  bdei = CloudGraphs.BigDataElement("depthframe-image", imageData)
+    push!(cv.bigData.dataElements, bdei);
+
+  CloudGraphs.save_BigData!(slam.fg.cg, cv)
+  println("Finished writing to Mongo.")
+
+  nothing
+end
 
 function parseTCP!(slam::SLAMWrapper, line::ASCIIString)
     sp = split(line,' ')
@@ -212,6 +234,8 @@ function parseTCP!(slam::SLAMWrapper, line::ASCIIString)
       f = parseGetNextID
     elseif cmd == "DRAWFGPDF"
       f = parseDotFG
+    elseif cmd == "MONGOFILE"
+      f = parseMongoFileSave
     elseif cmd == "RESET"
       f = parseReset
     elseif cmd == "QUIT"

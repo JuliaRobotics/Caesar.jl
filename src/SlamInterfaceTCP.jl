@@ -4,7 +4,7 @@ using RoME
 using CloudGraphs
 
 @show dbaddress = ARGS[1]
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, "", "", "localhost", 27017, false, "", "");
+configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, "", "", dbaddress, 27017, false, "", "");
 cloudGraph = connect(configuration);
 
 # register types of interest in CloudGraphs

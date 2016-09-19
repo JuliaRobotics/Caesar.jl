@@ -214,3 +214,11 @@ class NPSLAMWrapper(object):
             Vl.append(self.getParticles(l))
             Cl.append(landmc)
         self.drawParticles2d(Vl, c=Cl, name=lname)
+
+    def insertFileToMongo(self, poselbl, filelist):
+        print 'saving files to Mongo'
+        sendstr = 'MONGOFILE ' + poselbl
+        for f in filelist:
+            sendstr = sendstr + ' ' + f
+        self.sendCmd(sendstr)
+        print 'Finished saving to Mongo'

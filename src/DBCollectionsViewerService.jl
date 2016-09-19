@@ -6,9 +6,7 @@
 
 using Caesar, RoME, KernelDensityEstimate
 using IncrementalInference, CloudGraphs, Neo4j
-
-
-# dbaddress = "mrg-liljon.csail.mit.edu"
+using TransformUtils
 
 #
 # # connect to the server, CloudGraph stuff
@@ -54,9 +52,23 @@ CAMK = [[ 570.34222412; 0.0; 319.5]';
  [   0.0; 0.0; 1.0]'];
 
 dcam = cu.DepthCamera(K=CAMK)
+# -np.pi/2, 0, -np.pi/2
+
+temp = bgrt.RigidTransform[:from_rpyxyz](-pi/2, 0, -pi/2, 0, 0, 0.6, axes="sxyz")
+# @show temp[:to_matrix]()
+
+# bTc = SE3([0;0;0.6],AngleAxis(-pi/2,[1;0;0])*AngleAxis(-pi/2,[0;0;1]))
+bTc = SE3(temp[:to_matrix]())
+
+
 
 poseswithdepth = Dict()
 poseswithdepth["x1"] = 0 # skip this pose -- there is no big data before ICRA
+# poseswithdepth["x52"] = 0 # skip this pose -- there is no big data before ICRA
+# poseswithdepth["x53"] = 0 # skip this pose -- there is no big data before ICRA
+# poseswithdepth["x54"] = 0 # skip this pose -- there is no big data before ICRA
+# poseswithdepth["x55"] = 0 # skip this pose -- there is no big data before ICRA
+
 
 while true
   # this is being replaced by cloudGraph, added here for development period
@@ -80,8 +92,11 @@ while true
 			# draw pose MAP triads
 			# Xpp,Ypp, Thpp, LBLS = get2DPoseMax(fg)
 			poses = []
+      cams = []
 			# for i in 1:length(Xpp)
+      j=0
 			for x in xx
+        j+=1
 				# posei = bgrt.RigidTransform[:from_angle_axis](Thpp[i],[0;0;1],[Xpp[i];Ypp[i];0])
 				vert = getVert(fg,x)
 				X = Float64[]
@@ -92,10 +107,19 @@ while true
 				end
 				posei = bgrt.RigidTransform[:from_angle_axis](X[3],[0;0;1],[X[1];X[2];0])
 				push!(poses, posei)
+        wTb = SE3([X[1];X[2];0], AngleAxis(X[3],[0;0;1]))
+        wTc = wTb*bTc
+        camiRT = bgrt.RigidTransform[:from_matrix](matrix(wTc))
+        cami = bgrt.Pose[:from_rigid_transform](j, camiRT)
+
+        push!(cams, cami)
 			end
 			bedu.publish_pose_list("MAPposes",poses, frame_id="origin",texts=xx)
+      bedu.publish_pose_list("MAPcams",cams, frame_id="origin",reset=false)
 
+      j=0
       for x in xx
+        j+=1
   			if !haskey(poseswithdepth, x)
           poseswithdepth[x]=1
           cvid = -1
@@ -121,43 +145,71 @@ while true
           close(fid)
           img = opencv.imread("tempdepth.png",2)
           imgc = map(Float64,img)/1000.0
-          # for i in 1:100
           #   opencv.imshow("yes", img)
-          #   opencv.waitKey(1)
-          # end
-          # calibrate the image
-          # color conversion of points, so we can get pretty pictures...
+          # calibrate the image # color conversion of points, so we can get pretty pictures...
           X = dcam[:reconstruct](imgc)
+          r,c,h = size(X)
+          Xd = X[1:3:r,1:3:c,:]
+          mask = Xd[:,:,:] .> 5.0
+          Xd[mask] = Inf
           # get color information
           rgbpng = nothing
+          segpng = nothing
           for i in bd.dataElements
             if i.description == "keyframe-image"
               rgbpng = i.data
-              break
+            end
+            if i.description == "segnet-image"
+              segpng = i.data
             end
           end
           #interpret data
-          fid = open("temprgb.png","w")
-          write(fid, rgbpng)
-          close(fid)
-          rgb = opencv.imread("temprgb.png")
-          # cv2.cvtColor(im,im,cv2.COLOR_BGR2RGB)
-          # rgb = bgr[:,:,[3;2;1]]
-          # publish to viewer via Sudeeps python code
-          bedu.publish_cloud("depth", X, c=rgb, frame_id="camera", flip_rb=true)
+          if rgbpng != nothing
+            fid = open("temprgb.png","w")
+            write(fid, rgbpng)
+            close(fid)
+            rgb = opencv.imread("temprgb.png")
+            # rgb = bgr[:,:,[3;2;1]]
+            # publish to viewer via Sudeeps python code
+            rgbss = rgb[1:3:r,1:3:c,:]
+            bedu.publish_cloud("depth", Xd, c=rgbss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
+          end
+          if segpng != nothing
+            fid = open("temprgb.png","w")
+            write(fid, segpng)
+            close(fid)
+            seg = opencv.imread("temprgb.png")
+            segss = seg[1:3:r,1:3:c,:]
+            bedu.publish_cloud("segnet", Xd, c=segss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
+          end
         end
       end
 
 			# now do landmarks
 			LD = Array{Array{Float64,1},1}()
 			C = Vector{ASCIIString}()
+      landms = []
 			for l in ll
-				val = getVal(fg,l)
+        vert = getVert(fg,l)
+
+				val = getVal(vert)
 				len = size(val,2)
 				[push!(C,"c") for i in 1:len];
 				[push!(LD, vec([val[1:2,i];0])) for i in 1:len];
+
+				X = Float64[]
+				if haskey(vert.attributes, "MAP_est")
+					X = vert.attributes["MAP_est"]
+				else
+					X = getKDEMax(getKDE(vert))
+				end
+
+        lmi = bgrt.RigidTransform[:from_angle_axis](0,[0;0;1],[X[1];X[2];0])
+				push!(landms, lmi)
+
 			end
 			bedu.publish_cloud("landmarkPts", LD,c=C, frame_id="origin")
+      bedu.publish_pose_list("MAPlandms",landms, frame_id="origin",texts=ll)
     else
       sleep(0.2)
     end
