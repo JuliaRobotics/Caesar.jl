@@ -13,8 +13,13 @@ using TransformUtils
 dbaddress = length(ARGS) > 0 ? ARGS[1] : "localhost"
 println("Taking Neo4j database address as $(dbaddress)...")
 
-# switch IncrementalInference to use CloudGraphs (Neo4j) data layer
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, "", "", dbaddress, 27017, false, "", "");
+dbusr = length(ARGS) > 1 ? ARGS[2] : ""
+dbpwd = length(ARGS) > 2 ? ARGS[3] : ""
+
+mongoaddress = length(ARGS) > 3 ? ARGS[4] : "localhost"
+println("Taking Mongo database address as $(mongoaddress)...")
+
+configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
 cloudGraph = connect(configuration);
 IncrementalInference.setCloudDataLayerAPI!()
 # Connection to database for additional queries
@@ -150,7 +155,7 @@ while true
           X = dcam[:reconstruct](imgc)
           r,c,h = size(X)
           Xd = X[1:3:r,1:3:c,:]
-          mask = Xd[:,:,:] .> 5.0
+          mask = Xd[:,:,:] .> 4.5
           Xd[mask] = Inf
           # get color information
           rgbpng = nothing
