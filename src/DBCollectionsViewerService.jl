@@ -19,6 +19,10 @@ dbpwd = length(ARGS) > 2 ? ARGS[3] : ""
 mongoaddress = length(ARGS) > 3 ? ARGS[4] : "localhost"
 println("Taking Mongo database address as $(mongoaddress)...")
 
+session = length(ARGS) > 4 ? utf8(ARGS[5]) : ""
+println("Attempting to draw session $(session)...")
+
+
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
 cloudGraph = connect(configuration);
 IncrementalInference.setCloudDataLayerAPI!()
@@ -75,12 +79,14 @@ poseswithdepth["x1"] = 0 # skip this pose -- there is no big data before ICRA
 # poseswithdepth["x55"] = 0 # skip this pose -- there is no big data before ICRA
 
 
+
 while true
   # this is being replaced by cloudGraph, added here for development period
   fg = emptyFactorGraph()
   fg.cg = cloudGraph
+  fg.sessionname = session
 
-    IDs = getPoseExVertexNeoIDs(conn);
+    IDs = getPoseExVertexNeoIDs(conn, sessionname=session);
 
     println("get local copy of graph")
     if fullLocalGraphCopy!(fg, conn)
