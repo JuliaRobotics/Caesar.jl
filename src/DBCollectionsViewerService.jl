@@ -22,6 +22,7 @@ println("Taking Mongo database address as $(mongoaddress)...")
 session = length(ARGS) > 4 ? utf8(ARGS[5]) : ""
 println("Attempting to draw session $(session)...")
 
+DRAWDEPTH = length(ARGS) > 5 ? ARGS[6]=="drawdepth" : false
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
 cloudGraph = connect(configuration);
@@ -131,7 +132,7 @@ while true
       j=0
       for x in xx
         j+=1
-  			if !haskey(poseswithdepth, x)
+  			if !haskey(poseswithdepth, x) && DRAWDEPTH
           poseswithdepth[x]=1
           cvid = -1
           for id in IDs
