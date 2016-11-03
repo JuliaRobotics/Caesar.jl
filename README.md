@@ -7,6 +7,8 @@ Towards non-parametric / parametric navigation solutions
 
 This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This Julia package encompasses test cases and robot related software for multimodal (multihypothesis) navigation and mapping solutions from various sensor data.
 
+[Video example](https://vimeo.com/190052649)
+
 Installation (unregistered package)
 -----------------------------------
 
@@ -24,7 +26,7 @@ Major features
 A multicore SLAM server over tcp
 
     julia -p10 -e "using Caesar; tcpStringSLAMServer()"
-    
+
 A multicore Bayes 2D feature tracking server over tcp
 
     julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
