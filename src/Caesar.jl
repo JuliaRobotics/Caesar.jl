@@ -1,8 +1,8 @@
 module Caesar
 
 using
-  IncrementalInference,
   RoME,
+  IncrementalInference,
   KernelDensityEstimate,
   Gadfly,
   Colors,
@@ -38,12 +38,17 @@ export
 
   # save and load data
   saveSlam,
-  loadSlam
+  loadSlam,
+
+  # cloudgraph
+  usecloudgraphsdatalayer!
 
   # shouldnt be here
   # wrapRad
 
 
+
+include("CloudGraphIntegration.jl") # Work in progress code
 
 
 include("VictoriaParkTypes.jl")
