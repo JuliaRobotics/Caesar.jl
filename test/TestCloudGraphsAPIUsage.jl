@@ -22,7 +22,7 @@ using IncrementalInference, CloudGraphs
 
 
 
-#CloudGraph.registerPackedType!(cloudGraph, IncrementalInference.FunctionNodeData{PackedOdo},
+#CloudGraph.registerPackedType!(cloudGraph, IncrementalInference.PackedFunctionNodeData{PackedOdo},
 #                               coolencode, cooldecode)
 
 @test false

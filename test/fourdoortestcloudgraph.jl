@@ -7,7 +7,7 @@ dbaddress = "localhost"
 dbusr = "neo4j"
 dbpwd = "profroot"
 mongoaddress = "localhost"
-session = ""
+session = "SESSTEST"
 println("Attempting to solve session $(session)...")
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
@@ -24,7 +24,7 @@ Caesar.usecloudgraphsdatalayer!()
 # this is being replaced by cloudGraph, added here for development period
 fg = emptyFactorGraph()
 fg.cg = cloudGraph
-fg.sessionname = "SESSTEST"
+fg.sessionname = session
 
 # Robot navigation and inference type stuff
 N=200
@@ -51,11 +51,11 @@ f2 = addFactor!(fg,[v3], Obsv2(doors, cov', [1.0]))
 v4=addNode!(fg,"x4",2.0*randn(1,N)+getVal(v3)+50.0, N=N,labels=["POSE"])
 addFactor!(fg,[v3;v4],Odo([50.0]',[2.0]',[1.0]))
 
-if true
-    l1=addNode!(fg, "l1", 0.5*randn(1,N)+getVal(v3)+64.0, N=N,labels=["LANDMARK"])
-    addFactor!(fg, [v3,l1], Ranged([64.0],[0.5],[1.0]))
-    addFactor!(fg, [v4,l1], Ranged([16.0],[0.5],[1.0]))
-end
+# if true
+l1=addNode!(fg, "l1", 0.5*randn(1,N)+getVal(v3)+64.0, N=N,labels=["LANDMARK"])
+addFactor!(fg, [v3,l1], Ranged([64.0],[0.5],[1.0]))
+addFactor!(fg, [v4,l1], Ranged([16.0],[0.5],[1.0]))
+# end
 
 
 v5=addNode!(fg,"x5",2.0*randn(1,N)+getVal(v4)+50.0, N=N,labels=["POSE"])
@@ -75,9 +75,10 @@ f3 = addFactor!(fg,[v7], Obsv2(doors, cov', [1.0]))
 # Now operate with the data in the DB
 
 tree = prepBatchTree!(fg,drawpdf=true)
-
+gc()
 # recursive solving (single process, easy stack trace for debugging)
-inferOverTree!(fg, tree)
+println("Starting inference over tree")
+inferOverTreeR!(fg, tree)
 
 
 # get vertex back from DB
@@ -87,7 +88,7 @@ inferOverTree!(fg, tree)
 # Get neighbors
 # neighs = CloudGraphs.get_neighbors(fg.cg, cv1r)
 
-gt = Dict{String, Array{Float64,2}}()
+gt = Dict{AbstractString, Array{Float64,2}}()
 gt["x1"]=([0.0;1.97304 ]')' # -0.0342366
 gt["x2"]=([50.0; 2.83153 ]')' # 49.8797
 gt["x3"]=([100.0; 1.65557 ]')' # 99.8351

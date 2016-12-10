@@ -108,14 +108,14 @@ end
 
 function usecloudgraphsdatalayer!()
   IncrementalInference.setdatalayerAPI!(
-    addvertex!= addCloudVert!,
+    addvertex= addCloudVert!,
     getvertex= getExVertFromCloud,
-    makeaddedge!= makeAddCloudEdge!,
+    makeaddedge= makeAddCloudEdge!,
     getedge= getEdgeFromCloud,
     outneighbors= getCloudOutNeighbors,
-    updatevertex!= updateFullCloudVertData!,
-    deletevertex!= deleteCloudVertex!,
-    deleteedge!= deleteCloudEdge!,
+    updatevertex= updateFullCloudVertData!,
+    deletevertex= deleteCloudVertex!,
+    deleteedge= deleteCloudEdge!,
     cgEnabled= true )
   nothing
 end
@@ -173,16 +173,16 @@ end
 function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
   # 1D early development types
   CloudGraphs.registerPackedType!(cloudGraph, VariableNodeData, PackedVariableNodeData, encodingConverter=VNDencoder, decodingConverter=VNDdecoder);
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Obsv2}, FunctionNodeData{PackedObsv2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Odo}, FunctionNodeData{PackedOdo}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericMarginal}, FunctionNodeData{GenericMarginal}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Ranged}, FunctionNodeData{Ranged}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Obsv2}, PackedFunctionNodeData{PackedObsv2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Odo}, PackedFunctionNodeData{PackedOdo}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericMarginal}, PackedFunctionNodeData{PackedGenericMarginal}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Ranged}, PackedFunctionNodeData{PackedRanged}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   # Pose2
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{PriorPose2}, FunctionNodeData{PackedPriorPose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Pose2Pose2}, FunctionNodeData{PackedPose2Pose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Pose2DPoint2DBearingRange}, FunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{PriorPose2}, PackedFunctionNodeData{PackedPriorPose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Pose2Pose2}, PackedFunctionNodeData{PackedPose2Pose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Pose2DPoint2DBearingRange}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Pose2DPoint2DRange}, FunctionNodeData{Pose2DPoint2DRange}, encodingConverter=passTypeThrough, decodingConverter=passTypeThrough)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{PriorPoint2D}, FunctionNodeData{PackedPriorPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{PriorPoint2D}, PackedFunctionNodeData{PackedPriorPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   # TODO -- Pose3 stuff
   nothing
 end

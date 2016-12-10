@@ -10,8 +10,8 @@ using IncrementalInference, CloudGraphs
 
     # register types of interest in CloudGraphs
     CloudGraphs.registerPackedType!(cloudGraph, VariableNodeData, PackedVariableNodeData, encodingConverter=VNDencoder, decodingConverter=VNDdecoder);
-    CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Obsv2}, FunctionNodeData{PackedObsv2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-    CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Odo}, FunctionNodeData{PackedOdo}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+    CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Obsv2}, PackedFunctionNodeData{PackedObsv2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+    CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Odo}, PackedFunctionNodeData{PackedOdo}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
 
 
 IncrementalInference.setCloudDataLayerAPI()
