@@ -107,7 +107,7 @@ end
 
 
 function usecloudgraphsdatalayer!()
-  IncrementalInference.setdatalayerAPI(
+  IncrementalInference.setdatalayerAPI!(
     addvertex!= addCloudVert!,
     getvertex= getExVertFromCloud,
     makeaddedge!= makeAddCloudEdge!,

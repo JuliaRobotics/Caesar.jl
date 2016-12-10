@@ -1,6 +1,7 @@
-julia 0.4
-IncrementalInference
+julia 0.5
 RoME
+IncrementalInference
+Graphs
 KernelDensityEstimate
 Gadfly
 Colors

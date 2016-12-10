@@ -3,12 +3,14 @@ module Caesar
 using
   RoME,
   IncrementalInference,
+  Graphs,
   KernelDensityEstimate,
   Gadfly,
   Colors,
   JLD,
   HDF5,
-  JSON
+  JSON,
+  CloudGraphs
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
 
@@ -41,15 +43,23 @@ export
   loadSlam,
 
   # cloudgraph
-  usecloudgraphsdatalayer!
-
-  # shouldnt be here
-  # wrapRad
+  usecloudgraphsdatalayer!,
+  # CloudGraph stuff
+  registerGeneralVariableTypes!,
+  fullLocalGraphCopy!,
+  removeGenericMarginals!,
+  setBackendWorkingSet!,
+  setDBAllReady!,
+  getExVertFromCloud,
+  getAllExVertexNeoIDs,
+  getPoseExVertexNeoIDs,
+  copyAllNodes!,
+  copyAllEdges!,
+  registerCallback!
 
 
 
 include("CloudGraphIntegration.jl") # Work in progress code
-
 
 include("VictoriaParkTypes.jl")
 # using VictoriaParkTypes
