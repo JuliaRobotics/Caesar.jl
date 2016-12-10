@@ -4,8 +4,8 @@ using Caesar, IncrementalInference, CloudGraphs
 
 # switch IncrementalInference to use CloudGraphs (Neo4j) data layer
 dbaddress = "localhost"
-dbusr = "neo4j"
-dbpwd = "profroot"
+dbusr = ""
+dbpwd = ""
 mongoaddress = "localhost"
 session = "SESSTEST"
 println("Attempting to solve session $(session)...")
