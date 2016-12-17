@@ -1,24 +1,24 @@
-
+using Caesar, RoME
 
 # look at SimpleExample.jl for TCP based usage example
 
 nprocs() > 1 ? thxl = 2 : nothing
 
-
-type SLAMWrapper
-  fg::FactorGraph
-  tree
-  lndmidx::Int
-end
+#
+# type SLAMWrapper
+#   fg::FactorGraph
+#   tree
+#   lndmidx::Int
+# end
 
 USEREADY=1
 include("SlamConvenienceFunctions.jl")
 
 
-function tcpStringSLAMServer(;slamdata=Union{},port::Int=60001)
+function tcpStringSLAMServer(;slamdata=nothing,port::Int=60001)
   println("Empty slam object created")
-  if slamdata == Union{}
-    slamdata = SLAMWrapper(emptyFactorGraph(), Union{}, 0)
+  if slamdata == nothing
+    slamdata = SLAMWrapper(emptyFactorGraph(), nothing, 0)
   end
 
   println("Listenting on $(port)")

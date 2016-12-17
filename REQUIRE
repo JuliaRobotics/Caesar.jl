@@ -3,6 +3,10 @@ RoME
 IncrementalInference
 Graphs
 KernelDensityEstimate
+DrakeVisualizer
+TransformUtils
+CoordinateTransformations
+GeometryTypes
 Gadfly
 Colors
 JLD
