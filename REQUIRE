@@ -7,8 +7,10 @@ DrakeVisualizer
 TransformUtils
 CoordinateTransformations
 GeometryTypes
+Rotations
 Gadfly
 Colors
+ColorTypes
 JLD
 HDF5
 JSON

@@ -9,6 +9,7 @@ using
   TransformUtils,
   CoordinateTransformations,
   GeometryTypes,
+  Rotations,
   Gadfly,
   Colors,
   JLD,
