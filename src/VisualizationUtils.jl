@@ -1,6 +1,19 @@
 # some drawing utils
 
-using DrakeVisualizer, CoordinateTransformations, GeometryTypes, Rotations, TransformUtils, ColorTypes
+# using DrakeVisualizer, CoordinateTransformations, GeometryTypes, Rotations, TransformUtils, ColorTypes
+
+
+type VisualizationContainer{T}
+  model
+  triads::Dict{T, Link}
+  triadposes::Dict{T, AbstractAffineMap}
+  points::Dict{T, HyperSphere}
+  pointpositions::Dict{T, Translation}
+  # VisualizationContainer() = new()
+  # VisualizationContainer(a,b,c) = new{T}(a,b,c, Dict{T, HyperSphere}(), Dict{T, Translation}() )
+  # VisualizationContainer(a,b,c,d,e) = new{T}(a,b,c,d,e)
+end
+
 
 function linkaxestriad(;width=0.02,length=1.0)
   Xbox = GeometryData(HyperRectangle(Vec(0.,-width,-width), Vec(length,width,width)))
@@ -12,14 +25,14 @@ function linkaxestriad(;width=0.02,length=1.0)
   Link([Xbox;Ybox;Zbox])
 end
 
-function settriadpose!(triadposes::Dict{Int, AbstractAffineMap}, id::Int, wTb::Translation, wRb::Rotation)
+function settriadpose!{T}(triadposes::Dict{T, AbstractAffineMap}, id::T, wTb::Translation, wRb::Rotation)
   triadposes[id] = wTb ∘ LinearMap(wRb)
   nothing
 end
-settriadpose!(triadposes::Dict{Int, AbstractAffineMap}, id::Int, wTb::Vector{Float64}, wQb::TransformUtils.Quaternion) =
+settriadpose!{T}(triadposes::Dict{T, AbstractAffineMap}, id::T, wTb::Vector{Float64}, wQb::TransformUtils.Quaternion) =
     updatetriad!(triadposes, id, Translation(wTb...), Quat(wQb.s, wQb.v...))
 
-function newtriad!(triads::Dict{Int,Link}, triadposes::Dict{Int, AbstractAffineMap}, id::Int;
+function newtriad!{T}(triads::Dict{T,Link}, triadposes::Dict{T, AbstractAffineMap}, id::T;
       wRb::Rotation=Quat(1.,0,0,0),
       wTb::Translation=Translation(0.,0,0),
       width=0.02,
@@ -29,16 +42,21 @@ function newtriad!(triads::Dict{Int,Link}, triadposes::Dict{Int, AbstractAffineM
   nothing
 end
 
-function updatetriadposes!(model, triadposes::Dict{Int, AbstractAffineMap})
-  draw(model, triadposes)
-  nothing
+function newtriad!{T}(dc::VisualizationContainer{T}, id::T;
+      wRb::Rotation=Quat(1.,0,0,0),
+      wTb::Translation=Translation(0.,0,0),
+      width=0.02,
+      length=1.0 )
+  #
+  newtriad!(dc.triads, dc.triadposes, id, wRb=wRb, wTb=wTb, width=width, length=length)
 end
 
-function visualizetriads(triads::Dict{Int,Link}, triadposes::Dict{Int, AbstractAffineMap})
+function visualizetriads{T}(triads::Dict{T,Link}, triadposes::Dict{T, AbstractAffineMap})
   triadsmodel = Visualizer(triads)
-  updatetriadposes!(triadsmodel, triadposes)
-  nothing
+  DrakeVisualizer.draw(triadsmodel, triadposes)
+  triadsmodel
 end
+visualizetriads(dc::VisualizationContainer) = visualizetriads(dc.triads, dc.triadposes)
 
 function testtriaddrawing()
   triads, trposes = Dict{Int,Link}(), Dict{Int, AbstractAffineMap}()
@@ -50,9 +68,34 @@ function testtriaddrawing()
   nothing
 end
 
-DrakeVisualizer.new_window();
 
-testtriaddrawing()
+# create a new Director window with home axis
+function startdefaultvisualization(;newwindow=true)
+  DrakeVisualizer.new_window()
+  triads, trposes = Dict{Symbol, Link}(), Dict{Symbol, AbstractAffineMap}()
+  newtriad!(triads, trposes, :origin)
+  model = visualizetriads(triads, trposes)
+  dc = VisualizationContainer(model, triads, trposes, Dict{Symbol, HyperSphere}(), Dict{Symbol, Translation}())
+  return dc
+end
+
+
+function visualizeallposes!(dc::VisualizationContainer, fgl::FactorGraph)
+  po,ll = ls(fgl)
+  for p in po
+    # v = getVert(fgl, p)
+    den = getVertKDE(fgl, p)
+    maxval = getKDEMax(den)
+    q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
+    newtriad!(dc,p, wTb=Translation(maxval[1:3]...), wRb=Quat(q.s,q.v...))
+  end
+  visualizetriads(dc)
+  nothing
+end
+
+
+
+# testtriaddrawing()
 
 
 

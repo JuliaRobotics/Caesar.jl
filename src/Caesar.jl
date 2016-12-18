@@ -12,6 +12,7 @@ using
   Rotations,
   Gadfly,
   Colors,
+  ColorTypes,
   JLD,
   HDF5,
   JSON,
@@ -60,7 +61,14 @@ export
   getPoseExVertexNeoIDs,
   copyAllNodes!,
   copyAllEdges!,
-  registerCallback!
+  registerCallback!,
+
+  # drawing functions
+  VisualizationContainer,
+  startdefaultvisualization,
+  newtriad!,
+  visualizetriads,
+  visualizeallposes!
 
 
 
@@ -75,5 +83,7 @@ include("SlamServer.jl")
 include("BearingRangeTrackingServer.jl")
 
 include("DataUtils.jl")
+
+include("VisualizationUtils.jl")
 
 end
