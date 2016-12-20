@@ -4,14 +4,11 @@ using DrakeVisualizer, CoordinateTransformations, GeometryTypes, Rotations, Tran
 
 
 type VisualizationContainer{T}
-  model
+  models::Dict{T, Visualizer}
   triads::Dict{T, Link}
   triadposes::Dict{T, AbstractAffineMap}
-  # points::Dict{T, HyperSphere}
+  meshes::Dict{T, Link}
   # pointpositions::Dict{T, Translation}
-  # VisualizationContainer() = new()
-  # VisualizationContainer(a,b,c) = new{T}(a,b,c, Dict{T, HyperSphere}(), Dict{T, Translation}() )
-  # VisualizationContainer(a,b,c,d,e) = new{T}(a,b,c,d,e)
 end
 
 
@@ -59,7 +56,7 @@ end
 
 function newpoint!{T}(dc::VisualizationContainer{T}, id::T;
       wTb::Translation=Translation(0.,0,0),
-      radius=0.05,
+      radius=0.02,
       color=RGBA(0., 0, 1, 0.5) )
   #
   pt = GeometryData(HyperSphere(Point(0.,0,0), radius))
@@ -75,14 +72,14 @@ end
 #   triadsmodel
 # end
 function visualizetriads!(vc::VisualizationContainer)  # = visualizetriads(dc.triads, dc.triadposes)
-  vc.model = Visualizer(vc.triads)
-  DrakeVisualizer.draw(vc.model, vc.triadposes)
+  vc.models[:dev] = Visualizer(vc.triads, 1)
+  DrakeVisualizer.draw(vc.models[:dev], vc.triadposes)
   nothing
 end
 
 function testtriaddrawing()
   # triads, trposes = Dict{Int,Link}(), Dict{Int, AbstractAffineMap}()
-  vc = VisualizationContainer(nothing,Dict{Int,Link}(), Dict{Int, AbstractAffineMap}())
+  vc = VisualizationContainer(nothing,Dict{Int,Link}(), Dict{Int, AbstractAffineMap}(), Dict{Int, HomogenousMesh}())
   newtriad!(vc, 0)
   newtriad!(vc, 1,wTb=Translation(2.,0,0),wRb=CoordinateTransformations.AngleAxis(pi/4,1.,0,0),length=0.5)
   newtriad!(vc, 2,wTb=Translation(4.,0,0),wRb=CoordinateTransformations.AngleAxis(pi/2,1.,0,0),length=0.5)
@@ -97,9 +94,9 @@ end
 # create a new Director window with home axis
 function startdefaultvisualization(;newwindow=true)
   DrakeVisualizer.new_window()
-  triads, trposes = Dict{Symbol, Link}(), Dict{Symbol, AbstractAffineMap}()
+  triads, trposes, meshes = Dict{Symbol, Link}(), Dict{Symbol, AbstractAffineMap}(), Dict{Symbol, Link}()
   newtriad!(triads, trposes, :origin)
-  dc = VisualizationContainer(nothing, triads, trposes) #, Dict{Symbol, HyperSphere}(), Dict{Symbol, Translation}()
+  dc = VisualizationContainer(Dict{Symbol, Visualizer}(), triads, trposes, meshes)
   visualizetriads!(dc)
   # model = visualizetriads(triads, trposes)
   return dc
@@ -123,6 +120,35 @@ function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph)
   end
 
   visualizetriads!(vc)
+  nothing
+end
+
+
+
+function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl::Symbol; levels=3)
+
+  pl1 = marginal(getVertKDE(fgl,lbl),[1;2;3])
+
+  gg = (x, a=0.0) -> evaluateDualTree(pl1, ([x[1];x[2];x[3]]')')[1]-a
+
+  x = getKDEMax(pl1)
+  maxval = gg(x)
+
+  vv = getKDERange(pl1)
+  lower_bound = Vec(vec(vv[:,1])...)
+  upper_bound = Vec(vec(vv[:,2])...)
+
+  levels = linspace(0.0,maxval,levels+2)
+
+  MD = []
+  for val in levels[2:(end-1)]
+    meshdata = GeometryData(contour_mesh(x -> gg(x,val), lower_bound, upper_bound))
+    meshdata.color = RGBA( val/(1.5*maxval),0.0,1.0,val/(1.5*maxval))
+    push!(MD, meshdata)
+  end
+  mptr = Link(MD)
+  vc.meshes[lbl] = mptr
+  Visualizer(mptr, 2) # meshdata
   nothing
 end
 

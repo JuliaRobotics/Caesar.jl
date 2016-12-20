@@ -1,7 +1,12 @@
-using Caesar, RoME, TransformUtils, IncrementalInference, Gadfly
+addprocs(3)
+
+using TransformUtils, Gadfly
+using KernelDensityEstimate
+using IncrementalInference
+using RoME
+using Caesar
 # using Base.Test
 
-using KernelDensityEstimate
 
 N = 200
 fg = initfg()
@@ -55,9 +60,6 @@ odo = SE3([-0.0615969; 0.00849829; -0.0170747], Euler( -0.00605423,-0.0115416,0.
 # v, f = addPose3Pose3(fg, "x6", deepcopy(odo), odoCov, N=N)
 addOdoFG!(fg, Pose3Pose3(deepcopy(odo), odoCov) )
 
-
-
-visualizeallposes!(dc, fg)
 
 
 # convenience function to add DIDSON sonar constraints to graph
@@ -155,10 +157,56 @@ addDidsonConstraint(fg, (3.09855, 0.0878667), :x5, :l7)
 addDidsonConstraint(fg, (3.07297, 0.041406), :x6, :l7)
 
 
-tree = wipeBuildNewTree!!(fg,drawpdf=false);
+tree = wipeBuildNewTree!(fg,drawpdf=false);
 inferOverTree!(fg, tree)
 
+
+
 visualizeallposes!(dc, fg)
+
+
+
+@async begin
+  for i in 1:50
+    visualizeallposes!(dc, fg)
+    sleep(2)
+  end
+end
+
+
+# testing better drawing
+#
+# using CoordinateTransformations, GeometryTypes, DrakeVisualizer, ColorTypes
+#
+# function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl::Symbol;levels=3)
+#
+#   pl1 = marginal(getVertKDE(fgl,lbl),[1;2;3])
+#
+#   gg = (x, a=0.0) -> evaluateDualTree(pl1, ([x[1];x[2];x[3]]')')[1]-a
+#
+#   x = getKDEMax(pl1)
+#   maxval = gg(x)
+#
+#   vv = getKDERange(pl1)
+#   lower_bound = Vec(vec(vv[:,1])...)
+#   upper_bound = Vec(vec(vv[:,2])...)
+#
+#   levels = linspace(0.0,maxval,levels+2)
+#
+#   i = 1
+#   for val in levels[2:(end-1)]
+#     i+=1
+#     meshdata = GeometryData(contour_mesh(x -> gg(x,val), lower_bound, upper_bound))
+#     meshdata.color = RGBA( val/(1.5*maxval),0.0,1.0,val/(1.5*maxval))
+#     linkdata = Link([meshdata])
+#     Visualizer(linkdata, i) # meshdata
+#   end
+#   nothing
+# end
+
+ls(fg)
+
+visualizeDensityMesh!(dc, fg, :x6)
 
 
 [inferOverTree!(fg, tree) for i in 1:3]; # should not be required
@@ -168,8 +216,12 @@ draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
  plotKDE( getVertKDE(fg,:l1), dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
 
 
+ draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
+  plotKDE( pl1, dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
+
+
 draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
- plotKDE( getVertKDE(fg,"x6"), dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
+ plotKDE( getVertKDE(fg,:x6), dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
 
 XX = String["x$i" for i in 1:6];
 LL = String["l$i" for i in 1:7];

@@ -1,7 +1,7 @@
 
 # BearingRangeTrackingServer
 
-function parseProcTracking!(instSys::InSituSystem, d::Dict{UTF8String, Any})
+function parseProcTracking!{T <: AbstractString}(instSys::InSituSystem, d::Dict{T, Any})
     # parameters
     lsrnoise = []
 
@@ -31,7 +31,7 @@ function parseProcTracking!(instSys::InSituSystem, d::Dict{UTF8String, Any})
 end
 
 
-function parseTCP!(insitu::InSituSystem, line::ASCIIString)
+function parseTCP!(insitu::InSituSystem, line::AbstractString)
     # sp = split(line,' ')
     # cmd = sp[1]
 
@@ -40,7 +40,7 @@ function parseTCP!(insitu::InSituSystem, line::ASCIIString)
     d = Dict{AbstractString, Any}()
     try
       d = JSON.parse(line)
-      cmd = ASCIIString(d["CMD"])
+      cmd = AbstractString(d["CMD"])
       # if cmd == "INIT"
       #   f = parseInit!
       if cmd == "PROCESS"
@@ -49,7 +49,7 @@ function parseTCP!(insitu::InSituSystem, line::ASCIIString)
       #   f = parseReset
       elseif cmd == "QUIT"
         println("parseTCP -- should quit now")
-        return false, ASCIIString("")
+        return false, string("")
       else
         warn("parseTCP -- I don't know what $(cmd) means")
         goahead = false
