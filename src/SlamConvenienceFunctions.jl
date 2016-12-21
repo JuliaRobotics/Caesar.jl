@@ -18,7 +18,7 @@ function prepString(arr::Array{Float64,2})
 end
 
 
-function parseInit!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseInit!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   if length(sp2) == 3
     println("parseInit! -- received initialization point $(sp2) NOT CURRENTLY USED")
     x0 = parse(Float64,sp2[1])
@@ -31,7 +31,7 @@ function parseInit!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
 end
 
 posecount = 1
-function parseOdo!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseOdo!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   global posecount
   # println("parseOdo -- ")
   posecount += 1
@@ -48,29 +48,29 @@ function parseOdo!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   return n
 end
 
-function parseAddLandmBR!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseAddLandmBR!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   poseid = floor(Int,parse(Float64, sp2[1]))
-  pose = ASCIIString(getVert(slam.fg,poseid).label)
+  pose = string(getVert(slam.fg,poseid).label)
   lmid = floor(Int,parse(Float64, sp2[2]))
   zbr = [parse(Float64,sp2[3]);parse(Float64,sp2[4])]
   cov = diagm([parse(Float64,sp2[5]);parse(Float64,sp2[7])])
   cov[1,2] = parse(Float64,sp2[6])
   cov[2,1] = parse(Float64,sp2[6])
-  lm = ASCIIString("")
+  lm = string("")
   if !haskey(slam.fg.v, lmid)
     slam.lndmidx += 1
-    lm = ASCIIString(string('l',slam.lndmidx))
+    lm = string(string('l',slam.lndmidx))
     projNewLandm!(slam.fg, pose, lm, zbr, cov, ready=USEREADY)
   else
-    lm = ASCIIString(getVert(slam.fg,lmid).label)
+    lm = string(getVert(slam.fg,lmid).label)
     addBRFG!(slam.fg, pose, lm, zbr, cov, ready=USEREADY)
   end
   return lm
 end
 
-function parseLandmBRMM!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseLandmBRMM!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   poseid = floor(Int,parse(Float64, sp2[1]))
-  pose = ASCIIString(getVert(slam.fg, poseid).label)
+  pose = string(getVert(slam.fg, poseid).label)
   lm1id = floor(Int,parse(Float64, sp2[2]))
   w1 = parse(Float64, sp2[3])
   lm2id = floor(Int,parse(Float64, sp2[4]))
@@ -80,24 +80,24 @@ function parseLandmBRMM!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1}
   cov[1,2] = parse(Float64,sp2[9])
   cov[2,1] = parse(Float64,sp2[9])
   # TODO --do the tests here
-  lm1 = ASCIIString(getVert(slam.fg,lm1id).label)
-  lm2 = ASCIIString(getVert(slam.fg,lm2id).label)
+  lm1 = string(getVert(slam.fg,lm1id).label)
+  lm2 = string(getVert(slam.fg,lm2id).label)
   addMMBRFG!(slam.fg, pose, [lm1;lm2], zbr, cov, w=[w1;w2], ready=USEREADY)
-  # function addMMBRFG!(fg::FactorGraph, pose::ASCIIString,
-  #                   lm::Array{ASCIIString,1}, br::Array{Float64,1},
+  # function addMMBRFG!(fg::FactorGraph, pose::AbstractString,
+  #                   lm::Array{AbstractString,1}, br::Array{Float64,1},
   #                   cov::Array{Float64,2}; w=[0.5;0.5])
   return "$(lm1), $(lm2)"
 end
 
-function parseLandmBRAuto!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseLandmBRAuto!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   poseid = floor(Int,parse(Float64, sp2[1]))
-  pose = ASCIIString(getVert(slam.fg,poseid).label)
+  pose = string(getVert(slam.fg,poseid).label)
   lmid = sp2[2] != "*" ? floor(Int,parse(Float64, sp2[2])) : -1
   zbr = [parse(Float64,sp2[3]);parse(Float64,sp2[4])]
   cov = diagm([parse(Float64,sp2[5]);parse(Float64,sp2[7])])
   cov[1,2] = parse(Float64,sp2[6])
   cov[2,1] = parse(Float64,sp2[6])
-  lm = ASCIIString("")
+  lm = string("")
 
   vlm, flm, slam.lndmidx = addAutoLandmBR!(slam.fg, pose, lmid, zbr, cov, slam.lndmidx, ready=USEREADY)
 
@@ -107,7 +107,7 @@ function parseLandmBRAuto!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},
 end
 
 
-function parseLandmarkXY!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseLandmarkXY!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   pose = getVert(slam.fg, map(Int, sp2[1]) ).label
   lmid = map(Int, sp2[2])
   zxy = [map(Float64,sp[3]);map(Float64,sp[4])]
@@ -119,22 +119,22 @@ function parseLandmarkXY!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1
 end
 
 
-function batchSolve!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function batchSolve!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   println("batchSolve -- wiping tree and solving")
   slam.tree = wipeBuildNewTree!(slam.fg)
   @time inferOverTree!(slam.fg, slam.tree, N=100)
   nothing
 end
 
-function parseGetparticles(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
-  val = getVal(slam.fg, ASCIIString(sp2[1]))
+function parseGetparticles(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
+  val = getVal(slam.fg, string(sp2[1]))
   retstr = prepString(val)
   return retstr
 end
 
-function parseLS(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseLS(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   xx,ll = ls(slam.fg)
-  str = ASCIIString("")
+  str = string("")
   [str = string(str, x, ",") for x in xx]
   if length(str) > 0
     str = string(str[1:(end-1)], ';')
@@ -144,34 +144,34 @@ function parseLS(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
   return length(str) > 0 ? str : nothing
 end
 
-function parseGetID(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseGetID(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   id = slam.fg.IDs[sp2[1]]
   return "$(id)"
 end
 
-function parseGetNextID(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseGetNextID(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   id = slam.fg.id + 1
   return "$(id)"
 end
 
-function parseReset(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseReset(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   warn("parseReset -- resetting factor graph")
   slam = SLAMWrapper(emptyFactorGraph(), Union{}, 0)
   nothing
 end
 
-function parseDotFG(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseDotFG(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   writeGraphPdf(slam.fg)
   nothing
 end
 
 
-function parseSetReady!(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseSetReady!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   setDBAllReady!(slam.fg)
   nothing
 end
 
-function parseMongoFileSave(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString},1})
+function parseMongoFileSave(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   id = slam.fg.IDs[sp2[1]]
   cgid = slam.fg.cgIDs[id]
   cv = CloudGraphs.get_vertex(slam.fg.cg, cgid)
@@ -194,7 +194,7 @@ function parseMongoFileSave(slam::SLAMWrapper, sp2::Array{SubString{ASCIIString}
   nothing
 end
 
-function parseTCP!(slam::SLAMWrapper, line::ASCIIString)
+function parseTCP!(slam::SLAMWrapper, line::AbstractString)
     sp = split(line,' ')
     f = +
     cmd = sp[1]
@@ -231,7 +231,7 @@ function parseTCP!(slam::SLAMWrapper, line::ASCIIString)
       f = parseReset
     elseif cmd == "QUIT"
       println("parseTCP -- should quit now")
-      return false, ASCIIString("")
+      return false, string("")
     else
       warn("parseTCP -- I don't know what $(cmd) means")
       goahead = false

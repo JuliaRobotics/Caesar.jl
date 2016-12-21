@@ -7,11 +7,12 @@ using RoME
 using Caesar
 # using Base.Test
 
+# setup visualization process and default drawings
+vc = startdefaultvisualization()
+
 
 N = 200
 fg = initfg()
-
-dc = startdefaultvisualization()
 
 sqrtinv = [[10;0;0;0;0;0]';
 [0;10;0;0;0;0]';
@@ -61,14 +62,6 @@ odo = SE3([-0.0615969; 0.00849829; -0.0170747], Euler( -0.00605423,-0.0115416,0.
 addOdoFG!(fg, Pose3Pose3(deepcopy(odo), odoCov) )
 
 
-
-# convenience function to add DIDSON sonar constraints to graph
-function addDidsonConstraint(fgl::FactorGraph, rangebearing::Tuple, pose::Symbol, landm::Symbol)
-  cl = LinearRangeBearingElevation((rangebearing[1],3e-4),(rangebearing[2],3e-4))
-  addFactor!(fgl, [getVert(fg, pose); getVert(fgl, landm)], cl)
-  nothing
-end
-
 println("Adding landmarks to graph...")
 # Bearing Range pose 1 landmark 0: (0.0103329, 2.99139)
 # Bearing Range pose 2 landmark 0: (0.0456434, 3.02145)
@@ -76,11 +69,11 @@ println("Adding landmarks to graph...")
 # Bearing Range pose 4 landmark 0: (0.0778371, 3.20003)
 # Bearing Range pose 5 landmark 0: (0.03676, 3.17675)
 vl1 = addNode!(fg, :l1,  0.1*randn(3,N),  N=N)
-addDidsonConstraint(fg, (2.9914, 0.010333), :x2, :l1)
-addDidsonConstraint(fg, (3.02145, 0.04564), :x3, :l1)
-addDidsonConstraint(fg, (3.12405, -0.027711), :x4, :l1)
-addDidsonConstraint(fg, (3.2, 0.0778371), :x5, :l1)
-addDidsonConstraint(fg, (3.17675, 0.03676), :x6, :l1)
+addLinearArrayConstraint(fg, (2.9914, 0.010333), :x2, :l1)
+addLinearArrayConstraint(fg, (3.02145, 0.04564), :x3, :l1)
+addLinearArrayConstraint(fg, (3.12405, -0.027711), :x4, :l1)
+addLinearArrayConstraint(fg, (3.2, 0.0778371), :x5, :l1)
+addLinearArrayConstraint(fg, (3.17675, 0.03676), :x6, :l1)
 
 # Bearing Range pose 1 landmark 1: (-0.0971847, 3.49785)
 # Bearing Range pose 2 landmark 1: (-0.0522769, 3.5344)
@@ -88,11 +81,11 @@ addDidsonConstraint(fg, (3.17675, 0.03676), :x6, :l1)
 # Bearing Range pose 4 landmark 1: (-0.0471636, 3.66387)
 # Bearing Range pose 5 landmark 1: (-0.0887547, 3.66507)
 addNode!(fg, :l2,  0.1*randn(3,N),  N=N)
-addDidsonConstraint(fg, (3.49785, -0.0971847), :x2, :l2)
-addDidsonConstraint(fg, (3.5344, -0.0522769), :x3, :l2)
-addDidsonConstraint(fg, (3.69064, -0.115672), :x4, :l2)
-addDidsonConstraint(fg, (3.66387, -0.0471636), :x5, :l2)
-addDidsonConstraint(fg, (3.66507, -0.0887547), :x6, :l2)
+addLinearArrayConstraint(fg, (3.49785, -0.0971847), :x2, :l2)
+addLinearArrayConstraint(fg, (3.5344, -0.0522769), :x3, :l2)
+addLinearArrayConstraint(fg, (3.69064, -0.115672), :x4, :l2)
+addLinearArrayConstraint(fg, (3.66387, -0.0471636), :x5, :l2)
+addLinearArrayConstraint(fg, (3.66507, -0.0887547), :x6, :l2)
 
 # Bearing Range pose 1 landmark 2: (-0.149587, 3.06005)
 # Bearing Range pose 2 landmark 2: (-0.0960879, 3.07682)
@@ -100,11 +93,11 @@ addDidsonConstraint(fg, (3.66507, -0.0887547), :x6, :l2)
 # Bearing Range pose 4 landmark 2: (-0.065336, 3.21081)
 # Bearing Range pose 5 landmark 2: (-0.115751, 3.20317)
 addNode!(fg, :l3,  0.1*randn(3,N),  N=N)
-addDidsonConstraint(fg, (3.06005, -0.149587), :x2, :l3)
-addDidsonConstraint(fg, (3.07682, -0.0960879), :x3, :l3)
-addDidsonConstraint(fg, (3.23283, -0.176641), :x4, :l3)
-addDidsonConstraint(fg, (3.21081, -0.065336), :x5, :l3)
-addDidsonConstraint(fg, (3.20317, -0.115751), :x6, :l3)
+addLinearArrayConstraint(fg, (3.06005, -0.149587), :x2, :l3)
+addLinearArrayConstraint(fg, (3.07682, -0.0960879), :x3, :l3)
+addLinearArrayConstraint(fg, (3.23283, -0.176641), :x4, :l3)
+addLinearArrayConstraint(fg, (3.21081, -0.065336), :x5, :l3)
+addLinearArrayConstraint(fg, (3.20317, -0.115751), :x6, :l3)
 
 
 
@@ -114,11 +107,11 @@ addDidsonConstraint(fg, (3.20317, -0.115751), :x6, :l3)
 # Bearing Range pose 4 landmark 3: (-0.0662606, 3.32899)
 # Bearing Range pose 5 landmark 3: (-0.114886, 3.32137)
 addNode!(fg, :l4,  0.1*randn(3,N),  N=N)
-addDidsonConstraint(fg, (3.18027, -0.151731),:x2, :l4)
-addDidsonConstraint(fg, (3.20953, -0.099368), :x3, :l4)
-addDidsonConstraint(fg, (3.33787, -0.174175),:x4, :l4)
-addDidsonConstraint(fg, (3.32899, -0.0662606),:x5, :l4)
-addDidsonConstraint(fg, (3.32137, -0.114886),:x6, :l4)
+addLinearArrayConstraint(fg, (3.18027, -0.151731),:x2, :l4)
+addLinearArrayConstraint(fg, (3.20953, -0.099368), :x3, :l4)
+addLinearArrayConstraint(fg, (3.33787, -0.174175),:x4, :l4)
+addLinearArrayConstraint(fg, (3.32899, -0.0662606),:x5, :l4)
+addLinearArrayConstraint(fg, (3.32137, -0.114886),:x6, :l4)
 
 # Bearing Range pose 1 landmark 4: (0.00322788, 3.10878)
 # Bearing Range pose 2 landmark 4: (0.0370399, 3.15066)
@@ -126,11 +119,11 @@ addDidsonConstraint(fg, (3.32137, -0.114886),:x6, :l4)
 # Bearing Range pose 4 landmark 4: (0.0683279, 3.31492)
 # Bearing Range pose 5 landmark 4: (0.0323075, 3.29366)
 addNode!(fg, :l5,  0.1*randn(3,N),  N=N)
-addDidsonConstraint(fg, (3.10878, 0.00322788),:x2, :l5)
-addDidsonConstraint(fg, (3.15066, 0.0370399), :x3, :l5)
-addDidsonConstraint(fg, (3.22893, -0.030071), :x4, :l5)
-addDidsonConstraint(fg, (3.31492, 0.0683279), :x5, :l5)
-addDidsonConstraint(fg, (3.29366, 0.0323075), :x6, :l5)
+addLinearArrayConstraint(fg, (3.10878, 0.00322788),:x2, :l5)
+addLinearArrayConstraint(fg, (3.15066, 0.0370399), :x3, :l5)
+addLinearArrayConstraint(fg, (3.22893, -0.030071), :x4, :l5)
+addLinearArrayConstraint(fg, (3.31492, 0.0683279), :x5, :l5)
+addLinearArrayConstraint(fg, (3.29366, 0.0323075), :x6, :l5)
 
 # Bearing Range pose 1 landmark 5: (-0.146491, 2.95272)
 # Bearing Range pose 2 landmark 5: (-0.090717, 2.99605)
@@ -138,11 +131,11 @@ addDidsonConstraint(fg, (3.29366, 0.0323075), :x6, :l5)
 # Bearing Range pose 4 landmark 5: (-0.0603386, 3.10463)
 # Bearing Range pose 5 landmark 5: (-0.111392, 3.10912)
 addNode!(fg, :l6,  0.1*randn(3,N),  N=N)
-addDidsonConstraint(fg, (2.95272, -0.146491), :x2, :l6)
-addDidsonConstraint(fg, (2.99605, -0.090717), :x3, :l6)
-addDidsonConstraint(fg, (3.14063, -0.178344), :x4, :l6)
-addDidsonConstraint(fg, (3.10463, -0.0603386), :x5, :l6)
-addDidsonConstraint(fg, (3.10912, -0.111392), :x6, :l6)
+addLinearArrayConstraint(fg, (2.95272, -0.146491), :x2, :l6)
+addLinearArrayConstraint(fg, (2.99605, -0.090717), :x3, :l6)
+addLinearArrayConstraint(fg, (3.14063, -0.178344), :x4, :l6)
+addLinearArrayConstraint(fg, (3.10463, -0.0603386), :x5, :l6)
+addLinearArrayConstraint(fg, (3.10912, -0.111392), :x6, :l6)
 
 # Bearing Range pose 1 landmark 6: (0.0179481, 2.8873)
 # Bearing Range pose 2 landmark 6: (0.0543992, 2.9317)
@@ -150,28 +143,30 @@ addDidsonConstraint(fg, (3.10912, -0.111392), :x6, :l6)
 # Bearing Range pose 4 landmark 6: (0.0878667, 3.09855)
 # Bearing Range pose 5 landmark 6: (0.041406, 3.07297)
 addNode!(fg, :l7,  0.1*randn(3,N),  N=N)
-addDidsonConstraint(fg, (2.8873, 0.0179481), :x2, :l7)
-addDidsonConstraint(fg, (2.9317, 0.0543992), :x3, :l7)
-addDidsonConstraint(fg, (3.03224, -0.0250711), :x4, :l7)
-addDidsonConstraint(fg, (3.09855, 0.0878667), :x5, :l7)
-addDidsonConstraint(fg, (3.07297, 0.041406), :x6, :l7)
+addLinearArrayConstraint(fg, (2.8873, 0.0179481), :x2, :l7)
+addLinearArrayConstraint(fg, (2.9317, 0.0543992), :x3, :l7)
+addLinearArrayConstraint(fg, (3.03224, -0.0250711), :x4, :l7)
+addLinearArrayConstraint(fg, (3.09855, 0.0878667), :x5, :l7)
+addLinearArrayConstraint(fg, (3.07297, 0.041406), :x6, :l7)
 
+
+
+@async begin
+  for i in 1:150
+    println("visualizing")
+    visualizeallposes!(vc, fg)
+    visualizeDensityMesh!(vc, fg, :l3)
+    sleep(2)
+  end
+end
 
 tree = wipeBuildNewTree!(fg,drawpdf=false);
 inferOverTree!(fg, tree)
 
 
 
-visualizeallposes!(dc, fg)
+visualizeallposes!(vc, fg)
 
-
-
-@async begin
-  for i in 1:50
-    visualizeallposes!(dc, fg)
-    sleep(2)
-  end
-end
 
 
 # testing better drawing
@@ -206,7 +201,7 @@ end
 
 ls(fg)
 
-visualizeDensityMesh!(dc, fg, :x6)
+visualizeDensityMesh!(vc, fg, :l3)
 
 
 [inferOverTree!(fg, tree) for i in 1:3]; # should not be required
