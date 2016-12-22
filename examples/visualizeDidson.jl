@@ -32,8 +32,9 @@ f1  = addFactor!(fg,[v0], initPosePrior)
 
 println("Adding LinearRangeBearingElevation to graph...")
 meas = LinearRangeBearingElevation((3.0,3e-4),(0.0,3e-4))
+fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
 for i in 1:N
-	project!(meas, X, pts, i)
+	project!(meas, X, pts, i, fp!)
 end
 v1 = addNode!(fg, :l1, pts, N=N)
 addFactor!(fg,[v0;v1],meas)
