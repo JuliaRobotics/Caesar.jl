@@ -1,4 +1,4 @@
-addprocs(3)
+addprocs(4)
 
 using TransformUtils, Gadfly
 using KernelDensityEstimate
@@ -158,7 +158,7 @@ solving = [true]
   while solving[1]
     println("visualizing")
     visualizeallposes!(vc, fg)
-    visualizeDensityMesh!(vc, fg, :l3)
+    visualizeDensityMesh!(vc, fg, :l1)
     sleep(2)
   end
 end
@@ -172,40 +172,9 @@ solving[1]=false;
 visualizeallposes!(vc, fg)
 
 
+# ls(fg)
 
-# testing better drawing
-#
-# using CoordinateTransformations, GeometryTypes, DrakeVisualizer, ColorTypes
-#
-# function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl::Symbol;levels=3)
-#
-#   pl1 = marginal(getVertKDE(fgl,lbl),[1;2;3])
-#
-#   gg = (x, a=0.0) -> evaluateDualTree(pl1, ([x[1];x[2];x[3]]')')[1]-a
-#
-#   x = getKDEMax(pl1)
-#   maxval = gg(x)
-#
-#   vv = getKDERange(pl1)
-#   lower_bound = Vec(vec(vv[:,1])...)
-#   upper_bound = Vec(vec(vv[:,2])...)
-#
-#   levels = linspace(0.0,maxval,levels+2)
-#
-#   i = 1
-#   for val in levels[2:(end-1)]
-#     i+=1
-#     meshdata = GeometryData(contour_mesh(x -> gg(x,val), lower_bound, upper_bound))
-#     meshdata.color = RGBA( val/(1.5*maxval),0.0,1.0,val/(1.5*maxval))
-#     linkdata = Link([meshdata])
-#     Visualizer(linkdata, i) # meshdata
-#   end
-#   nothing
-# end
-
-ls(fg)
-
-visualizeDensityMesh!(vc, fg, :x6)
+visualizeDensityMesh!(vc, fg, :l6)
 
 
 [inferOverTree!(fg, tree) for i in 1:3]; # should not be required
