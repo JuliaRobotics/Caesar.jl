@@ -4,7 +4,7 @@ using Base.Test
 
 
 println("[TEST] CloudGraphs API calls...")
-if true
+if false
   println("[TEST] with CloudGraphs with local DB data layer (multicore)...")
   include("fourdoortestcloudgraph.jl")
   println("[SUCCESS]")
