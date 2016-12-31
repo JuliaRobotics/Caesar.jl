@@ -1,11 +1,16 @@
 language: julia
+dist: trusty
+sudo: required
 os:
   - linux
 julia:
-  - release
+  - 0.5
   - nightly
 notifications:
   email: false
+matrix:
+  allow_failures:
+    - julia: nightly
 
 after_success:
   - julia -e 'cd(Pkg.dir("Caesar")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
