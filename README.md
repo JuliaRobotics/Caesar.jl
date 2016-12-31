@@ -13,7 +13,7 @@ A modern robotic toolkit for localization and mapping.
 Towards non-parametric / parametric navigation solutions
 --------------------------------------------------------
 
-This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) package encompasses test cases and robot related software for multimodal (multihypothesis) navigation and mapping solutions from various sensor data.
+This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf). Please see related packages, Robot Motion Estimate [RoME.jl](https://github.com/dehann/RoME.jl) and back-end solver [IncrementalInference.jl](https://github.com/dehann/IncrementalInference.jl).
 
 ## Examples
 
