@@ -15,7 +15,7 @@ using
   ColorTypes,
   JLD,
   HDF5,
-  JSON,
+  JSON
   #CloudGraphs
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
