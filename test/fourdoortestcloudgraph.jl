@@ -1,6 +1,7 @@
 # a basic create robot type node example
 
-using Caesar, IncrementalInference, CloudGraphs
+using Caesar, IncrementalInference
+# using CloudGraphs
 
 # switch IncrementalInference to use CloudGraphs (Neo4j) data layer
 dbaddress = "localhost"

@@ -1,5 +1,4 @@
 using Caesar, IncrementalInference, RoME, HDF5, JLD
-using CloudGraphs
 using Base.Test
 
 
