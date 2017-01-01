@@ -28,12 +28,11 @@ Ambiguous elevation angle from planar sensor:
 Installation
 ------------
 
-    julia> Pkg.add("https://github.com/dehann/Caesar.jl.git")
+    julia> Pkg.add("Caesar")
 
 Requires via sudo apt-get, see [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) for more details.
 
-    libvtk5-qt4-dev
-    python-vtk
+    libvtk5-qt4-dev python-vtk
 
 Major features
 --------------
