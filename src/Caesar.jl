@@ -69,7 +69,11 @@ export
   newtriad!,
   visualizetriads,
   visualizeallposes!,
-  visualizeDensityMesh!
+  visualizeDensityMesh!,
+
+  # user functions
+  identitypose6fg,
+  solveandvisualize
 
 
 
@@ -86,5 +90,7 @@ include("BearingRangeTrackingServer.jl")
 include("DataUtils.jl")
 
 include("VisualizationUtils.jl")
+
+include("UserFunctions.jl")
 
 end

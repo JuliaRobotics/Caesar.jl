@@ -125,7 +125,7 @@ end
 
 
 
-function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl::Symbol; levels=3)
+function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl::Symbol; levels=3, meshid::Int=2)
 
   pl1 = marginal(getVertKDE(fgl,lbl),[1;2;3])
 
@@ -148,7 +148,7 @@ function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl
   end
   mptr = Link(MD)
   vc.meshes[lbl] = mptr
-  Visualizer(mptr, 2) # meshdata
+  Visualizer(mptr, meshid) # meshdata
   nothing
 end
 
