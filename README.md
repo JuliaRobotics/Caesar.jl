@@ -12,13 +12,13 @@ This is a research and development driven project and intended to reduce the bar
 
 ## Examples
 
+Intersection of ambiguous elevation angle from planar SONAR sensor:
+
+![alt tag](https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/directorexample01.png)
+
 Multi-modal range only example:
 
 <a href="https://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="480" border="10" /></a>
-
-Ambiguous elevation angle from planar sensor:
-
-![alt tag](https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/directorexample01.png)
 
 Installation
 ------------
