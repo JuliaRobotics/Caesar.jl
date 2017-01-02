@@ -5,6 +5,8 @@ using KernelDensityEstimate
 using IncrementalInference
 using RoME
 using Caesar
+
+using Distributions
 # using Base.Test
 
 
@@ -31,11 +33,13 @@ f1  = addFactor!(fg,[v0], initPosePrior)
 
 
 println("Adding LinearRangeBearingElevation to graph...")
-meas = LinearRangeBearingElevation((3.0,3e-5),(0.0,3e-5))
-fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
-for i in 1:N
-	project!(meas, X, pts, i, fp!)
-end
+meas = LinearRangeBearingElevation((3.0,3e-5),(0.0,3e-5)) #, elev=Uniform(0.0,0.25))
+# fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
+# for i in 1:N
+# 	project!(meas, X, pts, i, fp!)
+# end
+
+pts = getVal(fg,:x1) + meas
 v1 = addNode!(fg, :l1, pts, N=N)
 addFactor!(fg,[v0;v1],meas)
 
@@ -45,23 +49,28 @@ visualizeDensityMesh!(vc, fg, :l1)
 
 
 
-odo = SE3([2.7;2.7;0.0], Euler(0.0,0.0, -pi/2.0) )
+odo = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
 # v, f = addPose3Pose3(fg, "x3", deepcopy(odo), odoCov, N=N)
 addOdoFG!(fg, Pose3Pose3(deepcopy(odo), odoCov) )
 
 
 
 meas2 = LinearRangeBearingElevation((3.0,3e-5),(0.0,3e-5))
-addFactor!(fg,[getVert(fg, :x2);v1],meas2)
+pts = getVal(fg,:x2) + meas2
+# v2 = addNode!(fg, :l2, pts, N=N)
+addFactor!(fg,[getVert(fg, :x2); v1],meas2)
 
 
 
 # solve
 tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg, tree)
+inferOverTree!(fg, tree)
 
 visualizeallposes!(vc, fg)
 visualizeDensityMesh!(vc, fg, :l1)
+
+# visualizeDensityMesh!(vc, fg, :x2)
+
 
 
 

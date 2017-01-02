@@ -1,4 +1,4 @@
-addprocs(4)
+addprocs(3)
 
 using TransformUtils, Gadfly
 using KernelDensityEstimate
@@ -71,7 +71,7 @@ println("Adding landmarks to graph...")
 
 rangecov, bearingcov=3e-5, 3e-5
 
-vl1 = addNode!(fg, :l1,  0.1*randn(3,N),  N=N)
+# vl1 = addNode!(fg, :l1,  0.1*randn(3,N),  N=N)
 addLinearArrayConstraint(fg, (2.9914, 0.010333), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.02145, 0.04564), :x3, :l1, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.12405, -0.027711), :x4, :l1, rangecov=rangecov,bearingcov=bearingcov)
@@ -83,7 +83,7 @@ addLinearArrayConstraint(fg, (3.17675, 0.03676), :x6, :l1, rangecov=rangecov,bea
 # Bearing Range pose 3 landmark 1: (-0.115672, 3.69064)
 # Bearing Range pose 4 landmark 1: (-0.0471636, 3.66387)
 # Bearing Range pose 5 landmark 1: (-0.0887547, 3.66507)
-addNode!(fg, :l2,  0.1*randn(3,N),  N=N)
+# addNode!(fg, :l2,  0.1*randn(3,N),  N=N)
 addLinearArrayConstraint(fg, (3.49785, -0.0971847), :x2, :l2, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.5344, -0.0522769), :x3, :l2, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.69064, -0.115672), :x4, :l2, rangecov=rangecov,bearingcov=bearingcov)
@@ -95,7 +95,7 @@ addLinearArrayConstraint(fg, (3.66507, -0.0887547), :x6, :l2, rangecov=rangecov,
 # Bearing Range pose 3 landmark 2: (-0.176641, 3.23283)
 # Bearing Range pose 4 landmark 2: (-0.065336, 3.21081)
 # Bearing Range pose 5 landmark 2: (-0.115751, 3.20317)
-addNode!(fg, :l3,  0.1*randn(3,N),  N=N)
+# addNode!(fg, :l3,  0.1*randn(3,N),  N=N)
 addLinearArrayConstraint(fg, (3.06005, -0.149587), :x2, :l3, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.07682, -0.0960879), :x3, :l3, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.23283, -0.176641), :x4, :l3, rangecov=rangecov,bearingcov=bearingcov)
@@ -109,7 +109,7 @@ addLinearArrayConstraint(fg, (3.20317, -0.115751), :x6, :l3, rangecov=rangecov,b
 # Bearing Range pose 3 landmark 3: (-0.174175, 3.33787)
 # Bearing Range pose 4 landmark 3: (-0.0662606, 3.32899)
 # Bearing Range pose 5 landmark 3: (-0.114886, 3.32137)
-addNode!(fg, :l4,  0.1*randn(3,N),  N=N)
+# addNode!(fg, :l4,  0.1*randn(3,N),  N=N)
 addLinearArrayConstraint(fg, (3.18027, -0.151731),:x2, :l4, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.20953, -0.099368), :x3, :l4, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.33787, -0.174175),:x4, :l4, rangecov=rangecov,bearingcov=bearingcov)
@@ -121,7 +121,7 @@ addLinearArrayConstraint(fg, (3.32137, -0.114886),:x6, :l4, rangecov=rangecov,be
 # Bearing Range pose 3 landmark 4: (-0.030071, 3.22893)
 # Bearing Range pose 4 landmark 4: (0.0683279, 3.31492)
 # Bearing Range pose 5 landmark 4: (0.0323075, 3.29366)
-addNode!(fg, :l5,  0.1*randn(3,N),  N=N)
+# addNode!(fg, :l5,  0.1*randn(3,N),  N=N)
 addLinearArrayConstraint(fg, (3.10878, 0.00322788),:x2, :l5, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.15066, 0.0370399), :x3, :l5, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.22893, -0.030071), :x4, :l5, rangecov=rangecov,bearingcov=bearingcov)
@@ -133,7 +133,7 @@ addLinearArrayConstraint(fg, (3.29366, 0.0323075), :x6, :l5, rangecov=rangecov,b
 # Bearing Range pose 3 landmark 5: (-0.178344, 3.14063)
 # Bearing Range pose 4 landmark 5: (-0.0603386, 3.10463)
 # Bearing Range pose 5 landmark 5: (-0.111392, 3.10912)
-addNode!(fg, :l6,  0.1*randn(3,N),  N=N)
+# addNode!(fg, :l6,  0.1*randn(3,N),  N=N)
 addLinearArrayConstraint(fg, (2.95272, -0.146491), :x2, :l6, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (2.99605, -0.090717), :x3, :l6, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.14063, -0.178344), :x4, :l6, rangecov=rangecov,bearingcov=bearingcov)
@@ -145,7 +145,7 @@ addLinearArrayConstraint(fg, (3.10912, -0.111392), :x6, :l6, rangecov=rangecov,b
 # Bearing Range pose 3 landmark 6: (-0.0250711, 3.03224)
 # Bearing Range pose 4 landmark 6: (0.0878667, 3.09855)
 # Bearing Range pose 5 landmark 6: (0.041406, 3.07297)
-addNode!(fg, :l7,  0.1*randn(3,N),  N=N)
+# addNode!(fg, :l7,  0.1*randn(3,N),  N=N)
 addLinearArrayConstraint(fg, (2.8873, 0.0179481), :x2, :l7, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (2.9317, 0.0543992), :x3, :l7, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (3.03224, -0.0250711), :x4, :l7, rangecov=rangecov,bearingcov=bearingcov)
@@ -164,7 +164,7 @@ solving = [true]
 end
 
 tree = wipeBuildNewTree!(fg,drawpdf=false);
-inferOverTree!(fg, tree)
+@time inferOverTree!(fg, tree)
 solving[1]=false;
 
 

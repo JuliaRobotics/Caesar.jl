@@ -33,7 +33,7 @@ if false
   fgu = jldopen("test/data/fgWithISAMrefERR01.jld", "r") do file
     read(file, "fgu")
   end
-  T=1400
+  T=40 # 1400
   fg = emptyFactorGraph();
   idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:mmodal, MM=MMr);
   tree = prepBatchTree!(fg, ordering=:qr,drawpdf=true);
