@@ -42,25 +42,31 @@ addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l2, rangecov=rangecov,bearingcov=
 addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l3, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l3, rangecov=rangecov,bearingcov=bearingcov)
 
+visualizeallposes!(vc, fg, drawlandms=false)
+visualizeDensityMesh!(vc, fg, :l2, meshid=3)
 
+
+solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:x2;:l3])
 
 # draw while solving[1]==true
-solving = [true]
-@async begin
-  while solving[1]
-    println(".")
-    visualizeallposes!(vc, fg)
-    visualizeDensityMesh!(vc, fg, :x1, meshid=2)
-    visualizeDensityMesh!(vc, fg, :x2, meshid=3)
-    visualizeDensityMesh!(vc, fg, :l3, meshid=4)
-    sleep(1)
-  end
-end
+# solving = [true]
+# @async begin
+#   while solving[1]
+#     println(".")
+#     visualizeallposes!(vc, fg, drawlandms=false)
+#     visualizeDensityMesh!(vc, fg, :x2, meshid=2)
+#     visualizeDensityMesh!(vc, fg, :l3, meshid=3)
+#     # visualizeDensityMesh!(vc, fg, :l1, meshid=4)
+#     sleep(1)
+#   end
+# end
+#
+#
+# # solve
+# tree = wipeBuildNewTree!(fg)
+# @time inferOverTree!(fg, tree)
+# solving[1]=false;
 
-# solve
-tree = wipeBuildNewTree!(fg)
-@time inferOverTree!(fg, tree)
-solving[1]=false;
 
 
 #

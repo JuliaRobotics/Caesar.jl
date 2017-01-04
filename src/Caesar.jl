@@ -71,8 +71,14 @@ export
   visualizeallposes!,
   visualizeDensityMesh!,
 
+  # for models
+  loadmodel,
+  DrawModel,
+  DrawROV,
+
   # user functions
   identitypose6fg,
+  projectrbe,
   solveandvisualize
 
 
@@ -90,6 +96,7 @@ include("BearingRangeTrackingServer.jl")
 include("DataUtils.jl")
 
 include("VisualizationUtils.jl")
+include("ModelVisualizationUtils.jl")
 
 include("UserFunctions.jl")
 

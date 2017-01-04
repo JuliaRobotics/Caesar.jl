@@ -103,7 +103,7 @@ function startdefaultvisualization(;newwindow=true)
 end
 
 
-function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph)
+function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph; drawlandms::Bool=true)
   po,ll = ls(fgl)
   for p in po
     # v = getVert(fgl, p)
@@ -112,11 +112,13 @@ function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph)
     q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
     newtriad!(vc,p, wTb=Translation(maxval[1:3]...), wRb=Quat(q.s,q.v...), length=0.5)
   end
-  for l in ll
-    # v = getVert(fgl, p)
-    den = getVertKDE(fgl, l)
-    maxval = getKDEMax(den)
-    newpoint!(vc, l, wTb=Translation(maxval[1:3]...))
+  if drawlandms
+    for l in ll
+      # v = getVert(fgl, p)
+      den = getVertKDE(fgl, l)
+      maxval = getKDEMax(den)
+      newpoint!(vc, l, wTb=Translation(maxval[1:3]...))
+    end
   end
 
   visualizetriads!(vc)
