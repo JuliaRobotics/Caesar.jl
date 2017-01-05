@@ -14,7 +14,7 @@ This is a research and development driven project and intended to reduce the bar
 
 Intersection of ambiguous elevation angle from planar SONAR sensor:
 
-![alt tag](https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/directorexample01.png)
+<a href="https://vimeo.com/198237738" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/rovasfm02.gif" alt="IMAGE ALT TEXT HERE" width="480" border="10" /></a>
 
 Multi-modal range only example:
 

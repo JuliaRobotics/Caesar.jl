@@ -92,10 +92,10 @@ end
 
 
 # create a new Director window with home axis
-function startdefaultvisualization(;newwindow=true)
+function startdefaultvisualization(;newwindow=true,draworigin=true)
   DrakeVisualizer.new_window()
   triads, trposes, meshes = Dict{Symbol, Link}(), Dict{Symbol, AbstractAffineMap}(), Dict{Symbol, Link}()
-  newtriad!(triads, trposes, :origin)
+  draworigin ? newtriad!(triads, trposes, :origin) : nothing
   dc = VisualizationContainer(Dict{Symbol, Visualizer}(), triads, trposes, meshes)
   visualizetriads!(dc)
   # model = visualizetriads(triads, trposes)

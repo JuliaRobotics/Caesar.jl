@@ -21,7 +21,8 @@ function solveandvisualize(fg::FactorGraph,
   vc::VisualizationContainer;
   refresh::Number=1.0,
   densitymeshes::Vector{Symbol}=Symbol[],
-  drawlandms::Bool=true )
+  drawlandms::Bool=true,
+  N::Int=100 )
   # draw while solving[1]==true
   solving = [true]
   @async begin
@@ -39,7 +40,7 @@ function solveandvisualize(fg::FactorGraph,
 
   # solve
   tree = wipeBuildNewTree!(fg)
-  @time inferOverTree!(fg, tree)
+  @time inferOverTree!(fg, tree, N=N)
   solving[1]=false;
   nothing
 end

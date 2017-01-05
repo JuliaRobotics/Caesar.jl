@@ -39,6 +39,14 @@ end
 function (dmdl::DrawROV)(vc::VisualizationContainer,
         am::AffineMap  )
   #
+  # mam = am.m
+  # if typeof(am.m)==Rotations.AngleAxis{Float64}
+  #   mam = convert(Rotations.Quat, am.m)
+  # end
+  # res = SE3(am.v[1:3],Quaternion(mam.w,[mam.x;mam.y;mam.z]))*SE3(dmdl.offset.v[1:3],Quaternion(dmdl.offset.m.w,[dmdl.offset.m.x;dmdl.offset.m.y;dmdl.offset.m.z]))
+  # q = convert(Quaternion, res.R)
+  # DrakeVisualizer.draw(vc.models[dmdl.symbol], [Translation(res.t...) ∘ LinearMap(Rotations.Quat(q.s,q.v...))])
+
   DrakeVisualizer.draw(vc.models[dmdl.symbol], [am ∘ dmdl.offset])
   nothing
 end
