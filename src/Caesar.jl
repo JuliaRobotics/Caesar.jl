@@ -17,7 +17,8 @@ using
   HDF5,
   JSON,
   MeshIO,
-  FileIO
+  FileIO,
+  NLsolve
   #CloudGraphs
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
@@ -78,10 +79,22 @@ export
   DrawModel,
   DrawROV,
 
+  # more drawing utils
+  ArcPointsRangeSolve,
+  findaxiscenter!,
+
+  # default scenes
+  defaultscene01!,
+
   # user functions
   identitypose6fg,
   projectrbe,
-  solveandvisualize
+  solveandvisualize,
+
+  # repeats from RoME and IIF
+  initfg,
+  addNode!,
+  addFactor!
 
 
 

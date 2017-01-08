@@ -1,9 +1,9 @@
 # ROV visualization
 
-using MeshIO, FileIO
-using CoordinateTransformations
-using Rotations
-using ColorTypes: RGBA
+# using MeshIO, FileIO
+# using CoordinateTransformations
+# using Rotations
+# using ColorTypes: RGBA
 
 abstract DrawModel <: Function
 
@@ -63,7 +63,30 @@ function (dmdl::DrawROV)(vc::VisualizationContainer)
 end
 
 
-
+function defaultscene01!(vc::VisualizationContainer; meshid=100)
+  println("Starting here")
+  ln = []
+  boxdata = GeometryData(HyperRectangle(Vec(0.0,4.0,-0.7), Vec(5.0,5.0,1.4)))
+  boxdata.color = RGBA(0.5,0.1,0.0,0.5)
+  push!(ln, boxdata)
+  # # model = Visualizer(boxdata,100)
+  #
+  println("going here")
+  # l1p = [0.0; 4.0; 0.7]
+  # featuredata = GeometryData(HyperSphere(Point(l1p...), 0.10) )
+  # featuredata.color = RGBA(0.5, 1.0, 0.0, 0.7)
+  # push!(ln, featuredata)
+  # # model = Visualizer(featuredata,101)
+  #
+  # # l1p = [0.0; 4.0; 0.7]
+  # # featuredata = GeometryData(HyperSphere(Point(l1p...), 0.1) )
+  # # featuredata.color = RGBA(0.0, 0.0, 1.0, 0.6)
+  # # model = Visualizer(featuredata,102)
+  println("going to draw")
+  vc.meshes[:scene] = Link(ln)
+  vc.models[:scene] = Visualizer(vc.meshes[:scene],meshid)
+  nothing
+end
 
 
 
