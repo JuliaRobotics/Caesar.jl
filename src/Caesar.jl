@@ -82,6 +82,8 @@ export
   # more drawing utils
   ArcPointsRangeSolve,
   findaxiscenter!,
+  parameterizeArcAffineMap,
+  animatearc,
 
   # default scenes
   defaultscene01!,

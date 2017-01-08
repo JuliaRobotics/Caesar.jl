@@ -201,13 +201,15 @@ end
 # as = ArcPointsRangeSolve([-1.0;0],[2.0;0],1.5)
 # nlsolve(as, [1.0;1.0])
 
-# t∈[0,1], about
-# function parameterizeArcAffineMap(t, as::ArcPointsRangeSolve)
-#   the = t*as.angle
-#   rot = Rotations.AngleAxis(the, as.axis...)
-#
-#   return Translation() ∘ LinearMap(rot)
-# end
+
+# find and set initial transform to project model in the world frame to the
+# desired stating point and orientation
+function findinitaffinemap!(as::ArcPointsRangeSolve; initrot::Rotation=Rotations.Quaternion(1.0,0,0,0))
+  # how to go from origin to center to x1 of arc
+  cent = Translation(as.center)
+  rho = Translation(as.r, 0,0)
+  return
+end
 
 
 

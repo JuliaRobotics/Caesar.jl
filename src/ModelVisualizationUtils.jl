@@ -91,6 +91,53 @@ end
 
 
 
+# t∈[0,1], about
+function parameterizeArcAffineMap(t, as::ArcPointsRangeSolve; initrot::Rotation=Rotations.Quat(1.0,0,0,0))
+  the = t*as.angle
+  rot = Rotations.AngleAxis(the, as.axis...)
+  dp = as.x1-as.center
+  arc = LinearMap(rot) ∘ Translation(dp...)
+
+  cent = Translation(as.center)
+  return cent ∘ arc ∘ LinearMap(initrot)
+end
+
+
+function animatearc(vc::VisualizationContainer,
+            drmodel::DrawModel,
+            as::ArcPointsRangeSolve;
+            N::Int=100,
+            delaytime::Float64=0.05,
+            initrot::Rotation=Rotations.Quat(1.0,0,0,0)   )
+  #
+  for t in linspace(0,1,N)
+    am = parameterizeArcAffineMap(t, as, initrot=initrot )
+    drmodel(vc, am )
+    sleep(delaytime)
+  end
+  nothing
+end
+
+# as = ArcPointsRangeSolve(
+#       [0.0;0;0.0],
+#       [0.0;6.0;6.0],
+#       [0.0;12.0;0.0], 6.0)
+# findaxiscenter!(as)
+# # @show as.center, as.axis, as.angle, as.r
+# animatearc(vc, rovt, as, initrot=Rotations.AngleAxis(pi/2,0,0,1.0))
+#
+#
+# as = ArcPointsRangeSolve(
+#       [2.5;-1;0.0],
+#       [-4.5;4.0;0.0],
+#       [9.5;6.0;0.0], 7.0)
+# findaxiscenter!(as)
+# # @show as.center, as.axis, as.angle, as.r
+# animatearc(vc, rovt, as, initrot=Rotations.AngleAxis(pi/2,0,0,1.0))
+#
+
+
+
 
 
 #

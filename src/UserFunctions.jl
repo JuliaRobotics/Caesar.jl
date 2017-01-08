@@ -2,7 +2,8 @@
 
 function identitypose6fg(;
       N::Int=100,
-      initCov::Array{Float64,2}=0.001*eye(6) )
+      initCov::Array{Float64,2}=0.001*eye(6),
+      initpose::SE3=SE3(0) )
   #
   fg = initfg()
   N = 100
@@ -11,7 +12,7 @@ function identitypose6fg(;
   pts = 0.01*randn(6,N)
 
   v0 = addNode!(fg, :x1,  pts,  N=N)
-  initPosePrior = PriorPose3(SE3(0), initCov)
+  initPosePrior = PriorPose3(initpose, initCov)
   f1  = addFactor!(fg,[v0], initPosePrior)
   return fg
 end
