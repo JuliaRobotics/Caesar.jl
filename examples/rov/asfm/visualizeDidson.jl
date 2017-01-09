@@ -3,33 +3,41 @@ addprocs(2)
 
 using TransformUtils
 using KernelDensityEstimate
-using IncrementalInference
+# using IncrementalInference
 using RoME
 using Caesar
-using DrakeVisualizer, GeometryTypes
+using GeometryTypes
+using DrakeVisualizer
 using ColorTypes: RGBA
-using MeshIO, FileIO
+# using MeshIO, FileIO
 using CoordinateTransformations
 using Rotations
 
+# # start visualizer and models
+# vc = startdefaultvisualization(draworigin=false)
+# sleep(2.0)
+# rovt(vc)
+# am = Translation(0,0,0) ∘ LinearMap(Rotations.AngleAxis(pi/2,0,0,1.0))
+# rovt(vc, am )
+#
+# # and some default object in the world
+# boxdata = GeometryData(HyperRectangle(Vec(0.0,4.0,-0.7), Vec(5.0,5.0,1.4)))
+# boxdata.color = RGBA(0.5,0.1,0.0,0.5)
+# model = Visualizer(boxdata,100)
+
+
+# start visualizer with some scene
+vc = startdefaultvisualization(draworigin=false)
+sleep(3.0)
+defaultscene01!(vc)
+
 # load necessary data
 rovt = loadmodel(:rov)
-
-# true position
-gt = Dict{Symbol, Vector{Float64}}()
-gt[:l1] = [4.0;0.0;-0.7]
-
-# start visualizer and models
-vc = startdefaultvisualization(draworigin=false)
-sleep(2.0)
 rovt(vc)
-am = Translation(0,0,0) ∘ LinearMap(Rotations.AngleAxis(pi/2,0,0,1.0))
+
+am = Translation(0,0,0.0) ∘ LinearMap(Rotations.AngleAxis(pi/2,0,0,1.0))
 rovt(vc, am )
 
-# and some default object in the world
-boxdata = GeometryData(HyperRectangle(Vec(0.0,4.0,-0.7), Vec(5.0,5.0,1.4)))
-boxdata.color = RGBA(0.5,0.1,0.0,0.5)
-model = Visualizer(boxdata,100)
 
 l1p = [0.0; 4.0; 0.7]
 featuredata = GeometryData(HyperSphere(Point(l1p...), 0.10) )
@@ -54,6 +62,11 @@ model = Visualizer(featuredata,101)
 # end
 
 
+# true position
+gt = Dict{Symbol, Vector{Float64}}()
+gt[:l1] = [4.0;0.0;-0.7]
+
+
 # okay build the graph
 fg = initfg()
 N = 200
@@ -73,16 +86,17 @@ f1  = addFactor!(fg,[v0], initPosePrior)
 rangecov, bearingcov=3e-3, 3e-3
 println("Adding :l1 LinearRangeBearingElevation to graph...")
 addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
-solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1])
+# solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1])
+visualizeDensityMesh!(vc, fg, :l1, meshid=2)
 
 # @async begin
-  for t in linspace(0,1,100)
-    x = -t*0.7
-    phi = pi/4.0*t
-    am = Translation(x,0,0) ∘ LinearMap(Rotations.AngleAxis(pi/2,0,0,1.0)) ∘ LinearMap( Rotations.AngleAxis(phi,1.0,0,0))
-    rovt(vc, am )
-    sleep(0.05)
-  end
+for t in linspace(0,1,50)
+  x = -t*0.7
+  phi = pi/4.0*t
+  am = Translation(x,0,0) ∘ LinearMap(Rotations.AngleAxis(pi/2,0,0,1.0)) ∘ LinearMap( Rotations.AngleAxis(phi,1.0,0,0))
+  rovt(vc, am )
+  sleep(0.02)
+end
 # end
 
 
