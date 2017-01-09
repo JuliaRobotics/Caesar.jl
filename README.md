@@ -60,7 +60,7 @@ Here is a basic example of using visualization and multi-core factor graph solvi
     visualizeDensityMesh!(vc, fg, :l1, meshid=2)
     addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
-    solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:X2], N=N)
+    solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:X2])
 
 
 Major features
