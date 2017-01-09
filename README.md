@@ -23,11 +23,45 @@ Multi-modal range only example:
 Installation
 ------------
 
-    julia> Pkg.add("Caesar")
-
 Requires via sudo apt-get, see [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) for more details.
 
     libvtk5-qt4-dev python-vtk
+
+Then install required Julia packages  
+
+    julia> Pkg.add("Caesar")
+
+Note that Database related packages will not be automatically installed. Please see section below for details.
+
+Basic usage
+-----------
+
+Here is a basic example of using visualization and multi-core solving a factor graph using Caesar.jl
+
+    addprocs(2)
+    using Caesar, RoME, TransformUtils
+
+    vc = startdefaultvisualization()
+    defaultscene01!(vc)
+    rovt = loadmodel(:rov)
+    rovt(vc)
+
+    initCov = 0.01*eye(6); [initCov[i,i] = 0.001 for i in 4:6];
+    odoCov = 0.001*eye(6); [odoCov[i,i] = 0.001 for i in 4:6];
+    rangecov, bearingcov = 3e-4, 2e-3
+
+    fg = identitypose6fg(initCov=initCov)
+    tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
+    addOdoFG!(fg, Pose3Pose3(tf, odoCov) )
+
+    visualizeallposes!(vc, fg, drawlandms=false)
+
+    addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
+    visualizeDensityMesh!(vc, fg, :l1, meshid=2)
+    addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
+
+    solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:X2], N=N)
+
 
 Major features
 --------------
@@ -52,7 +86,7 @@ Install [Neo4j](https://neo4j.com/) and add these packages to your Julia system
     Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 
-And uncomment CloudGraphs related lines from Caesar/REQUIRE and src/Caesar.jl and test/runtests.jl Ln 7 to true.
+Modify CloudGraphs related lines from test/runtests.jl Ln 7 to true.
 
 You should be able to rerun the four door test on both internal dictionaries and repeated on Neo4j DB
 
