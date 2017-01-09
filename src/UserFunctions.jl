@@ -9,10 +9,10 @@ function identitypose6fg(;
   N = 100
 
   println("Adding PriorPose3 and :x1 to graph...")
-  pts = 0.01*randn(6,N)
-
-  v0 = addNode!(fg, :x1,  pts,  N=N)
+  # pts = 0.001*randn(6,N)
   initPosePrior = PriorPose3(initpose, initCov)
+  pts = getSample(initPosePrior,N)[1]
+  v0 = addNode!(fg, :x1,  pts,  N=N)
   f1  = addFactor!(fg,[v0], initPosePrior)
   return fg
 end
