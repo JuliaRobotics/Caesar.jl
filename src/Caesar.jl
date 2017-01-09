@@ -1,5 +1,7 @@
 module Caesar
 
+instpkg = Pkg.installed();
+
 using
   RoME,
   IncrementalInference,
@@ -19,7 +21,10 @@ using
   MeshIO,
   FileIO,
   NLsolve
-  #CloudGraphs
+
+if haskey(instpkg,"CloudGraphs")
+  using CloudGraphs
+end
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
 
@@ -100,16 +105,21 @@ export
 
 
 
-# include("CloudGraphIntegration.jl") # Work in progress code
+if instpkg["RoME"] > v"0.0.3"
+  include("BearingRangeTrackingServer.jl")
+else
+  warn("Some features disabled since the package RoME is too far behind.")
+end
 
 include("SlamServer.jl")
-include("BearingRangeTrackingServer.jl")
-
 include("DataUtils.jl")
-
 include("VisualizationUtils.jl")
 include("ModelVisualizationUtils.jl")
-
 include("UserFunctions.jl")
+
+if haskey(instpkg, "CloudGraphs")
+  include("CloudGraphIntegration.jl") # Work in progress code
+end
+
 
 end
