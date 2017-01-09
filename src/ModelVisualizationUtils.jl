@@ -66,7 +66,7 @@ end
 function defaultscene01!(vc::VisualizationContainer; meshid=100)
   println("Starting here")
   ln = []
-  boxdata = GeometryData(HyperRectangle(Vec(0.1,4.1,-0.7), Vec(5.0,5.0,1.4)))
+  boxdata = GeometryData(HyperRectangle(Vec(0.0,4.0,-0.7), Vec(5.0,5.0,1.4)))
   boxdata.color = RGBA(0.5,0.1,0.0,0.5)
   push!(ln, boxdata)
   # # model = Visualizer(boxdata,100)
@@ -108,9 +108,11 @@ function animatearc(vc::VisualizationContainer,
             as::ArcPointsRangeSolve;
             N::Int=100,
             delaytime::Float64=0.05,
-            initrot::Rotation=Rotations.Quat(1.0,0,0,0)   )
+            initrot::Rotation=Rotations.Quat(1.0,0,0,0),
+            from::Number=0,
+            to::Number=1  )
   #
-  for t in linspace(0,1,N)
+  for t in linspace(from,to,N)
     am = parameterizeArcAffineMap(t, as, initrot=initrot )
     drmodel(vc, am )
     sleep(delaytime)

@@ -23,8 +23,7 @@ gt[:x1] = [0.0;0.0;0;0;0;pi/2]
 gt[:x2] = [-4.0;4.0;0;0;0;0]
 gt[:l1] = [0.0;4.0;0.7]
 
-
-# am = Translation(0,0,0.0) ∘ LinearMap(Rotations.Quat(1.0,0,0,0))
+# am = Translation(0,0,0.0) ∘ LinearMap(Rotations.AngleAxis(pi/2,0,0,1.0))
 # rovt(vc, am )
 
 # covariance parameters
@@ -52,9 +51,7 @@ visualizeDensityMesh!(vc, fg, :l1, meshid=2)
         [-4.0/sqrt(2);4-4.0/sqrt(2);0.0],
         [-4.0;4.0;0.0], 4.0 )
   findaxiscenter!(as)
-  sleep(5)
   animatearc(vc, rovt, as, initrot=Rotations.AngleAxis(pi/2,0,0,1.0), delaytime=0.02)
-  sleep(5)
 # end
 
 
