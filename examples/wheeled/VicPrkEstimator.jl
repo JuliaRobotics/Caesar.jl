@@ -1,6 +1,15 @@
 # include("../datasets/Vic120MM.jl")
 
-
+function loadVicPrkDataset(filename::AbstractString="datasets/VicPrk.jld")
+  DRS,GPS,LsrFeats,d,f = jldopen(filename, "r") do file
+    read(file, "DRS")
+    read(file, "GPS")
+    read(file, "LsrFeats")
+    read(file, "d")
+    read(file, "f")
+  end
+  return DRS,GPS,LsrFeats,d,f
+end
 
 function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
                     lcmode=:mmodal, lsrNoise=diagm([0.1;1.0]), N::Int=100, MM=Union{})

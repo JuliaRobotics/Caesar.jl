@@ -102,11 +102,6 @@ export
 
 # include("CloudGraphIntegration.jl") # Work in progress code
 
-include("VictoriaParkTypes.jl")
-# using VictoriaParkTypes
-include("VictoriaParkSystem.jl")
-# include("VicPrkEstimator.jl")
-
 include("SlamServer.jl")
 include("BearingRangeTrackingServer.jl")
 
