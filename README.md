@@ -36,7 +36,7 @@ Note that Database related packages will not be automatically installed. Please 
 Basic usage
 -----------
 
-Here is a basic example of using visualization and multi-core solving a factor graph using Caesar.jl
+Here is a basic example of using visualization and multi-core factor graph solving:
 
     addprocs(2)
     using Caesar, RoME, TransformUtils
