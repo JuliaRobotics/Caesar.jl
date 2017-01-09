@@ -5,6 +5,8 @@ using KernelDensityEstimate
 using Caesar, IncrementalInference, RoME
 
 
+include("VicPrkEstimator.jl")
+
 d = jldopen("test/data/VicPrkBasic.jld", "r") do file
   read(file, "dBasic")
 end
