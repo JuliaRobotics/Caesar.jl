@@ -27,7 +27,7 @@ Multi-modal range only example:
 Installation
 ------------
 
-Requires via sudo apt-get, see [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) for more details.
+Requires via ```sudo apt-get install```, see [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) for more details.
 
     libvtk5-qt4-dev python-vtk
 
@@ -64,7 +64,7 @@ Here is a basic example of using visualization and multi-core factor graph solvi
     visualizeDensityMesh!(vc, fg, :l1, meshid=2)
     addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
-    solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:X2])
+    solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:x2])
 
 
 Major features
