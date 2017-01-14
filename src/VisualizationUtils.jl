@@ -107,12 +107,23 @@ function startdefaultvisualization(;newwindow=true,draworigin=true)
 end
 
 
-function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph; drawlandms::Bool=true)
+function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph; drawlandms::Bool=true,drawtype::Symbol=:max)
+  topoint = +
+  if drawtype == :max
+    topoint = getKDEMax
+  elseif drawtype == :mean
+    topoint = getKDEMean
+  elseif drawtype == :fit
+    topoint = (x) -> getKDEfit(x).μ
+  else
+    error("Unknown draw type")
+  end
+
   po,ll = ls(fgl)
   for p in po
     # v = getVert(fgl, p)
     den = getVertKDE(fgl, p)
-    maxval = getKDEMax(den)
+    maxval = topoint(den)
     q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
     newtriad!(vc,p, wTb=Translation(maxval[1:3]...), wRb=Quat(q.s,q.v...), length=0.5)
   end
@@ -120,7 +131,7 @@ function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph; drawla
     for l in ll
       # v = getVert(fgl, p)
       den = getVertKDE(fgl, l)
-      maxval = getKDEMax(den)
+      maxval = topoint(den)
       newpoint!(vc, l, wTb=Translation(maxval[1:3]...))
     end
   end
