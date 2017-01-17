@@ -7,6 +7,8 @@ using RoME
 using Caesar
 # using Base.Test
 
+# import RoME: ⊕
+
 # setup visualization process and default drawings
 vc = startdefaultvisualization()
 
@@ -153,23 +155,26 @@ addLinearArrayConstraint(fg, (3.09855, 0.0878667), :x5, :l7, rangecov=rangecov,b
 addLinearArrayConstraint(fg, (3.07297, 0.041406), :x6, :l7, rangecov=rangecov,bearingcov=bearingcov)
 
 
-solving = [true]
-@async begin
-  while solving[1]
-    println("visualizing")
-    visualizeallposes!(vc, fg)
-    visualizeDensityMesh!(vc, fg, :l1)
-    sleep(2)
-  end
-end
+# solving = [true]
+# @async begin
+#   while solving[1]
+#     println("visualizing")
+#     visualizeallposes!(vc, fg)
+#     visualizeDensityMesh!(vc, fg, :l1)
+#     sleep(2)
+#   end
+# end
+#
+# tree = wipeBuildNewTree!(fg,drawpdf=false);
+# @time inferOverTree!(fg, tree)
+# solving[1]=false;
 
-tree = wipeBuildNewTree!(fg,drawpdf=false);
-@time inferOverTree!(fg, tree)
-solving[1]=false;
+solveandvisualize(fg, vc, N=N, drawtype=:fit)
 
 
 
-visualizeallposes!(vc, fg)
+
+visualizeallposes!(vc, fg, drawtype=:fit)
 
 
 # ls(fg)
