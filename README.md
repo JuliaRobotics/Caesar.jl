@@ -1,20 +1,20 @@
 # Caesar.jl
 
-[![Build Status](https://travis-ci.org/dehann/Caesar.jl.svg?branch=master)](https://travis-ci.org/dehann/Caesar.jl)
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)
 
-| **Major Packages** |     **Status**     |    **Coverage**    |
-|:-----------------------:|:------------------:|:------------------:|
-| Caesar | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] |
-| RoME | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] |
-| IncrementalInference | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] |
-| TransformUtils | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] |
-
-
 A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
 
-This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf). Please see related packages, Robot Motion Estimate [RoME.jl](https://github.com/dehann/RoME.jl) and back-end solver [IncrementalInference.jl](https://github.com/dehann/IncrementalInference.jl).
+| **Major Dependencies** |     **Status**     |    **Test Coverage**    |
+|:-----------------------:|:------------------:|:------------------:|
+| Caesar.jl | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] |
+| [RoME.jl]([rome-url]) | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] |
+| [IncrementalInference.jl]([iif-url]) | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] |
+| [TransformUtils]([tf-url]) | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] |
+
+This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
+
+Please see related packages, Robot Motion Estimate [RoME.jl]([rome-url]) and back-end solver [IncrementalInference.jl]([iif-url]).
 
 ## Examples
 
@@ -123,6 +123,8 @@ Hybrid parametric and non-parametric optimization. Incrementalized update rules 
 [build-img]: https://travis-ci.org/dehann/Caesar.jl.svg?branch=master
 [build-url]: https://travis-ci.org/dehann/Caesar.jl
 
+[rome-url]: http://www.github.com/dehann/RoME.jl
+
 [r-cov-img]: https://codecov.io/github/dehann/RoME.jl/coverage.svg?branch=master
 [r-cov-url]: https://codecov.io/github/dehann/RoME.jl?branch=master
 [r-build-img]: https://travis-ci.org/dehann/RoME.jl.svg?branch=master
@@ -133,7 +135,11 @@ Hybrid parametric and non-parametric optimization. Incrementalized update rules 
 [iif-build-img]: https://travis-ci.org/dehann/IncrementalInference.jl.svg?branch=master
 [iif-build-url]: https://travis-ci.org/dehann/IncrementalInference.jl
 
+[iif-url]: http://www.github.com/dehann/IncrementalInference.jl
+
 [tf-cov-img]: https://codecov.io/github/dehann/TransformUtils.jl/coverage.svg?branch=master
 [tf-cov-url]: https://codecov.io/github/dehann/TransformUtils.jl?branch=master
 [tf-build-img]: https://travis-ci.org/dehann/TransformUtils.jl.svg?branch=master
 [tf-build-url]: https://travis-ci.org/dehann/TransformUtils.jl
+
+[tf-url]: http://www.github.com/dehann/TransformUtils.jl
