@@ -7,6 +7,9 @@
 | **Major Packages** |     **Status**     |    **Coverage**    |
 |:-----------------------:|:------------------:|:------------------:|
 | Caesar | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] |
+| RoME | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] |
+| IncrementalInference | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] |
+
 
 A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
 
@@ -118,3 +121,13 @@ Hybrid parametric and non-parametric optimization. Incrementalized update rules 
 [cov-url]: https://codecov.io/github/dehann/Caesar.jl?branch=master
 [build-img]: https://travis-ci.org/dehann/Caesar.jl.svg?branch=master
 [build-url]: https://travis-ci.org/dehann/Caesar.jl
+
+[r-cov-img]: https://codecov.io/github/dehann/RoME.jl/coverage.svg?branch=master
+[r-cov-url]: https://codecov.io/github/dehann/RoME.jl?branch=master
+[r-build-img]: https://travis-ci.org/dehann/RoME.jl.svg?branch=master
+[r-build-url]: https://travis-ci.org/dehann/RoME.jl
+
+[iif-cov-img]: https://codecov.io/github/dehann/IncrementalInference.jl/coverage.svg?branch=master
+[iif-cov-url]: https://codecov.io/github/dehann/IncrementalInference.jl?branch=master
+[iif-build-img]: https://travis-ci.org/dehann/IncrementalInference.jl.svg?branch=master
+[iif-build-url]: https://travis-ci.org/dehann/IncrementalInference.jl
