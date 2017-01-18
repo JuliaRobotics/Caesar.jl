@@ -1,9 +1,10 @@
 # Caesar.jl
 
+A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
+
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)
 
-A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
 
 | **Major Dependencies** |     **Status**     |    **Test Coverage**    |
 |:-----------------------:|:------------------:|:------------------:|
