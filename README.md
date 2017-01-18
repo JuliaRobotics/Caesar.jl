@@ -4,9 +4,9 @@
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)
 
-| **Major Packages used** |     **Status**     |    **Coverage**    |
+| **Major Packages** |     **Status**     |    **Coverage**    |
 |:-----------------------:|:------------------:|:------------------:|
-| Caesar | [![Build Status][build-img]][build-url]  | [![codecov.io][codecov-img]][codecov-url] |
+| Caesar | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] |
 
 A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
 
@@ -114,7 +114,7 @@ This is a work in progress package. Please file issues here as needed to help re
 
 Hybrid parametric and non-parametric optimization. Incrementalized update rules and properly marginalized 'forgetting' for sliding window type operation. We defined interprocess interface for multi-language front-end development.
 
-[cov-0.5-img]: https://codecov.io/github/dehann/Caesar.jl/coverage.svg?branch=master
-[cov-0.5-url]: https://codecov.io/github/dehann/Caesar.jl?branch=master
+[cov-img]: https://codecov.io/github/dehann/Caesar.jl/coverage.svg?branch=master
+[cov-url]: https://codecov.io/github/dehann/Caesar.jl?branch=master
 [build-img]: https://travis-ci.org/dehann/Caesar.jl.svg?branch=master
 [build-url]: https://travis-ci.org/dehann/Caesar.jl
