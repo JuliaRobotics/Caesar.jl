@@ -19,8 +19,8 @@ function getExVertFromCloud(fgl::FactorGraph, fgid::Int64; bigdata::Bool=false)
   CloudGraphs.cloudVertex2ExVertex(cvr)
 end
 
-function getExVertFromCloud(fgl::FactorGraph, lbl::String; bigdata::Bool=false)
-  getExVertFromCloud(fgl, fgl.IDs[lbl],bigdata=bigdata)
+function getExVertFromCloud(fgl::FactorGraph, lbl::Symbol; bigdata::Bool=false)
+  getExVertFromCloud(fgl, fgl.IDs[lbl], bigdata=bigdata)
 end
 
 function updateFullCloudVertData!(fgl::FactorGraph,
@@ -173,16 +173,16 @@ end
 function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
   # 1D early development types
   CloudGraphs.registerPackedType!(cloudGraph, VariableNodeData, PackedVariableNodeData, encodingConverter=VNDencoder, decodingConverter=VNDdecoder);
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Obsv2}, PackedFunctionNodeData{PackedObsv2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Odo}, PackedFunctionNodeData{PackedOdo}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericMarginal}, PackedFunctionNodeData{PackedGenericMarginal}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Ranged}, PackedFunctionNodeData{PackedRanged}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Obsv2}}, PackedFunctionNodeData{PackedObsv2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Odo}}, PackedFunctionNodeData{PackedOdo}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{GenericMarginal}}, PackedFunctionNodeData{PackedGenericMarginal}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Ranged}}, PackedFunctionNodeData{PackedRanged}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   # Pose2
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{PriorPose2}, PackedFunctionNodeData{PackedPriorPose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Pose2Pose2}, PackedFunctionNodeData{PackedPose2Pose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Pose2DPoint2DBearingRange}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{Pose2DPoint2DRange}, FunctionNodeData{Pose2DPoint2DRange}, encodingConverter=passTypeThrough, decodingConverter=passTypeThrough)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{PriorPoint2D}, PackedFunctionNodeData{PackedPriorPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPose2}}, PackedFunctionNodeData{PackedPriorPose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2Pose2}}, PackedFunctionNodeData{PackedPose2Pose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRange}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DRange}}, FunctionNodeData{Pose2DPoint2DRange}, encodingConverter=passTypeThrough, decodingConverter=passTypeThrough)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPoint2D}}, PackedFunctionNodeData{PackedPriorPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   # TODO -- Pose3 stuff
   nothing
 end

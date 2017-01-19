@@ -2,7 +2,6 @@ using Caesar, IncrementalInference, RoME, HDF5, JLD
 using CloudGraphs, Neo4j
 
 
-# dbaddress = "mrg-liljon.csail.mit.edu"
 dbaddress = "localhost"
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, "", "", "localhost", 27017, false, "", "");
 cloudGraph = connect(configuration);
