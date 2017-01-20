@@ -78,6 +78,8 @@ export
   visualizetriads,
   visualizeallposes!,
   visualizeDensityMesh!,
+  updaterealtime!,
+  visualizerealtime,
 
   # for models
   loadmodel,

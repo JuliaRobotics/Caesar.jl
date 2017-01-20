@@ -23,13 +23,14 @@ function solveandvisualize(fg::FactorGraph,
   refresh::Number=1.0,
   densitymeshes::Vector{Symbol}=Symbol[],
   drawlandms::Bool=true,
-  N::Int=100 )
+  N::Int=100,
+  drawtype::Symbol=:max )
   # draw while solving[1]==true
   solving = [true]
   @async begin
     while solving[1]
       println(".")
-      visualizeallposes!(vc, fg, drawlandms=drawlandms)
+      visualizeallposes!(vc, fg, drawlandms=drawlandms, drawtype=drawtype)
       i = 1
       for dm in densitymeshes
         i+=1

@@ -1,14 +1,14 @@
 # Caesar.jl
 
-[![Build Status](https://travis-ci.org/dehann/Caesar.jl.svg?branch=master)](https://travis-ci.org/dehann/Caesar.jl)
-[![codecov.io](https://codecov.io/github/dehann/Caesar.jl/coverage.svg?branch=master)](https://codecov.io/github/dehann/Caesar.jl?branch=master)
+A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
 
+[![Build Status][build-img]][build-url]
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)
 
-A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
+This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
 
-This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf). Please see related packages, Robot Motion Estimate [RoME.jl](https://github.com/dehann/RoME.jl) and back-end solver [IncrementalInference.jl](https://github.com/dehann/IncrementalInference.jl).
+Please see related packages, Robot Motion Estimate [RoME.jl][rome-url] and back-end solver [IncrementalInference.jl][iif-url].
 
 ## Examples
 
@@ -66,7 +66,6 @@ Here is a basic example of using visualization and multi-core factor graph solvi
 
     solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:x2])
 
-
 Major features
 --------------
 
@@ -79,6 +78,18 @@ Major features
 * A multicore Bayes 2D feature tracking server over tcp
 
     julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
+
+Dependency Status
+-----------------
+
+| **Major Dependencies** |     **Status**     |    **Test Coverage**    |
+|:-----------------------:|:------------------:|:------------------:|
+| Caesar.jl | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] |
+| [RoME.jl][rome-url] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] |
+| [IncrementalInference.jl][iif-url] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] |
+| [KernelDensityEstimate.jl][kde-url] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] |
+| [TransformUtils.jl][tf-url] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] |
+| [DrakeVisualizer.jl][dvis-url] | [![Build Status][dvis-build-img]][dvis-build-url] | [![codecov.io][dvis-cov-img]][dvis-cov-url] |
 
 Database interaction layer
 --------------------------
@@ -111,3 +122,38 @@ Future targets
 This is a work in progress package. Please file issues here as needed to help resolve problems for everyone!
 
 Hybrid parametric and non-parametric optimization. Incrementalized update rules and properly marginalized 'forgetting' for sliding window type operation. We defined interprocess interface for multi-language front-end development.
+
+[cov-img]: https://codecov.io/github/dehann/Caesar.jl/coverage.svg?branch=master
+[cov-url]: https://codecov.io/github/dehann/Caesar.jl?branch=master
+[build-img]: https://travis-ci.org/dehann/Caesar.jl.svg?branch=master
+[build-url]: https://travis-ci.org/dehann/Caesar.jl
+
+[rome-url]: http://www.github.com/dehann/RoME.jl
+[r-cov-img]: https://codecov.io/github/dehann/RoME.jl/coverage.svg?branch=master
+[r-cov-url]: https://codecov.io/github/dehann/RoME.jl?branch=master
+[r-build-img]: https://travis-ci.org/dehann/RoME.jl.svg?branch=master
+[r-build-url]: https://travis-ci.org/dehann/RoME.jl
+
+[iif-cov-img]: https://codecov.io/github/dehann/IncrementalInference.jl/coverage.svg?branch=master
+[iif-cov-url]: https://codecov.io/github/dehann/IncrementalInference.jl?branch=master
+[iif-build-img]: https://travis-ci.org/dehann/IncrementalInference.jl.svg?branch=master
+[iif-build-url]: https://travis-ci.org/dehann/IncrementalInference.jl
+[iif-url]: http://www.github.com/dehann/IncrementalInference.jl
+
+[kde-cov-img]: https://codecov.io/github/dehann/KernelDensityEstimate.jl/coverage.svg?branch=master
+[kde-cov-url]: https://codecov.io/github/dehann/KernelDensityEstimate.jl?branch=master
+[kde-build-img]: https://travis-ci.org/dehann/KernelDensityEstimate.jl.svg?branch=master
+[kde-build-url]: https://travis-ci.org/dehann/KernelDensityEstimate.jl
+[kde-url]: http://www.github.com/dehann/KernelDensityEstimate.jl
+
+[tf-cov-img]: https://codecov.io/github/dehann/TransformUtils.jl/coverage.svg?branch=master
+[tf-cov-url]: https://codecov.io/github/dehann/TransformUtils.jl?branch=master
+[tf-build-img]: https://travis-ci.org/dehann/TransformUtils.jl.svg?branch=master
+[tf-build-url]: https://travis-ci.org/dehann/TransformUtils.jl
+[tf-url]: http://www.github.com/dehann/TransformUtils.jl
+
+[dvis-cov-img]: https://codecov.io/github/rdeits/DrakeVisualizer.jl/coverage.svg?branch=master
+[dvis-cov-url]: https://codecov.io/github/rdeits/DrakeVisualizer.jl?branch=master
+[dvis-build-img]: https://travis-ci.org/rdeits/DrakeVisualizer.jl.svg?branch=master
+[dvis-build-url]: https://travis-ci.org/rdeits/DrakeVisualizer.jl
+[dvis-url]: http://www.github.com/rdeits/DrakeVisualizer.jl

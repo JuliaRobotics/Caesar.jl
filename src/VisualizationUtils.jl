@@ -8,6 +8,8 @@ type VisualizationContainer{T}
   triads::Dict{T, Link}
   triadposes::Dict{T, AbstractAffineMap}
   meshes::Dict{T, Link}
+  realtime::Dict{T, Link}
+  rttfs::Dict{T, AbstractAffineMap}
   # pointpositions::Dict{T, Translation}
 end
 
@@ -79,7 +81,7 @@ end
 
 function testtriaddrawing()
   # triads, trposes = Dict{Int,Link}(), Dict{Int, AbstractAffineMap}()
-  vc = VisualizationContainer(nothing,Dict{Int,Link}(), Dict{Int, AbstractAffineMap}(), Dict{Int, HomogenousMesh}())
+  vc = VisualizationContainer(nothing,Dict{Int,Link}(), Dict{Int, AbstractAffineMap}(), Dict{Int, HomogenousMesh}(), Dict{Int, Link}(), Dict{Int, AbstractAffineMap}())
   newtriad!(vc, 0)
   newtriad!(vc, 1,wTb=Translation(2.,0,0),wRb=CoordinateTransformations.AngleAxis(pi/4,1.,0,0),length=0.5)
   newtriad!(vc, 2,wTb=Translation(4.,0,0),wRb=CoordinateTransformations.AngleAxis(pi/2,1.,0,0),length=0.5)
@@ -96,19 +98,32 @@ function startdefaultvisualization(;newwindow=true,draworigin=true)
   DrakeVisualizer.new_window()
   triads, trposes, meshes = Dict{Symbol, Link}(), Dict{Symbol, AbstractAffineMap}(), Dict{Symbol, Link}()
   draworigin ? newtriad!(triads, trposes, :origin) : nothing
-  dc = VisualizationContainer(Dict{Symbol, Visualizer}(), triads, trposes, meshes)
+  realtime, rttfs = Dict{Symbol, Link}(), Dict{Symbol, AbstractAffineMap}()
+  #newtriad!(vc,p, wTb=Translation(maxval[1:3]...), wRb=Quat(q.s,q.v...), length=0.5)
+  dc = VisualizationContainer(Dict{Symbol, Visualizer}(), triads, trposes, meshes, realtime, rttfs)
   visualizetriads!(dc)
   # model = visualizetriads(triads, trposes)
   return dc
 end
 
 
-function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph; drawlandms::Bool=true)
+function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph; drawlandms::Bool=true,drawtype::Symbol=:max)
+  topoint = +
+  if drawtype == :max
+    topoint = getKDEMax
+  elseif drawtype == :mean
+    topoint = getKDEMean
+  elseif drawtype == :fit
+    topoint = (x) -> getKDEfit(x).μ
+  else
+    error("Unknown draw type")
+  end
+
   po,ll = ls(fgl)
   for p in po
     # v = getVert(fgl, p)
     den = getVertKDE(fgl, p)
-    maxval = getKDEMax(den)
+    maxval = topoint(den)
     q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
     newtriad!(vc,p, wTb=Translation(maxval[1:3]...), wRb=Quat(q.s,q.v...), length=0.5)
   end
@@ -116,7 +131,7 @@ function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph; drawla
     for l in ll
       # v = getVert(fgl, p)
       den = getVertKDE(fgl, l)
-      maxval = getKDEMax(den)
+      maxval = topoint(den)
       newpoint!(vc, l, wTb=Translation(maxval[1:3]...))
     end
   end
@@ -125,6 +140,21 @@ function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph; drawla
   nothing
 end
 
+# should be using Twan's code here
+function updaterealtime!{T}(vc::VisualizationContainer{T}, id::T, am::AbstractAffineMap)
+  if !haskey(vc.realtime, id)
+    newtriad!(vc.realtime, vc.rttfs, id, wRb=Quat(am.m.w,am.m.x,am.m.y,am.m.z), wTb=Translation(am.v...), length=0.6)
+    vc.models[:realtime] = Visualizer(vc.realtime, 9999)
+  else
+    vc.rttfs[id] = am
+  end
+  nothing
+end
+
+function visualizerealtime(vc::VisualizationContainer)
+  DrakeVisualizer.draw(vc.models[:realtime], vc.rttfs)
+  nothing
+end
 
 
 function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl::Symbol; levels=3, meshid::Int=2)

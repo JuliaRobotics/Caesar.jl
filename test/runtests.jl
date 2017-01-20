@@ -31,8 +31,8 @@ println("[SUCCESS]")
 
 
 println("[TEST] CloudGraphs API calls...")
-# instpkg = Pkg.installed()
-if false
+instpkg = Pkg.installed()
+if haskey(instpkg,"CloudGraphs")
   println("[TEST] with CloudGraphs with local DB data layer (multicore)...")
   include("fourdoortestcloudgraph.jl")
   println("[SUCCESS]")
