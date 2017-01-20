@@ -170,14 +170,17 @@ flags[1] = false
 
 solveandvisualize(slam.fg, vc, drawtype=:fit) #, densitymeshes=[:x1;:x33;:x60])
 
-visualizeallposes!(vc, slam.fg, drawtype=:fit)
+visualizeallposes!(vc, slam.fg, drawtype=:max)
+
+
+
 
 lc = LCM()
 lcmsendallposes(lc, slam)
 
 
 
-visualizeDensityMesh!(vc, slam.fg, :x62,meshid=2)
+visualizeDensityMesh!(vc, slam.fg, :x1,meshid=2)
 
 
 # savefg = deepcopy(slam.fg)
