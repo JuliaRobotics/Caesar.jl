@@ -3,6 +3,8 @@
 using Caesar, IncrementalInference
 using CloudGraphs
 
+using KernelDensityEstimate
+
 # switch IncrementalInference to use CloudGraphs (Neo4j) data layer
 # dbaddress = "localhost"
 # dbusr = ""
@@ -24,9 +26,9 @@ Caesar.usecloudgraphsdatalayer!()
 # IncrementalInference.setdatalayerAPI!()
 
 # this is being replaced by cloudGraph, added here for development period
-fg = emptyFactorGraph()
+fg = initfg(sessionname = session)
 fg.cg = cloudGraph
-fg.sessionname = session
+
 
 # Robot navigation and inference type stuff
 N=200
@@ -45,6 +47,7 @@ v2 = addNode!(fg, :x2, tem, N=N,labels=["POSE"])
 
 # now add the odometry factor between them
 f1 = addFactor!(fg,[v1;v2],Odo([50.0]',[2.0]',[1.0]))
+
 
 v3=addNode!(fg,:x3,4.0*randn(1,N)+getVal(v2)+50.0, N=N,labels=["POSE"])
 addFactor!(fg,[v2;v3],Odo([50.0]',[4.0]',[1.0]))
@@ -76,16 +79,14 @@ f3 = addFactor!(fg,[v7], Obsv2(doors, cov', [1.0]))
 
 # Now operate with the data in the DB
 
-tree = prepBatchTree!(fg,drawpdf=true)
-gc()
+tree = wipeBuildNewTree!(fg,drawpdf=true)
+# run(`evince bt.pdf`)
+
+# gc()
 # recursive solving (single process, easy stack trace for debugging)
 println("Starting inference over tree")
 inferOverTreeR!(fg, tree)
 
-
-# get vertex back from DB
-# x1neoID = fg.cgIDs[fg.IDs[:x1]]
-# cv1r = CloudGraphs.get_vertex(fg.cg, x1neoID, false)
 
 # Get neighbors
 # neighs = CloudGraphs.get_neighbors(fg.cg, cv1r)
@@ -99,6 +100,16 @@ gt[:x5]=([200.0; 1.77992 ]')' # 198.62
 gt[:x6]=([240.0; 2.20466 ]')' # 238.492
 gt[:x7]=([300.0; 2.14353 ]')' # 298.467
 gt[:l1]=([165.0; 1.17284 ]')' # 164.102
+
+
+
+# get vertex back from DB
+x1neoID = fg.cgIDs[fg.IDs[:x1]]
+cv1r = CloudGraphs.get_vertex(fg.cg, x1neoID, false)
+v1r = cloudVertex2ExVertex(cv1r)
+plotKDE(getKDE(v1r))
+
+plotKDE( getVertKDE(fg, :x2) )
 
 
 
