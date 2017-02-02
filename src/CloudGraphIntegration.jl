@@ -1,5 +1,11 @@
 # integration code for database usage via CloudGraphs.jl
 
+function initfg(;sessionname="NA",cloudgraph=nothing)
+  fgl = RoME.initfg(sessionname=sessionname)
+  fgl.cg = cloudgraph
+  return fgl
+end
+
 function addCloudVert!(fgl::FactorGraph, exvert::Graphs.ExVertex;
     labels=String[])
   # if typeof(getData(exvert).fnc)==GenericMarginal
@@ -287,10 +293,10 @@ function copyAllNodes!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::
     fgl.id < exvert.index ? fgl.id = exvert.index : nothing
     fgl.cgIDs[ids[1]] = ids[2]
     if typeof(exvert.attributes["data"]) == VariableNodeData  # variable node
-      fgl.IDs[exvert.label] = ids[1]
+      fgl.IDs[Symbol(exvert.label)] = ids[1]
       push!(fgl.nodeIDs, ids[1])
     else # function node
-      fgl.fIDs[exvert.label] = ids[1]
+      fgl.fIDs[Symbol(exvert.label)] = ids[1]
       push!(fgl.factorIDs, ids[1])
     end
   end
