@@ -1,7 +1,8 @@
 # a basic create robot type node example
 
-using Caesar, RoME, CloudGraphs
-# using IncrementalInference
+using Caesar, RoME 
+using CloudGraphs
+using IncrementalInference
 
 
 include(joinpath(dirname(@__FILE__) ,"blandauthremote.jl"))
@@ -58,6 +59,7 @@ fgs = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 setBackendWorkingSet!(conn, session)
 fullLocalGraphCopy!(fgs, conn)
 tree = wipeBuildNewTree!(fgs)
+
 
 inferOverTreeR!(fgs, tree)
 
