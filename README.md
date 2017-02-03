@@ -107,14 +107,16 @@ You should be able to rerun the four door test on both internal dictionaries and
 
     Pkg.test("Caesar")
 
-Go to your browser at localhost:7474 and run the Cypher query
+Go to your browser at localhost:7474 and run one of the Cypher queries to either retrieve or delete everything:
 
     match (n) return n
-
-to see current graph. You can delete the graph using the query
-
     match (n) detach delete n
 
+You can run the database solver using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl)
+
+```julia
+julia050 -p7 MM-iSAMCloudSolve.jl <neo4jaddr> <neo4jusr> <pwd> <mongoaddr> <SESSIONNAME>
+```
 
 Future targets
 --------------
