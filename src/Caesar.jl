@@ -125,7 +125,7 @@ end
 include("SlamServer.jl")
 include("DataUtils.jl")
 include("VisualizationUtils.jl")
-include("ModelVisualizationUtils.jl")
+# include("ModelVisualizationUtils.jl")
 include("UserFunctions.jl")
 
 if haskey(instpkg, "CloudGraphs")
