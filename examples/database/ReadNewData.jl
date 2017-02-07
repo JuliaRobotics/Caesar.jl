@@ -62,9 +62,15 @@ end
 for elem in newvertdict
   @show elem[2]["t"]
   @show collect(keys(elem[2]))
+  if elem[2]["t"] == "P"
+    @show elem[1], elem[2]["uid"]
+  elseif elem[2]["t"] == "L"
+    @show elem[1], elem[2]["uid"], elem[2]["tag_id"]
+  end
+  println()
 end
 
-
+@show
 
 
 

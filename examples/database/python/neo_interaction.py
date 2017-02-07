@@ -32,8 +32,8 @@ for i in range(NUM_ODOM_NODES):
     # loc = "50 0 0.523599 100 0 0 100 0 500"
 
     # encode JSON string to add to slamstring property of new4j node
-    var_b4jso1 = {'t':'P', 'uid': str(old_odom_num)}
-    var_b4jso2 = {'t':'P', 'uid': str(curr_odom_num)}
+    var_b4jso1 = {'t':'P', 'uid': old_odom_num}
+    var_b4jso2 = {'t':'P', 'uid': curr_odom_num}
     var_json_str1 = json.dumps(var_b4jso1)
     var_json_str2 = json.dumps(var_b4jso2)
 
@@ -64,7 +64,7 @@ for i in range(NUM_ODOM_NODES):
                  "fac_info":fac_json_str})
 
     if add_landmark:
-        landmark_num = random.randint(0,15)
+        landmark_num = random.randint(6,15)
         landmark_old_odom_loc = random.uniform(min(old_odom_num, landmark_num),
                                                max(old_odom_num, landmark_num))
         # measure between them: goes into factor
@@ -73,7 +73,8 @@ for i in range(NUM_ODOM_NODES):
                           'btwn':str(old_odom_num)+' '+str(landmark_num),
                           't': 'F', 'lklh':'BR G 2'} # whatever the odom-factor should contain
         land_fac_json_str = json.dumps(fac_b4jso_land)
-        land_var_json = json.dumps({'tag_id':landmark_num, 't':'L'})
+        # TODO -- resolve uid vs tag_id
+        land_var_json = json.dumps({'tag_id':landmark_num, 'uid':landmark_num, 't':'L'})
         # add observation/new location var to current odom (IE new factor node, new POSE)
         session.run("MERGE (l1:LANDMARK:SESSROX:NEWDATA {frtend: {land_info}})"
                     "MERGE (o1:POSE:SESSROX:NEWDATA {frtend: {var_info}})"
