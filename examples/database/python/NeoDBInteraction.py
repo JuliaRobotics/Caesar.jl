@@ -121,10 +121,11 @@ class Neo4jTalkApp():
     def on_keyframe_cb(self, data):
         im = data.data # should be under 16 MB
         ## TODO Get BigData key?
-        self.session.run("MATCH (od:POSE:ODOM:NEWDATA:SESSTURTLE)" 
+        #self.session.run("MATCH (od:POSE:ODOM:NEWDATA:SESSTURTLE)" 
                          "WHERE od.slam_info.slam_id=\"{odom_id}\"", {"odom_id"=})
-        j = Binary(im)
-        self.db.insert(j)
+        
+        #j = Binary(im)
+        #self.db.insert(j)
 
 if __name__=="__main__":
     m = Neo4jTalkApp()
