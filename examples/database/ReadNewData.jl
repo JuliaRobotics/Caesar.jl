@@ -42,28 +42,27 @@ cph = loadtx(query, submit=true)
 
 # @show cph.results[1]
 
-newposedict = Dict{Symbol, Int}()
+newvertdict = Dict{Int, Dict{AbstractString,Any}}()
 
 for val in cph.results[1]["data"]
   i = 0
   for elem in val["meta"]
-    # @show elem["type"]
+    # @show elem["type"]    # @show rdict["type"]
     i+=1
-    rdict =  JSON.parse(val["row"][i]["frontend"])
-    @show rdict["type"]
-    if uppercase(rdict["type"])=="POSE"
-      npsym = Symbol(string("x",parse(Int, rdict["userid"])+1)) # TODO -- fix :x0 requirement
-      newposedict[npsym] = elem["id"]
-    end
+    rdict = JSON.parse(val["row"][i]["frontend"])
+    newvertdict[elem["id"]] = rdict
+    # if uppercase(rdict["type"])=="POSE" || uppercase(rdict["type"])=="FACTOR"
+      # npsym = Symbol(string("x",parse(Int, rdict["userid"])+1)) # TODO -- fix :x0 requirement
   end
-  println()
+  # println()
 end
 
-@show newposedict
+@show newvertdict
 
-
-
-
+for elem in newvertdict
+  @show elem[2]["type"]
+  @show collect(keys(elem[2]))
+end
 
 
 
