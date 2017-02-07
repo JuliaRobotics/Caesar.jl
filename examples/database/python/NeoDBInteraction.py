@@ -1,4 +1,3 @@
-from neo4j.v1 import GraphDatabase, basic_auth # via queries
 import json
 import random#.uniform as ru
 import rospy
@@ -19,27 +18,41 @@ from neo4j.v1 import GraphDatabase, basic_auth # via queries
 import json
 import random#.uniform as ru
 
+from pymongo import MongoClient, Binary
+
 ##############
 
 # To Run: 
 # $ python NeoDBInteraction.py -f <path-to-rosbag>
 
 # Make sure authfile path below exists where you run this script
+# And the tags in the commands are the ones desired!
 
 authfile = '/home/rmata/neo_authfile.txt' # username on one line, password on next (for database)
 un,pw = open(authfile).read().splitlines()
+
+# Running Mongo
+
+client = MongoClient()
 
 ##############
 
 class Neo4jTalkApp():
     def __init__(self):
         self.idx_ = 0 # odom_index
-        authfile = '/home/rmata/neo_authfile.txt' # username on one line, password on next (for database)
-        un,pw = open(authfile).read().splitlines()
-        self.driver = GraphDatabase.driver("bolt://mrg-liljon.csail.mit.edu", auth=basic_auth(un, pw))
-        self.session = self.driver.session()
-        self.session.run("MATCH (n:SESSTURTLE) DETACH DELETE n")
+
+        ## Authentication and Setup for Neo4j
+
+        # authfile = '/home/rmata/neo_authfile.txt' # username on one line, password on next (for database)
+        # un,pw = open(authfile).read().splitlines()
+        # self.driver = GraphDatabase.driver("bolt://mrg-liljon.csail.mit.edu", auth=basic_auth(un, pw))
+        # self.session = self.driver.session()
+        # self.session.run("MATCH (n:SESSTURTLE) DETACH DELETE n")
         
+        ## Authentication/Setup for Mongo
+        client = MongoClient() # Default is local for now
+        self.db = client.test # test is the name of the data base. 
+
     def on_tags_detection_cb(self, tag_array, tf_dict=None):
         #print "DETECTING TAGS"
         detections = tag_array.detections
@@ -105,6 +118,14 @@ class Neo4jTalkApp():
         self.idx_ += 1
         #self.old_odom = self.
 
+    def on_keyframe_cb(self, data):
+        im = data.data # should be under 16 MB
+        ## TODO Get BigData key?
+        self.session.run("MATCH (od:POSE:ODOM:NEWDATA:SESSTURTLE)" 
+                         "WHERE od.slam_info.slam_id=\"{odom_id}\"", {"odom_id"=})
+        j = Binary(im)
+        self.db.insert(j)
+
 if __name__=="__main__":
     m = Neo4jTalkApp()
     # rospy.spin()
@@ -122,6 +143,11 @@ if __name__=="__main__":
         '-o', '--odom-channel', type=str, required=False, 
         default='/odom_throttle', 
         help='/odom_throttle')
+    parser.add_argument(
+        '-k', '--keyframe-channel', type=str, required=False, 
+        default='/camera/rgb/image_raw/compressed_triggered', 
+        help='/camera/rgb/image_raw/compressed_triggered')
+    
     args = parser.parse_args()
 
     # Setup dataset/log
@@ -139,10 +165,19 @@ if __name__=="__main__":
         def _func(t, d): 
             return func(d)
         return _func
+
     def convert_tags(func, tf_dict):
         def _func(t,d):
             return func(d, tf_dict)
         return _func
-    controller.subscribe(args.odom_channel, convert_odom(m.on_odom_cb))
-    controller.subscribe(args.tag_channel, convert_tags(m.on_tags_detection_cb, d))
+
+    def convert_keyfr(func):
+        def _func(t, d): 
+            return func(d)
+        return _func
+        
+    # Subscribe to callbacks that modify the databases
+    #controller.subscribe(args.odom_channel, convert_odom(m.on_odom_cb))
+    #controller.subscribe(args.tag_channel, convert_tags(m.on_tags_detection_cb, d))
+    controller.subscribe(args.keyfr_channel, convert_keyfr(m.on_keyframe_cb))
     controller.run()
