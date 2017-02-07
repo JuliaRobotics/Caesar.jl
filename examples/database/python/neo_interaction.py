@@ -32,30 +32,31 @@ for i in range(NUM_ODOM_NODES):
     # loc = "50 0 0.523599 100 0 0 100 0 500"
 
     # encode JSON string to add to slamstring property of new4j node
-    var_b4jso1 = {'type':'POSE', 'userid': str(old_odom_num)}
-    var_b4jso2 = {'type':'POSE', 'userid': str(curr_odom_num)}
+    var_b4jso1 = {'t':'P', 'uid': str(old_odom_num)}
+    var_b4jso2 = {'t':'P', 'uid': str(curr_odom_num)}
     var_json_str1 = json.dumps(var_b4jso1)
     var_json_str2 = json.dumps(var_b4jso2)
 
     # odo_str = "ODOM " + str(old_odom_num) + " " + str(curr_odom_num) + " " + str(loc)
-    fac_b4jso = {'dstr': 'G 1e-3 0 0 1e-3 0 5e-5', 'meas': '50 0 0.523599', 'type': 'FACTOR',
-                 'btwn': str(old_odom_num) + " " + str(curr_odom_num)}
+    fac_b4jso = {'lklh': 'PP2 G 3', 'meas': '50 0 0.523599 1e-3 0 0 1e-3 0 5e-5', 't': 'F',
+                 'btwn': str(old_odom_num)+' '+str(curr_odom_num)}
     fac_json_str = json.dumps(fac_b4jso)
     # fac_json_str = odo_str
 
     if old_odom_num == 0:
-        prior_json_str = json.dumps({'dstr':'G 1e-4 0 0 1e-4 0 4e-6', 'meas': '0 0 0',
-                                     'type': 'FACTOR', 'btwn': '0'})
-        session.run("MERGE (o1:POSE:SESSROX:NEWDATA { frontend: {var_info1} }) " # finds, creates if not exist
-                    "MERGE (f:FACTOR:SESSROX:NEWDATA { frontend: {fac_info} }) " # prior factor
+        prior_json_str = json.dumps({'meas': '0 0 0 1e-4 0 0 1e-4 0 4e-6',
+                                     't': 'F', 'lklh':'PR2 G 3',
+                                     'btwn': '0'})
+        session.run("MERGE (o1:POSE:SESSROX:NEWDATA { frtend: {var_info1} }) " # finds, creates if not exist
+                    "MERGE (f:FACTOR:SESSROX:NEWDATA { frtend: {fac_info} }) " # prior factor
                     "MERGE (o1)-[:REL]-(f)",
                     {"var_info1": var_json_str1,
                      "fac_info": prior_json_str})
 
     # create nodes (if not already): property/key "slamstring", value JSON string?
-    session.run("MERGE (o1:POSE:SESSROX:NEWDATA { frontend: {var_info1} }) " # finds, creates if not exist
-                "MERGE (o2:POSE:SESSROX:NEWDATA { frontend: {var_info2} })"
-                "MERGE (f:FACTOR:SESSROX:NEWDATA { frontend: {fac_info} }) " # odom-odom factor
+    session.run("MERGE (o1:POSE:SESSROX:NEWDATA { frtend: {var_info1} }) " # finds, creates if not exist
+                "MERGE (o2:POSE:SESSROX:NEWDATA { frtend: {var_info2} })"
+                "MERGE (f:FACTOR:SESSROX:NEWDATA { frtend: {fac_info} }) " # odom-odom factor
                 "MERGE (o1)-[:REL]-(f) " # add relationships
                 "MERGE (o2)-[:REL]-(f) ",
                 {"var_info1":var_json_str1,
@@ -68,16 +69,15 @@ for i in range(NUM_ODOM_NODES):
                                                max(old_odom_num, landmark_num))
         # measure between them: goes into factor
 
-        fac_b4jso_land = {'slamstring':"LANDMARK " + str(old_odom_num) +
-                          " " + str(landmark_num) + " " +
-                          str(landmark_old_odom_loc),
-                          'type': 'FACTOR'} # whatever the odom-factor should contain
+        fac_b4jso_land = {'meas': str(landmark_old_odom_loc)+' 1e-3 0 1e-2',
+                          'btwn':str(old_odom_num)+' '+str(landmark_num),
+                          't': 'F', 'lklh':'BR G 2'} # whatever the odom-factor should contain
         land_fac_json_str = json.dumps(fac_b4jso_land)
-        land_var_json = json.dumps({'tag_id':landmark_num, 'type':'LANDMARK'})
+        land_var_json = json.dumps({'tag_id':landmark_num, 't':'L'})
         # add observation/new location var to current odom (IE new factor node, new POSE)
-        session.run("MERGE (l1:LANDMARK:SESSROX:NEWDATA {frontend: {land_info}})"
-                    "MERGE (o1:POSE:SESSROX:NEWDATA {frontend: {var_info}})"
-                    "MERGE (f:FACTOR:SESSROX:NEWDATA {frontend: {fac_info}})" # odom-landmark factor
+        session.run("MERGE (l1:LANDMARK:SESSROX:NEWDATA {frtend: {land_info}})"
+                    "MERGE (o1:POSE:SESSROX:NEWDATA {frtend: {var_info}})"
+                    "MERGE (f:FACTOR:SESSROX:NEWDATA {frtend: {fac_info}})" # odom-landmark factor
                     "MERGE (o1)-[:REL]-(f) "
                     "MERGE (f)-[:REL]-(l1) ",
                     {"land_info": land_var_json,

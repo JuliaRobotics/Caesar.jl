@@ -49,7 +49,7 @@ for val in cph.results[1]["data"]
   for elem in val["meta"]
     # @show elem["type"]    # @show rdict["type"]
     i+=1
-    rdict = JSON.parse(val["row"][i]["frontend"])
+    rdict = JSON.parse(val["row"][i]["frtend"])
     newvertdict[elem["id"]] = rdict
     # if uppercase(rdict["type"])=="POSE" || uppercase(rdict["type"])=="FACTOR"
       # npsym = Symbol(string("x",parse(Int, rdict["userid"])+1)) # TODO -- fix :x0 requirement
@@ -57,10 +57,10 @@ for val in cph.results[1]["data"]
   # println()
 end
 
-@show newvertdict
+# @show newvertdict
 
 for elem in newvertdict
-  @show elem[2]["type"]
+  @show elem[2]["t"]
   @show collect(keys(elem[2]))
 end
 
