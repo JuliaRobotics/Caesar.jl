@@ -2,8 +2,9 @@ from neo4j.v1 import GraphDatabase, basic_auth # via queries
 import json
 import random#.uniform as ru
 
-authfile = '/home/rmata/neo_authfile.txt' # username on one line, password on next (for database)
-un,pw = open(authfile).read().splitlines()
+authfile = '/home/dehann/neo_authfile.txt' # username on one line, password on next (for database)
+un,pw,addr = open(authfile).read().splitlines()
+print un, pw, addr
 
 #####################################################################################
 ## Database Construction in Python Example
