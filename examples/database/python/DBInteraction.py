@@ -27,14 +27,13 @@ import uuid
 # $ python NeoDBInteraction.py -f <path-to-rosbag>
 
 # Make sure authfile path below exists where you run this script
-# And the tags in the commands are the ones desired!
+# And the labels/properties in the commands are the ones desired!
 
 #authfile = '/home/rmata/neo_authfile.txt' # username on one line, password on next (for database)
 #un,pw, addr = open(authfile).read().splitlines()
 
 # Running Mongo
-
-#client = MongoClient()
+#client = MongoClient() # auth for 
 
 ##############
 
@@ -43,7 +42,7 @@ class Neo4jTalkApp():
         self.idx_ = 0 # odom_index
 
         ## Authentication and Setup for Neo4j
-        authfile = '/home/rmata/neo_authfile.txt' # username on one line, password on next (for database)
+        authfile = '/home/rmata/authfile.txt' # username on one line, password on next (for database)
         un,pw, addr = open(authfile).read().splitlines()
         self.driver = GraphDatabase.driver(addr, auth=basic_auth(un, pw))
         self.session = self.driver.session()
@@ -52,8 +51,11 @@ class Neo4jTalkApp():
         self.odom_node_id = None # neo4j node id
 
         ## Authentication/Setup for Mongo
-        client = MongoClient() # Default is local for now
-        self.db = client.tester # test is the name of the data base?
+        mongo_authfile = "/home/rmata/mongo_authfile.txt"
+        maddr = open(mongo_authfile).read().splitlines()
+        print maddr
+        client = MongoClient(maddr) # Default is local for now
+        self.db = client.tester # test is the name of the data base
 
     def on_tags_detection_cb(self, tag_array, tf_dict=None):
         #print "DETECTING TAGS"
@@ -152,7 +154,7 @@ class Neo4jTalkApp():
                          {"jungle":self.odom_node_id,
                           "newkeys":{"mongo_keys":json.dumps({"keyframe_rgb":str(new_im_uid.hex)})}})
         j = Binary(im)
-        self.db.collection.insert({"key": str(new_im_uid.hex),
+        self.db["rgb_keyframes"].insert({"key": str(new_im_uid.hex),
                                    "rgb_image":j})
 
 if __name__=="__main__":
