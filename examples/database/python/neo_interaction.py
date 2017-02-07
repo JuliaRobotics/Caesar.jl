@@ -69,7 +69,7 @@ for i in range(NUM_ODOM_NODES):
                                                max(old_odom_num, landmark_num))
         # measure between them: goes into factor
 
-        fac_b4jso_land = {'meas': str(landmark_old_odom_loc)+' 1e-3 0 1e-2',
+        fac_b4jso_land = {'meas': '0 '+str(landmark_old_odom_loc)+' 1e-3 0 1e-2',
                           'btwn':str(old_odom_num)+' '+str(landmark_num),
                           't': 'F', 'lklh':'BR G 2'} # whatever the odom-factor should contain
         land_fac_json_str = json.dumps(fac_b4jso_land)
@@ -88,6 +88,7 @@ for i in range(NUM_ODOM_NODES):
 odom_results = session.run("MATCH (n:SESSROX) RETURN n")
 factor_results = session.run("MATCH (n:FACTOR:SESSROX) RETURN n")
 landmark_results = session.run("MATCH (n:LANDMARK:SESSROX) RETURN n")
+
 for record in odom_results:
     print record
 for record in factor_results:

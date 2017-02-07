@@ -79,6 +79,7 @@ export
   copyAllNodes!,
   copyAllEdges!,
   registerCallback!,
+  updateFullCloudVertData!,
 
   # drawing functions
   VisualizationContainer,

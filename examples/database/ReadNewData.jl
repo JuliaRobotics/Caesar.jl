@@ -1,9 +1,9 @@
 # find and interact with NEWDATA in neo4j
 
 
-using Caesar, RoME
+using Caesar, RoME, IncrementalInference
 using CloudGraphs, Neo4j
-
+using Distributions
 using JSON
 
 # # # connect to the server, CloudGraph stuff
@@ -70,8 +70,128 @@ for elem in newvertdict
   println()
 end
 
-@show
 
+function insertValuesCloudVert(fgl::FactorGraph, neoNodeId::Int, elem, uidl, nlbsym; labels=String[])
+  #
+  addNode!(fgl, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
+
+  v = getVert(fgl, nlbsym, api=localapi)
+  warn("deleting frntend values")
+  delete!(v.attributes,"frntend")
+  # v.attributes["frntend"] = elem
+  fgl.cgIDs[uidl] = neoNodeId
+
+  # updateFullCloudVertData!(fgl, v)
+  #
+  cv = exVertex2CloudVertex( v )
+  cv.neo4jNodeId = neoNodeId
+  cv.neo4jNode = Neo4j.getnode(fgl.cg.neo4j.graph, neoNodeId)
+  cv.isValidNeoNodeId = true
+  cv.labels=labels
+  #
+  CloudGraphs.update_vertex!(fgl.cg, cv)
+  # TODO -- this function refactoring and better integration here
+  # function updateFullCloudVertData!( fgl::FactorGraph,
+  #     nv::Graphs.ExVertex; updateMAPest=false )
+  nothing
+end
+
+
+function recoverConstraintType(elem)
+  lkl = split(elem["lklh"], ' ')
+  if lkl[1]=="PR2"
+    msm = split(elem["meas"], ' ')
+    cov = zeros(3,3)
+    cov[1,2], cov[1,3], cov[2,3] = parse(Float64, msm[5]), parse(Float64, msm[6]), parse(Float64, msm[8])
+    cov += cov'
+    cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
+    zi = zeros(3,1)
+    zi[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
+    return PriorPose2(zi, cov, [1.0])
+  elseif lkl[1]=="PP2"
+    msm = split(elem["meas"], ' ')
+    cov = zeros(3,3)
+    cov[1,2], cov[1,3], cov[2,3] = parse(Float64, msm[5]), parse(Float64, msm[6]), parse(Float64, msm[8])
+    cov += cov'
+    cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
+    zij = zeros(3,1)
+    zij[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
+    return Pose2Pose2(zij, cov, [1.0])
+  elseif lkl[1]=="BR"
+    msm = split(elem["meas"], ' ')
+    return Pose2DPoint2DBearingRange{Normal, Normal}(
+                  Normal(parse(msm[1]), parse(Float64, msm[3]) ),
+                  Normal(parse(msm[2]),parse(Float64, msm[5]) )  )
+  else
+    return error("Don't know how to convert $(lkl[1]) to a factor")
+  end
+end
+
+# next step is to convert theis data into actual usable graph for IIF.
+# We'll do this with CloudGraphs.updatevertex!(...)
+
+# first iteration, lets use addNode/addFactor to local graph only and
+# then call updateFullCloudVertData!. ID tracking may be the issue here.
+
+N=100
+
+fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+
+for (neoNodeId,elem) in newvertdict
+  # neoNodeId = 31369
+  if elem["t"] == "P"
+    uidl = elem["uid"]+1
+    nlbsym = Symbol(string('x', uidl))
+    insertValuesCloudVert(fg, neoNodeId, elem, uidl, nlbsym, labels=["POSE";"$(session)"])
+  elseif elem["t"] == "L"
+    uidl = elem["uid"]+1
+    nlbsym = Symbol(string('l', uidl))
+    insertValuesCloudVert(fg, neoNodeId, elem, uidl, nlbsym, labels=["LANDMARK";"$(session)"])
+  end
+end
+
+
+
+warn("using hack counter for FACTOR uid")
+fuid = 10000
+for (neoNodeId,elem) in newvertdict
+  if elem["t"] == "F"
+    # verts relating to this factor
+    verts = Vector{Graphs.ExVertex}()
+    for bf in split(elem["btwn"], ' ')
+      uid = parse(Int,bf)+1
+      push!(verts, fg.g.vertices[uid])
+    end
+    # the factor type
+    usrfnc = recoverConstraintType(elem)
+    fuid += 1
+    vert = addFactor!(fg, verts, usrfnc, ready=0, api=localapi, uid=fuid)
+
+    fg.cgIDs[fuid] = neoNodeId
+
+    # updateFullCloudVertData!(fg, v)
+    #
+    cv = exVertex2CloudVertex( vert )
+    cv.neo4jNodeId = neoNodeId
+    cv.neo4jNode = Neo4j.getnode(fg.cg.neo4j.graph, neoNodeId)
+    cv.isValidNeoNodeId = true
+    # cv.labels=labels
+    #
+    CloudGraphs.update_vertex!(fg.cg, cv)
+
+  end
+end
+
+
+# function addFactor!{I <: Union{FunctorInferenceType, InferenceType}, T <: AbstractString}(fgl::FactorGraph,
+#       Xi::Array{Graphs.ExVertex,1},
+#       usrfnc::I;
+#       ready::Int=1,
+#       api::DataLayerAPI=dlapi,
+#       labels::Vector{T}=String[] )
+
+
+ls(fg)
 
 
 

@@ -30,7 +30,8 @@ function getExVertFromCloud(fgl::FactorGraph, lbl::Symbol; bigdata::Bool=false)
 end
 
 function updateFullCloudVertData!(fgl::FactorGraph,
-    nv::Graphs.ExVertex; updateMAPest=false)
+    nv::Graphs.ExVertex;
+    updateMAPest::Bool=false )
 
   # TODO -- this get_vertex seems excessive, but we need the CloudVertex
   neoID = fgl.cgIDs[nv.index]
