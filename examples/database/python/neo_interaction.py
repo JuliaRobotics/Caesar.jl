@@ -38,7 +38,7 @@ for i in range(NUM_ODOM_NODES):
     var_json_str2 = json.dumps(var_b4jso2)
 
     # odo_str = "ODOM " + str(old_odom_num) + " " + str(curr_odom_num) + " " + str(loc)
-    fac_b4jso = {'dstr': 'G 1e-3 0 0 1e-3 0 5e-5', meas: '50 0 0.523599', 'type': 'FACTOR',
+    fac_b4jso = {'dstr': 'G 1e-3 0 0 1e-3 0 5e-5', 'meas': '50 0 0.523599', 'type': 'FACTOR',
                  'btwn': str(old_odom_num) + " " + str(curr_odom_num)}
     fac_json_str = json.dumps(fac_b4jso)
     # fac_json_str = odo_str
