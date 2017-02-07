@@ -21,7 +21,7 @@ function loadmodel(model::Symbol=:rov;
     offset = Translation(0.,0,0) ∘ LinearMap(Rotations.Quat(1.0,0,0,0))  )
   #
   if model==:rov
-    @show file = joinpath(Pkg.dir("Caesar"), "data", "models", "rov2.obj")
+    @show file = joinpath(dirname(@__FILE__), ".." , "data", "models", "rov2.obj")
     rov = load(file)
     rovdata = GeometryData(rov)
     rovdata.color = color

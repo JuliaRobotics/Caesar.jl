@@ -5,23 +5,23 @@ using DrakeVisualizer, CoordinateTransformations, GeometryTypes, Rotations, Tran
 
 type VisualizationContainer{T}
   models::Dict{T, Visualizer}
-  triads::Dict{T, Link}
+  triads::Dict{T, Any}
   triadposes::Dict{T, AbstractAffineMap}
-  meshes::Dict{T, Link}
-  realtime::Dict{T, Link}
+  meshes::Dict{T, Any}
+  realtime::Dict{T, Any}
   rttfs::Dict{T, AbstractAffineMap}
   # pointpositions::Dict{T, Translation}
 end
 
 
-function linkaxestriad(;width=0.02,length=1.0)
+function Anyaxestriad(;width=0.02,length=1.0)
   Xbox = GeometryData(HyperRectangle(Vec(0.,-width,-width), Vec(length,width,width)))
   Xbox.color = RGBA(1., 0, 0, 0.5)
   Ybox = GeometryData(HyperRectangle(Vec(-width,0.0,-width), Vec(width,length,width)))
   Ybox.color = RGBA(0., 1, 0, 0.5)
   Zbox = GeometryData(HyperRectangle(Vec(-width,-width,0.0), Vec(width,width,length)))
   Zbox.color = RGBA(0., 0, 1, 0.5)
-  Link([Xbox;Ybox;Zbox])
+  Any([Xbox;Ybox;Zbox])
 end
 
 function settriadpose!{T}(triadposes::Dict{T, AbstractAffineMap}, id::T, wTb::Translation, wRb::Rotation)
@@ -36,12 +36,12 @@ function setpointpose!{T}(positions::Dict{T, AbstractAffineMap}, id::T, wTb::Tra
   nothing
 end
 
-function newtriad!{T}(triads::Dict{T,Link}, triadposes::Dict{T, AbstractAffineMap}, id::T;
+function newtriad!{T}(triads::Dict{T,Any}, triadposes::Dict{T, AbstractAffineMap}, id::T;
       wRb::Rotation=Quat(1.,0,0,0),
       wTb::Translation=Translation(0.,0,0),
       width=0.02,
       length=1.0  )
-  triads[id] = linkaxestriad(width=width, length=length)
+  triads[id] = Anyaxestriad(width=width, length=length)
   settriadpose!(triadposes, id, wTb, wRb)
   nothing
 end
@@ -63,12 +63,12 @@ function newpoint!{T}(dc::VisualizationContainer{T}, id::T;
   #
   pt = GeometryData(HyperSphere(Point(0.,0,0), radius))
   pt.color = color
-  dc.triads[id] = Link([pt])
+  dc.triads[id] = Any([pt])
   setpointpose!(dc.triadposes, id, wTb)
   nothing
 end
 
-# function visualizetriads{T}(triads::Dict{T,Link}, triadposes::Dict{T, AbstractAffineMap})
+# function visualizetriads{T}(triads::Dict{T,Any}, triadposes::Dict{T, AbstractAffineMap})
 #   triadsmodel = Visualizer(triads)
 #   DrakeVisualizer.draw(triadsmodel, triadposes)
 #   triadsmodel
@@ -80,8 +80,8 @@ function visualizetriads!(vc::VisualizationContainer)  # = visualizetriads(dc.tr
 end
 
 function testtriaddrawing()
-  # triads, trposes = Dict{Int,Link}(), Dict{Int, AbstractAffineMap}()
-  vc = VisualizationContainer(nothing,Dict{Int,Link}(), Dict{Int, AbstractAffineMap}(), Dict{Int, HomogenousMesh}(), Dict{Int, Link}(), Dict{Int, AbstractAffineMap}())
+  # triads, trposes = Dict{Int,Any}(), Dict{Int, AbstractAffineMap}()
+  vc = VisualizationContainer(nothing,Dict{Int,Any}(), Dict{Int, AbstractAffineMap}(), Dict{Int, HomogenousMesh}(), Dict{Int, Any}(), Dict{Int, AbstractAffineMap}())
   newtriad!(vc, 0)
   newtriad!(vc, 1,wTb=Translation(2.,0,0),wRb=CoordinateTransformations.AngleAxis(pi/4,1.,0,0),length=0.5)
   newtriad!(vc, 2,wTb=Translation(4.,0,0),wRb=CoordinateTransformations.AngleAxis(pi/2,1.,0,0),length=0.5)
@@ -96,9 +96,9 @@ end
 # create a new Director window with home axis
 function startdefaultvisualization(;newwindow=true,draworigin=true)
   DrakeVisualizer.new_window()
-  triads, trposes, meshes = Dict{Symbol, Link}(), Dict{Symbol, AbstractAffineMap}(), Dict{Symbol, Link}()
+  triads, trposes, meshes = Dict{Symbol, Any}(), Dict{Symbol, AbstractAffineMap}(), Dict{Symbol, Any}()
   draworigin ? newtriad!(triads, trposes, :origin) : nothing
-  realtime, rttfs = Dict{Symbol, Link}(), Dict{Symbol, AbstractAffineMap}()
+  realtime, rttfs = Dict{Symbol, Any}(), Dict{Symbol, AbstractAffineMap}()
   #newtriad!(vc,p, wTb=Translation(maxval[1:3]...), wRb=Quat(q.s,q.v...), length=0.5)
   dc = VisualizationContainer(Dict{Symbol, Visualizer}(), triads, trposes, meshes, realtime, rttfs)
   visualizetriads!(dc)
@@ -178,7 +178,7 @@ function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl
     meshdata.color = RGBA( val/(1.5*maxval),0.0,1.0,val/(1.5*maxval))
     push!(MD, meshdata)
   end
-  mptr = Link(MD)
+  mptr = Any(MD)
   vc.meshes[lbl] = mptr
   Visualizer(mptr, meshid) # meshdata
   nothing

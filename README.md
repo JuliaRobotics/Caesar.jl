@@ -3,8 +3,8 @@
 A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
 
 [![Build Status][build-img]][build-url]
-[![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
-[![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)
+<!-- [![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
+[![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)-->
 
 This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
 
@@ -107,14 +107,16 @@ You should be able to rerun the four door test on both internal dictionaries and
 
     Pkg.test("Caesar")
 
-Go to your browser at localhost:7474 and run the Cypher query
+Go to your browser at localhost:7474 and run one of the Cypher queries to either retrieve or delete everything:
 
     match (n) return n
-
-to see current graph. You can delete the graph using the query
-
     match (n) detach delete n
 
+You can run the database solver using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl)
+
+```julia
+julia050 -p7 MM-iSAMCloudSolve.jl <neo4jaddr> <neo4jusr> <pwd> <mongoaddr> <SESSIONNAME>
+```
 
 Future targets
 --------------

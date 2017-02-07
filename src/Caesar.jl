@@ -2,6 +2,8 @@ module Caesar
 
 instpkg = Pkg.installed();
 
+# import RoME: initfg
+
 using
   RoME,
   IncrementalInference,
@@ -24,9 +26,13 @@ using
 
 if haskey(instpkg,"CloudGraphs")
   using CloudGraphs
+  using Neo4j
 end
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
+
+
+
 
 export
   # Victoria Park example -- batch
@@ -55,6 +61,9 @@ export
   # save and load data
   saveSlam,
   loadSlam,
+
+  # more passthrough
+  initfg,
 
   # cloudgraph
   usecloudgraphsdatalayer!,
@@ -116,7 +125,7 @@ end
 include("SlamServer.jl")
 include("DataUtils.jl")
 include("VisualizationUtils.jl")
-include("ModelVisualizationUtils.jl")
+# include("ModelVisualizationUtils.jl")
 include("UserFunctions.jl")
 
 if haskey(instpkg, "CloudGraphs")
