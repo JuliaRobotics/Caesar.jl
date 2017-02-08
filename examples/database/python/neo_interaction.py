@@ -49,7 +49,7 @@ for i in range(NUM_ODOM_NODES):
                                      'btwn': '0'})
         session.run("MERGE (o1:POSE:SESSROX:NEWDATA { frtend: {var_info1} }) " # finds, creates if not exist
                     "MERGE (f:FACTOR:SESSROX:NEWDATA { frtend: {fac_info} }) " # prior factor
-                    "MERGE (o1)-[:REL]-(f)",
+                    "MERGE (o1)-[:DEPENDENCE]-(f)",
                     {"var_info1": var_json_str1,
                      "fac_info": prior_json_str})
 
@@ -57,8 +57,8 @@ for i in range(NUM_ODOM_NODES):
     session.run("MERGE (o1:POSE:SESSROX:NEWDATA { frtend: {var_info1} }) " # finds, creates if not exist
                 "MERGE (o2:POSE:SESSROX:NEWDATA { frtend: {var_info2} })"
                 "MERGE (f:FACTOR:SESSROX:NEWDATA { frtend: {fac_info} }) " # odom-odom factor
-                "MERGE (o1)-[:REL]-(f) " # add relationships
-                "MERGE (o2)-[:REL]-(f) ",
+                "MERGE (o1)-[:DEPENDENCE]-(f) " # add relationships
+                "MERGE (o2)-[:DEPENDENCE]-(f) ",
                 {"var_info1":var_json_str1,
                  "var_info2":var_json_str2,
                  "fac_info":fac_json_str})
@@ -79,8 +79,8 @@ for i in range(NUM_ODOM_NODES):
         session.run("MERGE (l1:LANDMARK:SESSROX:NEWDATA {frtend: {land_info}})"
                     "MERGE (o1:POSE:SESSROX:NEWDATA {frtend: {var_info}})"
                     "MERGE (f:FACTOR:SESSROX:NEWDATA {frtend: {fac_info}})" # odom-landmark factor
-                    "MERGE (o1)-[:REL]-(f) "
-                    "MERGE (f)-[:REL]-(l1) ",
+                    "MERGE (o1)-[:DEPENDENCE]-(f) "
+                    "MERGE (f)-[:DEPENDENCE]-(l1) ",
                     {"land_info": land_var_json,
                      "var_info": var_json_str1,
                      "fac_info": land_fac_json_str})
@@ -89,9 +89,9 @@ odom_results = session.run("MATCH (n:SESSROX) RETURN n")
 factor_results = session.run("MATCH (n:FACTOR:SESSROX) RETURN n")
 landmark_results = session.run("MATCH (n:LANDMARK:SESSROX) RETURN n")
 
-for record in odom_results:
-    print record
-for record in factor_results:
-    print record
-for record in landmark_results:
-    print record
+# for record in odom_results:
+#     print record
+# for record in factor_results:
+#     print record
+# for record in landmark_results:
+#     print record

@@ -3,12 +3,15 @@ module Caesar
 instpkg = Pkg.installed();
 
 # import RoME: initfg
+import Distributions: Normal
+import GeometryTypes: Normal
 
 using
   RoME,
   IncrementalInference,
   Graphs,
   KernelDensityEstimate,
+  Distributions,
   DrakeVisualizer,
   TransformUtils,
   CoordinateTransformations,
@@ -80,6 +83,8 @@ export
   copyAllEdges!,
   registerCallback!,
   updateFullCloudVertData!,
+  insertValuesCloudVert!,
+  recoverConstraintType,
 
   # drawing functions
   VisualizationContainer,
