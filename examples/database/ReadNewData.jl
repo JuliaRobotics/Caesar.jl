@@ -1,9 +1,9 @@
 # find and interact with NEWDATA in neo4j
 
 
-using Caesar, RoME
+using Caesar, RoME, IncrementalInference
 using CloudGraphs, Neo4j
-
+using Distributions
 using JSON
 
 # # # connect to the server, CloudGraph stuff
@@ -36,7 +36,7 @@ Caesar.usecloudgraphsdatalayer!()
 
 
 loadtx = transaction(conn)
-query = "match (n:$(session))-[r1]-(f:NEWDATA:$(session):FACTOR)-[r2]-(m:NEWDATA:$(session)) return distinct n, f, m"
+query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) return distinct n, f"
 cph = loadtx(query, submit=true)
 # loadresult = commit(loadtx)
 
@@ -59,19 +59,100 @@ end
 
 # @show newvertdict
 
-for elem in newvertdict
-  @show elem[2]["t"]
-  @show collect(keys(elem[2]))
-  if elem[2]["t"] == "P"
-    @show elem[1], elem[2]["uid"]
-  elseif elem[2]["t"] == "L"
-    @show elem[1], elem[2]["uid"], elem[2]["tag_id"]
+# for elem in newvertdict
+#   @show elem[2]["t"]
+#   @show collect(keys(elem[2]))
+#   if elem[2]["t"] == "P"
+#     @show elem[1], elem[2]["uid"]
+#   elseif elem[2]["t"] == "L"
+#     @show elem[1], elem[2]["uid"], elem[2]["tag_id"]
+#   end
+#   println()
+# end
+
+
+# next step is to convert theis data into actual usable graph for IIF.
+# We'll do this with CloudGraphs.updatevertex!(...)
+
+# first iteration, lets use addNode/addFactor to local graph only and
+# then call updateFullCloudVertData!. ID tracking may be the issue here.
+
+N=100
+fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+
+for (neoNodeId,elem) in newvertdict
+  # neoNodeId = 31369
+  if elem["t"] == "P"
+    uidl = elem["uid"]+1
+    nlbsym = Symbol(string('x', uidl))
+    v = addNode!(fg, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
+    insertValuesCloudVert!(fg, neoNodeId, elem, uidl, v, labels=["POSE";"$(session)"])
+  elseif elem["t"] == "L"
+    uidl = elem["uid"]+1
+    nlbsym = Symbol(string('l', uidl))
+    v = addNode!(fg, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
+    insertValuesCloudVert!(fg, neoNodeId, elem, uidl, v, labels=["LANDMARK";"$(session)"])
   end
-  println()
 end
 
-@show
 
+warn("using hack counter for FACTOR uid")
+fuid = 100000
+# neoNodeId = 63363
+# elem = newvertdict[neoNodeId]
+for (neoNodeId,elem) in newvertdict
+  if elem["t"] == "F"
+    # verts relating to this factor
+    verts = Vector{Graphs.ExVertex}()
+    for bf in split(elem["btwn"], ' ')
+      uid = parse(Int,bf)+1
+      push!(verts, fg.g.vertices[uid])
+    end
+    # the factor type
+    usrfnc = recoverConstraintType(elem)
+    fuid += 1
+    vert = addFactor!(fg, verts, usrfnc, ready=0, api=localapi, uid=fuid)
+    insertValuesCloudVert!(fg, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(session)"])
+  end
+end
+
+
+
+ls(fg)
+
+
+# This one is breaking
+# neoNodeId = 63433
+# elem = newvertdict[neoNodeId]
+#
+# verts = Vector{Graphs.ExVertex}()
+# for bf in split(elem["btwn"], ' ')
+#   uid = parse(Int,bf)+1
+#   push!(verts, fg.g.vertices[uid])
+# end
+# # the factor type
+# @show usrfnc = recoverConstraintType(elem)
+#
+# fuid += 1
+# vert = addFactor!(fg, verts, usrfnc, ready=0, api=localapi, uid=fuid)
+#
+# fg.cgIDs[fuid] = neoNodeId
+# cv = exVertex2CloudVertex( vert )
+# @show cv.neo4jNodeId = neoNodeId
+# cv.neo4jNode = Neo4j.getnode(fg.cg.neo4j.graph, neoNodeId)
+# cv.isValidNeoNodeId = true
+# cv.labels=["FACTOR";"$(session)"]
+#
+# @show typeof(cv.packed.fnc.usrfnc!)
+#
+# CloudGraphs.update_vertex!(fg.cg, cv)
+
+# function addFactor!{I <: Union{FunctorInferenceType, InferenceType}, T <: AbstractString}(fgl::FactorGraph,
+#       Xi::Array{Graphs.ExVertex,1},
+#       usrfnc::I;
+#       ready::Int=1,
+#       api::DataLayerAPI=dlapi,
+#       labels::Vector{T}=String[] )
 
 
 
