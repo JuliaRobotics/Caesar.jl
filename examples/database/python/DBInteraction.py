@@ -24,7 +24,7 @@ import uuid
 ##############
 
 # To Run: 
-# $ python NeoDBInteraction.py -f <path-to-rosbag>
+# $ python NeoDBInteraction.py -f <path-to-rosbag> (SESSTURTLE in particular is autonomous_2017-01-15-15-34-19.bag)
 
 # Make sure authfile path below exists where you run this script
 # And the labels/properties in the commands are the ones desired!
@@ -89,19 +89,19 @@ class Neo4jTalkApp():
         poses = [pose_bc*pose_ct for pose_ct in poses_ct] # rigidtransforms for tag_ids, in body frame
 
         for i in range(len(tag_ids)):
+            x = poses[i].t[0]
+            y = poses[i].t[1]
             #rospy.logerr('\n\n tag is {}'.format(tag_ids[i]))
-            self.session.run("MERGE (l1:POSE:NEWDATA:LAND:SESSTURTLE {frtend: {land_info}}) "
+            self.session.run("MERGE (l1:NEWDATA:LAND:SESSTURTLE {frtend: {land_info}}) "
                              "MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info}}) "
                              "MERGE (f:FACTOR:NEWDATA:SESSTURTLE {frtend: {fac_info}}) " # odom-landmark factor
-                             "MERGE (o1)-[:REL]->(f) "
-                             "MERGE (f)-[:REL]->(l1) "
+                             "MERGE (o1)-[:DEPENDENCE]->(f) "
+                             "MERGE (f)-[:DEPENDENCE]->(l1) "
                              "RETURN id(o1)",
-                             {"land_info": json.dumps({"t":"P", "tag_id": tag_ids[i], "userready":0}), 
+                             {"land_info": json.dumps({"t":"L", "tag_id": tag_ids[i], "userready":0}), 
                               "var_info": json.dumps({"t":"P", "uid": self.idx_, "userready":0}), 
-                              "fac_info": json.dumps({"t":"F", "lklh":"PP2 G 3", 
-                                                      "meas":str(poses[i].t[0])+" "+str(poses[i].t[1])+\
-                                                      " "+str(euler_from_quaternion(poses[i].xyzw)[2])+\
-                                                      " 1e-3 0 1e-2" , "userready":0})})
+                              "fac_info": json.dumps({"t":"F", "lklh":"BR G 2", 
+                                                      "meas": str(math.atan2(y,x))+" "+str(math.sqrt(x*x + y*y))+ " 1e-3 0 1e-2", "userready":0, "btwn":str(self.idx_)+" "+str(tag_ids[i]) } ) })
 
     def on_odom_cb(self, data):
         #print "GETTING ODOM"
@@ -130,7 +130,7 @@ class Neo4jTalkApp():
         if self.idx_ == 0:
             self.session.run("MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info1} }) "
                              "MERGE (f:FACTOR:NEWDATA:SESSTURTLE { frtend: {fac_info} }) "
-                             "MERGE (o1)-[:REL]-(f) ",
+                             "MERGE (o1)-[:DEPENDENCE]-(f) ",
                              {"var_info1":json.dumps({"t":"P", "uid":self.idx_, "userready":0}),
                               "fac_info":json.dumps({"meas": "0 0 0 1e-4 0 0 1e-4 0 4e-6",
                                                      "t": "F", "lklh":"PR2 G 3",
@@ -140,8 +140,8 @@ class Neo4jTalkApp():
             running_result = self.session.run("MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info1} }) " # finds/creates
                                               "MERGE (o2:POSE:NEWDATA:SESSTURTLE { frtend: {var_info2} })"
                                               "MERGE (f:FACTOR:NEWDATA:SESSTURTLE { frtend: {fac_info} }) " # odom-odom factor
-                                              "MERGE (o1)-[:REL]-(f) " # add relationships
-                                              "MERGE (o2)-[:REL]-(f) "
+                                              "MERGE (o1)-[:DEPENDENCE]-(f) " # add relationships
+                                              "MERGE (o2)-[:DEPENDENCE]-(f) "
                                               "RETURN id(o1) as oid",
                                               {"var_info1":json.dumps({"t":"P", "uid":self.idx_, "userready":0}), 
                                                "var_info2":json.dumps({"t":"P", "uid":self.idx_+1, 

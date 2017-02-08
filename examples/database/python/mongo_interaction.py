@@ -1,10 +1,11 @@
 from pymongo import MongoClient
 import pymongo
-from bson import Binary
+from bson import Binary, json_util, BSON
+import bson
 import uuid
 import pickle
 import cv2 # for image pulling/read in only
-#impot json # for
+import json # for
 
 #####################################################################################
 ## MongoDB Construction in Python Example
@@ -24,7 +25,8 @@ collection = "testing_collection"
 # find image, make binary/BSON, ready for insertion
 ## NOTE this assumes image is under 16 MB. If it is over, use GridFS for inserting into Mongo
 X = cv2.imread("/home/rmata/Downloads/sample_image.jpg")
-f = Binary(pickle.dumps(X)) # blah 6Kb image of a printer
+print type(X)
+f = BSON(X) # blah 6Kb image of a printer
 
 # create key (uuid straightup doesn't work) (extra key like this might be redundant)
 key = str(uuid.uuid4().hex)
@@ -47,3 +49,12 @@ db[collection].insert({"key": key,
 #                         $> db.testing_collection.find({"key":<key>})
 #  - want to drop/forget/erase(?) a collection?
 #                         $> db.testing_collection.drop()
+
+# get the image?
+for result in db.testing_collection.find({"key":key}):
+    newf = open('/home/rmata/newfile.jpg', 'w+') # to write image to
+    #print type(result["image"])
+    X = BSON(result["image"]).decode()
+    print X
+    pickle.load(X)
+    newf.close()
