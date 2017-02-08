@@ -45,3 +45,5 @@ db[collection].insert({"key": key,
 #                         $> show collections
 #  - find the blob that the key references
 #                         $> db.testing_collection.find({"key":<key>})
+#  - want to drop/forget/erase(?) a collection?
+#                         $> db.testing_collection.drop()

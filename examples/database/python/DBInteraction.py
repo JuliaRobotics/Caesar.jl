@@ -46,7 +46,8 @@ class Neo4jTalkApp():
         un,pw, addr = open(authfile).read().splitlines()
         self.driver = GraphDatabase.driver(addr, auth=basic_auth(un, pw))
         self.session = self.driver.session()
-        self.session.run("MATCH (n:SESSTURTLE) DETACH DELETE n")
+        self.session.run("MATCH (n:SESSTURTLE) DETACH DELETE n") # REMOVE ALL SESSTURTLE NODES
+        self.odom_diff = None
         self.old_odom = None
         self.odom_node_id = None # neo4j node id
 
@@ -72,7 +73,6 @@ class Neo4jTalkApp():
                                    tvec=[d.pose.pose.position.x,
                                          d.pose.pose.position.y,
                                          d.pose.pose.position.z]) for d in detections]
-        ########## gtsam.py
         if not tf_dict:
             if (self.transformer.frameExists('/base_link') and self.transformer.frameExists(frame_ct)):
                 t = self.transformer.getLatestCommonTime(frame_ct,'/base_link')
@@ -86,10 +86,10 @@ class Neo4jTalkApp():
         else:
             e = tf_dict[0]#tf_dict[from, to] = (trans, rot) in the form of a RigidTransform
             pose_bc = RigidTransform(xyzw=e.quat, tvec=e.tvec).inverse() #pose of camera in body frame
-        poses = [pose_bc*pose_ct for pose_ct in poses_ct] # rigidtransforms for tag_ids
+        poses = [pose_bc*pose_ct for pose_ct in poses_ct] # rigidtransforms for tag_ids, in body frame
 
         for i in range(len(tag_ids)):
-            rospy.logerr('\n\n tag is {}'.format(tag_ids[i]))
+            #rospy.logerr('\n\n tag is {}'.format(tag_ids[i]))
             self.session.run("MERGE (l1:POSE:NEWDATA:LAND:SESSTURTLE {frtend: {land_info}}) "
                              "MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info}}) "
                              "MERGE (f:FACTOR:NEWDATA:SESSTURTLE {frtend: {fac_info}}) " # odom-landmark factor
@@ -98,7 +98,7 @@ class Neo4jTalkApp():
                              "RETURN id(o1)",
                              {"land_info": json.dumps({"t":"P", "tag_id": tag_ids[i], "userready":0}), 
                               "var_info": json.dumps({"t":"P", "uid": self.idx_, "userready":0}), 
-                              "fac_info": json.dumps({"t":"F", 
+                              "fac_info": json.dumps({"t":"F", "lklh":"PP2 G 3", 
                                                       "meas":str(poses[i].t[0])+" "+str(poses[i].t[1])+\
                                                       " "+str(euler_from_quaternion(poses[i].xyzw)[2])+\
                                                       " 1e-3 0 1e-2" , "userready":0})})
@@ -111,9 +111,32 @@ class Neo4jTalkApp():
                                  data.pose.pose.orientation.w], 
                            tvec=[data.pose.pose.position.x, 
                                  data.pose.pose.position.y, 
-                                 data.pose.pose.position.z])
-        if self.old_odom:
-            odom_diff = self.old_odom.inverse()*r
+                                 data.pose.pose.position.z]) # current odom
+        if not self.old_odom:
+            self.old_odom = r
+            # no odom diff set
+        else:
+            self.odom_diff = self.old_odom.inverse()*r
+        #rospy.logwarn(str(self.odom_diff.t[0])+"  "+ str(self.odom_diff.t[1])+"  "+str(euler_from_quaternion(self.odom_diff.xyzw)[2]))
+            
+
+    def on_keyframe_cb(self, data):
+        im = data.data # should be under 16 MB
+        ## TODO Get BigData key?
+        new_im_uid = uuid.uuid4()
+        #rospy.logwarn(str(new_im_uid.hex))
+        
+        # add odom
+        if self.idx_ == 0:
+            self.session.run("MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info1} }) "
+                             "MERGE (f:FACTOR:NEWDATA:SESSTURTLE { frtend: {fac_info} }) "
+                             "MERGE (o1)-[:REL]-(f) ",
+                             {"var_info1":json.dumps({"t":"P", "uid":self.idx_, "userready":0}),
+                              "fac_info":json.dumps({"meas": "0 0 0 1e-4 0 0 1e-4 0 4e-6",
+                                                     "t": "F", "lklh":"PR2 G 3",
+                                                     "btwn": "0"})})
+            
+        if self.odom_diff:
             running_result = self.session.run("MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info1} }) " # finds/creates
                                               "MERGE (o2:POSE:NEWDATA:SESSTURTLE { frtend: {var_info2} })"
                                               "MERGE (f:FACTOR:NEWDATA:SESSTURTLE { frtend: {fac_info} }) " # odom-odom factor
@@ -124,35 +147,23 @@ class Neo4jTalkApp():
                                                "var_info2":json.dumps({"t":"P", "uid":self.idx_+1, 
                                                                        "userready":0}), 
                                                "fac_info":json.dumps({"t":"F", "lklh":"PP2 G 3", 
-                                                                      "meas":str(odom_diff.t[0])+" "+str(odom_diff.t[1])+" "+ \
-                                                                      str(euler_from_quaternion(odom_diff.xyzw)[2]) + \
+                                                                      "meas":str(self.odom_diff.t[0])+" "+str(self.odom_diff.t[1])+" "+ \
+                                                                      str(euler_from_quaternion(self.odom_diff.xyzw)[2]) + \
                                                                       " 1e-3 0 0 1e-3 0 5e-5",  
                                                                       "userready": 0,
                                                                       "btwn": str(self.idx_) + " " + str(self.idx_+1)})})
             for record in running_result: # just one record
                 self.odom_node_id = record["oid"]
+            self.session.run("MATCH (od:POSE:NEWDATA:SESSTURTLE)" 
+                             "WHERE id(od)={odom_node_id}" 
+                             "SET od += {newkeys}",
+                             {"odom_node_id":self.odom_node_id,
+                              "newkeys":{"mongo_keys":json.dumps({"keyframe_rgb":str(new_im_uid.hex)})}})
             self.idx_ += 1
-        else:
-            self.session.run("MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info1} }) "
-                             "MERGE (f:FACTOR:NEWDATA:SESSTURTLE { frtend: {fac_info} }) "
-                             "MERGE (o1)-[:REL]-(f) ",
-                             {"var_info1":json.dumps({"t":"P", "uid":self.idx_, "userready":0}),
-                              "fac_info":json.dumps({"meas": "0 0 0 1e-4 0 0 1e-4 0 4e-6",
-                                                     "t": "F", "lklh":"PR2 G 3",
-                                                     "btwn": "0"})})
-                              
-        self.old_odom = r
-
-    def on_keyframe_cb(self, data):
-        im = data.data # should be under 16 MB
-        ## TODO Get BigData key?
-        new_im_uid = uuid.uuid4()
-        #rospy.logwarn(str(new_im_uid.hex))
-        self.session.run("MATCH (od:POSE:NEWDATA:SESSTURTLE)" 
-                         "WHERE id(od)={jungle}" 
-                         "SET od += {newkeys}",
-                         {"jungle":self.odom_node_id,
-                          "newkeys":{"mongo_keys":json.dumps({"keyframe_rgb":str(new_im_uid.hex)})}})
+            self.old_odom = self.old_odom*self.odom_diff # advance old odom
+            self.odom_diff = None # reset difference
+       
+            
         j = Binary(im)
         self.db["rgb_keyframes"].insert({"key": str(new_im_uid.hex),
                                    "rgb_image":j})
@@ -184,7 +195,7 @@ if __name__=="__main__":
     # Setup dataset/log
     dataset = ROSBagReader(filename=os.path.expanduser(args.filename), 
                            decoder=[
-                               Decoder(channel=args.odom_channel, every_k_frames=10), # internal throttling...
+                               Decoder(channel=args.odom_channel, every_k_frames=1), # internal throttling
                                Decoder(channel=args.tag_channel, every_k_frames=1),
                                Decoder(channel=args.keyframe_channel, every_k_frames=1)
                            ],                                    
