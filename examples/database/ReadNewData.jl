@@ -3,7 +3,7 @@
 
 using Caesar, RoME, IncrementalInference
 using CloudGraphs, Neo4j
-using Distributions
+# using Distributions
 using JSON
 
 # # # connect to the server, CloudGraph stuff
@@ -23,7 +23,7 @@ using JSON
 
 # TODO comment out for command line operation
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "SESSROX"
+session = "SESSTURTLE"
 
 
 # Connection to database
@@ -82,15 +82,17 @@ fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
 for (neoNodeId,elem) in newvertdict
   # neoNodeId = 31369
+  @show neoNodeId
   if elem["t"] == "P"
     uidl = elem["uid"]+1
     nlbsym = Symbol(string('x', uidl))
     v = addNode!(fg, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
+    # v.attributes["mongo_key_hack"] = elem[]
     insertValuesCloudVert!(fg, neoNodeId, elem, uidl, v, labels=["POSE";"$(session)"])
   elseif elem["t"] == "L"
-    uidl = elem["uid"]+1
+    uidl = elem["tag_id"]+200000 # TODO complete hack
     nlbsym = Symbol(string('l', uidl))
-    v = addNode!(fg, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
+    v = addNode!(fg, nlbsym, 0.1*randn(2,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
     insertValuesCloudVert!(fg, neoNodeId, elem, uidl, v, labels=["LANDMARK";"$(session)"])
   end
 end
@@ -102,10 +104,18 @@ fuid = 100000
 # elem = newvertdict[neoNodeId]
 for (neoNodeId,elem) in newvertdict
   if elem["t"] == "F"
+    @show neoNodeId
     # verts relating to this factor
     verts = Vector{Graphs.ExVertex}()
+    i=0
     for bf in split(elem["btwn"], ' ')
-      uid = parse(Int,bf)+1
+      i+=1
+      uid = 0
+      if elem["lklh"][1] == 'P' || i==1
+        uid = parse(Int,bf)+1
+      else
+        uid = parse(Int,bf)+200000
+      end
       push!(verts, fg.g.vertices[uid])
     end
     # the factor type

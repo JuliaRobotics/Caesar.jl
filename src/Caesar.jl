@@ -4,7 +4,6 @@ instpkg = Pkg.installed();
 
 # import RoME: initfg
 import Distributions: Normal
-import GeometryTypes: Normal
 
 using
   RoME,
