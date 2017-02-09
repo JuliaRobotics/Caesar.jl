@@ -1,3 +1,5 @@
+addprocs(7)
+
 using Caesar, RoME
 using CloudGraphs, Neo4j
 
@@ -12,7 +14,9 @@ mongoaddress = length(ARGS) > 3 ? ARGS[4] : "localhost"
 
 session = length(ARGS) > 4 ? string(ARGS[5]) : ""
 
-println("Attempting to solve session $(session)...")
+Nparticles = length(ARGS) > 5 ? parse(Int,string(ARGS[6])) : 100
+
+println("Attempting to solve session $(session) with $(Nparticles) particles per marginal...")
 
 
 # include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
@@ -41,10 +45,10 @@ while true
   if fullLocalGraphCopy!(fg, conn)
     tree = wipeBuildNewTree!(fg,drawpdf=false)
     # removeGenericMarginals!(conn)
-    
+
     # while true # repeat while graph unchanged
       # okay now do the solve
-      inferOverTree!(fg, tree, N=100)
+      inferOverTree!(fg, tree, N=Nparticles)
       # if true # current hack till test is inserted
       #   break;
       # end
@@ -56,5 +60,13 @@ end
 
 
 
+# fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+# fullLocalGraphCopy!(fg, conn)
+#
+# ls(fg)
+#
+# tree = wipeBuildNewTree!(fg,drawpdf=true)
+#
+# inferOverTreeR!(fg, tree, N=100)
 
   #
