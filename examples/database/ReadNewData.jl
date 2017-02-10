@@ -23,7 +23,7 @@ using JSON
 
 # TODO comment out for command line operation
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "SESSTURTLE"
+session = "SESSLIVE"
 
 
 # Connection to database
@@ -42,7 +42,9 @@ cph = loadtx(query, submit=true)
 
 # @show cph.results[1]
 
-newvertdict = Dict{Int, Dict{AbstractString,Any}}()
+newvertdict = Dict{Int, Dict{Symbol,Dict{AbstractString,Any}}}()
+# mongokeydict = Dict{Int, Dict{AbstractString,Any}}()
+
 
 for val in cph.results[1]["data"]
   i = 0
@@ -50,7 +52,12 @@ for val in cph.results[1]["data"]
     # @show elem["type"]    # @show rdict["type"]
     i+=1
     rdict = JSON.parse(val["row"][i]["frtend"])
-    newvertdict[elem["id"]] = rdict
+    newvertdict[elem["id"]] = Dict{Symbol, Dict{AbstractString,Any}}()
+    newvertdict[elem["id"]][:frtend] = rdict
+    if haskey(val["row"][i], "mongo_keys")
+      # @show val["row"][i]["mongo_keys"]
+      newvertdict[elem["id"]][:mongokeys] = JSON.parse(val["row"][i]["mongo_keys"])
+    end
     # if uppercase(rdict["type"])=="POSE" || uppercase(rdict["type"])=="FACTOR"
       # npsym = Symbol(string("x",parse(Int, rdict["userid"])+1)) # TODO -- fix :x0 requirement
   end
@@ -83,14 +90,14 @@ fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 for (neoNodeId,elem) in newvertdict
   # neoNodeId = 31369
   @show neoNodeId
-  if elem["t"] == "P"
-    uidl = elem["uid"]+1
+  if elem[:frtend]["t"] == "P"
+    uidl = elem[:frtend]["uid"]+1
     nlbsym = Symbol(string('x', uidl))
     v = addNode!(fg, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
     # v.attributes["mongo_key_hack"] = elem[]
     insertValuesCloudVert!(fg, neoNodeId, elem, uidl, v, labels=["POSE";"$(session)"])
-  elseif elem["t"] == "L"
-    uidl = elem["tag_id"]+200000 # TODO complete hack
+  elseif elem[:frtend]["t"] == "L"
+    uidl = elem[:frtend]["tag_id"]+200000 # TODO complete hack
     nlbsym = Symbol(string('l', uidl))
     v = addNode!(fg, nlbsym, 0.1*randn(2,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
     insertValuesCloudVert!(fg, neoNodeId, elem, uidl, v, labels=["LANDMARK";"$(session)"])
@@ -103,15 +110,15 @@ fuid = 100000
 # neoNodeId = 63363
 # elem = newvertdict[neoNodeId]
 for (neoNodeId,elem) in newvertdict
-  if elem["t"] == "F"
+  if elem[:frtend]["t"] == "F"
     @show neoNodeId
     # verts relating to this factor
     verts = Vector{Graphs.ExVertex}()
     i=0
-    for bf in split(elem["btwn"], ' ')
+    for bf in split(elem[:frtend]["btwn"], ' ')
       i+=1
       uid = 0
-      if elem["lklh"][1] == 'P' || i==1
+      if elem[:frtend]["lklh"][1] == 'P' || i==1
         uid = parse(Int,bf)+1
       else
         uid = parse(Int,bf)+200000
@@ -119,7 +126,7 @@ for (neoNodeId,elem) in newvertdict
       push!(verts, fg.g.vertices[uid])
     end
     # the factor type
-    usrfnc = recoverConstraintType(elem)
+    usrfnc = recoverConstraintType(elem[:frtend])
     fuid += 1
     vert = addFactor!(fg, verts, usrfnc, ready=0, api=localapi, uid=fuid)
     insertValuesCloudVert!(fg, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(session)"])

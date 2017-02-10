@@ -363,9 +363,13 @@ function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v:
   # addNode!(fgl, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
 
   # v = getVert(fgl, nlbsym, api=localapi)
-  warn("deleting frntend values")
-  delete!(v.attributes,"frntend")
-  # v.attributes["frntend"] = elem
+  # warn("deleting frntend values")
+  # delete!(v.attributes,"frntend")
+
+  v.attributes["frtend"] = JSON.json(elem[:frtend])
+  if haskey(elem, :mongokeys)
+    v.attributes["mongo_keys"] = JSON.json(elem[:mongokeys])
+  end
   fgl.cgIDs[uidl] = neoNodeId
 
   cv = exVertex2CloudVertex( v )
