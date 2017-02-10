@@ -30,7 +30,8 @@ function getExVertFromCloud(fgl::FactorGraph, lbl::Symbol; bigdata::Bool=false)
 end
 
 function updateFullCloudVertData!(fgl::FactorGraph,
-    nv::Graphs.ExVertex; updateMAPest=false)
+    nv::Graphs.ExVertex;
+    updateMAPest::Bool=false )
 
   # TODO -- this get_vertex seems excessive, but we need the CloudVertex
   neoID = fgl.cgIDs[nv.index]
@@ -177,8 +178,9 @@ end
 # register types of interest (Pose2, etc) in CloudGraphs
 # you can register new types at any time (Julia is dynamic)
 function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
-  # 1D early development types
+  # Variable node
   CloudGraphs.registerPackedType!(cloudGraph, VariableNodeData, PackedVariableNodeData, encodingConverter=VNDencoder, decodingConverter=VNDdecoder);
+  # factor nodes
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Obsv2}}, PackedFunctionNodeData{PackedObsv2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Odo}}, PackedFunctionNodeData{PackedOdo}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{GenericMarginal}}, PackedFunctionNodeData{PackedGenericMarginal}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
@@ -186,7 +188,7 @@ function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
   # Pose2
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPose2}}, PackedFunctionNodeData{PackedPriorPose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2Pose2}}, PackedFunctionNodeData{PackedPose2Pose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRange}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRange{Distributions.Normal,Distributions.Normal}}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DRange}}, FunctionNodeData{Pose2DPoint2DRange}, encodingConverter=passTypeThrough, decodingConverter=passTypeThrough)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPoint2D}}, PackedFunctionNodeData{PackedPriorPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   # TODO -- Pose3 stuff
@@ -354,6 +356,66 @@ function setBackendWorkingSet!(conn, sessionname::AbstractString)
   loadresult = commit(loadtx)
   nothing
 end
+
+
+function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v::Graphs.ExVertex; labels=String[])
+  #
+  # addNode!(fgl, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
+
+  # v = getVert(fgl, nlbsym, api=localapi)
+  # warn("deleting frntend values")
+  # delete!(v.attributes,"frntend")
+
+  v.attributes["frtend"] = JSON.json(elem[:frtend])
+  if haskey(elem, :mongokeys)
+    v.attributes["mongo_keys"] = JSON.json(elem[:mongokeys])
+  end
+  fgl.cgIDs[uidl] = neoNodeId
+
+  cv = exVertex2CloudVertex( v )
+  cv.neo4jNodeId = neoNodeId
+  cv.neo4jNode = Neo4j.getnode(fgl.cg.neo4j.graph, neoNodeId)
+  cv.isValidNeoNodeId = true
+  cv.labels=labels
+  #
+  CloudGraphs.update_vertex!(fgl.cg, cv)
+  # TODO -- this function refactoring and better integration here
+  # function updateFullCloudVertData!( fgl::FactorGraph,
+  #     nv::Graphs.ExVertex; updateMAPest=false )
+  nothing
+end
+
+
+function recoverConstraintType(elem)
+  lkl = split(elem["lklh"], ' ')
+  if lkl[1]=="PR2"
+    msm = split(elem["meas"], ' ')
+    cov = zeros(3,3)
+    cov[1,2], cov[1,3], cov[2,3] = parse(Float64, msm[5]), parse(Float64, msm[6]), parse(Float64, msm[8])
+    cov += cov'
+    cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
+    zi = zeros(3,1)
+    zi[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
+    return PriorPose2(zi, cov, [1.0])
+  elseif lkl[1]=="PP2"
+    msm = split(elem["meas"], ' ')
+    cov = zeros(3,3)
+    cov[1,2], cov[1,3], cov[2,3] = parse(Float64, msm[5]), parse(Float64, msm[6]), parse(Float64, msm[8])
+    cov += cov'
+    cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
+    zij = zeros(3,1)
+    zij[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
+    return Pose2Pose2(zij, cov, [1.0])
+  elseif lkl[1]=="BR"
+    msm = split(elem["meas"], ' ')
+    return Pose2DPoint2DBearingRange{Normal, Normal}(
+                  Normal(parse(msm[1]), parse(Float64, msm[3]) ),
+                  Normal(parse(msm[2]),parse(Float64, msm[5]) )  )
+  else
+    return error("Don't know how to convert $(lkl[1]) to a factor")
+  end
+end
+
 
 
 

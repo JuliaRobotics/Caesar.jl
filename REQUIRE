@@ -3,6 +3,7 @@ RoME
 IncrementalInference
 Graphs
 KernelDensityEstimate
+Distributions
 DrakeVisualizer
 TransformUtils
 CoordinateTransformations
