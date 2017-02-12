@@ -358,6 +358,48 @@ function setBackendWorkingSet!(conn, sessionname::AbstractString)
 end
 
 
+
+"""
+    getnewvertdict(conn, session)
+
+return a dictionary with frtend and mongo_keys json string information for :NEWDATA
+elements in Neo4j database.
+"""
+function getnewvertdict(conn, session::AbstractString)
+
+  loadtx = transaction(conn)
+  query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) return distinct n, f"
+  cph = loadtx(query, submit=true)
+  # loadresult = commit(loadtx)
+  # @show cph.results[1]
+
+  newvertdict = SortedDict{Int, Dict{Symbol,Dict{AbstractString,Any}}, Base.Order.ForwardOrdering}()
+  # mongokeydict = Dict{Int, Dict{AbstractString,Any}}()
+
+  for val in cph.results[1]["data"]
+    i = 0
+    for elem in val["meta"]
+      # @show elem["type"]    # @show rdict["type"]
+      i+=1
+      rdict = JSON.parse(val["row"][i]["frtend"])
+      newvertdict[elem["id"]] = Dict{Symbol, Dict{AbstractString,Any}}()
+      newvertdict[elem["id"]][:frtend] = rdict
+      if haskey(val["row"][i], "mongo_keys")
+        # @show val["row"][i]["mongo_keys"]
+        newvertdict[elem["id"]][:mongokeys] = JSON.parse(val["row"][i]["mongo_keys"])
+      end
+      # if uppercase(rdict["type"])=="POSE" || uppercase(rdict["type"])=="FACTOR"
+        # npsym = Symbol(string("x",parse(Int, rdict["userid"])+1)) # TODO -- fix :x0 requirement
+    end
+    # println()
+  end
+
+  return newvertdict
+end
+
+
+
+
 function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v::Graphs.ExVertex; labels=String[])
   #
   # addNode!(fgl, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
@@ -417,8 +459,73 @@ function recoverConstraintType(elem)
 end
 
 
+function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N::Int=100)
+
+  for (neoNodeId,elem) in newvertdict
+    # @show neoNodeId
+    nlbsym = Symbol()
+    uidl = 0
+    labels = AbstractString["$(fgl.sessionname)"]
+    initvals = Array{Float64,2}()
+    if elem[:frtend]["t"] == "P"
+      uidl = elem[:frtend]["uid"]+1 # TODO -- remove +1 and allow :x0, :l0
+      nlbsym = Symbol(string('x', uidl))
+      initvals = 0.1*randn(3,N) # TODO -- fix init to proper values
+      # v = addNode!(fgl, nlbsym, , 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
+      push!(labels,"POSE")
+    elseif elem[:frtend]["t"] == "L"
+      uidl = elem[:frtend]["tag_id"]+200000 # TODO complete hack
+      nlbsym = Symbol(string('l', uidl))
+      initvals = 0.1*randn(2,N)
+      push!(labels,"LANDMARK")
+    end
+    if !haskey(fgl.IDs, nlbsym) && nlbsym != Symbol()
+      @show nlbsym, size(initvals)
+      v = addNode!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, ready=0, uid=uidl,api=localapi) # TODO remove initstdev, deprecated
+      insertValuesCloudVert!(fgl, neoNodeId, elem, uidl, v, labels=labels)
+    end
+  end
+  nothing
+end
+
+function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
+  warn("using hack counter for FACTOR uid")
+  fuid = 100000 # offset factor values
+  # neoNodeId = 63363
+  # elem = newvertdict[neoNodeId]
+  for (neoNodeId,elem) in newvertdict
+    if elem[:frtend]["t"] == "F"
+      # @show neoNodeId
+      # verts relating to this factor
+      verts = Vector{Graphs.ExVertex}()
+      i=0
+      for bf in split(elem[:frtend]["btwn"], ' ')
+        i+=1
+        # uid = 0
+        uid = parse(Int,bf)+1
+        if elem[:frtend]["lklh"][1:2] == "BR" && i==2
+          # detect bearing range factors being added between pose and landmark
+          uid = parse(Int,bf)+200000 # complete hack
+        end
+        push!(verts, fgl.g.vertices[uid])
+      end
+      # the factor type
+      usrfnc = recoverConstraintType(elem[:frtend])
+      fuid += 1
+      vert = addFactor!(fgl, verts, usrfnc, ready=0, api=localapi, uid=fuid)
+      insertValuesCloudVert!(fgl, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(fgl.sessionname)"])
+    end
+  end
+  nothing
+end
 
 
+function updatenewverts!(fgl::FactorGraph; N::Int=100)
+  sortedvd = getnewvertdict(fgl.cg.neo4j.connection, fgl.sessionname)
+  populatenewvariablenodes!(fgl, sortedvd, N=N)
+  populatenewfactornodes!(fgl, sortedvd)
+  nothing
+end
 
 
 

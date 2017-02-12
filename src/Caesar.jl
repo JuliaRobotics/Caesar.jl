@@ -24,7 +24,8 @@ using
   JSON,
   MeshIO,
   FileIO,
-  NLsolve
+  NLsolve,
+  DataStructures
 
 if haskey(instpkg,"CloudGraphs")
   using CloudGraphs
@@ -82,8 +83,13 @@ export
   copyAllEdges!,
   registerCallback!,
   updateFullCloudVertData!,
+
+  #loading frtend generated fg
+  getnewvertdict,
   insertValuesCloudVert!,
   recoverConstraintType,
+  populatenewvariablenodes!,
+  updatenewverts!,
 
   # drawing functions
   VisualizationContainer,

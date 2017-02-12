@@ -25,8 +25,8 @@ DRAWDEPTH = length(ARGS) > 5 ? ARGS[6]=="drawdepth" : false
 
 # TODO comment out for command line operation
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-DRAWDEPTH = true
-session = "TESTPOSE2"
+DRAWDEPTH = false
+session = "SESSTURTLE"
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
 cloudGraph = connect(configuration);
