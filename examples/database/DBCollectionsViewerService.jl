@@ -24,9 +24,9 @@ println("Attempting to draw session $(session)...")
 DRAWDEPTH = length(ARGS) > 5 ? ARGS[6]=="drawdepth" : false
 
 # TODO comment out for command line operation
-include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-DRAWDEPTH = true
-session = "TESTPOSE2"
+# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
+# DRAWDEPTH = false
+# session = "SESSROX"
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
 cloudGraph = connect(configuration);
@@ -87,10 +87,10 @@ while true
   # this is being replaced by cloudGraph, added here for development period
   fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
-  IDs = getPoseExVertexNeoIDs(conn, sessionname=session);
+  IDs = getPoseExVertexNeoIDs(conn, sessionname=session, reqbackendset=false);
 
   println("get local copy of graph")
-  if fullLocalGraphCopy!(fg, conn)
+  if fullLocalGraphCopy!(fg, conn, reqbackendset=false)
   	xx,ll = ls(fg)
   	LD = Array{Array{Float64,1},1}()
   	C = Vector{AbstractString}()

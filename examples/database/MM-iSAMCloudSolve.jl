@@ -20,7 +20,7 @@ println("Attempting to solve session $(session) with $(Nparticles) particles per
 
 
 # include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-# session = "SESSROX"
+# session = "SESSLIVE"
 
 
 # Connect to database

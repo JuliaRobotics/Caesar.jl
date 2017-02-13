@@ -211,11 +211,19 @@ function removeGenericMarginals!(conn)
 end
 
 
-function getAllExVertexNeoIDs(conn; ready::Int=1, backendset::Int=1, sessionname::AbstractString="")
-
+function getAllExVertexNeoIDs(conn;
+        ready::Int=1,
+        backendset::Int=1,
+        sessionname::AbstractString="",
+        reqbackendset::Bool=true  )
+  #
   loadtx = transaction(conn)
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn)) where n.ready=$(ready) and n.backendset=$(backendset) return n"
+  # query = "match (n$(sn)) where n.ready=$(ready) and n.backendset=$(backendset) return n"
+  query = "match (n$(sn)) where n.ready=$(ready)"
+  query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
+  query = query*" return n"
+
   # query = "match (n) where n.ready=1 and n.backendset=1 and not(n.packedType = 'IncrementalInference.FunctionNodeData{IncrementalInference.GenericMarginal}') return n"
   cph = loadtx(query, submit=true)
   ret = Array{Tuple{Int64,Int64},1}()
@@ -229,14 +237,21 @@ function getAllExVertexNeoIDs(conn; ready::Int=1, backendset::Int=1, sessionname
 end
 
 # return array of tuples with exvertex and neo4j IDs for all poses
-function getPoseExVertexNeoIDs(conn; ready::Int=1, backendset::Int=1, sessionname::AbstractString="")
+function getPoseExVertexNeoIDs(conn;
+        ready::Int=1,
+        backendset::Int=1,
+        sessionname::AbstractString="",
+        reqbackendset::Bool=true  )
+  #
   # TODO -- in query we can use return n.exVertexId, n.neo4jNodeId
   # TODO -- in query we can use n:POSE rather than length(n.MAP_est)=3
 
   loadtx = transaction(conn)
   # query = "match (n:$(sessionname)) where n.ready=$(ready) and n.backendset=$(backendset) and n.packedType = 'IncrementalInference.PackedVariableNodeData' and length(n.MAP_est)=3 return n"
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn)) where n:POSE and n.ready=$(ready) and n.backendset=$(backendset) return n"
+  query = "match (n$(sn)) where n:POSE and n.ready=$(ready)"
+  query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
+  query = query*" return n"
   cph = loadtx(query, submit=true)
   ret = Array{Tuple{Int64,Int64},1}()
 
@@ -305,9 +320,9 @@ function copyAllNodes!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::
   nothing
 end
 
-function fullLocalGraphCopy!(fgl::FactorGraph, conn)
+function fullLocalGraphCopy!(fgl::FactorGraph, conn; reqbackendset::Bool=true)
 
-  IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname)
+  IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, reqbackendset=reqbackendset)
   if length(IDs) > 1
     cverts = Dict{Int64, CloudVertex}()
     unsorted = Int64[]
@@ -356,6 +371,48 @@ function setBackendWorkingSet!(conn, sessionname::AbstractString)
   loadresult = commit(loadtx)
   nothing
 end
+
+
+
+"""
+    getnewvertdict(conn, session)
+
+return a dictionary with frtend and mongo_keys json string information for :NEWDATA
+elements in Neo4j database.
+"""
+function getnewvertdict(conn, session::AbstractString)
+
+  loadtx = transaction(conn)
+  query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) return distinct n, f"
+  cph = loadtx(query, submit=true)
+  # loadresult = commit(loadtx)
+  # @show cph.results[1]
+
+  newvertdict = SortedDict{Int, Dict{Symbol,Dict{AbstractString,Any}}, Base.Order.ForwardOrdering}()
+  # mongokeydict = Dict{Int, Dict{AbstractString,Any}}()
+
+  for val in cph.results[1]["data"]
+    i = 0
+    for elem in val["meta"]
+      # @show elem["type"]    # @show rdict["type"]
+      i+=1
+      rdict = JSON.parse(val["row"][i]["frtend"])
+      newvertdict[elem["id"]] = Dict{Symbol, Dict{AbstractString,Any}}()
+      newvertdict[elem["id"]][:frtend] = rdict
+      if haskey(val["row"][i], "mongo_keys")
+        # @show val["row"][i]["mongo_keys"]
+        newvertdict[elem["id"]][:mongokeys] = JSON.parse(val["row"][i]["mongo_keys"])
+      end
+      # if uppercase(rdict["type"])=="POSE" || uppercase(rdict["type"])=="FACTOR"
+        # npsym = Symbol(string("x",parse(Int, rdict["userid"])+1)) # TODO -- fix :x0 requirement
+    end
+    # println()
+  end
+
+  return newvertdict
+end
+
+
 
 
 function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v::Graphs.ExVertex; labels=String[])
@@ -417,8 +474,82 @@ function recoverConstraintType(elem)
 end
 
 
+function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N::Int=100)
+
+  for (neoNodeId,elem) in newvertdict
+    # @show neoNodeId
+    nlbsym = Symbol()
+    uidl = 0
+    labels = AbstractString["$(fgl.sessionname)"]
+    initvals = Array{Float64,2}()
+    if elem[:frtend]["t"] == "P"
+      uidl = elem[:frtend]["uid"]+1 # TODO -- remove +1 and allow :x0, :l0
+      nlbsym = Symbol(string('x', uidl))
+      initvals = 0.1*randn(3,N) # TODO -- fix init to proper values
+      # v = addNode!(fgl, nlbsym, , 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
+      push!(labels,"POSE")
+    elseif elem[:frtend]["t"] == "L"
+      warn("using hack counter for LANDMARKS uid +200000")
+      uidl = elem[:frtend]["tag_id"]+200000 # TODO complete hack
+      nlbsym = Symbol(string('l', uidl))
+      initvals = 0.1*randn(2,N)
+      push!(labels,"LANDMARK")
+    end
+    if !haskey(fgl.IDs, nlbsym) && nlbsym != Symbol()
+      @show nlbsym, size(initvals)
+      v = addNode!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, ready=0, uid=uidl,api=localapi) # TODO remove initstdev, deprecated
+      insertValuesCloudVert!(fgl, neoNodeId, elem, uidl, v, labels=labels)
+    end
+  end
+  nothing
+end
+
+function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
+  warn("using hack counter for FACTOR uid +100000")
+  fuid = 100000 # offset factor values
+  # neoNodeId = 63363
+  # elem = newvertdict[neoNodeId]
+  for (neoNodeId,elem) in newvertdict
+    if elem[:frtend]["t"] == "F"
+      # verts relating to this factor
+      verts = Vector{Graphs.ExVertex}()
+      i=0
+      for bf in split(elem[:frtend]["btwn"], ' ')
+        i+=1
+        # uid = 0
+        uid = parse(Int,bf)+1
+        if elem[:frtend]["lklh"][1:2] == "BR" && i==2
+          # detect bearing range factors being added between pose and landmark
+          warn("using hack counter for LANDMARKS uid +200000")
+          uid = parse(Int,bf)+200000 # complete hack
+        end
+        push!(verts, fgl.g.vertices[uid])
+      end
+      # the factor type
+      usrfnc = recoverConstraintType(elem[:frtend])
+      fuid += 1
+      vert = addFactor!(fgl, verts, usrfnc, ready=0, api=localapi, uid=fuid, autoinit=true)
+      println("at populatenewfactornodes!, btwn="*elem[:frtend]["btwn"])
+      insertValuesCloudVert!(fgl, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(fgl.sessionname)"])
+
+      # TODO -- upgrade to add multple variables
+      # for vv in verts
+      vv = verts[end]
+      @show vv.label, Base.mean(vv.attributes["data"].val, 2)
+      dlapi.updatevertex!(fgl, vv, updateMAPest=false)
+      # end
+    end
+  end
+  nothing
+end
 
 
+function updatenewverts!(fgl::FactorGraph; N::Int=100)
+  sortedvd = getnewvertdict(fgl.cg.neo4j.connection, fgl.sessionname)
+  populatenewvariablenodes!(fgl, sortedvd, N=N)
+  populatenewfactornodes!(fgl, sortedvd)
+  nothing
+end
 
 
 
