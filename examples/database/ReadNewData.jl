@@ -44,9 +44,12 @@ fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 # setBackendWorkingSet!(conn, session)
 fullLocalGraphCopy!(fg, conn)
 
-@show length(fg.IDs)
+# @show length(fg.IDs)
+# showcurrentdlapi()
 
 updatenewverts!(fg, N=N)
+
+# getVal(fg, :x6)
 
 @show length(fg.IDs)
 

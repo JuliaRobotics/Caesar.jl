@@ -511,7 +511,6 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
   # elem = newvertdict[neoNodeId]
   for (neoNodeId,elem) in newvertdict
     if elem[:frtend]["t"] == "F"
-      # @show neoNodeId
       # verts relating to this factor
       verts = Vector{Graphs.ExVertex}()
       i=0
@@ -530,7 +529,15 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
       usrfnc = recoverConstraintType(elem[:frtend])
       fuid += 1
       vert = addFactor!(fgl, verts, usrfnc, ready=0, api=localapi, uid=fuid, autoinit=true)
+      println("at populatenewfactornodes!, btwn="*elem[:frtend]["btwn"])
       insertValuesCloudVert!(fgl, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(fgl.sessionname)"])
+
+      # TODO -- upgrade to add multple variables
+      # for vv in verts
+      vv = verts[end]
+      @show vv.label, Base.mean(vv.attributes["data"].val, 2)
+      dlapi.updatevertex!(fgl, vv, updateMAPest=false)
+      # end
     end
   end
   nothing
