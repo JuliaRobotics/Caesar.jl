@@ -4,6 +4,7 @@ instpkg = Pkg.installed();
 
 # import RoME: initfg
 import Distributions: Normal
+import DrakeVisualizer: Triad
 
 using
   RoME,
@@ -100,11 +101,16 @@ export
   visualizeDensityMesh!,
   updaterealtime!,
   visualizerealtime,
+  # new tree interface
+  drawpose!,
 
   # for models
   loadmodel,
   DrawModel,
   DrawROV,
+  DrawScene,
+  #deleting functions
+  deletemeshes!,
 
   # more drawing utils
   ArcPointsRangeSolve,
@@ -136,7 +142,7 @@ end
 include("SlamServer.jl")
 include("DataUtils.jl")
 include("VisualizationUtils.jl")
-# include("ModelVisualizationUtils.jl")
+include("ModelVisualizationUtils.jl")
 include("UserFunctions.jl")
 
 if haskey(instpkg, "CloudGraphs")
