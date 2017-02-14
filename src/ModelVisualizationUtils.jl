@@ -44,6 +44,13 @@ function loadmodel(model::Symbol=:rov;
     # boxdata.color =
     offset = Translation(0.0,0,0) ∘ LinearMap(CoordinateTransformations.AngleAxis(0.0,0,0,1.0))
     return DrawScene(boxdata, :scene01, offset)
+  elseif model == :dock
+    @show file = joinpath(dirname(@__FILE__), ".." , "data", "models", "dock.obj")
+    rov = load(file)
+    rovdata = GeometryData(rov)
+    rovdata.color = color
+    offset = Translation(0.0,0,0) ∘ LinearMap(Rotations.Quat(1.0,0,0,0.0))
+    return DrawScene(rovdata, :dock, offset)
   else
     error("Don't recognize requested $(string(model)) model.")
   end
