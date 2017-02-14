@@ -1,33 +1,26 @@
 # test DrakeVisualizer
 
-using Caesar, RoME, TransformUtils
+# for more low level interaction with the DraekVisualizer/Director, please see
+# www.github.com/rdeits/DrakeVisualizer.jl
 
-
-vc = startdefaultvisualization()
-
-
-using DrakeVisualizer
-
+using Caesar, RoME, CoordinateTransformations, Rotations
 using GeometryTypes
-
-using CoordinateTransformations
-
+using ColorTypes: RGB
+# for illustration only
+using DrakeVisualizer
 import DrakeVisualizer: Triad
 
-DrakeVisualizer.new_window();
+vis = startdefaultvisualization(draworigin=true)
 
-tr = Triad()
+setgeometry!(vis[:basics][:triad], Triad())
+settransform!(vis[:basics][:triad], Translation(0.0,0,0) ∘ LinearMap(Rotations.AngleAxis(pi/4,0,0,1.)  ))
 
-viz = Visualizer()
+setgeometry!(vis[:basics][:box], HyperRectangle(Vec(0.,0,0), Vec(1.,1,1)) )
+settransform!(vis[:basics][:box], Translation(2.0,0,0) ∘ LinearMap(Rotations.AngleAxis(0.0,0,0,1.)  ))
 
-@show typeof(viz)
+# and a point cloud
 
-box = HyperRectangle(Vec(0.,0,0), Vec(1.,1,1))
-
-setgeometry!(viz[:origin], tr)
-
-settransform!(viz[:origin], Translation(0.0,0,0) ∘ LinearMap(CoordinateTransformations.AngleAxis(0.0,0,0,1.)  ))
-
-
-
-model = Visualizer(box)
+pointcloud = PointCloud([[x, 0, 0.5] for x in linspace(-1, 1)])
+pointcloud.channels[:rgb] = [RGB(g, (1-g), 0) for g in linspace(0, 1)]
+setgeometry!(vis[:pointcloud], pointcloud)
+delete!(vis[:pointcloud])

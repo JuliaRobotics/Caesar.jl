@@ -29,7 +29,9 @@ using Rotations
 # start visualizer with some scene
 vc = startdefaultvisualization(draworigin=false)
 sleep(3.0)
-defaultscene01!(vc)
+# defaultscene01!(vc)
+sc01 = loadmodel(:scene01)
+sc01(vc)
 
 # load necessary data
 rovt = loadmodel(:rov)

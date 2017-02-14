@@ -103,6 +103,7 @@ export
   visualizerealtime,
   # new tree interface
   drawpose!,
+  drawmarginalpoints!,
 
   # for models
   loadmodel,

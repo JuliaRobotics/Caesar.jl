@@ -35,6 +35,7 @@ function solveandvisualize(fg::FactorGraph,
       println(".")
       visualizeallposes!(vc, fg, drawlandms=drawlandms, drawtype=drawtype)
       i = 1
+      deletemeshes!(vc)
       for dm in densitymeshes
         i+=1
         visualizeDensityMesh!(vc, fg, dm)
