@@ -11,11 +11,12 @@ using IncrementalInference
 # start visualizer with some scene
 vc = startdefaultvisualization(draworigin=false)
 sleep(3.0)
-defaultscene01!(vc)
-
 # load necessary data
 rovt = loadmodel(:rov)
 rovt(vc)
+# defaultscene01!(vc)
+sc01 = loadmodel(:scene01)
+sc01(vc)
 
 # ground truth positions
 gt = Dict{Symbol, Vector{Float64}}()
@@ -37,12 +38,15 @@ tfx2 = SE3(gt[:x2][1:3],Euler(gt[:x2][4:6]) )
 N=200
 fg = identitypose6fg(initpose=tfx1, initCov=initCov, N=N)
 
+drawmarginalpoints!(vc, fg, :x1)
+
 addOdoFG!(fg, Pose3Pose3(SE3([4.0;4;0],Euler(0,0,-pi/2)), odoCov) )
 
 visualizeallposes!(vc, fg, drawlandms=false)
 addLinearArrayConstraint(fg, (4.23, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
-visualizeDensityMesh!(vc, fg, :l1, meshid=2)
+visualizeDensityMesh!(vc, fg, :l1)
 
+drawmarginalpoints!(vc, fg, :x2)
 
 # animate visualization
 # @async begin
@@ -64,6 +68,7 @@ addFactor!(fg,[getVert(fg, :x2)], pose2prior)
 solveandvisualize(fg, vc, densitymeshes=[:l1], N=N)
 
 
+deletemeshes!(vc)
 
 
 
