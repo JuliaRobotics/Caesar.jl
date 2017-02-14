@@ -19,12 +19,15 @@ end
 
 
 function solveandvisualize(fg::FactorGraph,
-  vc::VisualizationContainer;
-  refresh::Number=1.0,
-  densitymeshes::Vector{Symbol}=Symbol[],
-  drawlandms::Bool=true,
-  N::Int=100,
-  drawtype::Symbol=:max )
+      vc::DrakeVisualizer.Visualizer;
+      refresh::Number=1.0,
+      densitymeshes::Vector{Symbol}=Symbol[],
+      drawlandms::Bool=true,
+      N::Int=100,
+      drawtype::Symbol=:max )
+  #
+  deletemeshes!(vc)
+
   # draw while solving[1]==true
   solving = [true]
   @async begin
@@ -34,7 +37,7 @@ function solveandvisualize(fg::FactorGraph,
       i = 1
       for dm in densitymeshes
         i+=1
-        visualizeDensityMesh!(vc, fg, dm, meshid=i)
+        visualizeDensityMesh!(vc, fg, dm)
       end
       sleep(1)
     end

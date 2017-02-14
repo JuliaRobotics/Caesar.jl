@@ -96,14 +96,16 @@ end
 # create a new Director window with home axis
 function startdefaultvisualization(;newwindow=true,draworigin=true)
   DrakeVisualizer.new_window()
-  triads, trposes, meshes = Dict{Symbol, Any}(), Dict{Symbol, AbstractAffineMap}(), Dict{Symbol, Any}()
-  draworigin ? newtriad!(triads, trposes, :origin) : nothing
-  realtime, rttfs = Dict{Symbol, Any}(), Dict{Symbol, AbstractAffineMap}()
-  #newtriad!(vc,p, wTb=Translation(maxval[1:3]...), wRb=Quat(q.s,q.v...), length=0.5)
-  dc = VisualizationContainer(Dict{Symbol, Visualizer}(), triads, trposes, meshes, realtime, rttfs)
-  visualizetriads!(dc)
-  # model = visualizetriads(triads, trposes)
-  return dc
+  viz = DrakeVisualizer.Visualizer()
+  if draworigin
+    setgeometry!(viz[:origin], Triad())
+    settransform!(viz[:origin], Translation(0, 0, 0.0) ∘ LinearMap(Rotations.Quat(1.0,0,0,0)))
+  end
+
+  # realtime, rttfs = Dict{Symbol, Any}(), Dict{Symbol, AbstractAffineMap}()
+  # dc = VisualizationContainer(Dict{Symbol, Visualizer}(), triads, trposes, meshes, realtime, rttfs)
+  # visualizetriads!(dc)
+  return viz
 end
 
 
@@ -157,7 +159,7 @@ function visualizerealtime(vc::VisualizationContainer)
 end
 
 
-function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl::Symbol; levels=3, meshid::Int=2)
+function visualizeDensityMesh!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph, lbl::Symbol; levels=3, meshid::Int=2)
 
   pl1 = marginal(getVertKDE(fgl,lbl),[1;2;3])
 
@@ -172,15 +174,16 @@ function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl
 
   levels = linspace(0.0,maxval,levels+2)
 
-  MD = []
+  # MD = []
   for val in levels[2:(end-1)]
     meshdata = GeometryData(contour_mesh(x -> gg(x,val), lower_bound, upper_bound))
     meshdata.color = RGBA( val/(1.5*maxval),0.0,1.0,val/(1.5*maxval))
-    push!(MD, meshdata)
+    # push!(MD, meshdata)
+    setgeometry!(vc[:meshes][lbl][Symbol("lev$(val)")], meshdata)
   end
-  mptr = Any(MD)
-  vc.meshes[lbl] = mptr
-  Visualizer(mptr, meshid) # meshdata
+  # mptr = Any(MD)
+  # vc.meshes[lbl] = mptr
+  # Visualizer(mptr, meshid) # meshdata
   nothing
 end
 
@@ -249,12 +252,49 @@ end
 
 
 
+function drawpose!(viz::DrakeVisualizer.Visualizer, sym::Symbol;
+      tf::CoordinateTransformations.AbstractAffineMap=Translation(0.0,0,0)∘LinearMap(CoordinateTransformations.AngleAxix(0.0,0,0,1.0)))
+  #
 
+  setgeometry!(viz[:poses][sym], Triad())
+  settransform!(viz[:poses][sym], tf)
+  nothing
+end
 
+function visualizeallposes!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph; drawlandms::Bool=true,drawtype::Symbol=:max)
+  topoint = +
+  if drawtype == :max
+    topoint = getKDEMax
+  elseif drawtype == :mean
+    topoint = getKDEMean
+  elseif drawtype == :fit
+    topoint = (x) -> getKDEfit(x).μ
+  else
+    error("Unknown draw type")
+  end
 
+  po,ll = ls(fgl)
+  for p in po
+    # v = getVert(fgl, p)
+    den = getVertKDE(fgl, p)
+    maxval = topoint(den)
+    q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
+    drawpose!(vc, p, tf=Translation(maxval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) )
+  end
+  # if drawlandms
+  #   for l in ll
+  #     # v = getVert(fgl, p)
+  #     den = getVertKDE(fgl, l)
+  #     maxval = topoint(den)
+  #     newpoint!(vc, l, wTb=Translation(maxval[1:3]...))
+  #   end
+  # end
 
+  nothing
+end
 
-
-
+function deletemeshes!(vc::DrakeVisualizer.Visualizer)
+  delete!(vc[:meshes])
+end
 
 #

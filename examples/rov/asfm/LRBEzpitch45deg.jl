@@ -9,9 +9,8 @@ using CoordinateTransformations
 using Rotations
 
 # start visualizer with some scene
-vc = startdefaultvisualization(draworigin=false)
+vc = startdefaultvisualization(draworigin=true)
 sleep(3.0)
-defaultscene01!(vc)
 
 # load necessary data
 rovt = loadmodel(:rov)
@@ -20,6 +19,9 @@ rovt(vc)
 am = Translation(0,0,0.0) ∘ LinearMap(Rotations.AngleAxis(pi/2,0,0,1.0))
 rovt(vc, am )
 
+# defaultscene01!(vc)
+sc01 = loadmodel(:scene01)
+sc01(vc)
 
 # ground truth positions
 gt = Dict{Symbol, Vector{Float64}}()
@@ -49,7 +51,8 @@ visualizeallposes!(vc, fg, drawlandms=false)
 
 rho1 = norm(tfx1.t-gt[:l1])
 addLinearArrayConstraint(fg, (rho1, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
-visualizeDensityMesh!(vc, fg, :l1, meshid=2)
+
+visualizeDensityMesh!(vc, fg, :l1)
 
 
 # animate visualization
@@ -69,12 +72,15 @@ addOdoFG!(fg, Pose3Pose3(px2, odoCov) )
 @show rho2 = norm((tfx1*px2).t-gt[:l1])
 addLinearArrayConstraint(fg, (rho2, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (rho2, 0.0), :x2, :l2, rangecov=rangecov,bearingcov=bearingcov)
-visualizeDensityMesh!(vc, fg, :l2, meshid=2)
+visualizeDensityMesh!(vc, fg, :l2)
 sleep(3)
 
 
-solveandvisualize(fg, vc, densitymeshes=[:l1], N=N, drawlandms=false)
+solveandvisualize(fg, vc, densitymeshes=[:l1, :l2], N=N, drawlandms=false)
 
+# should just be the point where landmark likelihoods sightings intersect
+deletemeshes!(vc)
+visualizeDensityMesh!(vc, fg, :l1)
 
 
 
