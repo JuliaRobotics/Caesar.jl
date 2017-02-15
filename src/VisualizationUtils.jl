@@ -274,18 +274,35 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph; dr
   end
 
   po,ll = ls(fgl)
+
+  dotwo = false
+  dothree = false
+  if length(po) > 0
+    sym = po[1]
+    X = getVal(fgl, sym)
+    dims = size(X,1)
+    dotwo = dims == 2 || (dims == 3 && string(sym)[1] == 'x')
+    dothree = dims == 6 || (string(sym)[1] == 'l' && dims != 2)
+    (dotwo && dothree) || (!dotwo && !dothree) ? error("Unknown dimension for drawing points in viewer") : nothing
+  end
+
   for p in po
     # v = getVert(fgl, p)
     den = getVertKDE(fgl, p)
     maxval = topoint(den)
-    q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
-    drawpose!(vc, p, tf=Translation(maxval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) )
+    if dothree
+      q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
+      drawpose!(vc, p, tf=Translation(maxval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) )
+    elseif dotwo
+      drawpose!(vc, p, tf=Translation(maxval[1],maxval[2],0.0)∘LinearMap(Rotations.AngleAxis(maxval[3],0,0,1.0)) )
+    end
   end
   # if drawlandms
   #   for l in ll
   #     # v = getVert(fgl, p)
   #     den = getVertKDE(fgl, l)
   #     maxval = topoint(den)
+  #
   #     newpoint!(vc, l, wTb=Translation(maxval[1:3]...))
   #   end
   # end
@@ -301,8 +318,9 @@ end
 function drawmarginalpoints!(vis::DrakeVisualizer.Visualizer, fgl::FactorGraph, sym::Symbol)
   X = getVal(fgl, sym)
   dims = size(X,1)
-  dotwo = dim == 2 || (dim == 3 && string(sym)[1] == 'x')
-  dothree = dims == 6 || string(sym)[1] == 'l'
+  dotwo = dims == 2 || (dims == 3 && string(sym)[1] == 'x')
+  dothree = dims == 6 || (string(sym)[1] == 'l' && dims != 2)
+  # @show dims, dotwo, dothree
   (dotwo && dothree) || (!dotwo && !dothree) ? error("Unknown dimension for drawing points in viewer") : nothing
   # compile data points for drawing
   XX = Vector{Vector{Float64}}()
@@ -313,7 +331,11 @@ function drawmarginalpoints!(vis::DrakeVisualizer.Visualizer, fgl::FactorGraph, 
       push!(XX,X[1:3,i])
     end
   end
-  setgeometry!(vis[:marginals][sym][:points], PointCloud(XX))
+  pointcloud = PointCloud(XX)
+  if string(sym)[1] == 'l'
+    pointcloud.channels[:rgb] = [RGB(1.0, 1.0, 0) for i in 1:length(XX)]
+  end
+  setgeometry!(vis[:marginals][sym][:points], pointcloud)
   nothing
 end
 

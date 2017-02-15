@@ -191,6 +191,9 @@ function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRange{Distributions.Normal,Distributions.Normal}}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DRange}}, FunctionNodeData{Pose2DPoint2DRange}, encodingConverter=passTypeThrough, decodingConverter=passTypeThrough)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPoint2D}}, PackedFunctionNodeData{PackedPriorPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  #acoustic types
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DRangeDensity}}, PackedFunctionNodeData{PackedPose2DPoint2DRangeDensity}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRangeDensity}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRangeDensity}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   # TODO -- Pose3 stuff
   nothing
 end
@@ -396,15 +399,19 @@ function getnewvertdict(conn, session::AbstractString)
     for elem in val["meta"]
       # @show elem["type"]    # @show rdict["type"]
       i+=1
-      rdict = JSON.parse(val["row"][i]["frtend"])
       newvertdict[elem["id"]] = Dict{Symbol, Dict{AbstractString,Any}}()
-      newvertdict[elem["id"]][:frtend] = rdict
-      if haskey(val["row"][i], "mongo_keys")
-        # @show val["row"][i]["mongo_keys"]
-        newvertdict[elem["id"]][:mongokeys] = JSON.parse(val["row"][i]["mongo_keys"])
+      for (k,nv) in val["row"][i]
+        @show k
+        newvertdict[elem["id"]][Symbol(k)] = JSON.parse(nv)
       end
-      # if uppercase(rdict["type"])=="POSE" || uppercase(rdict["type"])=="FACTOR"
-        # npsym = Symbol(string("x",parse(Int, rdict["userid"])+1)) # TODO -- fix :x0 requirement
+      # rdict = JSON.parse(val["row"][i]["frtend"])
+      # newvertdict[elem["id"]][:frtend] = rdict
+      # if haskey(val["row"][i], "mongo_keys")
+      #   # @show val["row"][i]["mongo_keys"]
+      #   newvertdict[elem["id"]][:mongokeys] = JSON.parse(val["row"][i]["mongo_keys"])
+      # end
+      # # if uppercase(rdict["type"])=="POSE" || uppercase(rdict["type"])=="FACTOR"
+      #   # npsym = Symbol(string("x",parse(Int, rdict["userid"])+1)) # TODO -- fix :x0 requirement
     end
     # println()
   end
@@ -423,10 +430,14 @@ function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v:
   # warn("deleting frntend values")
   # delete!(v.attributes,"frntend")
 
-  v.attributes["frtend"] = JSON.json(elem[:frtend])
-  if haskey(elem, :mongokeys)
-    v.attributes["mongo_keys"] = JSON.json(elem[:mongokeys])
+  # v.attributes["frtend"] = JSON.json(elem[:frtend])
+  # if haskey(elem, :mongokeys)
+  #   v.attributes["mongo_keys"] = JSON.json(elem[:mongokeys])
+  # end
+  for (k,va) in elem
+    v.attributes[string(k)] = JSON.json(va)
   end
+
   fgl.cgIDs[uidl] = neoNodeId
 
   cv = exVertex2CloudVertex( v )
@@ -443,7 +454,7 @@ function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v:
 end
 
 
-function recoverConstraintType(elem)
+function recoverConstraintType(elem; N::Int=200)
   lkl = split(elem["lklh"], ' ')
   if lkl[1]=="PR2"
     msm = split(elem["meas"], ' ')
@@ -454,6 +465,15 @@ function recoverConstraintType(elem)
     zi = zeros(3,1)
     zi[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
     return PriorPose2(zi, cov, [1.0])
+  elseif lkl[1]=="PTPR2"
+    msm = split(elem["meas"], ' ')
+    cov = zeros(2,2)
+    cov[1,2] = parse(Float64, msm[4])^2
+    cov += cov'
+    cov[1,1], cov[2,2] = parse(Float64, msm[3])^2, parse(Float64, msm[5])^2
+    zi = zeros(2)
+    zi[1:2] = [parse(msm[1]);parse(msm[2])]
+    return PriorPoint2D(zi, cov, [1.0])
   elseif lkl[1]=="PP2"
     msm = split(elem["meas"], ' ')
     cov = zeros(3,3)
@@ -468,6 +488,24 @@ function recoverConstraintType(elem)
     return Pose2DPoint2DBearingRange{Normal, Normal}(
                   Normal(parse(msm[1]), parse(Float64, msm[3]) ),
                   Normal(parse(msm[2]),parse(Float64, msm[5]) )  )
+  elseif lkl[1]=="rangeBearingMEAS"
+    # @show elem["range"]
+    rngs = Vector{Float64}(elem["range"] )
+    bearing = Vector{Float64}(elem["bearing"] )
+    @show size(rngs), size(bearing)
+    prange = resample(kde!(rngs),N)
+    pbear = resample(kde!(bearing),N)
+    # warn("temporary return")
+    # return prange, pbear
+    return Pose2DPoint2DBearingRangeDensity(pbear, prange)
+  elseif lkl[1]=="rangeMEAS"
+    # @show elem["range"]
+    rngs = Vector{Float64}(elem["range"] )
+    @show size(rngs)
+    prange = resample(kde!(rngs),N)
+    # warn("temporary return")
+    # return prange
+    return Pose2DPoint2DRangeDensity(prange)
   else
     return error("Don't know how to convert $(lkl[1]) to a factor")
   end
@@ -512,13 +550,17 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
   for (neoNodeId,elem) in newvertdict
     if elem[:frtend]["t"] == "F"
       # verts relating to this factor
+      @show neoNodeId
       verts = Vector{Graphs.ExVertex}()
       i=0
       for bf in split(elem[:frtend]["btwn"], ' ')
         i+=1
         # uid = 0
         uid = parse(Int,bf)+1
-        if elem[:frtend]["lklh"][1:2] == "BR" && i==2
+        if ((elem[:frtend]["lklh"][1:2] == "BR" ||
+            elem[:frtend]["lklh"] == "rangeBearingMEAS" ||
+            elem[:frtend]["lklh"] == "rangeMEAS" ) && i==2 ) ||
+            ( elem[:frtend]["lklh"] == "PTPR2 G 2" && i==1 )
           # detect bearing range factors being added between pose and landmark
           warn("using hack counter for LANDMARKS uid +200000")
           uid = parse(Int,bf)+200000 # complete hack

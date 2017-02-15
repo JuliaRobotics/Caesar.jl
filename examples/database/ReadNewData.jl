@@ -55,9 +55,8 @@ updatenewverts!(fg, N=N)
 
 
 
-
-
-
+# writeGraphPdf(fg)
+# @async run(`evince fg.pdf`)
 
 
 
