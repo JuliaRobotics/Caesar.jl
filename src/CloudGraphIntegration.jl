@@ -354,7 +354,7 @@ end
 function setDBAllReady!(conn, sessionname)
   loadtx = transaction(conn)
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn)) where n.ready=0 set n.ready=1"
+  query = "match (n$(sn)) set n.ready=1"
   cph = loadtx(query, submit=true)
   loadresult = commit(loadtx)
   nothing
@@ -401,7 +401,6 @@ function getnewvertdict(conn, session::AbstractString)
       i+=1
       newvertdict[elem["id"]] = Dict{Symbol, Dict{AbstractString,Any}}()
       for (k,nv) in val["row"][i]
-        @show k
         newvertdict[elem["id"]][Symbol(k)] = JSON.parse(nv)
       end
       # rdict = JSON.parse(val["row"][i]["frtend"])
@@ -593,6 +592,23 @@ function updatenewverts!(fgl::FactorGraph; N::Int=100)
   nothing
 end
 
+"""
+    resetentireremotesession(conn, session)
+
+match (n:\$(session))
+remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width
+set n :NEWDATA
+return n
+"""
+function resetentireremotesession(conn, session)
+  loadtx = transaction(conn)
+  query = "match (n:$(session))
+           remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width, n.MAP_est
+           set n :NEWDATA"
+  cph = loadtx(query, submit=true)
+  loadresult = commit(loadtx)
+  nothing
+end
 
 
   #

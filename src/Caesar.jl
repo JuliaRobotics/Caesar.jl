@@ -91,6 +91,8 @@ export
   recoverConstraintType,
   populatenewvariablenodes!,
   updatenewverts!,
+  # to reset the server side graph
+  resetentireremotesession,
 
   # drawing functions
   VisualizationContainer,
