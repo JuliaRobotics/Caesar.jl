@@ -11,7 +11,7 @@ using Base.Test
 
 # TODO comment out for command line operation
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "RYPKEMA"
+session = "RYPKEMA2"
 
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
@@ -28,17 +28,31 @@ fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 updatenewverts!(fg, N=N)
 
 
+
+writeGraphPdf(fg)
+@async run(`evince fg.pdf`)
+
+setDBAllReady!(fg)
+
+
+# totally reset to frontend built state in DB
+resetentireremotesession(conn,session)
+
+
+
 fg.fIDs
 
-# sortedvd = getnewvertdict(fg.cg.neo4j.connection, fg.sessionname)
+
+
+sortedvd = getnewvertdict(fg.cg.neo4j.connection, fg.sessionname)
 #
 # sortedvd[110240]
 #
-# elem = sortedvd[110536][:frtend]
+elem = sortedvd[110592][:frtend]
 #
 # elem["range"]
 #
-# rn = recoverConstraintType(elem)
+rn = recoverConstraintType(elem)
 
 # pty = convert(PackedPose2DPoint2DBearingRangeDensity, rn)
 # upt = convert(Pose2DPoint2DBearingRangeDensity, pty)
@@ -47,14 +61,14 @@ fg.fIDs
 # @test norm(getPoints(rn.range)-getPoints(upt.range)) < 1e-10
 
 # plotKDE(upt.bearing)
-# plotKDE(rn.range)
+plotKDE(rn.bearing)
 
 
 vc = startdefaultvisualization(draworigin=true)
 
 drawmarginalpoints!(vc, fg, :l200050)
 
-getVal(fg, :x1)
+getVal(fg, :l200050, api=dlapi)
 
 visualizeallposes!(vc, fg, drawlandms=false)
 
@@ -64,31 +78,11 @@ visualizeallposes!(vc, fg, drawlandms=false)
 plotKDE(marginal(getKDE(getVert(fg,:l200050,api=dlapi)),[1;2]))
 
 
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
-
-setBackendWorkingSet!(conn, session)
-fullLocalGraphCopy!(fg, conn)
-
-tree = wipeBuildNewTree!(fg,drawpdf=false)
-@async run(`evince bt.pdf`)
-
-spyCliqMat(tree, :x1)
-
-ls(fg,:l200050)
-
-inferOverTree!(fg, tree, N=N)
 
 
-ls(fg)
 
 
-writeGraphPdf(fg)
-run(`evince fg.pdf`)
 
-fg.IDs
-
-
-import IncrementalInference: drawCopyFG, writeGraphPdf
 
 
 

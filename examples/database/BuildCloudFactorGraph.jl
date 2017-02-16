@@ -1,36 +1,24 @@
 # a basic create robot type node example
-using IncrementalInference, CloudGraphs
+using Caesar, IncrementalInference
 
-# switch IncrementalInference to use CloudGraphs (Neo4j) data layer
-dbaddress = length(ARGS) > 0 ? ARGS[1] : "localhost"
-dbusr = length(ARGS) > 1 ? ARGS[2] : ""
-dbpwd = length(ARGS) > 2 ? ARGS[3] : ""
 
-mongoaddress = length(ARGS) > 3 ? ARGS[4] : "localhost"
 
-session = length(ARGS) > 4 ? utf8(ARGS[5]) : ""
-println("Attempting to solve session $(session)...")
-
+# TODO comment out for command line operation
+include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
+session = "SESSCLOUDTEST"
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
 cloudGraph = connect(configuration);
-# Connection to database
 conn = cloudGraph.neo4j.connection
-
-
-# register types of interest in CloudGraphs
 registerGeneralVariableTypes!(cloudGraph)
+Caesar.usecloudgraphsdatalayer!()
 
-IncrementalInference.setdatalayerAPI!()
 
+N=100
+fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
-# this is being replaced by cloudGraph, added here for development period
-fg = emptyFactorGraph()
-fg.cg = cloudGraph
-fg.sessionname = "SESSCLOUDTEST"
 
 # Robot navigation and inference type stuff
-N=200
 doors = [-100.0;0.0;100.0;300.0]'
 cov = [3.0]
 
@@ -50,6 +38,16 @@ f1 = addFactor!(fg,[v1;v2],Odo([50.0]',[2.0]',[1.0]))
 v3=addNode!(fg,:x3,4.0*randn(1,N)+getVal(v2)+50.0, N=N,labels=["POSE"])
 addFactor!(fg,[v2;v3],Odo([50.0]',[4.0]',[1.0]))
 f2 = addFactor!(fg,[v3], Obsv2(doors, cov', [1.0]))
+
+
+
+inc =  fg.g.inclist
+using Graphs
+tt = fg.g.vertices[f0.index]
+for vv in out_neighbors(tt, fg.g)
+  @show vv.label
+end
+
 
 # set this part of graph to ready for solving
 setDBAllReady!(conn, fg.sessionname)

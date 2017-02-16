@@ -282,7 +282,7 @@ function copyAllEdges!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::
       #   end
       # end
       # TODO -- remove last test, since only works for array
-      if nei.properties["ready"]==1 && nei.properties["backendset"] == 1 && nei.exVertexId <= length(fgl.g.vertices)
+      if nei.properties["ready"]==1 && nei.properties["backendset"] == 1 #&& nei.exVertexId <= length(fgl.g.vertices)
           alreadythere = false
           # TODO -- error point
           v2 = fgl.g.vertices[nei.exVertexId]
@@ -380,7 +380,7 @@ end
 """
     getnewvertdict(conn, session)
 
-return a dictionary with frtend and mongo_keys json string information for :NEWDATA
+Return a dictionary with frtend and mongo_keys json string information for :NEWDATA
 elements in Neo4j database.
 """
 function getnewvertdict(conn, session::AbstractString)
@@ -585,12 +585,19 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
 end
 
 
+"""
+    updatenewverts!(fgl; N=100)
+
+Convert vertices of session in Neo4j DB with Caesar.jl's required data elements
+in preparation for MM-iSAMCloudSolve process.
+"""
 function updatenewverts!(fgl::FactorGraph; N::Int=100)
   sortedvd = getnewvertdict(fgl.cg.neo4j.connection, fgl.sessionname)
   populatenewvariablenodes!(fgl, sortedvd, N=N)
   populatenewfactornodes!(fgl, sortedvd)
   nothing
 end
+
 
 """
     resetentireremotesession(conn, session)
