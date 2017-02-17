@@ -82,7 +82,7 @@ class rangeFactorPose2Point2(object):
             raise TypeError("noise must be of type Noise1D")
         self.landmark_id = landmark_id
         self.range_val = range_val
-        self.noise = noise.noise
+        self.noise = noise
 
 class bearingRangeFactorPose2Point2(object):
     ''' unimodal bearing and range factor '''
@@ -92,7 +92,17 @@ class bearingRangeFactorPose2Point2(object):
         self.landmark_id = landmark_id
         self.bearing_val = bearing_val
         self.range_val = range_val
-        self.noise = noise.noise
+        self.noise = noise
+
+class rangeNullHypothesisFactorPose2Point2(object):
+    ''' unimodal range factor '''
+    def __init__(self, landmark_id, range_val, null_prob, noise):
+        if type(noise) is not Noise1D:
+            raise TypeError("noise must be of type Noise1D")
+        self.landmark_id = landmark_id
+        self.range_val = range_val
+        self.null_prob = null_prob
+        self.noise = noise
 
 class neo4j_interact(object):
     ''' Non-parametric SLAMinDB Neo4j interface '''
@@ -124,7 +134,7 @@ class neo4j_interact(object):
         self._landmark_to_prior[l_id] = []
         if prior_factor is not None:
             l_prior_factor_neo4j = json.dumps({'meas': str(prior_factor.x) + ' ' + str(prior_factor.y) + ' ' + str(prior_factor.noise.x) + ' 0 ' + str(prior_factor.noise.y),
-                                                'lklh': 'PTPR2 G 2',
+                                                'lklh': 'PTPR2 G 2 STDEV',
                                                 'btwn': str(l_id),
                                                 't': 'F'})
             self._landmark_to_prior[l_id].append(self._max_factor_id)
@@ -180,7 +190,7 @@ class neo4j_interact(object):
         self._pose_to_odometry_or_prior[p_id] = []
         self._pose_to_measurements[p_id] = []
         p_prior_factor_neo4j = json.dumps({'meas': str(prior_factor.x) + ' ' + str(prior_factor.y) + ' ' + str(prior_factor.theta) + ' ' + str(prior_factor.noise.x) + ' 0 0 ' + str(prior_factor.noise.y) + ' 0 ' + str(prior_factor.noise.z),
-                                            'lklh': 'PR2 G 3',
+                                            'lklh': 'PR2 G 3 STDEV',
                                             'btwn': str(p_id),
                                             't': 'F'})
         self._pose_to_odometry_or_prior[p_id].append(self._max_factor_id)
@@ -205,7 +215,7 @@ class neo4j_interact(object):
         self._pose_to_odometry_or_prior[p_id] = []
         self._pose_to_measurements[p_id] = []
         p_odometry_factor_neo4j = json.dumps({'meas': str(odometry_factor.delta_surge) + ' ' + str(odometry_factor.delta_sway) + ' ' + str(odometry_factor.delta_theta) + ' ' + str(odometry_factor.noise.x) + ' 0 0 ' + str(odometry_factor.noise.y) + ' 0 ' + str(odometry_factor.noise.z),
-                                              'lklh': 'PP2 G 3',
+                                              'lklh': 'PP2 G 3 STDEV',
                                               'btwn': str(head_id) + ' ' + str(p_id),
                                               't': 'F'})
         self._pose_to_odometry_or_prior[p_id].append(self._max_factor_id)
@@ -246,20 +256,27 @@ class neo4j_interact(object):
             self._max_factor_id += 1
         elif type(measurement_factor) is rangeFactorPose2Point2:
             p_measurement_factor_neo4j = json.dumps({'meas': str(measurement_factor.range_val) + str(measurement_factor.noise.x),
-                                                     'lklh': 'R G 1',
+                                                     'lklh': 'RNG G 1 STDEV',
                                                      'btwn': str(p_id) + ' ' + str(measurement_factor.landmark_id),
                                                      't': 'F'})
             self._pose_to_measurements[p_id].append(self._max_factor_id)
             self._max_factor_id += 1
         elif type(measurement_factor) is bearingRangeFactorPose2Point2:
             p_measurement_factor_neo4j = json.dumps({'meas': str(measurement_factor.bearing_val) + str(measurement_factor.range_val) + str(measurement_factor.noise.x) + '0' + str(measurement_factor.noise.y),
-                                                     'lklh': 'BR G 2',
+                                                     'lklh': 'BR G 2 STDEV',
+                                                     'btwn': str(p_id) + ' ' + str(measurement_factor.landmark_id),
+                                                     't': 'F'})
+            self._pose_to_measurements[p_id].append(self._max_factor_id)
+            self._max_factor_id += 1
+        elif type(measurement_factor) is rangeNullHypothesisFactorPose2Point2:
+            p_measurement_factor_neo4j = json.dumps({'meas': str(measurement_factor.range_val) + str(measurement_factor.noise.x) + str(measurement_factor.null_prob),
+                                                     'lklh': 'RNG GNH 1 STDEV NULL',
                                                      'btwn': str(p_id) + ' ' + str(measurement_factor.landmark_id),
                                                      't': 'F'})
             self._pose_to_measurements[p_id].append(self._max_factor_id)
             self._max_factor_id += 1
         else:
-            raise TypeError("measurement_factor must be of type rangeFactorPose2Point2, bearingRangeFactorPose2Point2, rangeMeasurementFactorPose2Point2, or bearingRangeMeasurementFactorPose2Point2")
+            raise TypeError("measurement_factor must be of type rangeFactorPose2Point2, bearingRangeFactorPose2Point2, rangeMeasurementFactorPose2Point2, bearingRangeMeasurementFactorPose2Point2, or rangeNullHypothesisFactorPose2Point2")
         self.session.run("MERGE (l:LANDMARK:"+self._session_name+":NEWDATA { frtend: {landmark_info} }) "
                          "MERGE (p:POSE:"+self._session_name+":NEWDATA { frtend: {pose_info} })"
                          "MERGE (f:FACTOR:"+self._session_name+":NEWDATA { frtend: {measurement_factor_info} }) "
