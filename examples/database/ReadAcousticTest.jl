@@ -66,11 +66,11 @@ plotKDE(rn.bearing)
 
 vc = startdefaultvisualization(draworigin=true)
 
-drawmarginalpoints!(vc, fg, :l200050)
+drawmarginalpoints!(vc, fg, :x8)
 
 getVal(fg, :l200050, api=dlapi)
 
-visualizeallposes!(vc, fg, drawlandms=false)
+visualizeallposes!(vc, fg, drawlandms=false, drawtype=:fit)
 
 # for lb in [:x1,:x2,:x3,:x4,:x5,:x6,:x7]
 #   @show getKDEMax(getVertKDE(fg, lb))

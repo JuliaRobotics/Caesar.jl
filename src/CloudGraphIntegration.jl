@@ -463,7 +463,7 @@ function recoverConstraintType(elem; N::Int=200)
     cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
     zi = zeros(3,1)
     zi[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
-    return PriorPose2(zi, cov, [1.0])
+    return PriorPose2(zi, cov^2, [1.0])
   elseif lkl[1]=="PTPR2"
     msm = split(elem["meas"], ' ')
     cov = zeros(2,2)
@@ -481,7 +481,7 @@ function recoverConstraintType(elem; N::Int=200)
     cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
     zij = zeros(3,1)
     zij[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
-    return Pose2Pose2(zij, cov, [1.0])
+    return Pose2Pose2(zij, cov^2, [1.0])
   elseif lkl[1]=="BR"
     msm = split(elem["meas"], ' ')
     return Pose2DPoint2DBearingRange{Normal, Normal}(
