@@ -10,7 +10,7 @@ using Base.Test
 
 # TODO comment out for command line operation
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "RYPKEMA2"
+session = "SANDSHARK_2016_11_14"
 
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
@@ -18,7 +18,6 @@ cloudGraph = connect(configuration);
 conn = cloudGraph.neo4j.connection
 registerGeneralVariableTypes!(cloudGraph)
 Caesar.usecloudgraphsdatalayer!()
-
 
 
 N=100
@@ -35,59 +34,73 @@ fullLocalGraphCopy!(fg, conn)
 # @async run(`evince fg.pdf`)
 
 tree = wipeBuildNewTree!(fg,drawpdf=true)
-@async run(`evince bt.pdf`)
+# @async run(`evince bt.pdf`)
 
-spyCliqMat(tree, :x1)
 
+spyCliqMat(tree, :l200050)
 
 
 inferOverTreeR!(fg, tree, N=N, dbg=true)
 
 
 # Some inspection methods to see what is going on
-spyCliqMat(tree, :x1)
+spyCliqMat(tree, :l200050)
 
-plotMCMC(tree, :x7)
+plotMCMC(tree, :l200050)
 
-plotPriorsAtCliq(tree, :x1, :x1, marg=[1;2], levels=3)
+plotPriorsAtCliq(tree, :l200050, :l200050, marg=[1;2], levels=1)
 
-plotUpMsgsAtCliq(tree, :l200050, :x2, marg=[1;2])
+plotUpMsgsAtCliq(tree, :l200050, :l200050, marg=[1;2])
 
 
 # basic plotting of Pose2D and landmarks
 drawPosesLandms(fg ,spscale=0.5)
 
 
-
-
+lbll=:l200050
+cliq = whichCliq(tree, string(lbll))
+cliqdbg = cliq.attributes["debug"]
+vidx = 1
+for lb in cliqdbg.mcmc[1].lbls
+  if lb == lbll
+    break;
+  else
+    vidx += 1
+  end
+end
+ppp = kde!(cliqdbg.mcmc[3].prods[vidx].product)
+plotKDE(ppp)
 
 
 vc = startdefaultvisualization(draworigin=true)
 
-drawmarginalpoints!(vc, fg, :x8)
+drawmarginalpoints!(vc, fg, :x4)
 
 visualizeallposes!(vc, fg, drawlandms=false, drawtype=:fit)
 
 
 
-
+drawPoses(fg,from=4,to=4)
 
 # prior on :x1 issue
 
-fc = getVert(fg, 100002)
+fc = getVert(fg, 100007)
 
-vid = fg.IDs[:x1]
+vid = fg.IDs[:l200050]
+vid = fg.IDs[:x4]
 
 
+fc
 
-evalFactor2(fg, fc, vid)
+Profile.clear()
+
+@profile pts = evalFactor2(fg, fc, vid)
+plotKDE(kde!(pts[1:2,:]))
 
 
 getSample( getData(fc).fnc.usrfnc!, 100 )
 
-
-getData(fc).fnc.usrfnc!.Cov
-
+plotKDE(getData(fc).fnc.usrfnc!.range)
 
 
 #
