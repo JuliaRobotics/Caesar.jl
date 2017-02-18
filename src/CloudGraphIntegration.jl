@@ -275,6 +275,10 @@ function copyAllEdges!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::
   for ids in IDs
     # look at neighbors of this node
     for nei in CloudGraphs.get_neighbors(fgl.cg, cverts[ids[2]])
+      if !haskey(fgl.g.vertices, nei.exVertexId)
+        warn("skip neighbor if not in the subgraph segment of interest, exVertexId=$(nei.exVertexId)")
+        continue;
+      end
       # allow = true
       # if haskey(nei.properties, "packedType")
       #   if nei.properties["packedType"] == "IncrementalInference.FunctionNodeData{IncrementalInference.GenericMarginal}"
