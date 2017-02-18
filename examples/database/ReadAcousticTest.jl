@@ -11,7 +11,7 @@ using Base.Test
 
 # TODO comment out for command line operation
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "RYPKEMA2"
+session = "SANDSHARK_2016_11_14"
 
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
@@ -29,6 +29,8 @@ updatenewverts!(fg, N=N)
 
 
 
+ls(fg,:x754)
+
 writeGraphPdf(fg)
 @async run(`evince fg.pdf`)
 
@@ -45,6 +47,16 @@ fg.fIDs
 
 
 sortedvd = getnewvertdict(fg.cg.neo4j.connection, fg.sessionname)
+
+sortedvd[200050]
+
+
+loadtx = transaction(conn)
+query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) where n.ready=1 or f.ready=1 return distinct n, f"
+cph = loadtx(query, submit=true)
+
+
+
 #
 # sortedvd[110240]
 #

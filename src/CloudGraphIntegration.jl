@@ -386,12 +386,12 @@ elements in Neo4j database.
 function getnewvertdict(conn, session::AbstractString)
 
   loadtx = transaction(conn)
-  query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) return distinct n, f"
+  query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) where n.ready=1 or f.ready=1 return distinct n, f"
   cph = loadtx(query, submit=true)
   # loadresult = commit(loadtx)
   # @show cph.results[1]
 
-  newvertdict = SortedDict{Int, Dict{Symbol,Dict{AbstractString,Any}}, Base.Order.ForwardOrdering}()
+  newvertdict = SortedDict{Int, Dict{Symbol, Dict{AbstractString,Any}}, Base.Order.ForwardOrdering}()
   # mongokeydict = Dict{Int, Dict{AbstractString,Any}}()
 
   for val in cph.results[1]["data"]
@@ -401,7 +401,11 @@ function getnewvertdict(conn, session::AbstractString)
       i+=1
       newvertdict[elem["id"]] = Dict{Symbol, Dict{AbstractString,Any}}()
       for (k,nv) in val["row"][i]
-        newvertdict[elem["id"]][Symbol(k)] = JSON.parse(nv)
+        if Symbol(k) == :frtend
+          newvertdict[elem["id"]][Symbol(k)] = JSON.parse(nv)
+        else
+          newvertdict[elem["id"]][Symbol(k)] = Dict{AbstractString, Any}("val"=> nv)
+        end
       end
       # rdict = JSON.parse(val["row"][i]["frtend"])
       # newvertdict[elem["id"]][:frtend] = rdict
@@ -434,7 +438,11 @@ function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v:
   #   v.attributes["mongo_keys"] = JSON.json(elem[:mongokeys])
   # end
   for (k,va) in elem
-    v.attributes[string(k)] = JSON.json(va)
+    if k != :frtend
+      v.attributes[string(k)] = va["val"]
+    else
+      v.attributes[string(k)] = JSON.json(va)
+    end
   end
 
   fgl.cgIDs[uidl] = neoNodeId
@@ -559,7 +567,7 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
         if ((elem[:frtend]["lklh"][1:2] == "BR" ||
             elem[:frtend]["lklh"] == "rangeBearingMEAS" ||
             elem[:frtend]["lklh"] == "rangeMEAS" ) && i==2 ) ||
-            ( elem[:frtend]["lklh"] == "PTPR2 G 2" && i==1 )
+            ( elem[:frtend]["lklh"] == "PTPR2 G 2 STDEV" && i==1 )
           # detect bearing range factors being added between pose and landmark
           warn("using hack counter for LANDMARKS uid +200000")
           uid = parse(Int,bf)+200000 # complete hack

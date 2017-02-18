@@ -25,12 +25,30 @@ fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
 
 # setDBAllReady!(fg)
-# setBackendWorkingSet!(conn, session)
+setBackendWorkingSet!(conn, session)
 
 fullLocalGraphCopy!(fg, conn)
 
 
-# writeGraphPdf(fg)
+
+
+
+
+
+
+IDs = getAllExVertexNeoIDs(conn, sessionname=fg.sessionname)
+
+tosee = Dict()
+tosee2 = Dict()
+for i in 1:length(IDs)
+  vid, nid = IDs[i]
+  tosee[vid] = nid
+  tosee2[nid] = vid
+end
+
+tosee2[149088]
+
+writeGraphPdf(fg)
 # @async run(`evince fg.pdf`)
 
 tree = wipeBuildNewTree!(fg,drawpdf=true)
