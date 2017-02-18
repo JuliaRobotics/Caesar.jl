@@ -1,4 +1,6 @@
-<div style="text-align:center"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/caesarimgL.png" alt="IMAGE ALT TEXT HERE" width="200" border="10" /></a>
+<p align="center">
+<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/caesarimgL.png" width="200" border="10" />
+</p>
 
 A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
 
