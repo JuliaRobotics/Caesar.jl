@@ -24,7 +24,7 @@ conn = cloudGraph.neo4j.connection
 registerGeneralVariableTypes!(cloudGraph)
 Caesar.usecloudgraphsdatalayer!()
 
-if !clearslamindb
+if !clearslamindbdata
   fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
   updatenewverts!(fg, N=Nparticles)
