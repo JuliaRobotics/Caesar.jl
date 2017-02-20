@@ -10,7 +10,7 @@ using Base.Test
 
 # TODO comment out for command line operation
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "SANDSHARK_2016_11_14"
+session = "SESSROX"
 
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");

@@ -455,7 +455,9 @@ function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v:
   cv.neo4jNodeId = neoNodeId
   cv.neo4jNode = Neo4j.getnode(fgl.cg.neo4j.graph, neoNodeId)
   cv.isValidNeoNodeId = true
-  cv.labels=labels
+  existlbs = Vector{AbstractString}(cv.neo4jNode.metadata["labels"])
+  filter!(e->e!="NEWDATA",existlbs)
+  cv.labels = union(existlbs, labels)
   #
   CloudGraphs.update_vertex!(fgl.cg, cv)
   # TODO -- this function refactoring and better integration here

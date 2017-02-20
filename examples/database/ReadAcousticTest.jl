@@ -11,7 +11,7 @@ using Base.Test
 
 # TODO comment out for command line operation
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "SANDSHARK_2016_11_14"
+session = "SANDSHARK_2016_11_14_SPARE"
 
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
@@ -47,6 +47,16 @@ fg.fIDs
 
 
 sortedvd = getnewvertdict(fg.cg.neo4j.connection, fg.sessionname)
+
+@show collect(keys(sortedvd))
+
+populatenewvariablenodes!(fg, sortedvd, N=N)
+
+populatenewfactornodes!(fg, sortedvd)
+
+
+ls(fg)
+
 
 sortedvd[200050]
 

@@ -28,7 +28,6 @@ session = "SESSROX"
 #
 # DRAWDEPTH = length(ARGS) > 5 ? ARGS[6]=="drawdepth" : false
 
-
 # Connection to database
 # register types of interest in CloudGraphs
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");

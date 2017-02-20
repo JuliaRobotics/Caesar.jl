@@ -25,10 +25,9 @@ registerGeneralVariableTypes!(cloudGraph)
 Caesar.usecloudgraphsdatalayer!()
 
 if !clearslamindb
-  N=100
   fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
-  updatenewverts!(fg, N=N)
+  updatenewverts!(fg, N=Nparticles)
 else
   println("Clearing slamindb data, leaving front-end data, session: $(session)")
   resetentireremotesession(conn,session)

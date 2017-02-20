@@ -90,6 +90,7 @@ export
   insertValuesCloudVert!,
   recoverConstraintType,
   populatenewvariablenodes!,
+  populatenewfactornodes!,
   updatenewverts!,
   # to reset the server side graph
   resetentireremotesession,
