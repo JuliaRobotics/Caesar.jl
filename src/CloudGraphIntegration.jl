@@ -231,7 +231,7 @@ function getAllExVertexNeoIDs(conn;
   cph = loadtx(query, submit=true)
   ret = Array{Tuple{Int64,Int64},1}()
 
-  for data in cph.results[1]["data"]
+  @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
     metadata = data["meta"][1]
     rowdata = data["row"][1]
     push!(ret, (rowdata["exVertexId"],metadata["id"])  )
@@ -258,7 +258,7 @@ function getPoseExVertexNeoIDs(conn;
   cph = loadtx(query, submit=true)
   ret = Array{Tuple{Int64,Int64},1}()
 
-  for data in cph.results[1]["data"]
+  @showprogress 1 "Get Pose ExVertex IDs..." for data in cph.results[1]["data"]
     metadata = data["meta"][1]
     rowdata = data["row"][1]
     push!(ret, (rowdata["exVertexId"],metadata["id"])  )
@@ -272,7 +272,7 @@ end
 
 function copyAllEdges!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64},1})
   # do entire graph, one node at a time
-  for ids in IDs
+  @showprogress 1 "Copy all edges..." for ids in IDs
     # look at neighbors of this node
     for nei in CloudGraphs.get_neighbors(fgl.cg, cverts[ids[2]], needdata=true)
       # if !haskey(fgl.g.vertices, nei.exVertexId)
@@ -310,7 +310,7 @@ function copyAllEdges!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::
 end
 
 function copyAllNodes!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64},1}, conn)
-  for ids in IDs
+  @showprogress 1 "Copy all nodes..." for ids in IDs
     cvert = CloudGraphs.get_vertex(fgl.cg, ids[2], false)
     cverts[ids[2]] = cvert
     exvert = cloudVertex2ExVertex(cvert)

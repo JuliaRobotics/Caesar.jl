@@ -26,7 +26,8 @@ using
   MeshIO,
   FileIO,
   NLsolve,
-  DataStructures
+  DataStructures,
+  ProgressMeter
 
 if haskey(instpkg,"CloudGraphs")
   using CloudGraphs
