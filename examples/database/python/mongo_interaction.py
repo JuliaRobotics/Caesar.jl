@@ -53,7 +53,7 @@ key = db[collection].insert({"neoNodeId": -1, "val": f, "description": "Auto-ins
 for result in db.bindata.find({"_id":key}):
     newf = open('/home/rmata/newfile.jpg', 'w+') # to write image to
     #print type(result["image"])
-    X = BSON(result["image"]).decode()
+    X = BSON(result["val"]).decode()
     print X
     pickle.load(X)
     newf.close()
