@@ -13,6 +13,7 @@ from pybot.externals.ros.bag_utils import Decoder, ImageDecoder, NavMsgDecoder, 
 from pybot.utils.db_utils import AttrDict
 from apriltags_ros.msg import AprilTagDetectionArray
 from nav_msgs.msg import Odometry
+import cv2
 
 from neo4j.v1 import GraphDatabase, basic_auth # via queries
 import json
@@ -56,7 +57,7 @@ class Neo4jTalkApp():
         maddr = open(mongo_authfile).read().splitlines()
         print maddr
         client = MongoClient(maddr) # Default is local for now
-        self.db = client.tester # test is the name of the data base
+        self.db = client.CloudGraphs # test is the name of the data base
 
     def on_tags_detection_cb(self, tag_array, tf_dict=None):
         #print "DETECTING TAGS"
@@ -122,9 +123,10 @@ class Neo4jTalkApp():
 
     def on_keyframe_cb(self, data):
         im = data.data # should be under 16 MB
-        ## TODO Get BigData key?
-        new_im_uid = uuid.uuid4()
         #rospy.logwarn(str(new_im_uid.hex))
+	#Make data pretty binary and get an ID from Mongo on insertion.
+	res, imdata = cv2.imencode('.png', im)
+        oid = self.db["bindata"].insert({"neoNodeId": -1, "val": imdata, "description": "Auto-inserted with DBInteraction.py"})
 
         # add odom
         if self.idx_ == 0:
@@ -158,15 +160,10 @@ class Neo4jTalkApp():
                              "WHERE id(od)={odom_node_id}"
                              "SET od += {newkeys}",
                              {"odom_node_id":self.odom_node_id,
-                              "newkeys":{"mongo_keys":json.dumps({"keyframe_rgb":str(new_im_uid.hex)})}})
+                              "newkeys":{"mongo_keys":json.dumps({"keyframe_rgb":str(oid)})}})
             self.idx_ += 1
             self.old_odom = self.old_odom*self.odom_diff # advance old odom
             self.odom_diff = None # reset difference
-
-
-        j = Binary(im)
-        self.db["rgb_keyframes"].insert({"key": str(new_im_uid.hex),
-                                   "rgb_image":j})
 
 if __name__=="__main__":
     m = Neo4jTalkApp()
