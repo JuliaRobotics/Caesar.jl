@@ -43,7 +43,7 @@ class Neo4jTalkApp():
         self.idx_ = 0 # odom_index
 
         ## Authentication and Setup for Neo4j
-        authfile = '/home/rmata/authfile.txt' # username on one line, password on next (for database)
+        authfile = '/home/dehann/neo_authfile.txt' # username on one line, password on next (for database)
         un,pw, addr = open(authfile).read().splitlines()
         self.driver = GraphDatabase.driver(addr, auth=basic_auth(un, pw))
         self.session = self.driver.session()
@@ -53,7 +53,7 @@ class Neo4jTalkApp():
         self.odom_node_id = None # neo4j node id
 
         ## Authentication/Setup for Mongo
-        mongo_authfile = "/home/rmata/mongo_authfile.txt"
+        mongo_authfile = "/home/dehann/mongo_authfile.txt"
         maddr = open(mongo_authfile).read().splitlines()
         print maddr
         client = MongoClient(maddr) # Default is local for now
@@ -122,11 +122,15 @@ class Neo4jTalkApp():
 
 
     def on_keyframe_cb(self, data):
-        im = data.data # should be under 16 MB
+        im = data # should be under 16 MB
+        #print 'here',type(im)
         #rospy.logwarn(str(new_im_uid.hex))
 	#Make data pretty binary and get an ID from Mongo on insertion.
 	res, imdata = cv2.imencode('.png', im)
-        oid = self.db["bindata"].insert({"neoNodeId": -1, "val": imdata, "description": "Auto-inserted with DBInteraction.py"})
+        #f = open('testFile.png', 'w')
+        #f.write(imdata)
+        #f.close()
+        oid = self.db["bindata"].insert({"neoNodeId": -1, "val": Binary(imdata.tostring()), "description": "Auto-inserted with DBInteraction.py"})
 
         # add odom
         if self.idx_ == 0:
@@ -194,7 +198,7 @@ if __name__=="__main__":
                            decoder=[
                                Decoder(channel=args.odom_channel, every_k_frames=1), # internal throttling
                                Decoder(channel=args.tag_channel, every_k_frames=1),
-                               Decoder(channel=args.keyframe_channel, every_k_frames=1)
+                               ImageDecoder(channel=args.keyframe_channel, every_k_frames=1,compressed=True)
                            ],
                            every_k_frames=1, start_idx=0, index=False)
     d = dataset.establish_tfs([('/camera_rgb_optical_frame', '/base_link')])
