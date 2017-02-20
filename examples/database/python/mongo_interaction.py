@@ -33,7 +33,7 @@ f = BSON(X) # blah 6Kb image of a printer
 #print "key is: ", key
 
 # insert!
-key = db[collection].insert(f)
+key = db[collection].insert({"neoNodeId": -1, "val": f, "description": "Auto-inserted with mongo_interaction.py"})
 
 # check that mongo ate your key/image combo by asking it for image via key ref
 #  - start up mongo 
