@@ -13,6 +13,7 @@ from pybot.externals.ros.bag_utils import Decoder, ImageDecoder, NavMsgDecoder, 
 from pybot.utils.db_utils import AttrDict
 from apriltags_ros.msg import AprilTagDetectionArray
 from nav_msgs.msg import Odometry
+import cv2
 
 from neo4j.v1 import GraphDatabase, basic_auth # via queries
 import json
@@ -124,8 +125,8 @@ class Neo4jTalkApp():
         im = data.data # should be under 16 MB
         #rospy.logwarn(str(new_im_uid.hex))
 	#Make data pretty binary and get an ID from Mongo on insertion.
-	j = Binary(im) #TODO - imencode....
-        oid = self.db["bindata"].insert({"neoNodeId": -1, "val": j, "description": "Auto-inserted with mongo_interaction.py"})
+	res, imdata = cv2.imencode('.png', im)
+        oid = self.db["bindata"].insert({"neoNodeId": -1, "val": imdata, "description": "Auto-inserted with DBInteraction.py"})
 
         # add odom
         if self.idx_ == 0:
