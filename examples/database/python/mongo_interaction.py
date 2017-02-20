@@ -19,8 +19,8 @@ print addr # address should be "mongodb://username:password@host1:port"
 client = MongoClient(addr)
 
 # connect to database using client
-db = client.tester # tester==name of the db. also db = client['tester'] works.
-collection = "testing_collection"
+db = client.CloudGraphs # tester==name of the db. also db = client['tester'] works.
+collection = "bindata"
 
 # find image, make binary/BSON, ready for insertion
 ## NOTE this assumes image is under 16 MB. If it is over, use GridFS for inserting into Mongo
@@ -29,12 +29,11 @@ print type(X)
 f = BSON(X) # blah 6Kb image of a printer
 
 # create key (uuid straightup doesn't work) (extra key like this might be redundant)
-key = str(uuid.uuid4().hex)
-print "key is: ", key
+#key = str(uuid.uuid4().hex)
+#print "key is: ", key
 
 # insert!
-db[collection].insert({"key": key,
-                       "image": f})
+key = db[collection].insert(f)
 
 # check that mongo ate your key/image combo by asking it for image via key ref
 #  - start up mongo 
@@ -51,7 +50,7 @@ db[collection].insert({"key": key,
 #                         $> db.testing_collection.drop()
 
 # get the image?
-for result in db.testing_collection.find({"key":key}):
+for result in db.bindata.find({"_id":key}):
     newf = open('/home/rmata/newfile.jpg', 'w+') # to write image to
     #print type(result["image"])
     X = BSON(result["image"]).decode()
