@@ -2,7 +2,8 @@
 # find and interact with NEWDATA in neo4j
 
 
-using Caesar, RoME, IncrementalInference
+using Caesar
+using RoME, IncrementalInference
 using CloudGraphs, Neo4j
 # using Distributions
 using JSON
@@ -26,7 +27,6 @@ session = "SESSROX"
 # println("Attempting to draw session $(session)...")
 #
 # DRAWDEPTH = length(ARGS) > 5 ? ARGS[6]=="drawdepth" : false
-
 
 # Connection to database
 # register types of interest in CloudGraphs
@@ -55,14 +55,29 @@ updatenewverts!(fg, N=N)
 
 
 
+writeGraphPdf(fg)
+@async run(`evince fg.pdf`)
 
 
 
+# Okay now solve locally, or start MM-iSAMCloudSolve.jl
+fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+
+setDBAllReady!(fg)
+setBackendWorkingSet!(conn, session)
+fullLocalGraphCopy!(fg, conn)
+
+tree = wipeBuildNewTree!(fg,drawpdf=true)
+@async run(`evince bt.pdf`)
+
+
+# single core recursive inference, allowing better stacktrace
+inferOverTreeR!(fg, tree, N=N)
 
 
 
-
-
+# totally reset to frontend built state in DB
+resetentireremotesession(conn,session)
 
 
 

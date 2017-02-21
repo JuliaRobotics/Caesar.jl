@@ -26,7 +26,8 @@ using
   MeshIO,
   FileIO,
   NLsolve,
-  DataStructures
+  DataStructures,
+  ProgressMeter
 
 if haskey(instpkg,"CloudGraphs")
   using CloudGraphs
@@ -90,7 +91,10 @@ export
   insertValuesCloudVert!,
   recoverConstraintType,
   populatenewvariablenodes!,
+  populatenewfactornodes!,
   updatenewverts!,
+  # to reset the server side graph
+  resetentireremotesession,
 
   # drawing functions
   VisualizationContainer,
