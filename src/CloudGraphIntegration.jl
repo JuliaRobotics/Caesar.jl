@@ -574,8 +574,17 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
   # elem = newvertdict[neoNodeId]
   for (neoNodeId,elem) in newvertdict
     if elem[:frtend]["t"] == "F"
-      # verts relating to this factor
       @show neoNodeId
+      if !haskey(elem,:ready)
+        warn("missing ready field")
+        continue
+      end
+      if Int(elem[:ready]["val"]) != 1
+        @show elem[:ready]
+        warn("ready/val field not equal to 1")
+        continue
+      end
+      # verts relating to this factor
       verts = Vector{Graphs.ExVertex}()
       i=0
       for bf in split(elem[:frtend]["btwn"], ' ')
