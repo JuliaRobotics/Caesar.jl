@@ -47,6 +47,5 @@ key = db[collection].insert({"neoNodeId": -1, "val": f, "description": "Auto-ins
 # get the image?
 for result in db.bindata.find({"_id":key}):
     newf = open('/home/dehann/newfile.png', 'w') # to write image to
-    #print type(result["image"])
-    X = BSON(result["val"]).decode()
+    newf.write(result["val"]);
     newf.close()
