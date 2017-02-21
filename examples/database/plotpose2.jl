@@ -31,9 +31,10 @@ fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 # setBackendWorkingSet!(conn, session)
 fullLocalGraphCopy!(fg, conn)
 
-
+println("Plotting...")
 pl = drawPosesLandms(fg)
 
+println("Rendering plotpose2_$(session).pdf...")
 draw(PDF("plotpose2_$(session).pdf",40cm,40cm),pl)
 
 #

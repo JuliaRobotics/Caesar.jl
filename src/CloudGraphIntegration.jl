@@ -74,14 +74,21 @@ end
 
 
 # TODO -- fetching of CloudVertex propably not required, make faster request to @GearsAD
-function getCloudOutNeighbors(fgl::FactorGraph, exVertId::Int64; ready::Int=1,backendset::Int=1)
+function getCloudOutNeighbors(fgl::FactorGraph,
+      exVertId::Int64;
+      ready::Int=1,
+      backendset::Int=1,
+      needdata::Bool=false  )
+  #
   cgid = fgl.cgIDs[exVertId]
   cv = CloudGraphs.get_vertex(fgl.cg, cgid, false)
   neighs = CloudGraphs.get_neighbors(fgl.cg, cv)
   neExV = Graphs.ExVertex[]
   for n in neighs
     cgn = CloudGraphs.cloudVertex2ExVertex(n)
-    if cgn.attributes["ready"] == ready && cgn.attributes["backendset"] == backendset
+    if (cgn.attributes["ready"] == ready &&
+       cgn.attributes["backendset"] == backendset &&
+       (!needdata || haskey(cgn.attributes, "data") )  )
       push!(neExV, cgn )
     end
   end
@@ -89,9 +96,13 @@ function getCloudOutNeighbors(fgl::FactorGraph, exVertId::Int64; ready::Int=1,ba
 end
 
 # return list of neighbors as Graphs.ExVertex type
-function getCloudOutNeighbors(fgl::FactorGraph, vert::Graphs.ExVertex; ready::Int=1,backendset::Int=1)
+function getCloudOutNeighbors(fgl::FactorGraph,
+      vert::Graphs.ExVertex;
+      ready::Int=1,
+      backendset::Int=1,
+      needdata::Bool=false  )
   # TODO -- test for ready and backendset here
-  getCloudOutNeighbors(fgl, vert.index, ready=ready,backendset=backendset)
+  getCloudOutNeighbors(fgl, vert.index, ready=ready,backendset=backendset, needdata=needdata )
 end
 
 
