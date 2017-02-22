@@ -25,7 +25,7 @@ import uuid
 ##############
 
 # To Run:
-# $ python NeoDBInteraction.py -f <path-to-rosbag> (SESSTURTLE in particular is autonomous_2017-01-15-15-34-19.bag)
+# $ python NeoDBInteraction.py -f <path-to-rosbag> ("+self.sessname+" in particular is autonomous_2017-01-15-15-34-19.bag)
 
 # Make sure authfile path below exists where you run this script
 # And the labels/properties in the commands are the ones desired!
@@ -39,7 +39,7 @@ un,pw, addr = open(authfile).read().splitlines()
 ##############
 
 class Neo4jTalkApp():
-    def __init__(self):
+    def __init__(self, sessname):
         self.idx_ = 0 # odom_index
 
         ## Authentication and Setup for Neo4j
@@ -47,10 +47,11 @@ class Neo4jTalkApp():
         un,pw, addr = open(authfile).read().splitlines()
         self.driver = GraphDatabase.driver(addr, auth=basic_auth(un, pw))
         self.session = self.driver.session()
-        self.session.run("MATCH (n:SESSTURTLE) DETACH DELETE n") # REMOVE ALL SESSTURTLE NODES
+        self.session.run("MATCH (n:"+self.sessname+") DETACH DELETE n") # REMOVE ALL "+self.sessname+" NODES
         self.odom_diff = None
         self.old_odom = None
         self.odom_node_id = None # neo4j node id
+        self.sessname = sessname
 
         ## Authentication/Setup for Mongo
         mongo_authfile = "/home/dehann/mongo_authfile.txt"
@@ -93,9 +94,9 @@ class Neo4jTalkApp():
             x = poses[i].t[0]
             y = poses[i].t[1]
             #rospy.logerr('\n\n tag is {}'.format(tag_ids[i]))
-            self.session.run("MERGE (l1:NEWDATA:LAND:SESSTURTLE {frtend: {land_info}}) "
-                             "MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info}}) "
-                             "MERGE (f:FACTOR:NEWDATA:SESSTURTLE {frtend: {fac_info}}) " # odom-landmark factor
+            self.session.run("MERGE (l1:NEWDATA:LAND:"+self.sessname+" {frtend: {land_info}}) "
+                             "MERGE (o1:POSE:NEWDATA:"+self.sessname+" {frtend: {var_info}}) "
+                             "MERGE (f:FACTOR:NEWDATA:"+self.sessname+" {frtend: {fac_info}}) " # odom-landmark factor
                              "MERGE (o1)-[:DEPENDENCE]->(f) "
                              "MERGE (f)-[:DEPENDENCE]->(l1) "
                              "RETURN id(o1)",
@@ -134,8 +135,8 @@ class Neo4jTalkApp():
 
         # add odom
         if self.idx_ == 0:
-            self.session.run("MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info1} }) "
-                             "MERGE (f:FACTOR:NEWDATA:SESSTURTLE { frtend: {fac_info} }) "
+            self.session.run("MERGE (o1:POSE:NEWDATA:"+self.sessname+" {frtend: {var_info1} }) "
+                             "MERGE (f:FACTOR:NEWDATA:"+self.sessname+" { frtend: {fac_info} }) "
                              "MERGE (o1)-[:DEPENDENCE]-(f) ",
                              {"var_info1":json.dumps({"t":"P", "uid":self.idx_, "userready":0}),
                               "fac_info":json.dumps({"meas": "0 0 0 1e-4 0 0 1e-4 0 4e-6",
@@ -143,9 +144,9 @@ class Neo4jTalkApp():
                                                      "btwn": "0"})})
 
         if self.odom_diff:
-            running_result = self.session.run("MERGE (o1:POSE:NEWDATA:SESSTURTLE {frtend: {var_info1} }) " # finds/creates
-                                              "MERGE (o2:POSE:NEWDATA:SESSTURTLE { frtend: {var_info2} })"
-                                              "MERGE (f:FACTOR:NEWDATA:SESSTURTLE { frtend: {fac_info} }) " # odom-odom factor
+            running_result = self.session.run("MERGE (o1:POSE:NEWDATA:"+self.sessname+" {frtend: {var_info1} }) " # finds/creates
+                                              "MERGE (o2:POSE:NEWDATA:"+self.sessname+" { frtend: {var_info2} })"
+                                              "MERGE (f:FACTOR:NEWDATA:"+self.sessname+" { frtend: {fac_info} }) " # odom-odom factor
                                               "MERGE (o1)-[:DEPENDENCE]-(f) " # add relationships
                                               "MERGE (o2)-[:DEPENDENCE]-(f) "
                                               "RETURN id(o1) as oid",
@@ -160,7 +161,7 @@ class Neo4jTalkApp():
                                                                       "btwn": str(self.idx_) + " " + str(self.idx_+1)})})
             for record in running_result: # just one record
                 self.odom_node_id = record["oid"]
-            self.session.run("MATCH (od:POSE:NEWDATA:SESSTURTLE)"
+            self.session.run("MATCH (od:POSE:NEWDATA:"+self.sessname+")"
                              "WHERE id(od)={odom_node_id}"
                              "SET od += {newkeys}",
                              {"odom_node_id":self.odom_node_id,
@@ -170,9 +171,7 @@ class Neo4jTalkApp():
             self.odom_diff = None # reset difference
 
 if __name__=="__main__":
-    m = Neo4jTalkApp()
     # rospy.spin()
-
     parser = argparse.ArgumentParser(
         description='rosbag player')
     parser.add_argument(
@@ -190,8 +189,13 @@ if __name__=="__main__":
         '-k', '--keyframe-channel', type=str, required=False,
         default='/camera/rgb/image_raw/compressed_triggered',
         help='/camera/rgb/image_raw/compressed_triggered')
+    parser.add_argument(
+        '-S', '--sessionname', type=str, required=True,
+        help='SESS?')
 
     args = parser.parse_args()
+
+    m = Neo4jTalkApp(args.sessionname)
 
     # Setup dataset/log
     dataset = ROSBagReader(filename=os.path.expanduser(args.filename),
