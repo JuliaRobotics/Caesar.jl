@@ -46,6 +46,43 @@ class SegnetExtractor(object):
 
         return colored        
     
+
+def updatemongokeys(session, dbsessname, neoid, oidname, newoid):
+    res = session.run("MATCH (n:"+dbsessname+") " # finds if not exist
+                      "WHERE id(n)="+str(neoid)+" "
+                      "return n.frtend as frtend, n.mongo_keys as mongo_keys")
+
+    elem = res.single()
+    var_json_str1 = elem["frtend"]
+    mymoids = elem["mongo_keys"]
+    if mymoids == None:
+        mymoids = {}
+    else:
+        print 'trying to load json'
+        mymoids = json.loads(mymoids)
+
+    mymoids[oidname] = newoid
+    mym_json_str = json.dumps(mymoids)
+
+    # import IPython; IPython.embed()
+    
+    res = session.run("MATCH (n:"+dbsessname+") "
+                      "WHERE id(n)="+str(neoid)+" "
+                      "SET n.mongo_keys = {mym_info} "
+                      "RETURN count(n) as numupdated",
+                      {"mym_info": mym_json_str} )
+
+    elem = res.single()
+    if elem["numupdated"] != 1:
+        print "ERROR, did not work. Number of updated entries are", elem["numupdated"]
+    # res = session.run("MERGE (o1:POSE:SESSROX { frtend: {var_info1} }) "
+    #                   "set o1.mongo_keys = {mym_info} "
+    #                   "return o1.frtend as frtend, o1.mongo_keys as mongo_keys ",
+    #                   {"var_info1": var_json_str1,
+    #                    "mym_info": mym_json_str})
+
+
+    
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
@@ -63,56 +100,71 @@ if __name__ == "__main__":
     driver = GraphDatabase.driver(addrn, auth=basic_auth(un, pw))
     session = driver.session()
 
+    # Mongo client
+    authfilemongo = os.path.join(os.getenv('HOME'), 'mongo_authfile.txt') # username on one line, password on next (for database)
+    addrm = open(authfilemongo).read().splitlines()
+    client = MongoClient(addrm)
+    db = client.CloudGraphs
+    collection = "bindata"
+    
+    # connect to database using client
+    # db = client.tester # tester==name of the db. also db = client['tester'] works.
+
     # update and repeat this
-    above = 0
+    last_neo_id = 0
     recs = session.run('''match (n:SESSTURTLE:POSE) where id(n) > {} '''
                        '''return id(n) as id, n.mongo_keys as mongokeys, '''
-                       '''n.frtend as label order by id(n) asc limit 1'''.format(above))
+                       '''n.frtend as label order by id(n) asc limit 1'''.format(last_neo_id))
 
+    # Setup segnet
+    segnet = SegnetExtractor(os.path.expanduser(args.directory))
+    
     # iterate through the poses and get the mongokeys
     for index in range(0,9): 
         for rec in recs:
           print 'record', rec["id"], rec["label"], rec["mongokeys"]
-          above = rec["id"]
+          last_neo_id = rec["id"]
           recs = session.run('''match (n:SESSTURTLE:POSE) where id(n) > {} '''
                              '''return id(n) as id, n.mongo_keys as mongokeys, '''
-                             '''n.frtend as label order by id(n) asc limit 1'''.format(above))
+                             '''n.frtend as label order by id(n) asc limit 1'''.format(last_neo_id))
 
+          mongo_key = ObjectId(json.loads(rec['mongokeys'])['keyframe_rgb'])
+          results = db[collection].find({"_id": mongo_key})
+
+          for item in results:
+              im = cv2.imdecode(np.fromstring(str(item['val']), dtype=np.uint8), -1)
+              print im.shape
+              
+              label = segnet.extract(im)
+              print label.shape
+              
+              # Re-encode segnet label
+              res, label_encoded = cv2.imencode('.png', label)
+              label_monogo_key = db[collection].insert({"neoNodeId": -1, "val": Binary(label_encoded.tostring()),
+                                                        "description": "Auto-inserted with mongo_interaction.py"})
+
+              print 'New mongo key for segnet label', label_monogo_key, type(label_monogo_key)
+              updatemongokeys(session, "SESSTURTLE", last_neo_id, 'keyframe_segnet', str(label_monogo_key))
+    
+
+          
+          
 
     #####################################################################################
     ## MongoDB Construction in Python Example
     # Add a binary image entry (referred to as a "document") to a "collection" in a mongo database.
     #####################################################################################
 
-    authfilemongo = os.path.join(os.getenv('HOME'), 'mongo_authfile.txt') # username on one line, password on next (for database)
-    addrm = open(authfilemongo).read().splitlines()
-    client = MongoClient(addrm)
-
     print "------- GETTING From CG's PNG data ----------"
     print ""
 
 
-    # USING NEW DATA
-    # connect to database using client
-    db = client.CloudGraphs # tester==name of the db. also db = client['tester'] works.
-    # db = client.tester # tester==name of the db. also db = client['tester'] works.
-
-    collection = "bindata"
     # collection = "rgb_keyframes"
 
     # New PNG dataset
-    key = ObjectId("58ab6b015d76250947c22498")
+    # key = ObjectId("58ab6b015d76250947c22498")
     # key = ObjectId("589b7535093d3f1d51cc81da")
 
-    results = db[collection].find({"_id":key})
-
-    # Setup segnet
-    segnet = SegnetExtractor(os.path.expanduser(args.directory))
 
     # get the image?
-    for item in results:
-      im = cv2.imdecode(np.fromstring(str(item['val']), dtype=np.uint8), -1)
 
-      for j in range(100): 
-          label = segnet.extract(im)
-          print im.shape, label.shape
