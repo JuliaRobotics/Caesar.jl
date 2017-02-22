@@ -41,7 +41,7 @@ un,pw, addr = open(authfile).read().splitlines()
 class Neo4jTalkApp():
     def __init__(self, sessname):
         self.idx_ = 0 # odom_index
-
+        self.sessname = sessname
         ## Authentication and Setup for Neo4j
         authfile = '/home/dehann/neo_authfile.txt' # username on one line, password on next (for database)
         un,pw, addr = open(authfile).read().splitlines()
@@ -51,7 +51,6 @@ class Neo4jTalkApp():
         self.odom_diff = None
         self.old_odom = None
         self.odom_node_id = None # neo4j node id
-        self.sessname = sessname
 
         ## Authentication/Setup for Mongo
         mongo_authfile = "/home/dehann/mongo_authfile.txt"
