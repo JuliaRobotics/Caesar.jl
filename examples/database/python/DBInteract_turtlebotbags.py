@@ -123,10 +123,10 @@ class Neo4jTalkApp():
 
         # add odom
         if self.idx_ == 0:
-            neo4j_iface.add_pose(0, 0, 0, priorFactorPose2(0, 0, 0, priorNoise), None)
+            self.neo4j_iface.add_pose(0, 0, 0, priorFactorPose2(0, 0, 0, priorNoise), None)
         if self.odom_diff:
             odometry = betweenFactorPose2(self.odom_diff.t[0], self.odom_diff.t[1], euler_from_quaternion(self.odom_diff.xyzw)[2], odometryNoise)
-            p_id, running_result = neo4j_iface.add_pose(None, None, None, None, odometry)
+            p_id, running_result = self.neo4j_iface.add_pose(None, None, None, None, odometry)
             # running_result = self.session.run("MERGE (o1:POSE:NEWDATA:"+self.sessname+" {frtend: {var_info1} }) " # finds/creates
             #                                   "MERGE (o2:POSE:NEWDATA:"+self.sessname+" { frtend: {var_info2} })"
             #                                   "MERGE (f:FACTOR:NEWDATA:"+self.sessname+" { frtend: {fac_info} }) " # odom-odom factor
