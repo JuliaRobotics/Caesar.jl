@@ -11,6 +11,7 @@ from pybot.geometry.rigid_transform import RigidTransform, Pose, Quaternion
 from pybot.externals.ros.bag_utils import ROSBagReader, ROSBagController
 from pybot.externals.ros.bag_utils import Decoder, ImageDecoder, NavMsgDecoder, TfDecoderAndPublisher
 from pybot.utils.db_utils import AttrDict
+from pybot_apriltags import AprilTag, AprilTagsWrapper
 from apriltags_ros.msg import AprilTagDetectionArray
 from nav_msgs.msg import Odometry
 import cv2
@@ -38,7 +39,7 @@ authfile = '/home/dehann/neo_authfile.txt' # username on one line, password on n
 
 priorNoise = Noise3D(0.2, 0.2, 0.05)
 landmarkPriorNoise = Noise2D(0.002, 0.002)
-odometryNoise = Noise3D(0.1, 0.05, 0.01)
+odometryNoise = Noise3D(0.1, 0.1, 0.015)
 rangeNoise = Noise1D(0.25)
 bearingRangeNoise = Noise2D(0.1, 0.25)
 
@@ -186,7 +187,7 @@ if __name__=="__main__":
                            decoder=[
                                Decoder(channel=args.odom_channel, every_k_frames=1), # internal throttling
                                Decoder(channel=args.tag_channel, every_k_frames=1),
-                               ImageDecoder(channel=args.keyframe_channel, every_k_frames=5,compressed=True)
+                               ImageDecoder(channel=args.keyframe_channel, every_k_frames=15,compressed=True)
                            ],
                            every_k_frames=1, start_idx=0, index=False)
     d = dataset.establish_tfs([('/camera_rgb_optical_frame', '/base_link')])
