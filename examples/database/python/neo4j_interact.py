@@ -259,7 +259,8 @@ class neo4j_interact(object):
             self._pose_to_measurements[p_id].append(self._max_factor_id)
             self._max_factor_id += 1
         elif type(measurement_factor) is bearingRangeFactorPose2Point2:
-            p_measurement_factor_neo4j = json.dumps({'meas': str(measurement_factor.bearing_val) + str(measurement_factor.range_val) + str(measurement_factor.noise.x) + '0' + str(measurement_factor.noise.y),
+            # TODO -- noise xx 0 yy, where is xy
+            p_measurement_factor_neo4j = json.dumps({'meas': str(measurement_factor.bearing_val) + ' ' + str(measurement_factor.range_val) + ' ' + str(measurement_factor.noise.x) + ' 0 ' + str(measurement_factor.noise.y),
                                                      'lklh': 'BR G 2',
                                                      'btwn': str(p_id) + ' ' + str(measurement_factor.landmark_id),
                                                      't': 'F'})
