@@ -144,7 +144,7 @@ class Neo4jTalkApp():
             #                                                           "btwn": str(self.idx_) + " " + str(self.idx_+1)})})
             for record in running_result: # just one record
                 self.odom_node_id = record["pose2id"]
-            self.addmongokeys(self.odom_node_id, "keyframe_rgb", str(oid) )
+            self.neo4j_iface.addmongokeys(self.odom_node_id, "keyframe_rgb", str(oid) )
             # self.session.run("MATCH (od:POSE:NEWDATA:"+self.sessname+")"
             #                  "WHERE id(od)={odom_node_id}"
             #                  "SET od += {newkeys}",
