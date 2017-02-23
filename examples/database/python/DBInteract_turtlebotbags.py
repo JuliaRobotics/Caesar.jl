@@ -154,8 +154,7 @@ class Neo4jTalkApp():
             self.old_odom = self.old_odom*self.odom_diff # advance old odom
             self.odom_diff = None # reset difference
 
-
-    def on_depth(self, t, data):
+    def on_depth(self, data):
         """
         Callback for images:
         Only responsible for accumulating images, and maintaining
@@ -197,7 +196,8 @@ if __name__=="__main__":
                            decoder=[
                                Decoder(channel=args.odom_channel, every_k_frames=1), # internal throttling
                                Decoder(channel=args.tag_channel, every_k_frames=1),
-                               ImageDecoder(channel=args.keyframe_channel, every_k_frames=1,compressed=True)
+                               ImageDecoder(channel=args.keyframe_channel, every_k_frames=1,compressed=True),
+                               ImageDecoder(channel='/camera/depth_registered/image_raw_triggered', scale=1, encoding='passthrough', every_k_frames=1)
                            ],
                            every_k_frames=1, start_idx=0, index=False)
     d = dataset.establish_tfs([('/camera_rgb_optical_frame', '/base_link')])
@@ -223,5 +223,5 @@ if __name__=="__main__":
     controller.subscribe(args.odom_channel, convert_odom(m.on_odom_cb))
     controller.subscribe(args.tag_channel, convert_tags(m.on_tags_detection_cb, d))
     controller.subscribe(args.keyframe_channel, convert_keyfr(m.on_keyframe_cb))
-    controller.subscribe('/camera/depth_registered/image_raw_triggered', controller.on_depth)
+    controller.subscribe('/camera/depth_registered/image_raw_triggered', m.on_depth)
     controller.run()
