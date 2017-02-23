@@ -154,7 +154,7 @@ class Neo4jTalkApp():
             self.old_odom = self.old_odom*self.odom_diff # advance old odom
             self.odom_diff = None # reset difference
 
-    def on_depth(self, data):
+    def on_depth(self, t, data):
         """
         Callback for images:
         Only responsible for accumulating images, and maintaining
