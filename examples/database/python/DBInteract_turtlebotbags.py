@@ -11,7 +11,6 @@ from pybot.geometry.rigid_transform import RigidTransform, Pose, Quaternion
 from pybot.externals.ros.bag_utils import ROSBagReader, ROSBagController
 from pybot.externals.ros.bag_utils import Decoder, ImageDecoder, NavMsgDecoder, TfDecoderAndPublisher
 from pybot.utils.db_utils import AttrDict
-from pybot_apriltags import AprilTag, AprilTagsWrapper
 from apriltags_ros.msg import AprilTagDetectionArray
 from nav_msgs.msg import Odometry
 import cv2
@@ -41,7 +40,7 @@ priorNoise = Noise3D(0.2, 0.2, 0.05)
 landmarkPriorNoise = Noise2D(0.002, 0.002)
 odometryNoise = Noise3D(0.1, 0.1, 0.015)
 rangeNoise = Noise1D(0.25)
-bearingRangeNoise = Noise2D(0.1, 0.25)
+bearingRangeNoise = Noise2D(0.1, 0.4)
 
 # Running Mongo
 #client = MongoClient() # auth for
@@ -58,6 +57,8 @@ class Neo4jTalkApp():
         self.odom_diff = None
         self.old_odom = None
         self.odom_node_id = None # neo4j node id
+        self.skipkf = 0
+        self.gotkf = 0
 
         ## Authentication/Setup for Mongo
         mongo_authfile = "/home/dehann/mongo_authfile.txt"
@@ -67,6 +68,12 @@ class Neo4jTalkApp():
         self.db = client.CloudGraphs # test is the name of the data base
 
     def on_tags_detection_cb(self, tag_array, tf_dict=None):
+        if self.gotkf == 0:
+            return
+        elif self.gotkf == 1:
+            self.gotkf -= 1
+        else:
+            ValueError("Tags and keyframes out of sync")
         #print "DETECTING TAGS"
         detections = tag_array.detections
         if len(detections) == 0:
@@ -99,7 +106,7 @@ class Neo4jTalkApp():
         for i in range(len(tag_ids)):
             x = poses[i].t[0]
             y = poses[i].t[1]
-            #self.neo4j_iface.add_measurement(bearingRangeFactorPose2Point2(tag_ids[i], math.atan2(y,x), math.sqrt(x*x + y*y), bearingRangeNoise))
+            self.neo4j_iface.add_measurement(bearingRangeFactorPose2Point2(tag_ids[i], math.atan2(y,x), math.sqrt(x*x + y*y), bearingRangeNoise))
 
     def on_odom_cb(self, data):
         r = RigidTransform(xyzw=[data.pose.pose.orientation.x,
@@ -118,6 +125,12 @@ class Neo4jTalkApp():
 
 
     def on_keyframe_cb(self, data):
+        if self.skipkf < 15:
+            self.skipkf += 1
+            return
+        else:
+            self.skipkf = 0
+            self.gotkf += 1
         im = data # should be under 16 MB
         res, imdata = cv2.imencode('.png', im)
         oid = self.db["bindata"].insert({"neoNodeId": -1, "val": Binary(imdata.tostring()), "description": "Auto-inserted with DBInteraction.py"})
@@ -187,7 +200,7 @@ if __name__=="__main__":
                            decoder=[
                                Decoder(channel=args.odom_channel, every_k_frames=1), # internal throttling
                                Decoder(channel=args.tag_channel, every_k_frames=1),
-                               ImageDecoder(channel=args.keyframe_channel, every_k_frames=15,compressed=True)
+                               ImageDecoder(channel=args.keyframe_channel, every_k_frames=1,compressed=True)
                            ],
                            every_k_frames=1, start_idx=0, index=False)
     d = dataset.establish_tfs([('/camera_rgb_optical_frame', '/base_link')])
