@@ -82,7 +82,7 @@ class rangeFactorPose2Point2(object):
             raise TypeError("noise must be of type Noise1D")
         self.landmark_id = landmark_id
         self.range_val = range_val
-        self.noise = noise.noise
+        self.noise = noise
 
 class bearingRangeFactorPose2Point2(object):
     ''' unimodal bearing and range factor '''
@@ -92,7 +92,7 @@ class bearingRangeFactorPose2Point2(object):
         self.landmark_id = landmark_id
         self.bearing_val = bearing_val
         self.range_val = range_val
-        self.noise = noise.noise
+        self.noise = noise
 
 class neo4j_interact(object):
     ''' Non-parametric SLAMinDB Neo4j interface '''
