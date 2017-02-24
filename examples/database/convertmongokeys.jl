@@ -132,21 +132,22 @@ include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 
 
 collection = "bindata"
+
+client = pymongo.MongoClient(mongoaddress)
+db = client[:CloudGraphs]
+
+
 key = "58af67265d7625647859fa73"
 @show gi.test(key,1)
 
 # @show gi.getrgbimg(mongoaddress, collection, key)
 
 
-client = pymongo.MongoClient(mongoaddress)
-db = client[:CloudGraphs]
-
 mongo_key = bson.ObjectId(key)
 
 im = gi.fastrgbimg(db[collection], mongo_key)
 @show size(im),typeof(im)
 # opencv.imshow("image", im)
-
 
 keydepth = "58b07be05d7625699151a01d"
 mongo_keydepth = bson.ObjectId(keydepth)
@@ -155,6 +156,14 @@ dpim, ims = gi.fastdepthimg(db[collection], mongo_keydepth)
 
 
 
+
+
+key = "58b07bdf5d7625699151a01c"
+mongo_key = bson.ObjectId(key)
+
+im, ims = gi.fastrgbimg(db[collection], mongo_key)
+
+@show size(im)
 
 
 results = (db[collection])[:find]( Dict{String, Any}("_id" => mongo_key) )

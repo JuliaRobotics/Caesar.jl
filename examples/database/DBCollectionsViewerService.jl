@@ -135,7 +135,7 @@ while true
     j=0
     for x in xx
       j+=1
-      mongk = getmongokeys(fg, x, IDs)
+      mongk, cvid = getmongokeys(fg, x, IDs)
   		if DRAWDEPTH && haskey(mongk, "depthframe_image") # !haskey(poseswithdepth, x)
         poseswithdepth[x]=1
         mongo_keydepth = bson.ObjectId(mongk["depthframe_image"])
@@ -165,21 +165,24 @@ while true
         imgc = map(Float64,img)/1000.0
         #   opencv.imshow("yes", img)
         # calibrate the image # color conversion of points, so we can get pretty pictures...
-        X = dcam[:reconstruct](imgc)
-        r,c,h = size(X)
+        X = dcam[:reconstruct](img)
+        @show cvid
+        @show r,c,h = size(X)
         Xd = X[1:3:r,1:3:c,:]
         mask = Xd[:,:,:] .> 4.5
         Xd[mask] = Inf
         # get color information
-        rgbpng = nothing
-        segpng = nothing
+        rgb = nothing
+        seg = nothing
         if haskey(mongk, "keyframe_rgb")
+          @show cvid, mongk["keyframe_rgb"]
           mongo_key = bson.ObjectId(mongk["keyframe_rgb"])
-          rgbpng, ims = gi.fastrgbimg(db[collection], mongo_key)
+          rgb, ims = gi.fastrgbimg(db[collection], mongo_key)
+          # @show size(rgb)
         end
         if haskey(mongk, "keyframe_segnet")
           mongo_key = bson.ObjectId(mongk["keyframe_segnet"])
-          segpng, ims = gi.fastrgbimg(db[collection], mongo_key)
+          seg, ims = gi.fastrgbimg(db[collection], mongo_key)
         end
         # for i in bd.dataElements
         #   if i.description == "keyframe-image"
@@ -190,21 +193,23 @@ while true
         #   end
         # end
         #interpret data
-        if rgbpng != nothing
-          fid = open("temprgb.png","w")
-          write(fid, rgbpng)
-          close(fid)
-          rgb = opencv.imread("temprgb.png")
+        if rgb != nothing
+          # fid = open("temprgb.png","w")
+          # write(fid, rgbpng)
+          # close(fid)
+          # rgb = opencv.imread("temprgb.png")
           # rgb = bgr[:,:,[3;2;1]]
           # publish to viewer via Sudeeps python code
+          @show size(rgb), typeof(rgb)
           rgbss = rgb[1:3:r,1:3:c,:]
           bedu.publish_cloud("depth", Xd, c=rgbss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
         end
-        if segpng != nothing
-          fid = open("temprgb.png","w")
-          write(fid, segpng)
-          close(fid)
-          seg = opencv.imread("temprgb.png")
+        if seg != nothing
+          # fid = open("temprgb.png","w")
+          # write(fid, segpng)
+          # close(fid)
+          # seg = opencv.imread("temprgb.png")
+          @show size(seg), typeof(seg)
           segss = seg[1:3:r,1:3:c,:]
           bedu.publish_cloud("segnet", Xd, c=segss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
         end
