@@ -8,6 +8,10 @@ using Caesar, RoME, KernelDensityEstimate
 using IncrementalInference, CloudGraphs, Neo4j
 using TransformUtils
 
+using PyCall
+
+include("VisualizationUtilities.jl")  # @pyimport getimages as gi
+
 # # connect to the server, CloudGraph stuff
 dbaddress = length(ARGS) > 0 ? ARGS[1] : "localhost"
 println("Taking Neo4j database address as $(dbaddress)...")
@@ -34,7 +38,6 @@ conn = cloudGraph.neo4j.connection
 registerGeneralVariableTypes!(cloudGraph)
 Caesar.usecloudgraphsdatalayer!()
 
-using PyCall
 
 @pyimport pybot.geometry.rigid_transform as bgrt
 @pyimport pybot.geometry.quaternion as bgq
@@ -47,9 +50,9 @@ using PyCall
 @pyimport pybot.vision.camera_utils as cu
 
 
-
 @pyimport numpy as np
 @pyimport cv2 as opencv
+
 
 # draw_utils.publish_pose_list('apriltag', self.tagwposes, frame_id='origin', texts=ids)
 
@@ -132,30 +135,33 @@ while true
     j=0
     for x in xx
       j+=1
-  		if !haskey(poseswithdepth, x) && DRAWDEPTH
+      mongk = getmongokeys(fg, x, IDs)
+  		if DRAWDEPTH && haskey(mongk, "depthframe_image") # !haskey(poseswithdepth, x)
         poseswithdepth[x]=1
-        cvid = -1
-        for id in IDs
-          if Symbol(fg.g.vertices[id[1]].label) == x
-            cvid = id[2]
-            break
-          end
-        end
-        # fetch depth cloud from mongo for pose
-        cv = CloudGraphs.get_vertex(fg.cg, cvid)
-        bd = CloudGraphs.read_BigData!(cloudGraph, cv)
-        depthcloudpng = nothing
-        for i in bd.dataElements
-          if i.description == "depthframe-image"
-            depthcloudpng = i.data
-            break
-          end
-        end
-        #interpret data
-        fid = open("tempdepth.png","w")
-        write(fid, depthcloudpng)
-        close(fid)
-        img = opencv.imread("tempdepth.png",2)
+        mongo_keydepth = bson.ObjectId(mongk["depthframe_image"])
+        img, ims = gi.fastdepthimg(db[collection], mongo_keydepth)
+        # cvid = -1
+        # for id in IDs
+        #   if Symbol(fg.g.vertices[id[1]].label) == x
+        #     cvid = id[2]
+        #     break
+        #   end
+        # end
+        # # fetch depth cloud from mongo for pose
+        # cv = CloudGraphs.get_vertex(fg.cg, cvid)
+        # bd = CloudGraphs.read_BigData!(cloudGraph, cv)
+        # depthcloudpng = nothing
+        # for i in bd.dataElements
+        #   if i.description == "depthframe-image"
+        #     depthcloudpng = i.data
+        #     break
+        #   end
+        # end
+        # #interpret data
+        # fid = open("tempdepth.png","w")
+        # write(fid, depthcloudpng)
+        # close(fid)
+        # img = opencv.imread("tempdepth.png",2)
         imgc = map(Float64,img)/1000.0
         #   opencv.imshow("yes", img)
         # calibrate the image # color conversion of points, so we can get pretty pictures...
@@ -167,14 +173,22 @@ while true
         # get color information
         rgbpng = nothing
         segpng = nothing
-        for i in bd.dataElements
-          if i.description == "keyframe-image"
-            rgbpng = i.data
-          end
-          if i.description == "segnet-image"
-            segpng = i.data
-          end
+        if haskey(mongk, "keyframe_rgb")
+          mongo_key = bson.ObjectId(mongk["keyframe_rgb"])
+          rgbpng, ims = gi.fastrgbimg(db[collection], mongo_key)
         end
+        if haskey(mongk, "keyframe_segnet")
+          mongo_key = bson.ObjectId(mongk["keyframe_segnet"])
+          segpng, ims = gi.fastrgbimg(db[collection], mongo_key)
+        end
+        # for i in bd.dataElements
+        #   if i.description == "keyframe-image"
+        #     rgbpng = i.data
+        #   end
+        #   if i.description == "segnet-image"
+        #     segpng = i.data
+        #   end
+        # end
         #interpret data
         if rgbpng != nothing
           fid = open("temprgb.png","w")

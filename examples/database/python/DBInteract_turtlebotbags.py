@@ -136,8 +136,8 @@ class Neo4jTalkApp():
         res, imdata = cv2.imencode('.png', im)
         oid = self.db["bindata"].insert({"neoNodeId": -1, "val": Binary(imdata.tostring()), "description": "Auto-inserted with DBInteract_turtlebot.py"})
 
-        resdepth, imdatadepth = cv2.imencode('.png', self.lastdepth)
-        oiddepth = self.db["bindata"].insert({"neoNodeId": -1, "val": Binary(imdatadepth.tostring()), "description": "Auto-inserted with DBInteract_turtlebot.py"})
+        # resdepth, imdatadepth = cv2.imencode('.png', self.lastdepth)
+        oiddepth = self.db["bindata"].insert({"neoNodeId": -1, "val": Binary(self.lastdepth.tostring()), "description": "Auto-inserted with DBInteract_turtlebot.py"})
 
         # add odom
         if self.idx_ == 0:

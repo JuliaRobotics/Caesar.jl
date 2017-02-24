@@ -100,6 +100,7 @@ For using the solver on a DataBase layer (work in progress on centralized archit
 
 Install [Neo4j](https://neo4j.com/) and add these packages to your Julia system
 
+    Pkg.add("Mongo")
     Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 

@@ -290,7 +290,6 @@ class neo4j_interact(object):
         if mymoids == None:
             mymoids = {}
         else:
-            print 'trying to load json'
             mymoids = json.loads(mymoids)
 
         mymoids[oidname] = newoid
