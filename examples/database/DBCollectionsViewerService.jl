@@ -118,7 +118,7 @@ while true
   		if haskey(vert.attributes, "MAP_est")
   			X = vert.attributes["MAP_est"]
   		else
-  			X = getKDEMax(getKDE(vert))
+  			X = getKDEfit(getKDE(vert))
   		end
   		posei = bgrt.RigidTransform[:from_angle_axis](X[3],[0;0;1],[X[1];X[2];0])
   		push!(poses, posei)
@@ -166,8 +166,7 @@ while true
         #   opencv.imshow("yes", img)
         # calibrate the image # color conversion of points, so we can get pretty pictures...
         X = dcam[:reconstruct](img)
-        @show cvid
-        @show r,c,h = size(X)
+        r,c,h = size(X)
         Xd = X[1:3:r,1:3:c,:]
         mask = Xd[:,:,:] .> 4.5
         Xd[mask] = Inf
@@ -175,7 +174,6 @@ while true
         rgb = nothing
         seg = nothing
         if haskey(mongk, "keyframe_rgb")
-          @show cvid, mongk["keyframe_rgb"]
           mongo_key = bson.ObjectId(mongk["keyframe_rgb"])
           rgb, ims = gi.fastrgbimg(db[collection], mongo_key)
           # @show size(rgb)
@@ -200,7 +198,7 @@ while true
           # rgb = opencv.imread("temprgb.png")
           # rgb = bgr[:,:,[3;2;1]]
           # publish to viewer via Sudeeps python code
-          @show size(rgb), typeof(rgb)
+          # @show size(rgb), typeof(rgb)
           rgbss = rgb[1:3:r,1:3:c,:]
           bedu.publish_cloud("depth", Xd, c=rgbss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
         end
@@ -209,7 +207,7 @@ while true
           # write(fid, segpng)
           # close(fid)
           # seg = opencv.imread("temprgb.png")
-          @show size(seg), typeof(seg)
+          # @show size(seg), typeof(seg)
           segss = seg[1:3:r,1:3:c,:]
           bedu.publish_cloud("segnet", Xd, c=segss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
         end
