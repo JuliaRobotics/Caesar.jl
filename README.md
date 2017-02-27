@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/caesarimgL.png" width="200" border="10" />
+<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/caesarimgL.png" width="200" border="0" />
 </p>
 
 A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
@@ -16,15 +16,19 @@ Please see related packages, Robot Motion Estimate [RoME.jl][rome-url] and back-
 
 Intersection of ambiguous elevation angle from planar SONAR sensor:
 
-<a href="http://vimeo.com/198237738" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/rovasfm02.gif" alt="IMAGE ALT TEXT HERE" width="480" border="10" /></a>
+<a href="http://vimeo.com/198237738" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/rovasfm02.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 
 Bi-modal belief
 
-<a href="http://vimeo.com/198872855" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/rovyaw90.gif" alt="IMAGE ALT TEXT HERE" width="480" border="10" /></a>
+<a href="http://vimeo.com/198872855" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/rovyaw90.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
+
+Multi-session Turtlebot example (using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git)):
+
+<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/turtlemultisession.gif" alt="Turtlebot Multi-session animation" width="480" border="0" /></a>
 
 Multi-modal range only example:
 
-<a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="480" border="10" /></a>
+<a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 
 Installation
 ------------
@@ -96,7 +100,7 @@ Dependency Status
 Database interaction layer
 --------------------------
 
-For using the solver on a DataBase layer (work in progress on centralized architecture ) see [CloudGraphs](https://github.com/GearsAD/CloudGraphs.jl.git),
+For using the solver on a DataBase layer (work in progress on centralized architecture ) see [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git),
 
 Install [Neo4j](https://neo4j.com/) and add these packages to your Julia system
 
