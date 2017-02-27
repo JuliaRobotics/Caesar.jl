@@ -440,6 +440,13 @@ end
 
 
 
+function transfermongokeys!(fgl::FactorGraph)
+
+  cv = CloudGraphs.get_vertex(fgl.cg, cgid)
+
+
+end
+
 
 function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v::Graphs.ExVertex; labels=String[])
   #
@@ -453,11 +460,15 @@ function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v:
   # if haskey(elem, :mongokeys)
   #   v.attributes["mongo_keys"] = JSON.json(elem[:mongokeys])
   # end
+  mongos = Dict()
   for (k,va) in elem
-    if k != :frtend
+    if k == :frtend
+      v.attributes[string(k)] = JSON.json(va)
+    elseif k == :mongo_keys
+      @show mongos = JSON.parse(va["val"])
       v.attributes[string(k)] = va["val"]
     else
-      v.attributes[string(k)] = JSON.json(va)
+      v.attributes[string(k)] = va["val"]
     end
   end
 
@@ -470,8 +481,21 @@ function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v:
   existlbs = Vector{AbstractString}(cv.neo4jNode.metadata["labels"])
   filter!(e->e!="NEWDATA",existlbs)
   cv.labels = union(existlbs, labels)
+
+  # if mongos != nothing
+  #   for (k,va) in mongos
+  #     @show k, va
+  #     mongoId = BSONOID(va);
+  #     results = first(find(fgl.cg.mongo.cgBindataCollection, ("_id" => eq(mongoId))));
+  #     bdei = CloudGraphs.BigDataElement(k, results)
+  #     push!(cv.bigData.dataElements, bdei);
+  #   end
+  # else
+  #   println("no mongo")
+  # end
   #
   CloudGraphs.update_vertex!(fgl.cg, cv)
+  # CloudGraphs.save_BigData!(fgl.cg, cv)
   # TODO -- this function refactoring and better integration here
   # function updateFullCloudVertData!( fgl::FactorGraph,
   #     nv::Graphs.ExVertex; updateMAPest=false )

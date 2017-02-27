@@ -32,6 +32,8 @@ using
 if haskey(instpkg,"CloudGraphs")
   using CloudGraphs
   using Neo4j
+  using Mongo
+  using LibBSON
 end
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames

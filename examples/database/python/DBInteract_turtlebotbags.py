@@ -21,8 +21,12 @@ import random#.uniform as ru
 
 from pymongo import MongoClient
 from bson import Binary
-import uuid
+# import uuid
 ##############
+
+from neo4j_interact import neo4j_interact
+from neo4j_interact import Noise1D, Noise2D, Noise3D
+from neo4j_interact import priorFactorPoint2, priorFactorPose2, betweenFactorPose2, rangeFactorPose2Point2, bearingRangeFactorPose2Point2
 
 # To Run:
 # $ python NeoDBInteraction.py -f <path-to-rosbag> ("+self.sessname+" in particular is autonomous_2017-01-15-15-34-19.bag)
@@ -31,7 +35,12 @@ import uuid
 # And the labels/properties in the commands are the ones desired!
 
 authfile = '/home/dehann/neo_authfile.txt' # username on one line, password on next (for database)
-un,pw, addr = open(authfile).read().splitlines()
+
+priorNoise = Noise3D(0.2, 0.2, 0.05)
+landmarkPriorNoise = Noise2D(0.002, 0.002)
+odometryNoise = Noise3D(0.1, 0.1, 0.015)
+rangeNoise = Noise1D(0.25)
+bearingRangeNoise = Noise2D(0.1, 0.4)
 
 # Running Mongo
 #client = MongoClient() # auth for
@@ -44,13 +53,13 @@ class Neo4jTalkApp():
         self.sessname = sessname
         ## Authentication and Setup for Neo4j
         authfile = '/home/dehann/neo_authfile.txt' # username on one line, password on next (for database)
-        un,pw, addr = open(authfile).read().splitlines()
-        self.driver = GraphDatabase.driver(addr, auth=basic_auth(un, pw))
-        self.session = self.driver.session()
-        self.session.run("MATCH (n:"+self.sessname+") DETACH DELETE n") # REMOVE ALL "+self.sessname+" NODES
+        self.neo4j_iface = neo4j_interact(authfile=authfile, session_name=sessname)
         self.odom_diff = None
         self.old_odom = None
         self.odom_node_id = None # neo4j node id
+        self.skipkf = 0
+        self.gotkf = 0
+        self.lastdepth = np.zeros((480,640,1), np.uint16)
 
         ## Authentication/Setup for Mongo
         mongo_authfile = "/home/dehann/mongo_authfile.txt"
@@ -60,6 +69,12 @@ class Neo4jTalkApp():
         self.db = client.CloudGraphs # test is the name of the data base
 
     def on_tags_detection_cb(self, tag_array, tf_dict=None):
+        if self.gotkf == 0:
+            return
+        elif self.gotkf == 1:
+            self.gotkf -= 1
+        else:
+            ValueError("Tags and keyframes out of sync")
         #print "DETECTING TAGS"
         detections = tag_array.detections
         if len(detections) == 0:
@@ -92,20 +107,9 @@ class Neo4jTalkApp():
         for i in range(len(tag_ids)):
             x = poses[i].t[0]
             y = poses[i].t[1]
-            #rospy.logerr('\n\n tag is {}'.format(tag_ids[i]))
-            self.session.run("MERGE (l1:NEWDATA:LAND:"+self.sessname+" {frtend: {land_info}}) "
-                             "MERGE (o1:POSE:NEWDATA:"+self.sessname+" {frtend: {var_info}}) "
-                             "MERGE (f:FACTOR:NEWDATA:"+self.sessname+" {frtend: {fac_info}}) " # odom-landmark factor
-                             "MERGE (o1)-[:DEPENDENCE]->(f) "
-                             "MERGE (f)-[:DEPENDENCE]->(l1) "
-                             "RETURN id(o1)",
-                             {"land_info": json.dumps({"t":"L", "tag_id": tag_ids[i], "userready":0}),
-                              "var_info": json.dumps({"t":"P", "uid": self.idx_, "userready":0}),
-                              "fac_info": json.dumps({"t":"F", "lklh":"BR G 2",
-                                                      "meas": str(math.atan2(y,x))+" "+str(math.sqrt(x*x + y*y))+ " 1e-3 0 1e-2", "userready":0, "btwn":str(self.idx_)+" "+str(tag_ids[i]) } ) })
+            self.neo4j_iface.add_measurement(bearingRangeFactorPose2Point2(tag_ids[i], math.atan2(y,x), math.sqrt(x*x + y*y), bearingRangeNoise))
 
     def on_odom_cb(self, data):
-        #print "GETTING ODOM"
         r = RigidTransform(xyzw=[data.pose.pose.orientation.x,
                                  data.pose.pose.orientation.y,
                                  data.pose.pose.orientation.z,
@@ -122,52 +126,43 @@ class Neo4jTalkApp():
 
 
     def on_keyframe_cb(self, data):
+        if self.skipkf < 15:
+            self.skipkf += 1
+            return
+        else:
+            self.skipkf = 0
+            self.gotkf += 1
         im = data # should be under 16 MB
-        #print 'here',type(im)
-        #rospy.logwarn(str(new_im_uid.hex))
-	#Make data pretty binary and get an ID from Mongo on insertion.
-	res, imdata = cv2.imencode('.png', im)
-        #f = open('testFile.png', 'w')
-        #f.write(imdata)
-        #f.close()
-        oid = self.db["bindata"].insert({"neoNodeId": -1, "val": Binary(imdata.tostring()), "description": "Auto-inserted with DBInteraction.py"})
+        res, imdata = cv2.imencode('.png', im)
+        oid = self.db["bindata"].insert({"neoNodeId": -1, "val": Binary(imdata.tostring()), "description": "Auto-inserted with DBInteract_turtlebot.py"})
+
+        # resdepth, imdatadepth = cv2.imencode('.png', self.lastdepth)
+        oiddepth = self.db["bindata"].insert({"neoNodeId": -1, "val": Binary(self.lastdepth.tostring()), "description": "Auto-inserted with DBInteract_turtlebot.py"})
 
         # add odom
         if self.idx_ == 0:
-            self.session.run("MERGE (o1:POSE:NEWDATA:"+self.sessname+" {frtend: {var_info1} }) "
-                             "MERGE (f:FACTOR:NEWDATA:"+self.sessname+" { frtend: {fac_info} }) "
-                             "MERGE (o1)-[:DEPENDENCE]-(f) ",
-                             {"var_info1":json.dumps({"t":"P", "uid":self.idx_, "userready":0}),
-                              "fac_info":json.dumps({"meas": "0 0 0 1e-4 0 0 1e-4 0 4e-6",
-                                                     "t": "F", "lklh":"PR2 G 3",
-                                                     "btwn": "0"})})
-
+            self.neo4j_iface.add_pose(0, 0, 0, priorFactorPose2(0, 0, 0, priorNoise), None)
         if self.odom_diff:
-            running_result = self.session.run("MERGE (o1:POSE:NEWDATA:"+self.sessname+" {frtend: {var_info1} }) " # finds/creates
-                                              "MERGE (o2:POSE:NEWDATA:"+self.sessname+" { frtend: {var_info2} })"
-                                              "MERGE (f:FACTOR:NEWDATA:"+self.sessname+" { frtend: {fac_info} }) " # odom-odom factor
-                                              "MERGE (o1)-[:DEPENDENCE]-(f) " # add relationships
-                                              "MERGE (o2)-[:DEPENDENCE]-(f) "
-                                              "RETURN id(o1) as oid",
-                                              {"var_info1":json.dumps({"t":"P", "uid":self.idx_, "userready":0}),
-                                               "var_info2":json.dumps({"t":"P", "uid":self.idx_+1,
-                                                                       "userready":0}),
-                                               "fac_info":json.dumps({"t":"F", "lklh":"PP2 G 3",
-                                                                      "meas":str(self.odom_diff.t[0])+" "+str(self.odom_diff.t[1])+" "+ \
-                                                                      str(euler_from_quaternion(self.odom_diff.xyzw)[2]) + \
-                                                                      " 1e-3 0 0 1e-3 0 5e-5",
-                                                                      "userready": 0,
-                                                                      "btwn": str(self.idx_) + " " + str(self.idx_+1)})})
+            odometry = betweenFactorPose2(self.odom_diff.t[0], self.odom_diff.t[1], euler_from_quaternion(self.odom_diff.xyzw)[2], odometryNoise)
+            p_id, running_result = self.neo4j_iface.add_pose(None, None, None, None, odometry)
             for record in running_result: # just one record
-                self.odom_node_id = record["oid"]
-            self.session.run("MATCH (od:POSE:NEWDATA:"+self.sessname+")"
-                             "WHERE id(od)={odom_node_id}"
-                             "SET od += {newkeys}",
-                             {"odom_node_id":self.odom_node_id,
-                              "newkeys":{"mongo_keys":json.dumps({"keyframe_rgb":str(oid)})}})
+                self.odom_node_id = record["pose2id"]
+            self.neo4j_iface.addmongokeys(self.odom_node_id, "keyframe_rgb", str(oid) )
+            self.neo4j_iface.addmongokeys(self.odom_node_id, "depthframe_image", str(oiddepth) )
+
             self.idx_ += 1
             self.old_odom = self.old_odom*self.odom_diff # advance old odom
             self.odom_diff = None # reset difference
+
+    def on_depth(self, t, data):
+        """
+        Callback for images:
+        Only responsible for accumulating images, and maintaining
+        queue for images
+        """
+        # print 'ot depth', data.shape, data.dtype
+        self.lastdepth = data
+
 
 if __name__=="__main__":
     # rospy.spin()
@@ -201,7 +196,8 @@ if __name__=="__main__":
                            decoder=[
                                Decoder(channel=args.odom_channel, every_k_frames=1), # internal throttling
                                Decoder(channel=args.tag_channel, every_k_frames=1),
-                               ImageDecoder(channel=args.keyframe_channel, every_k_frames=1,compressed=True)
+                               ImageDecoder(channel=args.keyframe_channel, every_k_frames=1,compressed=True),
+                               ImageDecoder(channel='/camera/depth_registered/image_raw_triggered', scale=1, encoding='passthrough', every_k_frames=1)
                            ],
                            every_k_frames=1, start_idx=0, index=False)
     d = dataset.establish_tfs([('/camera_rgb_optical_frame', '/base_link')])
@@ -227,4 +223,5 @@ if __name__=="__main__":
     controller.subscribe(args.odom_channel, convert_odom(m.on_odom_cb))
     controller.subscribe(args.tag_channel, convert_tags(m.on_tags_detection_cb, d))
     controller.subscribe(args.keyframe_channel, convert_keyfr(m.on_keyframe_cb))
+    controller.subscribe('/camera/depth_registered/image_raw_triggered', m.on_depth)
     controller.run()
