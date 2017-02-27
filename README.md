@@ -22,7 +22,7 @@ Bi-modal belief
 
 <a href="http://vimeo.com/198872855" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/rovyaw90.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 
-Multi-session Turtlebot example (using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git)):
+Multi-session [Turtlebot](http://www.turtlebot.com/) example (using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git) [1]):
 
 <img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/turtlemultisession.gif" alt="Turtlebot Multi-session animation" width="480" border="0" /></a>
 
@@ -131,6 +131,13 @@ Future targets
 This is a work in progress package. Please file issues here as needed to help resolve problems for everyone!
 
 Hybrid parametric and non-parametric optimization. Incrementalized update rules and properly marginalized 'forgetting' for sliding window type operation. We defined interprocess interface for multi-language front-end development.
+
+References
+==========
+
+    [1]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: "SLAMinDB: Centralized graph
+         databases for mobile robotics" IEEE International Conference on Robotics and Automation (ICRA),
+         Singapore, 2017.
 
 [cov-img]: https://codecov.io/github/dehann/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/dehann/Caesar.jl?branch=master
