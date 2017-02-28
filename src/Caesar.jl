@@ -4,6 +4,7 @@ instpkg = Pkg.installed();
 
 # import RoME: initfg
 import Distributions: Normal
+import DrakeVisualizer: Triad
 
 using
   RoME,
@@ -24,11 +25,15 @@ using
   JSON,
   MeshIO,
   FileIO,
-  NLsolve
+  NLsolve,
+  DataStructures,
+  ProgressMeter
 
 if haskey(instpkg,"CloudGraphs")
   using CloudGraphs
   using Neo4j
+  using Mongo
+  using LibBSON
 end
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
@@ -67,24 +72,6 @@ export
   # more passthrough
   initfg,
 
-  # cloudgraph
-  usecloudgraphsdatalayer!,
-  # CloudGraph stuff
-  registerGeneralVariableTypes!,
-  fullLocalGraphCopy!,
-  removeGenericMarginals!,
-  setBackendWorkingSet!,
-  setDBAllReady!,
-  getExVertFromCloud,
-  getAllExVertexNeoIDs,
-  getPoseExVertexNeoIDs,
-  copyAllNodes!,
-  copyAllEdges!,
-  registerCallback!,
-  updateFullCloudVertData!,
-  insertValuesCloudVert!,
-  recoverConstraintType,
-
   # drawing functions
   VisualizationContainer,
   startdefaultvisualization,
@@ -94,11 +81,17 @@ export
   visualizeDensityMesh!,
   updaterealtime!,
   visualizerealtime,
+  # new tree interface
+  drawpose!,
+  drawmarginalpoints!,
 
   # for models
   loadmodel,
   DrawModel,
   DrawROV,
+  DrawScene,
+  #deleting functions
+  deletemeshes!,
 
   # more drawing utils
   ArcPointsRangeSolve,
@@ -130,7 +123,7 @@ end
 include("SlamServer.jl")
 include("DataUtils.jl")
 include("VisualizationUtils.jl")
-# include("ModelVisualizationUtils.jl")
+include("ModelVisualizationUtils.jl")
 include("UserFunctions.jl")
 
 if haskey(instpkg, "CloudGraphs")

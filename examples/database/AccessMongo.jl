@@ -1,23 +1,25 @@
 using Mongo, LibBSON
+using Caesar
 
-client = MongoClient("mrg-liljon.csail.mit.edu", 27017)
-cgBindataCollection = MongoCollection(client, "CloudGraphs", "bindata")
+## Uncomment out for command line operation
+cloudGraph, addrdict = standardcloudgraphsetup()
 
+## interactive operation
+# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 
+# Get the keys (and possibly the data)
+cursor = find(cloudGraph.mongo.cgBindataCollection, query())
+for o in cursor
+    # println( ", oid: ", o["_id"])
+    println("id: ", o["_id"]);
+end
 
-
-
-
-
-
-
-# Example query
-# does not deal with wrap around issue yet
-n.MAP_est = [x; y; yaw]
-setp = [x; y]
-
-match (n)
-where (n.MAP_est[0] - setp[0])*(n.MAP_est[0] - setp[0]) + (n.MAP_est[1] - setp[1])*(n.MAP_est[1] - setp[1]) < 10.0
-			and
-			abs( atan2( (0-n.MAP_est[1]), (0-n.MAP_est[0]) ) - n.MAP_est[2] ) < 0.3
-return n
+# Get Roxana's encoded parameters
+#REF: https://github.com/dehann/Caesar.jl/blob/master/examples/database/python/mongo_interaction.py
+mongoClient = cloudGraph.mongo.client
+# mongoTestCollection = MongoCollection(mongoClient, "tester", "testing_collection")
+# cursor = find(mongoTestCollection, query())
+# for o in cursor
+#     println("Key: ", o["key"], ", oid: ", o["_id"])  # Or simply,
+#     #println(o)
+# end

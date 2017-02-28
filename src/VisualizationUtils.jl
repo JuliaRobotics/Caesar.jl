@@ -3,161 +3,24 @@
 using DrakeVisualizer, CoordinateTransformations, GeometryTypes, Rotations, TransformUtils, ColorTypes
 
 
-type VisualizationContainer{T}
-  models::Dict{T, Visualizer}
-  triads::Dict{T, Any}
-  triadposes::Dict{T, AbstractAffineMap}
-  meshes::Dict{T, Any}
-  realtime::Dict{T, Any}
-  rttfs::Dict{T, AbstractAffineMap}
-  # pointpositions::Dict{T, Translation}
-end
-
-
-function Anyaxestriad(;width=0.02,length=1.0)
-  Xbox = GeometryData(HyperRectangle(Vec(0.,-width,-width), Vec(length,width,width)))
-  Xbox.color = RGBA(1., 0, 0, 0.5)
-  Ybox = GeometryData(HyperRectangle(Vec(-width,0.0,-width), Vec(width,length,width)))
-  Ybox.color = RGBA(0., 1, 0, 0.5)
-  Zbox = GeometryData(HyperRectangle(Vec(-width,-width,0.0), Vec(width,width,length)))
-  Zbox.color = RGBA(0., 0, 1, 0.5)
-  Any([Xbox;Ybox;Zbox])
-end
-
-function settriadpose!{T}(triadposes::Dict{T, AbstractAffineMap}, id::T, wTb::Translation, wRb::Rotation)
-  triadposes[id] = wTb ∘ LinearMap(wRb)
-  nothing
-end
-settriadpose!{T}(triadposes::Dict{T, AbstractAffineMap}, id::T, wTb::Vector{Float64}, wQb::TransformUtils.Quaternion) =
-    updatetriad!(triadposes, id, Translation(wTb...), Quat(wQb.s, wQb.v...))
-
-function setpointpose!{T}(positions::Dict{T, AbstractAffineMap}, id::T, wTb::Translation)
-  positions[id] = wTb
-  nothing
-end
-
-function newtriad!{T}(triads::Dict{T,Any}, triadposes::Dict{T, AbstractAffineMap}, id::T;
-      wRb::Rotation=Quat(1.,0,0,0),
-      wTb::Translation=Translation(0.,0,0),
-      width=0.02,
-      length=1.0  )
-  triads[id] = Anyaxestriad(width=width, length=length)
-  settriadpose!(triadposes, id, wTb, wRb)
-  nothing
-end
-
-function newtriad!{T}(dc::VisualizationContainer{T}, id::T;
-      wRb::Rotation=Quat(1.,0,0,0),
-      wTb::Translation=Translation(0.,0,0),
-      width=0.02,
-      length=1.0 )
-  #
-  newtriad!(dc.triads, dc.triadposes, id, wRb=wRb, wTb=wTb, width=width, length=length)
-end
-
-
-function newpoint!{T}(dc::VisualizationContainer{T}, id::T;
-      wTb::Translation=Translation(0.,0,0),
-      radius=0.02,
-      color=RGBA(0., 0, 1, 0.5) )
-  #
-  pt = GeometryData(HyperSphere(Point(0.,0,0), radius))
-  pt.color = color
-  dc.triads[id] = Any([pt])
-  setpointpose!(dc.triadposes, id, wTb)
-  nothing
-end
-
-# function visualizetriads{T}(triads::Dict{T,Any}, triadposes::Dict{T, AbstractAffineMap})
-#   triadsmodel = Visualizer(triads)
-#   DrakeVisualizer.draw(triadsmodel, triadposes)
-#   triadsmodel
-# end
-function visualizetriads!(vc::VisualizationContainer)  # = visualizetriads(dc.triads, dc.triadposes)
-  vc.models[:dev] = Visualizer(vc.triads, 1)
-  DrakeVisualizer.draw(vc.models[:dev], vc.triadposes)
-  nothing
-end
-
-function testtriaddrawing()
-  # triads, trposes = Dict{Int,Any}(), Dict{Int, AbstractAffineMap}()
-  vc = VisualizationContainer(nothing,Dict{Int,Any}(), Dict{Int, AbstractAffineMap}(), Dict{Int, HomogenousMesh}(), Dict{Int, Any}(), Dict{Int, AbstractAffineMap}())
-  newtriad!(vc, 0)
-  newtriad!(vc, 1,wTb=Translation(2.,0,0),wRb=CoordinateTransformations.AngleAxis(pi/4,1.,0,0),length=0.5)
-  newtriad!(vc, 2,wTb=Translation(4.,0,0),wRb=CoordinateTransformations.AngleAxis(pi/2,1.,0,0),length=0.5)
-
-  newpoint!(vc, 100, wTb=Translation(1.,1,0))
-
-  visualizetriads!(vc)
-  vc
-end
-
 
 # create a new Director window with home axis
 function startdefaultvisualization(;newwindow=true,draworigin=true)
   DrakeVisualizer.new_window()
-  triads, trposes, meshes = Dict{Symbol, Any}(), Dict{Symbol, AbstractAffineMap}(), Dict{Symbol, Any}()
-  draworigin ? newtriad!(triads, trposes, :origin) : nothing
-  realtime, rttfs = Dict{Symbol, Any}(), Dict{Symbol, AbstractAffineMap}()
-  #newtriad!(vc,p, wTb=Translation(maxval[1:3]...), wRb=Quat(q.s,q.v...), length=0.5)
-  dc = VisualizationContainer(Dict{Symbol, Visualizer}(), triads, trposes, meshes, realtime, rttfs)
-  visualizetriads!(dc)
-  # model = visualizetriads(triads, trposes)
-  return dc
+  viz = DrakeVisualizer.Visualizer()
+  if draworigin
+    setgeometry!(viz[:origin], Triad())
+    settransform!(viz[:origin], Translation(0, 0, 0.0) ∘ LinearMap(Rotations.Quat(1.0,0,0,0)))
+  end
+
+  # realtime, rttfs = Dict{Symbol, Any}(), Dict{Symbol, AbstractAffineMap}()
+  # dc = VisualizationContainer(Dict{Symbol, Visualizer}(), triads, trposes, meshes, realtime, rttfs)
+  # visualizetriads!(dc)
+  return viz
 end
 
 
-function visualizeallposes!(vc::VisualizationContainer, fgl::FactorGraph; drawlandms::Bool=true,drawtype::Symbol=:max)
-  topoint = +
-  if drawtype == :max
-    topoint = getKDEMax
-  elseif drawtype == :mean
-    topoint = getKDEMean
-  elseif drawtype == :fit
-    topoint = (x) -> getKDEfit(x).μ
-  else
-    error("Unknown draw type")
-  end
-
-  po,ll = ls(fgl)
-  for p in po
-    # v = getVert(fgl, p)
-    den = getVertKDE(fgl, p)
-    maxval = topoint(den)
-    q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
-    newtriad!(vc,p, wTb=Translation(maxval[1:3]...), wRb=Quat(q.s,q.v...), length=0.5)
-  end
-  if drawlandms
-    for l in ll
-      # v = getVert(fgl, p)
-      den = getVertKDE(fgl, l)
-      maxval = topoint(den)
-      newpoint!(vc, l, wTb=Translation(maxval[1:3]...))
-    end
-  end
-
-  visualizetriads!(vc)
-  nothing
-end
-
-# should be using Twan's code here
-function updaterealtime!{T}(vc::VisualizationContainer{T}, id::T, am::AbstractAffineMap)
-  if !haskey(vc.realtime, id)
-    newtriad!(vc.realtime, vc.rttfs, id, wRb=Quat(am.m.w,am.m.x,am.m.y,am.m.z), wTb=Translation(am.v...), length=0.6)
-    vc.models[:realtime] = Visualizer(vc.realtime, 9999)
-  else
-    vc.rttfs[id] = am
-  end
-  nothing
-end
-
-function visualizerealtime(vc::VisualizationContainer)
-  DrakeVisualizer.draw(vc.models[:realtime], vc.rttfs)
-  nothing
-end
-
-
-function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl::Symbol; levels=3, meshid::Int=2)
+function visualizeDensityMesh!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph, lbl::Symbol; levels=3, meshid::Int=2)
 
   pl1 = marginal(getVertKDE(fgl,lbl),[1;2;3])
 
@@ -172,15 +35,16 @@ function visualizeDensityMesh!(vc::VisualizationContainer, fgl::FactorGraph, lbl
 
   levels = linspace(0.0,maxval,levels+2)
 
-  MD = []
+  # MD = []
   for val in levels[2:(end-1)]
     meshdata = GeometryData(contour_mesh(x -> gg(x,val), lower_bound, upper_bound))
     meshdata.color = RGBA( val/(1.5*maxval),0.0,1.0,val/(1.5*maxval))
-    push!(MD, meshdata)
+    # push!(MD, meshdata)
+    setgeometry!(vc[:meshes][lbl][Symbol("lev$(val)")], meshdata)
   end
-  mptr = Any(MD)
-  vc.meshes[lbl] = mptr
-  Visualizer(mptr, meshid) # meshdata
+  # mptr = Any(MD)
+  # vc.meshes[lbl] = mptr
+  # Visualizer(mptr, meshid) # meshdata
   nothing
 end
 
@@ -246,6 +110,95 @@ end
 
 # DrakeVisualizer.new_window()
 # vctest = testtriaddrawing()
+
+
+
+function drawpose!(viz::DrakeVisualizer.Visualizer, sym::Symbol;
+      tf::CoordinateTransformations.AbstractAffineMap=Translation(0.0,0,0)∘LinearMap(CoordinateTransformations.AngleAxix(0.0,0,0,1.0)))
+  #
+
+  setgeometry!(viz[:poses][sym], Triad())
+  settransform!(viz[:poses][sym], tf)
+  nothing
+end
+
+function visualizeallposes!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph; drawlandms::Bool=true,drawtype::Symbol=:max)
+  topoint = +
+  if drawtype == :max
+    topoint = getKDEMax
+  elseif drawtype == :mean
+    topoint = getKDEMean
+  elseif drawtype == :fit
+    topoint = (x) -> getKDEfit(x).μ
+  else
+    error("Unknown draw type")
+  end
+
+  po,ll = ls(fgl)
+
+  dotwo = false
+  dothree = false
+  if length(po) > 0
+    sym = po[1]
+    X = getVal(fgl, sym)
+    dims = size(X,1)
+    dotwo = dims == 2 || (dims == 3 && string(sym)[1] == 'x')
+    dothree = dims == 6 || (string(sym)[1] == 'l' && dims != 2)
+    (dotwo && dothree) || (!dotwo && !dothree) ? error("Unknown dimension for drawing points in viewer") : nothing
+  end
+
+  for p in po
+    # v = getVert(fgl, p)
+    den = getVertKDE(fgl, p)
+    maxval = topoint(den)
+    if dothree
+      q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
+      drawpose!(vc, p, tf=Translation(maxval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) )
+    elseif dotwo
+      drawpose!(vc, p, tf=Translation(maxval[1],maxval[2],0.0)∘LinearMap(Rotations.AngleAxis(maxval[3],0,0,1.0)) )
+    end
+  end
+  # if drawlandms
+  #   for l in ll
+  #     # v = getVert(fgl, p)
+  #     den = getVertKDE(fgl, l)
+  #     maxval = topoint(den)
+  #
+  #     newpoint!(vc, l, wTb=Translation(maxval[1:3]...))
+  #   end
+  # end
+
+  nothing
+end
+
+function deletemeshes!(vc::DrakeVisualizer.Visualizer)
+  delete!(vc[:meshes])
+end
+
+
+function drawmarginalpoints!(vis::DrakeVisualizer.Visualizer, fgl::FactorGraph, sym::Symbol)
+  X = getVal(fgl, sym)
+  dims = size(X,1)
+  dotwo = dims == 2 || (dims == 3 && string(sym)[1] == 'x')
+  dothree = dims == 6 || (string(sym)[1] == 'l' && dims != 2)
+  # @show dims, dotwo, dothree
+  (dotwo && dothree) || (!dotwo && !dothree) ? error("Unknown dimension for drawing points in viewer") : nothing
+  # compile data points for drawing
+  XX = Vector{Vector{Float64}}()
+  for i in 1:size(X,2)
+    if dotwo
+      push!(XX,[X[1:2,i];0.0])
+    elseif dothree
+      push!(XX,X[1:3,i])
+    end
+  end
+  pointcloud = PointCloud(XX)
+  if string(sym)[1] == 'l'
+    pointcloud.channels[:rgb] = [RGB(1.0, 1.0, 0) for i in 1:length(XX)]
+  end
+  setgeometry!(vis[:marginals][sym][:points], pointcloud)
+  nothing
+end
 
 
 

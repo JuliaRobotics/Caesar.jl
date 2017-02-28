@@ -5,17 +5,29 @@
 # using Rotations
 # using ColorTypes: RGBA
 
-abstract DrawModel <: Function
+abstract DrawObject <: Function
 
 # Modified ROV model from GrabCAD
 # http://grabcad.com/library/rov-7
-type DrawROV <: DrawModel
+type DrawROV <: DrawObject
   data
   visid::Int
   symbol::Symbol
   offset::AffineMap
 end
 
+type DrawScene <: DrawObject
+  data
+  symbol::Symbol
+  offset::AffineMap
+end
+
+"""
+    mdl = loadmodel(model, [color=, offset=])
+
+Brings model data into context, but generating or loading meshes, Geometries, etc as required by requested model,
+and must still be drawn with the Visualizer object using mdl(vis).
+"""
 function loadmodel(model::Symbol=:rov;
     color=RGBA(0., 1.0, 0.5, 0.3),
     offset = Translation(0.,0,0) ∘ LinearMap(Rotations.Quat(1.0,0,0,0))  )
@@ -27,67 +39,63 @@ function loadmodel(model::Symbol=:rov;
     rovdata.color = color
     offset = Translation(-0.5,0,0.25) ∘ LinearMap(Rotations.Quat(0,0,0,1.0))
     return DrawROV(rovdata, 99, :rov, offset)
+  elseif model == :scene01
+    boxdata = GeometryData(HyperRectangle(Vec(0.0,4.0,-0.7), Vec(5.0,5.0,1.4)), RGBA(0.5,0.1,0.0,0.5))
+    # boxdata.color =
+    offset = Translation(0.0,0,0) ∘ LinearMap(CoordinateTransformations.AngleAxis(0.0,0,0,1.0))
+    return DrawScene(boxdata, :scene01, offset)
+  elseif model == :dock
+    @show file = joinpath(dirname(@__FILE__), ".." , "data", "models", "dock.obj")
+    rov = load(file)
+    rovdata = GeometryData(rov)
+    rovdata.color = color
+    offset = Translation(0.0,0,0) ∘ LinearMap(Rotations.Quat(1.0,0,0,0.0))
+    return DrawScene(rovdata, :dock, offset)
   else
     error("Don't recognize requested $(string(model)) model.")
   end
 end
 
 #syntax support lost in 0.5, but see conversation at
-# function (dmdl::DrawModel)(vc::VisualizationContainer)
+# function (dmdl::DrawObject)(vc::VisualizationContainer)
 # issue  https://github.com/JuliaLang/julia/issues/14919
 
-function (dmdl::DrawROV)(vc::VisualizationContainer,
-        am::AffineMap  )
+function (dmdl::DrawROV)(vc::DrakeVisualizer.Visualizer,
+        am::AbstractAffineMap  )
   #
-  # mam = am.m
-  # if typeof(am.m)==Rotations.AngleAxis{Float64}
-  #   mam = convert(Rotations.Quat, am.m)
-  # end
-  # res = SE3(am.v[1:3],Quaternion(mam.w,[mam.x;mam.y;mam.z]))*SE3(dmdl.offset.v[1:3],Quaternion(dmdl.offset.m.w,[dmdl.offset.m.x;dmdl.offset.m.y;dmdl.offset.m.z]))
-  # q = convert(Quaternion, res.R)
-  # DrakeVisualizer.draw(vc.models[dmdl.symbol], [Translation(res.t...) ∘ LinearMap(Rotations.Quat(q.s,q.v...))])
-
-  DrakeVisualizer.draw(vc.models[dmdl.symbol], [am ∘ dmdl.offset])
+  settransform!(vc[:models][dmdl.symbol], am ∘ dmdl.offset)
   nothing
 end
-function (dmdl::DrawROV)(vc::VisualizationContainer,
+function (dmdl::DrawROV)(vc::DrakeVisualizer.Visualizer,
         t::Translation,
         R::Rotation  )
   #
-  dmdl(vc, t ∘ LinearMap(R))
-  nothing
+  dmdl(vc, Translation ∘ LinearMap(R))
 end
-function (dmdl::DrawROV)(vc::VisualizationContainer)
-  vc.models[dmdl.symbol] = Visualizer(dmdl.data, dmdl.visid)
+function (dmdl::DrawROV)(vc::DrakeVisualizer.Visualizer)
+  setgeometry!(vc[:models][dmdl.symbol], dmdl.data)
   dmdl(vc, Translation(0.,0,0) ∘ LinearMap(Rotations.Quat(1.0,0,0,0)) )
-end
-
-
-function defaultscene01!(vc::VisualizationContainer; meshid=100)
-  println("Starting here")
-  ln = []
-  boxdata = GeometryData(HyperRectangle(Vec(0.0,4.0,-0.7), Vec(5.0,5.0,1.4)))
-  boxdata.color = RGBA(0.5,0.1,0.0,0.5)
-  push!(ln, boxdata)
-  # # model = Visualizer(boxdata,100)
-  #
-  println("going here")
-  # l1p = [0.0; 4.0; 0.7]
-  # featuredata = GeometryData(HyperSphere(Point(l1p...), 0.10) )
-  # featuredata.color = RGBA(0.5, 1.0, 0.0, 0.7)
-  # push!(ln, featuredata)
-  # # model = Visualizer(featuredata,101)
-  #
-  # # l1p = [0.0; 4.0; 0.7]
-  # # featuredata = GeometryData(HyperSphere(Point(l1p...), 0.1) )
-  # # featuredata.color = RGBA(0.0, 0.0, 1.0, 0.6)
-  # # model = Visualizer(featuredata,102)
-  println("going to draw")
-  vc.meshes[:scene] = Link(ln)
-  vc.models[:scene] = Visualizer(vc.meshes[:scene],meshid)
   nothing
 end
 
+
+function (dmdl::DrawScene)(vc::DrakeVisualizer.Visualizer,
+        am::AbstractAffineMap  )
+  #
+  settransform!(vc[:env][dmdl.symbol], am ∘ dmdl.offset)
+  nothing
+end
+function (dmdl::DrawScene)(vc::DrakeVisualizer.Visualizer,
+        t::Translation,
+        R::Rotation  )
+  #
+  dmdl(vc, Translation ∘ LinearMap(R))
+end
+function (dmdl::DrawScene)(vc::DrakeVisualizer.Visualizer)
+  setgeometry!(vc[:env][dmdl.symbol], dmdl.data)
+  dmdl(vc, Translation(0.,0,0) ∘ LinearMap(Rotations.Quat(1.0,0,0,0)) )
+  nothing
+end
 
 
 
@@ -103,8 +111,8 @@ function parameterizeArcAffineMap(t, as::ArcPointsRangeSolve; initrot::Rotation=
 end
 
 
-function animatearc(vc::VisualizationContainer,
-            drmodel::DrawModel,
+function animatearc(vc::DrakeVisualizer.Visualizer,
+            drmodel::DrawObject,
             as::ArcPointsRangeSolve;
             N::Int=100,
             delaytime::Float64=0.05,

@@ -2,15 +2,14 @@ using Caesar, IncrementalInference, RoME, HDF5, JLD
 using CloudGraphs, Neo4j
 
 
-dbaddress = "localhost"
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, "", "", "localhost", 27017, false, "", "");
-cloudGraph = connect(configuration);
+# # Uncomment out for command line operation
+# cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true)
+# session = addrdict["session"]
 
-# register types of interest in CloudGraphs
-registerGeneralVariableTypes!(cloudGraph)
-IncrementalInference.setCloudDataLayerAPI!()
-conn = cloudGraph.neo4j.connection
-
+# interactive operation
+# session = "SESSROX"
+# Nparticles = 100
+# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 
 
 # get all the data
