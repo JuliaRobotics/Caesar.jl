@@ -1,2 +1,4 @@
 *.pdf
 *.dot
+examples/lcmserver/lcmtypes/rome/
+examples/lcmserver/rome/
