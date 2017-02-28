@@ -2,6 +2,7 @@
 
 export
   usecloudgraphsdatalayer!,
+  standardcloudgraphsetup,
   consoleaskuserfordb,
   registerGeneralVariableTypes!,
   fullLocalGraphCopy!,
@@ -365,8 +366,8 @@ function copyAllNodes!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::
   nothing
 end
 
-function fullLocalGraphCopy!(fgl::FactorGraph, conn; reqbackendset::Bool=true)
-
+function fullLocalGraphCopy!(fgl::FactorGraph; reqbackendset::Bool=true)
+  conn = fgl.cg.neo4j.connection
   IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, reqbackendset=reqbackendset)
   if length(IDs) > 1
     cverts = Dict{Int64, CloudVertex}()
@@ -702,16 +703,36 @@ function resetentireremotesession(conn, session)
   nothing
 end
 
-function consoleaskuserfordb()
-  println("Please enter information for:")
-  need = ["neo4j addr";"neo4j usr";"neo4j pwd";"mongo addr"]
+function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false)
   res = Dict{AbstractString, AbstractString}()
+  need = ["neo4j addr";"neo4j usr";"neo4j pwd";"mongo addr";"mongo usr";"mongo pwd";"session"]
+  !nparticles ? nothing : push!(need, "num particles")
+  !drawdepth ? nothing : push!(need, "draw depth")
+  !clearslamindb ? nothing : push!(need, "clearslamindb")
+
+  println("Please enter information for:")
   for n in need
     println(n)
     str = readline(STDIN)
-    res[n] = str[:(end-1)]
+    res[n] = str[1:(end-1)]
   end
   return res
+end
+
+function standardcloudgraphsetup(;nparticles=false, drawdepth=false, clearslamindb=false)
+  addrdict = consoleaskuserfordb(nparticles=nparticles, drawdepth=drawdepth, clearslamindb=clearslamindb)
+
+  # Connect to database
+  configuration = CloudGraphs.CloudGraphConfiguration(
+                            addrdict["neo4j addr"], 7474, addrdict["neo4j usr"], addrdict["neo4j pwd"],
+                            addrdict["mongo addr"], 27017, false, addrdict["mongo usr"], addrdict["mongo pwd"]);
+  cloudGraph = connect(configuration);
+  # conn = cloudGraph.neo4j.connection
+  # register types of interest in CloudGraphs
+  registerGeneralVariableTypes!(cloudGraph)
+  Caesar.usecloudgraphsdatalayer!()
+
+  return cloudGraph, addrdict
 end
 
 

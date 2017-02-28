@@ -3,16 +3,15 @@
 
 using IncrementalInference, CloudGraphs
 
-# connect to the server, CloudGraph stuff
-# dbaddress = length(ARGS) > 0 ? ARGS[1] : "localhost"
-println("Taking Neo4j database address as $(dbaddress)...")
 
-# switch IncrementalInference to use CloudGraphs (Neo4j) data layer
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, "", "", dbaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
-IncrementalInference.setdatalayerAPI!()
-# Connection to database for additional queries
-conn = cloudGraph.neo4j.connection
+## Uncomment out for command line operation
+cloudGraph, addrdict = standardcloudgraphsetup()
+session = addrdict["session"]
+
+# interactive operation
+# session = "SESSROX"
+# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
+
 
 # Register protobuf types of interest in CloudGraphs layer
 registerGeneralVariableTypes!(cloudGraph)
@@ -20,7 +19,7 @@ registerGeneralVariableTypes!(cloudGraph)
 fg = emptyFactorGraph()
 fg.cg = cloudGraph
 
-fullLocalGraphCopy!(fg, conn)
+fullLocalGraphCopy!(fg)
 
 v1a = getVert(fg, :l9)
 v1b = getVert(fg, :l16)

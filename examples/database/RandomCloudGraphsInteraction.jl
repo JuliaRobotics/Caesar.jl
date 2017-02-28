@@ -1,22 +1,22 @@
 # random DB interactions
 
 
-include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "SESSROX"
+## Uncomment out for command line operation
+# cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true)
+# session = addrdict["session"]
+# Nparticles = parse(Int,addrdict["num particles"])
 
-# Connect to database
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
-conn = cloudGraph.neo4j.connection
-# register types of interest in CloudGraphs
-registerGeneralVariableTypes!(cloudGraph)
-Caesar.usecloudgraphsdatalayer!()
+# interactive operation
+session = "SESSROX"
+Nparticles = 100
+include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
+
 
 
 
 
 fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
-fullLocalGraphCopy!(fg, conn)
+fullLocalGraphCopy!(fg)
 
 @show usrf = getData(fg.g.vertices[100003]).fnc.usrfnc!
 pts = evalFactor2(fg, fg.g.vertices[100003], fg.IDs[:l15])

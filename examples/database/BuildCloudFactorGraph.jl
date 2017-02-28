@@ -3,18 +3,20 @@ using Caesar, IncrementalInference
 
 
 
-# TODO comment out for command line operation
-include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "SESSCLOUDTEST"
+## Uncomment out for command line operation
+cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true)
+session = addrdict["session"]
+Nparticles = parse(Int,addrdict["num particles"])
 
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
-conn = cloudGraph.neo4j.connection
-registerGeneralVariableTypes!(cloudGraph)
-Caesar.usecloudgraphsdatalayer!()
+# interactive operation
+# session = "SESSCLOUDTEST"
+# Nparticles = 100
+# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 
 
-N=100
+N=Nparticles profroot
+profroot
+
 fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
 

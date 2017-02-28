@@ -3,26 +3,17 @@
 using Caesar, CloudGraphs
 
 
-# connect to the server, CloudGraph stuff
-dbaddress = length(ARGS) > 0 ? ARGS[1] : "localhost"
-dbusr = length(ARGS) > 1 ? ARGS[2] : ""
-dbpwd = length(ARGS) > 2 ? ARGS[3] : ""
+# Uncomment out for command line operation
+cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true, clearslamindb=true)
+session = addrdict["session"]
+@show clearslamindbdata = addrdict["clearslamindb"]=="y" || addrdict["clearslamindb"]=="yes"
 
-mongoaddress = length(ARGS) > 3 ? ARGS[4] : "localhost"
-
-session = length(ARGS) > 4 ? string(ARGS[5]) : ""
-
-clearslamindbdata = length(ARGS) > 5 && string(ARGS[6]) == "clear" ? true : false
-Nparticles = length(ARGS) > 5 && !clearslamindbdata ? parse(Int,string(ARGS[6])) : 100
-
-println("Attempting to solve session $(session) with $(Nparticles) particles per marginal...")
+# interactive operation
+# session = "SESSROX"
+# Nparticles = 100
+# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 
 
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
-conn = cloudGraph.neo4j.connection
-registerGeneralVariableTypes!(cloudGraph)
-Caesar.usecloudgraphsdatalayer!()
 
 if !clearslamindbdata
   fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)

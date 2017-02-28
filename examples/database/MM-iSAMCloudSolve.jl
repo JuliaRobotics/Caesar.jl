@@ -1,48 +1,29 @@
 # addprocs(7)
+# ask first for user convenience
+using Caesar
+cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true)
 
-using Caesar, RoME
+using RoME
 using CloudGraphs, Neo4j
 
 # using IncrementalInference
 
-# connect to the server, CloudGraph stuff
-dbaddress = length(ARGS) > 0 ? ARGS[1] : "localhost"
-dbusr = length(ARGS) > 1 ? ARGS[2] : ""
-dbpwd = length(ARGS) > 2 ? ARGS[3] : ""
-
-mongoaddress = length(ARGS) > 3 ? ARGS[4] : "localhost"
-
-session = length(ARGS) > 4 ? string(ARGS[5]) : ""
-
-Nparticles = length(ARGS) > 5 ? parse(Int,string(ARGS[6])) : 100
-
+session = addrdict["session"]
+Nparticles = parse(Int, addrdict["num particles"])
 println("Attempting to solve session $(session) with $(Nparticles) particles per marginal...")
 
 
-# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-# session = "SESSLIVE"
-
-
-# Connect to database
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
-conn = cloudGraph.neo4j.connection
-# register types of interest in CloudGraphs
-registerGeneralVariableTypes!(cloudGraph)
-Caesar.usecloudgraphsdatalayer!()
-
-
-# TODO -- MAKE INCREMENAL in graph, SUBGRAPHS work in progress!!!!!
+# TODO -- incremental graph and subgraphs are works in progress
 while true
   println("=================================================")
   fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
-  setBackendWorkingSet!(conn, session)
+  setBackendWorkingSet!(fg.cg.neo4j.connection, session)
 
   println("get local copy of graph")
 
   # removeGenericMarginals!(conn) # function should not be necessary, but fixes a minor bug following elimination algorithm
-  if fullLocalGraphCopy!(fg, conn)
+  if fullLocalGraphCopy!(fg)
     tree = wipeBuildNewTree!(fg,drawpdf=true)
     # removeGenericMarginals!(conn)
 

@@ -5,18 +5,18 @@ using CloudGraphs
 using IncrementalInference
 
 
-include(joinpath(dirname(@__FILE__) ,"blandauthremote.jl"))
-
-# Connection to database
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
-conn = cloudGraph.neo4j.connection
-# register types of interest in CloudGraphs
-registerGeneralVariableTypes!(cloudGraph)
-Caesar.usecloudgraphsdatalayer!()
+# # Uncomment out for command line operation
+# cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true)
+# Nparticles = parse(Int, addrdict["num particles"])
+# session = addrdict["session"]
 
 
-session = "TESTPOSE2"
+interactive operation
+session = "SESSROX"
+Nparticles = 100
+include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
+
+
 
 fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 println("Working with session $(fg.sessionname)...")
@@ -55,7 +55,7 @@ neighs = CloudGraphs.get_neighbors(fg.cg, cv1r)
 fgs = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
 setBackendWorkingSet!(conn, session)
-fullLocalGraphCopy!(fgs, conn)
+fullLocalGraphCopy!(fgs)
 tree = wipeBuildNewTree!(fgs)
 
 
