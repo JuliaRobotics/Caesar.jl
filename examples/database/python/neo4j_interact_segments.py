@@ -7,7 +7,7 @@
 Simple functions to interface with SLAMinDB
 '''
 
-'''
+''' 
 WIP: x, y parameters passed into add_* are used in GTSAM to initialize the optimization solution - in SLAMinDB, initialization
 is performed using prior factors (I think), and so these parameters remain unused; we keep them in case the interface changes in the future
 '''
@@ -110,8 +110,7 @@ class neo4j_interact(object):
         self._authfile = authfile
         self._session_name = session_name
         self._num_variables = 0
-        self._num_landmarks = 0
-        self._uid_landmarks = {}
+        self._num_landmarks = 50
         self._pose_to_odometry_or_prior = {}
         self._pose_to_measurements = {}
         self._landmark_to_prior = {}
@@ -126,15 +125,12 @@ class neo4j_interact(object):
         self.session.run("MATCH (n:" + self._session_name + ") DETACH DELETE n")
 
     # adds landmark to DB, with Point2 prior if given
-    def add_landmark(self, x, y, prior_factor=None, uid=None):
+    def add_landmark(self, x, y, prior_factor=None):
         if prior_factor is not None and type(prior_factor) is not priorFactorPoint2:
             raise TypeError("prior_factor must be of type priorFactorPoint2")
         l_id = self._num_landmarks
-        if uid is None:
-            l_id = uid
-        else:
-            self._num_landmarks += 1
         l_neo4j = json.dumps({'tag_id': l_id, 'uid': l_id, 't': 'L'})
+        self._num_landmarks += 1
         self._landmark_to_prior[l_id] = []
         if prior_factor is not None:
             l_prior_factor_neo4j = json.dumps({'meas': str(prior_factor.x) + ' ' + str(prior_factor.y) + ' ' + str(prior_factor.noise.x) + ' 0 ' + str(prior_factor.noise.y),
@@ -154,7 +150,7 @@ class neo4j_interact(object):
         return l_id
 
     # adds pose to DB, with Pose2 prior if given, or using an odometry factor to the latest pose if given
-    def add_pose(self, x=None, y=None, theta=None, prior_factor=None, odometry_factor=None):
+    def add_pose(self, segment_val, x=None, y=None, theta=None, prior_factor=None, odometry_factor=None):
         if x is not None and y is not None and theta is not None and prior_factor is None:
             sel = 'no_factor'
         elif x is not None and y is not None and theta is not None and prior_factor is not None:
@@ -165,28 +161,27 @@ class neo4j_interact(object):
             raise ValueError("three choices:\n  - x, y, theta not None\n  - x, y, theta, prior_factor not None\n  - odometry_factor not None")
 
         if sel == 'no_factor':
-            p_id, res = self._add_no_factor_pose(x, y, theta)
+            p_id = self._add_no_factor_pose(x, y, theta, segment_val)
         elif sel == 'prior':
-            p_id, res = self._add_prior_factor_pose(x, y, theta, prior_factor)
+            p_id = self._add_prior_factor_pose(x, y, theta, prior_factor, segment_val)
         elif sel == 'odometry':
-            p_id, res = self._add_odometry_factor_pose(odometry_factor)
+            p_id = self._add_odometry_factor_pose(odometry_factor, segment_val)
 
         self._pose_ids.append(p_id)
 
-        return p_id, res
+        return p_id
 
-    def _add_no_factor_pose(self, x, y, theta):
+    def _add_no_factor_pose(self, x, y, theta, segment_val):
         p_id = self._num_variables
         p_neo4j = json.dumps({'uid': p_id, 't': 'P'})
         self._num_variables += 1
         self._pose_to_odometry_or_prior[p_id] = []
         self._pose_to_measurements[p_id] = []
-        res = self.session.run("MERGE (p:POSE:"+self._session_name+":NEWDATA { frtend: {pose_info} }) "
-                               "RETURN id(p) as poseid",
-                              {"pose_info": p_neo4j})
-        return p_id, res
+        self.session.run("MERGE (p:POSE:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {pose_info} }) ",
+                        {"pose_info": p_neo4j})
+        return p_id
 
-    def _add_prior_factor_pose(self, x, y, theta, prior_factor):
+    def _add_prior_factor_pose(self, x, y, theta, prior_factor, segment_val):
         if type(prior_factor) is not priorFactorPose2:
             raise TypeError("prior_factor must be of type priorFactorPose2")
         p_id = self._num_variables
@@ -200,15 +195,14 @@ class neo4j_interact(object):
                                             't': 'F'})
         self._pose_to_odometry_or_prior[p_id].append(self._max_factor_id)
         self._max_factor_id += 1
-        res = self.session.run("MERGE (p:POSE:"+self._session_name+":NEWDATA { frtend: {pose_info} }) "
-                               "MERGE (f:FACTOR:"+self._session_name+":NEWDATA { frtend: {prior_factor_info} }) "
-                               "MERGE (p)-[:DEPENDENCE]-(f)"
-                               "RETURN id(p) as poseid, id(f) as fctid",
-                              {"pose_info": p_neo4j,
-                               "prior_factor_info": p_prior_factor_neo4j})
-        return p_id, res
+        self.session.run("MERGE (p:POSE:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {pose_info} }) "
+                         "MERGE (f:FACTOR:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {prior_factor_info} }) "
+                         "MERGE (p)-[:DEPENDENCE]-(f)",
+                        {"pose_info": p_neo4j,
+                         "prior_factor_info": p_prior_factor_neo4j})
+        return p_id
 
-    def _add_odometry_factor_pose(self, odometry_factor):
+    def _add_odometry_factor_pose(self, odometry_factor, segment_val):
         if len(self._pose_ids) == 0:
             raise Exception("cannot add odometry-based pose because no prior poses exist")
         if type(odometry_factor) is not betweenFactorPose2:
@@ -226,19 +220,18 @@ class neo4j_interact(object):
                                               't': 'F'})
         self._pose_to_odometry_or_prior[p_id].append(self._max_factor_id)
         self._max_factor_id += 1
-        result = self.session.run("MERGE (p1:POSE:"+self._session_name+":NEWDATA { frtend: {previous_pose_info} }) "
-                                  "MERGE (p2:POSE:"+self._session_name+":NEWDATA { frtend: {pose_info} })"
-                                  "MERGE (f:FACTOR:"+self._session_name+":NEWDATA { frtend: {odometry_factor_info} }) "
-                                  "MERGE (p1)-[:DEPENDENCE]-(f) " # add relationships
-                                  "MERGE (p2)-[:DEPENDENCE]-(f) "
-                                  "RETURN id(p1) as pose1id, id(p2) as pose2id, id(f) as fctid",
-                                 {"previous_pose_info": head_neo4j,
-                                  "pose_info": p_neo4j,
-                                  "odometry_factor_info": p_odometry_factor_neo4j})
-        return p_id, result
+        self.session.run("MERGE (p1:POSE:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {previous_pose_info} }) "
+                         "MERGE (p2:POSE:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {pose_info} })"
+                         "MERGE (f:FACTOR:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {odometry_factor_info} }) "
+                         "MERGE (p1)-[:DEPENDENCE]-(f) " # add relationships
+                         "MERGE (p2)-[:DEPENDENCE]-(f) ",
+                        {"previous_pose_info": head_neo4j,
+                         "pose_info": p_neo4j,
+                         "odometry_factor_info": p_odometry_factor_neo4j})
+        return p_id
 
     # adds a measurement factor between a pose and landmark
-    def add_measurement(self, measurement_factor, pose2_id=None):
+    def add_measurement(self, segment_val, measurement_factor, pose2_id=None):
         if pose2_id is None:
             p_id = self._pose_ids[-1]
         else:
@@ -269,8 +262,7 @@ class neo4j_interact(object):
             self._pose_to_measurements[p_id].append(self._max_factor_id)
             self._max_factor_id += 1
         elif type(measurement_factor) is bearingRangeFactorPose2Point2:
-            # TODO -- noise xx 0 yy, where is xy
-            p_measurement_factor_neo4j = json.dumps({'meas': str(measurement_factor.bearing_val) + ' ' + str(measurement_factor.range_val) + ' ' + str(measurement_factor.noise.x) + ' 0 ' + str(measurement_factor.noise.y),
+            p_measurement_factor_neo4j = json.dumps({'meas': str(measurement_factor.bearing_val) + str(measurement_factor.range_val) + str(measurement_factor.noise.x) + '0' + str(measurement_factor.noise.y),
                                                      'lklh': 'BR G 2 STDEV',
                                                      'btwn': str(p_id) + ' ' + str(measurement_factor.landmark_id),
                                                      't': 'F'})
@@ -286,45 +278,10 @@ class neo4j_interact(object):
         else:
             raise TypeError("measurement_factor must be of type rangeFactorPose2Point2, bearingRangeFactorPose2Point2, rangeMeasurementFactorPose2Point2, bearingRangeMeasurementFactorPose2Point2, or rangeNullHypothesisFactorPose2Point2")
         self.session.run("MERGE (l:LANDMARK:"+self._session_name+":NEWDATA { frtend: {landmark_info} }) "
-                         "MERGE (p:POSE:"+self._session_name+":NEWDATA { frtend: {pose_info} })"
-                         "MERGE (f:FACTOR:"+self._session_name+":NEWDATA { frtend: {measurement_factor_info} }) "
+                         "MERGE (p:POSE:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {pose_info} })"
+                         "MERGE (f:FACTOR:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {measurement_factor_info} }) "
                          "MERGE (l)-[:DEPENDENCE]-(f) " # add relationships
                          "MERGE (p)-[:DEPENDENCE]-(f) ",
                         {"landmark_info": l_neo4j,
                          "pose_info": p_neo4j,
                          "measurement_factor_info": p_measurement_factor_neo4j})
-
-
-    def addmongokeys(self, neoid, oidname, newoid):
-        res = self.session.run("MATCH (n:"+self._session_name+") " # finds if not exist
-                               "WHERE id(n)="+str(neoid)+" "
-                               "return n.frtend as frtend, n.mongo_keys as mongo_keys")
-
-        elem = res.single()
-        var_json_str1 = elem["frtend"]
-        mymoids = elem["mongo_keys"]
-        if mymoids == None:
-            mymoids = {}
-        else:
-            mymoids = json.loads(mymoids)
-
-        mymoids[oidname] = newoid
-        mym_json_str = json.dumps(mymoids)
-
-        # import IPython; IPython.embed()
-
-        res = self.session.run("MATCH (n:"+self._session_name+") "
-                               "WHERE id(n)="+str(neoid)+" "
-                               "SET n.mongo_keys = {mym_info} "
-                               "RETURN count(n) as numupdated",
-                               {"mym_info": mym_json_str} )
-
-        elem = res.single()
-        if elem["numupdated"] != 1:
-            ValueError("ERROR, did not work. Number of updated entries are = "+str(elem["numupdated"]) )
-            return False
-        return True
-
-
-
-#
