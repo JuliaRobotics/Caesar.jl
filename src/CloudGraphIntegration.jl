@@ -1,5 +1,31 @@
 # integration code for database usage via CloudGraphs.jl
 
+export
+  usecloudgraphsdatalayer!,
+  consoleaskuserfordb,
+  registerGeneralVariableTypes!,
+  fullLocalGraphCopy!,
+  removeGenericMarginals!,
+  setBackendWorkingSet!,
+  setDBAllReady!,
+  getExVertFromCloud,
+  getAllExVertexNeoIDs,
+  getPoseExVertexNeoIDs,
+  copyAllNodes!,
+  copyAllEdges!,
+  registerCallback!,
+  updateFullCloudVertData!,
+  #loading frtend generated fg
+  getnewvertdict,
+  insertValuesCloudVert!,
+  recoverConstraintType,
+  populatenewvariablenodes!,
+  populatenewfactornodes!,
+  updatenewverts!,
+  resetentireremotesession
+
+
+
 function initfg(;sessionname="NA",cloudgraph=nothing)
   fgl = RoME.initfg(sessionname=sessionname)
   fgl.cg = cloudgraph
@@ -674,6 +700,18 @@ function resetentireremotesession(conn, session)
   cph = loadtx(query, submit=true)
   loadresult = commit(loadtx)
   nothing
+end
+
+function consoleaskuserfordb()
+  println("Please enter information for:")
+  need = ["neo4j addr";"neo4j usr";"neo4j pwd";"mongo addr"]
+  res = Dict{AbstractString, AbstractString}()
+  for n in need
+    println(n)
+    str = readline(STDIN)
+    res[n] = str[:(end-1)]
+  end
+  return res
 end
 
 
