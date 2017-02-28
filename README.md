@@ -51,15 +51,16 @@ Here is a basic example of using visualization and multi-core factor graph solvi
     addprocs(2)
     using Caesar, RoME, TransformUtils
 
+    # load scene and ROV model (might experience UDP packet loss LCM buffer not set)
     vc = startdefaultvisualization()
-    defaultscene01!(vc)
-    rovt = loadmodel(:rov)
-    rovt(vc)
+    sc1 = loadmodel(:scene01); sc1(vc)
+    rovt = loadmodel(:rov); rovt(vc)
 
     initCov = 0.01*eye(6); [initCov[i,i] = 0.001 for i in 4:6];
     odoCov = 0.001*eye(6); [odoCov[i,i] = 0.001 for i in 4:6];
     rangecov, bearingcov = 3e-4, 2e-3
 
+    # start and add to a factor graph
     fg = identitypose6fg(initCov=initCov)
     tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
     addOdoFG!(fg, Pose3Pose3(tf, odoCov) )
@@ -71,6 +72,7 @@ Here is a basic example of using visualization and multi-core factor graph solvi
     addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
     solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:x2])
+
 
 Major features
 --------------
