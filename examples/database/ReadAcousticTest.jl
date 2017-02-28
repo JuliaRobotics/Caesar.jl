@@ -9,23 +9,23 @@ using KernelDensityEstimate
 
 using Base.Test
 
-# TODO comment out for command line operation
+
+## Uncomment out for command line operation
+# cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true)
+# session = addrdict["session"]
+# Nparticles = parse(Int,addrdict["num particles"])
+
+# interactive operation
+session = "SESSTRUT45"
+Nparticles = 100
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-session = "SESSTURT45"
 
 
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
-conn = cloudGraph.neo4j.connection
-registerGeneralVariableTypes!(cloudGraph)
-Caesar.usecloudgraphsdatalayer!()
 
-
-N=100
 fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
 
-updatenewverts!(fg, N=N)
+updatenewverts!(fg, N=Nparticles)
 
 
 

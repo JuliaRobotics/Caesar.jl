@@ -12,31 +12,19 @@ using PyCall
 
 include("VisualizationUtilities.jl")  # @pyimport getimages as gi
 
-# # connect to the server, CloudGraph stuff
-dbaddress = length(ARGS) > 0 ? ARGS[1] : "localhost"
-println("Taking Neo4j database address as $(dbaddress)...")
 
-dbusr = length(ARGS) > 1 ? ARGS[2] : ""
-dbpwd = length(ARGS) > 2 ? ARGS[3] : ""
+# Uncomment out for command line operation
+cloudGraph, addrdict = standardcloudgraphsetup(drawdepth=true)
+session = addrdict["session"]
+@show DRAWDEPTH = addrdict["drawdepth"]=="y" || addrdict["drawdepth"]=="yes"
 
-mongoaddress = length(ARGS) > 3 ? ARGS[4] : "localhost"
-println("Taking Mongo database address as $(mongoaddress)...")
 
-session = length(ARGS) > 4 ? string(ARGS[5]) : ""
-println("Attempting to draw session $(session)...")
-
-DRAWDEPTH = length(ARGS) > 5 ? ARGS[6]=="drawdepth" : false
-
-# TODO comment out for command line operation
-# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-# DRAWDEPTH = false
+# interactive operation
 # session = "SESSROX"
+# Nparticles = 100
+# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 
-configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
-conn = cloudGraph.neo4j.connection
-registerGeneralVariableTypes!(cloudGraph)
-Caesar.usecloudgraphsdatalayer!()
+
 
 
 @pyimport pybot.geometry.rigid_transform as bgrt
@@ -93,7 +81,7 @@ while true
   IDs = getPoseExVertexNeoIDs(conn, sessionname=session, reqbackendset=false);
 
   println("get local copy of graph")
-  if fullLocalGraphCopy!(fg, conn, reqbackendset=false)
+  if fullLocalGraphCopy!(fg, reqbackendset=false)
   	xx,ll = ls(fg)
   	LD = Array{Array{Float64,1},1}()
   	C = Vector{AbstractString}()

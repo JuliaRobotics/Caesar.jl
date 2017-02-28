@@ -72,32 +72,6 @@ export
   # more passthrough
   initfg,
 
-  # cloudgraph
-  usecloudgraphsdatalayer!,
-  # CloudGraph stuff
-  registerGeneralVariableTypes!,
-  fullLocalGraphCopy!,
-  removeGenericMarginals!,
-  setBackendWorkingSet!,
-  setDBAllReady!,
-  getExVertFromCloud,
-  getAllExVertexNeoIDs,
-  getPoseExVertexNeoIDs,
-  copyAllNodes!,
-  copyAllEdges!,
-  registerCallback!,
-  updateFullCloudVertData!,
-
-  #loading frtend generated fg
-  getnewvertdict,
-  insertValuesCloudVert!,
-  recoverConstraintType,
-  populatenewvariablenodes!,
-  populatenewfactornodes!,
-  updatenewverts!,
-  # to reset the server side graph
-  resetentireremotesession,
-
   # drawing functions
   VisualizationContainer,
   startdefaultvisualization,
