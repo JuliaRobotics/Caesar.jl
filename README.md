@@ -104,7 +104,12 @@ Database interaction layer
 
 For using the solver on a DataBase layer (work in progress on centralized architecture ) see [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git),
 
-Install [Neo4j](https://neo4j.com/) and add these packages to your Julia system
+You can directly run from Julia:
+
+    using Caesar
+    installcloudgraphs()
+
+Which perform these same steps: Install [Neo4j](https://neo4j.com/) and add these packages to your Julia system
 
     Pkg.add("Mongo")
     Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
@@ -124,8 +129,10 @@ Go to your browser at localhost:7474 and run one of the Cypher queries to either
 You can run the database solver using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl)
 
 ```julia
-julia050 -p7 MM-iSAMCloudSolve.jl <neo4jaddr> <neo4jusr> <pwd> <mongoaddr> <SESSIONNAME>
+julia050 -p20 MM-iSAMCloudSolve.jl
 ```
+
+Database driven Visualization using Collections Rendered is provided via [Pybot](http/www.github.com/spillai/pybot), and an [example service script](https://github.com/dehann/Caesar.jl/blob/master/examples/database/DBCollectionsViewerService.jl) is available. Work is in progress to provide basic visualization support through [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl).
 
 Future targets
 --------------

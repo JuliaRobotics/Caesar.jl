@@ -27,7 +27,8 @@ using
   FileIO,
   NLsolve,
   DataStructures,
-  ProgressMeter
+  ProgressMeter,
+  PyCall
 
 if haskey(instpkg,"CloudGraphs")
   using CloudGraphs
@@ -42,6 +43,8 @@ end
 
 
 export
+  # pass through from IIF and RoME
+  ls,
   # Victoria Park example -- batch
   loadVicPrkDataset,
   # addLandmarksFactoGraph!,
@@ -99,8 +102,13 @@ export
   parameterizeArcAffineMap,
   animatearc,
 
-  # default scenes
-  defaultscene01!,
+  # vis service
+  drawdbsession,
+  drawdbdirector,
+  meshgrid,
+  DepthCamera,
+  buildmesh!,
+  reconstruct,
 
   # user functions
   identitypose6fg,
@@ -110,15 +118,15 @@ export
   # repeats from RoME and IIF
   initfg,
   addNode!,
-  addFactor!
+  addFactor!,
+
+  # install db stuff
+  installcloudgraphs
 
 
 
-if instpkg["RoME"] > v"0.0.3"
-  include("BearingRangeTrackingServer.jl")
-else
-  warn("Some features disabled since the package RoME is too far behind.")
-end
+
+include("BearingRangeTrackingServer.jl")
 
 include("SlamServer.jl")
 include("DataUtils.jl")
@@ -128,6 +136,8 @@ include("UserFunctions.jl")
 
 if haskey(instpkg, "CloudGraphs")
   include("CloudGraphIntegration.jl") # Work in progress code
+  include("DBVisualizationUtils.jl")
+  include("DirectorVisService.jl")
 end
 
 

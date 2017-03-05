@@ -88,7 +88,21 @@ function projectrbe(fgl::FactorGraph, from::Symbol, to::Symbol)
 end
 
 
+function installcloudgraphs()
+  warn("""
+  Please ensure Mongo and OpenCV are installed for Python, such as:
 
+  pip install pymongo
+  pip install opencv-python
+
+  The pymogo dependency is temporarily used to cover binary data not yet implemented in
+  LibBSON.jl.
+  """)
+  Pkg.add("Mongo")
+  Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
+  Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
+  nothing
+end
 
 
 

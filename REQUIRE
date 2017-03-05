@@ -1,8 +1,8 @@
 julia 0.5
-RoME
-IncrementalInference 0.2.4
+RoME 0.0.4
+IncrementalInference 0.2.5
 Graphs 0.7.1
-KernelDensityEstimate
+KernelDensityEstimate 0.2.3
 Distributions
 DrakeVisualizer
 TransformUtils
@@ -20,3 +20,4 @@ FileIO
 NLsolve
 DataStructures
 ProgressMeter
+PyCall

@@ -1,5 +1,5 @@
 # help DBCollectionsViewerService
-using PyCall
+# using PyCall
 
 
 thispath = joinpath(dirname(@__FILE__),"python")
@@ -13,10 +13,6 @@ unshift!(PyVector(pyimport("sys")["path"]),thispath)
 @pyimport pymongo
 @pyimport getimages as gi
 
-
-# also connect to mongo separately
-client = pymongo.MongoClient(mongoaddress)
-db = client[:CloudGraphs]
 
 
 function getmongokeys(fgl::FactorGraph, x::Symbol, IDs)
