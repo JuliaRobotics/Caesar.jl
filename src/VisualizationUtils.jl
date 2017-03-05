@@ -114,11 +114,17 @@ end
 
 
 function drawpose!(viz::DrakeVisualizer.Visualizer, sym::Symbol;
-      tf::CoordinateTransformations.AbstractAffineMap=Translation(0.0,0,0)∘LinearMap(CoordinateTransformations.AngleAxix(0.0,0,0,1.0)))
+      tf::CoordinateTransformations.AbstractAffineMap=Translation(0.0,0,0)∘LinearMap(CoordinateTransformations.AngleAxix(0.0,0,0,1.0)),
+      session::AbstractString="")
   #
-
-  setgeometry!(viz[:poses][sym], Triad())
-  settransform!(viz[:poses][sym], tf)
+  if session == ""
+    setgeometry!(viz[:poses][sym], Triad())
+    settransform!(viz[:poses][sym], tf)
+  else
+    sesssym=Symbol(session)
+    setgeometry!(viz[sesssym][:poses][sym], Triad())
+    settransform!(viz[sesssym][:poses][sym], tf)
+  end
   nothing
 end
 
@@ -127,6 +133,7 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
     drawlandms::Bool=true,
     drawtype::Symbol=:max  )
   #
+  session = fgl.sessionname
   topoint = +
   if drawtype == :max
     topoint = getKDEMax
@@ -157,9 +164,9 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
     maxval = topoint(den)
     if dothree
       q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
-      drawpose!(vc, p, tf=Translation(maxval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) )
+      drawpose!(vc, p, tf=Translation(maxval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) ,session=session)
     elseif dotwo
-      drawpose!(vc, p, tf=Translation(maxval[1],maxval[2],0.0)∘LinearMap(Rotations.AngleAxis(maxval[3],0,0,1.0)) )
+      drawpose!(vc, p, tf=Translation(maxval[1],maxval[2],0.0)∘LinearMap(Rotations.AngleAxis(maxval[3],0,0,1.0)) ,session=session)
     end
   end
   # if drawlandms

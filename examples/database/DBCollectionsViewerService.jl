@@ -38,7 +38,7 @@ include("VisualizationUtilities.jl")  # @pyimport getimages as gi
 
 # this resets the Collections Viewer visualization
 @pyimport pybot.externals.lcm.draw_utils as bedu
-@pyimport pybot.vision.camera_utils as cu
+# @pyimport pybot.vision.camera_utils as cu
 
 
 @pyimport numpy as np
@@ -55,7 +55,7 @@ CAMK = [[ 570.34222412; 0.0; 319.5]';
  [   0.0; 570.34222412; 239.5]';
  [   0.0; 0.0; 1.0]'];
 
-dcam = cu.DepthCamera(K=CAMK)
+# dcam = cu.DepthCamera(K=CAMK)
 # -np.pi/2, 0, -np.pi/2
 dcamjl = DepthCamera(CAMK)
 buildmesh!(dcamjl)
@@ -90,7 +90,7 @@ while true
   	LD = Array{Array{Float64,1},1}()
   	C = Vector{AbstractString}()
   	for x in xx
-  		val = getVal(fg,x)
+  		val = getVal(fg, x)
   		len = size(val,2)
   		[push!(C,"g") for i in 1:len];
   		[push!(LD, vec([val[1:2,i];0])) for i in 1:len];
@@ -105,7 +105,7 @@ while true
   	for x in xx
       j+=1
   		# posei = bgrt.RigidTransform[:from_angle_axis](Thpp[i],[0;0;1],[Xpp[i];Ypp[i];0])
-  		vert = getVert(fg,x)
+  		vert = getVert(fg,x, api=localapi)
   		X = Float64[]
   		if haskey(vert.attributes, "MAP_est")
   			X = vert.attributes["MAP_est"]
@@ -157,9 +157,10 @@ while true
         # imgc = map(Float64,img)/1000.0
         #   opencv.imshow("yes", img)
         # calibrate the image # color conversion of points, so we can get pretty pictures...
-        X = dcam[:reconstruct](img)
-        X2 = reconstruct(dcamjl, Array{Float64,2}(img))
-        Xd = X2[1:3:r,1:3:c,:]
+        # X = dcam[:reconstruct](img)
+        X = reconstruct(dcamjl, Array{Float64,2}(img))
+        r,c,h = size(X)
+        Xd = X[1:3:r,1:3:c,:]
         mask = Xd[:,:,:] .> 4.5
         Xd[mask] = Inf
         # get color information
@@ -211,7 +212,7 @@ while true
   	C = Vector{AbstractString}()
     landms = []
   	for l in ll
-      vert = getVert(fg,l)
+      vert = getVert(fg,l, api=localapi)
 
   		val = getVal(vert)
   		len = size(val,2)

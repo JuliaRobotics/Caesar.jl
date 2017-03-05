@@ -1,6 +1,4 @@
 
-
-
 # include("VisualizationUtilities.jl")  # @pyimport getimages as gi
 
 meshgrid(v::AbstractVector) = meshgrid(v, v)
@@ -46,9 +44,7 @@ function reconstruct(dc::DepthCamera, depth::Array{Float64})
   s = dc.skip
   depth_sampled = depth[1:s:end,1:s:end]
   # assert(depth_sampled.shape == self.xs.shape)
-  @show r,c = size(dc.xs)
-  @show size(dc.ys)
-  @show size(depth)
+  r,c = size(dc.xs)
 
   ret = Array{Float64,3}(r,c,3)
   ret[:,:,1] = dc.xs .* depth_sampled
@@ -62,8 +58,11 @@ end
 
 
 
-function drawdbsession(vis, cloudGraph, attrdict)
+function drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, dbcoll)
 
+  sesssym = Symbol(attrdict["session"])
+  poseswithdepth = Dict()
+  poseswithdepth["x1"] = 0 # skip this pose -- there is no big data before ICRA
 
   fg = Caesar.initfg(sessionname=attrdict["session"], cloudgraph=cloudGraph)
   IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, sessionname=attrdict["session"], reqbackendset=false);
@@ -80,8 +79,48 @@ function drawdbsession(vis, cloudGraph, attrdict)
   		# [push!(C,"g") for i in 1:len];
       # assuming 2D here
       pointcloud = PointCloud([vec([val[1:2,i];0]) for i in 1:len])
-      setgeometry!(vis[:posepts][x], pointcloud)
-  	end
+      setgeometry!(vis[sesssym][:posepts][x], pointcloud)
+
+      mongk, cvid = getmongokeys(fg, x, IDs)
+  		if DRAWDEPTH && haskey(mongk, "depthframe_image") && !haskey(poseswithdepth, x)
+        poseswithdepth[x]=1
+        mongo_keydepth = bson.ObjectId(mongk["depthframe_image"])
+        img, ims = gi.fastdepthimg(dbcoll, mongo_keydepth)
+        X = reconstruct(dcamjl, Array{Float64,2}(img))
+        r,c,h = size(X)
+        Xd = X[1:10:r,1:10:c,:]
+        rd,cd,hd = size(Xd)
+        mask = Xd[:,:,:] .> 4.5
+        Xd[mask] = Inf
+        rgb = nothing
+        seg = nothing
+        if haskey(mongk, "keyframe_rgb")
+          mongo_key = bson.ObjectId(mongk["keyframe_rgb"])
+          rgb, ims = gi.fastrgbimg(dbcoll, mongo_key)
+          # @show size(rgb)
+        end
+        if haskey(mongk, "keyframe_segnet")
+          mongo_key = bson.ObjectId(mongk["keyframe_segnet"])
+          seg, ims = gi.fastrgbimg(dbcoll, mongo_key)
+        end
+        if rgb != nothing
+          rgbss = rgb[1:10:r,1:10:c,:]
+          # bedu.publish_cloud("depth", Xd, c=rgbss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
+          pts = Vector{Vector{Float64}}()
+          for i in 1:rd, j in 1:cd
+            push!(pts, vec(Xd[i,j,:]) )
+          end
+          pointcloud = PointCloud(pts)
+          println("drawing point cloud for $(string(x)), size $(size(pts))")
+          setgeometry!(vis[sesssym][:poses][x][:pc], pointcloud)
+          sleep(0.2)
+        end
+        # if seg != nothing
+        #   segss = seg[1:3:r,1:3:c,:]
+        #   bedu.publish_cloud("segnet", Xd, c=segss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
+        # end
+      end
+    end
 
 
   end
@@ -89,18 +128,30 @@ function drawdbsession(vis, cloudGraph, attrdict)
 end
 
 
+
 function askdrawdirectordb()
   # Uncomment out for command line operation
   cloudGraph, attrdict = standardcloudgraphsetup(drawdepth=true)
   session = attrdict["session"]
-  # @show DRAWDEPTH = attrdict["draw depth"]=="y" # not going to support just yet
+  DRAWDEPTH = attrdict["draw depth"]=="y" # not going to support just yet
+
+  # also connect to mongo separately
+  client = pymongo.MongoClient(attrdict["mongo addr"])
+  db = client[:CloudGraphs]
+  collection = "bindata"
 
   vis = startdefaultvisualization()
   sleep(1.0)
 
+  CAMK = [[ 570.34222412; 0.0; 319.5]';
+   [   0.0; 570.34222412; 239.5]';
+   [   0.0; 0.0; 1.0]'];
+  dcamjl = DepthCamera(CAMK)
+  buildmesh!(dcamjl)
+
   drawloop = Bool[true]
   while drawloop[1]
-    drawdbsession(vis, cloudGraph, attrdict)
+    drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, db[collection])
     println(".")
   end
 
