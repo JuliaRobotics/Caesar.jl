@@ -104,7 +104,12 @@ Database interaction layer
 
 For using the solver on a DataBase layer (work in progress on centralized architecture ) see [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git),
 
-Install [Neo4j](https://neo4j.com/) and add these packages to your Julia system
+You can directly run from Julia:
+
+    using Caesar
+    installcloudgraphs()
+
+Which perform these same steps: Install [Neo4j](https://neo4j.com/) and add these packages to your Julia system
 
     Pkg.add("Mongo")
     Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
