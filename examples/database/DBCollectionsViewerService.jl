@@ -10,21 +10,24 @@ using TransformUtils
 
 using PyCall
 
-include("VisualizationUtilities.jl")  # @pyimport getimages as gi
 
 
 # Uncomment out for command line operation
 cloudGraph, addrdict = standardcloudgraphsetup(drawdepth=true)
 session = addrdict["session"]
-@show DRAWDEPTH = addrdict["drawdepth"]=="y" || addrdict["drawdepth"]=="yes"
+DRAWDEPTH = addrdict["draw depth"]=="y" || addrdict["draw depth"]=="yes"
+
+mongoaddress = addrdict["mongo addr"]
+collection = "bindata"
 
 
-# interactive operation
-# session = "SESSROX"
+# # interactive operation
+# session = "SESSTURT21"
 # Nparticles = 100
 # include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
+# DRAWDEPTH = true
 
-
+include("VisualizationUtilities.jl")  # @pyimport getimages as gi
 
 
 @pyimport pybot.geometry.rigid_transform as bgrt
@@ -44,7 +47,6 @@ session = addrdict["session"]
 
 # draw_utils.publish_pose_list('apriltag', self.tagwposes, frame_id='origin', texts=ids)
 
-
 # CAMK [[ 570.34222412    0.          319.5       ]
 #  [   0.          570.34222412  239.5       ]
 #  [   0.            0.            1.        ]]
@@ -55,6 +57,8 @@ CAMK = [[ 570.34222412; 0.0; 319.5]';
 
 dcam = cu.DepthCamera(K=CAMK)
 # -np.pi/2, 0, -np.pi/2
+dcamjl = DepthCamera(CAMK)
+buildmesh!(dcamjl)
 
 temp = bgrt.RigidTransform[:from_rpyxyz](-pi/2, 0, -pi/2, 0, 0, 0.6, axes="sxyz")
 # @show temp[:to_matrix]()
@@ -78,7 +82,7 @@ while true
   # this is being replaced by cloudGraph, added here for development period
   fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
-  IDs = getPoseExVertexNeoIDs(conn, sessionname=session, reqbackendset=false);
+  IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, sessionname=session, reqbackendset=false);
 
   println("get local copy of graph")
   if fullLocalGraphCopy!(fg, reqbackendset=false)
@@ -150,12 +154,12 @@ while true
         # write(fid, depthcloudpng)
         # close(fid)
         # img = opencv.imread("tempdepth.png",2)
-        imgc = map(Float64,img)/1000.0
+        # imgc = map(Float64,img)/1000.0
         #   opencv.imshow("yes", img)
         # calibrate the image # color conversion of points, so we can get pretty pictures...
         X = dcam[:reconstruct](img)
-        r,c,h = size(X)
-        Xd = X[1:3:r,1:3:c,:]
+        X2 = reconstruct(dcamjl, Array{Float64,2}(img))
+        Xd = X2[1:3:r,1:3:c,:]
         mask = Xd[:,:,:] .> 4.5
         Xd[mask] = Inf
         # get color information

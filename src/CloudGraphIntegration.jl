@@ -286,7 +286,6 @@ function getPoseExVertexNeoIDs(conn;
   #
   # TODO -- in query we can use return n.exVertexId, n.neo4jNodeId
   # TODO -- in query we can use n:POSE rather than length(n.MAP_est)=3
-
   loadtx = transaction(conn)
   # query = "match (n:$(sessionname)) where n.ready=$(ready) and n.backendset=$(backendset) and n.packedType = 'IncrementalInference.PackedVariableNodeData' and length(n.MAP_est)=3 return n"
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
@@ -713,8 +712,16 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   println("Please enter information for:")
   for n in need
     println(n)
+    n == "mongo addr" ? print(string("[",res["neo4j addr"],"]: ")) : nothing
+    n == "draw depth" ? print("[y]/n: ") : nothing
     str = readline(STDIN)
     res[n] = str[1:(end-1)]
+  end
+  @show if res["mongo addr"] == ""
+    res["mongo addr"] = res["neo4j addr"]
+  end
+  @show if drawdepth
+    res["draw depth"] = res["draw depth"]=="" || res["draw depth"]=="y" || res["draw depth"]=="yes" ? "y" : "n"
   end
   return res
 end

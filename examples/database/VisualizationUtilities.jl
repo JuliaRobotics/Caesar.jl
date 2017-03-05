@@ -7,8 +7,8 @@ using PyCall
 
 lcmtpath = joinpath(dirname(@__FILE__),"python")
 unshift!(PyVector(pyimport("sys")["path"]),lcmtpath)
-include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-collection = "bindata"
+# include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
+# collection = "bindata"
 
 
 # temporary helper function to read binary BSON data via pymongo

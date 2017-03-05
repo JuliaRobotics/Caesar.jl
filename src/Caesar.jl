@@ -27,7 +27,8 @@ using
   FileIO,
   NLsolve,
   DataStructures,
-  ProgressMeter
+  ProgressMeter,
+  PyCall
 
 if haskey(instpkg,"CloudGraphs")
   using CloudGraphs
@@ -99,8 +100,13 @@ export
   parameterizeArcAffineMap,
   animatearc,
 
-  # default scenes
-  defaultscene01!,
+  # vis service
+  drawdbsession,
+  askdrawdirectordb,
+  meshgrid,
+  DepthCamera,
+  buildmesh!,
+  reconstruct,
 
   # user functions
   identitypose6fg,
@@ -130,5 +136,6 @@ if haskey(instpkg, "CloudGraphs")
   include("CloudGraphIntegration.jl") # Work in progress code
 end
 
+include("DirectorVisService.jl")
 
 end

@@ -6,7 +6,7 @@ using DrakeVisualizer, CoordinateTransformations, GeometryTypes, Rotations, Tran
 
 # create a new Director window with home axis
 function startdefaultvisualization(;newwindow=true,draworigin=true)
-  DrakeVisualizer.new_window()
+  DrakeVisualizer.any_open_windows() || DrakeVisualizer.new_window(); #DrakeVisualizer.new_window()
   viz = DrakeVisualizer.Visualizer()
   if draworigin
     setgeometry!(viz[:origin], Triad())
@@ -122,7 +122,11 @@ function drawpose!(viz::DrakeVisualizer.Visualizer, sym::Symbol;
   nothing
 end
 
-function visualizeallposes!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph; drawlandms::Bool=true,drawtype::Symbol=:max)
+function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
+    fgl::FactorGraph;
+    drawlandms::Bool=true,
+    drawtype::Symbol=:max  )
+  #
   topoint = +
   if drawtype == :max
     topoint = getKDEMax
