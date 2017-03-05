@@ -114,7 +114,7 @@ end
 
 
 function drawpose!(viz::DrakeVisualizer.Visualizer, sym::Symbol;
-      tf::CoordinateTransformations.AbstractAffineMap=Translation(0.0,0,0)∘LinearMap(CoordinateTransformations.AngleAxix(0.0,0,0,1.0)),
+      tf::CoordinateTransformations.AbstractAffineMap=Translation(0.0,0,0)∘LinearMap(CoordinateTransformations.AngleAxis(0.0,0,0,1.0)),
       session::AbstractString="")
   #
   if session == ""

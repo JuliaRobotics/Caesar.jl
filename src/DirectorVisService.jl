@@ -58,7 +58,18 @@ end
 
 
 
-function drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, dbcoll, poseswithdepth)
+function drawdbsession(vis,
+      cloudGraph,
+      attrdict,
+      dcamjl,
+      DRAWDEPTH,
+      dbcoll,
+      poseswithdepth;
+      bTc::CoordinateTransformations.AbstractAffineMap=
+            Translation(0,0,0.55) ∘ LinearMap(
+            CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5) )
+  )
+
 
   sesssym = Symbol(attrdict["session"])
 
@@ -86,7 +97,7 @@ function drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, dbcoll, pos
         img, ims = gi.fastdepthimg(dbcoll, mongo_keydepth)
         X = reconstruct(dcamjl, Array{Float64,2}(img))
         r,c,h = size(X)
-        Xd = X[1:10:r,1:10:c,:]
+        Xd = X[1:4:r,1:4:c,:]
         rd,cd,hd = size(Xd)
         mask = Xd[:,:,:] .> 4.5
         Xd[mask] = Inf
@@ -102,7 +113,7 @@ function drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, dbcoll, pos
           seg, ims = gi.fastrgbimg(dbcoll, mongo_key)
         end
         if rgb != nothing
-          rgbss = rgb[1:10:r,1:10:c,:]
+          rgbss = rgb[1:4:r,1:4:c,:]
           # bedu.publish_cloud("depth", Xd, c=rgbss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
           pts = Vector{Vector{Float64}}()
           for i in 1:rd, j in 1:cd
@@ -112,7 +123,9 @@ function drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, dbcoll, pos
           end
           pointcloud = PointCloud(pts)
           println("drawing point cloud for $(string(x)), size $(size(pts))")
-          setgeometry!(vis[sesssym][:poses][x][:pc], pointcloud)
+          setgeometry!(vis[sesssym][:poses][x][:cam], Triad())
+          settransform!(vis[sesssym][:poses][x][:cam], bTc)
+          setgeometry!(vis[sesssym][:poses][x][:cam][:pc], pointcloud)
           sleep(0.2)
         end
         # if seg != nothing
