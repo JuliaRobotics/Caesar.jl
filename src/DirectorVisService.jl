@@ -58,11 +58,9 @@ end
 
 
 
-function drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, dbcoll)
+function drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, dbcoll, poseswithdepth)
 
   sesssym = Symbol(attrdict["session"])
-  poseswithdepth = Dict()
-  poseswithdepth["x1"] = 0 # skip this pose -- there is no big data before ICRA
 
   fg = Caesar.initfg(sessionname=attrdict["session"], cloudgraph=cloudGraph)
   IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, sessionname=attrdict["session"], reqbackendset=false);
@@ -71,8 +69,8 @@ function drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, dbcoll)
     visualizeallposes!(vis, fg)
 
     xx,ll = ls(fg)
-  	LD = Array{Array{Float64,1},1}()
-  	C = Vector{AbstractString}()
+  	# LD = Array{Array{Float64,1},1}()
+  	# C = Vector{AbstractString}()
   	for x in xx
   		val = getVal(fg,x)
   		len = size(val,2)
@@ -108,7 +106,9 @@ function drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, dbcoll)
           # bedu.publish_cloud("depth", Xd, c=rgbss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
           pts = Vector{Vector{Float64}}()
           for i in 1:rd, j in 1:cd
-            push!(pts, vec(Xd[i,j,:]) )
+            if !isnan(Xd[i,j,1]) && Xd[i,j,3] != Inf
+              push!(pts, vec(Xd[i,j,:]) )
+            end
           end
           pointcloud = PointCloud(pts)
           println("drawing point cloud for $(string(x)), size $(size(pts))")
@@ -129,7 +129,7 @@ end
 
 
 
-function askdrawdirectordb()
+function drawdbdirector()
   # Uncomment out for command line operation
   cloudGraph, attrdict = standardcloudgraphsetup(drawdepth=true)
   session = attrdict["session"]
@@ -139,6 +139,9 @@ function askdrawdirectordb()
   client = pymongo.MongoClient(attrdict["mongo addr"])
   db = client[:CloudGraphs]
   collection = "bindata"
+
+  poseswithdepth = Dict()
+  poseswithdepth[:x1] = 0 # skip this pose -- there is no big data before ICRA
 
   vis = startdefaultvisualization()
   sleep(1.0)
@@ -151,7 +154,7 @@ function askdrawdirectordb()
 
   drawloop = Bool[true]
   while drawloop[1]
-    drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, db[collection])
+    drawdbsession(vis, cloudGraph, attrdict, dcamjl, DRAWDEPTH, db[collection], poseswithdepth)
     println(".")
   end
 

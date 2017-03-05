@@ -43,6 +43,8 @@ end
 
 
 export
+  # pass through from IIF and RoME
+  ls,
   # Victoria Park example -- batch
   loadVicPrkDataset,
   # addLandmarksFactoGraph!,
@@ -102,7 +104,7 @@ export
 
   # vis service
   drawdbsession,
-  askdrawdirectordb,
+  drawdbdirector,
   meshgrid,
   DepthCamera,
   buildmesh!,
