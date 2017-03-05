@@ -66,7 +66,7 @@ function drawdbsession(vis,
       dbcoll,
       poseswithdepth;
       bTc::CoordinateTransformations.AbstractAffineMap=
-            Translation(0,0,0.55) ∘ LinearMap(
+            Translation(0,0,0.6) ∘ LinearMap(
             CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5) )
   )
 
@@ -113,15 +113,18 @@ function drawdbsession(vis,
           seg, ims = gi.fastrgbimg(dbcoll, mongo_key)
         end
         if rgb != nothing
-          rgbss = rgb[1:4:r,1:4:c,:]
-          # bedu.publish_cloud("depth", Xd, c=rgbss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
+          rgbss = rgb[1:4:r,1:4:c,:]./255.0
           pts = Vector{Vector{Float64}}()
+          pccols = Vector()
+          # @show typeof(rgb), rgb[200,200,1]/255.0, rgb[200,200,2]/255.0, rgb[200,200,3]/255.0
           for i in 1:rd, j in 1:cd
             if !isnan(Xd[i,j,1]) && Xd[i,j,3] != Inf
               push!(pts, vec(Xd[i,j,:]) )
+              push!(pccols, RGB(rgbss[i,j,3], rgbss[i,j,2], rgbss[i,j,1]) )
             end
           end
           pointcloud = PointCloud(pts)
+          pointcloud.channels[:rgb] = pccols
           println("drawing point cloud for $(string(x)), size $(size(pts))")
           setgeometry!(vis[sesssym][:poses][x][:cam], Triad())
           settransform!(vis[sesssym][:poses][x][:cam], bTc)
