@@ -118,15 +118,15 @@ export
   # repeats from RoME and IIF
   initfg,
   addNode!,
-  addFactor!
+  addFactor!,
+
+  # install db stuff
+  installcloudgraphs
 
 
 
-if instpkg["RoME"] > v"0.0.3"
-  include("BearingRangeTrackingServer.jl")
-else
-  warn("Some features disabled since the package RoME is too far behind.")
-end
+
+include("BearingRangeTrackingServer.jl")
 
 include("SlamServer.jl")
 include("DataUtils.jl")
