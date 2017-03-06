@@ -12,26 +12,28 @@ using KernelDensityEstimate
 # mongoaddress = "localhost"
 session = "SESSTEST"
 include(joinpath(dirname(@__FILE__) ,"blandauth.jl"))
+Nparticles = 200
 println("Attempting to solve session $(session)...")
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
 cloudGraph = connect(configuration);
-# Connection to database
-conn = cloudGraph.neo4j.connection
-
 # register types of interest in CloudGraphs
 registerGeneralVariableTypes!(cloudGraph)
-
 Caesar.usecloudgraphsdatalayer!()
-# IncrementalInference.setdatalayerAPI!()
+
+# Uncomment out for command line operation
+# cloudGraph, addrdict = standardcloudgraphsetup(drawdepth=true)
+# session = addrdict["session"]
+# Nparticles = addrdict["num particles"]
+
+
 
 # this is being replaced by cloudGraph, added here for development period
-fg = initfg(sessionname = session)
-fg.cg = cloudGraph
+fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
 
 # Robot navigation and inference type stuff
-N=200
+N=Nparticles
 doors = [-100.0;0.0;100.0;300.0]'
 cov = [3.0]
 
