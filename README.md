@@ -115,6 +115,12 @@ Which perform these same steps: Install [Neo4j](https://neo4j.com/) and add thes
     Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 
+You should be able to run the following two commands in Python:
+
+    $ python
+    >>> import pymongo
+    >>> import cv2
+
 Modify CloudGraphs related lines from test/runtests.jl Ln 7 to true.
 
 You should be able to rerun the four door test on both internal dictionaries and repeated on Neo4j DB
