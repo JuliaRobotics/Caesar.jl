@@ -4,7 +4,7 @@ IncrementalInference 0.2.5
 Graphs 0.7.1
 KernelDensityEstimate 0.2.3
 Distributions
-DrakeVisualizer
+DrakeVisualizer 0.1.2
 TransformUtils
 CoordinateTransformations
 GeometryTypes
