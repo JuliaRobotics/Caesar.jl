@@ -1,5 +1,6 @@
 module Caesar
 
+instpkg = Pkg.installed();
 
 # import RoME: initfg
 import Distributions: Normal
@@ -26,7 +27,15 @@ using
   FileIO,
   NLsolve,
   DataStructures,
-  ProgressMeter
+  ProgressMeter,
+  PyCall
+
+if haskey(instpkg,"CloudGraphs")
+  using CloudGraphs
+  using Neo4j
+  using Mongo
+  using LibBSON
+end
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
 
@@ -125,6 +134,11 @@ include("VisualizationUtils.jl")
 include("ModelVisualizationUtils.jl")
 include("UserFunctions.jl")
 
+if haskey(instpkg, "CloudGraphs")
+  include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
+  include("cloudgraphs/DBVisualizationUtils.jl")
+  include("cloudgraphs/DirectorVisService.jl")
+end
 
 
 end
