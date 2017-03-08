@@ -28,22 +28,3 @@ findaxiscenter!(as)
 @test -1e-4 < as.angle-pi < 1e-4
 
 println("[SUCCESS]")
-
-
-println("[TEST] CloudGraphs API calls...")
-instpkg = Pkg.installed()
-if haskey(instpkg,"CloudGraphs")
-  println("[TEST] with CloudGraphs with local DB data layer (multicore)...")
-  include("fourdoortestcloudgraph.jl")
-  println("[SUCCESS]")
-else
-  warn("[NOT TESTING] CloudGraphs interface -- you must enable it here at Caesar/test/runtests.jl, and you'll need Neo4j and MongoDB installed.")
-end
-
-
-if false
-  # using VictoriaParkTypes
-
-else
-  warn("not running full Victoria park dataset now")
-end
