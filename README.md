@@ -100,30 +100,35 @@ Dependency Status
 | [DrakeVisualizer.jl][dvis-url] | [![Build Status][dvis-build-img]][dvis-build-url] | [![codecov.io][dvis-cov-img]][dvis-cov-url] |
 
 Database interaction layer
---------------------------
+==========================
 
-For using the solver on a DataBase layer (work in progress on centralized architecture ) see [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git),
+For using the solver on a DataBase layer you need to do two things: Currently we have a weak dependency on some Python functions, and use the ```cloudgraphs``` branch. You can set up the Julia dependencies as follows:
 
-You can directly run from Julia:
+    $ julia
+    julia> Pkg.checkout("Caesar","cloudgraphs")
+    julia> using Caesar
+    julia> installcloudgraphs()
 
-    using Caesar
-    installcloudgraphs()
+This will install additional features, mostly relating to [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git). During some of the development we used three libraries from Python, but this Python dependency is temporary and will be deprecated in the future. Make sure you have these libraries are available to PyCall.jl
 
-Which perform these same steps: Install [Neo4j](https://neo4j.com/) and add these packages to your Julia system
+    python-numpy   # similar dependency in DrakeVisualizer
+    python-pymongo # only using bson.BINARY functionality until LibBSON.jl wraps binary functions
+    python-opencv  # only using imread('.png', ), and will be replaced with Images.jl
 
-    Pkg.add("Mongo")
+Before running the current Caesar DB features, make sure you can do this:
+
+    $ julia
+    julia> using PyCall
+    julia> @pyimport pymongo
+    julia> @pyimport cv2
+
+INFO, ```installcloudgraphs()``` will perform:
+
+    Pkg.add("Mongo")  # brings in LibBSON.jl as dependency
     Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 
-You should be able to run the following two commands in Python:
-
-    $ python
-    >>> import pymongo
-    >>> import cv2
-
-Modify CloudGraphs related lines from test/runtests.jl Ln 7 to true.
-
-You should be able to rerun the four door test on both internal dictionaries and repeated on Neo4j DB
+If you have access to Neo4j and Mongo services you should be able to run the [four door test](https://github.com/dehann/Caesar.jl/blob/master/test/fourdoortestcloudgraph.jl) on both internal dictionaries and repeated on Neo4j DB:
 
     Pkg.test("Caesar")
 
@@ -132,13 +137,17 @@ Go to your browser at localhost:7474 and run one of the Cypher queries to either
     match (n) return n
     match (n) detach delete n
 
-You can run the database solver using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl)
-
+You can run the multi-modal iSAM solver against the DB using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl):
 ```julia
-julia050 -p20 MM-iSAMCloudSolve.jl
+$ julia -p20 MM-iSAMCloudSolve.jl
 ```
 
-Database driven Visualization using Collections Rendered is provided via [Pybot](http/www.github.com/spillai/pybot), and an [example service script](https://github.com/dehann/Caesar.jl/blob/master/examples/database/DBCollectionsViewerService.jl) is available. Work is in progress to provide basic visualization support through [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl).
+Database driven Visualization can be done with either MIT's [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl) (prefered), or Collections Render which additionally relies on [Pybot](http/www.github.com/spillai/pybot). For visualization using Director/DrakeVisualizer.jl:
+```
+$ julia -e "using Caesar; drawdbdirector()"
+```
+
+And an [example service script for CollectionsRender](https://github.com/dehann/Caesar.jl/blob/master/examples/database/DBCollectionsViewerService.jl) is also available.
 
 Future targets
 --------------
