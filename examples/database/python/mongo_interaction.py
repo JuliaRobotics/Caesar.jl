@@ -4,6 +4,7 @@ from bson import Binary, json_util, BSON
 import bson
 import cv2 # for image pulling/read in only
 import json # for
+import numpy as np
 
 #####################################################################################
 ## MongoDB Construction in Python Example
@@ -26,9 +27,28 @@ X = cv2.imread("/home/dehann/Downloads/sample_image.jpg")
 print type(X)
 f = BSON(X) # blah 6Kb image of a printer
 
-
-# insert!
+# insert to MongoDB, but then remember to insert the key to Neo4j for later reference
+# see neo_interact.py/addmongokeys(.)
 key = db[collection].insert({"neoNodeId": -1, "val": f, "description": "Auto-inserted with mongo_interaction.py"})
+
+
+
+# Nick please see here for insert array and Neo4j node update with mongo objectid
+def insertarray(dbcoll, X):
+    r.c = X.shape
+    mngdata = Binary(X.tostring())
+    key = dbcoll.insert({"neoNodeId": -1,"rows":r, "cols":c, "val": mngdata, "description": "Auto-inserted with mongo_interaction.py"})
+    return key
+
+r,c = 2,5
+X = np.random.randn(r,c)
+key = insertarray(db[collection], X)
+newoid = str(key)
+# neo4j_iface.addmongokeys(neoid, "arrnameinneo4j", newoid)
+
+
+
+
 
 # check that mongo ate your key/image combo by asking it for image via key ref
 #  - start up mongo
