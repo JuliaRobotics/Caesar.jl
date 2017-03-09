@@ -27,7 +27,7 @@ collection = "bindata"
 # include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 # DRAWDEPTH = true
 
-include("VisualizationUtilities.jl")  # @pyimport getimages as gi
+# include("VisualizationUtilities.jl")  # @pyimport getimages as gi
 
 
 @pyimport pybot.geometry.rigid_transform as bgrt
