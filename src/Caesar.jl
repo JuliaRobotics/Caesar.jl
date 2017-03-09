@@ -118,10 +118,7 @@ export
   # repeats from RoME and IIF
   initfg,
   addNode!,
-  addFactor!,
-
-  # install db stuff
-  installcloudgraphs
+  addFactor!
 
 
 
