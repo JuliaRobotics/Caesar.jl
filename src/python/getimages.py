@@ -33,6 +33,12 @@ def test(key, val):
     mongo_key = bson.ObjectId(key)
     return mongo_key
 
+def getbinarray(dbcoll, mongo_key):
+    results = dbcoll.find({"_id": mongo_key})
+    arr = None
+    for item in results:
+        arr = np.fromstring(str(item["val"]) ).reshape(item["rows"],item["cols"])
+    return arr
 
 
 

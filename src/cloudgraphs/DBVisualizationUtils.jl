@@ -1,8 +1,8 @@
 # help DBCollectionsViewerService
 # using PyCall
 
-
-thispath = joinpath(dirname(@__FILE__),"python")
+thispath = joinpath(joinpath(dirname(@__FILE__),".."),"python")
+println("Adding to session Python path: $(thispath)")
 unshift!(PyVector(pyimport("sys")["path"]),thispath)
 # include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 # collection = "bindata"
@@ -17,6 +17,7 @@ unshift!(PyVector(pyimport("sys")["path"]),thispath)
 
 function getmongokeys(fgl::FactorGraph, x::Symbol, IDs)
   cvid = -1
+  # TODO -- could likely just use existing mapping already in fgl
   for id in IDs
     if Symbol(fgl.g.vertices[id[1]].label) == x
       cvid = id[2]
@@ -48,6 +49,11 @@ function fetchmongorgbimg(dbcoll, key)
 end
 
 
+function getbinarraymongo(dbcoll, key)
+  mongo_key = bson.ObjectId(key)
+  arr = gi.getbinarray(dbcoll, mongo_key)
+  return arr
+end
 
 
 

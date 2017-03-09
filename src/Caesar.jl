@@ -120,8 +120,11 @@ export
   addNode!,
   addFactor!,
 
+  # Using CloudGraphs
   # install cloudgraphs
-  installcloudgraphs
+  installcloudgraphs,
+  # helper functions
+  getbinarraymongo
 
 
 
