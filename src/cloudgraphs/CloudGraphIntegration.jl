@@ -232,7 +232,11 @@ function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
   #acoustic types
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DRangeDensity}}, PackedFunctionNodeData{PackedPose2DPoint2DRangeDensity}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRangeDensity}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRangeDensity}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  # TODO -- Pose3 stuff
+  # Pose3 stuff
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPose3}}, PackedFunctionNodeData{PackedPriorPose3}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose3Pose3}}, PackedFunctionNodeData{PackedPose3Pose3}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose3Pose3NH}}, PackedFunctionNodeData{PackedPose3Pose3NH}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+
   nothing
 end
 
@@ -726,8 +730,14 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   return res
 end
 
-function standardcloudgraphsetup(;nparticles=false, drawdepth=false, clearslamindb=false)
-  addrdict = consoleaskuserfordb(nparticles=nparticles, drawdepth=drawdepth, clearslamindb=clearslamindb)
+function standardcloudgraphsetup(;addrdict=nothing,
+            nparticles=false,
+            drawdepth=false,
+            clearslamindb=false  )
+  #
+  if addrdict == nothing
+    addrdict = consoleaskuserfordb(nparticles=nparticles, drawdepth=drawdepth, clearslamindb=clearslamindb)
+  end
 
   # Connect to database
   configuration = CloudGraphs.CloudGraphConfiguration(
