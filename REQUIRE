@@ -18,5 +18,6 @@ JSON
 MeshIO
 FileIO
 NLsolve
+PyLCM
 DataStructures
 ProgressMeter
