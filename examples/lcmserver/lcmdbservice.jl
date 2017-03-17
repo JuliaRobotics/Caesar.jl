@@ -1,4 +1,4 @@
-addprocs(4)
+# addprocs(4)
 
 using Caesar, RoME
 using TransformUtils
@@ -200,9 +200,9 @@ rovt(vc)
 
 
 Nparticles = 100
-# include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
-# addrdict["session"] = "SESSHAUV"
-# cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
+include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
+addrdict["session"] = "SESSHAUV"
+cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 # # cloudGraph, addrdict = standardcloudgraphsetup()
 # slam = setupSLAMinDB(cloudGraph, addrdict)
 
@@ -219,107 +219,110 @@ runlistener!(flags, slam, vc, until=:x10, MSGDATA=MSGDATA, record=false)
 
 
 
-# visualizeDensityMesh!(vc, slam.fg, :x30)
-visualizeallposes!(vc, slam.fg, drawtype=:fit)
-
-[solveandvisualize(slam.fg, vc, drawtype=:fit) for i in 1:1] #, densitymeshes=[:x1;:x33;:x60])
-
-
-
-println("Debugging functions")
-using IncrementalInference
-
-fg = slam.fg
-
-# loopclosures
-@show lcfncs = lsf(fg, Pose3Pose3NH)
-
-
-
-
-# plotKDEofnc(fg, :x1x2, marg=[1;2], N=Nparticles)
-
-donum = 5
-plotKDEofnc(fg, lcfncs[donum], marg=[1;2], N=Nparticles)
-plotKDEofnc(fg, lcfncs[donum], marg=[6;3], N=Nparticles)
-plotKDEofnc(fg, lcfncs[donum], marg=[4;5], N=Nparticles)
-
-
-
-plotKDEresiduals(fg, :x1x2, marg=[6;3], N=Nparticles)
-
-
-fnc = getfnctype(fg, fg.fIDs[:x33x34])
-fnc.Zij
-
-pts = getSample(fnc, Nparticles)[1]
-Base.mean(pts,2)
-
-ls(fg, :x55)
-
-msgdata = MSGDATA[:pose_node_t][3]
-odomsg = rome.pose_node_t[:decode](msgdata)
-@show odomsg[:id]
-@show odomsg[:mean]
-
-
-ft = getVert(fg, fg.fIDs[:x2])
-fieldnames(getData(ft).fnc.usrfnc!)
-getData(ft).fnc.usrfnc!.rp
-
-
-
-
-
-getData(ft).fnc.usrfnc!.z
-
-
-
-
-meas = getSample(getData(ft).fnc.usrfnc!)
-
-
-
-
-p = findRelatedFromPotential(fg, ft, fg.IDs[:x2], Nparticles)
-plotKDE(marginal(p,[3]))
-
-
-val = predictbelief(fg, :x2, [:x2], N=Nparticles)
-
-
-
-
-
-
-ppx2 = marginal(kde!(val),[3])
-plotKDE(ppx2, levels=3)
-
-
-
-
-plotKDE([px1;ppx2],c=["red";"green"], levels=4)
-
 
 
 #
+# # visualizeDensityMesh!(vc, slam.fg, :x30)
+# visualizeallposes!(vc, slam.fg, drawtype=:fit)
 #
-ls(slam.fg)
-writeGraphPdf(slam.fg)
-run(`evince fg.pdf`)
-#
-#
-# println("AD-HOC DEBUGGING")
-#
-# slam = setupSLAMinDB()
+# [solveandvisualize(slam.fg, vc, drawtype=:fit) for i in 1:1] #, densitymeshes=[:x1;:x33;:x60])
 #
 #
-# lcmposenodes!(vc, slam, MSGDATA[:pose_node_t][1], record=false)
-# lcmposenodes!(vc, slam, MSGDATA[:pose_node_t][2], record=false)
+#
+# println("Debugging functions")
+# using IncrementalInference
+#
+# fg = slam.fg
+#
+# # loopclosures
+# @show lcfncs = lsf(fg, Pose3Pose3NH)
 #
 #
-# lcmodomsg!(vc, slam, MSGDATA[:pose_pose_nh_t][1], record=false)
 #
+#
+# # plotKDEofnc(fg, :x1x2, marg=[1;2], N=Nparticles)
+#
+# donum = 5
+# plotKDEofnc(fg, lcfncs[donum], marg=[1;2], N=Nparticles)
+# plotKDEofnc(fg, lcfncs[donum], marg=[6;3], N=Nparticles)
+# plotKDEofnc(fg, lcfncs[donum], marg=[4;5], N=Nparticles)
+#
+#
+#
+# plotKDEresiduals(fg, :x1x2, marg=[6;3], N=Nparticles)
+#
+#
+# fnc = getfnctype(fg, fg.fIDs[:x33x34])
+# fnc.Zij
+#
+# pts = getSample(fnc, Nparticles)[1]
+# Base.mean(pts,2)
+#
+# ls(fg, :x55)
+#
+# msgdata = MSGDATA[:pose_node_t][3]
+# odomsg = rome.pose_node_t[:decode](msgdata)
+# @show odomsg[:id]
+# @show odomsg[:mean]
+#
+#
+# ft = getVert(fg, fg.fIDs[:x2])
+# fieldnames(getData(ft).fnc.usrfnc!)
+# getData(ft).fnc.usrfnc!.rp
+#
+#
+#
+#
+#
+# getData(ft).fnc.usrfnc!.z
+#
+#
+#
+#
+# meas = getSample(getData(ft).fnc.usrfnc!)
+#
+#
+#
+#
+# p = findRelatedFromPotential(fg, ft, fg.IDs[:x2], Nparticles)
+# plotKDE(marginal(p,[3]))
+#
+#
+# val = predictbelief(fg, :x2, [:x2], N=Nparticles)
+#
+#
+#
+#
+#
+#
+# ppx2 = marginal(kde!(val),[3])
+# plotKDE(ppx2, levels=3)
+#
+#
+#
+#
+# plotKDE([px1;ppx2],c=["red";"green"], levels=4)
+#
+#
+#
+# #
+# #
+# ls(slam.fg)
+# writeGraphPdf(slam.fg)
+# run(`evince fg.pdf`)
+# #
+# #
+# # println("AD-HOC DEBUGGING")
+# #
+# # slam = setupSLAMinDB()
+# #
+# #
+# # lcmposenodes!(vc, slam, MSGDATA[:pose_node_t][1], record=false)
+# # lcmposenodes!(vc, slam, MSGDATA[:pose_node_t][2], record=false)
+# #
+# #
+# # lcmodomsg!(vc, slam, MSGDATA[:pose_pose_nh_t][1], record=false)
+# #
 
 
 
