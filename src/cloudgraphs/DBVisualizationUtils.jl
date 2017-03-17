@@ -24,6 +24,10 @@ function getmongokeys(fgl::FactorGraph, x::Symbol, IDs)
       break
     end
   end
+  if cvid == -1
+    warn("getmongokeys is not finding $(x)")
+    return Dict{AbstractString, Any}(), cvid
+  end
   # @show cvid
   cv = CloudGraphs.get_vertex(fgl.cg, cvid)
   if haskey(cv.properties, "mongo_keys")
