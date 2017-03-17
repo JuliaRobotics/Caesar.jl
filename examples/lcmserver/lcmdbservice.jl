@@ -1,4 +1,4 @@
-# addprocs(4)
+addprocs(4)
 
 using Caesar, RoME
 using TransformUtils
@@ -184,7 +184,7 @@ function lcmsendallposes(lc, slaml::SLAMWrapper)
   nothing
 end
 
-function setupSLAMinDB(cloudGraph=nothing, addrdict=nothing)
+function setupSLAMinDB(;cloudGraph=nothing, addrdict=nothing)
   if cloudGraph != nothing
     return SLAMWrapper(Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph), nothing, 0)
   else
@@ -200,13 +200,14 @@ rovt(vc)
 
 
 Nparticles = 100
+# # cloudGraph, addrdict = standardcloudgraphsetup()
+
 include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
 addrdict["session"] = "SESSHAUV"
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
-# # cloudGraph, addrdict = standardcloudgraphsetup()
-# slam = setupSLAMinDB(cloudGraph, addrdict)
 
-slam = setupSLAMinDB()
+slam = setupSLAMinDB(cloudGraph=cloudGraph, addrdict=addrdict)
+# slam = setupSLAMinDB()
 
 
 flags = Bool[1]
@@ -214,30 +215,52 @@ flags[1] = true
 
 MSGDATA = Dict{Symbol, Vector{Vector{UInt8}}}()
 
+
 println("LCM listener running...")
 runlistener!(flags, slam, vc, until=:x10, MSGDATA=MSGDATA, record=false)
 
+# slamdb10 = deepcopy(slam)
 
 
+0
 
-
-#
 # # visualizeDensityMesh!(vc, slam.fg, :x30)
 # visualizeallposes!(vc, slam.fg, drawtype=:fit)
 #
-# [solveandvisualize(slam.fg, vc, drawtype=:fit) for i in 1:1] #, densitymeshes=[:x1;:x33;:x60])
+[solveandvisualize(slam.fg, vc, drawtype=:fit) for i in 1:1] #, densitymeshes=[:x1;:x33;:x60])
 #
 #
 #
 # println("Debugging functions")
-# using IncrementalInference
-#
-# fg = slam.fg
-#
+using IncrementalInference
+
+fg = slam.fg
+
+fg = slamdict10.fg
+
+getVal(fg, :x1)
+
+fullLocalGraphCopy!(slam.fg)
+
+sp = plotKDEresiduals(fg, :x1x2, marg=[1;2], N=Nparticles)
+sp = plotKDEresiduals(fg, :x1x2, marg=[3;6], N=Nparticles)
+
+# Gadfly.draw(PNG("/home/dehann/Pictures/sp3.png",20cm,15cm),sp)
+
+
+
+
+savefgjld(fg)
+
+
+
+# end
+
+
+1
 # # loopclosures
 # @show lcfncs = lsf(fg, Pose3Pose3NH)
-#
-#
+# #
 #
 #
 # # plotKDEofnc(fg, :x1x2, marg=[1;2], N=Nparticles)
@@ -249,7 +272,6 @@ runlistener!(flags, slam, vc, until=:x10, MSGDATA=MSGDATA, record=false)
 #
 #
 #
-# plotKDEresiduals(fg, :x1x2, marg=[6;3], N=Nparticles)
 #
 #
 # fnc = getfnctype(fg, fg.fIDs[:x33x34])
