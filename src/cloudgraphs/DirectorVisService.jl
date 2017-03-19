@@ -93,8 +93,10 @@ function drawdbsession(vis,
       mongk, cvid = getmongokeys(fg, x, IDs)
   		if DRAWDEPTH && haskey(mongk, "depthframe_image") && !haskey(poseswithdepth, x)
         poseswithdepth[x]=1
+
         mongo_keydepth = bson.ObjectId(mongk["depthframe_image"])
         img, ims = gi.fastdepthimg(dbcoll, mongo_keydepth)
+
         X = reconstruct(dcamjl, Array{Float64,2}(img))
         r,c,h = size(X)
         Xd = X[1:4:r,1:4:c,:]

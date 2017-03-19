@@ -38,6 +38,9 @@ function getmongokeys(fgl::FactorGraph, x::Symbol, IDs)
   end
 end
 
+function fetchmongorgbimg(dbcoll, key)
+
+end
 
 function fetchmongodepthimg(dbcoll, key)
   mongo_keydepth = bson.ObjectId(key)
