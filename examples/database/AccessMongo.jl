@@ -9,11 +9,11 @@ cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 # include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 
 # Get the keys (and possibly the data)
-cursor = find(cloudGraph.mongo.cgBindataCollection, query())
-for o in cursor
-    # println( ", oid: ", o["_id"])
-    println("id: ", o["_id"]);
-end
+# cursor = find(cloudGraph.mongo.cgBindataCollection, query())
+# for o in cursor
+#     # println( ", oid: ", o["_id"])
+#     println("id: ", o["_id"]);
+# end
 
 # Get Roxana's encoded parameters
 #REF: https://github.com/dehann/Caesar.jl/blob/master/examples/database/python/mongo_interaction.py
@@ -33,11 +33,20 @@ findsomthing = find(cloudGraph.mongo.cgBindataCollection, ("_id" => eq(myKeyToFi
 # @show myFavouriteKey["val"]
 myFavouriteKey = first( findsomthing );
 
-file = open("test.png", "w")
+file = open("/home/gearsad/test.png", "w")
 write(file, myFavouriteKey["val"])
 close(file)
-run(`eog test.png`)
-run(`rm test.png`)
+
+data = myFavouriteKey["val"]
+using ImageMagick
+img = ImageMagick.readblob(data);
+# using Images
+# using FileIO
+# using Images, ImageView
+# img = load("test.png")
+# imshow(img)
+# run(`eog test.png`)
+# run(`rm test.png`)
 
 
 
