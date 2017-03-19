@@ -1,4 +1,4 @@
-addprocs(4)
+# addprocs(4)
 
 using Caesar, RoME
 using TransformUtils
@@ -249,10 +249,17 @@ sp = plotKDEresiduals(fg, :x1x2, marg=[3;6], N=Nparticles)
 
 
 
+savejld(fg) # file=tempfg.jld
 
-savefgjld(fg)
 
+using RoME
 
+# Juno.breakpoint("/home/dehann/.julia/v0.5/RoME/src/fgos.jl",19)
+
+fgu = loadjld(file="test.jld")
+
+writeGraphPdf(fgu)
+run(`evince fg.pdf`)
 
 # end
 
