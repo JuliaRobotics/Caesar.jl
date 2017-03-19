@@ -48,6 +48,14 @@ img = ImageMagick.readblob(data);
 # run(`eog test.png`)
 # run(`rm test.png`)
 
+img[1,1].r
+imgA = zeros(480,640,3);
+@time for i in 1:480, j in 1:640
+  imgA[i,j,1] = img[i,j].r
+  imgA[i,j,2] = img[i,j].g
+  imgA[i,j,3] = img[i,j].b
+end
+
 
 
 
