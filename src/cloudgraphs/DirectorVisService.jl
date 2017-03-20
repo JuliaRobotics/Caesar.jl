@@ -104,12 +104,12 @@ function prepcolordepthcloud!( X, rgb; skip::Int=4, maxrange=4.5 )
 end
 
 
+# dbcoll,
 function drawdbsession(vis,
       cloudGraph,
       addrdict,
       dcamjl,
       DRAWDEPTH,
-      dbcoll,
       poseswithdepth;
       bTc::CoordinateTransformations.AbstractAffineMap=
             Translation(0,0,0.6) ∘ LinearMap(
@@ -151,8 +151,6 @@ function drawdbsession(vis,
   		if DRAWDEPTH && haskey(mongk, "depthframe_image") && !haskey(poseswithdepth, x)
         poseswithdepth[x]=1
 
-        mongo_keydepth = bson.ObjectId(mongk["depthframe_image"])
-        img, ims = gi.fastdepthimg(dbcoll, mongo_keydepth)
 
         rgb = nothing
         seg = nothing
@@ -164,6 +162,12 @@ function drawdbsession(vis,
           # mongo_key = bson.ObjectId(mongk["keyframe_segnet"])
           # seg, ims = gi.fastrgbimg(dbcoll, mongo_key)
         end
+
+        ri,ci = size(rgb)
+        arr = fetchmongodepthimg(cloudGraph, mongk["depthframe_image"], dtype=Float32)
+        img = reshape(arr, ci, ri)'
+        # mongo_keydepth = bson.ObjectId(mongk["depthframe_image"])
+        # imgO, ims = gi.fastdepthimg(dbcoll, mongo_keydepth)
 
         X = reconstruct(dcamjl, Array{Float64,2}(img))
 
@@ -194,9 +198,9 @@ function drawdbdirector()
   DRAWDEPTH = addrdict["draw depth"]=="y" # not going to support just yet
 
   # also connect to mongo separately
-  client = pymongo.MongoClient(addrdict["mongo addr"])
-  db = client[:CloudGraphs]
-  collection = "bindata"
+  # client = pymongo.MongoClient(addrdict["mongo addr"])
+  # db = client[:CloudGraphs]
+  # collection = "bindata"
 
   poseswithdepth = Dict()
   poseswithdepth[:x1] = 0 # skip this pose -- there is no big data before ICRA
@@ -212,7 +216,7 @@ function drawdbdirector()
 
   drawloop = Bool[true]
   while drawloop[1]
-    drawdbsession(vis, cloudGraph, addrdict, dcamjl, DRAWDEPTH, db[collection], poseswithdepth)
+    drawdbsession(vis, cloudGraph, addrdict, dcamjl, DRAWDEPTH, poseswithdepth) #,  db[collection]
     println(".")
   end
 
