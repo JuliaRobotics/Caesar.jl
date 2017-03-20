@@ -130,7 +130,7 @@ function drawdbsession(vis,
   	# LD = Array{Array{Float64,1},1}()
   	# C = Vector{AbstractString}()
   	# for x in xx
-    for (vid,cvid) in IDs
+    @showprogress 1 "Drawing IDs..." for (vid,cvid) in IDs
 
       cv = CloudGraphs.get_vertex(cloudGraph, cvid)
       vert = cloudVertex2ExVertex(cv)
