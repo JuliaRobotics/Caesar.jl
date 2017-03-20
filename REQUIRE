@@ -22,3 +22,5 @@ PyLCM
 DataStructures
 ProgressMeter
 PyCall
+ImageMagick
+ImageCore

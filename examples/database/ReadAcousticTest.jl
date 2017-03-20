@@ -88,7 +88,7 @@ plotKDE(rn.bearing)
 
 vc = startdefaultvisualization(draworigin=true)
 
-drawmarginalpoints!(vc, fg, :x8)
+drawposepoints!(vc, fg, :x8)
 
 getVal(fg, :l200050, api=dlapi)
 

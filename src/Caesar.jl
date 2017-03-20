@@ -28,6 +28,8 @@ using
   NLsolve,
   DataStructures,
   ProgressMeter,
+  ImageMagick,
+  ImageCore,
   PyCall
 
 if haskey(instpkg,"CloudGraphs")
@@ -86,7 +88,7 @@ export
   visualizerealtime,
   # new tree interface
   drawpose!,
-  drawmarginalpoints!,
+  drawposepoints!,
 
   # for models
   loadmodel,
@@ -124,8 +126,18 @@ export
   # install cloudgraphs
   installcloudgraphs,
   # helper functions
-  getbinarraymongo
+  getbinarraymongo,
+  gettopoint,
+  getdotwothree
 
+
+
+include("BearingRangeTrackingServer.jl")
+
+include("SlamServer.jl")
+include("DataUtils.jl")
+include("VisualizationUtils.jl")
+include("ModelVisualizationUtils.jl")
 
 
 

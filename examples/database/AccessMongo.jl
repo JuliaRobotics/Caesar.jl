@@ -25,17 +25,20 @@ cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 #     #println(o)
 # end
 
+# myKeyToFind = BSONOID("58b0a34b5d76256bd2b8183c") # example of string array
 
 
 # fetch a binary png image
-myKeyToFind = BSONOID("58af67255d7625647859fa71")
+myKeyToFind = BSONOID("58af67255d7625647859fa71") # good example of opencv binary encoded png
 findsomthing = find(cloudGraph.mongo.cgBindataCollection, ("_id" => eq(myKeyToFind)))
 # @show myFavouriteKey["val"]
 myFavouriteKey = first( findsomthing );
 
-file = open("/home/gearsad/test.png", "w")
+file = open("test.png", "w")
 write(file, myFavouriteKey["val"])
 close(file)
+
+run(`eog test.png`)
 
 data = myFavouriteKey["val"]
 using ImageMagick
