@@ -116,7 +116,8 @@ This will install additional features, mostly relating to [CloudGraphs.jl](https
 
 INFO, ```installcloudgraphs()``` will perform:
 
-    Pkg.add("Mongo")  # brings in LibBSON.jl as dependency
+    Pkg.clone("https://github.com/dehann/LibBSON.jl.git")
+    Pkg.add("Mongo")  #  LibBSON.jl dependency
     Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 
