@@ -34,10 +34,6 @@ myFavouriteKey = first( findsomthing );
 mfkv = myFavouriteKey["val"];
 # @show myFavouriteKey["val"]
 
-# function _uint8ArrayToString(arr::Vector{UInt8})
-#   sMap = "[" * chop(mapreduce(x->x*",", *, map(x -> hex(x,2), arr))) * "]";
-#   return(sMap);
-# # end
 ptrT = pointer(mfkv)
 # Ptr{UInt8} @0x00000000080f9740
 #
@@ -49,9 +45,7 @@ arr = Vector{Float32}(round(Int,len/4));
 
 unsafe_copy!(pointer(arr),ptrTf,round(Int,len/4))
 
-arr[10000:10010]
 
-a
 
 # fetch a binary png image
 myKeyToFind = BSONOID("58af67255d7625647859fa71") # good example of opencv binary encoded png
