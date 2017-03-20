@@ -1,6 +1,4 @@
 
-# include("VisualizationUtilities.jl")  # @pyimport getimages as gi
-
 meshgrid(v::AbstractVector) = meshgrid(v, v)
 
 function meshgrid{T}(vx::AbstractVector{T}, vy::AbstractVector{T})
@@ -54,31 +52,6 @@ function reconstruct(dc::DepthCamera, depth::Array{Float64})
 end
 
 
-# function drawallposes(vis,
-#       cloudGraph,
-#       addrdict,
-#       dcamjl,
-#       DRAWDEPTH,
-#       dbcoll,
-#       poseswithdepth;
-#       bTc::CoordinateTransformations.AbstractAffineMap=
-#             Translation(0,0,0.6) ∘ LinearMap(
-#             CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5) )
-#     )
-#   #
-#
-#   sesssym = Symbol(addrdict["session"])
-#
-#   fg = Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph)
-#   IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, sessionname=addrdict["session"], reqbackendset=false);
-#   @show typeof(IDs)
-#
-#   CloudGraphs.get_vertex(cloudGraph, IDs[2])
-#
-#
-# end
-
-
 function prepcolordepthcloud!( X, rgb; skip::Int=4, maxrange=4.5 )
   #
   r,c,h = size(X)
@@ -121,71 +94,56 @@ function drawdbsession(vis,
 
   # fg = Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph)
   IDs = getPoseExVertexNeoIDs(cloudGraph.neo4j.connection, sessionname=addrdict["session"], reqbackendset=false);
-  # println("get local copy of graph")
 
-  # if fullLocalGraphCopy!(fg, reqbackendset=false)
-    # visualizeallposes!(vis, fg)
+  @showprogress 1 "Drawing IDs..." for (vid,cvid) in IDs
 
-    # xx,ll = ls(fg)
-  	# LD = Array{Array{Float64,1},1}()
-  	# C = Vector{AbstractString}()
-  	# for x in xx
-    @showprogress 1 "Drawing IDs..." for (vid,cvid) in IDs
+    cv = CloudGraphs.get_vertex(cloudGraph, cvid)
+    vert = cloudVertex2ExVertex(cv)
+    x = Symbol(vert.label)
 
-      cv = CloudGraphs.get_vertex(cloudGraph, cvid)
-      vert = cloudVertex2ExVertex(cv)
-      x = Symbol(vert.label)
-
-      mongk = Dict{AbstractString, Any}()
-      if haskey(cv.properties, "mongo_keys")
-        jsonstr = cv.properties["mongo_keys"]
-        mongk =  JSON.parse(jsonstr)
-      end
-
-      # vert = getVert(fg, x, api=localapi)
-      drawpose!(vis, vert, session=session)
-      drawposepoints!(vis, vert, session=session )
-
-      # mongk, cvid = getmongokeys(fg, x, IDs)
-
-  		if DRAWDEPTH && haskey(mongk, "depthframe_image") && !haskey(poseswithdepth, x)
-        poseswithdepth[x]=1
-
-
-        rgb = nothing
-        seg = nothing
-        if haskey(mongk, "keyframe_rgb")
-          rgb = fetchmongorgbimg(cloudGraph, mongk["keyframe_rgb"])
-        end
-        if haskey(mongk, "keyframe_segnet")
-          seg = fetchmongorgbimg(cloudGraph, mongk["keyframe_segnet"])
-          # mongo_key = bson.ObjectId(mongk["keyframe_segnet"])
-          # seg, ims = gi.fastrgbimg(dbcoll, mongo_key)
-        end
-
-        ri,ci = size(rgb)
-        arr = fetchmongodepthimg(cloudGraph, mongk["depthframe_image"], dtype=Float32)
-        img = reshape(arr, ci, ri)'
-        # mongo_keydepth = bson.ObjectId(mongk["depthframe_image"])
-        # imgO, ims = gi.fastdepthimg(dbcoll, mongo_keydepth)
-
-        X = reconstruct(dcamjl, Array{Float64,2}(img))
-
-        if rgb != nothing
-          pointcloud = prepcolordepthcloud!( X, rgb )
-          setgeometry!(vis[sesssym][:poses][x][:cam], Triad())
-          settransform!(vis[sesssym][:poses][x][:cam], bTc)
-          setgeometry!(vis[sesssym][:poses][x][:cam][:pc], pointcloud )
-          sleep(0.005)
-        end
-        # if seg != nothing
-        #   segss = seg[1:3:r,1:3:c,:]
-        #   bedu.publish_cloud("segnet", Xd, c=segss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
-        # end
-      end
+    mongk = Dict{AbstractString, Any}()
+    if haskey(cv.properties, "mongo_keys")
+      jsonstr = cv.properties["mongo_keys"]
+      mongk =  JSON.parse(jsonstr)
     end
 
-  # end
+    # vert = getVert(fg, x, api=localapi)
+    drawpose!(vis, vert, session=session)
+    drawposepoints!(vis, vert, session=session )
+
+    # mongk, cvid = getmongokeys(fg, x, IDs)
+
+		if DRAWDEPTH && haskey(mongk, "depthframe_image") && !haskey(poseswithdepth, x)
+      poseswithdepth[x]=1
+
+      rgb = nothing
+      seg = nothing
+      if haskey(mongk, "keyframe_rgb")
+        rgb = fetchmongorgbimg(cloudGraph, mongk["keyframe_rgb"])
+      end
+      if haskey(mongk, "keyframe_segnet")
+        seg = fetchmongorgbimg(cloudGraph, mongk["keyframe_segnet"])
+      end
+
+      ri,ci = size(rgb)
+      arr = fetchmongodepthimg(cloudGraph, mongk["depthframe_image"], dtype=Float32)
+      img = reshape(arr, ci, ri)'
+
+      X = reconstruct(dcamjl, Array{Float64,2}(img))
+
+      if rgb != nothing
+        pointcloud = prepcolordepthcloud!( X, rgb )
+        setgeometry!(vis[sesssym][:poses][x][:cam], Triad())
+        settransform!(vis[sesssym][:poses][x][:cam], bTc)
+        setgeometry!(vis[sesssym][:poses][x][:cam][:pc], pointcloud )
+        sleep(0.005)
+      end
+      # if seg != nothing
+      #   segss = seg[1:3:r,1:3:c,:]
+      #   bedu.publish_cloud("segnet", Xd, c=segss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
+      # end
+    end
+  end
 
 end
 
@@ -196,11 +154,6 @@ function drawdbdirector()
   cloudGraph, addrdict = standardcloudgraphsetup(drawdepth=true)
   session = addrdict["session"]
   DRAWDEPTH = addrdict["draw depth"]=="y" # not going to support just yet
-
-  # also connect to mongo separately
-  # client = pymongo.MongoClient(addrdict["mongo addr"])
-  # db = client[:CloudGraphs]
-  # collection = "bindata"
 
   poseswithdepth = Dict()
   poseswithdepth[:x1] = 0 # skip this pose -- there is no big data before ICRA
