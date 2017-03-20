@@ -91,7 +91,7 @@ plotKDE(ppp)
 
 vc = startdefaultvisualization(draworigin=true)
 
-drawmarginalpoints!(vc, fg, :x4)
+drawposepoints!(vc, fg, :x4)
 
 visualizeallposes!(vc, fg, drawlandms=false, drawtype=:fit)
 
