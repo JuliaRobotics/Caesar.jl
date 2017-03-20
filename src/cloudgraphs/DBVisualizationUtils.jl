@@ -38,8 +38,21 @@ function getmongokeys(fgl::FactorGraph, x::Symbol, IDs)
   end
 end
 
-function fetchmongorgbimg(dbcoll, key)
+function fetchmongorgbimg(cg::CloudGraph, key::AbstractString)
+  myKeyToFind = BSONOID(key)
+  findsomthing = find(cg.mongo.cgBindataCollection, ("_id" => eq(myKeyToFind)))
+  myFavouriteKey = first( findsomthing );
+  data = myFavouriteKey["val"]
+  img = ImageMagick.readblob(data);
 
+  # r, c = size(img)
+  # imgA = zeros(r,c,3);
+  # for i in 1:r, j in 1:c
+  #   imgA[i,j,1] = img[i,j].r
+  #   imgA[i,j,2] = img[i,j].g
+  #   imgA[i,j,3] = img[i,j].b
+  # end
+  return img
 end
 
 function fetchmongodepthimg(dbcoll, key)

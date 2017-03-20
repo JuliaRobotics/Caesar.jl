@@ -724,10 +724,10 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
     str = readline(STDIN)
     res[n] = str[1:(end-1)]
   end
-  @show if res["mongo addr"] == ""
+  if res["mongo addr"] == ""
     res["mongo addr"] = res["neo4j addr"]
   end
-  @show if drawdepth
+  if drawdepth
     res["draw depth"] = res["draw depth"]=="" || res["draw depth"]=="y" || res["draw depth"]=="yes" ? "y" : "n"
   end
   return res
