@@ -29,6 +29,34 @@ gt[:x5]= (:XYZqWXYZ , [-0.680204; -1.37827; 1.73447;         0.949729; -0.064483
 gt[:x6]= (:XYZqWXYZ , [-0.614131; -1.29263; 1.75964;         0.951792; -0.0638253;  -0.117314; -0.276146] )
 
 
+
+"""
+    gt2fg!(gt)
+
+Insert into existing or new FactorGraph type from ground truth data in gt.
+
+Example
+
+  gt[:l7] = (:XYZ ,  [2.02859; -2.82187; 2.16534] )
+  gt[:x1] = (:XYZqWXYZ , [0.000229458; 0.299991; -0.00230474;   0.696163;  0.0546845;  -0.123042;  0.705144] )
+"""
+function gt2fg!(gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}};
+    fg=nothing,
+    session="GROUNDTRUTH" )
+  #
+  fg = fg != nothing ? fg : initfg(sessionname=session)
+
+  for (key, val) in fg
+    #
+  end
+
+
+
+  warn("Under construction")
+  fg
+end
+
+
 # setup visualization process and default drawings
 vc = startdefaultvisualization()
 
