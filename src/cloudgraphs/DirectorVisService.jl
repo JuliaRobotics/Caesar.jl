@@ -89,14 +89,15 @@ function drawdbsession(vis,
             CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5) )     )
   #
 
-  sesssym = Symbol(addrdict["session"])
-  session = addrdict["session"]
+  @show session = addrdict["session"]
+  sesssym = Symbol(session)
 
   # fg = Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph)
-  IDs = getPoseExVertexNeoIDs(cloudGraph.neo4j.connection, sessionname=addrdict["session"], reqbackendset=false);
+  @show IDs = getPoseExVertexNeoIDs(cloudGraph.neo4j.connection, sessionname=session, reqbackendset=false);
 
   @showprogress 1 "Drawing IDs..." for (vid,cvid) in IDs
 
+    @show vid, cvid
     cv = CloudGraphs.get_vertex(cloudGraph, cvid)
     vert = cloudVertex2ExVertex(cv)
     x = Symbol(vert.label)
@@ -136,13 +137,13 @@ function drawdbsession(vis,
         setgeometry!(vis[sesssym][:poses][x][:cam], Triad())
         settransform!(vis[sesssym][:poses][x][:cam], bTc)
         setgeometry!(vis[sesssym][:poses][x][:cam][:pc], pointcloud )
-        sleep(0.005)
       end
       # if seg != nothing
       #   segss = seg[1:3:r,1:3:c,:]
       #   bedu.publish_cloud("segnet", Xd, c=segss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
       # end
     end
+    sleep(0.005)
   end
 
 end
