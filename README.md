@@ -102,29 +102,22 @@ Dependency Status
 Database interaction layer
 ==========================
 
-For using the solver on a DataBase layer you need to do two things: Currently we have a weak dependency on some Python functions, and use the ```cloudgraphs``` branch. You can set up the Julia dependencies as follows:
+For using the solver on a DataBase layer you need to do two things: 1) Use the ```cloudgraphs``` branch. You can set up the Julia dependencies as follows:
 
     $ julia
     julia> Pkg.checkout("Caesar","cloudgraphs")
     julia> using Caesar
+
+and, 2) install unregistered packages:
+
     julia> installcloudgraphs()
 
-This will install additional features, mostly relating to [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git). During some of the development we used three libraries from Python, but this Python dependency is temporary and will be deprecated in the future. Make sure you have these libraries are available to PyCall.jl
-
-    python-numpy   # similar dependency in DrakeVisualizer
-    python-pymongo # only using bson.BINARY functionality until LibBSON.jl wraps binary functions
-    python-opencv  # only using imread('.png', ), and will be replaced with Images.jl
-
-Before running the current Caesar DB features, make sure you can do this:
-
-    $ julia
-    julia> using PyCall
-    julia> @pyimport pymongo
-    julia> @pyimport cv2
+This will install additional features, mostly relating to [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git).
 
 INFO, ```installcloudgraphs()``` will perform:
 
-    Pkg.add("Mongo")  # brings in LibBSON.jl as dependency
+    Pkg.clone("https://github.com/dehann/LibBSON.jl.git")
+    Pkg.add("Mongo")  #  LibBSON.jl dependency
     Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 

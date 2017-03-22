@@ -26,7 +26,9 @@ using
   FileIO,
   NLsolve,
   DataStructures,
-  ProgressMeter
+  ProgressMeter,
+  ImageMagick,
+  ImageCore
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
 
@@ -77,7 +79,7 @@ export
   visualizerealtime,
   # new tree interface
   drawpose!,
-  drawmarginalpoints!,
+  drawposepoints!,
 
   # for models
   loadmodel,
