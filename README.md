@@ -12,6 +12,8 @@ This is a research and development driven project and intended to reduce the bar
 
 Please see related packages, Robot Motion Estimate [RoME.jl][rome-url] and back-end solver [IncrementalInference.jl][iif-url].
 
+Comments, questions and issues welcome.
+
 ## Examples
 
 Intersection of ambiguous elevation angle from planar SONAR sensor:
@@ -141,6 +143,11 @@ $ julia -e "using Caesar; drawdbdirector()"
 ```
 
 And an [example service script for CollectionsRender](https://github.com/dehann/Caesar.jl/blob/master/examples/database/DBCollectionsViewerService.jl) is also available.
+
+## Contributors
+
+D. Fourie, S. Claassens, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+
 
 Future targets
 --------------
