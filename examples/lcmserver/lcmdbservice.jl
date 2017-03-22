@@ -1,4 +1,4 @@
-# addprocs(4)
+addprocs(4)
 
 using Caesar, RoME
 using TransformUtils
@@ -92,6 +92,7 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata,
   EA = Euler(roll,pitch,yaw)
   Dx = SE3(tA, EA)
   dcovar = [odomsg[:covar][1];odomsg[:covar][2];odomsg[:covar][3];odomsg[:covar][6];odomsg[:covar][5];odomsg[:covar][4]]
+  dcovar = dcovar
 
   # println("lcmodomsg! mid")
 
@@ -107,7 +108,7 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata,
     #   MvNormal([odomsg[:mean][1];odomsg[:mean][2];odomsg[:mean][4]],
     #            [odomsg[:covar][1];odomsg[:covar][2];odomsg[:covar][4]] )
     # )
-    xyy = Pose3Pose3( Dx, diagm(dcovar) )
+    xyy = Pose3Pose3( Dx, diagm(dcovar)^2 )
 
     push!( constrs, prpz )
     push!( constrs, xyy )
@@ -116,7 +117,7 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata,
   else
     # loop closure case
     println("LOOP CLOSURE")
-    odoc3 = Pose3Pose3NH(Dx, diagm(1.0./dcovar), [0.5;0.5]) # define 50/50% hypothesis
+    odoc3 = Pose3Pose3NH( MvNormal(veeEuler(Dx), diagm(1.0./dcovar)), [0.5;0.5]) # define 50/50% hypothesis
     addFactor!(slam.fg,[Symbol("x$(odomsg[:node_1_id]+1)");Symbol("x$(odomsg[:node_2_id]+1)")],odoc3)
   end
   visualizeallposes!(vc, slaml.fg)
@@ -198,16 +199,17 @@ sleep(3.0)
 rovt = loadmodel(:rov)
 rovt(vc)
 
-
 Nparticles = 100
-# # cloudGraph, addrdict = standardcloudgraphsetup()
 
+# for local dictionary usage
+slam = setupSLAMinDB()
+
+# for remote db usage
 include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
 addrdict["session"] = "SESSHAUV"
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
-
-slam = setupSLAMinDB(cloudGraph=cloudGraph, addrdict=addrdict)
-# slam = setupSLAMinDB()
+# # cloudGraph, addrdict = standardcloudgraphsetup()
+slam = setupSLAMinDB(cloudGraph, addrdict)
 
 
 flags = Bool[1]
@@ -217,21 +219,80 @@ MSGDATA = Dict{Symbol, Vector{Vector{UInt8}}}()
 
 
 println("LCM listener running...")
-runlistener!(flags, slam, vc, until=:x10, MSGDATA=MSGDATA, record=false)
+runlistener!(flags, slam, vc, until=:x67, MSGDATA=MSGDATA, record=false)
+
+
 
 # slamdb10 = deepcopy(slam)
+
+savejld(slam.fg, file="hauvpedro.jld")
+
+
+fullLocalGraphCopy!(slam.fg)
+
+
+writeGraphPdf(slam.fg)
+run(`evince fg.pdf`)
+
+#
+
+# # visualizeDensityMesh!(vc, slam.fg, :x30)
+visualizeallposes!(vc, slam.fg, drawtype=:fit)
+
+f1 = getfnctype(slam.fg, slam.fg.fIDs[:x35x57])
+f1.Zij
+
+
+
+
+
+
+# loopclosures
+@show lcfncs = lsf(slam.fg, Pose3Pose3NH)
+
+
+
+session = addrdict["session"]
+@show IDs = getPoseExVertexNeoIDs(cloudGraph.neo4j.connection, sessionname=session, reqbackendset=false);
+
+
+
+using IncrementalInference
+
+
+plotKDEresiduals(slam.fg, :x15x61, marg=[1;2], N=Nparticles)
+
+
+
+using Gadfly
+
+plotMCMC(tree, :x60, dims=[1;2], levels=1)
+
+
+
+tree = wipeBuildNewTree!(slam.fg, drawpdf=true)
+@async run(`evince bt.pdf`)
+
+
+inferOverTree!(slam.fg,tree,N=Nparticles, dbg=true)
+
+pl = spyCliqMat(tree, :x61)
+Gadfly.draw(PDF("spycliqmatx61.pdf",15cm,20cm),pl)
+run(`evince spycliqmatx61.pdf`)
+run(`cp hauv67.jld /home/dehann/Pictures/hauv/`)
+
+
 
 
 0
 
-# # visualizeDensityMesh!(vc, slam.fg, :x30)
-# visualizeallposes!(vc, slam.fg, drawtype=:fit)
 #
 [solveandvisualize(slam.fg, vc, drawtype=:fit) for i in 1:1] #, densitymeshes=[:x1;:x33;:x60])
 #
 #
 #
 # println("Debugging functions")
+
 using IncrementalInference
 
 fg = slam.fg
@@ -268,6 +329,7 @@ run(`evince fg.pdf`)
 # # loopclosures
 # @show lcfncs = lsf(fg, Pose3Pose3NH)
 # #
+
 #
 #
 # # plotKDEofnc(fg, :x1x2, marg=[1;2], N=Nparticles)
@@ -278,67 +340,20 @@ run(`evince fg.pdf`)
 # plotKDEofnc(fg, lcfncs[donum], marg=[4;5], N=Nparticles)
 #
 #
+
+
+fgu = loadjld(file="hauvpedro.jld")
+
+plotKDE(fgu, :x60, marg=[1;2])
 #
-#
-#
-# fnc = getfnctype(fg, fg.fIDs[:x33x34])
-# fnc.Zij
-#
-# pts = getSample(fnc, Nparticles)[1]
-# Base.mean(pts,2)
-#
-# ls(fg, :x55)
-#
-# msgdata = MSGDATA[:pose_node_t][3]
-# odomsg = rome.pose_node_t[:decode](msgdata)
-# @show odomsg[:id]
-# @show odomsg[:mean]
-#
-#
-# ft = getVert(fg, fg.fIDs[:x2])
-# fieldnames(getData(ft).fnc.usrfnc!)
-# getData(ft).fnc.usrfnc!.rp
-#
-#
-#
-#
-#
-# getData(ft).fnc.usrfnc!.z
-#
-#
-#
-#
-# meas = getSample(getData(ft).fnc.usrfnc!)
-#
-#
-#
-#
-# p = findRelatedFromPotential(fg, ft, fg.IDs[:x2], Nparticles)
-# plotKDE(marginal(p,[3]))
-#
-#
-# val = predictbelief(fg, :x2, [:x2], N=Nparticles)
-#
-#
-#
-#
-#
-#
-# ppx2 = marginal(kde!(val),[3])
-# plotKDE(ppx2, levels=3)
-#
-#
-#
-#
-# plotKDE([px1;ppx2],c=["red";"green"], levels=4)
-#
-#
-#
-# #
-# #
-# ls(slam.fg)
-# writeGraphPdf(slam.fg)
-# run(`evince fg.pdf`)
+
+IncrementalInference.plotKDEresiduals(fgu, :x20x21, marg=[1;2], N=100)
+
+IncrementalInference.lsf(fgu, PartialPriorRollPitchZ)
+
+
+
+
 # #
 # #
 # # println("AD-HOC DEBUGGING")

@@ -91,7 +91,7 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata)
     # loop closure case
     println("LOOP CLOSURE")
     @show odomsg[:node_1_id], odomsg[:node_2_id]
-    odoc3 = Pose3Pose3NH(Dx, diagm(dcovar), [0.5;0.5]) # define 50/50% hypothesis
+    odoc3 = Pose3Pose3NH( MvNormal(veeEuler(Dx), diagm(dcovar)), [0.5;0.5]) # define 50/50% hypothesis
     addFactor!(slam.fg,[Symbol("x$(odomsg[:node_1_id]+1)");Symbol("x$(odomsg[:node_2_id]+1)")],odoc3)
   end
   visualizeallposes!(vc, slaml.fg)
