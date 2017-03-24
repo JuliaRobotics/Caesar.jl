@@ -85,7 +85,7 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata)
     # EA = Euler(odomsg[:mean][6], odomsg[:mean][5], odomsg[:mean][4])
     # Dx = SE3(tA, EA)
     # dcovar = [odomsg[:covar][1];odomsg[:covar][2];odomsg[:covar][3];odomsg[:covar][4];odomsg[:covar][5];odomsg[:covar][6]]
-    v,f = addOdoFG!(slaml, Pose3Pose3( Dx, diagm(dcovar) ) , saveusrid=odomsg[:node_2_id] )
+    v,f = addOdoFG!(slaml, Pose3Pose3( MvNormal([tA; EA], diagm(dcovar)^2) ) , saveusrid=odomsg[:node_2_id] )
     @show ls(slaml.fg)
   else
     # loop closure case

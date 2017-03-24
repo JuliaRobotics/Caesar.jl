@@ -59,9 +59,16 @@ vc = startdefaultvisualization()
 sc1 = loadmodel(:scene01); sc1(vc)
 rovt = loadmodel(:rov); rovt(vc)
 
-initCov = 0.01*eye(6); [initCov[i,i] = 0.001 for i in 4:6];
-odoCov = 0.001*eye(6); [odoCov[i,i] = 0.001 for i in 4:6];
+
+initCov = 0.001*eye(6); [initCov[i,i] = 0.00001 for i in 4:6];
+odoCov = 0.0001*eye(6); [odoCov[i,i] = 0.00001 for i in 4:6];
 rangecov, bearingcov = 3e-4, 2e-3
+
+# start and add to a factor graph
+fg = identitypose6fg(initCov=initCov)
+tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
+addOdoFG!(fg, Pose3Pose3(MvNormal(veeEuler(tf), odoCov) ) )
+
 
 # start and add to a factor graph
 fg = identitypose6fg(initCov=initCov)
@@ -119,9 +126,9 @@ This will install additional features, mostly relating to [CloudGraphs.jl](https
 
 INFO, ```installcloudgraphs()``` will perform:
 
+    Pkg.add("Neo4j")
     Pkg.clone("https://github.com/dehann/LibBSON.jl.git")
     Pkg.add("Mongo")  #  LibBSON.jl dependency
-    Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 
 If you have access to Neo4j and Mongo services you should be able to run the [four door test](https://github.com/dehann/Caesar.jl/blob/master/test/fourdoortestcloudgraph.jl) on both internal dictionaries and repeated on Neo4j DB:

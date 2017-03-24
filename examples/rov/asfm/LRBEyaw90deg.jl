@@ -40,7 +40,7 @@ fg = identitypose6fg(initpose=tfx1, initCov=initCov, N=N)
 
 drawposepoints!(vc, fg, :x1)
 
-addOdoFG!(fg, Pose3Pose3(SE3([4.0;4;0],Euler(0,0,-pi/2)), odoCov) )
+addOdoFG!(fg, Pose3Pose3(MvNormal([4.0;4;0;  0;0;-pi/2], odoCov) ) )
 
 visualizeallposes!(vc, fg, drawlandms=false)
 addLinearArrayConstraint(fg, (4.23, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)

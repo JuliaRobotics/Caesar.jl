@@ -103,8 +103,8 @@ end
 
 
 println("Adding :x2 pose and to graph...")
-tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
-odo = Pose3Pose3(tf, odoCov)
+tf = [0.0;0.7;0.0;pi/4;0.0;0.0]
+odo = Pose3Pose3(MvNormal(tf, odoCov))
 addOdoFG!(fg, odo , N=N)
 
 visualizeallposes!(vc, fg, drawlandms=false)
