@@ -6,7 +6,7 @@ using DrakeVisualizer, CoordinateTransformations, GeometryTypes, Rotations, Tran
 
 # create a new Director window with home axis
 function startdefaultvisualization(;newwindow=true,draworigin=true)
-  DrakeVisualizer.new_window()
+  DrakeVisualizer.any_open_windows() || DrakeVisualizer.new_window(); #DrakeVisualizer.new_window()
   viz = DrakeVisualizer.Visualizer()
   if draworigin
     setgeometry!(viz[:origin], Triad())
@@ -114,15 +114,21 @@ end
 
 
 function drawpose!(viz::DrakeVisualizer.Visualizer, sym::Symbol;
-      tf::CoordinateTransformations.AbstractAffineMap=Translation(0.0,0,0)∘LinearMap(CoordinateTransformations.AngleAxix(0.0,0,0,1.0)))
+      tf::CoordinateTransformations.AbstractAffineMap=Translation(0.0,0,0)∘LinearMap(CoordinateTransformations.AngleAxis(0.0,0,0,1.0)),
+      session::AbstractString="")
   #
-
-  setgeometry!(viz[:poses][sym], Triad())
-  settransform!(viz[:poses][sym], tf)
+  if session == ""
+    setgeometry!(viz[:poses][sym], Triad())
+    settransform!(viz[:poses][sym], tf)
+  else
+    sesssym=Symbol(session)
+    setgeometry!(viz[sesssym][:poses][sym], Triad())
+    settransform!(viz[sesssym][:poses][sym], tf)
+  end
   nothing
 end
 
-function visualizeallposes!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph; drawlandms::Bool=true,drawtype::Symbol=:max)
+function gettopoint(drawtype::Symbol=:max)
   topoint = +
   if drawtype == :max
     topoint = getKDEMax
@@ -133,30 +139,69 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph; dr
   else
     error("Unknown draw type")
   end
+  return topoint
+end
 
-  po,ll = ls(fgl)
+function getdotwothree(sym::Symbol, X::Array{Float64,2})
+  dims = size(X,1)
+  dotwo = dims == 2 || (dims == 3 && string(sym)[1] == 'x')
+  dothree = dims == 6 || (string(sym)[1] == 'l' && dims != 2)
+  (dotwo && dothree) || (!dotwo && !dothree) ? error("Unknown dimension for drawing points in viewer") : nothing
+  return dotwo, dothree
+end
+
+function drawpose!(vc::DrakeVisualizer.Visualizer,
+      vert::Graphs.ExVertex,
+      topoint::Function,
+      dotwo::Bool, dothree::Bool,
+      session::AbstractString  )
+  #
+  den = getVertKDE(vert)
+  p = Symbol(vert.label)
+  maxval = topoint(den)
+  if dothree
+    q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
+    drawpose!(vc, p, tf=Translation(maxval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) ,session=session)
+  elseif dotwo
+    drawpose!(vc, p, tf=Translation(maxval[1],maxval[2],0.0)∘LinearMap(Rotations.AngleAxis(maxval[3],0,0,1.0)) ,session=session)
+  end
+end
+
+function drawpose!(vc::DrakeVisualizer.Visualizer,
+      vert::Graphs.ExVertex;
+      session::AbstractString="NA",
+      drawtype::Symbol=:max )
+  #
+
+  topoint = gettopoint(drawtype)
+  X = getVal(vert)
+  dotwo, dothree = getdotwothree(Symbol(vert.label), X)
+  drawpose!(vc, vert, topoint, dotwo, dothree, session)
+  nothing
+end
+
+# TODO -- maybe we need RemoteFactorGraph type
+function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
+    fgl::FactorGraph;
+    drawlandms::Bool=true,
+    drawtype::Symbol=:max,
+    api::DataLayerAPI=localapi )
+  #
+  session = fgl.sessionname
+  topoint = gettopoint(drawtype)
 
   dotwo = false
   dothree = false
+  po,ll = ls(fgl)
   if length(po) > 0
     sym = po[1]
-    X = getVal(fgl, sym)
-    dims = size(X,1)
-    dotwo = dims == 2 || (dims == 3 && string(sym)[1] == 'x')
-    dothree = dims == 6 || (string(sym)[1] == 'l' && dims != 2)
-    (dotwo && dothree) || (!dotwo && !dothree) ? error("Unknown dimension for drawing points in viewer") : nothing
+    X = getVal(fgl, sym, api=api )
+    dotwo, dothree = getdotwothree(sym, X)
   end
 
   for p in po
-    # v = getVert(fgl, p)
-    den = getVertKDE(fgl, p)
-    maxval = topoint(den)
-    if dothree
-      q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
-      drawpose!(vc, p, tf=Translation(maxval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) )
-    elseif dotwo
-      drawpose!(vc, p, tf=Translation(maxval[1],maxval[2],0.0)∘LinearMap(Rotations.AngleAxis(maxval[3],0,0,1.0)) )
-    end
+    vert = getVert(fgl, p, api=api )
+    drawpose!(vc, vert, topoint, dotwo, dothree, session)
   end
   # if drawlandms
   #   for l in ll
@@ -171,38 +216,49 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph; dr
   nothing
 end
 
-function deletemeshes!(vc::DrakeVisualizer.Visualizer)
-  delete!(vc[:meshes])
-end
 
+function drawposepoints!(vis::DrakeVisualizer.Visualizer,
+      vert::Graphs.ExVertex;
+      session::AbstractString="NA"  )
+  #
+  vsym = Symbol(vert.label)
+  X = getVal(vert)
 
-function drawmarginalpoints!(vis::DrakeVisualizer.Visualizer, fgl::FactorGraph, sym::Symbol)
-  X = getVal(fgl, sym)
-  dims = size(X,1)
-  dotwo = dims == 2 || (dims == 3 && string(sym)[1] == 'x')
-  dothree = dims == 6 || (string(sym)[1] == 'l' && dims != 2)
-  # @show dims, dotwo, dothree
-  (dotwo && dothree) || (!dotwo && !dothree) ? error("Unknown dimension for drawing points in viewer") : nothing
-  # compile data points for drawing
+  dotwo, dothree = getdotwothree(vsym, X)
+  makefromX = (X::Array{Float64,2}, i::Int) -> X[1:3,i]
+  if dotwo
+    makefromX = (X::Array{Float64,2}, i::Int) -> Float64[X[1:2,i];0.0]
+  end
+
   XX = Vector{Vector{Float64}}()
   for i in 1:size(X,2)
-    if dotwo
-      push!(XX,[X[1:2,i];0.0])
-    elseif dothree
-      push!(XX,X[1:3,i])
-    end
+    push!(XX, makefromX(X,i))
   end
   pointcloud = PointCloud(XX)
-  if string(sym)[1] == 'l'
+  if string(vsym)[1] == 'l'
     pointcloud.channels[:rgb] = [RGB(1.0, 1.0, 0) for i in 1:length(XX)]
   end
-  setgeometry!(vis[:marginals][sym][:points], pointcloud)
+  setgeometry!(vis[Symbol(session)][:posepts][vsym], pointcloud)
+end
+
+function drawposepoints!(vis::DrakeVisualizer.Visualizer,
+      fgl::FactorGraph,
+      sym::Symbol;
+      session::AbstractString="NA",
+      api::DataLayerAPI=dlapi  )
+  #
+  vert = getVert(fgl, sym, api=api)
+  drawposepoints!(vis, vert, session=session, api=localapi) # definitely use localapi
   nothing
 end
 
 
 
 
+
+function deletemeshes!(vc::DrakeVisualizer.Visualizer)
+  delete!(vc[:meshes])
+end
 
 
 

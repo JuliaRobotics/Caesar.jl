@@ -1,6 +1,5 @@
 module Caesar
 
-instpkg = Pkg.installed();
 
 # import RoME: initfg
 import Distributions: Normal
@@ -27,14 +26,9 @@ using
   FileIO,
   NLsolve,
   DataStructures,
-  ProgressMeter
-
-if haskey(instpkg,"CloudGraphs")
-  using CloudGraphs
-  using Neo4j
-  using Mongo
-  using LibBSON
-end
+  ProgressMeter,
+  ImageMagick,
+  ImageCore
 
 # using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
 
@@ -42,6 +36,8 @@ end
 
 
 export
+  # pass through from IIF and RoME
+  ls,
   # Victoria Park example -- batch
   loadVicPrkDataset,
   # addLandmarksFactoGraph!,
@@ -83,7 +79,7 @@ export
   visualizerealtime,
   # new tree interface
   drawpose!,
-  drawmarginalpoints!,
+  drawposepoints!,
 
   # for models
   loadmodel,
@@ -99,8 +95,13 @@ export
   parameterizeArcAffineMap,
   animatearc,
 
-  # default scenes
-  defaultscene01!,
+  # vis service
+  drawdbsession,
+  drawdbdirector,
+  meshgrid,
+  DepthCamera,
+  buildmesh!,
+  reconstruct,
 
   # user functions
   identitypose6fg,
@@ -114,11 +115,8 @@ export
 
 
 
-if instpkg["RoME"] > v"0.0.3"
-  include("BearingRangeTrackingServer.jl")
-else
-  warn("Some features disabled since the package RoME is too far behind.")
-end
+
+include("BearingRangeTrackingServer.jl")
 
 include("SlamServer.jl")
 include("DataUtils.jl")
@@ -126,9 +124,6 @@ include("VisualizationUtils.jl")
 include("ModelVisualizationUtils.jl")
 include("UserFunctions.jl")
 
-if haskey(instpkg, "CloudGraphs")
-  include("CloudGraphIntegration.jl") # Work in progress code
-end
 
 
 end

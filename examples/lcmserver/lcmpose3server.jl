@@ -1,5 +1,5 @@
 
-addprocs(6)
+# addprocs(6)
 
 using Caesar, RoME
 using TransformUtils
@@ -11,7 +11,7 @@ using KernelDensityEstimate
 
 using JLD, HDF5
 
-lcmtpath = joinpath(dirname(@__FILE__),"lcmtypes")
+@show lcmtpath = joinpath(dirname(@__FILE__),"lcmtypes")
 
 # println("Compile LCM types")
 # run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_pose_node_t.lcm`)
@@ -29,15 +29,12 @@ function whatsthere(channel, msgdata)
   nothing
 end
 
-
-vc = startdefaultvisualization()
-sleep(3.0)
-rovt = loadmodel(:rov)
-rovt(vc)
-
+# MSGDATA = Dict{Symbol, Vector{}}()
+# MSGDATA[:pose_node_t] = []
 # lastpose = SE3(0)
 
-function lcmposenodes!(vc::VisualizationContainer, slaml::SLAMWrapper, msgdata)
+function lcmposenodes!(vc, slaml::SLAMWrapper, msgdata)
+  # push!(MSGDATA[:pose_node_t], msgdata)
   posenode = rome.pose_node_t[:decode](msgdata)
   # @show posenode[:id]
   tA = [posenode[:mean][1];posenode[:mean][2];posenode[:mean][3]]
@@ -52,10 +49,15 @@ function lcmposenodes!(vc::VisualizationContainer, slaml::SLAMWrapper, msgdata)
   # copy!(slaml.lastpose.t, newpose.t)
   # copy!(slaml.lastpose.R.R, newpose.R.R)
 
+  @show "here"
   if posenode[:id] == 0
     # first pose prior
     dcovar = [posenode[:covar][1];posenode[:covar][2];posenode[:covar][3];posenode[:covar][4];posenode[:covar][5];posenode[:covar][6]]
-    slaml.fg = identitypose6fg(initpose=newpose, initCov=diagm(dcovar))
+    # TODO -- this wont do, must add to existing slaml.fg
+    slaml.fg = identitypose6fg(fg=slaml.fg, initpose=newpose, initCov=diagm(dcovar))
+
+    @show length(slaml.fg.g.vertices)
+    @show ls(slaml.fg)
     @show lbls, = ls(slaml.fg)
     slaml.usrid2lbl[posenode[:id]] = lbls[1]
     slaml.lbl2usrid[lbls[1]] = posenode[:id]
@@ -68,7 +70,7 @@ function lcmposenodes!(vc::VisualizationContainer, slaml::SLAMWrapper, msgdata)
   nothing
 end
 
-function lcmodomsg!(vc::VisualizationContainer, slaml::SLAMWrapper, msgdata)
+function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata)
   odomsg = rome.pose_pose_nh_t[:decode](msgdata)
   # @show odomsg[:mean_dim]
   # @show odomsg[:node_1_id], odomsg[:node_2_id]
@@ -89,7 +91,7 @@ function lcmodomsg!(vc::VisualizationContainer, slaml::SLAMWrapper, msgdata)
     # loop closure case
     println("LOOP CLOSURE")
     @show odomsg[:node_1_id], odomsg[:node_2_id]
-    odoc3 = Pose3Pose3NH(Dx, diagm(dcovar), [0.5;0.5]) # define 50/50% hypothesis
+    odoc3 = Pose3Pose3NH( MvNormal(veeEuler(Dx), diagm(dcovar)), [0.5;0.5]) # define 50/50% hypothesis
     addFactor!(slam.fg,[Symbol("x$(odomsg[:node_1_id]+1)");Symbol("x$(odomsg[:node_2_id]+1)")],odoc3)
   end
   visualizeallposes!(vc, slaml.fg)
@@ -101,7 +103,7 @@ end
 function runlistener(
       fl::Vector{Bool},
       slam::SLAMWrapper,
-      vc::VisualizationContainer;
+      vc;
       until::Symbol=:x999 ) #slam::SLAMWrapper)
   #
   gg = (channel, msg_data) -> lcmposenodes!(vc, slam, msg_data)
@@ -122,8 +124,8 @@ function runlistener(
   nothing
 end
 
-function setupSLAMinDB()
-  SLAMWrapper(initfg(sessionname="HAUV"), nothing, 0)
+function setupSLAMinDB(cloudGraph, addrdict)
+  SLAMWrapper(Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph), nothing, 0)
 end
 
 function lcmsendpose(lc, vert::Graphs.ExVertex, usrid::Int)
@@ -151,36 +153,57 @@ function lcmsendallposes(lc, slaml::SLAMWrapper)
 end
 
 
-# am = Translation(0.0,0,0) ∘ LinearMap(Quat(0.0,1.0,0,0))
-# updaterealtime!(vc,:body, am)
-# visualizerealtime(vc)
-slam = setupSLAMinDB()
+
+vc = startdefaultvisualization()
+sleep(3.0)
+rovt = loadmodel(:rov)
+rovt(vc)
+
+
+Nparticles = 100
+include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
+addrdict["session"] = "SESSHAUV"
+cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
+# cloudGraph, addrdict = standardcloudgraphsetup()
+
+
+slam = setupSLAMinDB(cloudGraph, addrdict)
 
 flags = Bool[1]
 flags[1] = true
 
-@async runlistener(flags, slam, vc, until=:x67)
 println("LCM listener running...")
+runlistener(flags, slam, vc, until=:x5)
 
-
-
-# run this to stop the lcm listener loop
-flags[1] = false
-
-
-solveandvisualize(slam.fg, vc, drawtype=:fit) #, densitymeshes=[:x1;:x33;:x60])
-
-visualizeallposes!(vc, slam.fg, drawtype=:max)
-
-
-
-
-lc = LCM()
-lcmsendallposes(lc, slam)
-
-
-
-visualizeDensityMesh!(vc, slam.fg, :x1,meshid=2)
+# @show 1
+#
+#
+#
+# println("AD-HOC DEBUGGING")
+#
+# lcmposenodes!(vc, slam, MSGDATA[:pose_node_t][1])
+# splice!(MSGDATA[:pose_node_t], 2)
+#
+# @show -1
+#
+# #
+# # # run this to stop the lcm listener loop
+# # flags[1] = false
+# #
+# #
+# solveandvisualize(slam.fg, vc, drawtype=:fit) #, densitymeshes=[:x1;:x33;:x60])
+# #
+# visualizeallposes!(vc, slam.fg, drawtype=:fit)
+#
+#
+#
+#
+# lc = LCM()
+# lcmsendallposes(lc, slam)
+#
+#
+#
+# visualizeDensityMesh!(vc, slam.fg, :x1,meshid=2)
 
 
 # savefg = deepcopy(slam.fg)
@@ -191,13 +214,13 @@ visualizeDensityMesh!(vc, slam.fg, :x1,meshid=2)
 
 
 
-
-using Gadfly
-
-
-draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
-        plotKDE( marginal(p60,collect(4:6)),
-				dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
+#
+# using Gadfly
+#
+#
+# draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
+#         plotKDE( marginal(p60,collect(4:6)),
+# 				dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
 
 
 

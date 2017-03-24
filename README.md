@@ -8,9 +8,11 @@ A modern robotic toolkit for localization and mapping -- towards non-parametric 
 <!-- [![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)-->
 
-This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
+This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
 
 Please see related packages, Robot Motion Estimate [RoME.jl][rome-url] and back-end solver [IncrementalInference.jl][iif-url].
+
+Comments, questions and issues welcome.
 
 ## Examples
 
@@ -48,31 +50,32 @@ Basic usage
 
 Here is a basic example of using visualization and multi-core factor graph solving:
 
-    addprocs(2)
-    using Caesar, RoME, TransformUtils
+```julia
+addprocs(2)
+using Caesar, RoME, TransformUtils
 
-    # load scene and ROV model (might experience UDP packet loss LCM buffer not set)
-    vc = startdefaultvisualization()
-    sc1 = loadmodel(:scene01); sc1(vc)
-    rovt = loadmodel(:rov); rovt(vc)
+# load scene and ROV model (might experience UDP packet loss LCM buffer not set)
+vc = startdefaultvisualization()
+sc1 = loadmodel(:scene01); sc1(vc)
+rovt = loadmodel(:rov); rovt(vc)
 
-    initCov = 0.01*eye(6); [initCov[i,i] = 0.001 for i in 4:6];
-    odoCov = 0.001*eye(6); [odoCov[i,i] = 0.001 for i in 4:6];
-    rangecov, bearingcov = 3e-4, 2e-3
+initCov = 0.01*eye(6); [initCov[i,i] = 0.001 for i in 4:6];
+odoCov = 0.001*eye(6); [odoCov[i,i] = 0.001 for i in 4:6];
+rangecov, bearingcov = 3e-4, 2e-3
 
-    # start and add to a factor graph
-    fg = identitypose6fg(initCov=initCov)
-    tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
-    addOdoFG!(fg, Pose3Pose3(tf, odoCov) )
+# start and add to a factor graph
+fg = identitypose6fg(initCov=initCov)
+tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
+addOdoFG!(fg, Pose3Pose3(tf, odoCov) ) # will soon be Pose3Pose3(MvNormal(veeEuler(tf), odoCov))
 
-    visualizeallposes!(vc, fg, drawlandms=false)
+visualizeallposes!(vc, fg, drawlandms=false)
 
-    addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
-    visualizeDensityMesh!(vc, fg, :l1, meshid=2)
-    addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
+addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
+visualizeDensityMesh!(vc, fg, :l1, meshid=2)
+addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
-    solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:x2])
-
+solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:x2])
+```
 
 Major features
 --------------
@@ -100,19 +103,28 @@ Dependency Status
 | [DrakeVisualizer.jl][dvis-url] | [![Build Status][dvis-build-img]][dvis-build-url] | [![codecov.io][dvis-cov-img]][dvis-cov-url] |
 
 Database interaction layer
---------------------------
+==========================
 
-For using the solver on a DataBase layer (work in progress on centralized architecture ) see [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git),
+For using the solver on a DataBase layer you need to do two things: 1) Use the ```cloudgraphs``` branch. You can set up the Julia dependencies as follows:
 
-Install [Neo4j](https://neo4j.com/) and add these packages to your Julia system
+    $ julia
+    julia> Pkg.checkout("Caesar","cloudgraphs")
+    julia> using Caesar
 
-    Pkg.add("Mongo")
+and, 2) install unregistered packages:
+
+    julia> installcloudgraphs()
+
+This will install additional features, mostly relating to [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git).
+
+INFO, ```installcloudgraphs()``` will perform:
+
+    Pkg.clone("https://github.com/dehann/LibBSON.jl.git")
+    Pkg.add("Mongo")  #  LibBSON.jl dependency
     Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 
-Modify CloudGraphs related lines from test/runtests.jl Ln 7 to true.
-
-You should be able to rerun the four door test on both internal dictionaries and repeated on Neo4j DB
+If you have access to Neo4j and Mongo services you should be able to run the [four door test](https://github.com/dehann/Caesar.jl/blob/master/test/fourdoortestcloudgraph.jl) on both internal dictionaries and repeated on Neo4j DB:
 
     Pkg.test("Caesar")
 
@@ -121,11 +133,22 @@ Go to your browser at localhost:7474 and run one of the Cypher queries to either
     match (n) return n
     match (n) detach delete n
 
-You can run the database solver using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl)
-
+You can run the multi-modal iSAM solver against the DB using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl):
 ```julia
-julia050 -p7 MM-iSAMCloudSolve.jl <neo4jaddr> <neo4jusr> <pwd> <mongoaddr> <SESSIONNAME>
+$ julia -p20 MM-iSAMCloudSolve.jl
 ```
+
+Database driven Visualization can be done with either MIT's [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl) (prefered), or Collections Render which additionally relies on [Pybot](http/www.github.com/spillai/pybot). For visualization using Director/DrakeVisualizer.jl:
+```
+$ julia -e "using Caesar; drawdbdirector()"
+```
+
+And an [example service script for CollectionsRender](https://github.com/dehann/Caesar.jl/blob/master/examples/database/DBCollectionsViewerService.jl) is also available.
+
+## Contributors
+
+D. Fourie, S. Claassens, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+
 
 Future targets
 --------------

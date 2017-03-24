@@ -1,11 +1,11 @@
 # user functions
 
-function identitypose6fg(;
+function identitypose6fg(;fg=nothing,
       N::Int=100,
       initCov::Array{Float64,2}=0.001*eye(6),
       initpose::SE3=SE3(0) )
   #
-  fg = initfg()
+  fg = fg != nothing ? fg : initfg()
   N = 100
 
   println("Adding PriorPose3 and :x1 to graph...")
@@ -86,7 +86,6 @@ function projectrbe(fgl::FactorGraph, from::Symbol, to::Symbol)
   # elev = -atan2(Dx[3],norm(Dx[1:2]))
   # return range, bearing, elev
 end
-
 
 
 

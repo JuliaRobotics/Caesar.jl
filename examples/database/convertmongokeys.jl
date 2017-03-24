@@ -18,7 +18,7 @@ using PyCall
 @pyimport numpy as np
 @pyimport cv2 as opencv
 
-include("VisualizationUtilities.jl") # @pyimport getimages as gi
+# include("VisualizationUtilities.jl") # @pyimport getimages as gi
 
 
 
@@ -56,7 +56,7 @@ fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
 fullLocalGraphCopy!(fg)
 
-IDs = getPoseExVertexNeoIDs(conn, sessionname=session, reqbackendset=false);
+IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, sessionname=session, reqbackendset=false);
 
 
 xx,ll = ls(fg)
