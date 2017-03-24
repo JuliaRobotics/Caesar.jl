@@ -95,9 +95,9 @@ function installcloudgraphs()
   sudo apt-get install python-pymongo (until LibBSON.jl gets binary read api exposed)
   and opencv for python (soon to be deprecated)
   """)
+  Pkg.add("Neo4j")
   Pkg.clone("https://github.com/dehann/LibBSON.jl.git")
   Pkg.add("Mongo")
-  Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
   Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
   nothing
 end
