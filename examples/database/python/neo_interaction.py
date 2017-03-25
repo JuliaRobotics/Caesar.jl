@@ -54,14 +54,16 @@ for i in range(NUM_ODOM_NODES):
                      "fac_info": prior_json_str})
 
     # create nodes (if not already): property/key "slamstring", value JSON string?
-    session.run("MERGE (o1:POSE:SESSROX:NEWDATA { frtend: {var_info1} }) " # finds, creates if not exist
-                "MERGE (o2:POSE:SESSROX:NEWDATA { frtend: {var_info2} })"
-                "MERGE (f:FACTOR:SESSROX:NEWDATA { frtend: {fac_info} }) " # odom-odom factor
-                "MERGE (o1)-[:DEPENDENCE]-(f) " # add relationships
-                "MERGE (o2)-[:DEPENDENCE]-(f) ",
-                {"var_info1":var_json_str1,
-                 "var_info2":var_json_str2,
-                 "fac_info":fac_json_str})
+    ret = session.run("MERGE (o1:POSE:SESSROX:NEWDATA { frtend: {var_info1} }) " # finds, creates if not exist
+                      "MERGE (o2:POSE:SESSROX:NEWDATA { frtend: {var_info2} })"
+                      "MERGE (f:FACTOR:SESSROX:NEWDATA { frtend: {fac_info} }) " # odom-odom factor
+                      "MERGE (o1)-[:DEPENDENCE]-(f) " # add relationships
+                      "MERGE (o2)-[:DEPENDENCE]-(f) "
+                      "RETURN id(f)",
+                      {"var_info1":var_json_str1,
+                       "var_info2":var_json_str2,
+                       "fac_info":fac_json_str})
+    print ret.single()['id(f)']
 
     if add_landmark:
         landmark_num = random.randint(6,15)
