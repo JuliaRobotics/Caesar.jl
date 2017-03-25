@@ -108,7 +108,8 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata,
     #   MvNormal([odomsg[:mean][1];odomsg[:mean][2];odomsg[:mean][4]],
     #            [odomsg[:covar][1];odomsg[:covar][2];odomsg[:covar][4]] )
     # )
-    xyy = Pose3Pose3( Dx, diagm(dcovar)^2 )
+
+    xyy = Pose3Pose3( MvNormal([tA; EA], diagm(dcovar)^2 ) )
 
     push!( constrs, prpz )
     push!( constrs, xyy )

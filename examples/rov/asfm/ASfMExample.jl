@@ -5,6 +5,7 @@ using KernelDensityEstimate
 using IncrementalInference
 using RoME
 using Caesar
+using Distributions
 # using Base.Test
 
 # import RoME: ⊕
@@ -32,36 +33,32 @@ brCov = inv(sqrtinv^2)
 
 
 println("Adding PriorPose3 to graph...")
-init = SE3([0.0;0.0;0.0], Euler(-0.00772052, 0.0, -0.0992321))
-v1 = addNode!(fg, :x1,  zeros(6,N) ⊕ Pose3Pose3(init, initCov),  N=N)
-initPosePrior = PriorPose3(init, initCov)
+init = MvNormal([0.0;0.0;0.0;-0.00772052; 0.0; -0.0992321],initCov)
+v1 = addNode!(fg, :x1,  zeros(6,N) ⊕ Pose3Pose3(init ),  N=N)
+initPosePrior = PriorPose3(init)
 f1  = addFactor!(fg,[v1], initPosePrior)
 
 
 # Odometry pose 0 pose 1: (-0.380711, -1.02585, 1.77348; -2.19796, -0.151721, -0.0929671)
-odo = SE3([-0.380711, -1.02585, 1.77348], Euler(-0.0929671, -0.151721, -2.19796) )
-# v, f = addPose3Pose3(fg, "x2", deepcopy(odo), odoCov, N=N)
-addOdoFG!(fg, Pose3Pose3(deepcopy(odo), odoCov) )
+# odo = SE3([-0.380711, -1.02585, 1.77348], Euler(-0.0929671, -0.151721, -2.19796) )
+odo = MvNormal([-0.380711; -1.02585; 1.77348;-0.0929671; -0.151721; -2.19796], odoCov )
+addOdoFG!(fg, Pose3Pose3(deepcopy(odo)) )
 
 # Odometry pose 1 pose 2: (-0.00138117, -0.0600476, 0.0204065; -0.038278, 0.0186151, 0.00606331)
-odo = SE3([-0.00138117; -0.0600476; 0.0204065], Euler(0.00606331, 0.0186151, -0.038278) )
-# v, f = addPose3Pose3(fg, "x3", deepcopy(odo), odoCov, N=N)
-addOdoFG!(fg, Pose3Pose3(deepcopy(odo), odoCov) )
+odo = MvNormal([-0.00138117; -0.0600476; 0.0204065; 0.00606331; 0.0186151; -0.038278], odoCov )
+addOdoFG!(fg, Pose3Pose3(odo) )
 
 # Odometry pose 2 pose 3: (-0.298704, -0.113974, 0.0244868; -0.00805163, -0.00425057, -0.0275746)
-odo = SE3([-0.298704; -0.113974; 0.0244868], Euler(-0.0275746, -0.00425057, -0.00805163) )
-# v, f = addPose3Pose3(fg, "x4", deepcopy(odo), odoCov, N=N)
-addOdoFG!(fg, Pose3Pose3(deepcopy(odo), odoCov) )
+odo = MvNormal([-0.298704; -0.113974; 0.0244868; -0.0275746; -0.00425057; -0.00805163], odoCov )
+addOdoFG!(fg, Pose3Pose3(deepcopy(odo)) )
 
 # Odometry pose 3 pose 4: (0.670492, 0.0251882, -0.0705555; 0.109113, 0.0228966, 0.039246)
-odo = SE3([0.670492; 0.0251882; -0.0705555], Euler(0.039246, 0.0228966, 0.109113) )
-# v, f = addPose3Pose3(fg, "x5", deepcopy(odo), odoCov, N=N)
-addOdoFG!(fg, Pose3Pose3(deepcopy(odo), odoCov) )
+odo = MvNormal([0.670492; 0.0251882; -0.0705555; 0.039246; 0.0228966; 0.109113], odoCov )
+addOdoFG!(fg, Pose3Pose3(deepcopy(odo)) )
 
 # Odometry pose 4 pose 5: (-0.0615969, 0.00849829, -0.0170747; 0.0315662, -0.0115416, -0.00605423)
-odo = SE3([-0.0615969; 0.00849829; -0.0170747], Euler( -0.00605423,-0.0115416,0.0315662) )
-# v, f = addPose3Pose3(fg, "x6", deepcopy(odo), odoCov, N=N)
-addOdoFG!(fg, Pose3Pose3(deepcopy(odo), odoCov) )
+odo = MvNormal([-0.0615969; 0.00849829; -0.0170747;  -0.00605423;-0.0115416;0.0315662], odoCov )
+addOdoFG!(fg, Pose3Pose3(deepcopy(odo)) )
 
 
 println("Adding landmarks to graph...")
