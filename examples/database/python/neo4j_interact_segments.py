@@ -277,11 +277,44 @@ class neo4j_interact(object):
             self._max_factor_id += 1
         else:
             raise TypeError("measurement_factor must be of type rangeFactorPose2Point2, bearingRangeFactorPose2Point2, rangeMeasurementFactorPose2Point2, bearingRangeMeasurementFactorPose2Point2, or rangeNullHypothesisFactorPose2Point2")
-        self.session.run("MERGE (l:LANDMARK:"+self._session_name+":NEWDATA { frtend: {landmark_info} }) "
-                         "MERGE (p:POSE:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {pose_info} })"
-                         "MERGE (f:FACTOR:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {measurement_factor_info} }) "
-                         "MERGE (l)-[:DEPENDENCE]-(f) " # add relationships
-                         "MERGE (p)-[:DEPENDENCE]-(f) ",
-                        {"landmark_info": l_neo4j,
-                         "pose_info": p_neo4j,
-                         "measurement_factor_info": p_measurement_factor_neo4j})
+        result = self.session.run("MERGE (l:LANDMARK:"+self._session_name+":NEWDATA { frtend: {landmark_info} }) "
+                                  "MERGE (p:POSE:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {pose_info} })"
+                                  "MERGE (f:FACTOR:"+self._session_name+":NEWDATA:SEG"+str(segment_val)+" { frtend: {measurement_factor_info} }) "
+                                  "MERGE (l)-[:DEPENDENCE]-(f) " # add relationships
+                                  "MERGE (p)-[:DEPENDENCE]-(f) "
+                                  "RETURN id(f)",
+                                 {"landmark_info": l_neo4j,
+                                  "pose_info": p_neo4j,
+                                  "measurement_factor_info": p_measurement_factor_neo4j})
+        factor_id = result.single()['id(f)']
+        return factor_id
+
+    def add_mongo_key(self, neoid, oidname, mongo_oid):
+        res = self.session.run("MATCH (n:"+self._session_name+") " # finds if not exist
+                               "WHERE id(n)="+str(neoid)+" "
+                               "return n.frtend as frtend, n.mongo_keys as mongo_keys")
+
+        elem = res.single()
+        var_json_str1 = elem["frtend"]
+        mymoids = elem["mongo_keys"]
+        if mymoids == None:
+            mymoids = {}
+        else:
+            mymoids = json.loads(mymoids)
+
+        mymoids[oidname] = mongo_oid
+        mym_json_str = json.dumps(mymoids)
+
+        # import IPython; IPython.embed()
+
+        res = self.session.run("MATCH (n:"+self._session_name+") "
+                               "WHERE id(n)="+str(neoid)+" "
+                               "SET n.mongo_keys = {mym_info} "
+                               "RETURN count(n) as numupdated",
+                               {"mym_info": mym_json_str} )
+
+        elem = res.single()
+        if elem["numupdated"] != 1:
+            ValueError("ERROR, did not work. Number of updated entries are = "+str(elem["numupdated"]) )
+            return False
+        return True

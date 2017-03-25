@@ -67,7 +67,7 @@ am = LinearMap(Rotations.AngleAxis(-pi/2,0,0,1.0)) ∘ am
 px2 = SE3(am.v[1:3] ,Quaternion(am.m.w, [am.m.x;am.m.y;am.m.z] ))
 @show px2.t
 
-addOdoFG!(fg, Pose3Pose3(px2, odoCov) )
+addOdoFG!(fg, Pose3Pose3(MvNormal(veeEuler(px2), odoCov) ) )
 
 @show rho2 = norm((tfx1*px2).t-gt[:l1])
 addLinearArrayConstraint(fg, (rho2, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)

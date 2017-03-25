@@ -85,13 +85,13 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata)
     # EA = Euler(odomsg[:mean][6], odomsg[:mean][5], odomsg[:mean][4])
     # Dx = SE3(tA, EA)
     # dcovar = [odomsg[:covar][1];odomsg[:covar][2];odomsg[:covar][3];odomsg[:covar][4];odomsg[:covar][5];odomsg[:covar][6]]
-    v,f = addOdoFG!(slaml, Pose3Pose3( Dx, diagm(dcovar) ) , saveusrid=odomsg[:node_2_id] )
+    v,f = addOdoFG!(slaml, Pose3Pose3( MvNormal([tA; EA], diagm(dcovar)^2) ) , saveusrid=odomsg[:node_2_id] )
     @show ls(slaml.fg)
   else
     # loop closure case
     println("LOOP CLOSURE")
     @show odomsg[:node_1_id], odomsg[:node_2_id]
-    odoc3 = Pose3Pose3NH(Dx, diagm(dcovar), [0.5;0.5]) # define 50/50% hypothesis
+    odoc3 = Pose3Pose3NH( MvNormal(veeEuler(Dx), diagm(dcovar)), [0.5;0.5]) # define 50/50% hypothesis
     addFactor!(slam.fg,[Symbol("x$(odomsg[:node_1_id]+1)");Symbol("x$(odomsg[:node_2_id]+1)")],odoc3)
   end
   visualizeallposes!(vc, slaml.fg)

@@ -8,9 +8,11 @@ A modern robotic toolkit for localization and mapping -- towards non-parametric 
 <!-- [![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)-->
 
-This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
+This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
 
 Please see related packages, Robot Motion Estimate [RoME.jl][rome-url] and back-end solver [IncrementalInference.jl][iif-url].
+
+Comments, questions and issues welcome.
 
 ## Examples
 
@@ -48,31 +50,39 @@ Basic usage
 
 Here is a basic example of using visualization and multi-core factor graph solving:
 
-    addprocs(2)
-    using Caesar, RoME, TransformUtils
+```julia
+addprocs(2)
+using Caesar, RoME, TransformUtils
 
-    # load scene and ROV model (might experience UDP packet loss LCM buffer not set)
-    vc = startdefaultvisualization()
-    sc1 = loadmodel(:scene01); sc1(vc)
-    rovt = loadmodel(:rov); rovt(vc)
+# load scene and ROV model (might experience UDP packet loss LCM buffer not set)
+vc = startdefaultvisualization()
+sc1 = loadmodel(:scene01); sc1(vc)
+rovt = loadmodel(:rov); rovt(vc)
 
-    initCov = 0.01*eye(6); [initCov[i,i] = 0.001 for i in 4:6];
-    odoCov = 0.001*eye(6); [odoCov[i,i] = 0.001 for i in 4:6];
-    rangecov, bearingcov = 3e-4, 2e-3
 
-    # start and add to a factor graph
-    fg = identitypose6fg(initCov=initCov)
-    tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
-    addOdoFG!(fg, Pose3Pose3(tf, odoCov) )
+initCov = 0.001*eye(6); [initCov[i,i] = 0.00001 for i in 4:6];
+odoCov = 0.0001*eye(6); [odoCov[i,i] = 0.00001 for i in 4:6];
+rangecov, bearingcov = 3e-4, 2e-3
 
-    visualizeallposes!(vc, fg, drawlandms=false)
+# start and add to a factor graph
+fg = identitypose6fg(initCov=initCov)
+tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
+addOdoFG!(fg, Pose3Pose3(MvNormal(veeEuler(tf), odoCov) ) )
 
-    addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
-    visualizeDensityMesh!(vc, fg, :l1, meshid=2)
-    addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
-    solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:x2])
+# start and add to a factor graph
+fg = identitypose6fg(initCov=initCov)
+tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
+addOdoFG!(fg, Pose3Pose3(tf, odoCov) ) # will soon be Pose3Pose3(MvNormal(veeEuler(tf), odoCov))
 
+visualizeallposes!(vc, fg, drawlandms=false)
+
+addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
+visualizeDensityMesh!(vc, fg, :l1, meshid=2)
+addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
+
+solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:x2])
+```
 
 Major features
 --------------
@@ -116,9 +126,9 @@ This will install additional features, mostly relating to [CloudGraphs.jl](https
 
 INFO, ```installcloudgraphs()``` will perform:
 
+    Pkg.add("Neo4j")
     Pkg.clone("https://github.com/dehann/LibBSON.jl.git")
     Pkg.add("Mongo")  #  LibBSON.jl dependency
-    Pkg.clone("https://github.com/GearsAD/Neo4j.jl.git")
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 
 If you have access to Neo4j and Mongo services you should be able to run the [four door test](https://github.com/dehann/Caesar.jl/blob/master/test/fourdoortestcloudgraph.jl) on both internal dictionaries and repeated on Neo4j DB:
@@ -141,6 +151,11 @@ $ julia -e "using Caesar; drawdbdirector()"
 ```
 
 And an [example service script for CollectionsRender](https://github.com/dehann/Caesar.jl/blob/master/examples/database/DBCollectionsViewerService.jl) is also available.
+
+## Contributors
+
+D. Fourie, S. Claassens, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+
 
 Future targets
 --------------
