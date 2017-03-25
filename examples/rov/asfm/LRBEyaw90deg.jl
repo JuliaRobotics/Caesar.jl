@@ -4,6 +4,7 @@ using Caesar
 using RoME
 using TransformUtils
 using IncrementalInference
+using Distributions
 # using Rotations
 # using CoordinateTransformations
 
@@ -62,7 +63,7 @@ drawposepoints!(vc, fg, :x2)
 addLinearArrayConstraint(fg, (4.23, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
 visualizeallposes!(vc, fg, drawlandms=false)
 
-pose2prior = PriorPose3(tfx2, initCov)
+pose2prior = PriorPose3( MvNormal(veeEuler(tfx2), initCov) )
 addFactor!(fg,[getVert(fg, :x2)], pose2prior)
 
 solveandvisualize(fg, vc, densitymeshes=[:l1], N=N)
