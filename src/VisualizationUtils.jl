@@ -115,15 +115,16 @@ end
 
 function drawpose!(viz::DrakeVisualizer.Visualizer, sym::Symbol;
       tf::CoordinateTransformations.AbstractAffineMap=Translation(0.0,0,0)∘LinearMap(CoordinateTransformations.AngleAxis(0.0,0,0,1.0)),
-      session::AbstractString="")
+      session::AbstractString="",
+      collection::Symbol=:poses)
   #
   if session == ""
-    setgeometry!(viz[:poses][sym], Triad())
-    settransform!(viz[:poses][sym], tf)
+    setgeometry!(viz[collection][sym], Triad())
+    settransform!(viz[collection][sym], tf)
   else
     sesssym=Symbol(session)
-    setgeometry!(viz[sesssym][:poses][sym], Triad())
-    settransform!(viz[sesssym][:poses][sym], tf)
+    setgeometry!(viz[sesssym][collection][sym], Triad())
+    settransform!(viz[sesssym][collection][sym], tf)
   end
   nothing
 end
@@ -133,18 +134,19 @@ function drawpoint!(viz::DrakeVisualizer.Visualizer,
       wTrb=Translation(0.0,0,0),
       session::AbstractString="",
       scale=0.05,
-      color=RGBA(0., 1, 0, 0.5)  )
+      color=RGBA(0., 1, 0, 0.5),
+      collection::Symbol=:landmarks  )
   #
 
   sphere = HyperSphere(Point(0., 0, 0), scale)
   csph = GeometryData(sphere, color)
   if session == ""
-    setgeometry!(viz[:landmarks][sym], csph)
-    settransform!(viz[:landmarks][sym], wTrb)
+    setgeometry!(viz[collection][sym], csph)
+    settransform!(viz[collection][sym], wTrb)
   else
     sesssym=Symbol(session)
-    setgeometry!(viz[sesssym][:landmarks][sym], csph)
-    settransform!(viz[sesssym][:landmarks][sym], wTrb)
+    setgeometry!(viz[sesssym][collection][sym], csph)
+    settransform!(viz[sesssym][collection][sym], wTrb)
   end
   nothing
 end
@@ -205,7 +207,7 @@ end
 function drawpoint!(vc::DrakeVisualizer.Visualizer,
       vert::Graphs.ExVertex,
       topoint::Function,
-      dotwo::Bool, dothree::Bool,
+      dotwo::Bool, dothree::Bool;
       session::AbstractString  )
   #
   den = getVertKDE(vert)
@@ -233,12 +235,34 @@ function drawpoint!(vc::DrakeVisualizer.Visualizer,
   nothing
 end
 
+function drawgt!(vc::DrakeVisualizer, sym::Symbol,
+      gtval::Tuple{Symbol, Array{Float64}};
+      session::AbstractString="NA"  )
+  #
+  if gtval[1] == :XYZ
+    drawpoint!(vc, sym, wTrb=Translation(gtval[2][1],gtval[2][2],gtval[2][3]),
+          session=session,
+          color=RGBA(1.0,0,0,0.5),
+          collection=:gt_landm  )
+  elseif gtval[2] == :XYZqWXYZ
+    drawpose!(vc, sym,
+          tf = Translation(gtval[2][1],gtval[2][2],gtval[2][3]) ∘
+               LinearMap(CoordinateTransformations.Quat(gtval[2][4],gtval[2][5],gtval[2][6],gtval[2][7])),
+          session=session,
+          collection=:gt_poses  )
+  else
+    warn("unknown ground truth drawing type $(gtval[1])")
+  end
+
+  nothing
+end
 
 # TODO -- maybe we need RemoteFactorGraph type
 function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
     fgl::FactorGraph;
     drawlandms::Bool=true,
     drawtype::Symbol=:max,
+    gt::Dict{Symbol, Tuple{Symbol,Vector{}}}=Dict{Symbol, Tuple{Symbol,Vector{}}}(),
     api::DataLayerAPI=localapi )
   #
   session = fgl.sessionname
@@ -255,15 +279,19 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
 
   for p in po
     vert = getVert(fgl, p, api=api )
-    drawpose!(vc, vert, topoint, dotwo, dothree, session)
+    drawpose!(vc, vert, topoint, dotwo, dothree, session=session)
+    if haskey(gt, p)
+      drawgt!(vc, p, gt[p], session=session)
+    end
   end
   if drawlandms
     for l in ll
-      # v = getVert(fgl, p)
       den = getVertKDE(fgl, l, api=api)
       pointval = topoint(den)
-
-      drawpoint!(vc, l, wTrb=Translation(pointval[1:3]...))
+      drawpoint!(vc, l, wTrb=Translation(pointval[1:3]...), session=session)
+      if haskey(gt, l)
+        drawgt!(vc, l, gt[l], session=session)
+      end
     end
   end
 
