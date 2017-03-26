@@ -176,17 +176,17 @@ end
 function drawpose!(vc::DrakeVisualizer.Visualizer,
       vert::Graphs.ExVertex,
       topoint::Function,
-      dotwo::Bool, dothree::Bool,
-      session::AbstractString  )
+      dotwo::Bool, dothree::Bool;
+      session::AbstractString="NA"  )
   #
   den = getVertKDE(vert)
   p = Symbol(vert.label)
   pointval = topoint(den)
   if dothree
     q = convert(TransformUtils.Quaternion, Euler(pointval[4:6]...))
-    drawpose!(vc, p, tf=Translation(pointval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) ,session=session)
+    drawpose!(vc, p, tf=Translation(pointval[1:3]...)∘LinearMap(Quat(q.s,q.v...)), session=session)
   elseif dotwo
-    drawpose!(vc, p, tf=Translation(pointval[1],pointval[2],0.0)∘LinearMap(Rotations.AngleAxis(pointval[3],0,0,1.0)) ,session=session)
+    drawpose!(vc, p, tf=Translation(pointval[1],pointval[2],0.0)∘LinearMap(Rotations.AngleAxis(pointval[3],0,0,1.0)), session=session)
   end
   nothing
 end
@@ -208,7 +208,7 @@ function drawpoint!(vc::DrakeVisualizer.Visualizer,
       vert::Graphs.ExVertex,
       topoint::Function,
       dotwo::Bool, dothree::Bool;
-      session::AbstractString  )
+      session::AbstractString="NA"  )
   #
   den = getVertKDE(vert)
   p = Symbol(vert.label)
@@ -235,8 +235,8 @@ function drawpoint!(vc::DrakeVisualizer.Visualizer,
   nothing
 end
 
-function drawgt!(vc::DrakeVisualizer, sym::Symbol,
-      gtval::Tuple{Symbol, Array{Float64}};
+function drawgt!(vc::DrakeVisualizer.Visualizer, sym::Symbol,
+      gtval::Tuple{Symbol, Vector{Float64}};
       session::AbstractString="NA"  )
   #
   if gtval[1] == :XYZ
@@ -244,7 +244,7 @@ function drawgt!(vc::DrakeVisualizer, sym::Symbol,
           session=session,
           color=RGBA(1.0,0,0,0.5),
           collection=:gt_landm  )
-  elseif gtval[2] == :XYZqWXYZ
+  elseif gtval[1] == :XYZqWXYZ
     drawpose!(vc, sym,
           tf = Translation(gtval[2][1],gtval[2][2],gtval[2][3]) ∘
                LinearMap(CoordinateTransformations.Quat(gtval[2][4],gtval[2][5],gtval[2][6],gtval[2][7])),
@@ -262,7 +262,7 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
     fgl::FactorGraph;
     drawlandms::Bool=true,
     drawtype::Symbol=:max,
-    gt::Dict{Symbol, Tuple{Symbol,Vector{}}}=Dict{Symbol, Tuple{Symbol,Vector{}}}(),
+    gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}}=Dict{Symbol, Tuple{Symbol,Vector{Float64,1}}}(),
     api::DataLayerAPI=localapi )
   #
   session = fgl.sessionname
