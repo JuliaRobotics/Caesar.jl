@@ -128,6 +128,27 @@ function drawpose!(viz::DrakeVisualizer.Visualizer, sym::Symbol;
   nothing
 end
 
+function drawpoint!(viz::DrakeVisualizer.Visualizer,
+      sym::Symbol;
+      wTrb=Translation(0.0,0,0),
+      session::AbstractString="",
+      scale=0.05,
+      color=RGBA(0., 1, 0, 0.5)  )
+  #
+
+  sphere = HyperSphere(Point(0., 0, 0), scale)
+  csph = GeometryData(sphere, color)
+  if session == ""
+    setgeometry!(viz[:landmarks][sym], csph)
+    settransform!(viz[:landmarks][sym], wTrb)
+  else
+    sesssym=Symbol(session)
+    setgeometry!(viz[sesssym][:landmarks][sym], csph)
+    settransform!(viz[sesssym][:landmarks][sym], wTrb)
+  end
+  nothing
+end
+
 function gettopoint(drawtype::Symbol=:max)
   topoint = +
   if drawtype == :max
@@ -158,13 +179,14 @@ function drawpose!(vc::DrakeVisualizer.Visualizer,
   #
   den = getVertKDE(vert)
   p = Symbol(vert.label)
-  maxval = topoint(den)
+  pointval = topoint(den)
   if dothree
-    q = convert(TransformUtils.Quaternion, Euler(maxval[4:6]...))
-    drawpose!(vc, p, tf=Translation(maxval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) ,session=session)
+    q = convert(TransformUtils.Quaternion, Euler(pointval[4:6]...))
+    drawpose!(vc, p, tf=Translation(pointval[1:3]...)∘LinearMap(Quat(q.s,q.v...)) ,session=session)
   elseif dotwo
-    drawpose!(vc, p, tf=Translation(maxval[1],maxval[2],0.0)∘LinearMap(Rotations.AngleAxis(maxval[3],0,0,1.0)) ,session=session)
+    drawpose!(vc, p, tf=Translation(pointval[1],pointval[2],0.0)∘LinearMap(Rotations.AngleAxis(pointval[3],0,0,1.0)) ,session=session)
   end
+  nothing
 end
 
 function drawpose!(vc::DrakeVisualizer.Visualizer,
@@ -179,6 +201,38 @@ function drawpose!(vc::DrakeVisualizer.Visualizer,
   drawpose!(vc, vert, topoint, dotwo, dothree, session)
   nothing
 end
+
+function drawpoint!(vc::DrakeVisualizer.Visualizer,
+      vert::Graphs.ExVertex,
+      topoint::Function,
+      dotwo::Bool, dothree::Bool,
+      session::AbstractString  )
+  #
+  den = getVertKDE(vert)
+  p = Symbol(vert.label)
+  pointval = topoint(den)
+  if dothree
+    q = convert(TransformUtils.Quaternion, Euler(pointval[4:6]...))
+    drawpoint!(vc, p, tf=Translation(pointval[1:3]...), session=session)
+  elseif dotwo
+    drawpoint!(vc, p, tf=Translation(pointval[1],pointval[2],0.0), session=session)
+  end
+  nothing
+end
+
+
+function drawpoint!(vc::DrakeVisualizer.Visualizer,
+        vert::Graphs.ExVertex;
+        session::AbstractString="NA",
+        drawtype::Symbol=:max )
+  #
+  topoint = gettopoint(drawtype)
+  X = getVal(vert)
+  dotwo, dothree = getdotwothree(Symbol(vert.label), X)
+  drawpoint!(vc, vert, topoint, dotwo, dothree, session)
+  nothing
+end
+
 
 # TODO -- maybe we need RemoteFactorGraph type
 function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
@@ -203,15 +257,15 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
     vert = getVert(fgl, p, api=api )
     drawpose!(vc, vert, topoint, dotwo, dothree, session)
   end
-  # if drawlandms
-  #   for l in ll
-  #     # v = getVert(fgl, p)
-  #     den = getVertKDE(fgl, l)
-  #     maxval = topoint(den)
-  #
-  #     newpoint!(vc, l, wTb=Translation(maxval[1:3]...))
-  #   end
-  # end
+  if drawlandms
+    for l in ll
+      # v = getVert(fgl, p)
+      den = getVertKDE(fgl, l, api=api)
+      pointval = topoint(den)
+
+      drawpoint!(vc, l, wTrb=Translation(pointval[1:3]...))
+    end
+  end
 
   nothing
 end
@@ -239,6 +293,7 @@ function drawposepoints!(vis::DrakeVisualizer.Visualizer,
     pointcloud.channels[:rgb] = [RGB(1.0, 1.0, 0) for i in 1:length(XX)]
   end
   setgeometry!(vis[Symbol(session)][:posepts][vsym], pointcloud)
+  nothing
 end
 
 function drawposepoints!(vis::DrakeVisualizer.Visualizer,
@@ -251,8 +306,6 @@ function drawposepoints!(vis::DrakeVisualizer.Visualizer,
   drawposepoints!(vis, vert, session=session, api=localapi) # definitely use localapi
   nothing
 end
-
-
 
 
 
