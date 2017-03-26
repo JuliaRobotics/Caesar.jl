@@ -24,7 +24,8 @@ function solveandvisualize(fg::FactorGraph,
       densitymeshes::Vector{Symbol}=Symbol[],
       drawlandms::Bool=true,
       N::Int=100,
-      drawtype::Symbol=:max )
+      drawtype::Symbol=:max,
+      gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}}=Dict{Symbol, Tuple{Symbol,Vector{Float64,1}}}() )
   #
   deletemeshes!(vc)
 
@@ -33,7 +34,7 @@ function solveandvisualize(fg::FactorGraph,
   @async begin
     while solving[1]
       println(".")
-      visualizeallposes!(vc, fg, drawlandms=drawlandms, drawtype=drawtype)
+      visualizeallposes!(vc, fg, drawlandms=drawlandms, drawtype=drawtype, gt=gt)
       i = 1
       deletemeshes!(vc)
       for dm in densitymeshes
