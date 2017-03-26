@@ -756,5 +756,24 @@ function standardcloudgraphsetup(;addrdict=nothing,
   return cloudGraph, addrdict
 end
 
+"""
+    appendvertbigdata!(fg, vert, descr, data)
+
+Append big data element into current blob store and update associated global
+vertex information.
+"""
+function appendvertbigdata!(fgl::FactorGraph,
+      vert::Graphs.ExVertex,
+      description::AbstractString,
+      data  )
+  #
+  cvid = fgl.cgIDs[vert.index]
+  cv = CloudGraphs.get_vertex(fgl.cg, cvid)
+	bd = CloudGraphs.read_BigData!(fgl.cg, cv)
+	bdei = CloudGraphs.BigDataElement(description, data)
+	push!(cv.bigData.dataElements, bdei);
+	CloudGraphs.save_BigData!(fgl.cg, cv)
+end
+
 
   #
