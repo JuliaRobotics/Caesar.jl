@@ -151,6 +151,7 @@ include("UserFunctions.jl")
 
 if haskey(instpkg, "CloudGraphs")
   include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
+  include("cloudgraphs/ConvertGeneralSlaminDB.jl")
   include("cloudgraphs/DBVisualizationUtils.jl")
   include("cloudgraphs/DirectorVisService.jl")
 end
