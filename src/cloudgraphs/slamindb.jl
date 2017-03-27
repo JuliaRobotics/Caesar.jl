@@ -1,6 +1,9 @@
 # SLAMinDB service functions
 
-
+function getcredentials()
+  cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true, drawdepth=true)
+  return addrdict
+end
 
 function slamindb(;addrdict=nothing,
             N::Int=-1,
@@ -17,6 +20,7 @@ function slamindb(;addrdict=nothing,
   cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict, nparticles=nparticles)
 
   N = parse(Int, addrdict["num particles"])
+  session = addrdict["session"]
 
   while loopctrl[1] # loopctrl for future use
     println("===================CONVERT===================")
@@ -43,12 +47,28 @@ function slamindb(;addrdict=nothing,
   nothing
 end
 
-
-function clearConvertedinDB(;addrdict=nothing)
+function convertdb(;addrdict=nothing,
+      N::Int=-1  )
+  #
+  nparticles = false
+  if N > 0
+    addrdict["num particles"] = string(N)
+  else
+    nparticles = true
+  end
   cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict, nparticles=nparticles)
+  N = parse(Int, addrdict["num particles"])
+  fg = Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph)
+  updatenewverts!(fg, N=N)
+end
+
+function resetconvertdb(;addrdict=nothing)
+  cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
   println("Clearing slamindb data, leaving front-end data, session: $(addrdict["session"])")
   resetentireremotesession(cloudGraph.neo4j.connection, addrdict["session"])
 end
+
+
 
 
 

@@ -1,6 +1,24 @@
 # Convert slamindb Functions
 
 
+
+
+function getmaxfactorid(conn, session::AbstractString)
+  loadtx = transaction(conn)
+  query =  "match (n:$(session):FACTOR)
+            where not (n:NEWDATA)
+            with id(n) as idn, n.exVertexId as nexvid
+            order by nexvid desc limit 1
+            return idn, nexvid"
+  cph = loadtx(query, submit=true)
+  exvid = 0
+  if length(cph.results[1]["data"]) > 0
+    neoid = cph.results[1]["data"][1]["row"][1]
+    exvid = cph.results[1]["data"][1]["row"][2]
+  end
+  return exvid
+end
+
 """
     getnewvertdict(conn, session)
 
@@ -75,7 +93,8 @@ end
 
 Hodgepodge function to merge data in CloudVertex
 """
-function mergeCloudVertex!(cv::CloudGraphs.CloudVertex,
+function mergeCloudVertex!{T <: AbstractString}(cg::CloudGraph,
+      v::Graphs.ExVertex,
       neoNodeId::Int,
       alreadyexists::Bool,
       neo4jNode,
@@ -83,9 +102,10 @@ function mergeCloudVertex!(cv::CloudGraphs.CloudVertex,
       mongos;
       labels::Vector{T}=String[]  )
   #
+  cv = CloudVertex()
   if alreadyexists
     # simply fetch existing cloudgraph if it exists, AGAIN
-    cv = CloudGraphs.get_vertex(fgl.cg, neoNodeId)
+    cv = CloudGraphs.get_vertex(cg, neoNodeId)
     cgv = cloudVertex2ExVertex(cv)
     # NOTE, overwrite all values, assuming this is ONLY HAPPENING WITH VARIABLENODES
     # not checking to unpack Packed types
@@ -104,7 +124,7 @@ function mergeCloudVertex!(cv::CloudGraphs.CloudVertex,
 
   # want to check the mongo keys anyway, since they could have changed
   mergeBigDataElements!(cv.bigData.dataElements, mongos)
-  nothing
+  return cv
 end
 
 
@@ -157,7 +177,7 @@ function mergeValuesIntoCloudVert!{T <: AbstractString}(fgl::FactorGraph,
   end
 
   # merge CloudVertex
-  mergeCloudVertex!(cv, neoNodeId, alreadyexists, neo4jNode, existlbs, mongos, labels=labels )
+  cv = mergeCloudVertex!(fgl.cg, v, neoNodeId, alreadyexists, neo4jNode, existlbs, mongos, labels=labels )
 
   # update merged vertex to database
   CloudGraphs.update_vertex!(fgl.cg, cv)
@@ -259,9 +279,10 @@ function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N:
   nothing
 end
 
-function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
-  warn("using hack counter for FACTOR uid +100000")
-  fuid = 100000 # offset factor values
+function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict, maxfuid::Int)
+  foffset = 100000
+  @show fuid = maxfuid >= foffset ? maxfuid : maxfuid+foffset # offset factor values
+  warn("using hack counter for FACTOR uid starting at $(fuid)")
   # neoNodeId = 63363
   # elem = newvertdict[neoNodeId]
   for (neoNodeId,elem) in newvertdict
@@ -287,8 +308,8 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
             elem[:frtend]["lklh"] == "rangeMEAS" ) && i==2 ) ||
             ( elem[:frtend]["lklh"] == "PTPR2 G 2 STDEV" && i==1 )
           # detect bearing range factors being added between pose and landmark
-          warn("using hack counter for LANDMARKS uid +200000")
-          uid = parse(Int,bf)+200000 # complete hack
+          warn("using hack counter for LANDMARKS uid +$(2*foffset)")
+          uid = parse(Int,bf)+ 2*foffset # complete hack
         end
         push!(verts, fgl.g.vertices[uid])
       end
@@ -319,12 +340,9 @@ in preparation for MM-iSAMCloudSolve process.
 """
 function updatenewverts!(fgl::FactorGraph; N::Int=100)
   sortedvd = getnewvertdict(fgl.cg.neo4j.connection, fgl.sessionname)
-  @show length(sortedvd)
   populatenewvariablenodes!(fgl, sortedvd, N=N)
-  for (vid,ve) in fgl.g.vertices
-    @show vid, typeof(getData(ve))
-  end
-  populatenewfactornodes!(fgl, sortedvd)
+  maxfuid = getmaxfactorid(fgl.cg.neo4j.connection, fgl.sessionname)
+  populatenewfactornodes!(fgl, sortedvd, maxfuid)
   nothing
 end
 

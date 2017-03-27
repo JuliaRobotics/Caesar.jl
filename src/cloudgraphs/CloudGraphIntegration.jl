@@ -296,7 +296,7 @@ function getPoseExVertexNeoIDs(conn;
   loadtx = transaction(conn)
   # query = "match (n:$(sessionname)) where n.ready=$(ready) and n.backendset=$(backendset) and n.packedType = 'IncrementalInference.PackedVariableNodeData' and length(n.MAP_est)=3 return n"
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn):POSE) where n.ready=$(ready)"
+  query = "match (n$(sn):POSE) where n.ready=$(ready) and exists(n.exVertexId)"
   # query = "match (n$(sn)) where n:POSE and n.ready=$(ready)"
   query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
   query = query*" return n"

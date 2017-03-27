@@ -131,8 +131,10 @@ export
   getdotwothree,
 
   # solver service SLAMinDB
+  getcredentials,
   slamindb,
-  clearConvertedinDB
+  convertdb,
+  resetconvertdb
 
 
 

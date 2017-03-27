@@ -200,7 +200,7 @@ function drawpose!(vc::DrakeVisualizer.Visualizer,
   topoint = gettopoint(drawtype)
   X = getVal(vert)
   dotwo, dothree = getdotwothree(Symbol(vert.label), X)
-  drawpose!(vc, vert, topoint, dotwo, dothree, session)
+  drawpose!(vc, vert, topoint, dotwo, dothree, session=session)
   nothing
 end
 
