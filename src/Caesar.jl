@@ -128,7 +128,10 @@ export
   # helper functions
   getbinarraymongo,
   gettopoint,
-  getdotwothree
+  getdotwothree,
+
+  # solver service SLAMinDB
+  slamindb
 
 
 
@@ -138,7 +141,6 @@ include("SlamServer.jl")
 include("DataUtils.jl")
 include("VisualizationUtils.jl")
 include("ModelVisualizationUtils.jl")
-
 
 
 include("BearingRangeTrackingServer.jl")
@@ -152,6 +154,7 @@ include("UserFunctions.jl")
 if haskey(instpkg, "CloudGraphs")
   include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
   include("cloudgraphs/ConvertGeneralSlaminDB.jl")
+  include("cloudgraphs/slamindb.jl")
   include("cloudgraphs/DBVisualizationUtils.jl")
   include("cloudgraphs/DirectorVisService.jl")
 end
