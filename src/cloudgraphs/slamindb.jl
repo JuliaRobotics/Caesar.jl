@@ -44,8 +44,11 @@ function slamindb(;addrdict=nothing,
 end
 
 
-function clearConvertedinDB()
-
+function clearConvertedinDB(;addrdict=nothing)
+  cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict, nparticles=nparticles)
+  println("Clearing slamindb data, leaving front-end data, session: $(addrdict["session"])")
+  resetentireremotesession(cloudGraph.neo4j.connection, addrdict["session"])
+end
 
 
 
