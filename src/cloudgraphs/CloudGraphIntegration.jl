@@ -18,7 +18,7 @@ export
   updateFullCloudVertData!,
   #loading frtend generated fg
   getnewvertdict,
-  insertValuesCloudVert!,
+  mergeValuesIntoCloudVert!,
   recoverConstraintType,
   populatenewvariablenodes!,
   populatenewfactornodes!,
@@ -474,65 +474,87 @@ end
 
 
 
-function transfermongokeys!(fgl::FactorGraph)
+# function transfermongokeys!(fgl::FactorGraph)
+#
+#   cv = CloudGraphs.get_vertex(fgl.cg, cgid)
+#
+#   cvid = fgl.cgIDs[vert.index]
+#   cv = CloudGraphs.get_vertex(fgl.cg, cvid)
+#   bd = CloudGraphs.read_BigData!(fgl.cg, cv)
+#   bdei = CloudGraphs.BigDataElement(description, data)
+#   push!(cv.bigData.dataElements, bdei);
+#   CloudGraphs.save_BigData!(fgl.cg, cv)
+# end
 
-  cv = CloudGraphs.get_vertex(fgl.cg, cgid)
 
-
-end
-
-
-function insertValuesCloudVert!(fgl::FactorGraph, neoNodeId::Int, elem, uidl, v::Graphs.ExVertex; labels=String[])
+function mergeValuesIntoCloudVert!{T <: AbstractString}(fgl::FactorGraph,
+      neoNodeId::Int,
+      elem,
+      uidl,
+      v::Graphs.ExVertex;
+      labels::Vector{T}=String[]  )
   #
-  # addNode!(fgl, nlbsym, 0.1*randn(3,N), 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
 
-  # v = getVert(fgl, nlbsym, api=localapi)
-  # warn("deleting frntend values")
-  # delete!(v.attributes,"frntend")
+  # why am I getting a node again (because we don't have the labels here)?
+  neo4jNode = Neo4j.getnode(fgl.cg.neo4j.graph, neoNodeId)
+  existlbs = Vector{AbstractString}(neo4jNode.metadata["labels"])
 
-  # v.attributes["frtend"] = JSON.json(elem[:frtend])
-  # if haskey(elem, :mongokeys)
-  #   v.attributes["mongo_keys"] = JSON.json(elem[:mongokeys])
-  # end
+  @show vsym = Symbol(v.label)
+  @show alreadyexists = sum(existlbs .== "NEWDATA") == 0
+
+  # parse dictionary of values retrieved from Neo4j
   mongos = Dict()
   for (k,va) in elem
     if k == :frtend
       v.attributes[string(k)] = JSON.json(va)
     elseif k == :mongo_keys
-      @show mongos = JSON.parse(va["val"])
+      mongos = JSON.parse(va["val"])
       v.attributes[string(k)] = va["val"]
+    elseif k == :ready
+      v.attributes[string(k)] = typeof(va["val"]) == Int ? va["val"] : parse(Int,va["val"])
     else
-      v.attributes[string(k)] = va["val"]
+      warn("setting $(k) to $(typeof(va["val"]))")
+      v.attributes[string(k)] = va["val"]  # this is replacing data incorrectly
     end
   end
 
   fgl.cgIDs[uidl] = neoNodeId
+  if alreadyexists
+    # simply fetch existing cloudgraph if it exists, AGAIN
+    cv = CloudGraphs.get_vertex(fgl.cg, neoNodeId)
+    cgv = cloudVertex2ExVertex(cv)
+    # NOTE, overwrite all values, assuming this is ONLY HAPPENING WITH VARIABLENODES
+    for (ke,val) in cgv.attributes
+      v.attributes[ke] = val
+    end
+  else
+    cv = exVertex2CloudVertex( v )
+    cv.neo4jNode = neo4jNode
+    cv.neo4jNodeId = neoNodeId
+    # can't fetch in cloudgraphs with thin interface: (fntend, mongo_keys, ready)
+    cv.isValidNeoNodeId = true
+    filter!(e->e!="NEWDATA",existlbs)
+    cv.labels = union(existlbs, labels)
+  end
 
-  cv = exVertex2CloudVertex( v )
-  cv.neo4jNodeId = neoNodeId
-  cv.neo4jNode = Neo4j.getnode(fgl.cg.neo4j.graph, neoNodeId)
-  cv.isValidNeoNodeId = true
-  existlbs = Vector{AbstractString}(cv.neo4jNode.metadata["labels"])
-  filter!(e->e!="NEWDATA",existlbs)
-  cv.labels = union(existlbs, labels)
+  # want to check the mongo keys anyway, since they could have changed
+  if mongos != nothing
+    for (k,oid) in mongos
+      println("transfer mongo oid $((k,oid))")
+      # empty data, since we will call update_NeoBigData and not save_BigData
+      bdei = CloudGraphs.BigDataElement(k, Vector{UInt8}(), string(oid))
+      push!(cv.bigData.dataElements, bdei);
+    end
+  else
+    println("no mongo")
+  end
 
-  # if mongos != nothing
-  #   for (k,va) in mongos
-  #     @show k, va
-  #     mongoId = BSONOID(va);
-  #     results = first(find(fgl.cg.mongo.cgBindataCollection, ("_id" => eq(mongoId))));
-  #     bdei = CloudGraphs.BigDataElement(k, results)
-  #     push!(cv.bigData.dataElements, bdei);
-  #   end
-  # else
-  #   println("no mongo")
-  # end
-  #
+  # Only upload data to DB if it's a NEWDATA node
+  # if !alreadyexists
   CloudGraphs.update_vertex!(fgl.cg, cv)
-  # CloudGraphs.save_BigData!(fgl.cg, cv)
-  # TODO -- this function refactoring and better integration here
-  # function updateFullCloudVertData!( fgl::FactorGraph,
-  #     nv::Graphs.ExVertex; updateMAPest=false )
+  CloudGraphs.update_NeoBigData!(fgl.cg, cv)
+  # end
+  @show "end merge", typeof(cv.packed), typeof(getData(v))
   nothing
 end
 
@@ -613,15 +635,20 @@ function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N:
       warn("using hack counter for LANDMARKS uid +200000")
       uidl = elem[:frtend]["tag_id"]+200000 # TODO complete hack
       nlbsym = Symbol(string('l', uidl))
-      initvals = 0.1*randn(2,N)
+      initvals = 0.1*randn(2,N) # Make sure autoinit still works properly
       push!(labels,"LANDMARK")
     end
     if !haskey(fgl.IDs, nlbsym) && nlbsym != Symbol()
-      @show nlbsym, size(initvals)
-      v = addNode!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, ready=0, uid=uidl,api=localapi) # TODO remove initstdev, deprecated
-      insertValuesCloudVert!(fgl, neoNodeId, elem, uidl, v, labels=labels)
+      # @show nlbsym, size(initvals)
+      # TODO remove initstdev, deprecated
+      v = addNode!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, ready=0, uid=uidl,api=localapi)
+      @show "before transl", nlbsym, neoNodeId, typeof(getData(v))
+      mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, uidl, v, labels=labels)
+      @show "after transl", nlbsym, keys(v.attributes), typeof(getData(v))
+      println()
     end
   end
+  println("done populating new variables")
   nothing
 end
 
@@ -632,13 +659,12 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
   # elem = newvertdict[neoNodeId]
   for (neoNodeId,elem) in newvertdict
     if elem[:frtend]["t"] == "F"
-      @show neoNodeId
+      # @show neoNodeId
       if !haskey(elem,:ready)
-        warn("missing ready field")
+        # warn("missing ready field")
         continue
       end
       if Int(elem[:ready]["val"]) != 1
-        @show elem[:ready]
         warn("ready/val field not equal to 1")
         continue
       end
@@ -664,7 +690,7 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
       fuid += 1
       vert = addFactor!(fgl, verts, usrfnc, ready=0, api=localapi, uid=fuid, autoinit=true)
       println("at populatenewfactornodes!, btwn="*elem[:frtend]["btwn"])
-      insertValuesCloudVert!(fgl, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(fgl.sessionname)"])
+      mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(fgl.sessionname)"])
 
       # TODO -- upgrade to add multple variables
       # for vv in verts
@@ -686,7 +712,11 @@ in preparation for MM-iSAMCloudSolve process.
 """
 function updatenewverts!(fgl::FactorGraph; N::Int=100)
   sortedvd = getnewvertdict(fgl.cg.neo4j.connection, fgl.sessionname)
+  @show length(sortedvd)
   populatenewvariablenodes!(fgl, sortedvd, N=N)
+  for (vid,ve) in fgl.g.vertices
+    @show vid, typeof(getData(ve))
+  end
   populatenewfactornodes!(fgl, sortedvd)
   nothing
 end
@@ -710,6 +740,11 @@ function resetentireremotesession(conn, session)
   nothing
 end
 
+"""
+    consoleaskuserfordb(...)
+
+Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
+"""
 function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false)
   res = Dict{AbstractString, AbstractString}()
   need = ["neo4j addr";"neo4j usr";"neo4j pwd";"mongo addr";"mongo usr";"mongo pwd";"session"]
@@ -734,6 +769,12 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   return res
 end
 
+"""
+    standardcloudgraphsetup(...)
+
+Connect to databases via network according to addrdict, or ask user for credentials and return
+active cloudGraph object, as well as addrdict.
+"""
 function standardcloudgraphsetup(;addrdict=nothing,
             nparticles=false,
             drawdepth=false,
@@ -754,6 +795,46 @@ function standardcloudgraphsetup(;addrdict=nothing,
   Caesar.usecloudgraphsdatalayer!()
 
   return cloudGraph, addrdict
+end
+
+"""
+    appendvertbigdata!(fg, vert, descr, data)
+
+Append big data element into current blob store and update associated global
+vertex information.
+"""
+function appendvertbigdata!(fgl::FactorGraph,
+      vert::Graphs.ExVertex,
+      description::AbstractString,
+      data  )
+  #
+  cvid = fgl.cgIDs[vert.index]
+  cv = CloudGraphs.get_vertex(fgl.cg, cvid)
+  bd = CloudGraphs.read_BigData!(fgl.cg, cv)
+  bdei = CloudGraphs.BigDataElement(description, data)
+  push!(cv.bigData.dataElements, bdei);
+  CloudGraphs.save_BigData!(fgl.cg, cv)
+end
+
+
+"""
+    appendvertbigdata!(fg, sym, descr, data)
+
+Append big data element into current blob store using parent appendvertbigdata!,
+but here specified by symbol of variable node in the FactorGraph. Note the
+default data layer api definition. User must define dlapi to refetching the
+ vertex from the data layer. localapi avoids repeated network database fetches.
+"""
+function appendvertbigdata!(fgl::FactorGraph,
+      sym::Symbol,
+      description::AbstractString,
+      data;
+      api=IncrementalInference.localapi  )
+  #
+  appendvertbigdata!(fgl,
+        getVert(fgl, sym, api=api),
+        description,
+        data  )
 end
 
 
