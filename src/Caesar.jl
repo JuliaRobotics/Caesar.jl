@@ -130,6 +130,9 @@ export
   gettopoint,
   getdotwothree,
 
+  # would be CloudGraphs calls
+  getBigDataElement,
+
   # solver service SLAMinDB
   getcredentials,
   slamindb,

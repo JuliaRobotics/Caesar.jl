@@ -486,6 +486,21 @@ function standardcloudgraphsetup(;addrdict=nothing,
 end
 
 """
+    get_BigDataElement(vertex, description)
+
+Walk through vertex bigDataElements and return the last matching description.
+"""
+function getBigDataElement(vertex::CloudVertex, description::AbstractString)
+  bde = nothing
+  for bDE in vertex.bigData.dataElements
+    if bDE.description == description
+      bde = bDE
+    end
+  end
+  return bde
+end
+
+"""
     appendvertbigdata!(fg, vert, descr, data)
 
 Append big data element into current blob store and update associated global
