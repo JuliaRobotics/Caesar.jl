@@ -40,6 +40,20 @@ function fetchmongorgbimg(cg::CloudGraph, key::AbstractString)
   return img
 end
 
+function bin2arr(data::Vector{UInt8}; dtype::DataType=Float64)
+  len = length(data)
+  dl = sizeof(dtype)
+  alen = round(Int,len/dl)
+
+  ptrT = pointer(data)  # Ptr{UInt8}
+  ptrTf = convert(Ptr{dtype}, ptrT)  # Ptr{Float32}
+  arr = Vector{dtype}(alen);
+
+  unsafe_copy!(pointer(arr),ptrTf,alen)
+
+  return arr
+end
+
 function fetchmongodepthimg(cg::CloudGraph, key::AbstractString; dtype::DataType=Float64)
   myKeyToFind = BSONOID(key) # some valid numbers
 
@@ -47,17 +61,18 @@ function fetchmongodepthimg(cg::CloudGraph, key::AbstractString; dtype::DataType
   myFavouriteKey = first( findsomthing );
   mfkv = myFavouriteKey["val"];
 
-  len = length(mfkv)
-  dl = sizeof(dtype)
-  alen = round(Int,len/dl)
-
-  ptrT = pointer(mfkv)  # Ptr{UInt8}
-  ptrTf = convert(Ptr{dtype}, ptrT)  # Ptr{Float32}
-  arr = Vector{dtype}(alen);
-
-  unsafe_copy!(pointer(arr),ptrTf,alen)
-
-  return arr
+  return bin2arr(mfkv, dtype=dtype)
+  # len = length(mfkv)
+  # dl = sizeof(dtype)
+  # alen = round(Int,len/dl)
+  #
+  # ptrT = pointer(mfkv)  # Ptr{UInt8}
+  # ptrTf = convert(Ptr{dtype}, ptrT)  # Ptr{Float32}
+  # arr = Vector{dtype}(alen);
+  #
+  # unsafe_copy!(pointer(arr),ptrTf,alen)
+  #
+  # return arr
 end
 
 

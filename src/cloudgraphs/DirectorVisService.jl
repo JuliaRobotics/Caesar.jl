@@ -96,17 +96,19 @@ function drawdbsession(vis,
   @show IDs = getPoseExVertexNeoIDs(cloudGraph.neo4j.connection, sessionname=session, reqbackendset=false);
 
   @showprogress 1 "Drawing IDs..." for (vid,cvid) in IDs
-
+    cv = nothing
     @show vid, cvid
-    cv = CloudGraphs.get_vertex(cloudGraph, cvid)
+    # skip big data elements
+    cv = CloudGraphs.get_vertex(cloudGraph, cvid, false )
     vert = cloudVertex2ExVertex(cv)
     x = Symbol(vert.label)
 
-    mongk = Dict{AbstractString, Any}()
-    if haskey(cv.properties, "mongo_keys")
-      jsonstr = cv.properties["mongo_keys"]
-      mongk =  JSON.parse(jsonstr)
-    end
+    # to be deprecated
+    # mongk = Dict{AbstractString, Any}()
+    # if haskey(cv.properties, "mongo_keys")
+    #   jsonstr = cv.properties["mongo_keys"]
+    #   mongk =  JSON.parse(jsonstr)
+    # end
 
     # vert = getVert(fg, x, api=localapi)
     drawpose!(vis, vert, session=session)
@@ -114,20 +116,28 @@ function drawdbsession(vis,
 
     # mongk, cvid = getmongokeys(fg, x, IDs)
 
-		if DRAWDEPTH && haskey(mongk, "depthframe_image") && !haskey(poseswithdepth, x)
-      poseswithdepth[x]=1
+		if DRAWDEPTH && hasBigDataElement(cv, "depthframe_image") && !haskey(poseswithdepth, x)
+      cv = CloudGraphs.get_vertex(cloudGraph, cvid, true )
 
       rgb = nothing
       seg = nothing
-      if haskey(mongk, "keyframe_rgb")
-        rgb = fetchmongorgbimg(cloudGraph, mongk["keyframe_rgb"])
+
+      # to be deprecated
+      if hasBigDataElement(cv, "keyframe_rgb") #haskey(mongk, "keyframe_rgb")
+        rgbbigd = getBigDataElement(cv,"keyframe_rgb").data
+        rgb = ImageMagick.readblob(rgbbigd);
+        # rgb = fetchmongorgbimg(cloudGraph, mongk["keyframe_rgb"])
       end
-      if haskey(mongk, "keyframe_segnet")
-        seg = fetchmongorgbimg(cloudGraph, mongk["keyframe_segnet"])
+      if hasBigDataElement(cv, "keyframe_segnet") #haskey(mongk, "keyframe_segnet")
+        segbigd = getBigDataElement(cv,"keyframe_segnet").data
+        seg = ImageMagick.readblob(segbigd);
+        # seg = fetchmongorgbimg(cloudGraph, mongk["keyframe_segnet"])
       end
 
       ri,ci = size(rgb)
-      arr = fetchmongodepthimg(cloudGraph, mongk["depthframe_image"], dtype=Float32)
+      arrdata = getBigDataElement(cv,"depthframe_image").data
+      arr = bin2arr(arrdata, dtype=Float32)
+      # arr = fetchmongodepthimg(cloudGraph, mongk["depthframe_image"], dtype=Float32)
       img = reshape(arr, ci, ri)'
 
       X = reconstruct(dcamjl, Array{Float64,2}(img))
@@ -142,6 +152,7 @@ function drawdbsession(vis,
       #   segss = seg[1:3:r,1:3:c,:]
       #   bedu.publish_cloud("segnet", Xd, c=segss, frame_id="MAPcams",element_id=j, flip_rb=true, reset=false)
       # end
+      poseswithdepth[x]=1
     end
     sleep(0.005)
   end

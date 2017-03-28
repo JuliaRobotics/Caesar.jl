@@ -129,8 +129,10 @@ export
   getbinarraymongo,
   gettopoint,
   getdotwothree,
+  bin2arr,
 
   # would be CloudGraphs calls
+  hasBigDataElement,
   getBigDataElement,
 
   # solver service SLAMinDB

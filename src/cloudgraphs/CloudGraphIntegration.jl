@@ -486,7 +486,7 @@ function standardcloudgraphsetup(;addrdict=nothing,
 end
 
 """
-    get_BigDataElement(vertex, description)
+    getBigDataElement(vertex, description)
 
 Walk through vertex bigDataElements and return the last matching description.
 """
@@ -499,6 +499,21 @@ function getBigDataElement(vertex::CloudVertex, description::AbstractString)
   end
   return bde
 end
+
+"""
+    hasBigDataElement(vertex, description)
+
+Return true if vertex has bigDataElements with matching description.
+"""
+function hasBigDataElement(vertex::CloudVertex, description::AbstractString)
+  for bDE in vertex.bigData.dataElements
+    if bDE.description == description
+      return true
+    end
+  end
+  return false
+end
+
 
 """
     appendvertbigdata!(fg, vert, descr, data)
