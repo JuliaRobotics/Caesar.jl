@@ -432,7 +432,7 @@ Obtain Neo4j global database address and login credientials from STDIN, then ins
 """
 function askneo4jcredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
   need = ["neo4j addr";"neo4j usr";"neo4j pwd";"session"]
-  println("Please enter information for:")
+  println("Please enter information for Neo4j DB:")
   for n in need
     println(n)
     str = readline(STDIN)
@@ -448,12 +448,17 @@ Obtain Mongo database address and login credientials from STDIN, then insert and
 """
 function askmongocredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
   need = ["mongo addr";"mongo usr";"mongo pwd"]
-  println("Please enter information for:")
+  println("Please enter information for MongoDB:")
   for n in need
     println(n)
     n == "mongo addr" && haskey(addrdict, "neo4j addr") ? print(string("[",addrdict["neo4j addr"],"]: ")) : nothing
     str = readline(STDIN)
     addrdict[n] = str[1:(end-1)]
+  end
+  if addrdict["mongo addr"] == "" && haskey(addrdict, "neo4j addr")
+    addrdict["mongo addr"] = addrdict["neo4j addr"]
+  else
+    error("Don't how to get to MongoDB.")
   end
   return addrdict
 end
@@ -465,27 +470,33 @@ end
 Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
 """
 function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false)
-  res = Dict{AbstractString, AbstractString}()
-  need = ["neo4j addr";"neo4j usr";"neo4j pwd";"mongo addr";"mongo usr";"mongo pwd";"session"]
+  addrdict = Dict{AbstractString, AbstractString}()
+  askneo4jcredentials!(addrdict=addrdict)
+  askmongocredentials!(addrdict=addrdict)
+  need = String[]
   !nparticles ? nothing : push!(need, "num particles")
   !drawdepth ? nothing : push!(need, "draw depth")
   !clearslamindb ? nothing : push!(need, "clearslamindb")
 
-  println("Please enter information for:")
+  println("Please also enter information for:")
   for n in need
     println(n)
-    n == "mongo addr" ? print(string("[",res["neo4j addr"],"]: ")) : nothing
     n == "draw depth" ? print("[y]/n: ") : nothing
+    n == "num particles" ? print("[100]: ") : nothing
+    n == "clearslamindb" ? print("yes/[no]: ") : nothing
     str = readline(STDIN)
-    res[n] = str[1:(end-1)]
-  end
-  if res["mongo addr"] == ""
-    res["mongo addr"] = res["neo4j addr"]
+    addrdict[n] = str[1:(end-1)]
   end
   if drawdepth
-    res["draw depth"] = res["draw depth"]=="" || res["draw depth"]=="y" || res["draw depth"]=="yes" ? "y" : "n"
+    addrdict["draw depth"] = addrdict["draw depth"]=="" || addrdict["draw depth"]=="y" || addrdict["draw depth"]=="yes" ? "y" : "n"
   end
-  return res
+  if nparticles
+    addrdict["num particles"] = addrdict["num particles"]!="" ? addrdict["num particles"] : "100"
+  end
+  if clearslamindb
+    addrdict["clearslamindb"] = addrdict["clearslamindb"]=="" || addrdict["clearslamindb"]=="n" || addrdict["clearslamindb"]=="no" ? "n" : addrdict["clearslamindb"]
+  end
+  return addrdict
 end
 
 """
