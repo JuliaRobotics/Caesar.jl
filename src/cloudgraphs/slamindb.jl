@@ -7,7 +7,7 @@ end
 
 function slamindb(;addrdict=nothing,
             N::Int=-1,
-            loopctrl::Vector{Bool}=Bool[true];
+            loopctrl::Vector{Bool}=Bool[true],
             iterations::Int=-1  )
   #
 
