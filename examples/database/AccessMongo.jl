@@ -86,7 +86,7 @@ end
 # obj = find(cloudGraph.mongo.cgBindataCollection, ( "_id" => eq(key) ) )
 
 # fetching data from Mongo using getimages.py
-# IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, sessionname=attrdict["session"], reqbackendset=false);
+# IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, session=attrdict["session"], reqbackendset=false);
 # mongk = getmongokeys(fg, :x1, IDs)
 # mongo_key = bson.ObjectId(mongk["keyframe_rgb"])
 # arr = gi.getbinarray(dbcoll, mongo_key)
@@ -105,7 +105,7 @@ client = pymongo.MongoClient(addrdict["mongo addr"])
 db = client[:CloudGraphs]
 collection = "bindata"
 
-IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, sessionname=attrdict["session"], reqbackendset=false);
+IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, session=attrdict["session"], reqbackendset=false);
 mongk = getmongokeys(fg, :x1, IDs)
 arr = getbinarraymongo(db[collection], mongk["arrnameinneo4j"] )
 # arr = getbinarraymongo(db[collection], "58c1a1bdb2ca1534d30b1c96" )

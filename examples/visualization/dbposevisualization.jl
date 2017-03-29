@@ -17,7 +17,7 @@ session = ddrdict["session"]
 
 # fg = Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph)
 
-IDs = getPoseExVertexNeoIDs(cloudGraph.neo4j.connection, sessionname=addrdict["session"], reqbackendset=false);
+IDs = getPoseExVertexNeoIDs(cloudGraph.neo4j.connection, session=addrdict["session"], reqbackendset=false);
 
 
 cv = CloudGraphs.get_vertex(cloudGraph, IDs[10][2])

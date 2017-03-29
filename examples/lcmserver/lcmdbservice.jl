@@ -254,7 +254,7 @@ f1.Zij
 
 
 session = addrdict["session"]
-@show IDs = getPoseExVertexNeoIDs(cloudGraph.neo4j.connection, sessionname=session, reqbackendset=false);
+@show IDs = getPoseExVertexNeoIDs(cloudGraph.neo4j.connection, session=session, reqbackendset=false);
 
 
 

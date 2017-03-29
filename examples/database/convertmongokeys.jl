@@ -56,7 +56,7 @@ fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
 fullLocalGraphCopy!(fg)
 
-IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, sessionname=session, reqbackendset=false);
+IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, session=session, reqbackendset=false);
 
 
 xx,ll = ls(fg)
