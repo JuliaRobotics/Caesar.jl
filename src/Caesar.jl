@@ -1,7 +1,7 @@
 module Caesar
 
 
-# import RoME: initfg
+import RoME: initfg
 import Distributions: Normal
 import DrakeVisualizer: Triad
 
