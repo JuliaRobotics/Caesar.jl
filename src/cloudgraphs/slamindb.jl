@@ -7,7 +7,8 @@ end
 
 function slamindb(;addrdict=nothing,
             N::Int=-1,
-            loopctrl::Vector{Bool}=Bool[true]  )
+            loopctrl::Vector{Bool}=Bool[true];
+            iterations::Int=-1  )
   #
 
   nparticles = false
@@ -22,7 +23,8 @@ function slamindb(;addrdict=nothing,
   N = parse(Int, addrdict["num particles"])
   session = addrdict["session"]
 
-  while loopctrl[1] # loopctrl for future use
+  while loopctrl[1] && (iterations > 0 || iterations == -1) # loopctrl for future use
+    iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
     println("===================CONVERT===================")
     fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
     updatenewverts!(fg, N=N)
