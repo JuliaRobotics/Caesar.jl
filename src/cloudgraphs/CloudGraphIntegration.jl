@@ -284,31 +284,50 @@ function getAllExVertexNeoIDs(conn;
   return ret
 end
 
-# return array of tuples with exvertex and neo4j IDs for all poses
+"""
+    getExVertexNeoIDs(neo4j.connection, label="", session="")
+
+Return array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.
+"""
+function getExVertexNeoIDs(conn;
+        label::AbstractString="",
+        ready::Int=1,
+        backendset::Int=1,
+        session::AbstractString="",
+        reqbackendset::Bool=true  )
+  #
+  loadtx = transaction(conn)
+  sn = length(session) > 0 ? ":"*session : ""
+  lb = length(label) > 0 ? ":"*label : ""
+  query = "match (n$(sn)$(lb)) where n.ready=$(ready) and exists(n.exVertexId)"
+  query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
+  query = query*" return n.exVertexId, id(n)"
+  cph = loadtx(query, submit=true)
+  ret = Array{Tuple{Int64,Int64},1}()
+  @showprogress 1 "Get Pose ExVertex IDs..." for data in cph.results[1]["data"]
+    exvid, neoid = data["row"][1], data["row"][2]
+    push!(ret, (exvid,neoid)  )
+  end
+  return ret
+end
+
+"""
+    getPoseExVertexNeoIDs(neo4j.connection)
+
+Return array of tuples with ExVertex IDs and Neo4j IDs for all poses.
+"""
 function getPoseExVertexNeoIDs(conn;
         ready::Int=1,
         backendset::Int=1,
-        sessionname::AbstractString="",
+        session::AbstractString="",
         reqbackendset::Bool=true  )
   #
-  # TODO -- in query we can use return n.exVertexId, n.neo4jNodeId
-  # TODO -- in query we can use n:POSE rather than length(n.MAP_est)=3
-  loadtx = transaction(conn)
-  # query = "match (n:$(sessionname)) where n.ready=$(ready) and n.backendset=$(backendset) and n.packedType = 'IncrementalInference.PackedVariableNodeData' and length(n.MAP_est)=3 return n"
-  sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn):POSE) where n.ready=$(ready) and exists(n.exVertexId)"
-  # query = "match (n$(sn)) where n:POSE and n.ready=$(ready)"
-  query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
-  query = query*" return n"
-  cph = loadtx(query, submit=true)
-  ret = Array{Tuple{Int64,Int64},1}()
-
-  @showprogress 1 "Get Pose ExVertex IDs..." for data in cph.results[1]["data"]
-    metadata = data["meta"][1]
-    rowdata = data["row"][1]
-    push!(ret, (rowdata["exVertexId"],metadata["id"])  )
-  end
-  return ret
+  getPoseExVertexNeoIDs(conn;
+          label="POSE",
+          ready=ready,
+          backendset=backendset,
+          session=session,
+          reqbackendset=reqbackendset  )
 end
 
 # function getDBAdjMatrix()
