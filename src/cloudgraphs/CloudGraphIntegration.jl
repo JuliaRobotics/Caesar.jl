@@ -419,17 +419,48 @@ end
 function setBackendWorkingSet!(conn, sessionname::AbstractString)
   loadtx = transaction(conn)
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn)) set n.backendset=1"
+  query = "match (n$(sn)) where not (n:NEWDATA) set n.backendset=1"
   cph = loadtx(query, submit=true)
   loadresult = commit(loadtx)
   nothing
 end
 
+"""
+    askmongocredentials!(addrdict=Dict{AbstractString, AbstractString})
 
+Obtain Neo4j global database address and login credientials from STDIN, then insert and return in the addrdict colletion.
+"""
+function askneo4jcredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
+  need = ["neo4j addr";"neo4j usr";"neo4j pwd";"session"]
+  println("Please enter information for:")
+  for n in need
+    println(n)
+    str = readline(STDIN)
+    addrdict[n] = str[1:(end-1)]
+  end
+  return addrdict
+end
+
+"""
+    askmongocredentials!(addrdict=Dict{AbstractString, AbstractString})
+
+Obtain Mongo database address and login credientials from STDIN, then insert and return in the addrdict colletion.
+"""
+function askmongocredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
+  need = ["mongo addr";"mongo usr";"mongo pwd"]
+  println("Please enter information for:")
+  for n in need
+    println(n)
+    n == "mongo addr" && haskey(addrdict, "neo4j addr") ? print(string("[",addrdict["neo4j addr"],"]: ")) : nothing
+    str = readline(STDIN)
+    addrdict[n] = str[1:(end-1)]
+  end
+  return addrdict
+end
 
 
 """
-    consoleaskuserfordb(...)
+    consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false)
 
 Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
 """
@@ -458,7 +489,7 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
 end
 
 """
-    standardcloudgraphsetup(...)
+    standardcloudgraphsetup(;addrdict=nothing, nparticles=false, drawdepth=false, clearslamindb=false)
 
 Connect to databases via network according to addrdict, or ask user for credentials and return
 active cloudGraph object, as well as addrdict.
@@ -486,7 +517,7 @@ function standardcloudgraphsetup(;addrdict=nothing,
 end
 
 """
-    getBigDataElement(vertex, description)
+    getBigDataElement(vertex::CloudVertex, description)
 
 Walk through vertex bigDataElements and return the last matching description.
 """
@@ -555,5 +586,9 @@ function appendvertbigdata!(fgl::FactorGraph,
         data  )
 end
 
+
+function syncmongos()
+
+end
 
   #
