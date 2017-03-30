@@ -82,7 +82,7 @@ while true
   # this is being replaced by cloudGraph, added here for development period
   fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 
-  IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, sessionname=session, reqbackendset=false);
+  IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, session=session, reqbackendset=false);
 
   println("get local copy of graph")
   if fullLocalGraphCopy!(fg, reqbackendset=false)

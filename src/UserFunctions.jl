@@ -1,5 +1,11 @@
 # user functions
 
+"""
+    identitypose6fg()
+
+Initialize a and exiting or new factor graph with a first pose and prior as specified by default
+keywords or user.
+"""
 function identitypose6fg(;fg=nothing,
       N::Int=100,
       initCov::Array{Float64,2}=0.001*eye(6),
