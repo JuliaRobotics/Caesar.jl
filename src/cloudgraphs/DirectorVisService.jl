@@ -52,10 +52,10 @@ function reconstruct(dc::DepthCamera, depth::Array{Float64})
 end
 
 
-function prepcolordepthcloud!( X;
-      rgb::VoidUnion{Array{Colorant, 2}}=nothing,
+function prepcolordepthcloud!{T <: ColorTypes.Colorant}( X::Array{Float64};
+      rgb::Array{T, 2}=Array{Colorant,2}(),
       skip::Int=4,
-      maxrange=4.5 )
+      maxrange::Float64=4.5 )
   #
   r,c,h = size(X)
   Xd = X[1:skip:r,1:skip:c,:]
@@ -63,7 +63,7 @@ function prepcolordepthcloud!( X;
   mask = Xd[:,:,:] .> maxrange
   Xd[mask] = Inf
 
-  havecolor = rgb == nothing
+  havecolor = size(rgb,1) > 0
 
   rgbss = havecolor ? rgb[1:skip:r,1:skip:c] : nothing
   # rgbss = rgb[1:4:r,1:4:c,:]./255.0
@@ -83,11 +83,13 @@ function prepcolordepthcloud!( X;
   return pointcloud
 end
 
-
 function fetchdrawdepthcloudbycvid!(vis::DrakeVisualizer.Visualizer,
       cloudGraph::CloudGraphs.CloudGraph,
       cvid::Int,
-      poseswithdepth::Dict{Symbol, Int};
+      vsym::Symbol,
+      poseswithdepth::Dict,
+      dcamjl,
+      sesssym::Symbol;
       depthcolormaps=Dict(),
       imshape=(480,640),
       wTb::CoordinateTransformations.AbstractAffineMap=
@@ -97,47 +99,49 @@ function fetchdrawdepthcloudbycvid!(vis::DrakeVisualizer.Visualizer,
             Translation(0,0,0.6) ∘ LinearMap(
             CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5))  )
   #
+  # vsym = Symbol(vert.label)
 
-  vsym = Symbol(vert.label)
-
+  # @show vsym
   if !haskey(poseswithdepth, vsym)
     cache = Dict()
-    # fetch copy of big data from CloudGraphs
     cv = CloudGraphs.get_vertex(cloudGraph, cvid, true )
+    # fetch copy of big data from CloudGraphs
     # "depthframe_image" => "keyframe_rgb", "depthframe_image" => "keyframe_segnet"
-    for (ke, va) in depthcolormaps
-      # TODO -- should be removed since depth is array and should have rows and columns stored in Mongo
-      # size(rgb)
-      ri,ci = imshape[1], imshape[2]
-
+    for (va, ke) in depthcolormaps
+      ri,ci = imshape[1], imshape[2] # this is a hack # TODO -- should be removed since depth is array and should have rows and columns stored in Mongo
       if !haskey(cache, ke)
-        arrdata = getBigDataElement(cv,ke).data #"depthframe_image"
-        arr = bin2arr(arrdata, dtype=Float32) # should also store dtype for arr in Mongo
-        img = reshape(arr, ci, ri)'
-        X = reconstruct(dcamjl, Array{Float64,2}(img))
-        cache[ke] = X
+        data = getBigDataElement(cv,ke)
+        if typeof(data) != Void
+          arrdata = data.data #"depthframe_image"
+          arr = bin2arr(arrdata, dtype=Float32) # should also store dtype for arr in Mongo
+          img = reshape(arr, ci, ri)'
+          X = reconstruct(dcamjl, Array{Float64,2}(img))
+          cache[ke] = X
+        end
       end
+      if haskey(cache, ke)
+        rgb = Array{Colorant,2}()
+        if hasBigDataElement(cv, va) # "keyframe_rgb"
+          rgbbigd = getBigDataElement(cv, va).data
+          rgb = ImageMagick.readblob(rgbbigd);
+        end
+        @show typeof(cache[ke]), typeof(rgb)
+        pointcloud = prepcolordepthcloud!( cache[ke], rgb=rgb )
 
-      rgb = nothing
-      if hasBigDataElement(cv, va) # "keyframe_rgb"
-        rgbbigd = getBigDataElement(cv, va).data
-        rgb = ImageMagick.readblob(rgbbigd);
+        pcsym = Symbol(string("pc_",va))
+        setgeometry!(vis[sesssym][pcsym][vsym][:pose], Triad())
+        settransform!(vis[sesssym][pcsym][vsym][:pose], wTb) # also updated as parallel track
+        setgeometry!(vis[sesssym][pcsym][vsym][:pose][:cam], Triad())
+        settransform!(vis[sesssym][pcsym][vsym][:pose][:cam], bTc )
+        setgeometry!(vis[sesssym][pcsym][vsym][:pose][:cam][:pc], pointcloud )
+
+        # these poses need to be update if the point cloud is to be moved
+        if !haskey(poseswithdepth,vsym)
+          thetype = typeof(vis[sesssym][pcsym][vsym][:pose])
+          poseswithdepth[vsym] = Vector{ thetype }()
+        end
+        push!(poseswithdepth[vsym], vis[sesssym][pcsym][vsym][:pose])
       end
-      pointcloud = prepcolordepthcloud!( cache[ke], rgb=rgb )
-
-      pcsym = Symbol(string("pc_",va))
-      setgeometry!(vis[sesssym][pcsym][vsym][:pose], Triad())
-      settransform!(vis[sesssym][pcsym][vsym][:pose], wTb) # also updated as parallel track
-      setgeometry!(vis[sesssym][pcsym][vsym][:pose][:cam], Triad())
-      settransform!(vis[sesssym][pcsym][vsym][:pose][:cam], bTc )
-      setgeometry!(vis[sesssym][pcsym][vsym][:pose][:cam][:pc], pointcloud )
-
-      # these poses need to be update if the point cloud is to be moved
-      if !(length(poseswithdepth[x]) > 0)
-        @show thetype = typeof(vis[sesssym][pcsym][vsym][:pose])
-        poseswithdepth[vsym] = Vector{ thetype }()
-      end
-      push!(poseswithdepth[vsym], vis[sesssym][pcsym][vsym][:pose])
     end # for depthcolormaps
   end # !haskey(poseswithdepth, ke)
   nothing
@@ -149,16 +153,18 @@ end
 Update all triads listed in poseswithdepth[Symbol(vert.label)] with wTb. Prevents cycles in
 remote tree viewer of DrakeVisualizer.
 """
-function updateparallelposes!(vis::DrakeVisualizer.Visualizer, vert, poseswithdepth;
+function updateparallelposes!(vis::DrakeVisualizer.Visualizer,
+      vert::Graphs.ExVertex,
+      poseswithdepth::Dict;
       wTb::CoordinateTransformations.AbstractAffineMap=
             Translation(0,0,0.0) ∘ LinearMap(
             CoordinateTransformations.Quat(1.0, 0, 0, 0))    )
   #
 
-  @show Symbol(vert.label), length(poseswithdepth[Symbol(vert.label)])
-  for cp in poseswithdepth[Symbol(vert.label)]
-    @show cp
-    settransform!(cp, wTb)
+  if haskey(poseswithdepth, Symbol(vert.label))
+    for cp in poseswithdepth[Symbol(vert.label)]
+      settransform!(cp, wTb)
+    end
   end
   nothing
 end
@@ -166,7 +172,8 @@ end
 function fetchdrawposebycvid!(vis::DrakeVisualizer.Visualizer,
       cloudGraph::CloudGraphs.CloudGraph,
       cvid::Int,
-      poseswithdepth::Dict{Symbol, Int};
+      poseswithdepth::Dict,
+      dcamjl;
       session::AbstractString="",
       depthcolormaps=Dict(),
       imshape=(480,640),
@@ -184,17 +191,20 @@ function fetchdrawposebycvid!(vis::DrakeVisualizer.Visualizer,
   # also draw pose points from variable marginal belief approximation KDE
   drawposepoints!(vis, vert, session=session )
 
-  @show vert.label, typeof(poseswithdepth[Symbol(vert.label)]), poseswithdepth[Symbol(vert.label)]
-
   # also update any parallel transform paths, previous and new
   updateparallelposes!(vis, vert, poseswithdepth, wTb=wTb)
 
-  println("Draw depth cloud")
   # check if we can draw depth pointclouds, and add new ones to parallel transform paths
-  fetchdrawdepthcloudbycvid!(vis, cloudGraph, cvid, poseswithdepth,
+  fetchdrawdepthcloudbycvid!(vis,
+        cloudGraph,
+        cvid,
+        Symbol(vert.label),
+        poseswithdepth,
+        dcamjl,
+        Symbol(session),
         depthcolormaps=depthcolormaps,
         imshape=imshape,
-        wTb=wTb )
+        wTb=wTb  )
 
   sleep(0.005)
   nothing
@@ -206,7 +216,7 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
       addrdict,
       dcamjl,
       DRAWDEPTH,
-      poseswithdepth::Dict{Symbol, Int};
+      poseswithdepth::Dict;
       bTc::CoordinateTransformations.AbstractAffineMap=
             Translation(0,0,0.6) ∘ LinearMap(
             CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5) )     )
@@ -222,7 +232,7 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
 
   @showprogress 1 "Drawing LANDMARK IDs..." for (vid,cvid) in landmIDs
     cv = nothing
-    @show vid, cvid
+    # @show vid, cvid
     # skip big data elements
     cv = CloudGraphs.get_vertex(cloudGraph, cvid, false )
     vert = cloudVertex2ExVertex(cv)
@@ -233,12 +243,17 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
     # drawposepoints!(vis, vert, session=session )
   end
 
-  depthcolormaps = Dict("depthframe_image" => "keyframe_rgb", "depthframe_image" => "keyframe_segnet")
+  depthcolormaps = Dict("keyframe_rgb" => "depthframe_image", "keyframe_segnet" => "depthframe_image")
 
   @showprogress 1 "Drawing POSE IDs..." for (vid,cvid) in IDs
     @show vid, cvid
-    fetchdrawposebycvid!(vis, cloudGraph, cvid, poseswithdepth, session=session,
-                  depthcolormaps=depthcolormaps  )
+    fetchdrawposebycvid!(vis,
+          cloudGraph,
+          cvid,
+          poseswithdepth,
+          dcamjl,
+          session=session,
+          depthcolormaps=depthcolormaps  )
   end
 
 end
@@ -251,8 +266,8 @@ function drawdbdirector()
   session = addrdict["session"]
   DRAWDEPTH = addrdict["draw depth"]=="y" # not going to support just yet
 
-  poseswithdepth = Dict{Symbol, Int}()
-  poseswithdepth[:x1] = 0 # skip this pose -- there is no big data before ICRA
+  poseswithdepth = Dict()
+  # poseswithdepth[:x1] = 0 # skip this pose -- there is no big data before ICRA
 
   vis = startdefaultvisualization()
   sleep(1.0)

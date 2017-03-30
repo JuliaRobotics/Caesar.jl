@@ -141,7 +141,7 @@ export
   convertdb,
   resetconvertdb
 
-typealias VoidUnion{T} Union{Void, T}
+# typealias VoidUnion{T} Union{Void, T}
 
 include("BearingRangeTrackingServer.jl")
 

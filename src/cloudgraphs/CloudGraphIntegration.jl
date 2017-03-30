@@ -451,9 +451,9 @@ Obtain Neo4j global database address and login credientials from STDIN, then ins
 """
 function askneo4jcredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
   need = ["neo4j addr";"neo4j usr";"neo4j pwd";"session"]
-  println("Please enter information for Neo4j DB:")
+  info("Please enter information for Neo4j DB:")
   for n in need
-    println(n)
+    info(n)
     str = readline(STDIN)
     addrdict[n] = str[1:(end-1)]
   end
@@ -467,9 +467,9 @@ Obtain Mongo database address and login credientials from STDIN, then insert and
 """
 function askmongocredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
   need = ["mongo addr";"mongo usr";"mongo pwd"]
-  println("Please enter information for MongoDB:")
+  info("Please enter information for MongoDB:")
   for n in need
-    println(n)
+    info(n)
     n == "mongo addr" && haskey(addrdict, "neo4j addr") ? print(string("[",addrdict["neo4j addr"],"]: ")) : nothing
     str = readline(STDIN)
     addrdict[n] = str[1:(end-1)]
@@ -497,9 +497,9 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   !drawdepth ? nothing : push!(need, "draw depth")
   !clearslamindb ? nothing : push!(need, "clearslamindb")
 
-  println("Please also enter information for:")
+  info("Please also enter information for:")
   for n in need
-    println(n)
+    info(n)
     n == "draw depth" ? print("[y]/n: ") : nothing
     n == "num particles" ? print("[100]: ") : nothing
     n == "clearslamindb" ? print("yes/[no]: ") : nothing
