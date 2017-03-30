@@ -131,7 +131,7 @@ end
 
 function drawpoint!(viz::DrakeVisualizer.Visualizer,
       sym::Symbol;
-      wTrb=Translation(0.0,0,0),
+      tf=Translation(0.0,0,0),
       session::AbstractString="",
       scale=0.05,
       color=RGBA(0., 1, 0, 0.5),
@@ -142,11 +142,11 @@ function drawpoint!(viz::DrakeVisualizer.Visualizer,
   csph = GeometryData(sphere, color)
   if session == ""
     setgeometry!(viz[collection][sym], csph)
-    settransform!(viz[collection][sym], wTrb)
+    settransform!(viz[collection][sym], tf)
   else
     sesssym=Symbol(session)
     setgeometry!(viz[sesssym][collection][sym], csph)
-    settransform!(viz[sesssym][collection][sym], wTrb)
+    settransform!(viz[sesssym][collection][sym], tf)
   end
   nothing
 end
@@ -182,13 +182,16 @@ function drawpose!(vc::DrakeVisualizer.Visualizer,
   den = getVertKDE(vert)
   p = Symbol(vert.label)
   pointval = topoint(den)
+  tf = nothing
   if dothree
     q = convert(TransformUtils.Quaternion, Euler(pointval[4:6]...))
-    drawpose!(vc, p, tf=Translation(pointval[1:3]...)∘LinearMap(Quat(q.s,q.v...)), session=session)
+    tf = Translation(pointval[1:3]...)∘LinearMap(Quat(q.s,q.v...))
+    drawpose!(vc, p, tf=tf, session=session)
   elseif dotwo
-    drawpose!(vc, p, tf=Translation(pointval[1],pointval[2],0.0)∘LinearMap(Rotations.AngleAxis(pointval[3],0,0,1.0)), session=session)
+    tf = Translation(pointval[1],pointval[2],0.0)∘LinearMap(Rotations.AngleAxis(pointval[3],0,0,1.0))
+    drawpose!(vc, p, tf=tf, session=session)
   end
-  nothing
+  return tf
 end
 
 function drawpose!(vc::DrakeVisualizer.Visualizer,
@@ -200,8 +203,7 @@ function drawpose!(vc::DrakeVisualizer.Visualizer,
   topoint = gettopoint(drawtype)
   X = getVal(vert)
   dotwo, dothree = getdotwothree(Symbol(vert.label), X)
-  drawpose!(vc, vert, topoint, dotwo, dothree, session)
-  nothing
+  drawpose!(vc, vert, topoint, dotwo, dothree, session=session)
 end
 
 function drawpoint!(vc::DrakeVisualizer.Visualizer,
@@ -231,7 +233,7 @@ function drawpoint!(vc::DrakeVisualizer.Visualizer,
   topoint = gettopoint(drawtype)
   X = getVal(vert)
   dotwo, dothree = getdotwothree(Symbol(vert.label), X)
-  drawpoint!(vc, vert, topoint, dotwo, dothree, session)
+  drawpoint!(vc, vert, topoint, dotwo, dothree, session=session)
   nothing
 end
 
@@ -240,7 +242,7 @@ function drawgt!(vc::DrakeVisualizer.Visualizer, sym::Symbol,
       session::AbstractString="NA"  )
   #
   if gtval[1] == :XYZ
-    drawpoint!(vc, sym, wTrb=Translation(gtval[2][1],gtval[2][2],gtval[2][3]),
+    drawpoint!(vc, sym, tf=Translation(gtval[2][1],gtval[2][2],gtval[2][3]),
           session=session,
           color=RGBA(1.0,0,0,0.5),
           collection=:gt_landm  )
@@ -277,6 +279,7 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
     dotwo, dothree = getdotwothree(sym, X)
   end
 
+  # TODO -- move calls higher in abstraction to be more similar to drawdbdirector()
   for p in po
     vert = getVert(fgl, p, api=api )
     drawpose!(vc, vert, topoint, dotwo, dothree, session=session)
@@ -288,7 +291,7 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
     for l in ll
       den = getVertKDE(fgl, l, api=api)
       pointval = topoint(den)
-      drawpoint!(vc, l, wTrb=Translation(pointval[1:3]...), session=session)
+      drawpoint!(vc, l, tf=Translation(pointval[1:3]...), session=session)
       if haskey(gt, l)
         drawgt!(vc, l, gt[l], session=session)
       end

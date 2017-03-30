@@ -284,31 +284,50 @@ function getAllExVertexNeoIDs(conn;
   return ret
 end
 
-# return array of tuples with exvertex and neo4j IDs for all poses
+"""
+    getExVertexNeoIDs(neo4j.connection, label="", session="")
+
+Return array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.
+"""
+function getExVertexNeoIDs(conn;
+        label::AbstractString="",
+        ready::Int=1,
+        backendset::Int=1,
+        session::AbstractString="",
+        reqbackendset::Bool=true  )
+  #
+  loadtx = transaction(conn)
+  sn = length(session) > 0 ? ":"*session : ""
+  lb = length(label) > 0 ? ":"*label : ""
+  query = "match (n$(sn)$(lb)) where n.ready=$(ready) and exists(n.exVertexId)"
+  query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
+  query = query*" return n.exVertexId, id(n)"
+  cph = loadtx(query, submit=true)
+  ret = Array{Tuple{Int64,Int64},1}()
+  @showprogress 1 "Get Pose ExVertex IDs..." for data in cph.results[1]["data"]
+    exvid, neoid = data["row"][1], data["row"][2]
+    push!(ret, (exvid,neoid)  )
+  end
+  return ret
+end
+
+"""
+    getPoseExVertexNeoIDs(neo4j.connection)
+
+Return array of tuples with ExVertex IDs and Neo4j IDs for all poses.
+"""
 function getPoseExVertexNeoIDs(conn;
         ready::Int=1,
         backendset::Int=1,
-        sessionname::AbstractString="",
+        session::AbstractString="",
         reqbackendset::Bool=true  )
   #
-  # TODO -- in query we can use return n.exVertexId, n.neo4jNodeId
-  # TODO -- in query we can use n:POSE rather than length(n.MAP_est)=3
-  loadtx = transaction(conn)
-  # query = "match (n:$(sessionname)) where n.ready=$(ready) and n.backendset=$(backendset) and n.packedType = 'IncrementalInference.PackedVariableNodeData' and length(n.MAP_est)=3 return n"
-  sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn):POSE) where n.ready=$(ready)"
-  # query = "match (n$(sn)) where n:POSE and n.ready=$(ready)"
-  query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
-  query = query*" return n"
-  cph = loadtx(query, submit=true)
-  ret = Array{Tuple{Int64,Int64},1}()
-
-  @showprogress 1 "Get Pose ExVertex IDs..." for data in cph.results[1]["data"]
-    metadata = data["meta"][1]
-    rowdata = data["row"][1]
-    push!(ret, (rowdata["exVertexId"],metadata["id"])  )
-  end
-  return ret
+  getPoseExVertexNeoIDs(conn;
+          label="POSE",
+          ready=ready,
+          backendset=backendset,
+          session=session,
+          reqbackendset=reqbackendset  )
 end
 
 # function getDBAdjMatrix()
@@ -419,358 +438,88 @@ end
 function setBackendWorkingSet!(conn, sessionname::AbstractString)
   loadtx = transaction(conn)
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn)) set n.backendset=1"
-  cph = loadtx(query, submit=true)
-  loadresult = commit(loadtx)
-  nothing
-end
-
-
-
-"""
-    getnewvertdict(conn, session)
-
-Return a dictionary with frtend and mongo_keys json string information for :NEWDATA
-elements in Neo4j database.
-"""
-function getnewvertdict(conn, session::AbstractString)
-
-  loadtx = transaction(conn)
-  query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) where n.ready=1 or f.ready=1 return distinct n, f"
-  cph = loadtx(query, submit=true)
-  # loadresult = commit(loadtx)
-  # @show cph.results[1]
-
-  newvertdict = SortedDict{Int, Dict{Symbol, Dict{AbstractString,Any}}, Base.Order.ForwardOrdering}()
-  # mongokeydict = Dict{Int, Dict{AbstractString,Any}}()
-
-  for val in cph.results[1]["data"]
-    i = 0
-    for elem in val["meta"]
-      # @show elem["type"]    # @show rdict["type"]
-      i+=1
-      newvertdict[elem["id"]] = Dict{Symbol, Dict{AbstractString,Any}}()
-      for (k,nv) in val["row"][i]
-        if Symbol(k) == :frtend
-          newvertdict[elem["id"]][Symbol(k)] = JSON.parse(nv)
-        else
-          newvertdict[elem["id"]][Symbol(k)] = Dict{AbstractString, Any}("val"=> nv)
-        end
-      end
-      # rdict = JSON.parse(val["row"][i]["frtend"])
-      # newvertdict[elem["id"]][:frtend] = rdict
-      # if haskey(val["row"][i], "mongo_keys")
-      #   # @show val["row"][i]["mongo_keys"]
-      #   newvertdict[elem["id"]][:mongokeys] = JSON.parse(val["row"][i]["mongo_keys"])
-      # end
-      # # if uppercase(rdict["type"])=="POSE" || uppercase(rdict["type"])=="FACTOR"
-      #   # npsym = Symbol(string("x",parse(Int, rdict["userid"])+1)) # TODO -- fix :x0 requirement
-    end
-    # println()
-  end
-
-  return newvertdict
-end
-
-
-
-# function transfermongokeys!(fgl::FactorGraph)
-#
-#   cv = CloudGraphs.get_vertex(fgl.cg, cgid)
-#
-#   cvid = fgl.cgIDs[vert.index]
-#   cv = CloudGraphs.get_vertex(fgl.cg, cvid)
-#   bd = CloudGraphs.read_BigData!(fgl.cg, cv)
-#   bdei = CloudGraphs.BigDataElement(description, data)
-#   push!(cv.bigData.dataElements, bdei);
-#   CloudGraphs.save_BigData!(fgl.cg, cv)
-# end
-
-
-function mergeValuesIntoCloudVert!{T <: AbstractString}(fgl::FactorGraph,
-      neoNodeId::Int,
-      elem,
-      uidl,
-      v::Graphs.ExVertex;
-      labels::Vector{T}=String[]  )
-  #
-
-  # why am I getting a node again (because we don't have the labels here)?
-  neo4jNode = Neo4j.getnode(fgl.cg.neo4j.graph, neoNodeId)
-  existlbs = Vector{AbstractString}(neo4jNode.metadata["labels"])
-
-  @show vsym = Symbol(v.label)
-  @show alreadyexists = sum(existlbs .== "NEWDATA") == 0
-
-  # parse dictionary of values retrieved from Neo4j
-  mongos = Dict()
-  for (k,va) in elem
-    if k == :frtend
-      v.attributes[string(k)] = JSON.json(va)
-    elseif k == :mongo_keys
-      mongos = JSON.parse(va["val"])
-      v.attributes[string(k)] = va["val"]
-    elseif k == :ready
-      v.attributes[string(k)] = typeof(va["val"]) == Int ? va["val"] : parse(Int,va["val"])
-    else
-      warn("setting $(k) to $(typeof(va["val"]))")
-      v.attributes[string(k)] = va["val"]  # this is replacing data incorrectly
-    end
-  end
-
-  fgl.cgIDs[uidl] = neoNodeId
-  if alreadyexists
-    # simply fetch existing cloudgraph if it exists, AGAIN
-    cv = CloudGraphs.get_vertex(fgl.cg, neoNodeId)
-    cgv = cloudVertex2ExVertex(cv)
-    # NOTE, overwrite all values, assuming this is ONLY HAPPENING WITH VARIABLENODES
-    for (ke,val) in cgv.attributes
-      v.attributes[ke] = val
-    end
-  else
-    cv = exVertex2CloudVertex( v )
-    cv.neo4jNode = neo4jNode
-    cv.neo4jNodeId = neoNodeId
-    # can't fetch in cloudgraphs with thin interface: (fntend, mongo_keys, ready)
-    cv.isValidNeoNodeId = true
-    filter!(e->e!="NEWDATA",existlbs)
-    cv.labels = union(existlbs, labels)
-  end
-
-  # want to check the mongo keys anyway, since they could have changed
-  if mongos != nothing
-    for (k,oid) in mongos
-      println("transfer mongo oid $((k,oid))")
-      # empty data, since we will call update_NeoBigData and not save_BigData
-      bdei = CloudGraphs.BigDataElement(k, Vector{UInt8}(), string(oid))
-      push!(cv.bigData.dataElements, bdei);
-    end
-  else
-    println("no mongo")
-  end
-
-  # Only upload data to DB if it's a NEWDATA node
-  # if !alreadyexists
-  CloudGraphs.update_vertex!(fgl.cg, cv)
-  CloudGraphs.update_NeoBigData!(fgl.cg, cv)
-  # end
-  @show "end merge", typeof(cv.packed), typeof(getData(v))
-  nothing
-end
-
-
-function recoverConstraintType(elem; N::Int=200)
-  lkl = split(elem["lklh"], ' ')
-  if lkl[1]=="PR2"
-    msm = split(elem["meas"], ' ')
-    cov = zeros(3,3)
-    cov[1,2], cov[1,3], cov[2,3] = parse(Float64, msm[5]), parse(Float64, msm[6]), parse(Float64, msm[8])
-    cov += cov'
-    cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
-    zi = zeros(3,1)
-    zi[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
-    return PriorPose2(zi, cov^2, [1.0])
-  elseif lkl[1]=="PTPR2"
-    msm = split(elem["meas"], ' ')
-    cov = zeros(2,2)
-    cov[1,2] = parse(Float64, msm[4])^2
-    cov += cov'
-    cov[1,1], cov[2,2] = parse(Float64, msm[3])^2, parse(Float64, msm[5])^2
-    zi = zeros(2)
-    zi[1:2] = [parse(msm[1]);parse(msm[2])]
-    return PriorPoint2D(zi, cov, [1.0])
-  elseif lkl[1]=="PP2"
-    msm = split(elem["meas"], ' ')
-    cov = zeros(3,3)
-    cov[1,2], cov[1,3], cov[2,3] = parse(Float64, msm[5]), parse(Float64, msm[6]), parse(Float64, msm[8])
-    cov += cov'
-    cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
-    zij = zeros(3,1)
-    zij[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
-    return Pose2Pose2(zij, cov^2, [1.0])
-  elseif lkl[1]=="BR"
-    msm = split(elem["meas"], ' ')
-    return Pose2DPoint2DBearingRange{Normal, Normal}(
-                  Normal(parse(msm[1]), parse(Float64, msm[3]) ),
-                  Normal(parse(msm[2]),parse(Float64, msm[5]) )  )
-  elseif lkl[1]=="rangeBearingMEAS"
-    # @show elem["range"]
-    rngs = Vector{Float64}(elem["range"] )
-    bearing = Vector{Float64}(elem["bearing"] )
-    @show size(rngs), size(bearing)
-    prange = resample(kde!(rngs),N)
-    pbear = resample(kde!(bearing),N)
-    # warn("temporary return")
-    # return prange, pbear
-    return Pose2DPoint2DBearingRangeDensity(pbear, prange)
-  elseif lkl[1]=="rangeMEAS"
-    # @show elem["range"]
-    rngs = Vector{Float64}(elem["range"] )
-    @show size(rngs)
-    prange = resample(kde!(rngs),N)
-    # warn("temporary return")
-    # return prange
-    return Pose2DPoint2DRangeDensity(prange)
-  else
-    return error("Don't know how to convert $(lkl[1]) to a factor")
-  end
-end
-
-
-function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N::Int=100)
-
-  for (neoNodeId,elem) in newvertdict
-    # @show neoNodeId
-    nlbsym = Symbol()
-    uidl = 0
-    labels = AbstractString["$(fgl.sessionname)"]
-    initvals = Array{Float64,2}()
-    if elem[:frtend]["t"] == "P"
-      uidl = elem[:frtend]["uid"]+1 # TODO -- remove +1 and allow :x0, :l0
-      nlbsym = Symbol(string('x', uidl))
-      initvals = 0.1*randn(3,N) # TODO -- fix init to proper values
-      # v = addNode!(fgl, nlbsym, , 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
-      push!(labels,"POSE")
-    elseif elem[:frtend]["t"] == "L"
-      warn("using hack counter for LANDMARKS uid +200000")
-      uidl = elem[:frtend]["tag_id"]+200000 # TODO complete hack
-      nlbsym = Symbol(string('l', uidl))
-      initvals = 0.1*randn(2,N) # Make sure autoinit still works properly
-      push!(labels,"LANDMARK")
-    end
-    if !haskey(fgl.IDs, nlbsym) && nlbsym != Symbol()
-      # @show nlbsym, size(initvals)
-      # TODO remove initstdev, deprecated
-      v = addNode!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, ready=0, uid=uidl,api=localapi)
-      @show "before transl", nlbsym, neoNodeId, typeof(getData(v))
-      mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, uidl, v, labels=labels)
-      @show "after transl", nlbsym, keys(v.attributes), typeof(getData(v))
-      println()
-    end
-  end
-  println("done populating new variables")
-  nothing
-end
-
-function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict)
-  warn("using hack counter for FACTOR uid +100000")
-  fuid = 100000 # offset factor values
-  # neoNodeId = 63363
-  # elem = newvertdict[neoNodeId]
-  for (neoNodeId,elem) in newvertdict
-    if elem[:frtend]["t"] == "F"
-      # @show neoNodeId
-      if !haskey(elem,:ready)
-        # warn("missing ready field")
-        continue
-      end
-      if Int(elem[:ready]["val"]) != 1
-        warn("ready/val field not equal to 1")
-        continue
-      end
-      # verts relating to this factor
-      verts = Vector{Graphs.ExVertex}()
-      i=0
-      for bf in split(elem[:frtend]["btwn"], ' ')
-        i+=1
-        # uid = 0
-        uid = parse(Int,bf)+1
-        if ((elem[:frtend]["lklh"][1:2] == "BR" ||
-            elem[:frtend]["lklh"] == "rangeBearingMEAS" ||
-            elem[:frtend]["lklh"] == "rangeMEAS" ) && i==2 ) ||
-            ( elem[:frtend]["lklh"] == "PTPR2 G 2 STDEV" && i==1 )
-          # detect bearing range factors being added between pose and landmark
-          warn("using hack counter for LANDMARKS uid +200000")
-          uid = parse(Int,bf)+200000 # complete hack
-        end
-        push!(verts, fgl.g.vertices[uid])
-      end
-      # the factor type
-      usrfnc = recoverConstraintType(elem[:frtend])
-      fuid += 1
-      vert = addFactor!(fgl, verts, usrfnc, ready=0, api=localapi, uid=fuid, autoinit=true)
-      println("at populatenewfactornodes!, btwn="*elem[:frtend]["btwn"])
-      mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(fgl.sessionname)"])
-
-      # TODO -- upgrade to add multple variables
-      # for vv in verts
-      vv = verts[end]
-      @show vv.label, Base.mean(vv.attributes["data"].val, 2)
-      dlapi.updatevertex!(fgl, vv, updateMAPest=false)
-      # end
-    end
-  end
-  nothing
-end
-
-
-"""
-    updatenewverts!(fgl; N=100)
-
-Convert vertices of session in Neo4j DB with Caesar.jl's required data elements
-in preparation for MM-iSAMCloudSolve process.
-"""
-function updatenewverts!(fgl::FactorGraph; N::Int=100)
-  sortedvd = getnewvertdict(fgl.cg.neo4j.connection, fgl.sessionname)
-  @show length(sortedvd)
-  populatenewvariablenodes!(fgl, sortedvd, N=N)
-  for (vid,ve) in fgl.g.vertices
-    @show vid, typeof(getData(ve))
-  end
-  populatenewfactornodes!(fgl, sortedvd)
-  nothing
-end
-
-
-"""
-    resetentireremotesession(conn, session)
-
-match (n:\$(session))
-remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width
-set n :NEWDATA
-return n
-"""
-function resetentireremotesession(conn, session)
-  loadtx = transaction(conn)
-  query = "match (n:$(session))
-           remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width, n.MAP_est
-           set n :NEWDATA"
+  query = "match (n$(sn)) where not (n:NEWDATA) set n.backendset=1"
   cph = loadtx(query, submit=true)
   loadresult = commit(loadtx)
   nothing
 end
 
 """
-    consoleaskuserfordb(...)
+    askmongocredentials!(addrdict=Dict{AbstractString, AbstractString})
+
+Obtain Neo4j global database address and login credientials from STDIN, then insert and return in the addrdict colletion.
+"""
+function askneo4jcredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
+  need = ["neo4j addr";"neo4j usr";"neo4j pwd";"session"]
+  info("Please enter information for Neo4j DB:")
+  for n in need
+    info(n)
+    str = readline(STDIN)
+    addrdict[n] = str[1:(end-1)]
+  end
+  return addrdict
+end
+
+"""
+    askmongocredentials!(addrdict=Dict{AbstractString, AbstractString})
+
+Obtain Mongo database address and login credientials from STDIN, then insert and return in the addrdict colletion.
+"""
+function askmongocredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
+  need = ["mongo addr";"mongo usr";"mongo pwd"]
+  info("Please enter information for MongoDB:")
+  for n in need
+    info(n)
+    n == "mongo addr" && haskey(addrdict, "neo4j addr") ? print(string("[",addrdict["neo4j addr"],"]: ")) : nothing
+    str = readline(STDIN)
+    addrdict[n] = str[1:(end-1)]
+  end
+  if addrdict["mongo addr"] == "" && haskey(addrdict, "neo4j addr")
+    addrdict["mongo addr"] = addrdict["neo4j addr"]
+  else
+    error("Don't how to get to MongoDB.")
+  end
+  return addrdict
+end
+
+
+"""
+    consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false)
 
 Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
 """
 function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false)
-  res = Dict{AbstractString, AbstractString}()
-  need = ["neo4j addr";"neo4j usr";"neo4j pwd";"mongo addr";"mongo usr";"mongo pwd";"session"]
+  addrdict = Dict{AbstractString, AbstractString}()
+  askneo4jcredentials!(addrdict=addrdict)
+  askmongocredentials!(addrdict=addrdict)
+  need = String[]
   !nparticles ? nothing : push!(need, "num particles")
   !drawdepth ? nothing : push!(need, "draw depth")
   !clearslamindb ? nothing : push!(need, "clearslamindb")
 
-  println("Please enter information for:")
+  info("Please also enter information for:")
   for n in need
-    println(n)
-    n == "mongo addr" ? print(string("[",res["neo4j addr"],"]: ")) : nothing
+    info(n)
     n == "draw depth" ? print("[y]/n: ") : nothing
+    n == "num particles" ? print("[100]: ") : nothing
+    n == "clearslamindb" ? print("yes/[no]: ") : nothing
     str = readline(STDIN)
-    res[n] = str[1:(end-1)]
-  end
-  if res["mongo addr"] == ""
-    res["mongo addr"] = res["neo4j addr"]
+    addrdict[n] = str[1:(end-1)]
   end
   if drawdepth
-    res["draw depth"] = res["draw depth"]=="" || res["draw depth"]=="y" || res["draw depth"]=="yes" ? "y" : "n"
+    addrdict["draw depth"] = addrdict["draw depth"]=="" || addrdict["draw depth"]=="y" || addrdict["draw depth"]=="yes" ? "y" : "n"
   end
-  return res
+  if nparticles
+    addrdict["num particles"] = addrdict["num particles"]!="" ? addrdict["num particles"] : "100"
+  end
+  if clearslamindb
+    addrdict["clearslamindb"] = addrdict["clearslamindb"]=="" || addrdict["clearslamindb"]=="n" || addrdict["clearslamindb"]=="no" ? "n" : addrdict["clearslamindb"]
+  end
+  return addrdict
 end
 
 """
-    standardcloudgraphsetup(...)
+    standardcloudgraphsetup(;addrdict=nothing, nparticles=false, drawdepth=false, clearslamindb=false)
 
 Connect to databases via network according to addrdict, or ask user for credentials and return
 active cloudGraph object, as well as addrdict.
@@ -796,6 +545,36 @@ function standardcloudgraphsetup(;addrdict=nothing,
 
   return cloudGraph, addrdict
 end
+
+"""
+    getBigDataElement(vertex::CloudVertex, description)
+
+Walk through vertex bigDataElements and return the last matching description.
+"""
+function getBigDataElement(vertex::CloudVertex, description::AbstractString)
+  bde = nothing
+  for bDE in vertex.bigData.dataElements
+    if bDE.description == description
+      bde = bDE
+    end
+  end
+  return bde
+end
+
+"""
+    hasBigDataElement(vertex, description)
+
+Return true if vertex has bigDataElements with matching description.
+"""
+function hasBigDataElement(vertex::CloudVertex, description::AbstractString)
+  for bDE in vertex.bigData.dataElements
+    if bDE.description == description
+      return true
+    end
+  end
+  return false
+end
+
 
 """
     appendvertbigdata!(fg, vert, descr, data)
@@ -837,5 +616,9 @@ function appendvertbigdata!(fgl::FactorGraph,
         data  )
 end
 
+
+function syncmongos()
+
+end
 
   #
