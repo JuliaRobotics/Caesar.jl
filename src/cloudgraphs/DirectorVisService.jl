@@ -125,7 +125,7 @@ function fetchdrawdepthcloudbycvid!(vis::DrakeVisualizer.Visualizer,
           rgbbigd = getBigDataElement(cv, va).data
           rgb = ImageMagick.readblob(rgbbigd);
         end
-        @show typeof(cache[ke]), typeof(rgb)
+        # @show typeof(cache[ke]), typeof(rgb)
         pointcloud = prepcolordepthcloud!( cache[ke], rgb=rgb )
 
         pcsym = Symbol(string("pc_",va))
@@ -232,7 +232,6 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
 
   @showprogress 1 "Drawing LANDMARK IDs..." for (vid,cvid) in landmIDs
     cv = nothing
-    # @show vid, cvid
     # skip big data elements
     cv = CloudGraphs.get_vertex(cloudGraph, cvid, false )
     vert = cloudVertex2ExVertex(cv)
@@ -246,7 +245,6 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
   depthcolormaps = Dict("keyframe_rgb" => "depthframe_image", "keyframe_segnet" => "depthframe_image")
 
   @showprogress 1 "Drawing POSE IDs..." for (vid,cvid) in IDs
-    @show vid, cvid
     fetchdrawposebycvid!(vis,
           cloudGraph,
           cvid,
