@@ -168,6 +168,7 @@ if haskey(instpkg, "CloudGraphs")
   include("cloudgraphs/slamindb.jl")
   include("cloudgraphs/DBVisualizationUtils.jl")
   include("cloudgraphs/DirectorVisService.jl")
+  include("cloudgraphs/MultisessionUtils.jl")
 end
 
 
