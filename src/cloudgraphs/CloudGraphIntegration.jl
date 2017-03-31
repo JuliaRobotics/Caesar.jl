@@ -627,8 +627,65 @@ function appendvertbigdata!(fgl::FactorGraph,
 end
 
 
-function syncmongos()
+"""
+    fetchsubgraph!(::FactorGraph, ::Vector{CloudVertex}, numneighbors::Int=0)
 
+Fetch and insert list of CloudVertices into FactorGraph object, up to neighbor depth.
+"""
+function fetchsubgraph!(fgl::FactorGraph,
+          cvs::Vector{CloudGraphs.CloudVertex};
+          numneighbors::Int=0 )
+          # overwrite::Bool=false  )
+  # recursion termination condition
+  numneighbors >= 0 ? nothing : (return nothing)
+
+  for cv in cvs
+    # test if these are already in fgl
+    if !hasval(fgl.cgIDs, cv.neo4jNodeId) # may have been inserted as previous neighbor
+      # add this vert to graph
+      insertnodefromcv!(fgl, cv)
+
+      # recursive call on neighbors here
+      neicvs = CloudGraphs.get_neighbors(fgl.cg, cv, needdata=true)
+      fetchsubgraph!(fgl, neicvs; numneighbors=numneighbors-1 )
+      # add edges associated with the neighbors
+
+      if numneighbors-1 >= 0
+        for cvn in neicvs
+          checkandinsertedges!(fgl, cv.exVertexId, cvn, ready=1, backendset=1)
+          # makeAddEdge!(fgl, fgl.g.vertices[cv.exVertexId], fgl.g.vertices[cvn.exVertexId], saveedgeID=false)
+        end
+      end
+    end
+
+  end
 end
+
+"""
+    fetchsubgraph!(::FactorGraph, ::Vector{Int}, numneighbors::Int=0)
+
+Fetch and insert list of Neo4j IDs into FactorGraph object, up to neighbor depth.
+"""
+function fetchsubgraph!(fgl::FactorGraph,
+          neoids::Vector{Int};
+          numneighbors::Int=0 )
+          # overwrite::Bool=false  )
+  #
+  for nid in neoids
+    # test if these are already in fgl
+    if !hasval(fgl.cgIDs, nid)
+      cv = CloudGraphs.get_vertex(fgl.cg, nid, false)
+      fetchsubgraph!(fgl, [cv], numneighbors=numneighbors )
+    end
+  end
+  nothing
+end
+
+
+
+
+# function syncmongos()
+#
+# end
 
   #

@@ -133,6 +133,7 @@ export
   gettopoint,
   getdotwothree,
   bin2arr,
+  fetchsubgraph!,
 
   # would be CloudGraphs calls
   hasBigDataElement,
@@ -142,7 +143,13 @@ export
   getcredentials,
   slamindb,
   convertdb,
-  resetconvertdb
+  resetconvertdb,
+
+  # multisession utils
+  multisessionquery,
+  parsemultisessionqueryresult!,
+  getLandmOtherSessNeoIDs,
+  getprp2kde
 
 # typealias VoidUnion{T} Union{Void, T}
 
