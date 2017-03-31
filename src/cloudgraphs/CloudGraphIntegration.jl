@@ -334,41 +334,50 @@ end
 #
 # end
 
+function checkandinsertedges!(fgl::FactorGraph, exvid::Int, nei::CloudVertex; ready::Int=1, backendset::Int=1)
+  if nei.properties["ready"]==ready && nei.properties["backendset"] == backendset #&& nei.exVertexId <= length(fgl.g.vertices)
+    alreadythere = false
+    # TODO -- error point
+    v2 = fgl.g.vertices[nei.exVertexId]
+    for graphsnei in Graphs.out_neighbors(v2, fgl.g) # specifically want Graphs function
+      # want to ignore if the edge was previously added from the other side, comparing to the out neighbors in the Graphs structure
+      if graphsnei.index == exvid #graphsnei.index == nei.exVertexId
+        alreadythere = true
+        break;
+      end
+    end
+    if !alreadythere
+      # add the edge to graph
+      v1 = fgl.g.vertices[exvid]
+      makeAddEdge!(fgl, v1, v2, saveedgeID=false)
+    end
+  end
+  nothing
+end
+
 function copyAllEdges!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64},1})
   # do entire graph, one node at a time
   @showprogress 1 "Copy all edges..." for ids in IDs
-    # look at neighbors of this node
     for nei in CloudGraphs.get_neighbors(fgl.cg, cverts[ids[2]], needdata=true)
-      # if !haskey(fgl.g.vertices, nei.exVertexId)
-      #   warn("skip neighbor if not in the subgraph segment of interest, exVertexId=$(nei.exVertexId)")
-      #   continue;
-      # end
-
-      # allow = true
-      # if haskey(nei.properties, "packedType")
-      #   if nei.properties["packedType"] == "IncrementalInference.FunctionNodeData{IncrementalInference.GenericMarginal}"
-      #     allow = false
-      #   end
-      # end
-      # TODO -- remove last test, since only works for array
-      if nei.properties["ready"]==1 && nei.properties["backendset"] == 1 #&& nei.exVertexId <= length(fgl.g.vertices)
-          alreadythere = false
-          # TODO -- error point
-          v2 = fgl.g.vertices[nei.exVertexId]
-          for graphsnei in Graphs.out_neighbors(v2, fgl.g) # specifically want Graphs function
-            # want to ignore if the edge was previously added from the other side, comparing to the out neighbors in the Graphs structure
-            if graphsnei.index == ids[1] #graphsnei.index == nei.exVertexId
-              alreadythere = true
-              break;
-            end
-          end
-          if !alreadythere
-            # add the edge to graph
-            v1 = fgl.g.vertices[ids[1]]
-            makeAddEdge!(fgl, v1, v2, saveedgeID=false)
-          end
-      end
+      checkandinsertedges!(fgl, ids[1], nei, ready=1, backendset=1)
     end
+  end
+  nothing
+end
+
+function insertnodefromcv!(fgl::FactorGraph, cvert::CloudGraphs.CloudVertex)
+  exvid = cvert.exVertexId
+  neoid = cvert.neo4jNodeId
+  exvert = cloudVertex2ExVertex(cvert)
+  Graphs.add_vertex!(fgl.g, exvert)
+  fgl.id < exvert.index ? fgl.id = exvert.index : nothing
+  fgl.cgIDs[exvid] = neoid
+  if typeof(exvert.attributes["data"]) == VariableNodeData  # variable node
+    fgl.IDs[Symbol(exvert.label)] = exvid
+    push!(fgl.nodeIDs, exvid)
+  else # function node
+    fgl.fIDs[Symbol(exvert.label)] = exvid
+    push!(fgl.factorIDs, exvid)
   end
   nothing
 end
@@ -377,17 +386,18 @@ function copyAllNodes!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::
   @showprogress 1 "Copy all nodes..." for ids in IDs
     cvert = CloudGraphs.get_vertex(fgl.cg, ids[2], false)
     cverts[ids[2]] = cvert
-    exvert = cloudVertex2ExVertex(cvert)
-    Graphs.add_vertex!(fgl.g, exvert)
-    fgl.id < exvert.index ? fgl.id = exvert.index : nothing
-    fgl.cgIDs[ids[1]] = ids[2]
-    if typeof(exvert.attributes["data"]) == VariableNodeData  # variable node
-      fgl.IDs[Symbol(exvert.label)] = ids[1]
-      push!(fgl.nodeIDs, ids[1])
-    else # function node
-      fgl.fIDs[Symbol(exvert.label)] = ids[1]
-      push!(fgl.factorIDs, ids[1])
-    end
+    insertnodefromcv!(fgl, cvert)
+    # exvert = cloudVertex2ExVertex(cvert)
+    # Graphs.add_vertex!(fgl.g, exvert)
+    # fgl.id < exvert.index ? fgl.id = exvert.index : nothing
+    # fgl.cgIDs[ids[1]] = ids[2]
+    # if typeof(exvert.attributes["data"]) == VariableNodeData  # variable node
+    #   fgl.IDs[Symbol(exvert.label)] = ids[1]
+    #   push!(fgl.nodeIDs, ids[1])
+    # else # function node
+    #   fgl.fIDs[Symbol(exvert.label)] = ids[1]
+    #   push!(fgl.factorIDs, ids[1])
+    # end
   end
   nothing
 end

@@ -58,6 +58,14 @@ function solveandvisualize(fg::FactorGraph,
   nothing
 end
 
+function hasval(d::Dict, va)
+  for (k,v) in d
+    if v == va
+      return true
+    end
+  end
+  return false
+end
 
 
 function projectrbe(fgl::FactorGraph, from::Symbol, to::Vector{Float64})

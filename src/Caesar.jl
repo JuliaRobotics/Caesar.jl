@@ -116,6 +116,7 @@ export
   identitypose6fg,
   projectrbe,
   solveandvisualize,
+  hasval,
 
   # repeats from RoME and IIF
   initfg,
@@ -126,6 +127,8 @@ export
   # install cloudgraphs
   installcloudgraphs,
   # helper functions
+  insertnodefromcv!,
+  checkandinsertedges!,
   getbinarraymongo,
   gettopoint,
   getdotwothree,
