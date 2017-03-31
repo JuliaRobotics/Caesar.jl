@@ -126,7 +126,6 @@ function fetchsubgraph!(fgl::FactorGraph,
     # test if these are already in fgl
     if !hasval(fgl.cgIDs, cv.neo4jNodeId) # may have been inserted as previous neighbor
       # add this vert to graph
-      @show "inserting", cv.neo4jNodeId, cv.exVertexId
       insertnodefromcv!(fgl, cv)
 
       # recursive call on neighbors here
@@ -136,7 +135,6 @@ function fetchsubgraph!(fgl::FactorGraph,
 
       if numneighbors-1 >= 0
         for cvn in neicvs
-          @show "edge", cv.exVertexId, cvn.exVertexId
           checkandinsertedges!(fgl, cv.exVertexId, cvn, ready=1, backendset=1)
           # makeAddEdge!(fgl, fgl.g.vertices[cv.exVertexId], fgl.g.vertices[cvn.exVertexId], saveedgeID=false)
         end
