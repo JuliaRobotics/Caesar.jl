@@ -371,6 +371,7 @@ function insertnodefromcv!(fgl::FactorGraph, cvert::CloudGraphs.CloudVertex)
   exvid = cvert.exVertexId
   neoid = cvert.neo4jNodeId
   exvert = cloudVertex2ExVertex(cvert)
+  # TODO -- change to addNode
   Graphs.add_vertex!(fgl.g, exvert)
   fgl.id < exvert.index ? fgl.id = exvert.index : nothing
   fgl.cgIDs[exvid] = neoid
