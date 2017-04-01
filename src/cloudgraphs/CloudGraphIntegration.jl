@@ -501,7 +501,7 @@ end
 Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
 """
 function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false, multisession=false)
-  addrdict = Dict{AbstractString, Union{AbstractString, Vector{AbstractString}}}()
+  addrdict = Dict{AbstractString, Union{AbstractString, Vector{String}}}()
   askneo4jcredentials!(addrdict=addrdict)
   askmongocredentials!(addrdict=addrdict)
   need = String[]
@@ -516,7 +516,7 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
     n == "draw depth" ? print("[y]/n: ") : nothing
     n == "num particles" ? print("[100]: ") : nothing
     n == "clearslamindb" ? print("yes/[no]: ") : nothing
-    n == "multisession" ? print("comman separated list session names/[n]: ") : nothing
+    n == "multisession" ? print("comma separated list session names/[n]: ") : nothing
     str = readline(STDIN)
     addrdict[n] = str[1:(end-1)]
   end

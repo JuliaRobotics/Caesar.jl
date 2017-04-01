@@ -198,7 +198,7 @@ function rmInstMultisessionPriors!{T <: AbstractString}(cloudGraph::CloudGraph;
 
   # grab local subgraph using NeoIDs
   sfg, lms = getLocalSubGraphMultisession(cloudGraph, lm2others,
-                  session=session, numneighbors=2)
+                  session=session, numneighbors=0)
   #
 
   # get dict(sym => neoid) of exiting multisession constraints which may be removed during this update

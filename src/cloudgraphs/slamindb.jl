@@ -38,7 +38,7 @@ function slamindb(;addrdict=nothing,
     println()
 
     println("================MULTI-SESSION================")
-    rmInstMultisessionPriors!(cloudGraph, session=session, multisessions=multisessions)
+    rmInstMultisessionPriors!(cloudGraph, session=session, multisessions=addrdict["multisession"])
     println()
 
     println("====================SOLVE====================")
