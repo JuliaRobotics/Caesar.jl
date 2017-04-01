@@ -229,6 +229,8 @@ function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRange{Distributions.Normal,Distributions.Normal}}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DRange}}, FunctionNodeData{Pose2DPoint2DRange}, encodingConverter=passTypeThrough, decodingConverter=passTypeThrough)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPoint2D}}, PackedFunctionNodeData{PackedPriorPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPoint2DensityNH}}, PackedFunctionNodeData{PackedPriorPoint2DensityNH}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   #acoustic types
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DRangeDensity}}, PackedFunctionNodeData{PackedPose2DPoint2DRangeDensity}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRangeDensity}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRangeDensity}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
@@ -498,14 +500,15 @@ end
 
 Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
 """
-function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false)
-  addrdict = Dict{AbstractString, AbstractString}()
+function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false, multisession=false)
+  addrdict = Dict{AbstractString, Union{AbstractString, Vector{AbstractString}}}()
   askneo4jcredentials!(addrdict=addrdict)
   askmongocredentials!(addrdict=addrdict)
   need = String[]
   !nparticles ? nothing : push!(need, "num particles")
   !drawdepth ? nothing : push!(need, "draw depth")
   !clearslamindb ? nothing : push!(need, "clearslamindb")
+  !multisession ? nothing : push!(need, "multisession")
 
   info("Please also enter information for:")
   for n in need
@@ -513,6 +516,7 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
     n == "draw depth" ? print("[y]/n: ") : nothing
     n == "num particles" ? print("[100]: ") : nothing
     n == "clearslamindb" ? print("yes/[no]: ") : nothing
+    n == "multisession" ? print("comman separated list session names/[n]: ") : nothing
     str = readline(STDIN)
     addrdict[n] = str[1:(end-1)]
   end
@@ -525,6 +529,9 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   if clearslamindb
     addrdict["clearslamindb"] = addrdict["clearslamindb"]=="" || addrdict["clearslamindb"]=="n" || addrdict["clearslamindb"]=="no" ? "n" : addrdict["clearslamindb"]
   end
+  if multisession
+    addrdict["multisession"] = strip.(Vector{String}(split(addrdict["multisession"],',')))
+  end
   return addrdict
 end
 
@@ -535,12 +542,13 @@ Connect to databases via network according to addrdict, or ask user for credenti
 active cloudGraph object, as well as addrdict.
 """
 function standardcloudgraphsetup(;addrdict=nothing,
-            nparticles=false,
-            drawdepth=false,
-            clearslamindb=false  )
+            nparticles::Bool=false,
+            drawdepth::Bool=false,
+            clearslamindb::Bool=false,
+            multisession::Bool=false  )
   #
   if addrdict == nothing
-    addrdict = consoleaskuserfordb(nparticles=nparticles, drawdepth=drawdepth, clearslamindb=clearslamindb)
+    addrdict = consoleaskuserfordb(nparticles=nparticles, drawdepth=drawdepth, clearslamindb=clearslamindb, multisession=multisession)
   end
 
   # Connect to database
@@ -681,7 +689,47 @@ function fetchsubgraph!(fgl::FactorGraph,
   nothing
 end
 
+"""
+    getVertNeoIDs!(::CloudGraph, res::Dict{Symbol, Int}; session::AbstractString="NA")
 
+Insert into and return dict `res` with Neo4j IDs of ExVertex labels as stored per session in Neo4j database.
+"""
+function getVertNeoIDs!(cloudGraph::CloudGraph, res::Dict{Symbol, Int}; session::AbstractString="NA")
+  loadtx = transaction(cloudGraph.neo4j.connection)
+  syms = collect(keys(res))
+  query = "match (n:$(session)) where "
+  for i in 1:length(syms)
+    sym = syms[i]
+    query =query*"n.label='$(sym)' "
+    if i < length(syms)
+      query =query*"or "
+    end
+  end
+  query = query*"return id(n), n.label"
+  cph = loadtx(query, submit=true)
+  for qr in cph.results[1]["data"]
+    res[Symbol(qr["row"][2])] = qr["row"][1]
+  end
+  # Symbol(cph.results[1]["data"][1]["row"][2]) == sym ? nothing : error("Neo4j query not returning $(sym)")
+  return res
+end
+
+"""
+    removeNeo4jID(cg::CloudGraph, neoid=-1)
+
+Remove node from Neo4j according to Neo4j Node ID. Big data elements that may be associated with this
+node are not removed.
+"""
+function removeNeo4jID(cg::CloudGraph; neoid::Int=-1)
+  neoid > 0 ? nothing : error("Can't delete negative neoid=$(neoid).")
+  loadtx = transaction(cg.neo4j.connection)
+  query =  "match (n) where id(n)=$(neoid) detach delete n return count(n)"
+  cph = loadtx(query, submit=true)
+  commit(loadtx)
+  cnt = Int(cph.results[1]["data"][1]["row"][1])
+  cnt == 1 ? nothing : error("Did not delete just one entry after running query = $(query)")
+  nothing
+end
 
 
 # function syncmongos()

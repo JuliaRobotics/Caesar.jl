@@ -45,8 +45,18 @@ end
 
 
 export
+  # pass through from KDE
+  kde!,
+  plotKDE,
+  getPoints,
+  getBW,
+  Ndim,
+  Npts,
+
   # pass through from IIF and RoME
   ls,
+  FactorGraph,
+  writeGraphPdf,
   # Victoria Park example -- batch
   loadVicPrkDataset,
   # addLandmarksFactoGraph!,
@@ -134,22 +144,29 @@ export
   getdotwothree,
   bin2arr,
   fetchsubgraph!,
+  getVertNeoIDs!,
 
   # would be CloudGraphs calls
   hasBigDataElement,
   getBigDataElement,
+  removeNeo4jID,
 
   # solver service SLAMinDB
   getcredentials,
   slamindb,
   convertdb,
   resetconvertdb,
+  getmaxfactorid,
 
   # multisession utils
   multisessionquery,
   parsemultisessionqueryresult!,
   getLandmOtherSessNeoIDs,
-  getprp2kde
+  getAllLandmarkNeoIDs,
+  getLocalSubGraphMultisession,
+  findExistingMSConstraints,
+  getprpt2kde,
+  rmInstMultisessionPriors!
 
 # typealias VoidUnion{T} Union{Void, T}
 

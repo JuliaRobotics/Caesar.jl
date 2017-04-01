@@ -5,10 +5,12 @@ function getcredentials()
   return addrdict
 end
 
+
 function slamindb(;addrdict=nothing,
             N::Int=-1,
             loopctrl::Vector{Bool}=Bool[true],
-            iterations::Int=-1  )
+            iterations::Int=-1,
+            multisession::Bool=false  )
   #
 
   nparticles = false
@@ -18,16 +20,25 @@ function slamindb(;addrdict=nothing,
     nparticles = true
   end
 
-  cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict, nparticles=nparticles)
+  cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict,
+          nparticles=nparticles, multisession=multisession)
 
   N = parse(Int, addrdict["num particles"])
   session = addrdict["session"]
+
+  if !haskey(addrdict, "multisession")
+    addrdict["multisession"]=String[]
+  end
 
   while loopctrl[1] && (iterations > 0 || iterations == -1) # loopctrl for future use
     iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
     println("===================CONVERT===================")
     fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
     updatenewverts!(fg, N=N)
+    println()
+
+    println("================MULTI-SESSION================")
+    rmInstMultisessionPriors!(cloudGraph, session=session, multisessions=multisessions)
     println()
 
     println("====================SOLVE====================")
@@ -48,6 +59,7 @@ function slamindb(;addrdict=nothing,
   end
   nothing
 end
+
 
 function convertdb(;addrdict=nothing,
       N::Int=-1  )
