@@ -262,7 +262,7 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
     fgl::FactorGraph;
     drawlandms::Bool=true,
     drawtype::Symbol=:max,
-    gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}}=Dict{Symbol, Tuple{Symbol,Vector{Float64,1}}}(),
+    gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}}=Dict{Symbol, Tuple{Symbol,Vector{Float64}}}(),
     api::DataLayerAPI=localapi )
   #
   session = fgl.sessionname
