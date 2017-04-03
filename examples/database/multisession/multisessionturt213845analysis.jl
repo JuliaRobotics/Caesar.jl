@@ -41,10 +41,12 @@ for ANAITER in Int[1;2;3;4;5]
   for session in multisessions
     @show addrdict["session"] = session
     slamindb(addrdict=addrdict, iterations=1)
-
+  end
+  for session in multisessions
+    multisessionsl = Vector{String}(setdiff(multisessions, [session]))
     # These are the base steps in rmInstMultisessionPriors!
     lm2others = getLandmOtherSessNeoIDs(cloudGraph,
-                    session=session,multisessions=multisessions)
+                    session=session,multisessions=multisessionsl)
     # grab local subgraph using NeoIDs
     sfg, lms = getLocalSubGraphMultisession(cloudGraph, lm2others,
                     session=session, numneighbors=1)
@@ -55,6 +57,7 @@ for ANAITER in Int[1;2;3;4;5]
     jldfile = string(resultsfolder,"/", session, "_$(ANAITER).jld")
     savejld(fg, file=jldfile)
     for sym in lms
+      @show sym
       fv = getVert(fg, sym, nt=:fnc)
       ffv = getData(fv).fnc.usrfnc!
       # plotKDE(ffv.belief)

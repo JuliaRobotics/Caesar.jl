@@ -8,7 +8,7 @@ N = 100
 # standard setup, auth from file
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 addrdict["num particles"] = "$(N)"
-addrdict["session"] = "SESSTURT38"
+addrdict["session"] = "SESSTURT21"
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 
 # convenience variables
@@ -49,23 +49,24 @@ plotKDE(prp2.belief)
 fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
 fullLocalGraphCopy!(fg)
 
-import IncrementalInference: saveplot
+# import IncrementalInference: saveplot
 
 
 ANAITER=1
 
-for sym in lms
-  fv = getVert(fg, sym, nt=:fnc)
-  ffv = getData(fv).fnc.usrfnc!
-  # plotKDE(ffv.belief)
+# for sym in lms
+sym = lms[1]
+fv = getVert(fg, sym, nt=:fnc)
+ffv = getData(fv).fnc.usrfnc!
+# plotKDE(ffv.belief)
 
-  p = getVertKDE(fg, sym)
-  pl = plotKDE([ffv.belief; p], c=["red";"green"], levels=3, legend=["MultiSess"; "Current"], title=string(sym), fill=true)
+p = getVertKDE(fg, sym)
+pl = plotKDE([ffv.belief; p], c=["red";"green"], levels=3, legend=["MultiSess"; "Current"], title=string(sym), fill=true)
 
-  # run(`mkdir results`)
-  saveplot(pl, name=string("results/", session,"_",sym, "_$(ANAITER)"), frt=:pdf, nw=true)
-  saveplot(pl, name=string("results/", session,"_",sym, "_$(ANAITER)"), frt=:png, nw=true)
-end
+# run(`mkdir results`)
+saveplot(pl, name=string("results/", session,"_",sym, "_$(ANAITER)"), frt=:pdf, nw=true)
+saveplot(pl, name=string("results/", session,"_",sym, "_$(ANAITER)"), frt=:png, nw=true)
+# end
 
 # vert = getVert(fg, :x30, api=localapi)
 # pts = getVal(fg, :x29, api=localapi)
