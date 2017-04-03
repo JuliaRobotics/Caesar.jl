@@ -31,7 +31,7 @@ function solveandvisualize(fg::FactorGraph,
       drawlandms::Bool=true,
       N::Int=100,
       drawtype::Symbol=:max,
-      gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}}=Dict{Symbol, Tuple{Symbol,Vector{Float64,1}}}() )
+      gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}}=Dict{Symbol, Tuple{Symbol,Vector{Float64}}}() )
   #
   deletemeshes!(vc)
 

@@ -52,7 +52,7 @@ Here is a basic example of using visualization and multi-core factor graph solvi
 
 ```julia
 addprocs(2)
-using Caesar, RoME, TransformUtils
+using Caesar, RoME, TransformUtils, Distributions
 
 # load scene and ROV model (might experience UDP packet loss LCM buffer not set)
 vc = startdefaultvisualization()
@@ -69,19 +69,13 @@ fg = identitypose6fg(initCov=initCov)
 tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
 addOdoFG!(fg, Pose3Pose3(MvNormal(veeEuler(tf), odoCov) ) )
 
-
-# start and add to a factor graph
-fg = identitypose6fg(initCov=initCov)
-tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
-addOdoFG!(fg, Pose3Pose3(tf, odoCov) ) # will soon be Pose3Pose3(MvNormal(veeEuler(tf), odoCov))
-
 visualizeallposes!(vc, fg, drawlandms=false)
 
 addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
-visualizeDensityMesh!(vc, fg, :l1, meshid=2)
+visualizeDensityMesh!(vc, fg, :l1)
 addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
-solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1;:x2])
+solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
 ```
 
 Major features
