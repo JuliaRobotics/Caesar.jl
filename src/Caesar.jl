@@ -57,6 +57,8 @@ export
   ls,
   FactorGraph,
   writeGraphPdf,
+  getVert,
+  saveplot,
   # Victoria Park example -- batch
   loadVicPrkDataset,
   # addLandmarksFactoGraph!,
@@ -166,7 +168,8 @@ export
   getLocalSubGraphMultisession,
   findExistingMSConstraints,
   getprpt2kde,
-  rmInstMultisessionPriors!
+  rmInstMultisessionPriors!,
+  removeMultisessions!
 
 # typealias VoidUnion{T} Union{Void, T}
 

@@ -33,11 +33,10 @@ function initfg(;sessionname="NA",cloudgraph=nothing)
   return fgl
 end
 
-function addCloudVert!(fgl::FactorGraph, exvert::Graphs.ExVertex;
-    labels=String[])
-  # if typeof(getData(exvert).fnc)==GenericMarginal
-  #   error("Should not be here")
-  # end
+function addCloudVert!{T <: AbstractString}(fgl::FactorGraph,
+        exvert::Graphs.ExVertex;
+        labels::Vector{T}=String[]  )
+  #
   cv = CloudGraphs.exVertex2CloudVertex(exvert);
   cv.labels = labels
   CloudGraphs.add_vertex!(fgl.cg, cv);
@@ -46,20 +45,28 @@ function addCloudVert!(fgl::FactorGraph, exvert::Graphs.ExVertex;
 end
 
 # Return Graphs.ExVertex type containing data according to id
-function getExVertFromCloud(fgl::FactorGraph, fgid::Int64; bigdata::Bool=false)
+function getExVertFromCloud(fgl::FactorGraph,
+        fgid::Int64;
+        bigdata::Bool=false  )
+  #
   neoID = fgl.cgIDs[fgid]
   cvr = CloudGraphs.get_vertex(fgl.cg, neoID, false)
   CloudGraphs.cloudVertex2ExVertex(cvr)
 end
 
-function getExVertFromCloud(fgl::FactorGraph, lbl::Symbol; bigdata::Bool=false)
-  getExVertFromCloud(fgl, fgl.IDs[lbl], bigdata=bigdata)
+function getExVertFromCloud(fgl::FactorGraph,
+        lbl::Symbol;
+        nt::Symbol=:var,
+        bigdata::Bool=false  )
+  #
+  # getExVertFromCloud(fgl, fgl.IDs[lbl], bigdata=bigdata)
+  getExVertFromCloud(fgl, (nt==:var ? fgl.IDs[lbl] : fgl.fIDs[lbl]), bigdata=bigdata)
 end
 
 function updateFullCloudVertData!(fgl::FactorGraph,
-    nv::Graphs.ExVertex;
-    updateMAPest::Bool=false )
-
+        nv::Graphs.ExVertex;
+        updateMAPest::Bool=false  )
+ #
   # TODO -- this get_vertex seems excessive, but we need the CloudVertex
   neoID = fgl.cgIDs[nv.index]
   # println("updateFullCloudVertData! -- trying to get $(neoID)")

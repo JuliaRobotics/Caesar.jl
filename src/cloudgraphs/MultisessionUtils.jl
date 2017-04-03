@@ -217,8 +217,17 @@ function rmInstMultisessionPriors!{T <: AbstractString}(cloudGraph::CloudGraph;
 end
 
 
+function removeMultisessions!(cloudGraph::CloudGraph; session::AbstractString="NA")
+  session!="NA" ? nothing : error("Please specify a valid session, currently = $(session)")
 
-
+  loadtx = transaction(cloudGraph.neo4j.connection)
+  query =  "match (n:$(session):MULTISESSION)
+            detach delete n
+            return count(n)"
+  cph = loadtx(query, submit=true)
+  commit(loadtx)
+  return cph
+end
 
 
 #
