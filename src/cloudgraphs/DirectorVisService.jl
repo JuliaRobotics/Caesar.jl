@@ -52,8 +52,12 @@ function reconstruct(dc::DepthCamera, depth::Array{Float64})
 end
 
 
-function prepcolordepthcloud!{T <: ColorTypes.Colorant}( X::Array;
-      rgb::Array{T, 2}=Array{Colorant,2}(),
+# function prepcolordepthcloud!{T <: ColorTypes.Colorant}( X::Array;
+#       rgb::Array{T, 2}=Array{Colorant,2}(),
+#       skip::Int=4,
+#       maxrange::Float64=4.5 )
+function prepcolordepthcloud!( X::Array;
+      rgb::Array=Array{Colorant,2}(),
       skip::Int=4,
       maxrange::Float64=4.5 )
   #
@@ -320,7 +324,7 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
     # drawposepoints!(vis, vert, session=session )
   end
 
-  depthcolormaps = !DRAWDEPTH  ? Dict() : Dict("keyframe_rgb" => "depthframe_image", "keyframe_segnet" => "depthframe_image", "none" => "BSONpointcloud")
+  depthcolormaps = !DRAWDEPTH  ? Dict() : Dict("keyframe_rgb" => "depthframe_image", "keyframe_segnet" => "depthframe_image", "BSONcolors" => "BSONpointcloud")
 
   @showprogress 1 "Drawing POSE IDs..." for (vid,cvid) in IDs
     fetchdrawposebycvid!(vis,
