@@ -92,8 +92,20 @@ end
 # arr = gi.getbinarray(dbcoll, mongo_key)
 
 
+myKeyToFind = BSONOID("58e302546689bc617c1994c1") # good example of opencv binary encoded png
+findsomthing = find(cloudGraph.mongo.cgBindataCollection, ("_id" => eq(myKeyToFind)))
+# @show myFavouriteKey["val"]
+mkf = first( findsomthing );
 
+typeof(mkf["val"])
 
+buf = IOBuffer(mkf["val"])
+
+st = takebuf_string(buf)
+bb = BSONObject(st)
+typeof(bb)
+bba = convert(Array, bb["pointcloud"][1])
+convert(bb["pointcloud"]
 
 
 
