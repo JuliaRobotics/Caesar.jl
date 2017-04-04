@@ -1,0 +1,16 @@
+package hauv;
+
+struct submap_points_t
+{
+    int64_t id;                 // use this for utime
+
+    double t_start;             // submap start time
+    double t_stop;              // submap stop time
+    double pos[3];              // submap base node position
+    double orientation[4];      // submap base node orientation
+
+    int32_t num_points;
+    double points_local[num_points][3];  // 
+    byte colors[num_points][3];
+    // double points_global[num_points][3]; // 
+}

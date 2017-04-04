@@ -23,7 +23,8 @@ export
   populatenewvariablenodes!,
   populatenewfactornodes!,
   updatenewverts!,
-  resetentireremotesession
+  resetentireremotesession,
+  appendvertbigdata!
 
 
 

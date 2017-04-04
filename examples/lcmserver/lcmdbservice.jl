@@ -1,4 +1,4 @@
-addprocs(4)
+# addprocs(4)
 
 using Caesar, RoME
 using TransformUtils
@@ -7,6 +7,8 @@ using PyLCM
 using PyCall
 using Distributions
 
+using CloudGraphs
+
 using KernelDensityEstimate
 
 using JLD, HDF5
@@ -14,13 +16,16 @@ using JLD, HDF5
 @show lcmtpath = joinpath(dirname(@__FILE__),"lcmtypes")
 
 # println("Compile LCM types")
-# run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_pose_node_t.lcm`)
-# run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_pose_pose_nh_t.lcm`)
+run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_pose_node_t.lcm`)
+run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_pose_pose_nh_t.lcm`)
+# run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_point_cloud_t.lcm`)
+run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/hauv_submap_points_t.lcm`)
 
 println("Adding lcmtypes dir to Python path: $(lcmtpath)")
 unshift!(PyVector(pyimport("sys")["path"]),lcmtpath)
 
 @pyimport rome
+@pyimport hauv
 
 # random test and viewing function
 # function whatsthere(channel, msgdata)
@@ -29,9 +34,12 @@ unshift!(PyVector(pyimport("sys")["path"]),lcmtpath)
 #   nothing
 # end
 
+# ! = non-const function (eyecandy only)
+# . = dot-notation (element-wise execution)
 function lcmposenodes!(vc, slaml::SLAMWrapper, msgdata,
         lastposeRPZ::Vector{Float64}, MSGDATA;
-        record=false  )
+        record=false,
+        model=nothing )
   #
   println("lcmposenodes! start")
   !record ? nothing : push!(MSGDATA[:pose_node_t], deepcopy(msgdata))
@@ -58,15 +66,20 @@ function lcmposenodes!(vc, slaml::SLAMWrapper, msgdata,
     # first pose prior
     dcovar = [posenode[:covar][1];posenode[:covar][2];posenode[:covar][3];posenode[:covar][4];posenode[:covar][5];posenode[:covar][6]]
     # TODO -- this wont do, must add to existing slaml.fg
+    # initialize fg by setting the first pose w/ prior
     slaml.fg = identitypose6fg(fg=slaml.fg, initpose=newpose, initCov=diagm(dcovar))
 
+# ???
     lbls, = ls(slaml.fg)
     slaml.usrid2lbl[posenode[:id]] = lbls[1]
     slaml.lbl2usrid[lbls[1]] = posenode[:id]
   end
 
 
-  rovt( vc, am )
+  # update rov pose in visuzalizer
+  # TODO: add rovt as argument to fcn
+  model( vc, am )
+
   # change to using pose prior and interpose translation only
   # println("Added node $(v.label)")
   # println("lcmposenodes! end")
@@ -97,7 +110,7 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata,
   # println("lcmodomsg! mid")
 
   if abs(odomsg[:confidence] - 1.0) < 1e-10
-    constrs = IncrementalInference.FunctorInferenceType[]
+    constrs = IncrementalInference.FunctorInferenceType[] # factor super type
     println("adding PartialPriorRollPitchZ")
     prpz = PartialPriorRollPitchZ(
       MvNormal(  [lastposeRPZ[1];lastposeRPZ[2]],diagm([odomsg[:covar][6];odomsg[:covar][5]])  ),
@@ -114,13 +127,20 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata,
     push!( constrs, prpz )
     push!( constrs, xyy )
 
-    v,f = addposeFG!(slaml, constrs, saveusrid=odomsg[:node_2_id] )
+    # may or may not add a new pose node, depending on message order
+    v,f = addposeFG!(slaml, constrs, saveusrid=odomsg[:node_2_id], ready=0 )
+    setDBAllReady!(slaml.fg)
+
   else
     # loop closure case
     println("LOOP CLOSURE")
     odoc3 = Pose3Pose3NH( MvNormal(veeEuler(Dx), diagm(1.0./dcovar)), [0.5;0.5]) # define 50/50% hypothesis
-    addFactor!(slam.fg,[Symbol("x$(odomsg[:node_1_id]+1)");Symbol("x$(odomsg[:node_2_id]+1)")],odoc3)
+    between_verts = Symbol[Symbol("x$(odomsg[:node_1_id]+1)");Symbol("x$(odomsg[:node_2_id]+1)")]
+    # order in between_verts must match the order assumed in the factor functor
+    addFactor!(slaml.fg,between_verts,odoc3)
   end
+
+  # update viewer
   visualizeallposes!(vc, slaml.fg)
 
   # println("lcmodomsg! end")
@@ -128,6 +148,28 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata,
 end
 
 
+# call back for point cloud messages
+function lcmpointcloudmsg!(slaml::SLAMWrapper,
+                          msgdata,
+                          MSGDATA;
+                          record::Bool=false  )
+  #
+  !record ? nothing : push!(MSGDATA[:submap_points_t], deepcopy(msgdata))
+
+  msg = hauv.submap_points_t[:decode](msgdata)
+  @show msg[:id]
+  @show typeof(msg[:points_local])
+
+  node_name =  Symbol("x$(odomsg[:node_1_id]+1)")
+  # function appendvertbigdata!(fgl::FactorGraph,
+  #       vert::Graphs.ExVertex,
+  #       description::AbstractString,
+  #       data  )
+  vert = getVert(slaml.fg, )
+  appendvertbigdata!(slaml.fg, )
+
+  nothing
+end
 
 function runlistener!(
       fl::Vector{Bool},
@@ -135,22 +177,30 @@ function runlistener!(
       vc;
       MSGDATA=nothing,
       until::Symbol=:x999,
-      record=false  )
+      record=false,
+      model = nothing  )
   #
   lastposeRPZ = zeros(3)
 
   if record
     MSGDATA[:pose_node_t] = Vector{Vector{UInt8}}()
     MSGDATA[:pose_pose_nh_t] = Vector{Vector{UInt8}}()
+    MSGDATA[:submap_points_t] = Vector{Vector{UInt8}}()
   end
 
-  gg = (channel, msg_data) -> lcmposenodes!(vc, slam, msg_data, lastposeRPZ, MSGDATA, record=record )
+  # closure
+  gg = (channel, msg_data) -> lcmposenodes!(vc, slam, msg_data, lastposeRPZ, MSGDATA, record=record, model=model )
   odohdl = (channel, msg_data) -> lcmodomsg!(vc, slam, msg_data, lastposeRPZ, MSGDATA, record=record )
+  pchdl = (channel, msg_data) -> lcmpointcloudmsg!(slam, msg_data, MSGDATA, record=record )
+
 
   print("Preparing LCM...")
   lc = LCM()
-  subscribe(lc, "ROME_NODES", gg)
-  subscribe(lc, "ROME_FACTORS", odohdl)
+  # subscribe(lc, "ROME_NODES", gg)
+  # subscribe(lc, "ROME_FACTORS", odohdl)
+  # subscribe(lc, "ROME_POINTCLOUD", pchdl)
+  subscribe(lc, "SUBMAPS", pchdl)
+
   while fl[1]
     handle(lc)
     if slam.lastposesym == until
@@ -203,24 +253,37 @@ rovt(vc)
 Nparticles = 100
 
 # for local dictionary usage
-slam = setupSLAMinDB()
+# slam = setupSLAMinDB()
+
+0
 
 # for remote db usage
 include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
-addrdict["session"] = "SESSHAUV"
+addrdict["session"] = "SESSHAUVDEV"
+# addrdict are the server credentials and session id
+# if none are given, will prompt user
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 # # cloudGraph, addrdict = standardcloudgraphsetup()
-slam = setupSLAMinDB(cloudGraph, addrdict)
+slam = setupSLAMinDB(cloudGraph=cloudGraph, addrdict=addrdict)
 
 
-flags = Bool[1]
-flags[1] = true
+flags = Bool[true]
 
 MSGDATA = Dict{Symbol, Vector{Vector{UInt8}}}()
 
 
 println("LCM listener running...")
-runlistener!(flags, slam, vc, until=:x67, MSGDATA=MSGDATA, record=false)
+# can call @async runlistener!)
+@async runlistener!(flags, slam, vc, until=:x1, MSGDATA=MSGDATA, record=false, model=rovt)
+flags[1] = false
+
+####
+
+MSGDATA[:submap_points_t]
+msg = hauv.submap_points_t[:decode](MSGDATA[:submap_points_t][1])
+
+hauv.submap_points_t
+
 
 
 
