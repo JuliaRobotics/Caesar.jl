@@ -82,6 +82,7 @@ function prepcolordepthcloud!{T <: ColorTypes.Colorant}( X::Array;
     pointcloud = PointCloud(pts)
   elseif typeof(X) == Array{Array{Float64,1},1}
     pointcloud = PointCloud(X)
+    pccols = rgb # TODO: refactor
   else
     error("dont know how to deal with data type=$(typeof(X))")
   end
@@ -98,15 +99,17 @@ function cachepointclouds!(cache::Dict, cv::CloudVertex, ke::AbstractString, dca
       # warn("unable to load $(ke) from Mongo, gives data type Void")
       return nothing
     end
+    data = data.data
     if ke == "depthframe_image"
       ri,ci = imshape[1], imshape[2] # TODO -- hack should be removed since depth is array and should have rows and columns stored in Mongo
-      arrdata = data.data
-      arr = bin2arr(arrdata, dtype=Float32) # should also store dtype for arr in Mongo
+      # arrdata = data.data
+      arr = bin2arr(data, dtype=Float32) # should also store dtype for arr in Mongo
       img = reshape(arr, ci, ri)'
       X = reconstruct(dcamjl, Array{Float64,2}(img))
       cache[ke] = X
-    elseif ke == "pointcloud"
-      buf = IOBuffer(data.data)
+    elseif ke == "BSONpointcloud"
+      # deserialize BSON-encoded pointcloud
+      buf = IOBuffer(data)
       st = takebuf_string(buf)
       bb = BSONObject(st)
       ptarr = map(x -> convert(Array, x), bb["pointcloud"])
@@ -125,8 +128,13 @@ function retrievePointcloudColorInfo!(cv::CloudVertex, va::AbstractString)
   data = getBigDataElement(cv, va).data
   if va == "keyframe_rgb" || va == "keyframe_segnet"
     rgb = ImageMagick.readblob(data);
-  elseif va == "colors"
-    warn("Not implemented yet, $(va)")
+  elseif va == "BSONcolors"
+    buffer = IOBuffer(data)
+    str = takebuf_string(buffer)
+    bb = BSONObject(str)
+    carr = map(x -> convert(Array{UInt8}, x), bb["colors"])
+    # typeof(rgb) = Array{Array{Colorant,1},1}
+    rgb = carr
   end
 
   return rgb
@@ -312,7 +320,7 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
     # drawposepoints!(vis, vert, session=session )
   end
 
-  depthcolormaps = Dict("keyframe_rgb" => "depthframe_image", "keyframe_segnet" => "depthframe_image", "none" => "pointcloud")
+  depthcolormaps = !DRAWDEPTH  ? Dict() : Dict("keyframe_rgb" => "depthframe_image", "keyframe_segnet" => "depthframe_image", "none" => "BSONpointcloud")
 
   @showprogress 1 "Drawing POSE IDs..." for (vid,cvid) in IDs
     fetchdrawposebycvid!(vis,
@@ -324,13 +332,15 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
           depthcolormaps=depthcolormaps  )
   end
 
+  # TODO(pvt): draw factors
+
 end
 
 
 
-function drawdbdirector()
+function drawdbdirector(;addrdict=nothing)
   # Uncomment out for command line operation
-  cloudGraph, addrdict = standardcloudgraphsetup(drawdepth=true)
+  cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict,drawdepth=true)
   session = addrdict["session"]
   DRAWDEPTH = addrdict["draw depth"]=="y" # not going to support just yet
 
