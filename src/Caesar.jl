@@ -38,11 +38,16 @@ using
 export
   # pass through from IIF and RoME
   ls,
+  FactorGraph,
+  writeGraphPdf,
+  getVert,
+  saveplot,
+  # callbacks for datalayer changes
+  localapi,
+  dlapi,
   # Victoria Park example -- batch
   loadVicPrkDataset,
-  # addLandmarksFactoGraph!,
-  # appendFactorGraph!,
-  # doBatchRun,
+
   # insitu component
   GenericInSituSystem,
   makeGenericInSituSys,
