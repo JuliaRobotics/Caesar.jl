@@ -8,6 +8,6 @@ struct pose_node_t
   int32_t mean_dim;      // default will be 7 (3+4)
   double mean[mean_dim]; // default will be [x y z qw qx qy qz]
 
-  int32_t covar_dim;
-  double covar[covar_dim];
-} 
+  int32_t covar_dim;       // usually x y z yaw pitch roll (RotXYZ)
+  double covar[covar_dim]; 
+}
