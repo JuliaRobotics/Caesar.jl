@@ -81,15 +81,44 @@ solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
 Major features
 --------------
 
+* Performing multi-core inference with Multi-modal iSAM over factor graphs, supporting `Pose2, Pose3, Point2, Point3, Null hypothesis, Multi-modal, KDE density, partial constraints`, and more.
+```julia
+tree = wipeBuildBayesTree!(fg, drawpdf=true)
+inferOverTree!(fg, tree)
+```
+
+* Or directcly on a database, allowing for separation of concerns
+```julia
+slamindb()
+```
+
+* Local copy of database held FactorGraph
+```julia
+fg = Caesar.initfg(cloudGraph, session)
+fullLocalGraphCopy(fg)
+```
+
+* Saving and loading FactorGraph objects to file
+```julia
+savejld(fg, file="test.jld", groundtruth=gt)
+loadjld(file="test.jld")
+```
+
 * Visualization through [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl).
+```julia
+visualizeallposes(fg) # from local dictionary
+drawdbdirector()      # from database held factor graph
+```
 
-* A multicore SLAM server over tcp
-
-    julia -p10 -e "using Caesar; tcpStringSLAMServer()"
+* Operating on data from a thin client processes, such as a Python front-end
+ [examples/database/python/neo_interact_example.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py)
 
 * A multicore Bayes 2D feature tracking server over tcp
+```
+julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
+```
 
-    julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
+And many more, please see the examples folder.
 
 Dependency Status
 -----------------
@@ -129,9 +158,12 @@ If you have access to Neo4j and Mongo services you should be able to run the [fo
 
     Pkg.test("Caesar")
 
-Go to your browser at localhost:7474 and run one of the Cypher queries to either retrieve or delete everything:
+Go to your browser at localhost:7474 and run one of the Cypher queries to either retrieve
 
     match (n) return n
+
+or delete everything:
+
     match (n) detach delete n
 
 You can run the multi-modal iSAM solver against the DB using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl):
@@ -148,7 +180,7 @@ And an [example service script for CollectionsRender](https://github.com/dehann/
 
 ## Contributors
 
-D. Fourie, S. Claassens, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+D. Fourie, S. Claassens, N. Rypkema, S. Pillai, P. Vaz Teixeira, R. Mata, M. Kaess, J. Leonard
 
 
 Future targets
