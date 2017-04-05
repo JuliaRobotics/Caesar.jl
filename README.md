@@ -2,15 +2,15 @@
 <img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/caesarimgL.png" width="200" border="0" />
 </p>
 
-A modern robotic toolkit for localization and mapping -- towards non-parametric / parametric navigation solutions.
+A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
 [![Build Status][build-img]][build-url]
 <!-- [![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)-->
 
-This is a research and development driven project and intended to reduce the barrier of entry for Simultaneous Localization and Mapping (SLAM) systems. This [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) package encompasses test cases and robot related software for multi-modal (multi-hypothesis) navigation and mapping solutions from various sensor data, made possible by [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
+Towards non-parametric / parametric state estimation and navigation solutions. Implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages like C or Python. Multi-modal (multi-hypothesis) navigation and mapping solutions, using various sensor data, is a corner stone of this package. Multi-sensor fusion is made possible via vertically integrated [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
 
-Please see related packages, Robot Motion Estimate [RoME.jl][rome-url] and back-end solver [IncrementalInference.jl][iif-url].
+Critically, this package can operate in the conventional SLAM manner, using local dictionaries, or centralize around the `FactorGraph` through a graph database using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git), as [discussed here](people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf)[1]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate [RoME.jl][rome-url] and back-end solver [IncrementalInference.jl][iif-url].
 
 Comments, questions and issues welcome.
 
@@ -24,7 +24,7 @@ Bi-modal belief
 
 <a href="http://vimeo.com/198872855" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/rovyaw90.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 
-Multi-session [Turtlebot](http://www.turtlebot.com/) example (using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git) [1]):
+Multi-session [Turtlebot](http://www.turtlebot.com/) example of the second floor in the [Stata Center](https://en.wikipedia.org/wiki/Ray_and_Maria_Stata_Center):
 
 <img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/turtlemultisession.gif" alt="Turtlebot Multi-session animation" width="480" border="0" /></a>
 
@@ -81,15 +81,44 @@ solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
 Major features
 --------------
 
+* Performing multi-core inference with Multi-modal iSAM over factor graphs, supporting `Pose2, Pose3, Point2, Point3, Null hypothesis, Multi-modal, KDE density, partial constraints`, and more.
+```julia
+tree = wipeBuildBayesTree!(fg, drawpdf=true)
+inferOverTree!(fg, tree)
+```
+
+* Or directcly on a database, allowing for separation of concerns
+```julia
+slamindb()
+```
+
+* Local copy of database held FactorGraph
+```julia
+fg = Caesar.initfg(cloudGraph, session)
+fullLocalGraphCopy(fg)
+```
+
+* Saving and loading FactorGraph objects to file
+```julia
+savejld(fg, file="test.jld", groundtruth=gt)
+loadjld(file="test.jld")
+```
+
 * Visualization through [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl).
+```julia
+visualizeallposes(fg) # from local dictionary
+drawdbdirector()      # from database held factor graph
+```
 
-* A multicore SLAM server over tcp
-
-    julia -p10 -e "using Caesar; tcpStringSLAMServer()"
+* Operating on data from a thin client processes, such as a Python front-end
+ [examples/database/python/neo_interact_example.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py)
 
 * A multicore Bayes 2D feature tracking server over tcp
+```
+julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
+```
 
-    julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
+And many more, please see the examples folder.
 
 Dependency Status
 -----------------
@@ -129,9 +158,12 @@ If you have access to Neo4j and Mongo services you should be able to run the [fo
 
     Pkg.test("Caesar")
 
-Go to your browser at localhost:7474 and run one of the Cypher queries to either retrieve or delete everything:
+Go to your browser at localhost:7474 and run one of the Cypher queries to either retrieve
 
     match (n) return n
+
+or delete everything:
+
     match (n) detach delete n
 
 You can run the multi-modal iSAM solver against the DB using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl):
@@ -148,7 +180,7 @@ And an [example service script for CollectionsRender](https://github.com/dehann/
 
 ## Contributors
 
-D. Fourie, S. Claassens, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+D. Fourie, S. Claassens, N. Rypkema, S. Pillai, P. Vaz Teixeira, R. Mata, M. Kaess, J. Leonard
 
 
 Future targets
