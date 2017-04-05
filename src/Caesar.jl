@@ -147,6 +147,9 @@ export
   bin2arr,
   fetchsubgraph!,
   getVertNeoIDs!,
+  insertrobotdatafirstpose!,
+  tryunpackalltypes!,
+  fetchrobotdatafirstpose,
 
   # would be CloudGraphs calls
   hasBigDataElement,

@@ -96,7 +96,7 @@ function prepcolordepthcloud!( X::Array;
   return pointcloud
 end
 
-function cachepointclouds!(cache::Dict, cv::CloudVertex, ke::AbstractString, dcamjl, imshape)
+function cachepointclouds!(cache::Dict, cv::CloudVertex, ke::AbstractString, param::Dict)
   if !haskey(cache, ke)
     data = getBigDataElement(cv,ke)
     if typeof(data) == Void
@@ -105,11 +105,11 @@ function cachepointclouds!(cache::Dict, cv::CloudVertex, ke::AbstractString, dca
     end
     data = data.data
     if ke == "depthframe_image"
-      ri,ci = imshape[1], imshape[2] # TODO -- hack should be removed since depth is array and should have rows and columns stored in Mongo
+      ri,ci = param["imshape"][1], param["imshape"][2] # TODO -- hack should be removed since depth is array and should have rows and columns stored in Mongo
       # arrdata = data.data
       arr = bin2arr(data, dtype=Float32) # should also store dtype for arr in Mongo
       img = reshape(arr, ci, ri)'
-      X = reconstruct(dcamjl, Array{Float64,2}(img))
+      X = reconstruct(param["dcamjl"], Array{Float64,2}(img))
       cache[ke] = X
     elseif ke == "BSONpointcloud"
       # deserialize BSON-encoded pointcloud
@@ -149,21 +149,22 @@ function drawpointcloud!(vis::DrakeVisualizer.Visualizer,
         vsym::Symbol,
         pointcloud,
         va,
+        param::Dict,
         sesssym::Symbol;
-        imshape=(480,640),
+        # imshape=(480,640),
         wTb::CoordinateTransformations.AbstractAffineMap=
               Translation(0,0,0.0) ∘ LinearMap(
-              CoordinateTransformations.Quat(1.0, 0, 0, 0)),
-        bTc::CoordinateTransformations.AbstractAffineMap=
-              Translation(0,0,0.6) ∘ LinearMap(
-              CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5))  )
+              CoordinateTransformations.Quat(1.0, 0, 0, 0))   )
+        # bTc::CoordinateTransformations.AbstractAffineMap=
+        #       Translation(0,0,0.6) ∘ LinearMap(
+        #       CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5))  )
   #
 
   pcsym = Symbol(string("pc_",va))
   setgeometry!(vis[sesssym][pcsym][vsym][:pose], Triad())
   settransform!(vis[sesssym][pcsym][vsym][:pose], wTb) # also updated as parallel track
   setgeometry!(vis[sesssym][pcsym][vsym][:pose][:cam], Triad())
-  settransform!(vis[sesssym][pcsym][vsym][:pose][:cam], bTc )
+  settransform!(vis[sesssym][pcsym][vsym][:pose][:cam], param["bTc"] )
   setgeometry!(vis[sesssym][pcsym][vsym][:pose][:cam][:pc], pointcloud )
 
   # these poses need to be update if the point cloud is to be moved
@@ -182,16 +183,16 @@ function fetchdrawdepthcloudbycvid!(vis::DrakeVisualizer.Visualizer,
       cvid::Int,
       vsym::Symbol,
       poseswithdepth::Dict,
-      dcamjl,
+      param::Dict,
       sesssym::Symbol;
       depthcolormaps=Dict(),
-      imshape=(480,640),
+      # imshape=(480,640),
       wTb::CoordinateTransformations.AbstractAffineMap=
             Translation(0,0,0.0) ∘ LinearMap(
-            CoordinateTransformations.Quat(1.0, 0, 0, 0)),
-      bTc::CoordinateTransformations.AbstractAffineMap=
-            Translation(0,0,0.6) ∘ LinearMap(
-            CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5))  )
+            CoordinateTransformations.Quat(1.0, 0, 0, 0))   )
+      # bTc::CoordinateTransformations.AbstractAffineMap=
+      #       Translation(0,0,0.6) ∘ LinearMap(
+      #       CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5))  )
   #
 
   if !haskey(poseswithdepth, vsym)
@@ -210,7 +211,7 @@ function fetchdrawdepthcloudbycvid!(vis::DrakeVisualizer.Visualizer,
     #  ("colors" => "pointcloud")
     for (va, ke) in depthcolormaps
       # prep the detph pointcloud
-      cachepointclouds!(cache, cv, ke, dcamjl, imshape)
+      cachepointclouds!(cache, cv, ke, param)
 
       if haskey(cache, ke)
         rgb = Array{Colorant,2}()
@@ -222,7 +223,7 @@ function fetchdrawdepthcloudbycvid!(vis::DrakeVisualizer.Visualizer,
         pointcloud = prepcolordepthcloud!( cache[ke], rgb=rgb )
 
         # publish the pointcloud data to Director viewer
-        drawpointcloud!(vis, poseswithdepth, vsym, pointcloud, va, sesssym, imshape=imshape, wTb=wTb, bTc=bTc)
+        drawpointcloud!(vis, poseswithdepth, vsym, pointcloud, va, param, sesssym, wTb=wTb)
       end
     end
   end
@@ -255,13 +256,13 @@ function fetchdrawposebycvid!(vis::DrakeVisualizer.Visualizer,
       cloudGraph::CloudGraphs.CloudGraph,
       cvid::Int,
       poseswithdepth::Dict,
-      dcamjl;
+      param::Dict;
       session::AbstractString="",
-      depthcolormaps=Dict(),
-      imshape=(480,640),
-      bTc::CoordinateTransformations.AbstractAffineMap=
-            Translation(0,0,0.6) ∘ LinearMap(
-            CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5))  )
+      depthcolormaps=Dict()  )
+      # imshape=(480,640),
+      # bTc::CoordinateTransformations.AbstractAffineMap=
+      #       Translation(0,0,0.6) ∘ LinearMap(
+      #       CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5))  )
   #
 
   # skip big data elements at first
@@ -282,10 +283,10 @@ function fetchdrawposebycvid!(vis::DrakeVisualizer.Visualizer,
         cvid,
         Symbol(vert.label),
         poseswithdepth,
-        dcamjl,
+        param,
         Symbol(session),
         depthcolormaps=depthcolormaps,
-        imshape=imshape,
+        # imshape=imshape,
         wTb=wTb  )
 
   sleep(0.005)
@@ -296,12 +297,12 @@ end
 function drawdbsession(vis::DrakeVisualizer.Visualizer,
       cloudGraph::CloudGraphs.CloudGraph,
       addrdict,
-      dcamjl,
+      param::Dict,
       DRAWDEPTH,
-      poseswithdepth::Dict;
-      bTc::CoordinateTransformations.AbstractAffineMap=
-            Translation(0,0,0.6) ∘ LinearMap(
-            CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5) )    )
+      poseswithdepth::Dict  )
+      # bTc::CoordinateTransformations.AbstractAffineMap=
+      #       Translation(0,0,0.6) ∘ LinearMap(
+      #       CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5) )    )
   #
 
   @show session = addrdict["session"]
@@ -331,7 +332,7 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
           cloudGraph,
           cvid,
           poseswithdepth,
-          dcamjl,
+          param,
           session=session,
           depthcolormaps=depthcolormaps  )
   end
@@ -340,7 +341,29 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
 
 end
 
+function robotsetup(cg::CloudGraph, session::AbstractString)
+  resp = fetchrobotdatafirstpose(cg, session)
 
+  if haskey(resp, "CAMK")
+    # CAMK = [[ 570.34222412; 0.0; 319.5]';
+    #  [   0.0; 570.34222412; 239.5]';
+    #  [   0.0; 0.0; 1.0]'];
+    dcamjl = DepthCamera(resp["CAMK"])
+    buildmesh!(dcamjl)
+    resp["dcamjl"] = dcamjl
+  end
+
+  if haskey(resp, "bTc")
+    bTc = Translation(0.0,0,0) ∘ LinearMap( CoordinateTransformations.Quat(1.0,0,0,0) )
+    if resp["bTc_format"] == "xyzqwqxqyqz"
+      bTc = Translation(resp["bTc"][1:3]...) ∘ LinearMap( CoordinateTransformations.Quat(resp["bTc"][4:7]...) )
+    else
+      warn("Unknown bTc_format, assuming identity for bTc")
+    end
+    resp["bTc"] = bTc
+  end
+  resp
+end
 
 function drawdbdirector(;addrdict=nothing)
   # Uncomment out for command line operation
@@ -354,17 +377,14 @@ function drawdbdirector(;addrdict=nothing)
   vis = startdefaultvisualization()
   sleep(1.0)
 
-  CAMK = [[ 570.34222412; 0.0; 319.5]';
-   [   0.0; 570.34222412; 239.5]';
-   [   0.0; 0.0; 1.0]'];
-  dcamjl = DepthCamera(CAMK)
-  buildmesh!(dcamjl)
+  param = robotsetup(cloudGraph, session)
 
   drawloop = Bool[true]
   println("Starting draw loop...")
   while drawloop[1]
-    drawdbsession(vis, cloudGraph, addrdict, dcamjl, DRAWDEPTH, poseswithdepth) #,  db[collection]
+    drawdbsession(vis, cloudGraph, addrdict, param, DRAWDEPTH, poseswithdepth) #,  db[collection]
     println(".")
+    sleep(0.5)
   end
 
   println("Finishing askdrawdirectordb.")

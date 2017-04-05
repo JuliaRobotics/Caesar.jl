@@ -602,6 +602,22 @@ function hasBigDataElement(vertex::CloudVertex, description::AbstractString)
   return false
 end
 
+"""
+    appendvertbigdata!(cloudGraph, cloudvert, descr, data)
+
+Append big data element into current blob store and update associated global
+vertex information.
+"""
+function appendvertbigdata!(cloudGraph::CloudGraph,
+        cv::CloudVertex,
+        description,
+        data::Vector{UInt8}  )
+  #
+  bd = CloudGraphs.read_BigData!(cloudGraph, cv)
+  bdei = CloudGraphs.BigDataElement(description, data)
+  push!(cv.bigData.dataElements, bdei);
+  CloudGraphs.save_BigData!(cloudGraph, cv)
+end
 
 """
     appendvertbigdata!(fg, vert, descr, data)
@@ -612,14 +628,12 @@ vertex information.
 function appendvertbigdata!(fgl::FactorGraph,
       vert::Graphs.ExVertex,
       description::AbstractString,
-      data  )
+      data::Vector{UInt8}  )
   #
+  # TODO -- improve get/fetch vertex abstraction
   cvid = fgl.cgIDs[vert.index]
-  cv = CloudGraphs.get_vertex(fgl.cg, cvid)
-  bd = CloudGraphs.read_BigData!(fgl.cg, cv)
-  bdei = CloudGraphs.BigDataElement(description, data)
-  push!(cv.bigData.dataElements, bdei);
-  CloudGraphs.save_BigData!(fgl.cg, cv)
+  cv = CloudGraphs.get_vertex(fgl.cg, cvid, true)
+  appendvertbigdata!(fgl.cg, cv, description, data)
 end
 
 
@@ -739,6 +753,68 @@ function removeNeo4jID(cg::CloudGraph; neoid::Int=-1)
   cnt == 1 ? nothing : error("Did not delete just one entry after running query = $(query)")
   nothing
 end
+
+
+
+"""
+    getfirstpose(cg::CloudGraph, session::AbstractString)
+
+Return Tuple{Symbol, Int} of first pose symbol and Neo4j node ID.
+"""
+function getfirstpose(cg::CloudGraph, session::AbstractString)
+  loadtx = transaction(cg.neo4j.connection)
+  query = "match (n:$(session):POSE) with n.label as nlbl, n.exVertexId as exvid, id(n) as neoid order by exvid asc limit 1 return nlbl, neoid"
+  cph = loadtx(query, submit=true)
+  Symbol(cph.results[1]["data"][1]["row"][1]), cph.results[1]["data"][1]["row"][2]
+end
+
+
+"""
+    insertrobotdatafirstpose!(cg::CloudGraph, session::AbstractString, robotdict::Dict)
+
+Saves robotdict via JSON to first pose in a SESSION in the database. Used for
+storing general robot specific data in easily accessible manner. Can fetch later
+retrieve same dict with counterpart `fetchrobotdatafirstpose` function.
+"""
+function insertrobotdatafirstpose!(cg::CloudGraph, session::AbstractString, robotdict::Dict)
+  vsym, neoid = getfirstpose(cg, session)
+  cv = CloudGraphs.get_vertex(cg, neoid, true)
+  appendvertbigdata!(cg, cv, "robot_description", json(robotdict).data  )
+end
+
+function tryunpackalltypes!(resp::Dict)
+  for (k,v) in resp
+    tv = typeof(v)
+    if tv == Vector{Any}
+      ttv = typeof(v[1])
+      if ttv == Vector{Any}
+        try resp[k] = hcat(v...) catch end
+      else
+        try resp[k] = Vector{ttv}(v) catch end
+      end
+    end
+  end
+  nothing
+end
+
+"""
+    fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString)
+
+Return dict of JSON parsed "robot_description" field as was inserted by counterpart
+`insertrobotdatafirstpose!` function. Used for storing general robot specific data
+in easily accessible manner.
+"""
+function fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString)
+  vsym, neoid = getfirstpose(cg, session)
+  cv = CloudGraphs.get_vertex(cg, neoid, true)
+  bde = Caesar.getBigDataElement(cv, "robot_description")
+  resp = JSON.parse(takebuf_string(IOBuffer(bde.data)))
+  tryunpackalltypes!(resp)
+  return resp
+end
+
+
+
 
 
 # function syncmongos()
