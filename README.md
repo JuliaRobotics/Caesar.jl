@@ -110,6 +110,14 @@ visualizeallposes(fg) # from local dictionary
 drawdbdirector()      # from database held factor graph
 ```
 
+* [Foveation queries](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) to quickly organize, extract and work with big data blobs, for example looking at images from multiple sessions predicted to see the same point `[-9.0,9.0]` in the map:
+```julia
+neoids, syms = foveateQueryToPoint(cloudGraph,["SESS21";"SESS38";"SESS45"], point=[-9.0;9.0], fovrad=0.5 )
+for neoid in neoids
+    cloudimshow(cloudGraph, neoid=neoid)
+end
+```
+
 * Operating on data from a thin client processes, such as a Python front-end
  [examples/database/python/neo_interact_example.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py)
 
