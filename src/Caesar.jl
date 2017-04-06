@@ -200,6 +200,7 @@ if haskey(instpkg, "CloudGraphs")
   include("cloudgraphs/DBVisualizationUtils.jl")
   include("cloudgraphs/DirectorVisService.jl")
   include("cloudgraphs/MultisessionUtils.jl")
+  include("cloudgraphs/FoveationUtils.jl")
 end
 
 

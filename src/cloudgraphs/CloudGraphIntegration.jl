@@ -1,6 +1,7 @@
 # integration code for database usage via CloudGraphs.jl
 
 export
+  getCloudVert,
   usecloudgraphsdatalayer!,
   standardcloudgraphsetup,
   consoleaskuserfordb,
@@ -27,6 +28,15 @@ export
   appendvertbigdata!
 
 
+
+
+function getCloudVert(cg::CloudGraph, session::AbstractString, vsym::Symbol; bigdata::Bool=false)
+  loadtx = transaction(cg.neo4j.connection)
+  query = "match (n:$(session)) where n.label='$(vsym)' return id(n)"
+  cph = loadtx(query, submit=true)
+  neoid = cph.results[1]["data"][1]["row"][1]
+  CloudGraphs.get_vertex(cg, neoid, bigdata)
+end
 
 function initfg(;sessionname="NA",cloudgraph=nothing)
   fgl = RoME.initfg(sessionname=sessionname)
