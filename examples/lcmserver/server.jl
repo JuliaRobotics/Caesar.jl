@@ -42,19 +42,21 @@ function handle_odometry!(slam::SLAMWrapper,
                        message_data)
 
     println("[Caesar.jl] Received message ")
-    message = rome.pose_node_t[:decode](message_data)
+    message = rome.pose_pose_nh_t[:decode](message_data)
 
     source_id = message[:node_1_id]
     destination_id = message[:node_2_id]
 
     mean = message[:mean]
+    covar = message[:covar]
     t = [mean[1], mean[2], mean[3]]
     qw = mean[4]
     qxyz = [mean[5], mean[6], mean[7]]
     q = Quaternion(qw,qxyz) # why not a (w,x,y,z) constructor?
     pose = SE3(t,q)
+    euler = Euler(q)
     
-    if source_id == 0
+    if source_id == destination_id
         println("[Caesar.jl] First pose")
         # this is the first message, and it does not carry odometry, but the prior on the first node.
         
@@ -75,8 +77,7 @@ function handle_odometry!(slam::SLAMWrapper,
 
         # get previous node
         xo = getVert(slam.fg, slam.lastposesym)
-        prev_pose = getVal(xo)
-        odo = prev_pose\pose # (ominus)X1 (oplus)X2 = deltaX equivalent to X1\X2 = deltaX
+        odo = pose 
 
         # add node
         xn = addNode!(slam.fg, destination_label, labels=["POSE"]) # this is an incremental inference call
@@ -84,8 +85,6 @@ function handle_odometry!(slam::SLAMWrapper,
         
         # add ZPR prior
         println("[Caesar.jl] Adding prior on RPZ")
-        euler = Euler(q)
-        covar = message[:covar]
         rp_dist = MvNormal( [euler.R; euler.P], diagm([covar[6];covar[5]]))
         z_dist = Normal(mean[3], covar[3])
         prior_rpz = PartialPriorRollPitchZ(rp_dist, z_dist) 
@@ -94,7 +93,7 @@ function handle_odometry!(slam::SLAMWrapper,
         # add XYH factor
         println("[Caesar.jl] Adding odometry constraint on XYH")
         odo_ea = convert(Euler, odo.R)
-        xyh_dist = MVNormal([mean[1];mean[2];odo_ea.Y], diagm([covar[1];covar[2];covar[4]]))
+        xyh_dist = MvNormal([mean[1];mean[2];odo_ea.Y], diagm([covar[1];covar[2];covar[4]]))
         xyh_factor = PartialPose3XYYaw(xyh_dist)
         addFactor!(slam.fg, [xo;xn], xyh_factor)
 
@@ -120,10 +119,13 @@ function handle_clouds!(slam::SLAMWrapper,
 
     message = rome.point_cloud_t[:decode](message_data)
 
-    last_pose = Symbol("x$message[:id]")
+    id = message[:id]
+
+    last_pose = Symbol("x$(id)")
+    println("[Caesar.jl] Got cloud $id")
 
     # TODO: check if vert exists or not (may happen if messages are lost or out of order)
-    vert = getVert(slaml.fg, last_pose, api=IncrementalInference.dlapi) # fetch from database
+    vert = getVert(slam.fg, last_pose, api=IncrementalInference.dlapi) # fetch from database
     
     # 2d arrays of points and colors (from LCM data into arrays{arrays})
     points = [[pt[1], pt[2], pt[3]] for pt in message[:points]]
@@ -132,9 +134,9 @@ function handle_clouds!(slam::SLAMWrapper,
     # push to mongo (using BSON as a quick fix)
     # (for deserialization, see src/DirectorVisService.jl:cachepointclouds!)
     serialized_point_cloud = BSONObject(Dict("pointcloud" => points))
-    appendvertbigdata!(slaml.fg, vert, "BSONpointcloud", string(serialized_point_cloud).data)
+    appendvertbigdata!(slam.fg, vert, "BSONpointcloud", string(serialized_point_cloud).data)
     serialized_colors = BSONObject(Dict("colors" => colors))
-    appendvertbigdata!(slaml.fg, vert, "BSONcolors", string(serialized_colors).data)
+    appendvertbigdata!(slam.fg, vert, "BSONcolors", string(serialized_colors).data)
 end
 
 # this function handles lcm messages
@@ -165,15 +167,15 @@ slam_client = initialize!(backend_config,user_config)
 # NOTE: "Please also enter information for:" 
 
 # create new handlers to pass in additional data 
-lcm_pose_handler = (channel, message_data) -> handle_poses!(slam_client, message_data )
+lcm_pose_handler = (channel, message_data) -> handle_odometry!(slam_client, message_data )
 #lcm_factor_handler = (channel, message_data) -> handle_factors!(slam_client, message_data )
-#lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, message_data )
+lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, message_data )
 
 # create LCM object and subscribe to messages on the following channels
 lcm_node = LCM()
-subscribe(lcm_node, "ROME_POSES", lcm_pose_handler)
+subscribe(lcm_node, "ROME_FACTORS", lcm_pose_handler)
 #subscribe(lcm_node, "ROME_FACTORS", lcm_factor_handler)
-#subscribe(lcm_node, "ROME_CLOUDS", lcm_cloud_handler)
+subscribe(lcm_node, "ROME_POINT_CLOUDS", lcm_cloud_handler)
 
 println("[Caesar.jl] Running LCM listener")
 listener!(slam_client, lcm_node)
