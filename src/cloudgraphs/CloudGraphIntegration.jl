@@ -476,7 +476,7 @@ function setBackendWorkingSet!(conn, sessionname::AbstractString)
 end
 
 """
-    askmongocredentials!(addrdict=Dict{AbstractString, AbstractString})
+    askneo4jcredentials!(;addrdict::Dict{AbstractString, AbstractString})
 
 Obtain Neo4j global database address and login credientials from STDIN, then insert and return in the addrdict colletion.
 """

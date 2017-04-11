@@ -186,7 +186,11 @@ function mergeValuesIntoCloudVert!{T <: AbstractString}(fgl::FactorGraph,
 end
 
 
-function recoverConstraintType(elem; N::Int=200)
+function recoverConstraintType(cgl::CloudGraph,
+            elem;
+            mongokeys::Dict=Dict(),
+            N::Int=200  )
+  #
   lkl = split(elem["lklh"], ' ')
   if lkl[1]=="PR2"
     msm = split(elem["meas"], ' ')
@@ -221,9 +225,12 @@ function recoverConstraintType(elem; N::Int=200)
                   Normal(parse(msm[1]), parse(Float64, msm[3]) ),
                   Normal(parse(msm[2]),parse(Float64, msm[5]) )  )
   elseif lkl[1]=="rangeBearingMEAS"
-    # @show elem["range"]
-    rngs = Vector{Float64}(elem["range"] )
-    bearing = Vector{Float64}(elem["bearing"] )
+    @show rangekey = mongokeys["range"]
+    rngs = bin2arr(CloudGraphs.read_MongoData(cgl, rangekey))
+    # rngs = Vector{Float64}(elem["range"] )
+    @show bearingkey = mongokeys["bearing"]
+    bearing = bin2arr(CloudGraphs.read_MongoData(cgl, bearingkey))
+    # bearing = Vector{Float64}(elem["bearing"] )
     @show size(rngs), size(bearing)
     prange = resample(kde!(rngs),N)
     pbear = resample(kde!(bearing),N)
@@ -231,8 +238,9 @@ function recoverConstraintType(elem; N::Int=200)
     # return prange, pbear
     return Pose2DPoint2DBearingRangeDensity(pbear, prange)
   elseif lkl[1]=="rangeMEAS"
-    # @show elem["range"]
-    rngs = Vector{Float64}(elem["range"] )
+    @show rangekey = mongokeys["range"]
+    rngs = bin2arr(CloudGraphs.read_MongoData(cgl, rangekey))
+    # rngs = Vector{Float64}(elem["range"] )
     @show size(rngs)
     prange = resample(kde!(rngs),N)
     # warn("temporary return")
@@ -269,9 +277,7 @@ function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N:
       # @show nlbsym, size(initvals)
       # TODO remove initstdev, deprecated
       v = addNode!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, ready=0, uid=uidl,api=localapi)
-      @show "before transl", nlbsym, neoNodeId, typeof(getData(v))
       mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, uidl, v, labels=labels)
-      @show "after transl", nlbsym, keys(v.attributes), typeof(getData(v))
       println()
     end
   end
@@ -281,7 +287,7 @@ end
 
 function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict, maxfuid::Int)
   foffset = 100000
-  @show fuid = maxfuid >= foffset ? maxfuid : maxfuid+foffset # offset factor values
+  fuid = maxfuid >= foffset ? maxfuid : maxfuid+foffset # offset factor values
   warn("using hack counter for FACTOR uid starting at $(fuid)")
   # neoNodeId = 63363
   # elem = newvertdict[neoNodeId]
@@ -314,7 +320,7 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict, maxf
         push!(verts, fgl.g.vertices[uid])
       end
       # the factor type
-      usrfnc = recoverConstraintType(elem[:frtend])
+      usrfnc = !haskey(elem,:mongo_keys) ? recoverConstraintType(fgl.cg, elem[:frtend]) : recoverConstraintType(fgl.cg, elem[:frtend], mongokeys=JSON.parse(elem[:mongo_keys]["val"]) )
       fuid += 1
       vert = addFactor!(fgl, verts, usrfnc, ready=0, api=localapi, uid=fuid, autoinit=true)
       println("at populatenewfactornodes!, btwn="*elem[:frtend]["btwn"])
@@ -333,7 +339,7 @@ end
 
 
 """
-    updatenewverts!(fgl; N=100)
+    updatenewverts!(fgl::FactorGraph; N::Int)
 
 Convert vertices of session in Neo4j DB with Caesar.jl's required data elements
 in preparation for MM-iSAMCloudSolve process.
@@ -355,9 +361,10 @@ remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVert
 set n :NEWDATA
 return n
 """
-function resetentireremotesession(conn, session)
+function resetentireremotesession(conn, session::AbstractString; segment::AbstractString="")
   loadtx = transaction(conn)
-  query = "match (n:$(session))
+  query = segment == "" ? "match (n:$(session)) " : "match (n:$(session):$(segment)) "
+  query = query*"where exists(n.frtend)
            remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width, n.MAP_est
            set n :NEWDATA"
   cph = loadtx(query, submit=true)

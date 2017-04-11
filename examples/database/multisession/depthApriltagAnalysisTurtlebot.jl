@@ -16,7 +16,7 @@ include(joinpath(dirname(@__FILE__),"..","..","database","blandauthremote.jl"))
 # (will prompt on stdin for db credentials)
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 
-session = "SESSTURT45"
+session = "SESSTURT21"
 frd = fetchrobotdatafirstpose(cloudGraph, session)
 camf = frd["CAMK"][1,1]
 camc = frd["CAMK"][1,3]
@@ -46,8 +46,12 @@ ids = getExVertexNeoIDs(cloudGraph.neo4j.connection, label="LANDMARK", session=s
 sfg = initfg(cloudgraph=cloudGraph, sessionname=session)
 fetchsubgraph!(sfg, Int[ids[i][2] for i in 1:length(ids)], numneighbors=2 )
 
+# writeGraphPdf(sfg)
+# run(`evince fg.pdf`)
+
 xx,ll = ls(sfg)
 
+# cloudimshow(sfg.cg, session, :x2)
 
 i = 0
 # first for loop
@@ -78,10 +82,11 @@ for lsym in ll
       deptdist = Base.mean(depthcloud[260:270,measimgcol,3])
       push!(DISTS[fct], deptdist)
       imdrawline!(img, measimgcol)
-      @async imshowhack(roi(img,240,measimgcol))
+      roiimg = roi(img,240,measimgcol)
+      @async imshowhack(roiimg)
       i+=1
       filename = joinpath("results","turtroi$(i).png")
-      ImageMagick.save_(filename, img)
+      ImageMagick.save_(filename, roiimg)
 
       slamdist = getRangeKDEMax2D(sfg.cg, session, pose, lsym)
       push!(DISTS[fct], slamdist)
