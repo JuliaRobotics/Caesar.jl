@@ -1,7 +1,7 @@
 module Caesar
 
 
-# import RoME: initfg
+# import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 import DrakeVisualizer: Triad
 
@@ -69,9 +69,6 @@ export
   # save and load data
   saveSlam,
   loadSlam,
-
-  # more passthrough
-  initfg,
 
   # drawing functions
   VisualizationContainer,

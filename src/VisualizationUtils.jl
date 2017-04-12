@@ -166,10 +166,10 @@ function gettopoint(drawtype::Symbol=:max)
 end
 
 function getdotwothree(sym::Symbol, X::Array{Float64,2})
-  dims = size(X,1)
+  @show dims = size(X,1)
   dotwo = dims == 2 || (dims == 3 && string(sym)[1] == 'x')
   dothree = dims == 6 || (string(sym)[1] == 'l' && dims != 2)
-  (dotwo && dothree) || (!dotwo && !dothree) ? error("Unknown dimension for drawing points in viewer") : nothing
+  (dotwo && dothree) || (!dotwo && !dothree) ? error("Unknown dimension for drawing points in viewer, $((dotwo, dothree))") : nothing
   return dotwo, dothree
 end
 
