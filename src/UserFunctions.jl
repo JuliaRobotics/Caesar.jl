@@ -104,11 +104,8 @@ end
 
 
 function installcloudgraphs()
-  warn("""
-  Please ensure Mongo and OpenCV are installed for Python, such as:
-
-  sudo apt-get install python-pymongo (until LibBSON.jl gets binary read api exposed)
-  and opencv for python (soon to be deprecated)
+  info("""
+    Installation process will be simplified once CloudGraphs is registered on JuliaLang/METADATA.jl
   """)
   Pkg.add("Neo4j")
   Pkg.add("Mongo")
