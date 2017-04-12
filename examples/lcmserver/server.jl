@@ -2,12 +2,14 @@
 LCM Server: an LCM interface to Caesar.jl
 
 =#
+
 using JLD
 using Caesar, RoME
 using TransformUtils, Rotations, CoordinateTransformations
 using Distributions
 using PyCall, PyLCM
 using LibBSON
+using CloudGraphs # for sorryPedro
 
 function gen_bindings()
     @show lcmtpath = joinpath(dirname(@__FILE__),"lcmtypes")
@@ -22,7 +24,7 @@ println("[Caesar.jl] (re)generating LCM bindings")
 gen_bindings()
 
 println("[Caesar.jl] Importing LCM message types")
-@pyimport rome 
+@pyimport rome
 
 
 function initialize!(backend_config,
@@ -32,6 +34,21 @@ function initialize!(backend_config,
     fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
     println("[Caesar.jl] Creating SLAM client/object")
     return  SLAMWrapper(fg, nothing, 0)
+end
+
+function sorryPedro(cg::CloudGraph, session::AbstractString)
+  hauvconfig = Dict()
+  hauvconfig["robot"] = "hauv"
+  hauvconfig["bTc"] = [0.0;0.0;0.0; 1.0; 0.0; 0.0; 0.0]
+  hauvconfig["bTc_format"] = "xyzqwqxqyqz"
+  # currently unused, but upcoming
+  hauvconfig["pointcloud_description_name"] = "BSONpointcloud"
+  hauvconfig["pointcloud_color_description_name"] = "BSONcolors"
+  # robotdata = json(hauvconfig).data
+
+  # Actually modify the databases
+  insertrobotdatafirstpose!(cg, session, hauvconfig)
+  nothing
 end
 
 """
@@ -55,39 +72,49 @@ function handle_odometry!(slam::SLAMWrapper,
     q = Quaternion(qw,qxyz) # why not a (w,x,y,z) constructor?
     pose = SE3(t,q)
     euler = Euler(q)
-    
+
     if source_id == destination_id
         println("[Caesar.jl] First pose")
         # this is the first message, and it does not carry odometry, but the prior on the first node.
-        
+
         # add node
         node_label = Symbol("x1")
-        xn = addNode!(slam.fg, node_label, labels=["POSE"]) # this is an incremental inference call
+        xn = addNode!(slam.fg, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
         slam.lastposesym = node_label; # update object
 
         # add 6dof prior
         initPosePrior = PriorPose3( MvNormal( veeEuler(pose), diagm([covar...]) ) )
         addFactor!(slam.fg, [xn], initPosePrior)
 
+        # auto init is coming, this code will likely be removed
+        initializeNode!(slam.fg, node_label)
+        # belief,a,b,c  = localProduct(slam.fg, slam.lastposesym, api=localapi)
+        # pts = getPoints(belief)
+        # @show size(pts)
+        # setVal!(xn, pts)
+        # updateFullCloudVertData!(slam.fg, xn)
+
+        # set robot parameters in the first pose, this will become a separate node in the future
+        sorryPedro(slam.fg.cg, slam.fg.sessionname)
     else
         println("[Caesar.jl] Odometry from $source_id to $destination_id")
 
-        source_label = Symbol("x$source_id") 
+        source_label = Symbol("x$source_id")
         destination_label = Symbol("x$destination_id")
 
         # get previous node
         xo = getVert(slam.fg, slam.lastposesym)
-        odo = pose 
+        odo = pose
 
         # add node
-        xn = addNode!(slam.fg, destination_label, labels=["POSE"]) # this is an incremental inference call
+        xn = addNode!(slam.fg, destination_label, labels=["POSE"], dims=6) # this is an incremental inference call
         slam.lastposesym = destination_label
-        
+
         # add ZPR prior
         println("[Caesar.jl] Adding prior on RPZ")
         rp_dist = MvNormal( [euler.R; euler.P], diagm([covar[6];covar[5]]))
         z_dist = Normal(mean[3], covar[3])
-        prior_rpz = PartialPriorRollPitchZ(rp_dist, z_dist) 
+        prior_rpz = PartialPriorRollPitchZ(rp_dist, z_dist)
         addFactor!(slam.fg, [xn], prior_rpz)
 
         # add XYH factor
@@ -97,10 +124,13 @@ function handle_odometry!(slam::SLAMWrapper,
         xyh_factor = PartialPose3XYYaw(xyh_dist)
         addFactor!(slam.fg, [xo;xn], xyh_factor)
 
-        pts = localProduct(slam.fg, slam.lastposesym)
-        setVal!(xn, getPoints(pts[1]))
+        # auto init is coming, this code will likely be removed
+        initializeNode!(slam.fg, destination_label)
+        # belief,a,b,c = localProduct(slam.fg, slam.lastposesym, api=localapi)
+        # setVal!(xn, getPoints(belief))
+        # updateFullCloudVertData!(slam.fg, xn)
     end
-    
+
 end
 
 function handle_factors!(slam::SLAMWrapper,
@@ -109,7 +139,7 @@ function handle_factors!(slam::SLAMWrapper,
 end
 
 """
-   handle_clouds(slam::SLAMWrapper, message_data) 
+   handle_clouds(slam::SLAMWrapper, message_data)
 
 Callback for rome_point_cloud_t messages. Adds point cloud to SLAM_Client
 """
@@ -126,11 +156,11 @@ function handle_clouds!(slam::SLAMWrapper,
 
     # TODO: check if vert exists or not (may happen if messages are lost or out of order)
     vert = getVert(slam.fg, last_pose, api=IncrementalInference.dlapi) # fetch from database
-    
+
     # 2d arrays of points and colors (from LCM data into arrays{arrays})
     points = [[pt[1], pt[2], pt[3]] for pt in message[:points]]
     colors = [[UInt8(c.data[1]),UInt8(c.data[2]),UInt8(c.data[3])] for c in message[:colors]]
-    
+
     # push to mongo (using BSON as a quick fix)
     # (for deserialization, see src/DirectorVisService.jl:cachepointclouds!)
     serialized_point_cloud = BSONObject(Dict("pointcloud" => points))
@@ -154,8 +184,13 @@ end
 # (will prompt on stdin for db credentials)
 # TODO: why keep usrcfg and backendcfg? the former contains the latter
 #println("[Caesar.jl] Prompting user for configuration")
-@load "usercfg.jld"
+# @load "usercfg.jld"
+include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
+addrdict["session"] = "SESSHAUVDEV2"
+user_config = addrdict
 backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
+
+# Juno.breakpoint(@__FILE__, 127)
 
 # TODO: need better name for "slam_client"
 println("[Caesar.jl] Setting up local solver")
@@ -163,10 +198,9 @@ slam_client = initialize!(backend_config,user_config)
 
 # TODO: should take default install values as args?
 # TODO: supress/redirect standard server output to log
-# NOTE: neo4j: u=neo4j, p=imusing2fa
-# NOTE: "Please also enter information for:" 
+# NOTE: "Please also enter information for:"
 
-# create new handlers to pass in additional data 
+# create new handlers to pass in additional data
 lcm_pose_handler = (channel, message_data) -> handle_odometry!(slam_client, message_data )
 #lcm_factor_handler = (channel, message_data) -> handle_factors!(slam_client, message_data )
 lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, message_data )
@@ -179,6 +213,17 @@ subscribe(lcm_node, "ROME_POINT_CLOUDS", lcm_cloud_handler)
 
 println("[Caesar.jl] Running LCM listener")
 listener!(slam_client, lcm_node)
+
+
+
+
+writeGraphPdf(slam_client.fg)
+run(`evince fg.pdf`)
+
+pp = localProduct(slam_client.fg, :x2)
+
+getVal(slam_client.fg, :x2)
+
 
 # TODO: handle termination
 # TODO: reply with updates
