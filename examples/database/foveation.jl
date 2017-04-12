@@ -30,9 +30,13 @@ end
 
 
 
-@async cloudimshow(cloudGraph, "SESSTURT21", :x10)
-cloudimshow(cloudGraph, "SESSTURT21", :x25)
 
-cloudimshow(cloudGraph, "SESSTURT21", :x30)
+
+
+
+
+
+
+
 
 #

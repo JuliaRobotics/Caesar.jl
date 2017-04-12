@@ -324,7 +324,7 @@ function getExVertexNeoIDs(conn;
   query = query*" return n.exVertexId, id(n)"
   cph = loadtx(query, submit=true)
   ret = Array{Tuple{Int64,Int64},1}()
-  @showprogress 1 "Get Pose ExVertex IDs..." for data in cph.results[1]["data"]
+  @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
     exvid, neoid = data["row"][1], data["row"][2]
     push!(ret, (exvid,neoid)  )
   end
@@ -476,7 +476,7 @@ function setBackendWorkingSet!(conn, sessionname::AbstractString)
 end
 
 """
-    askmongocredentials!(addrdict=Dict{AbstractString, AbstractString})
+    askneo4jcredentials!(;addrdict::Dict{AbstractString, AbstractString})
 
 Obtain Neo4j global database address and login credientials from STDIN, then insert and return in the addrdict colletion.
 """
@@ -824,6 +824,24 @@ function fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString)
 end
 
 
+"""
+    getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)
+
+Calculate the cartesian distange between two vertices in the graph, by session and symbol names,
+and by maximum belief point.
+"""
+function getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)
+  # get the relavent neo4j ids
+  syms = Dict(vsym1=>0, vsym2 => 0)
+  getVertNeoIDs!(cgl, syms, session=session)
+
+  # build a local subgraph
+  sfg = initfg(cloudgraph=cgl, sessionname=session)
+  fetchsubgraph!(sfg, collect(values(syms)), numneighbors=1 )
+
+  # calculate distances on local subgraph
+  getRangeKDEMax2D(sfg, vsym1, vsym2)
+end
 
 
 
