@@ -158,8 +158,8 @@ This will install additional features, mostly relating to [CloudGraphs.jl](https
 INFO, ```installcloudgraphs()``` will perform:
 
     Pkg.add("Neo4j")
-    Pkg.clone("https://github.com/dehann/LibBSON.jl.git")
     Pkg.add("Mongo")  #  LibBSON.jl dependency
+    Pkg.checkout("LibBSON") # need latest for binary data format
     Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
 
 If you have access to Neo4j and Mongo services you should be able to run the [four door test](https://github.com/dehann/Caesar.jl/blob/master/test/fourdoortestcloudgraph.jl) on both internal dictionaries and repeated on Neo4j DB:

@@ -2,9 +2,10 @@ module Caesar
 
 instpkg = Pkg.installed();
 
-# import RoME: initfg
+# import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 import DrakeVisualizer: Triad
+import RoME: getRangeKDEMax2D
 
 using
   RoME,
@@ -87,9 +88,6 @@ export
   saveSlam,
   loadSlam,
 
-  # more passthrough
-  initfg,
-
   # drawing functions
   VisualizationContainer,
   startdefaultvisualization,
@@ -151,6 +149,10 @@ export
   insertrobotdatafirstpose!,
   tryunpackalltypes!,
   fetchrobotdatafirstpose,
+  getExVertexNeoIDs,
+
+  # Robot Utils
+  getRangeKDEMax2D,
 
   # would be CloudGraphs calls
   hasBigDataElement,
@@ -200,6 +202,7 @@ if haskey(instpkg, "CloudGraphs")
   include("cloudgraphs/DBVisualizationUtils.jl")
   include("cloudgraphs/DirectorVisService.jl")
   include("cloudgraphs/MultisessionUtils.jl")
+  include("cloudgraphs/ImageUtils.jl")
   include("cloudgraphs/FoveationUtils.jl")
 end
 

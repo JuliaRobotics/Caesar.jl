@@ -42,6 +42,9 @@ hauv = Dict()
 hauv["robot"] = "hauv"
 hauv["bTc"] = [0.0;0.0;0.0; 1.0; 0.0; 0.0; 0.0]
 hauv["bTc_format"] = "xyzqwqxqyqz"
+hauv["depth_pointcloud_description"] = "BSONpointcloud"
+hauv["depth_color_description"] = ["BSONcolor"]
+
 # robotdata = json(hauv).data
 hauv
 

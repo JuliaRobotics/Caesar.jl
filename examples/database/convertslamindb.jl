@@ -8,16 +8,16 @@ using Caesar, CloudGraphs
 
 # interactive operation
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
-addrdict["num particles"] = "100"
-addrdict["session"] = "SESSLIVE"  # "SESSROX"
+addrdict["session"] = "SESSSHARK_16_11_14"  # "SESSROX"
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 addrdict["clearslamindb"] = "n"
 
 
 session = addrdict["session"]
+segment = ""
 @show clearslamindbdata = addrdict["clearslamindb"]=="yes"
 
-println("remember to set n.ready=1")
+info("remember to set n.ready=1")
 if !clearslamindbdata
   println("converting front end data")
   fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
@@ -25,7 +25,7 @@ if !clearslamindbdata
   updatenewverts!(fg, N=Nparticles)
 else
   println("Clearing slamindb data, leaving front-end data, session: $(session)")
-  resetentireremotesession(cloudGraph.neo4j.connection,session)
+  resetentireremotesession(cloudGraph.neo4j.connection,session, segment=segment)
 end
 
 
