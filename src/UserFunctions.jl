@@ -111,8 +111,8 @@ function installcloudgraphs()
   and opencv for python (soon to be deprecated)
   """)
   Pkg.add("Neo4j")
-  Pkg.clone("https://github.com/dehann/LibBSON.jl.git")
   Pkg.add("Mongo")
+  Pkg.checkout("LibBSON")
   Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
   nothing
 end
