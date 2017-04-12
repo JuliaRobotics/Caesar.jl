@@ -348,8 +348,8 @@ msg[:node_2_utime] = 0
 msg[:node_2_id] = 2
 
 msg[:delta_x] = -0.341546
-msg[:delta_y] = 0.0
-msg[:delta_yaw] = 0.0
+msg[:delta_y] = -2.64716
+msg[:delta_yaw] = 0.137918
 
 msg[:var_x] = 0.001
 msg[:var_y] = 0.001
@@ -359,9 +359,10 @@ publish(lcm_node, "ROME_PARTIAL_XYH", msg)
 
 
 
+slam_client
 
 
-
+plotKDE(slam_client.fg, :x2, dims=[2;3])
 
 
 #
