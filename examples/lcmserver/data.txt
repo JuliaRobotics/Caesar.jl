@@ -1,0 +1,34 @@
+[hauv-slam-ping]
+using parameter server: ca-param-server
+[info] Subscribing to MULTIBEAM_RANGES.
+[info] Setting submap length to 150.
+[debug] SLAM thread initialization complete.
+[debug] Submapping thread initialization complete.
+[debug] Pushing new submap...done.
+
+[debug] Adding submap to map...i=0:
+Pose3d: (16.3, 1.15, 5.78; 2.14152, -0.0151844, 0.155858)
+done.
+[debug] Pushing new submap...done.
+
+[debug] Adding submap to map...i=1:
+Pose3d: (18.7389, 2.31, 5.77108; 2.28345, 0.000118684, 0.23285)
+odometry: (-0.341546, -2.64716, 0.412176; 0.137918, 0.0369321, 0.0806144)
+	XYH: -0.341546  -2.64716  0.137918
+	ZPR:     5.77108 0.000118684     0.23285
+done.
+
+[debug] Pushing new submap...done.
+[debug] Adding submap to map...i=2:
+Pose3d: (21.0984, 3.44, 5.75921; 2.37419, 0.00841811, 0.196432)
+odometry: (-0.687755, -2.45876, 0.570817; 0.0863945, 0.0289886, -0.035553)
+	XYH: -0.687755  -2.45876 0.0863945
+	ZPR:    5.75921 0.00841811   0.196432
+done.
+[debug] Pushing new submap...done.
+[debug] Adding submap to map...i=3:
+Pose3d: (23.95, 4.74, 5.78; 2.24449, 0.00821134, 0.169645)
+odometry: (-1.14993, -2.85719, 0.579899; -0.127197, -0.0253771, -0.0240908)
+	XYH:  -1.14993  -2.85719 -0.127197
+	ZPR:       5.78 0.00821134   0.169645
+done.
