@@ -2,7 +2,7 @@ module Caesar
 
 instpkg = Pkg.installed();
 
-# import RoME: initfg
+# import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 import DrakeVisualizer: Triad
 import RoME: getRangeKDEMax2D
@@ -87,9 +87,6 @@ export
   # save and load data
   saveSlam,
   loadSlam,
-
-  # more passthrough
-  initfg,
 
   # drawing functions
   VisualizationContainer,
