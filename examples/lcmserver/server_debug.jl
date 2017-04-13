@@ -201,7 +201,7 @@ end
  # @load "usercfg.jld"
 include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
 user_config = addrdict
-user_config["session"] = "SESSHAUVDEV3"
+user_config["session"] = "SESSHAUVDEV5"
 backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
 
 # Juno.breakpoint("/home/dehann/.julia/v0.5/CloudGraphs/src/CloudGraphs.jl", 291)
@@ -307,9 +307,9 @@ q1 = convert(Quaternion, Euler(0.155858, -0.0151844, 2.14152))
 msg[:mean] = Float64[16.3, 1.15, 5.78, q1.s, q1.v...]
 msg[:covar_dim] = 6
 msg[:covar] = Float64[0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
-
 publish(lcm_node, "ROME_POSES", msg)
 sleep(0.01)
+
 
 # send the second pose
 msg = rome.pose_node_t()
@@ -317,44 +317,81 @@ msg[:utime] = 0
 msg[:id] = 2
 msg[:mean_dim] = 7
 q2 = convert(Quaternion, Euler(0.23285, 0.000118684, 2.28345))
-msg[:mean] = Float64[18.7389, 2.31, 5.77108, q2.s, q2.v...]
+wTx2 = SE3([18.7389, 2.31, 5.77108], q2)
+msg[:mean] = Float64[wTx2.t..., q2.s, q2.v...]
 msg[:covar_dim] = 6
 msg[:covar] = Float64[0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
-
 publish(lcm_node, "ROME_POSES", msg)
 sleep(0.01)
 
-# send zpr for x2
 msg = rome.prior_zpr_t()
 msg[:utime] = 0
 msg[:id] = 2
 msg[:z] = 5.77108
 msg[:pitch] = 0.000118684
 msg[:roll] = 0.23285
-msg[:var_z] = 0.001
+msg[:var_z] = 0.01
 msg[:var_pitch] = 0.001
 msg[:var_roll] = 0.001
-
 publish(lcm_node, "ROME_PARTIAL_ZPR", msg)
 sleep(0.01)
 
-# send first zpr
 msg = rome.pose_pose_xyh_t()
 msg[:utime] = 0
 msg[:node_1_utime] = 0
 msg[:node_1_id] = 1
-
 msg[:node_2_utime] = 0
 msg[:node_2_id] = 2
-
 msg[:delta_x] = -0.341546
 msg[:delta_y] = -2.64716
 msg[:delta_yaw] = 0.137918
-
 msg[:var_x] = 0.001
 msg[:var_y] = 0.001
 msg[:var_yaw] = 0.001
+publish(lcm_node, "ROME_PARTIAL_XYH", msg)
 
+
+
+# send the third pose
+msg = rome.pose_node_t()
+msg[:utime] = 0
+msg[:id] = 3
+msg[:mean_dim] = 7
+q3 = convert(Quaternion, Euler(0.196432, 0.00841811, 2.37419))
+wTx3 = SE3([21.0984, 3.44, 5.75921], q3)
+msg[:mean] = Float64[wTx3.t..., q3.s, q3.v...]
+msg[:covar_dim] = 6
+msg[:covar] = Float64[0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
+publish(lcm_node, "ROME_POSES", msg)
+sleep(0.01)
+
+msg = rome.prior_zpr_t()
+msg[:utime] = 0
+msg[:id] = 3
+msg[:z] = 5.75921
+msg[:pitch] = 0.00841811
+msg[:roll] = 0.196432
+msg[:var_z] = 0.01
+msg[:var_pitch] = 0.001
+msg[:var_roll] = 0.001
+
+x2Tx3 = wTx2\wTx3
+wRx2 = SE3(zeros(3), wTx2.R)
+wTx2x3 = wRx2*x2Tx3
+wTx2x3_wxyh = SE3([wTx2x3.t[1:2]...,0.0], Euler(0.0,0.0,convert(Euler, wTx2x3.R).Y))
+x2Tx3_wxyh = wRx2\wTx2x3_wxyh
+msg = rome.pose_pose_xyh_t()
+msg[:utime] = 0
+msg[:node_1_utime] = 0
+msg[:node_1_id] = 2
+msg[:node_2_utime] = 0
+msg[:node_2_id] = 3
+msg[:delta_x] = wTx2x3.t[1]
+msg[:delta_y] = wTx2x3.t[2]
+msg[:delta_yaw] = convert(Euler, wTx2x3.R).Y
+msg[:var_x] = 0.001
+msg[:var_y] = 0.001
+msg[:var_yaw] = 0.001
 publish(lcm_node, "ROME_PARTIAL_XYH", msg)
 
 
