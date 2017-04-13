@@ -35,11 +35,9 @@ tq12 = convert(SE3, q12)
 
 
 
-
 # Launch the viewer application if it isn't running already:
 DrakeVisualizer.any_open_windows() || DrakeVisualizer.new_window();
 vis = Visualizer();
-
 
 # okay, do the numbers
 dist = 10.0
@@ -54,12 +52,14 @@ settransform!(vis[:evalXYH][:x1], convert(AffineMap,wTx1 ) );
 setgeometry!(vis[:evalXYH][:x2], Triad());
 settransform!(vis[:evalXYH][:x2], convert(AffineMap,wTx2 ) );
 
-
 ## Look at XYH constraint numbers
 # iSAM is doing
 # predicted = p2.ominus(p1);
 # Eigen::Vector3d predicted3(predicted.x(), predicted.y(), standardRad(predicted.yaw()));
 # Eigen::Vector3d err = predicted3 - _measure;
+# Pose3d ominus(const Pose3d& b) const {
+#     return Pose3d(b.oTw() * wTo());
+#   }
 
 x1Tx2 = wTx1\wTx2
 predicted = [x1Tx2.t[1:2]..., convert(Euler, x1Tx2.R).Y]
