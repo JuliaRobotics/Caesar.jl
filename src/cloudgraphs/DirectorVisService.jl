@@ -377,7 +377,12 @@ function drawdbdirector(;addrdict=nothing)
   vis = startdefaultvisualization()
   sleep(1.0)
 
-  param = robotsetup(cloudGraph, session)
+  param = Dict()
+  try
+    param = robotsetup(cloudGraph, session)
+  catch
+    warn("No robot parameters found for the session, continuing with basic visualization only")
+  end
 
   drawloop = Bool[true]
   println("Starting draw loop...")
