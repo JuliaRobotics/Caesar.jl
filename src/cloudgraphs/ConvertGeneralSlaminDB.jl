@@ -185,6 +185,21 @@ function mergeValuesIntoCloudVert!{T <: AbstractString}(fgl::FactorGraph,
   nothing
 end
 
+function parsePose2Pose2Constraint(lkl, elem)
+  msm = split(elem["meas"], ' ')
+  cov = zeros(3,3)
+  cov[1,2], cov[1,3], cov[2,3] = parse(Float64, msm[5]), parse(Float64, msm[6]), parse(Float64, msm[8])
+  cov += cov'
+  cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
+  zij = zeros(3,1)
+  zij[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
+  if length(lkl) >=4
+    if lkl[4] == "STDEV"
+      cov = cov^2
+    end
+  end
+  return Pose2Pose2(zij, cov, [1.0])
+end
 
 function recoverConstraintType(cgl::CloudGraph,
             elem;
@@ -211,14 +226,15 @@ function recoverConstraintType(cgl::CloudGraph,
     zi[1:2] = [parse(msm[1]);parse(msm[2])]
     return PriorPoint2D(zi, cov, [1.0])
   elseif lkl[1]=="PP2"
-    msm = split(elem["meas"], ' ')
-    cov = zeros(3,3)
-    cov[1,2], cov[1,3], cov[2,3] = parse(Float64, msm[5]), parse(Float64, msm[6]), parse(Float64, msm[8])
-    cov += cov'
-    cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
-    zij = zeros(3,1)
-    zij[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
-    return Pose2Pose2(zij, cov^2, [1.0])
+    return parsePose2Pose2Constraint(lkl, elem)
+    # msm = split(elem["meas"], ' ')
+    # cov = zeros(3,3)
+    # cov[1,2], cov[1,3], cov[2,3] = parse(Float64, msm[5]), parse(Float64, msm[6]), parse(Float64, msm[8])
+    # cov += cov'
+    # cov[1,1], cov[2,2], cov[3,3] = parse(Float64, msm[4]), parse(Float64, msm[7]), parse(Float64, msm[9])
+    # zij = zeros(3,1)
+    # zij[:,1] = [parse(msm[1]);parse(msm[2]);parse(msm[3])]
+    # return Pose2Pose2(zij, cov^2, [1.0])
   elseif lkl[1]=="BR"
     msm = split(elem["meas"], ' ')
     return Pose2DPoint2DBearingRange{Normal, Normal}(
