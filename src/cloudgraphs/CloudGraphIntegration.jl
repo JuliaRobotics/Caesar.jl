@@ -1,6 +1,7 @@
 # integration code for database usage via CloudGraphs.jl
 
 export
+  executeQuery,
   getCloudVert,
   usecloudgraphsdatalayer!,
   standardcloudgraphsetup,
@@ -28,7 +29,18 @@ export
   appendvertbigdata!
 
 
+"""
+    executeQuery(cg::CloudGraph, query::AbstractString)
 
+Run Neo4j Cypher queries on the cloudGraph database, andreturn Tuple with the
+unparsed (results, loadresponse).
+"""
+function executeQuery(cg::CloudGraph, query::AbstractString)
+  loadtx = transaction(cg.neo4j.connection)
+  cph = loadtx(query, submit=true)
+  loadresult = commit(loadtx)
+  return cph, loadresult
+end
 
 function getCloudVert(cg::CloudGraph, session::AbstractString, vsym::Symbol; bigdata::Bool=false)
   loadtx = transaction(cg.neo4j.connection)
