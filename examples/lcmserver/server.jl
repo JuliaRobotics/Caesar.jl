@@ -131,7 +131,7 @@ function handle_partials!(slam::SLAMWrapper,
     destination_id = message[:node_2_id]
     origin_label = Symbol("x$(origin_id)")
     destination_label = Symbol("x$(destination_id)")
-    
+
     delta_x = message[:delta_x]
     delta_y = message[:delta_y]
     delta_yaw = message[:delta_yaw]
@@ -199,9 +199,9 @@ end
 # TODO: why keep usrcfg and backendcfg? the former contains the latter
 #println("[Caesar.jl] Prompting user for configuration")
  @load "usercfg.jld"
-#include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
-user_config["session"] = "SESSHAUVDEV2"
+# include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
 # user_config = addrdict
+user_config["session"] = "SESSHAUVDEV2"
 backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
 
 # Juno.breakpoint(@__FILE__, 127)
