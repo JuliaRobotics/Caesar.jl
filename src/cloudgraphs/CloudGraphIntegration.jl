@@ -29,7 +29,10 @@ export
   populatenewfactornodes!,
   updatenewverts!,
   resetentireremotesession,
-  appendvertbigdata!
+  appendvertbigdata!,
+  # visualization exports
+  getPointCloudFromKinect,
+  getPointCloudFromBSON
 
 
 """
