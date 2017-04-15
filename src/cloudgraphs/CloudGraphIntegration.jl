@@ -1,6 +1,7 @@
 # integration code for database usage via CloudGraphs.jl
 
 export
+  executeQuery,
   getCloudVert,
   usecloudgraphsdatalayer!,
   standardcloudgraphsetup,
@@ -13,6 +14,9 @@ export
   getExVertFromCloud,
   getAllExVertexNeoIDs,
   getPoseExVertexNeoIDs,
+  getFirstPose,
+  getfirstpose,
+  getLastPose,
   copyAllNodes!,
   copyAllEdges!,
   registerCallback!,
@@ -25,10 +29,24 @@ export
   populatenewfactornodes!,
   updatenewverts!,
   resetentireremotesession,
-  appendvertbigdata!
+  appendvertbigdata!,
+  # visualization exports
+  getPointCloudFromKinect,
+  getPointCloudFromBSON
 
 
+"""
+    executeQuery(cg::CloudGraph, query::AbstractString)
 
+Run Neo4j Cypher queries on the cloudGraph database, andreturn Tuple with the
+unparsed (results, loadresponse).
+"""
+function executeQuery(cg::CloudGraph, query::AbstractString)
+  loadtx = transaction(cg.neo4j.connection)
+  cph = loadtx(query, submit=true)
+  loadresult = commit(loadtx)
+  return cph, loadresult
+end
 
 function getCloudVert(cg::CloudGraph, session::AbstractString, vsym::Symbol; bigdata::Bool=false)
   loadtx = transaction(cg.neo4j.connection)
@@ -772,9 +790,24 @@ end
 Return Tuple{Symbol, Int} of first pose symbol and Neo4j node ID.
 """
 function getfirstpose(cg::CloudGraph, session::AbstractString)
-  loadtx = transaction(cg.neo4j.connection)
   query = "match (n:$(session):POSE) with n.label as nlbl, n.exVertexId as exvid, id(n) as neoid order by exvid asc limit 1 return nlbl, neoid"
-  cph = loadtx(query, submit=true)
+  cph, = executeQuery(cg, query)
+  # loadtx = transaction(cg.neo4j.connection)
+  # cph = loadtx(query, submit=true)
+  Symbol(cph.results[1]["data"][1]["row"][1]), cph.results[1]["data"][1]["row"][2]
+end
+getFirstPose(cg::CloudGraph, session::AbstractString) = getfirstpose(cg, session)
+
+"""
+    getLastPose(cg::CloudGraph, session::AbstractString)
+
+Return Tuple{Symbol, Int} of first pose symbol and Neo4j node ID.
+"""
+function getLastPose(cg::CloudGraph, session::AbstractString)
+  query = "match (n:$(session):POSE) with n.label as nlbl, n.exVertexId as exvid, id(n) as neoid order by exvid desc limit 1 return nlbl, neoid"
+  cph, = executeQuery(cg, query)
+  # loadtx = transaction(cg.neo4j.connection)
+  # cph = loadtx(query, submit=true)
   Symbol(cph.results[1]["data"][1]["row"][1]), cph.results[1]["data"][1]["row"][2]
 end
 

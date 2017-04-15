@@ -96,6 +96,20 @@ function prepcolordepthcloud!( X::Array;
   return pointcloud
 end
 
+function getPointCloudFromKinect(data, dcamjl, imshape)
+  ri,ci = imshape[1], imshape[2] # TODO -- hack should be removed since depth is array and should have rows and columns stored in Mongo
+  arr = bin2arr(data, dtype=Float32) # should also store dtype for arr in Mongo
+  img = reshape(arr, ci, ri)'
+  reconstruct(dcamjl, Array{Float64,2}(img))
+end
+
+function getPointCloudFromBSON(data)
+  buf = IOBuffer(data)
+  st = takebuf_string(buf)
+  bb = BSONObject(st)
+  return map(x -> convert(Array, x), bb["pointcloud"])
+end
+
 function cachepointclouds!(cache::Dict, cv::CloudVertex, ke::AbstractString, param::Dict)
   if !haskey(cache, ke)
     data = getBigDataElement(cv,ke)
@@ -105,19 +119,21 @@ function cachepointclouds!(cache::Dict, cv::CloudVertex, ke::AbstractString, par
     end
     data = data.data
     if ke == "depthframe_image"
-      ri,ci = param["imshape"][1], param["imshape"][2] # TODO -- hack should be removed since depth is array and should have rows and columns stored in Mongo
-      # arrdata = data.data
-      arr = bin2arr(data, dtype=Float32) # should also store dtype for arr in Mongo
-      img = reshape(arr, ci, ri)'
-      X = reconstruct(param["dcamjl"], Array{Float64,2}(img))
-      cache[ke] = X
+      cache[ke] = getPointCloudFromKinect(data, param["dcamjl"], param["imshape"])
+      # ri,ci = param["imshape"][1], param["imshape"][2] # TODO -- hack should be removed since depth is array and should have rows and columns stored in Mongo
+      # # arrdata = data.data
+      # arr = bin2arr(data, dtype=Float32) # should also store dtype for arr in Mongo
+      # img = reshape(arr, ci, ri)'
+      # X = reconstruct(param["dcamjl"], Array{Float64,2}(img))
+      # cache[ke] = X
     elseif ke == "BSONpointcloud"
       # deserialize BSON-encoded pointcloud
-      buf = IOBuffer(data)
-      st = takebuf_string(buf)
-      bb = BSONObject(st)
-      ptarr = map(x -> convert(Array, x), bb["pointcloud"])
-      cache[ke] = ptarr
+      cache[ke] = getPointCloudFromBSON(data)
+      # buf = IOBuffer(data)
+      # st = takebuf_string(buf)
+      # bb = BSONObject(st)
+      # ptarr = map(x -> convert(Array, x), bb["pointcloud"])
+      # cache[ke] = ptarr
     end
   end
   nothing
@@ -377,7 +393,12 @@ function drawdbdirector(;addrdict=nothing)
   vis = startdefaultvisualization()
   sleep(1.0)
 
-  param = robotsetup(cloudGraph, session)
+  param = Dict()
+  try
+    param = robotsetup(cloudGraph, session)
+  catch
+    warn("No robot parameters found for the session, continuing with basic visualization only")
+  end
 
   drawloop = Bool[true]
   println("Starting draw loop...")
