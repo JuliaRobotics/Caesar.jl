@@ -97,7 +97,7 @@ function prepcolordepthcloud!( X::Array;
 end
 
 function getPointCloudFromKinect(data, dcamjl, imshape)
-  ri,ci = imshape, imshape # TODO -- hack should be removed since depth is array and should have rows and columns stored in Mongo
+  ri,ci = imshape[1], imshape[2] # TODO -- hack should be removed since depth is array and should have rows and columns stored in Mongo
   arr = bin2arr(data, dtype=Float32) # should also store dtype for arr in Mongo
   img = reshape(arr, ci, ri)'
   reconstruct(dcamjl, Array{Float64,2}(img))
