@@ -59,6 +59,7 @@ export
   FactorGraph,
   writeGraphPdf,
   getVert,
+  getVal,
   saveplot,
   # callbacks for datalayer changes
   localapi,

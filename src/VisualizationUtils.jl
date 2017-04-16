@@ -3,7 +3,6 @@
 using DrakeVisualizer, CoordinateTransformations, GeometryTypes, Rotations, TransformUtils, ColorTypes
 
 
-
 # create a new Director window with home axis
 function startdefaultvisualization(;newwindow=true,draworigin=true)
   DrakeVisualizer.any_open_windows() || DrakeVisualizer.new_window(); #DrakeVisualizer.new_window()

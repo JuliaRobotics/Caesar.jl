@@ -5,7 +5,6 @@ using CoordinateTransformations
 using DrakeVisualizer
 import DrakeVisualizer: Triad
 
-import Base: convert
 using Base: Test
 
 
@@ -13,13 +12,6 @@ using Base: Test
 
 # random testing and converstion to be moved out
 
-function convert{T <: CoordinateTransformations.AffineMap}(::Type{T}, x::SE3)
-  q = convert(TransformUtils.Quaternion, x.R)
-  Translation(x.t...) ∘ LinearMap( Rotations.Quat(q.s, q.v...) )
-end
-function convert{T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64}}}(::Type{SE3}, x::T)
-  SE3(x.v[1:3], TransformUtils.Quaternion(x.m.w, [x.m.x,x.m.y,x.m.z]) )
-end
 
 tq = SE3(zeros(3),Quaternion(0.0,[1.0, 0,0]));
 q1 = convert(AffineMap, tq);
