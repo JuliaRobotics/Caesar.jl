@@ -18,7 +18,7 @@ import Caesar: prepcolordepthcloud!
  # @load "usercfg.jld"
 include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
 user_config = addrdict
-user_config["session"] = "SESSHAUVDEV5"
+user_config["session"] = "SESSHAUVDEV1"
 backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
 
 
@@ -62,7 +62,7 @@ end
 
 # fetch and study the graph as built by server.jl
 
-setBackendWorkingSet!(fg.cg.neo4j.connection, user_config["session"])
+# setBackendWorkingSet!(fg.cg.neo4j.connection, user_config["session"])
 fg = Caesar.initfg(cloudgraph=backend_config, sessionname=user_config["session"])
 fullLocalGraphCopy!(fg, reqbackendset=true)
 writeGraphPdf(fg)
@@ -71,11 +71,35 @@ run(`evince fg.pdf`)
 tree = wipeBuildNewTree!(fg,drawpdf=true)
 @async run(`evince bt.pdf`)
 
+# Juno.breakpoint("/home/dehann/.julia/v0.5/IncrementalInference/src/ApproxConv.jl", 144)
 
-ret = inferOverTreeR!(fg, tree, dbg=true)
+ret = inferOverTreeR!(fg, tree, N=100, dbg=true)
+visualizeallposes!(vis, fg)
+
+
+spyCliqMat(tree, :x2)
+plotUpMsgsAtCliq(tree, :x1, :x2, marg=[6;3])
+
+
+plotPriorsAtCliq(tree, :x1, :x5, dims=[1;2])
+plotPriorsAtCliq(tree, :x1, :x5, dims=[6;3])
+plotPriorsAtCliq(tree, :x1, :x5, dims=[4;5])
 
 
 
+
+
+
+
+X1 = getVertKDE(fg, :x1)
+plotKDE(X1, dims=[1;2])
+X2 = getVertKDE(fg, :x2)
+plotKDE(X2, dims=[1;2])
+
+
+
+pp, = localProduct(fg, :x2)
+plotKDE(pp, dims=[1;2])
 
 
 
@@ -210,6 +234,30 @@ plotKDE(fgnew, :x5, dims=[1;2], title="$(veeEuler(wTx5))")
 
 visualizeallposes!(vis, fgnew)
 solveandvisualize(fgnew, vis)
+
+treenew = wipeBuildNewTree!(fgnew, drawpdf=true)
+inferOverTreeR!(fgnew, treenew, N=100, dbg=true)
+
+
+plotUpMsgsAtCliq(treenew, :x1, :x2, marg=[6;3])
+
+
+plotPriorsAtCliq(treenew, :x1, :x5, dims=[1;2])
+plotPriorsAtCliq(treenew, :x1, :x5, dims=[6;3])
+plotPriorsAtCliq(treenew, :x1, :x5, dims=[4;5])
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

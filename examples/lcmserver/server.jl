@@ -60,10 +60,10 @@ Adds pose nodes to graph with a prior on Z, pitch, and roll.
 function handle_poses!(slam::SLAMWrapper,
                        message_data)
 
-    println("[Caesar.jl] Received message ")
     message = rome.pose_node_t[:decode](message_data)
-
     id = message[:id]
+    println("[Caesar.jl] Received pose message for x$(id)")
+
 
     mean = message[:mean]
     covar = message[:covar]
@@ -97,21 +97,21 @@ end
 function handle_priors!(slam::SLAMWrapper,
                          message_data)
 
-    println("[Caesar.jl] Adding prior on RPZ")
 
     message = rome.prior_zpr_t[:decode](message_data)
-
     id = message[:id]
-    node_label = Symbol("x$(id)")
+    println("[Caesar.jl] Adding prior on RPZ to x$(id)")
+
+    @show node_label = Symbol("x$(id)")
     xn = getVert(slam.fg,node_label)
 
-    z = message[:z]
-    pitch = message[:pitch]
-    roll = message[:roll]
+    @show z = message[:z]
+    @show pitch = message[:pitch]
+    @show roll = message[:roll]
 
-    var_z = message[:var_z]
-    var_pitch = message[:var_pitch]
-    var_roll = message[:var_roll]
+    @show var_z = message[:var_z]
+    @show var_pitch = message[:var_pitch]
+    @show var_roll = message[:var_roll]
 
     rp_dist = MvNormal( [roll;pitch], diagm([var_roll, var_pitch]))
     z_dist = Normal(z, var_z)
@@ -123,7 +123,6 @@ end
 function handle_partials!(slam::SLAMWrapper,
                          message_data)
     # add XYH factor
-    println("[Caesar.jl] Adding odometry constraint on XYH")
 
     message = rome.pose_pose_xyh_t[:decode](message_data)
 
@@ -132,14 +131,17 @@ function handle_partials!(slam::SLAMWrapper,
     origin_label = Symbol("x$(origin_id)")
     destination_label = Symbol("x$(destination_id)")
 
-    delta_x = message[:delta_x]
-    delta_y = message[:delta_y]
-    delta_yaw = message[:delta_yaw]
+    println("[Caesar.jl] Adding XYH odometry constraint betwee (x$(origin_id), x$(destination_id))")
 
-    var_x = message[:var_x]
-    var_y = message[:var_y]
-    var_yaw = message[:var_yaw]
+    @show delta_x = message[:delta_x]
+    @show delta_y = message[:delta_y]
+    @show delta_yaw = message[:delta_yaw]
 
+    @show var_x = message[:var_x]
+    @show var_y = message[:var_y]
+    @show var_yaw = message[:var_yaw]
+
+    @show origin_label, destination_label
     xo = getVert(slam.fg,origin_label)
     xd = getVert(slam.fg,destination_label)
 
@@ -149,6 +151,9 @@ function handle_partials!(slam::SLAMWrapper,
 
 
     initializeNode!(slam.fg, destination_label)
+    println()
+    println()
+
 end
 
 
@@ -201,7 +206,7 @@ end
  @load "usercfg.jld"
 # include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
 # user_config = addrdict
-user_config["session"] = "SESSHAUVDEV2"
+user_config["session"] = "SESSHAUVDEV3"
 backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
 
 # Juno.breakpoint(@__FILE__, 127)
@@ -229,13 +234,6 @@ subscribe(lcm_node, "ROME_POINT_CLOUDS", lcm_cloud_handler)
 
 println("[Caesar.jl] Running LCM listener")
 listener!(slam_client, lcm_node)
-
-writeGraphPdf(slam_client.fg)
-run(`evince fg.pdf`)
-
-pp = localProduct(slam_client.fg, :x2)
-
-getVal(slam_client.fg, :x2)
 
 
 # TODO: handle termination
