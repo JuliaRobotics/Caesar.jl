@@ -1,0 +1,11 @@
+package rome;
+
+struct point_cloud_t
+{
+    int64_t utime;       // unix time associated with this cloud
+    int64_t id;          // root pose id (sequential, 0-based)
+
+    int32_t n;           // number of points in the cloud               
+    double points[n][3]; // points (relative to the root pose)
+    byte colors[n][3];   // point colors (rgb)
+}

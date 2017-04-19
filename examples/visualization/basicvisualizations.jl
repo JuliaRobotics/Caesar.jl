@@ -11,6 +11,10 @@ using DrakeVisualizer
 import DrakeVisualizer: Triad
 
 vis = startdefaultvisualization(draworigin=true)
+# Launch the viewer application if it isn't running already:
+# DrakeVisualizer.any_open_windows() || DrakeVisualizer.new_window();
+
+
 
 setgeometry!(vis[:basics][:triad], Triad())
 settransform!(vis[:basics][:triad], Translation(0.0,0,0) ∘ LinearMap(Rotations.AngleAxis(pi/4,0,0,1.)  ))
