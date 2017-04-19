@@ -351,6 +351,78 @@ end
 
 
 
+function drawLine!(vispath, from::Vector{Float64}, to::Vector{Float64}; scale=0.01,color=RGBA(0,1.0,0,0.5))
+  vector = to-from
+  len = norm(vector)
+  buildline = Float64[len, 0, 0]
+
+  v = norm(buildline-vector) > 1e-10 ? cross(buildline, vector)  : [0,0,1.0]
+  axis = v/norm(v)
+  angle = acos(dot(vector, buildline)/(len^2) )
+  rot = LinearMap( CoordinateTransformations.AngleAxis(angle, axis...) )
+
+  mol = HyperRectangle(Vec(0.0,-scale,-scale), Vec(len,scale,scale))
+  molbox = GeometryData(mol, color)
+
+  setgeometry!(vispath, molbox)
+  settransform!(vispath, Translation(from...) ∘ rot )
+  nothing
+end
+
+
+
+"""
+    drawLineBetweenPose3(fgl::FactorGraph, fr::Symbol, to::Symbol; scale, color, api  )
+
+Draw an awesome line segment between to nodes inthe factor graph, and of course you meant a 3D system.
+"""
+function drawLineBetween3!(vis::DrakeVisualizer.Visualizer,
+        fgl::FactorGraph,
+        fr::Symbol,
+        to::Symbol;
+        scale=0.01,
+        name::Symbol=:edges,
+        subname::Union{Void,Symbol}=nothing,
+        color=RGBA(0,1.0,0,0.5),
+        api::DataLayerAPI=dlapi  )
+  #
+
+  xi = marginal(getVertKDE(fgl, fr, api=api),[1;2;3] )
+  xj = marginal(getVertKDE(fgl, to, api=api),[1;2;3] )
+  xipt, xjpt = getKDEMax(xi), getKDEMax(xj)
+
+  place = vis[Symbol(fgl.sessionname)][name][Symbol(string(fr,to))]
+  if subname != nothing
+    place = vis[Symbol(fgl.sessionname)][name][subname][Symbol(string(fr,to))]
+  end
+  drawLine!(place, xipt, xjpt , color=color, scale=scale )
+  nothing
+end
+
+"""
+    drawAllPoseEdges!(fgl::FactorGraph, fr::Symbol, to::Symbol; scale, color, api  )
+
+Assume odometry chain and draw edges between subsequent poses. Use keyword arguments to change colors, etc.
+"""
+function drawAllPoseEdges!(vis::DrakeVisualizer.Visualizer,
+      fgl::FactorGraph;
+      scale=0.01,
+      name::Symbol=:edges,
+      color=RGBA(0,1.0,0,0.5),
+      api::DataLayerAPI=dlapi  )
+  #
+  xx, ll = ls(fgl)
+
+  for i in 1:(length(xx)-1)
+    drawLineBetween3!(vis, fgl, xx[i],xx[i+1], api=api , color=color, scale=scale, name=name )
+  end
+
+  nothing
+end
+
+
+
+
 
 
 

@@ -380,7 +380,9 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
   end
 
   # TODO(pvt): draw factors
+  # drawAllBinaryFactorEdges!()
 
+  nothing
 end
 
 function robotsetup(cg::CloudGraph, session::AbstractString)

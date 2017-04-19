@@ -101,6 +101,9 @@ export
   # new tree interface
   drawpose!,
   drawposepoints!,
+  drawLine!,
+  drawLineBetween3!,
+  drawAllPoseEdges!,
 
   # for models
   loadmodel,
