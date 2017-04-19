@@ -51,12 +51,33 @@ function reconstruct(dc::DepthCamera, depth::Array{Float64})
   return ret
 end
 
+type SubmapColorCheat
+  colors
+  SubmapColorCheat(;colors::Vector=
+    [ RGB(0.651, 0.808, 0.890),
+      RGB(0.122, 0.471, 0.706),
+      RGB(0.698, 0.875, 0.541),
+      RGB(0.200, 0.627, 0.172),
+      RGB(0.984, 0.604, 0.600),
+      RGB(0.890, 0.102, 0.110),
+      RGB(0.992, 0.749, 0.043)]
+  ) = new(colors)
+end
+
+function submapcolor(idx::Int, len::Int;
+        submapcolors=SubmapColorCheat() )
+  #
+  n = idx%length(submapcolors.colors)+1
+  smc = submapcolors.colors[n]
+  return [smc for g in 1:len]
+end
 
 # function prepcolordepthcloud!{T <: ColorTypes.Colorant}( X::Array;
 #       rgb::Array{T, 2}=Array{Colorant,2}(),
 #       skip::Int=4,
 #       maxrange::Float64=4.5 )
-function prepcolordepthcloud!( X::Array;
+function prepcolordepthcloud!( cvid::Int,
+      X::Array;
       rgb::Array=Array{Colorant,2}(),
       skip::Int=4,
       maxrange::Float64=4.5 )
@@ -70,7 +91,6 @@ function prepcolordepthcloud!( X::Array;
     rd,cd,hd = size(Xd)
     mask = Xd[:,:,:] .> maxrange
     Xd[mask] = Inf
-
 
     rgbss = havecolor ? rgb[1:skip:r,1:skip:c] : nothing
     # rgbss = rgb[1:4:r,1:4:c,:]./255.0
@@ -92,6 +112,10 @@ function prepcolordepthcloud!( X::Array;
   end
   if havecolor
     pointcloud.channels[:rgb] = pccols
+  else
+    #submap colors
+    smc = submapcolor(cvid, length(X))
+    pointcloud.channels[:rgb] = smc
   end
   return pointcloud
 end
@@ -152,6 +176,8 @@ function retrievePointcloudColorInfo!(cv::CloudVertex, va::AbstractString)
     buffer = IOBuffer(data)
     str = takebuf_string(buffer)
     bb = BSONObject(str)
+    # TODO -- maybe better to do: map(f, x), where f(x),
+    # see http://docs.julialang.org/en/stable/manual/style-guide/#do-no-write-x-f-x
     carr = map(x -> convert(Array{UInt8}, x), bb["colors"])
     # typeof(rgb) = Array{Array{Colorant,1},1}
     rgb = carr
@@ -176,7 +202,7 @@ function drawpointcloud!(vis::DrakeVisualizer.Visualizer,
         #       CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5))  )
   #
 
-  pcsym = Symbol(string("pc_",va))
+  pcsym = Symbol(string("pc_", va != "none" ? va : "ID"))
   setgeometry!(vis[sesssym][pcsym][vsym][:pose], Triad())
   settransform!(vis[sesssym][pcsym][vsym][:pose], wTb) # also updated as parallel track
   setgeometry!(vis[sesssym][pcsym][vsym][:pose][:cam], Triad())
@@ -236,7 +262,7 @@ function fetchdrawdepthcloudbycvid!(vis::DrakeVisualizer.Visualizer,
         end
 
         # add color information to the pointcloud
-        pointcloud = prepcolordepthcloud!( cache[ke], rgb=rgb )
+        pointcloud = prepcolordepthcloud!( cvid, cache[ke], rgb=rgb )
 
         # publish the pointcloud data to Director viewer
         drawpointcloud!(vis, poseswithdepth, vsym, pointcloud, va, param, sesssym, wTb=wTb)
@@ -341,7 +367,7 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
     # drawposepoints!(vis, vert, session=session )
   end
 
-  depthcolormaps = !DRAWDEPTH  ? Dict() : Dict("keyframe_rgb" => "depthframe_image", "keyframe_segnet" => "depthframe_image", "BSONcolors" => "BSONpointcloud")
+  depthcolormaps = !DRAWDEPTH  ? Dict() : Dict("keyframe_rgb" => "depthframe_image", "keyframe_segnet" => "depthframe_image", "BSONcolors" => "BSONpointcloud", "none"=>"BSONpointcloud")
 
   @showprogress 1 "Drawing POSE IDs..." for (vid,cvid) in IDs
     fetchdrawposebycvid!(vis,

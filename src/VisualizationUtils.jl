@@ -300,6 +300,10 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
   nothing
 end
 
+function colorwheel(n::Int)
+  # RGB(1.0, 1.0, 0)
+  convert(RGB, HSV((n*30)%360, 1.0,0.5))
+end
 
 function drawposepoints!(vis::DrakeVisualizer.Visualizer,
       vert::Graphs.ExVertex;
@@ -321,6 +325,8 @@ function drawposepoints!(vis::DrakeVisualizer.Visualizer,
   pointcloud = PointCloud(XX)
   if string(vsym)[1] == 'l'
     pointcloud.channels[:rgb] = [RGB(1.0, 1.0, 0) for i in 1:length(XX)]
+  elseif string(vsym)[1] == 'x'
+    pointcloud.channels[:rgb] = [colorwheel(vert.index) for i in 1:length(XX)]
   end
   setgeometry!(vis[Symbol(session)][:posepts][vsym], pointcloud)
   nothing

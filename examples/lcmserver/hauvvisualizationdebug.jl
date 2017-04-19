@@ -51,7 +51,7 @@ for i in 1:5
   # and a point cloud
   data = read_MongoData(backend_config, mkpc[i])
   pcarr = getPointCloudFromBSON(data)
-  pc = prepcolordepthcloud!(pcarr)
+  pc = prepcolordepthcloud!(i, pcarr)
   setgeometry!(vis[:debughauv][sym][:pointcloud], pc)
 end
 
