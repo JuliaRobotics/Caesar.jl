@@ -80,6 +80,66 @@ end
 
 
 
+function findAllBinaryFactors(cgl::CloudGraph, session::AbstractString)
+  xx = ls(cgl, session)
+
+  slowly = Dict{Symbol, Tuple{Symbol, Symbol, Symbol}}()
+  @showprogress 1 "Finding all binary edges..." for (x,va) in xx
+    facts = ls(cgl, session, sym=x)
+    for (fc, va2) in facts
+      nodesdict = ls(cgl, session, sym=fc)
+      if length(nodesdict) == 2
+        # add to dictionary for later drawing
+        nodes = collect(keys(nodesdict))
+        if !haskey(slowly, fc) && !haselement(nodesdict[nodes[1]][3],:FACTOR) && !haselement(nodesdict[nodes[2]][3],:FACTOR)
+          # fv = getVert(fgl, fgl.fIDs[fc])
+          # vty = typeof(getfnctype(fv)).name.name
+          slowly[fc] = (nodes[1], nodes[2], Symbol("NEEDCACHING"))
+        end
+      end
+    end
+  end
+
+  return slowly
+end
+
+
+function drawLineBetween!(vis::DrakeVisualizer.Visualizer,
+        cgl::CloudGraph,
+        session::AbstractString,
+        fr::Symbol,
+        to::Symbol;
+        scale=0.01,
+        name::Symbol=:edges,
+        subname::Union{Void,Symbol}=nothing,
+        color=RGBA(0,1.0,0,0.5)  )
+  #
+
+  cv1 = getCloudVert(cgl, session, sym=fr)
+  v1 = cloudVertex2ExVertex(cv1)
+  cv2 = getCloudVert(cgl, session, sym=to)
+  v2 = cloudVertex2ExVertex(cv2)
+
+  drawLineBetween!(vis,session,v1,v2,scale=scale,name=name,subname=subname,color=color   )
+  nothing
+end
+
+
+
+function drawAllBinaryFactorEdges!(vis::DrakeVisualizer.Visualizer,
+      cgl::CloudGraph,
+      session::AbstractString;
+      scale=0.01  )
+  #
+
+  sloth = findAllBinaryFactors(cgl, session)
+
+  @showprogress 1 "Drawing all binary edges..." for (teeth, toe) in sloth
+    color = pointToColor(toe[3])
+    drawLineBetween!(vis, cgl, session, toe[1], toe[2], subname=toe[3], scale=scale, color=color)
+  end
+  nothing
+end
 
 
 #

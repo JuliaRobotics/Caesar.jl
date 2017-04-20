@@ -370,13 +370,51 @@ function drawLine!(vispath, from::Vector{Float64}, to::Vector{Float64}; scale=0.
 end
 
 
+"""
+    drawLineBetweenPose3(fr::Graphs.ExVertex, to::Graphs.ExVertex; scale=, color=  )
+
+Draw a line segment between to vertices.
+"""
+function drawLineBetween!(vis::DrakeVisualizer.Visualizer,
+        session::AbstractString,
+        fr::Graphs.ExVertex,
+        to::Graphs.ExVertex;
+        scale=0.01,
+        name::Symbol=:edges,
+        subname::Union{Void,Symbol}=nothing,
+        color=RGBA(0,1.0,0,0.5)   )
+  #
+  dotwo, dothree = getdotwothree(Symbol(fr.label), getVal(fr))
+
+  xipt = zeros(3); xjpt = zeros(3);
+  if dothree
+    xi = marginal(getVertKDE( fr ),[1;2;3] )
+    xj = marginal(getVertKDE( to ),[1;2;3] )
+    xipt[1:3] = getKDEMax(xi)
+    xjpt[1:3] = getKDEMax(xj)
+  elseif dotwo
+    xi = marginal(getVertKDE( fr ),[1;2] )
+    xj = marginal(getVertKDE( to ),[1;2] )
+    xipt[1:2] = getKDEMax(xi)
+    xjpt[1:2] = getKDEMax(xj)
+  end
+
+  lbl = Symbol(string(fr.label,to.label))
+  place = vis[Symbol(session)][name][lbl]
+  if subname != nothing
+    place = vis[Symbol(session)][name][subname][lbl]
+  end
+  drawLine!(place, xipt, xjpt, color=color, scale=scale )
+  nothing
+end
+
 
 """
-    drawLineBetweenPose3(fgl::FactorGraph, fr::Symbol, to::Symbol; scale, color, api  )
+    drawLineBetween(fgl::FactorGraph, fr::Symbol, to::Symbol; scale, color, api  )
 
-Draw an awesome line segment between to nodes inthe factor graph, and of course you meant a 3D system.
+Draw a line segment between to nodes in the factor graph.
 """
-function drawLineBetween3!(vis::DrakeVisualizer.Visualizer,
+function drawLineBetween!(vis::DrakeVisualizer.Visualizer,
         fgl::FactorGraph,
         fr::Symbol,
         to::Symbol;
@@ -386,17 +424,10 @@ function drawLineBetween3!(vis::DrakeVisualizer.Visualizer,
         color=RGBA(0,1.0,0,0.5),
         api::DataLayerAPI=dlapi  )
   #
+  v1 = getVert(fgl, fr, api=api)
+  v2 = getVert(fgl, to, api=api)
 
-  xi = marginal(getVertKDE(fgl, fr, api=api),[1;2;3] )
-  xj = marginal(getVertKDE(fgl, to, api=api),[1;2;3] )
-  xipt, xjpt = getKDEMax(xi), getKDEMax(xj)
-
-  place = vis[Symbol(fgl.sessionname)][name][Symbol(string(fr,to))]
-  if subname != nothing
-    place = vis[Symbol(fgl.sessionname)][name][subname][Symbol(string(fr,to))]
-  end
-  drawLine!(place, xipt, xjpt, color=color, scale=scale )
-  nothing
+  drawLineBetween!(vis,fgl.sessionname, v1,v2,scale=scale,name=name,subname=subname,color=color   )
 end
 
 """
@@ -414,7 +445,7 @@ function drawAllOdometryEdges!(vis::DrakeVisualizer.Visualizer,
   xx, ll = ls(fgl)
 
   for i in 1:(length(xx)-1)
-    drawLineBetween3!(vis, fgl, xx[i],xx[i+1], api=api , color=color, scale=scale, name=name )
+    drawLineBetween!(vis, fgl, xx[i],xx[i+1], api=api , color=color, scale=scale, name=name )
   end
 
   nothing
@@ -422,6 +453,57 @@ end
 
 
 
+
+
+function findAllBinaryFactors(fgl::FactorGraph; api::DataLayerAPI=dlapi)
+  xx, ll = ls(fgl)
+
+  slowly = Dict{Symbol, Tuple{Symbol, Symbol, Symbol}}()
+  for x in xx
+    facts = ls(fgl, x, api=localapi) # TODO -- known BUG on ls(api=dlapi)
+    for fc in facts
+      nodes = lsf(fgl, fc)
+      if length(nodes) == 2
+        # add to dictionary for later drawing
+        if !haskey(slowly, fc)
+          fv = getVert(fgl, fgl.fIDs[fc])
+          slowly[fc] = (nodes[1], nodes[2], typeof(getfnctype(fv)).name.name)
+        end
+      end
+    end
+  end
+
+  return slowly
+end
+
+
+
+
+function pointToColor(nm::Symbol)
+  if nm == :PartialPose3XYYaw
+    return RGBA(0.6,0.8,0.9,0.5)
+  elseif nm == :Pose3Pose3NH
+    return RGBA(1.0,1.0,0,0.5)
+  else
+    # println("pointToColor(..) -- warning, using default color for edges")
+    return RGBA(0.0,1,0.0,0.5)
+  end
+end
+
+
+function drawAllBinaryFactorEdges!(vis::DrakeVisualizer.Visualizer,
+      fgl::FactorGraph;
+      scale=0.01,
+      api::DataLayerAPI=dlapi )
+  #
+  sloth = findAllBinaryFactors(fgl, api=api)
+
+  for (teeth, toe) in sloth
+    color = pointToColor(toe[3])
+    drawLineBetween!(vis, fgl, toe[1], toe[2], subname=toe[3], scale=scale, color=color)
+  end
+  nothing
+end
 
 
 

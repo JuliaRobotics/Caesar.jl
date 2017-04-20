@@ -1,10 +1,12 @@
 # integration code for database usage via CloudGraphs.jl
 
-import IncrementalInference: getVert
+import IncrementalInference: getVert, getfnctype, ls
 
 export
   executeQuery,
+  listAllVariables,
   getCloudVert,
+  getfnctype,
   usecloudgraphsdatalayer!,
   standardcloudgraphsetup,
   consoleaskuserfordb,
@@ -90,25 +92,58 @@ function getCloudVert(cgl::CloudGraph,
   CloudGraphs.get_vertex(cgl, neoid, bigdata)
 end
 
+
+function listAllVariables(cgl::CloudGraph, session::AbstractString)
+  #
+  query = "match (n:$(session)) where not (n:FACTOR) and exists(n.exVertexId) and n.ready=1 return n.label, n.exVertexId, id(n), labels(n)"
+  cph, = executeQuery(cgl.neo4j.connection, query)
+
+  dd = Dict{Symbol, Tuple{Int, Int, Vector{Symbol}}}()
+  for metarows in cph.results[1]["data"]
+    data = metarows["row"]
+    lbls = setdiff(data[4],String[session])
+    enl = (data[2], data[3], Symbol.(lbls))
+    dd[Symbol(data[1])] = enl
+  end
+  return dd
+end
+
+
+function getCloudNeighbors(cgl::CloudGraph, cv::CloudVertex; needdata=false, returntype=false)
+  neis = get_neighbors(cgl, cv, needdata=false)
+end
+
 """
     ls(cgl::CloudGraph, session::AbstractString; sym::Symbol=, neoid::Int=,exvid::Int=)
 
-List neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, String[labels]), and can take
-any of the three as input node identifier.
+List neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take
+any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes
+being returned.
 """
 function ls(cgl::CloudGraph, session::AbstractString;
       sym::VoidUnion{Symbol}=nothing,
       neoid::VoidUnion{Int64}=nothing,
       exvid::VoidUnion{Int64}=nothing  )
   #
+
+  if sym == nothing && exvid == nothing && neoid == nothing
+    # interrupt and just return all variable nodes
+    return listAllVariables(cgl, session)
+  end
   cv = getCloudVert(cgl, session, sym=sym, neoid=neoid, exvid=exvid, bigdata=false )
 
   neis = get_neighbors(cgl, cv, needdata=false)
-  dd = Dict{Symbol, Tuple{Int, Int, Vector{AbstractString}}}()
+  dd = Dict{Symbol, Tuple{Int, Int, Vector{Symbol}}}()
   for nei in neis
-    dd[Symbol(nei.properties["label"])] = (nei.exVertexId, nei.neo4jNodeId, nei.labels)
+    lbls = setdiff(nei.labels, String[session])
+    dd[Symbol(nei.properties["label"])] = (nei.exVertexId, nei.neo4jNodeId, Symbol.(lbls) )
   end
   return dd
+end
+
+function getfnctype(cvl::CloudGraphs.CloudVertex)
+  vert = cloudVertex2ExVertex(cvl)
+  return getfnctype(vert)
 end
 
 function initfg(;sessionname="NA",cloudgraph=nothing)
@@ -371,8 +406,8 @@ function getAllExVertexNeoIDs(conn;
   ret = Array{Tuple{Int64,Int64,Symbol},1}()
 
   @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
-    exvid, neoid = data["row"][1], data["row"][2], Symbol(data["row"][3])
-    push!(ret, (exvid,neoid,Symbol)  )
+    exvid, neoid, sym = data["row"][1], data["row"][2], Symbol(data["row"][3])
+    push!(ret, (exvid,neoid,sym)  )
   end
 
   # @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
@@ -457,7 +492,7 @@ function checkandinsertedges!(fgl::FactorGraph, exvid::Int, nei::CloudVertex; re
   nothing
 end
 
-function copyAllEdges!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64},1})
+function copyAllEdges!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64, Symbol},1})
   # do entire graph, one node at a time
   @showprogress 1 "Copy all edges..." for ids in IDs
     for nei in CloudGraphs.get_neighbors(fgl.cg, cverts[ids[2]], needdata=true)
@@ -485,7 +520,7 @@ function insertnodefromcv!(fgl::FactorGraph, cvert::CloudGraphs.CloudVertex)
   nothing
 end
 
-function copyAllNodes!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64},1}, conn)
+function copyAllNodes!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64, Symbol},1}, conn)
   @showprogress 1 "Copy all nodes..." for ids in IDs
     cvert = CloudGraphs.get_vertex(fgl.cg, ids[2], false)
     cverts[ids[2]] = cvert
@@ -604,7 +639,7 @@ end
 
 Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
 """
-function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false, multisession=false)
+function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false, multisession=false, drawedges=false)
   addrdict = Dict{AbstractString, Union{AbstractString, Vector{String}}}()
   askneo4jcredentials!(addrdict=addrdict)
   askmongocredentials!(addrdict=addrdict)
@@ -613,11 +648,14 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   !drawdepth ? nothing : push!(need, "draw depth")
   !clearslamindb ? nothing : push!(need, "clearslamindb")
   !multisession ? nothing : push!(need, "multisession")
+  !drawedges ? nothing : push!(need, "draw edges")
+
 
   info("Please also enter information for:")
   for n in need
     info(n)
     n == "draw depth" ? print("[y]/n: ") : nothing
+    n == "draw edges" ? print("[y]/n: ") : nothing
     n == "num particles" ? print("[100]: ") : nothing
     n == "clearslamindb" ? print("yes/[no]: ") : nothing
     n == "multisession" ? print("comma separated list session names/[n]: ") : nothing
@@ -626,6 +664,9 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   end
   if drawdepth
     addrdict["draw depth"] = addrdict["draw depth"]=="" || addrdict["draw depth"]=="y" || addrdict["draw depth"]=="yes" ? "y" : "n"
+  end
+  if drawdepth
+    addrdict["draw edges"] = addrdict["draw edges"]=="" || addrdict["draw edges"]=="y" || addrdict["draw edges"]=="yes" ? "y" : "n"
   end
   if nparticles
     addrdict["num particles"] = addrdict["num particles"]!="" ? addrdict["num particles"] : "100"
@@ -648,11 +689,12 @@ active cloudGraph object, as well as addrdict.
 function standardcloudgraphsetup(;addrdict=nothing,
             nparticles::Bool=false,
             drawdepth::Bool=false,
+            drawedges::Bool=false,
             clearslamindb::Bool=false,
             multisession::Bool=false  )
   #
   if addrdict == nothing
-    addrdict = consoleaskuserfordb(nparticles=nparticles, drawdepth=drawdepth, clearslamindb=clearslamindb, multisession=multisession)
+    addrdict = consoleaskuserfordb(nparticles=nparticles, drawdepth=drawdepth, clearslamindb=clearslamindb, multisession=multisession, drawedges=drawedges)
   end
 
   # Connect to database
@@ -942,6 +984,11 @@ function getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbo
   # calculate distances on local subgraph
   getRangeKDEMax2D(sfg, vsym1, vsym2)
 end
+
+
+
+
+
 
 
 

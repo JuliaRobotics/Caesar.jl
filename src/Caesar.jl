@@ -5,7 +5,6 @@ instpkg = Pkg.installed();
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 import DrakeVisualizer: Triad
-import IncrementalInference: ls
 import RoME: getRangeKDEMax2D, getLastPose
 
 using
@@ -89,6 +88,7 @@ export
   # save and load data
   saveSlam,
   loadSlam,
+  haselement,
 
   # drawing functions
   VisualizationContainer,
@@ -103,8 +103,11 @@ export
   drawpose!,
   drawposepoints!,
   drawLine!,
-  drawLineBetween3!,
+  drawLineBetween!,
   drawAllOdometryEdges!,
+  pointToColor,
+  findAllBinaryFactors,
+  drawAllBinaryFactorEdges!,
 
   # for models
   loadmodel,

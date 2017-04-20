@@ -340,8 +340,7 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
       cloudGraph::CloudGraphs.CloudGraph,
       addrdict,
       param::Dict,
-      DRAWDEPTH,
-      poseswithdepth::Dict  )
+      poseswithdepth::Dict )
       # bTc::CoordinateTransformations.AbstractAffineMap=
       #       Translation(0,0,0.6) ∘ LinearMap(
       #       CoordinateTransformations.Quat(0.5, -0.5, 0.5, -0.5) )    )
@@ -349,6 +348,9 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
 
   @show session = addrdict["session"]
   sesssym = Symbol(session)
+  DRAWDEPTH = addrdict["draw depth"]=="y" # not going to support just yet
+  DRAWEDGES = addrdict["draw edges"]=="y" # not going to support just yet
+
 
   # fg = Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph)
   println("Fetching pose IDs to be drawn...")
@@ -379,9 +381,10 @@ function drawdbsession(vis::DrakeVisualizer.Visualizer,
           depthcolormaps=depthcolormaps  )
   end
 
-  # TODO(pvt): draw factors
-  # drawAllBinaryFactorEdges!()
-
+  if DRAWEDGES
+    println("Going to draw edges...")
+    drawAllBinaryFactorEdges!(vis, cloudGraph, session)
+  end
   nothing
 end
 
@@ -411,9 +414,8 @@ end
 
 function drawdbdirector(;addrdict=nothing)
   # Uncomment out for command line operation
-  cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict,drawdepth=true)
+  cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict,drawdepth=true, drawedges=true)
   session = addrdict["session"]
-  DRAWDEPTH = addrdict["draw depth"]=="y" # not going to support just yet
 
   poseswithdepth = Dict()
   # poseswithdepth[:x1] = 0 # skip this pose -- there is no big data before ICRA
@@ -431,7 +433,7 @@ function drawdbdirector(;addrdict=nothing)
   drawloop = Bool[true]
   println("Starting draw loop...")
   while drawloop[1]
-    drawdbsession(vis, cloudGraph, addrdict, param, DRAWDEPTH, poseswithdepth) #,  db[collection]
+    drawdbsession(vis, cloudGraph, addrdict, param, poseswithdepth) #,  db[collection]
     println(".")
     sleep(0.5)
   end
