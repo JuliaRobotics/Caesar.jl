@@ -70,7 +70,7 @@ for lsym in ll
       # getfnctype(ve).bearing.μ
 
       pose = string(verts[1])[1] == 'x' ? verts[1] : verts[2]
-      cv = getCloudVert(sfg.cg, sfg.sessionname, pose, bigdata=true)
+      cv = getCloudVert(sfg.cg, sfg.sessionname, sym=pose, bigdata=true)
       imdata = Caesar.getBigDataElement(cv, "keyframe_rgb").data;
       img = ImageMagick.readblob(imdata);
       depthdata = Caesar.getBigDataElement(cv, "depthframe_image").data;
@@ -100,7 +100,7 @@ run(`mkdir -p results`)
 
 
 
-cv = getCloudVert(cloudGraph, session, xx[1], bigdata=true);
+cv = getCloudVert(cloudGraph, session, sym=xx[1], bigdata=true);
 sleep(0.5)
 imdata = Caesar.getBigDataElement(cv, "keyframe_rgb").data;
 img = ImageMagick.readblob(imdata);
