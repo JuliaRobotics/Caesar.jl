@@ -13,11 +13,11 @@ using CloudGraphs # for sorryPedro
 
 function gen_bindings()
     @show lcmtpath = joinpath(dirname(@__FILE__),"lcmtypes")
-    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_point_cloud_t.lcm`)
-    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_pose_node_t.lcm`)
-    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_pose_pose_nh_t.lcm`)
-    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_pose_pose_xyh_t.lcm`)
-    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/rome_prior_zpr_t.lcm`)
+    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_point_cloud_t.lcm`)
+    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_pose_node_t.lcm`)
+    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_pose_pose_nh_t.lcm`)
+    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_pose_pose_xyh_t.lcm`)
+    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_prior_zpr_t.lcm`)
     println("Adding lcmtypes dir to Python path: $(lcmtpath)")
     unshift!(PyVector(pyimport("sys")["path"]),lcmtpath)
 end
@@ -26,19 +26,17 @@ println("[Caesar.jl] (re)generating LCM bindings")
 gen_bindings()
 
 println("[Caesar.jl] Importing LCM message types")
-@pyimport rome
-
+@pyimport caesar
 
 function initialize!(backend_config,
                     user_config)
-    # TODO: init interface should be made cleaner/more straight forward
     println("[Caesar.jl] Setting up factor graph")
     fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
     println("[Caesar.jl] Creating SLAM client/object")
     return  SLAMWrapper(fg, nothing, 0)
 end
 
-function sorryPedro(cg::CloudGraph, session::AbstractString)
+function setRobotParameters!(cg::CloudGraph, session::AbstractString)
   hauvconfig = Dict()
   hauvconfig["robot"] = "hauv"
   hauvconfig["bTc"] = [0.0;0.0;0.0; 1.0; 0.0; 0.0; 0.0]
@@ -54,16 +52,13 @@ function sorryPedro(cg::CloudGraph, session::AbstractString)
 end
 
 """
-
 Adds pose nodes to graph with a prior on Z, pitch, and roll.
 """
 function handle_poses!(slam::SLAMWrapper,
                        message_data)
-
-    message = rome.pose_node_t[:decode](message_data)
+    message = caesar.pose_node_t[:decode](message_data)
     id = message[:id]
     println("[Caesar.jl] Received pose message for x$(id)")
-
 
     mean = message[:mean]
     covar = message[:covar]
@@ -90,7 +85,8 @@ function handle_poses!(slam::SLAMWrapper,
         initializeNode!(slam.fg, node_label)
 
         # set robot parameters in the first pose, this will become a separate node in the future
-        sorryPedro(slam.fg.cg, slam.fg.sessionname)
+        println("[Caesar.jl] Setting robot parameters")
+        setRobotParameters!(slam.fg.cg, slam.fg.sessionname)
     end
 end
 
@@ -98,20 +94,20 @@ function handle_priors!(slam::SLAMWrapper,
                          message_data)
 
 
-    message = rome.prior_zpr_t[:decode](message_data)
+    message = caesar.prior_zpr_t[:decode](message_data)
     id = message[:id]
     println("[Caesar.jl] Adding prior on RPZ to x$(id)")
 
-    @show node_label = Symbol("x$(id)")
+    node_label = Symbol("x$(id)")
     xn = getVert(slam.fg,node_label)
 
-    @show z = message[:z]
-    @show pitch = message[:pitch]
-    @show roll = message[:roll]
+    z = message[:z]
+    pitch = message[:pitch]
+    roll = message[:roll]
 
-    @show var_z = message[:var_z]
-    @show var_pitch = message[:var_pitch]
-    @show var_roll = message[:var_roll]
+    var_z = message[:var_z]
+    var_pitch = message[:var_pitch]
+    var_roll = message[:var_roll]
 
     rp_dist = MvNormal( [roll;pitch], diagm([var_roll, var_pitch]))
     z_dist = Normal(z, var_z)
@@ -122,9 +118,7 @@ end
 
 function handle_partials!(slam::SLAMWrapper,
                          message_data)
-    # add XYH factor
-
-    message = rome.pose_pose_xyh_t[:decode](message_data)
+    message = caesar.pose_pose_xyh_t[:decode](message_data)
 
     origin_id = message[:node_1_id]
     destination_id = message[:node_2_id]
@@ -133,15 +127,15 @@ function handle_partials!(slam::SLAMWrapper,
 
     println("[Caesar.jl] Adding XYH odometry constraint betwee (x$(origin_id), x$(destination_id))")
 
-    @show delta_x = message[:delta_x]
-    @show delta_y = message[:delta_y]
-    @show delta_yaw = message[:delta_yaw]
-
-    @show var_x = message[:var_x]
-    @show var_y = message[:var_y]
-    @show var_yaw = message[:var_yaw]
-
-    @show origin_label, destination_label
+    delta_x = message[:delta_x]
+    delta_y = message[:delta_y]
+    delta_yaw = message[:delta_yaw]
+    
+    var_x = message[:var_x]
+    var_y = message[:var_y]
+    var_yaw = message[:var_yaw]
+    
+    origin_label, destination_label
     xo = getVert(slam.fg,origin_label)
     xd = getVert(slam.fg,destination_label)
 
@@ -152,21 +146,19 @@ function handle_partials!(slam::SLAMWrapper,
 
     initializeNode!(slam.fg, destination_label)
     println()
-    println()
-
 end
 
 
 """
    handle_clouds(slam::SLAMWrapper, message_data)
 
-Callback for rome_point_cloud_t messages. Adds point cloud to SLAM_Client
+   Callback for caesar_point_cloud_t messages. Adds point cloud to SLAM_Client
 """
 function handle_clouds!(slam::SLAMWrapper,
                         message_data)
     # TODO: interface here should be as simple as slam_client.add_pointcloud(pc::SomeCloudType)
 
-    message = rome.point_cloud_t[:decode](message_data)
+    message = caesar.point_cloud_t[:decode](message_data)
 
     id = message[:id]
 
@@ -191,7 +183,6 @@ end
 # this function handles lcm messages
 function listener!(slam::SLAMWrapper,
                    lcm_node::LCMCore.LCM)
-
     # handle traffic
     while true
         handle(lcm_node)
@@ -199,9 +190,6 @@ function listener!(slam::SLAMWrapper,
 end
 
 
-# prepare the factor graph with just one node
-# (will prompt on stdin for db credentials)
-# TODO: why keep usrcfg and backendcfg? the former contains the latter
 #println("[Caesar.jl] Prompting user for configuration")
  @load "usercfg.jld"
 # include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
@@ -209,15 +197,9 @@ end
 user_config["session"] = "SESSHAUVDEV3"
 backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
 
-# Juno.breakpoint(@__FILE__, 127)
 
-# TODO: need better name for "slam_client"
 println("[Caesar.jl] Setting up local solver")
 slam_client = initialize!(backend_config,user_config)
-
-# TODO: should take default install values as args?
-# TODO: supress/redirect standard server output to log
-# NOTE: "Please also enter information for:"
 
 # create new handlers to pass in additional data
 lcm_pose_handler = (channel, message_data) -> handle_poses!(slam_client, message_data )
@@ -227,14 +209,12 @@ lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, messa
 
 # create LCM object and subscribe to messages on the following channels
 lcm_node = LCM()
-subscribe(lcm_node, "ROME_POSES", lcm_pose_handler)
-subscribe(lcm_node, "ROME_PARTIAL_XYH", lcm_odom_handler)
-subscribe(lcm_node, "ROME_PARTIAL_ZPR", lcm_prior_handler)
-subscribe(lcm_node, "ROME_POINT_CLOUDS", lcm_cloud_handler)
+subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler)
+subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler)
+subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler)
+subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler)
 
 println("[Caesar.jl] Running LCM listener")
 listener!(slam_client, lcm_node)
 
 
-# TODO: handle termination
-# TODO: reply with updates
