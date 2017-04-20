@@ -395,16 +395,16 @@ function drawLineBetween3!(vis::DrakeVisualizer.Visualizer,
   if subname != nothing
     place = vis[Symbol(fgl.sessionname)][name][subname][Symbol(string(fr,to))]
   end
-  drawLine!(place, xipt, xjpt , color=color, scale=scale )
+  drawLine!(place, xipt, xjpt, color=color, scale=scale )
   nothing
 end
 
 """
-    drawAllPoseEdges!(fgl::FactorGraph, fr::Symbol, to::Symbol; scale, color, api  )
+    drawAllOdometryEdges!(fgl::FactorGraph, fr::Symbol, to::Symbol; scale, color, api  )
 
 Assume odometry chain and draw edges between subsequent poses. Use keyword arguments to change colors, etc.
 """
-function drawAllPoseEdges!(vis::DrakeVisualizer.Visualizer,
+function drawAllOdometryEdges!(vis::DrakeVisualizer.Visualizer,
       fgl::FactorGraph;
       scale=0.01,
       name::Symbol=:edges,

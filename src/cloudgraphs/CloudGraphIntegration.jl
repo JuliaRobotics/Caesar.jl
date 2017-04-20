@@ -1,5 +1,7 @@
 # integration code for database usage via CloudGraphs.jl
 
+import IncrementalInference: getVert
+
 export
   executeQuery,
   getCloudVert,
@@ -41,12 +43,13 @@ export
 Run Neo4j Cypher queries on the cloudGraph database, andreturn Tuple with the
 unparsed (results, loadresponse).
 """
-function executeQuery(cg::CloudGraph, query::AbstractString)
-  loadtx = transaction(cg.neo4j.connection)
+function executeQuery(connection::Neo4j.Connection, query::AbstractString)
+  loadtx = transaction(connection)
   cph = loadtx(query, submit=true)
   loadresult = commit(loadtx)
   return cph, loadresult
 end
+executeQuery(cg::CloudGraph, query::AbstractString) = executeQuery(cg.neo4j.connection, query)
 
 function getCloudVert(cg::CloudGraph, session::AbstractString, vsym::Symbol; bigdata::Bool=false)
   loadtx = transaction(cg.neo4j.connection)
@@ -308,17 +311,23 @@ function getAllExVertexNeoIDs(conn;
   # query = "match (n$(sn)) where n.ready=$(ready) and n.backendset=$(backendset) return n"
   query = "match (n$(sn)) where n.ready=$(ready)"
   query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
-  query = query*" return n"
+  # query = query*" return n"
+  query = query*" return n.exVertexId, id(n), n.label"
 
-  # query = "match (n) where n.ready=1 and n.backendset=1 and not(n.packedType = 'IncrementalInference.FunctionNodeData{IncrementalInference.GenericMarginal}') return n"
+    ## query = "match (n) where n.ready=1 and n.backendset=1 and not(n.packedType = 'IncrementalInference.FunctionNodeData{IncrementalInference.GenericMarginal}') return n"
   cph = loadtx(query, submit=true)
-  ret = Array{Tuple{Int64,Int64},1}()
+  ret = Array{Tuple{Int64,Int64,Symbol},1}()
 
   @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
-    metadata = data["meta"][1]
-    rowdata = data["row"][1]
-    push!(ret, (rowdata["exVertexId"],metadata["id"])  )
+    exvid, neoid = data["row"][1], data["row"][2], Symbol(data["row"][3])
+    push!(ret, (exvid,neoid,Symbol)  )
   end
+
+  # @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
+  #   metadata = data["meta"][1]
+  #   rowdata = data["row"][1]
+  #   push!(ret, (rowdata["exVertexId"],metadata["id"])  )
+  # end
   return ret
 end
 
@@ -327,24 +336,27 @@ end
 
 Return array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.
 """
-function getExVertexNeoIDs(conn;
+function getExVertexNeoIDs(conn::Neo4j.connection;
         label::AbstractString="",
         ready::Int=1,
         backendset::Int=1,
         session::AbstractString="",
         reqbackendset::Bool=true  )
   #
-  loadtx = transaction(conn)
   sn = length(session) > 0 ? ":"*session : ""
   lb = length(label) > 0 ? ":"*label : ""
   query = "match (n$(sn)$(lb)) where n.ready=$(ready) and exists(n.exVertexId)"
   query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
-  query = query*" return n.exVertexId, id(n)"
-  cph = loadtx(query, submit=true)
-  ret = Array{Tuple{Int64,Int64},1}()
+  query = query*" return n.exVertexId, id(n), n.label"
+
+  cph, = executeQuery(conn, query)
+  # loadtx = transaction(conn)
+  # cph = loadtx(query, submit=true)
+
+  ret = Array{Tuple{Int64,Int64,Symbol},1}()
   @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
-    exvid, neoid = data["row"][1], data["row"][2]
-    push!(ret, (exvid,neoid)  )
+    exvid, neoid, vsym = data["row"][1], data["row"][2], Symbol(data["row"][3])
+    push!(ret, (exvid,neoid,vsym)  )
   end
   return ret
 end
@@ -469,12 +481,13 @@ function fullLocalGraphCopy!(fgl::FactorGraph; reqbackendset::Bool=true)
   end
 end
 
-function setDBAllReady!(conn, sessionname)
-  loadtx = transaction(conn)
+function setDBAllReady!(conn::Neo4.Connection, sessionname::AbstractString)
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   query = "match (n$(sn)) set n.ready=1"
-  cph = loadtx(query, submit=true)
-  loadresult = commit(loadtx)
+  cph, loadresult = executeQuery(conn, query)
+  # loadtx = transaction(conn)
+  # cph = loadtx(query, submit=true)
+  # loadresult = commit(loadtx)
   nothing
 end
 
@@ -484,12 +497,14 @@ function setDBAllReady!(fgl::FactorGraph)
 end
 
 
-function setBackendWorkingSet!(conn, sessionname::AbstractString)
-  loadtx = transaction(conn)
+function setBackendWorkingSet!(conn::Neo4j.Connection, sessionname::AbstractString)
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   query = "match (n$(sn)) where not (n:NEWDATA) set n.backendset=1"
-  cph = loadtx(query, submit=true)
-  loadresult = commit(loadtx)
+
+  cph, loadresult = executeQuery(conn, query)
+  # loadtx = transaction(conn)
+  # cph = loadtx(query, submit=true)
+  # loadresult = commit(loadtx)
   nothing
 end
 

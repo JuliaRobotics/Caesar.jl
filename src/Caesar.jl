@@ -103,7 +103,7 @@ export
   drawposepoints!,
   drawLine!,
   drawLineBetween3!,
-  drawAllPoseEdges!,
+  drawAllOdometryEdges!,
 
   # for models
   loadmodel,
@@ -181,7 +181,7 @@ export
   rmInstMultisessionPriors!,
   removeMultisessions!
 
-# typealias VoidUnion{T} Union{Void, T}
+typealias VoidUnion{T} Union{Void, T}
 
 include("BearingRangeTrackingServer.jl")
 

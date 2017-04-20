@@ -89,13 +89,13 @@ using Colors
 
 
 # drawLineBetween3!(vis, fg,:x1,:x2, api=localapi , color=RGBA(0,1.0,1.0,0.5), scale=0.045 )
-drawAllPoseEdges!(vis, fg, api=localapi)
+drawAllOdometryEdges!(vis, fg, api=localapi)
 
 
 vf = getVert(fg, fg.fIDs[:x1x2])
 thing = getfnctype(vf)
 
-function findAllBinaryFactors(cgl::CloudGraph)
+function findAllBinaryFactors(cgl::CloudGraph, session::AbstractString)
   error("Not implemented yet")
   return slowly
 end
@@ -125,6 +125,8 @@ function findAllBinaryFactors(fgl::FactorGraph; api::DataLayerAPI=dlapi)
   return slowly
 end
 
+
+
 function pointToColor(nm::Symbol)
   if nm == :PartialPose3XYYaw
     return RGBA(0.6,0.8,0.9,0.5)
@@ -146,13 +148,85 @@ function drawAllBinaryFactorEdges!(vis::DrakeVisualizer.Visualizer,
 
   for (teeth, toe) in sloth
     color = pointToColor(toe[3])
-    drawLineBetween3!(vis, fgl, toe[1], toe[2], subname=toe[3],scale=scale, color=color)
+    drawLineBetween3!(vis, fgl, toe[1], toe[2], subname=toe[3], scale=scale, color=color)
   end
   nothing
 end
 
 
+
+
+
 drawAllBinaryFactorEdges!(vis, fg)
+
+
+function listNeigborsBySym(cgl::CloudGraph, session::AbstractString, vsym::Symbol)
+  sn = length(session) > 0 ? ":"*session : ""
+  query = "match (n$(sn))-[]-(f$(sn)) where n.ready=$(ready) and n.label=$(vsym)"
+  query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
+  query = query*" return f.exVertexId, id(f), f.label"
+
+  cph, = executeQuery(conn, query)
+
+
+end
+
+function ls(cgl::CloudGraph, session::AbstractString;
+      sym::VoidUnion{Symbol}=nothing,
+      neoid::VoidUnion{Int64}=nothing,
+      exvid::VoidUnion{Int64}=nothing  )
+  #
+
+
+  error("Not implemented yet")
+end
+
+function ls(cgl::CloudGraph, session::AbstractString, neo)
+
+
+end
+
+
+using CloudGraphs
+
+function findAllBinaryFactors(cgl::CloudGraph, session::AbstractString)
+  xx, ll = ls(fgl)
+  xxids = getExVertexNeoIDs(cgl.neo4j.connection, session=session, label="POSE", reqbackendset=false)
+
+  slowly = Dict{Symbol, Tuple{Symbol, Symbol, Symbol}}()
+  for x in xx
+    facts = ls(cgl, session, x, api=localapi) # TODO -- known BUG on ls(api=dlapi)
+    for fc in facts
+      nodes = lsf(fgl, fc)
+      if length(nodes) == 2
+        # add to dictionary for later drawing
+        if !haskey(slowly, fc)
+          fv = getVert(fgl, fgl.fIDs[fc])
+          slowly[fc] = (nodes[1], nodes[2], typeof(getfnctype(fv)).name.name)
+        end
+      end
+    end
+  end
+
+  return slowly
+end
+
+
+function drawAllBinaryFactorEdges!(vis::DrakeVisualizer.Visualizer,
+      cgl::CloudGraph,
+      session::AbstractString;
+      scale=0.01  )
+  #
+
+  sloth = findAllBinaryFactors(cgl, session)
+
+
+end
+
+
+drawAllBinaryFactorEdges!(vis, fg.cg, fg.sessionname)
+
+
 
 X1 = getVertKDE(fg, :x1)
 plotKDE(X1, dims=[1;2])
