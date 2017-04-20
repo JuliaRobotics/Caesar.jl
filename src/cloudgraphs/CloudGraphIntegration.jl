@@ -52,11 +52,63 @@ end
 executeQuery(cg::CloudGraph, query::AbstractString) = executeQuery(cg.neo4j.connection, query)
 
 function getCloudVert(cg::CloudGraph, session::AbstractString, vsym::Symbol; bigdata::Bool=false)
-  loadtx = transaction(cg.neo4j.connection)
+  warn("getCloudVert(cg, sess, sym) will be deprecated, use getCloudVert(cg, sess, sym=sym) instead.")
+  # query = " and n.ready=$(ready) and n.label=$(vsym) "
+  # query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
   query = "match (n:$(session)) where n.label='$(vsym)' return id(n)"
-  cph = loadtx(query, submit=true)
+
+  cph, = executeQuery(cg, query)
+  # loadtx = transaction(cg.neo4j.connection)
+  # cph = loadtx(query, submit=true)
   neoid = cph.results[1]["data"][1]["row"][1]
   CloudGraphs.get_vertex(cg, neoid, bigdata)
+end
+
+function getCloudVert(cgl::CloudGraph,
+        session::AbstractString;
+        exvid::VoidUnion{Int}=nothing,
+        neoid::VoidUnion{Int}=nothing,
+        sym::VoidUnion{Symbol}=nothing,
+        bigdata=false  )
+  #
+  query = "match (n:$(session)) "
+
+  if sym != nothing
+    query = query*" where n.label='$(sym)' "
+  elseif exvid != nothing
+    query = query*" where n.exVertexId=$(exvid) "
+  elseif neoid != nothing
+    return CloudGraphs.get_vertex(cgl, neoid, bigdata)
+  else
+    @show sym, neoid,exvid
+    error("Cannot list neighbors if no input reference is given")
+  end
+  query = query*" return id(n)"
+
+  cph, = executeQuery(cgl.neo4j.connection, query)
+  neoid = cph.results[1]["data"][1]["row"][1]
+  CloudGraphs.get_vertex(cgl, neoid, bigdata)
+end
+
+"""
+    ls(cgl::CloudGraph, session::AbstractString; sym::Symbol=, neoid::Int=,exvid::Int=)
+
+List neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, String[labels]), and can take
+any of the three as input node identifier.
+"""
+function ls(cgl::CloudGraph, session::AbstractString;
+      sym::VoidUnion{Symbol}=nothing,
+      neoid::VoidUnion{Int64}=nothing,
+      exvid::VoidUnion{Int64}=nothing  )
+  #
+  cv = getCloudVert(cgl, session, sym=sym, neoid=neoid, exvid=exvid, bigdata=false )
+
+  neis = get_neighbors(cgl, cv, needdata=false)
+  dd = Dict{Symbol, Tuple{Int, Int, Vector{AbstractString}}}()
+  for nei in neis
+    dd[Symbol(nei.properties["label"])] = (nei.exVertexId, nei.neo4jNodeId, nei.labels)
+  end
+  return dd
 end
 
 function initfg(;sessionname="NA",cloudgraph=nothing)
@@ -336,7 +388,7 @@ end
 
 Return array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.
 """
-function getExVertexNeoIDs(conn::Neo4j.connection;
+function getExVertexNeoIDs(conn::Neo4j.Connection;
         label::AbstractString="",
         ready::Int=1,
         backendset::Int=1,
@@ -366,7 +418,7 @@ end
 
 Return array of tuples with ExVertex IDs and Neo4j IDs for all poses.
 """
-function getPoseExVertexNeoIDs(conn;
+function getPoseExVertexNeoIDs(conn::Neo4j.Connection;
         ready::Int=1,
         backendset::Int=1,
         session::AbstractString="",
@@ -481,7 +533,7 @@ function fullLocalGraphCopy!(fgl::FactorGraph; reqbackendset::Bool=true)
   end
 end
 
-function setDBAllReady!(conn::Neo4.Connection, sessionname::AbstractString)
+function setDBAllReady!(conn::Neo4j.Connection, sessionname::AbstractString)
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   query = "match (n$(sn)) set n.ready=1"
   cph, loadresult = executeQuery(conn, query)
