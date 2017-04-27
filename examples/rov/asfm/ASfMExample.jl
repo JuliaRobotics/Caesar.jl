@@ -1,3 +1,5 @@
+
+
 # addprocs(3)
 
 using TransformUtils, Gadfly
@@ -6,7 +8,23 @@ using IncrementalInference
 using RoME
 using Caesar
 using Distributions
+using CoordinateTransformations
+using TransformUtils
 # using Base.Test
+
+typealias CTs CoordinateTransformations
+typealias TUs TransformUtils
+
+CTs.Translation(zeros(3))
+
+import Base: \
+
+function \(s::SE3, t::CTs.Translation)
+  
+end
+
+SE3(0)\Translation(1.0,0,0)
+
 
 
 # Parametric solution with hand checked solution as ground truth
@@ -27,12 +45,6 @@ gt[:x3]= (:XYZqWXYZ , [-0.363944; -1.18799; 1.74864;         0.937102; -0.084778
 gt[:x4]= (:XYZqWXYZ , [-0.262489; -0.865555; 1.82557;        0.935268; -0.0797656; -0.0966424; -0.331015] )
 gt[:x5]= (:XYZqWXYZ , [-0.680204; -1.37827; 1.73447;         0.949729; -0.0644836;  -0.120014; -0.281874] )
 gt[:x6]= (:XYZqWXYZ , [-0.614131; -1.29263; 1.75964;         0.951792; -0.0638253;  -0.117314; -0.276146] )
-
-
-function veePose3(s::SE3)
-  veeEuler(s)
-end
-
 
 
 
@@ -100,16 +112,16 @@ x2Tx3 = SE3([-0.00138117; -0.0600476; 0.0204065], Euler( 0.00606331, 0.0186151, 
 addOdoFG!(fg, Pose3Pose3( MvNormal(veePose3(x2Tx3), odoCov) ) )
 
 # Odometry pose 2 pose 3: (-0.298704, -0.113974, 0.0244868; -0.00805163, -0.00425057, -0.0275746)
-odo = MvNormal([-0.298704; -0.113974; 0.0244868; -0.0275746; -0.00425057; -0.00805163], odoCov )
-addOdoFG!(fg, Pose3Pose3( odo ) )
+x3Tx4 = SE3([-0.298704; -0.113974; 0.0244868], Euler( -0.0275746, -0.00425057, -0.00805163) )
+addOdoFG!(fg, Pose3Pose3( MvNormal( veePose3(x3Tx4), odoCov ) ) )
 
 # Odometry pose 3 pose 4: (0.670492, 0.0251882, -0.0705555; 0.109113, 0.0228966, 0.039246)
-odo = MvNormal([0.670492; 0.0251882; -0.0705555; 0.039246; 0.0228966; 0.109113], odoCov )
-addOdoFG!(fg, Pose3Pose3( odo ) )
+x4Tx5 = SE3([0.670492; 0.0251882; -0.0705555], Euler(0.039246, 0.0228966, 0.109113) )
+addOdoFG!(fg, Pose3Pose3( MvNormal( veePose(x4T5), odoCov ) ) )
 
 # Odometry pose 4 pose 5: (-0.0615969, 0.00849829, -0.0170747; 0.0315662, -0.0115416, -0.00605423)
-odo = MvNormal([-0.0615969; 0.00849829; -0.0170747;  -0.00605423;-0.0115416;0.0315662], odoCov )
-addOdoFG!(fg, Pose3Pose3( odo ) )
+x5Tx6 = SE3([-0.0615969; 0.00849829; -0.0170747],  Euler(-0.00605423,-0.0115416,0.0315662))
+addOdoFG!(fg, Pose3Pose3( MvNormal(veePose3(x5Tx6), odoCov ) ) )
 
 
 println("Adding landmarks to graph...")
