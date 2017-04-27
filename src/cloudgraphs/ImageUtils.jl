@@ -26,7 +26,7 @@ function cloudimshow(cg::CloudGraph,
         vsym::Symbol;
         descr::AbstractString = "keyframe_rgb"  )
   #
-  cv = getCloudVert(cg, session, vsym, bigdata=true)
+  cv = getCloudVert(cg, session, sym=vsym, bigdata=true)
   imdata = Caesar.getBigDataElement(cv, descr).data
   imshowhackpng(imdata)
 end

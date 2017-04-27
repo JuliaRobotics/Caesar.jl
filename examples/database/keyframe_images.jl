@@ -48,7 +48,7 @@ vsym = xx[5]  #:x19
 
 
 # fetch and show images
-cv = getCloudVert(cloudGraph, session, vsym, bigdata=true);
+cv = getCloudVert(cloudGraph, session, sym=vsym, bigdata=true);
 sleep(0.5)
 imdata = Caesar.getBigDataElement(cv, "keyframe_rgb").data;
 img = ImageMagick.readblob(imdata);

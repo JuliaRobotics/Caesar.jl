@@ -300,6 +300,10 @@ function visualizeallposes!(vc::DrakeVisualizer.Visualizer,
   nothing
 end
 
+function colorwheel(n::Int)
+  # RGB(1.0, 1.0, 0)
+  convert(RGB, HSV((n*30)%360, 1.0,0.5))
+end
 
 function drawposepoints!(vis::DrakeVisualizer.Visualizer,
       vert::Graphs.ExVertex;
@@ -321,6 +325,8 @@ function drawposepoints!(vis::DrakeVisualizer.Visualizer,
   pointcloud = PointCloud(XX)
   if string(vsym)[1] == 'l'
     pointcloud.channels[:rgb] = [RGB(1.0, 1.0, 0) for i in 1:length(XX)]
+  elseif string(vsym)[1] == 'x'
+    pointcloud.channels[:rgb] = [colorwheel(vert.index) for i in 1:length(XX)]
   end
   setgeometry!(vis[Symbol(session)][:posepts][vsym], pointcloud)
   nothing
@@ -344,6 +350,160 @@ function deletemeshes!(vc::DrakeVisualizer.Visualizer)
 end
 
 
+
+function drawLine!(vispath, from::Vector{Float64}, to::Vector{Float64}; scale=0.01,color=RGBA(0,1.0,0,0.5))
+  vector = to-from
+  len = norm(vector)
+  buildline = Float64[len, 0, 0]
+
+  v = norm(buildline-vector) > 1e-10 ? cross(buildline, vector)  : [0,0,1.0]
+  axis = v/norm(v)
+  angle = acos(dot(vector, buildline)/(len^2) )
+  rot = LinearMap( CoordinateTransformations.AngleAxis(angle, axis...) )
+
+  mol = HyperRectangle(Vec(0.0,-scale,-scale), Vec(len,scale,scale))
+  molbox = GeometryData(mol, color)
+
+  setgeometry!(vispath, molbox)
+  settransform!(vispath, Translation(from...) ∘ rot )
+  nothing
+end
+
+
+"""
+    drawLineBetweenPose3(fr::Graphs.ExVertex, to::Graphs.ExVertex; scale=, color=  )
+
+Draw a line segment between to vertices.
+"""
+function drawLineBetween!(vis::DrakeVisualizer.Visualizer,
+        session::AbstractString,
+        fr::Graphs.ExVertex,
+        to::Graphs.ExVertex;
+        scale=0.01,
+        name::Symbol=:edges,
+        subname::Union{Void,Symbol}=nothing,
+        color=RGBA(0,1.0,0,0.5)   )
+  #
+  dotwo, dothree = getdotwothree(Symbol(fr.label), getVal(fr))
+
+  xipt = zeros(3); xjpt = zeros(3);
+  if dothree
+    xi = marginal(getVertKDE( fr ),[1;2;3] )
+    xj = marginal(getVertKDE( to ),[1;2;3] )
+    xipt[1:3] = getKDEMax(xi)
+    xjpt[1:3] = getKDEMax(xj)
+  elseif dotwo
+    xi = marginal(getVertKDE( fr ),[1;2] )
+    xj = marginal(getVertKDE( to ),[1;2] )
+    xipt[1:2] = getKDEMax(xi)
+    xjpt[1:2] = getKDEMax(xj)
+  end
+
+  lbl = Symbol(string(fr.label,to.label))
+  place = vis[Symbol(session)][name][lbl]
+  if subname != nothing
+    place = vis[Symbol(session)][name][subname][lbl]
+  end
+  drawLine!(place, xipt, xjpt, color=color, scale=scale )
+  nothing
+end
+
+
+"""
+    drawLineBetween(fgl::FactorGraph, fr::Symbol, to::Symbol; scale, color, api  )
+
+Draw a line segment between to nodes in the factor graph.
+"""
+function drawLineBetween!(vis::DrakeVisualizer.Visualizer,
+        fgl::FactorGraph,
+        fr::Symbol,
+        to::Symbol;
+        scale=0.01,
+        name::Symbol=:edges,
+        subname::Union{Void,Symbol}=nothing,
+        color=RGBA(0,1.0,0,0.5),
+        api::DataLayerAPI=dlapi  )
+  #
+  v1 = getVert(fgl, fr, api=api)
+  v2 = getVert(fgl, to, api=api)
+
+  drawLineBetween!(vis,fgl.sessionname, v1,v2,scale=scale,name=name,subname=subname,color=color   )
+end
+
+"""
+    drawAllOdometryEdges!(fgl::FactorGraph, fr::Symbol, to::Symbol; scale, color, api  )
+
+Assume odometry chain and draw edges between subsequent poses. Use keyword arguments to change colors, etc.
+"""
+function drawAllOdometryEdges!(vis::DrakeVisualizer.Visualizer,
+      fgl::FactorGraph;
+      scale=0.01,
+      name::Symbol=:edges,
+      color=RGBA(0,1.0,0,0.5),
+      api::DataLayerAPI=dlapi  )
+  #
+  xx, ll = ls(fgl)
+
+  for i in 1:(length(xx)-1)
+    drawLineBetween!(vis, fgl, xx[i],xx[i+1], api=api , color=color, scale=scale, name=name )
+  end
+
+  nothing
+end
+
+
+
+
+
+function findAllBinaryFactors(fgl::FactorGraph; api::DataLayerAPI=dlapi)
+  xx, ll = ls(fgl)
+
+  slowly = Dict{Symbol, Tuple{Symbol, Symbol, Symbol}}()
+  for x in xx
+    facts = ls(fgl, x, api=localapi) # TODO -- known BUG on ls(api=dlapi)
+    for fc in facts
+      nodes = lsf(fgl, fc)
+      if length(nodes) == 2
+        # add to dictionary for later drawing
+        if !haskey(slowly, fc)
+          fv = getVert(fgl, fgl.fIDs[fc])
+          slowly[fc] = (nodes[1], nodes[2], typeof(getfnctype(fv)).name.name)
+        end
+      end
+    end
+  end
+
+  return slowly
+end
+
+
+
+
+function pointToColor(nm::Symbol)
+  if nm == :PartialPose3XYYaw
+    return RGBA(0.6,0.8,0.9,0.5)
+  elseif nm == :Pose3Pose3NH
+    return RGBA(1.0,1.0,0,0.5)
+  else
+    # println("pointToColor(..) -- warning, using default color for edges")
+    return RGBA(0.0,1,0.0,0.5)
+  end
+end
+
+
+function drawAllBinaryFactorEdges!(vis::DrakeVisualizer.Visualizer,
+      fgl::FactorGraph;
+      scale=0.01,
+      api::DataLayerAPI=dlapi )
+  #
+  sloth = findAllBinaryFactors(fgl, api=api)
+
+  for (teeth, toe) in sloth
+    color = pointToColor(toe[3])
+    drawLineBetween!(vis, fgl, toe[1], toe[2], subname=toe[3], scale=scale, color=color)
+  end
+  nothing
+end
 
 
 

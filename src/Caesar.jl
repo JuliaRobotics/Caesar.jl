@@ -88,6 +88,7 @@ export
   # save and load data
   saveSlam,
   loadSlam,
+  haselement,
 
   # drawing functions
   VisualizationContainer,
@@ -101,6 +102,12 @@ export
   # new tree interface
   drawpose!,
   drawposepoints!,
+  drawLine!,
+  drawLineBetween!,
+  drawAllOdometryEdges!,
+  pointToColor,
+  findAllBinaryFactors,
+  drawAllBinaryFactorEdges!,
 
   # for models
   loadmodel,
@@ -178,7 +185,7 @@ export
   rmInstMultisessionPriors!,
   removeMultisessions!
 
-# typealias VoidUnion{T} Union{Void, T}
+typealias VoidUnion{T} Union{Void, T}
 
 include("BearingRangeTrackingServer.jl")
 

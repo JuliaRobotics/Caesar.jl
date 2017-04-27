@@ -65,7 +65,7 @@ spyCliqMat(tree, :l200050)
 
 plotMCMC(tree, :l200050)
 
-plotPriorsAtCliq(tree, :l200050, :l200050, marg=[1;2], levels=1)
+plotPriorsAtCliq(tree, :l200050, :l200050, dims=[1;2], levels=1)
 
 plotUpMsgsAtCliq(tree, :l200050, :l200050, marg=[1;2])
 

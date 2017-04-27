@@ -51,7 +51,7 @@ for i in 1:5
   # and a point cloud
   data = read_MongoData(backend_config, mkpc[i])
   pcarr = getPointCloudFromBSON(data)
-  pc = prepcolordepthcloud!(pcarr)
+  pc = prepcolordepthcloud!(i, pcarr)
   setgeometry!(vis[:debughauv][sym][:pointcloud], pc)
 end
 
@@ -85,6 +85,16 @@ plotPriorsAtCliq(tree, :x1, :x5, dims=[1;2])
 plotPriorsAtCliq(tree, :x1, :x5, dims=[6;3])
 plotPriorsAtCliq(tree, :x1, :x5, dims=[4;5])
 
+
+
+
+
+drawAllBinaryFactorEdges!(vis, backend_config, user_config["session"])
+
+
+# drawLineBetween!(vis, fg,:x1,:x2, api=localapi , color=RGBA(0,1.0,1.0,0.5), scale=0.045 )
+# drawAllOdometryEdges!(vis, fg, api=localapi)
+# drawAllBinaryFactorEdges!(vis, fg)
 
 
 

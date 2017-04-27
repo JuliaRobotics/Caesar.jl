@@ -98,7 +98,7 @@ end
 
 
 """
-    getAllExVertexNeoIDs(::Dict{Symbol, Dict{Symbol, Int}}, ::Symbol)
+    getAllLandmarkNeoIDs(::Dict{Symbol, Dict{Symbol, Int}}, ::Symbol)
 
 Return Vector{Int} of Neo4j vertex IDs relating to symbol, as listed in lm2others.
 """
