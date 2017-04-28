@@ -627,8 +627,10 @@ function askmongocredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
   end
   if addrdict["mongo addr"] == "" && haskey(addrdict, "neo4j addr")
     addrdict["mongo addr"] = addrdict["neo4j addr"]
+  elseif addrdict["mongo addr"] != ""
+    nothing
   else
-    error("Don't how to get to MongoDB.")
+    error("Don't know how to get to MongoDB address.")
   end
   return addrdict
 end
