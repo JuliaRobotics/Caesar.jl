@@ -367,6 +367,7 @@ function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
   # partial constraints
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PartialPriorRollPitchZ}}, PackedFunctionNodeData{PackedPartialPriorRollPitchZ}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PartialPose3XYYaw}}, PackedFunctionNodeData{PackedPartialPose3XYYaw}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PartialPose3XYYawNH}}, PackedFunctionNodeData{PackedPartialPose3XYYawNH}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
 
   nothing
 end
