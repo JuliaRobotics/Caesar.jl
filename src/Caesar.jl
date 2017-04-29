@@ -158,6 +158,7 @@ export
   tryunpackalltypes!,
   fetchrobotdatafirstpose,
   getExVertexNeoIDs,
+  db2jld,
 
   # Robot Utils
   getRangeKDEMax2D,
