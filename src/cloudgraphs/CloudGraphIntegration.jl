@@ -989,10 +989,27 @@ function getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbo
 end
 
 
+"""
+    db2jld(cgl::CloudGraph, session::AbstractString, filename::AbstractString)
 
+Fetch and save a FactorGraph session to a jld, using CloudGraph object and session definition.
+"""
+function db2jld(cgl::CloudGraph, session::AbstractString, filename::AbstractString)
+  fg = Caesar.initfg(sessionname=session, cloudgraph=cgl)
+  fullLocalGraphCopy!(fg)
+  savejld(fg, file=filename)
+  return fg
+end
 
+"""
+    db2jld(filename::AbstractString; addrdict::VoidUnion{Dict{AbstractString, AbstractString}}=nothing )
 
-
+Fetch and save a FactorGraph session to a jld, using or asking STDIN for credentials in the addrdict field.
+"""
+function db2jld(filename::AbstractString; addrdict::VoidUnion{Dict{AbstractString, AbstractString}}=nothing )
+  cg, cr = standardcloudgraphsetup(addrdict=addrdict)
+  db2jld(cg, cr["session"], filename)
+end
 
 
 # function syncmongos()
