@@ -412,7 +412,7 @@ function robotsetup(cg::CloudGraph, session::AbstractString)
   resp
 end
 
-function drawdbdirector(;addrdict=nothing)
+function drawdbdirector(;addrdict::VoidUnion{Dict{AbstractString, AbstractString}}=nothing)
   # Uncomment out for command line operation
   cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict,drawdepth=true, drawedges=true)
   session = addrdict["session"]
