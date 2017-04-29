@@ -98,7 +98,7 @@ export
   animatearc,
 
   # vis service
-  drawdbsession,
+  # drawdbsession,
   drawdbdirector,
   meshgrid,
   DepthCamera,
