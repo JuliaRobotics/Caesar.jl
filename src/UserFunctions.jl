@@ -14,11 +14,11 @@ function identitypose6fg(;fg=nothing,
   fg = fg != nothing ? fg : initfg()
   N = 100
 
-  println("Adding PriorPose3 and :x1 to graph...")
+  println("Adding PriorPose3 and :x0 to graph...")
   # pts = 0.001*randn(6,N)
   initPosePrior = PriorPose3( MvNormal(veeEuler(initpose), initCov)  )
   pts = getSample(initPosePrior,N)[1]
-  v0 = addNode!(fg, :x1,  pts,  N=N, labels=["POSE"])
+  v0 = addNode!(fg, :x0,  pts,  N=N, labels=["POSE"])
   f1  = addFactor!(fg,[v0], initPosePrior)
   return fg
 end
