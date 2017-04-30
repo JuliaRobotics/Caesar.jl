@@ -5,12 +5,20 @@ function getcredentials(;nparticles=true, drawdepth=true, multisession=false)
   return addrdict
 end
 
+function slamindbsavejld(fgl::FactorGraph, session::AbstractString, itercount::Int)
+  dt = Base.Dates.now()
+  filenamejld = "$(session)_$(Dates.format(dt, "dduyy-HH:MM:SS"))_slamindb_$(itercount).jld"
+  println("------Save fg to file: $(filenamejld)------")
+  savejld(fgl,file=filenamejld)
+  nothing
+end
 
 function slamindb(;addrdict=nothing,
             N::Int=-1,
             loopctrl::Vector{Bool}=Bool[true],
             iterations::Int=-1,
-            multisession::Bool=false  )
+            multisession::Bool=false,
+            savejlds::Bool=false  )
   #
 
   nparticles = false
@@ -30,6 +38,7 @@ function slamindb(;addrdict=nothing,
     addrdict["multisession"]=String[]
   end
 
+  itercount = 0
   while loopctrl[1] && (iterations > 0 || iterations == -1) # loopctrl for future use
     iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
     println("===================CONVERT===================")
@@ -48,11 +57,12 @@ function slamindb(;addrdict=nothing,
 
     println("get local copy of graph")
 
-    # removeGenericMarginals!(conn) # function should not be necessary, but fixes a minor bug following elimination algorithm
     if fullLocalGraphCopy!(fg)
+      (savejlds && itercount == 0) ? slamindbsavejld(fg, addrdict["session"], itercount) : nothing
+      itercount += 1
       tree = wipeBuildNewTree!(fg,drawpdf=true)
-      # removeGenericMarginals!(conn)
       inferOverTree!(fg, tree, N=N)
+      savejlds ? slamindbsavejld(fg, addrdict["session"], itercount) : nothing
     else
       sleep(0.2)
     end
