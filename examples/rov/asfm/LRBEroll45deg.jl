@@ -45,7 +45,8 @@ rovt(vc, am )
 l1p = [0.0; 4.0; 0.7]
 featuredata = GeometryData(HyperSphere(Point(l1p...), 0.10) )
 featuredata.color = RGBA(0.5, 1.0, 0.0, 0.7)
-model = Visualizer(featuredata,101)
+# model = Visualizer()
+setgeometry!(vc[:point],featuredata)
 
 # l1p = [0.0; 4.0; 0.7]
 # featuredata = GeometryData(HyperSphere(Point(l1p...), 0.1) )
@@ -81,7 +82,7 @@ odoCov = deepcopy(initCov)
 println("Adding PriorPose3 and :x1 to graph...")
 
 initp = SE3(zeros(3),TransformUtils.AngleAxis(pi/2,[0;0;1.0]))
-initPosePrior = PriorPose3( MVNormal(veeEuler(initp), initCov) )
+initPosePrior = PriorPose3( MvNormal(veeEuler(initp), initCov) )
 X= getSample(initPosePrior,N)[1]
 v0 = addNode!(fg, :x1,  X,  N=N)
 f1  = addFactor!(fg,[v0], initPosePrior)
@@ -90,7 +91,7 @@ rangecov, bearingcov=3e-3, 3e-3
 println("Adding :l1 LinearRangeBearingElevation to graph...")
 addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 # solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1])
-visualizeDensityMesh!(vc, fg, :l1, meshid=2)
+visualizeDensityMesh!(vc, fg, :l1)
 
 # @async begin
 for t in linspace(0,1,50)
@@ -111,7 +112,7 @@ addOdoFG!(fg, odo , N=N)
 visualizeallposes!(vc, fg, drawlandms=false)
 addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l2, rangecov=rangecov,bearingcov=bearingcov)
 
-visualizeDensityMesh!(vc, fg, :l2, meshid=2)
+visualizeDensityMesh!(vc, fg, :l2)
 sleep(5.0)
 
 # and a third seen from both poses
@@ -122,6 +123,6 @@ addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l3, rangecov=rangecov,bearingcov=
 
 
 solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l3;:l2], N=N)
-visualizeDensityMesh!(vc, fg, :x2, meshid=3)
+visualizeDensityMesh!(vc, fg, :x2)
 
 #

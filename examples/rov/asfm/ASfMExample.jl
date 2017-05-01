@@ -158,30 +158,6 @@ end
 
 meas = measGT
 
-"""
-    gt2fg!(gt)
-
-Insert into existing or new FactorGraph type from ground truth data in gt.
-
-Example
-
-  gt[:l6] = (:XYZ ,  [2.02859; -2.82187; 2.16534] )
-  gt[:x0] = (:XYZqWXYZ , [0.000229458; 0.299991; -0.00230474;   0.696163;  0.0546845;  -0.123042;  0.705144] )
-"""
-function gt2fg!(gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}};
-    fg=nothing,
-    session="GROUNDTRUTH" )
-  #
-  fg = fg != nothing ? fg : initfg(sessionname=session)
-
-  for (key, val) in fg
-    #
-  end
-
-
-  error("Under construction")
-  fg
-end
 
 
 # setup visualization process and default drawings
@@ -336,12 +312,21 @@ solveandvisualize(fg, vc, N=N, drawtype=:fit, gt=gt)
 
 
 
-visualizeallposes!(vc, fg, drawtype=:fit, gt=gt)
+visualizeallposes!(vc, fg, drawtype=:max, gt=gt)
 
 
 # ls(fg)
 
-visualizeDensityMesh!(vc, fg, :l5)
+visualizeDensityMesh!(vc, fg, :l2)
+
+
+plotKDE(fg, :l1, dims=[1;2])
+plotKDE(fg, :l1, dims=[3])
+
+
+
+
+
 
 
 [inferOverTree!(fg, tree) for i in 1:3]; # should not be required
@@ -362,6 +347,37 @@ XX = String["x$i" for i in 1:6];
 LL = String["l$i" for i in 1:7];
 [draw(PDF("/home/dehann/Desktop/imgs/$(i).pdf",30cm,20cm),
   plotKDE( getVertKDE(fg,i), dimLbls=["x";"y";"z";"phi";"the";"psi"]) ) for i in union(XX,LL)];
+
+
+
+
+
+
+
+  """
+      gt2fg!(gt)
+
+  Insert into existing or new FactorGraph type from ground truth data in gt.
+
+  Example
+
+    gt[:l6] = (:XYZ ,  [2.02859; -2.82187; 2.16534] )
+    gt[:x0] = (:XYZqWXYZ , [0.000229458; 0.299991; -0.00230474;   0.696163;  0.0546845;  -0.123042;  0.705144] )
+  """
+  function gt2fg!(gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}};
+      fg=nothing,
+      session="GROUNDTRUTH" )
+    #
+    fg = fg != nothing ? fg : initfg(sessionname=session)
+
+    for (key, val) in fg
+      #
+    end
+
+
+    error("Under construction")
+    fg
+  end
 
 
 
