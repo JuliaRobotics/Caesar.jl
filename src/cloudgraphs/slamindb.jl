@@ -1,7 +1,7 @@
 # SLAMinDB service functions
 
-function getcredentials(;nparticles=true, drawdepth=true, multisession=false)
-  cloudGraph, addrdict = standardcloudgraphsetup(nparticles=nparticles, drawdepth=drawdepth, multisession=multisession)
+function getcredentials(;nparticles=true, drawdepth=true, multisession=false, drawedges=true)
+  cloudGraph, addrdict = standardcloudgraphsetup(nparticles=nparticles, drawdepth=drawdepth, drawedges=drawedges, multisession=multisession)
   return addrdict
 end
 

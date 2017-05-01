@@ -107,8 +107,10 @@ function prepcolordepthcloud!( cvid::Int,
   elseif typeof(X) == Array{Array{Float64,1},1}
     pointcloud = PointCloud(X)
     pccols = rgb # TODO: refactor
+  elseif size(X,1)==0
+    return nothing
   else
-    error("dont know how to deal with data type=$(typeof(X))")
+    error("dont know how to deal with data type=$(typeof(X)),size=$(size(X))")
   end
   if havecolor
     pointcloud.channels[:rgb] = pccols
@@ -265,7 +267,9 @@ function fetchdrawdepthcloudbycvid!(vis::DrakeVisualizer.Visualizer,
         pointcloud = prepcolordepthcloud!( cvid, cache[ke], rgb=rgb )
 
         # publish the pointcloud data to Director viewer
-        drawpointcloud!(vis, poseswithdepth, vsym, pointcloud, va, param, sesssym, wTb=wTb)
+        if pointcloud != nothing
+          drawpointcloud!(vis, poseswithdepth, vsym, pointcloud, va, param, sesssym, wTb=wTb)
+        end
       end
     end
   end
