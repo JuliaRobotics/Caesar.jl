@@ -171,10 +171,10 @@ function handle_loops!(slaml::SLAMWrapper,
     xo = getVert(slaml.fg,origin_label)
     xd = getVert(slaml.fg,destination_label)
 
-    if (destination_id - origin_id == 1)
-        warn("Avoiding parallel factor! See: https://github.com/dehann/IncrementalInference.jl/issues/63To ")
-        return
-    end
+    # if (destination_id - origin_id == 1)
+    #     warn("Avoiding parallel factor! See: https://github.com/dehann/IncrementalInference.jl/issues/63To ")
+    #     return
+    # end
 
     println("[Caesar.jl] Adding XYH-NH loop closure constraint between (x$(origin_id), x$(destination_id))")
     xyh_dist = MvNormal([delta_x, delta_y, delta_yaw], diagm([var_x, var_y, var_yaw]))
@@ -260,7 +260,7 @@ end
 #@load "usercfg.jld"
 #user_config["session"] = "SESSHAUVDEV3"
 @load "liljon17.jld"
-# include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
+#  include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
 # user_config = addrdict
 backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
 
