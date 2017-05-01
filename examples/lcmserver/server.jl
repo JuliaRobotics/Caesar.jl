@@ -17,6 +17,7 @@ function gen_bindings()
     run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_pose_node_t.lcm`)
     run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_pose_pose_nh_t.lcm`)
     run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_pose_pose_xyh_t.lcm`)
+    run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_pose_pose_xyh_nh_t.lcm`)
     run(`lcm-gen -p --ppath $(lcmtpath) $(lcmtpath)/caesar_prior_zpr_t.lcm`)
     println("Adding lcmtypes dir to Python path: $(lcmtpath)")
     unshift!(PyVector(pyimport("sys")["path"]),lcmtpath)
@@ -90,6 +91,7 @@ function handle_poses!(slam::SLAMWrapper,
     end
 end
 
+# handles ZPR priors on poses
 function handle_priors!(slam::SLAMWrapper,
                          message_data)
 
@@ -125,7 +127,7 @@ function handle_partials!(slam::SLAMWrapper,
     origin_label = Symbol("x$(origin_id)")
     destination_label = Symbol("x$(destination_id)")
 
-    println("[Caesar.jl] Adding XYH odometry constraint betwee (x$(origin_id), x$(destination_id))")
+    println("[Caesar.jl] Adding XYH odometry constraint between(x$(origin_id), x$(destination_id))")
 
     delta_x = message[:delta_x]
     delta_y = message[:delta_y]
@@ -143,10 +145,70 @@ function handle_partials!(slam::SLAMWrapper,
     xyh_factor = PartialPose3XYYaw(xyh_dist)
     addFactor!(slam.fg, [xo;xd], xyh_factor)
 
-
     initializeNode!(slam.fg, destination_label)
     println()
 end
+
+
+function handle_loops!(slaml::SLAMWrapper,
+                       message_data)
+    message = caesar.pose_pose_xyh_nh_t[:decode](message_data)
+
+    origin_id = message[:node_1_id]
+    destination_id = message[:node_2_id]
+    origin_label = Symbol("x$(origin_id)")
+    destination_label = Symbol("x$(destination_id)")
+
+    delta_x = message[:delta_x]
+    delta_y = message[:delta_y]
+    delta_yaw = message[:delta_yaw]
+    
+    var_x = message[:var_x]
+    var_y = message[:var_y]
+    var_yaw = message[:var_yaw]
+    confidence = message[:confidence]
+
+    xo = getVert(slaml.fg,origin_label)
+    xd = getVert(slaml.fg,destination_label)
+
+    if (destination_id - origin_id == 1)
+        warn("Avoiding parallel factor! See: https://github.com/dehann/IncrementalInference.jl/issues/63To ")
+        return
+    end
+
+    println("[Caesar.jl] Adding XYH-NH loop closure constraint between (x$(origin_id), x$(destination_id))")
+    xyh_dist = MvNormal([delta_x, delta_y, delta_yaw], diagm([var_x, var_y, var_yaw]))
+    xyh_factor = PartialPose3XYYawNH(xyh_dist ,[1.0-confidence, confidence]) # change to NH
+    addFactor!(slaml.fg, [xo;xd], xyh_factor )
+
+    # println("[Caesar.jl] Adding P3P3NH loop closure constraint between (x$(origin_id), x$(destination_id))")
+
+    # # line below fails!
+    # lcf = Pose3Pose3NH( MvNormal(veeEuler(rel_pose), diagm(1.0./covar)), [0.5;0.5]) # define 50/50% hypothesis
+    # lcf_label = Symbol[origin_label;destination_label]
+    
+    # addFactor!(slaml.fg, lcf_label, lcf)
+end
+
+
+# type Cloud
+#     points::
+#     colors::
+# end
+
+# function add_pointcloud!(slaml::SLAMWrapper, nodeID::Symbol, cloud::Cloud )
+#     # fetch from database
+#     vert = getVert(slaml.fg, nodeID, api=IncrementalInference.dlapi) 
+
+#     # add points blob
+#     serialized_point_cloud = BSONObject(Dict("pointcloud" => cloud.points))
+#     appendvertbigdata!(slaml.fg, vert, "BSONpointcloud", string(serialized_point_cloud).data)
+
+#     # add colors blob
+#     serialized_colors = BSONObject(Dict("colors" => cloud.colors))
+#     appendvertbigdata!(slaml.fg, vert, "BSONcolors", string(serialized_colors).data)
+# end
+
 
 
 """
@@ -156,7 +218,9 @@ end
 """
 function handle_clouds!(slam::SLAMWrapper,
                         message_data)
-    # TODO: interface here should be as simple as slam_client.add_pointcloud(pc::SomeCloudType)
+    # TODO: interface here should be as simple as slam_client.add_pointcloud(nodeID, pc::SomeCloudType)
+
+    # TODO: check for empty clouds!
 
     message = caesar.point_cloud_t[:decode](message_data)
 
@@ -165,12 +229,13 @@ function handle_clouds!(slam::SLAMWrapper,
     last_pose = Symbol("x$(id)")
     println("[Caesar.jl] Got cloud $id")
 
-    # TODO: check if vert exists or not (may happen if messages are lost or out of order)
-    vert = getVert(slam.fg, last_pose, api=IncrementalInference.dlapi) # fetch from database
-
     # 2d arrays of points and colors (from LCM data into arrays{arrays})
     points = [[pt[1], pt[2], pt[3]] for pt in message[:points]]
     colors = [[UInt8(c.data[1]),UInt8(c.data[2]),UInt8(c.data[3])] for c in message[:colors]]
+
+
+    # TODO: check if vert exists or not (may happen if messages are lost or out of order)
+    vert = getVert(slam.fg, last_pose, api=IncrementalInference.dlapi) # fetch from database
 
     # push to mongo (using BSON as a quick fix)
     # (for deserialization, see src/DirectorVisService.jl:cachepointclouds!)
@@ -184,6 +249,7 @@ end
 function listener!(slam::SLAMWrapper,
                    lcm_node::LCMCore.LCM)
     # handle traffic
+    # TODO: handle termination
     while true
         handle(lcm_node)
     end
@@ -191,10 +257,11 @@ end
 
 
 #println("[Caesar.jl] Prompting user for configuration")
- @load "usercfg.jld"
+#@load "usercfg.jld"
+#user_config["session"] = "SESSHAUVDEV3"
+@load "liljon17.jld"
 # include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
 # user_config = addrdict
-user_config["session"] = "SESSHAUVDEV3"
 backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
 
 
@@ -206,12 +273,17 @@ lcm_pose_handler = (channel, message_data) -> handle_poses!(slam_client, message
 lcm_odom_handler = (channel, message_data) -> handle_partials!(slam_client, message_data )
 lcm_prior_handler = (channel, message_data) -> handle_priors!(slam_client, message_data )
 lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, message_data )
+lcm_loop_handler = (channel, message_data) -> handle_loops!(slam_client, message_data )
 
 # create LCM object and subscribe to messages on the following channels
 lcm_node = LCM()
+# poses
 subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler)
+# factors
 subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler)
 subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler)
+subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler) # loop closures come in via p3p3nh factors
+# sensor data
 subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler)
 
 println("[Caesar.jl] Running LCM listener")
