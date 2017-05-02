@@ -74,7 +74,7 @@ function handle_poses!(slam::SLAMWrapper,
     xn = addNode!(slam.fg, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
     slam.lastposesym = node_label; # update object
 
-    if id == 1
+    if id == 0
         println("[Caesar.jl] First pose")
         # this is the first message, and it does not carry odometry, but the prior on the first node.
 
@@ -84,8 +84,11 @@ function handle_poses!(slam::SLAMWrapper,
 
         # auto init is coming, this code will likely be removed
         initializeNode!(slam.fg, node_label)
+    end
 
+    if id == 1
         # set robot parameters in the first pose, this will become a separate node in the future
+        # visualization is still assuming parameters in node 1 (not 0), so leaving it here for now
         println("[Caesar.jl] Setting robot parameters")
         setRobotParameters!(slam.fg.cg, slam.fg.sessionname)
     end
@@ -289,4 +292,15 @@ subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler)
 println("[Caesar.jl] Running LCM listener")
 listener!(slam_client, lcm_node)
 
+#=
+using JLD, Caesar
+addrdict = nothing
+#to avoid retyping credentials, uncomment the block below
 
+try @load "credentials.jld"
+catch addrdict=getcredentials()
+@save "credentials.jld" addrdict
+end
+
+drawdbdirector(addrdict=addrdict);
+=#
