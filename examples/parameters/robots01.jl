@@ -42,14 +42,17 @@ hauv = Dict()
 hauv["robot"] = "hauv"
 hauv["bTc"] = [0.0;0.0;0.0; 1.0; 0.0; 0.0; 0.0]
 hauv["bTc_format"] = "xyzqwqxqyqz"
-hauv["depthcloud_description"]
+hauv["depth_pointcloud_description"] = "BSONpointcloud"
+hauv["depth_color_description"] = ["BSONcolor"]
+
 # robotdata = json(hauv).data
 hauv
 
 
 # Actually modify the databases
-insertrobotdatafirstpose!(cloudGraph, "SESSHAUVDEV2", hauv)
-frd = fetchrobotdatafirstpose(cloudGraph, "SESSHAUVDEV2")
+insertrobotdatafirstpose!(cloudGraph, "SESSHAUVDEV", hauv)
+frd = fetchrobotdatafirstpose(cloudGraph, "SESSHAUVDEV")
+
 
 
 

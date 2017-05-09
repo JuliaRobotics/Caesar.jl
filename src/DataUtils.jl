@@ -16,3 +16,12 @@ function loadSlam(; filename::AbstractString="tempSlam.jld")
   end
   return d
 end
+
+function haselement{T}(arr::Vector{T}, val::T)
+  for a in arr
+    if a == val
+      return true
+    end
+  end
+  return false
+end

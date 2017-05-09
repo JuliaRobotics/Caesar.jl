@@ -1,0 +1,20 @@
+package caesar;
+
+struct pose_pose_xyh_t {
+
+  int64_t utime; // unix time associated with this pose
+
+  int64_t node_1_utime; // pose 1 (source) utime
+  int64_t node_1_id;    // pose 1 id
+
+  int64_t node_2_utime; // pose 2 (destination) utime
+  int64_t node_2_id;    // pose 2 id
+
+  double delta_x;
+  double delta_y;
+  double delta_yaw;
+
+  double var_x;
+  double var_y;
+  double var_yaw;
+}

@@ -1,0 +1,15 @@
+package caesar;
+
+struct prior_zpr_t
+{
+  int64_t utime; // unix time associated with this pose
+  int64_t id;    // pose id (sequential, 0-based)
+
+  double z;
+  double pitch;
+  double roll;
+
+  double var_z; 
+  double var_pitch;
+  double var_roll;
+}
