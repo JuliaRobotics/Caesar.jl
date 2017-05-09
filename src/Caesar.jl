@@ -138,8 +138,6 @@ export
   addFactor!,
 
   # Using CloudGraphs
-  # install cloudgraphs
-  installcloudgraphs,
   # helper functions
   insertnodefromcv!,
   checkandinsertedges!,

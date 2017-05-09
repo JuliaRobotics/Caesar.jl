@@ -103,17 +103,6 @@ function projectrbe(fgl::FactorGraph, from::Symbol, to::Symbol)
 end
 
 
-function installcloudgraphs()
-  info("""
-    Installation process will be simplified once CloudGraphs is registered on JuliaLang/METADATA.jl
-  """)
-  Pkg.add("Neo4j")
-  Pkg.add("Mongo")
-  Pkg.checkout("LibBSON")
-  Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
-  nothing
-end
-
 
 
 

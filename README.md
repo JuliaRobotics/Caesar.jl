@@ -145,28 +145,16 @@ Dependency Status
 Database interaction layer
 ==========================
 
-For using the solver on a DataBase layer you need to do two things: 1) Use the ```cloudgraphs``` branch. You can set up the Julia dependencies as follows:
+For using the solver on a Database layer, you simply need to switch the working API. This can be done by calling the database connection function, and following the prompt:
 
-    $ julia
-    julia> Pkg.checkout("Caesar","cloudgraphs")
-    julia> using Caesar
+```julia
+using Caesar
+backend_config, user_config = standardcloudgraphsetup()
+fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+# and then continue as normal with the fg object, to add variables and factors, draw etc.
+```
 
-and, 2) install unregistered packages:
-
-    julia> installcloudgraphs()
-
-This will install additional features, mostly relating to [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git).
-
-INFO, ```installcloudgraphs()``` will perform:
-
-    Pkg.add("Neo4j")
-    Pkg.add("Mongo")  #  LibBSON.jl dependency
-    Pkg.checkout("LibBSON") # need latest for binary data format
-    Pkg.clone("https://github.com/GearsAD/CloudGraphs.jl.git")
-
-If you have access to Neo4j and Mongo services you should be able to run the [four door test](https://github.com/dehann/Caesar.jl/blob/master/test/fourdoortestcloudgraph.jl) on both internal dictionaries and repeated on Neo4j DB:
-
-    Pkg.test("Caesar")
+If you have access to Neo4j and Mongo services you should be able to run the [four door test](https://github.com/dehann/Caesar.jl/blob/master/test/fourdoortestcloudgraph.jl).
 
 Go to your browser at localhost:7474 and run one of the Cypher queries to either retrieve
 
@@ -177,8 +165,10 @@ or delete everything:
     match (n) detach delete n
 
 You can run the multi-modal iSAM solver against the DB using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl):
-```julia
-$ julia -p20 MM-iSAMCloudSolve.jl
+```
+$ julia -p20
+julia> using Caesar
+julia> slamindb() # iterations=-1
 ```
 
 Database driven Visualization can be done with either MIT's [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl) (prefered), or Collections Render which additionally relies on [Pybot](http/www.github.com/spillai/pybot). For visualization using Director/DrakeVisualizer.jl:
@@ -190,7 +180,7 @@ And an [example service script for CollectionsRender](https://github.com/dehann/
 
 ## Contributors
 
-D. Fourie, S. Claassens, N. Rypkema, S. Pillai, P. Vaz Teixeira, R. Mata, M. Kaess, J. Leonard
+D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
 
 
 Future targets
