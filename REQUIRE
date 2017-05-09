@@ -6,6 +6,10 @@ KernelDensityEstimate 0.2.3
 Distributions
 DrakeVisualizer 0.1.2
 TransformUtils
+CloudGraphs 0.0.2
+Neo4j 1.0.0
+LibBSON
+Mongo 0.2.3
 CoordinateTransformations
 GeometryTypes
 Rotations

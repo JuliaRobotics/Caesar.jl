@@ -1,6 +1,6 @@
 module Caesar
 
-instpkg = Pkg.installed();
+
 
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
@@ -33,15 +33,10 @@ using
   ImageCore,
   PyCall
 
-if haskey(instpkg,"CloudGraphs")
-  using CloudGraphs
-  using Neo4j
-  using Mongo
-  using LibBSON
-end
-
-# using GraphViz, Fontconfig, Cairo, Distributions, DataFrames
-
+using CloudGraphs,
+  Neo4j,
+  Mongo,
+  LibBSON
 
 
 
@@ -204,16 +199,16 @@ include("VisualizationUtils.jl")
 include("ModelVisualizationUtils.jl")
 include("UserFunctions.jl")
 
-if haskey(instpkg, "CloudGraphs")
-  include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
-  include("cloudgraphs/ConvertGeneralSlaminDB.jl")
-  include("cloudgraphs/slamindb.jl")
-  include("cloudgraphs/DBVisualizationUtils.jl")
-  include("cloudgraphs/DirectorVisService.jl")
-  include("cloudgraphs/MultisessionUtils.jl")
-  include("cloudgraphs/ImageUtils.jl")
-  include("cloudgraphs/FoveationUtils.jl")
-end
+# using CloudGraphs
+include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
+include("cloudgraphs/ConvertGeneralSlaminDB.jl")
+include("cloudgraphs/slamindb.jl")
+include("cloudgraphs/DBVisualizationUtils.jl")
+include("cloudgraphs/DirectorVisService.jl")
+include("cloudgraphs/MultisessionUtils.jl")
+include("cloudgraphs/ImageUtils.jl")
+include("cloudgraphs/FoveationUtils.jl")
+
 
 
 end
