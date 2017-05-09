@@ -145,7 +145,7 @@ idx = appendFactorGraph!(fg, XX[1], XX[2], lcmode=:unimodal, MM=MM);
 tree = prepBatchTree!(fg, ordering=:qr,drawpdf=true);
 inferOverTree!(fg,tree, N=100);
 
-isamdict, fgu = doISAMSolve(XX[1],XX[2], savejld=false, MM=MM, retfg=true)#, host="mrg-liljon.csail.mit.edu")
+isamdict, fgu = doISAMSolve(XX[1],XX[2], savejld=false, MM=MM, retfg=true)
 isamdict[1] = zeros(3)
 # @save "odoSandsharkISAM1.jld" isamdict fgu
 @load "odoSandsharkISAM1.jld"

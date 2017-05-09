@@ -49,8 +49,8 @@ function doISAMSolve(d,f;toT=Inf, savejld=false, retfg=false, MM=MM)
   #nc -l 2389 | python tcpisam.py | grep "POSE\|LNDM" | nc -l 2390
   global ENABLISAMREF, cl, clr
   ENABLISAMREF = true
-  cl = connect("mrg-liljon.csail.mit.edu", 2389)
-  clr = connect("mrg-liljon.csail.mit.edu", 2390)
+  cl = connect("localhost", 2389)
+  clr = connect("localhost", 2390)
 
   fgu = emptyFactorGraph()
   appendFactorGraph!(fgu, d, f, toT=toT,lcmode=:unimodal,MM=MM);

@@ -4,7 +4,7 @@ from JLSLAMInterf import NPSLAMWrapper
 bonoi = np.array([0.2, 0, 0, 0.1, 0, 0.08])
 
 npslam = NPSLAMWrapper()
-npslam.connectServer()#addr='mrg-liljon.csail.mit.edu')
+npslam.connectServer()
 npslam.init() # x1
 npslam.addLandmBR([+np.pi/2,5.0], npslam.getID('x1'))
 npslam.addLandmBR([+0.32175,15.81], npslam.getID('x1'))
