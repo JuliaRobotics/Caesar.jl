@@ -1,15 +1,15 @@
 julia 0.5
-RoME 0.0.4
-IncrementalInference 0.2.5
+RoME 0.0.6
+IncrementalInference 0.2.8
 Graphs 0.7.1
-KernelDensityEstimate 0.2.3
+KernelDensityEstimate 0.2.4
 Distributions
 DrakeVisualizer 0.1.2
-TransformUtils
 CloudGraphs 0.0.2
 Neo4j 1.0.0
 LibBSON
 Mongo 0.2.3
+TransformUtils 0.0.6
 CoordinateTransformations
 GeometryTypes
 Rotations
