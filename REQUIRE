@@ -1,5 +1,5 @@
 julia 0.5
-RoME 0.0.6
+RoME 0.0.5
 IncrementalInference 0.2.8
 Graphs 0.7.1
 KernelDensityEstimate 0.2.4
