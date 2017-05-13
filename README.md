@@ -171,7 +171,7 @@ julia> using Caesar
 julia> slamindb() # iterations=-1
 ```
 
-Database driven Visualization can be done with either MIT's [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl) (prefered), or Collections Render which additionally relies on [Pybot](http/www.github.com/spillai/pybot). For visualization using Director/DrakeVisualizer.jl:
+Database driven Visualization can be done with either MIT's [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl) (prefered), or Collections Render which additionally relies on [Pybot](http://www.github.com/spillai/pybot). For visualization using Director/DrakeVisualizer.jl:
 ```
 $ julia -e "using Caesar; drawdbdirector()"
 ```
