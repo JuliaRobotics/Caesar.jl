@@ -2,7 +2,6 @@
 
 using DrakeVisualizer, CoordinateTransformations, GeometryTypes, Rotations, TransformUtils, ColorTypes
 
-
 # create a new Director window with home axis
 function startdefaultvisualization(;newwindow=true,draworigin=true)
   DrakeVisualizer.any_open_windows() || DrakeVisualizer.new_window(); #DrakeVisualizer.new_window()
@@ -76,9 +75,9 @@ function findaxiscenter!(as::ArcPointsRangeSolve)
   vA, vB, vC = as.x1-as.center, as.x2-as.center, as.x3-as.center
   l1, l2 = norm(as.x1-as.x2), norm(as.x2-as.x3)
   halfl0 = 0.5*norm(as.x1-as.x3)
-  axt = l1 < l2 ? cross(vA,vB) : cross(vB,vC)
+  axt = l1 < l2 ? Base.cross(vA,vB) : Base.cross(vB,vC)
   as.axis[1:3] = axt / norm(axt)
-  ta = cross(vA,vC)
+  ta = Base.cross(vA,vC)
   ta ./= norm(ta)
   alph = acos(halfl0/as.r)
   if norm(ta-as.axis) < 1e-4
@@ -356,7 +355,7 @@ function drawLine!(vispath, from::Vector{Float64}, to::Vector{Float64}; scale=0.
   len = norm(vector)
   buildline = Float64[len, 0, 0]
 
-  v = norm(buildline-vector) > 1e-10 ? cross(buildline, vector)  : [0,0,1.0]
+  v = norm(buildline-vector) > 1e-10 ? Base.cross(buildline, vector)  : [0,0,1.0]
   axis = v/norm(v)
   angle = acos(dot(vector, buildline)/(len^2) )
   rot = LinearMap( CoordinateTransformations.AngleAxis(angle, axis...) )
