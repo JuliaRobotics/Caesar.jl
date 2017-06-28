@@ -40,7 +40,7 @@ function loadmodel(model::Symbol=:rov;
     offset = Translation(-0.5,0,0.25) ∘ LinearMap(Rotations.Quat(0,0,0,1.0))
     return DrawROV(rovdata, 99, :rov, offset)
   elseif model == :scene01
-    boxdata = GeometryData(HyperRectangle(Vec(0.0,4.0,-0.7), Vec(5.0,5.0,1.4)), RGBA(0.5,0.1,0.0,0.5))
+    boxdata = GeometryData(HyperRectangle(Vec(4.0,0,-0.7), Vec(5.0,5.0,1.4)), RGBA(0.5,0.1,0.0,0.5))
     # boxdata.color =
     offset = Translation(0.0,0,0) ∘ LinearMap(CoordinateTransformations.AngleAxis(0.0,0,0,1.0))
     return DrawScene(boxdata, :scene01, offset)
