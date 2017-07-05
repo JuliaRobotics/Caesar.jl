@@ -22,11 +22,11 @@ function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
         if !haskey(MM,i)
           if !haskey(fg.IDs, lsy)    # has landmark
             # add from previous and latest factor here
-            projNewLandm!(fg, prevn, lsy, [pfez[2];pfez[1]], lsrNoise , N=N )
-            addBRFG!(fg, nextn, lsy, [fez[2];fez[1]], lsrNoise)
+            projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise , N=N )
+            addBRFG!(fg, string(nextn), lsy, [fez[2];fez[1]], lsrNoise)
           else
             # previous already added, only add the new factor here
-            addBRFG!(fg, nextn, lsy, [fez[2];fez[1]], lsrNoise)
+            addBRFG!(fg, string(nextn), lsy, [fez[2];fez[1]], lsrNoise)
           end
         else
           lsymm = string("l",MM[i])
@@ -99,18 +99,18 @@ function doBatchRun(d, f; toT=30)
   return fg, tree, p
 end
 
-function saveImgSeq(d::Dict{Int64,Dict{Int64,Feature}}, lsrFeats::Dict{Int64,LaserFeatures}; from::Int=1,to::Int=10,step::Int=1)
-  for i in from:step:to
-    p = drawFeatTrackers(d[i], lsrFeats[i].feats);
-    Gadfly.draw(PNG(string("imgs/img",i,".png"),35cm,25cm),p)
-  end
-  nothing
-end
-
-
-function drawIROSVicPrkFig(fgl::FactorGraph, d, f, T, isamdict, fgu)
-  p1 = progressExamplePlot(d,f,toT=T);
-  p2 = drawCompPosesLandm(fg,isamdict, fgu, lbls=false,drawunilm=false);
-
-  vstack(p1,p2)
-end
+# function saveImgSeq(d::Dict{Int64,Dict{Int64,Feature}}, lsrFeats::Dict{Int64,LaserFeatures}; from::Int=1,to::Int=10,step::Int=1)
+#   for i in from:step:to
+#     p = drawFeatTrackers(d[i], lsrFeats[i].feats);
+#     Gadfly.draw(PNG(string("imgs/img",i,".png"),35cm,25cm),p)
+#   end
+#   nothing
+# end
+#
+#
+# function drawIROSVicPrkFig(fgl::FactorGraph, d, f, T, isamdict, fgu)
+#   p1 = progressExamplePlot(d,f,toT=T);
+#   p2 = drawCompPosesLandm(fg,isamdict, fgu, lbls=false,drawunilm=false);
+#
+#   vstack(p1,p2)
+# end

@@ -44,7 +44,7 @@ function parseOdo!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   cov[2,1] = parse(Float64,sp2[7])
   cov[3,1] = parse(Float64,sp2[8])
   cov[3,2] = parse(Float64,sp2[10])
-  addOdoFG!(slam.fg, n, DX, cov, ready=USEREADY)
+  addOdoFG!(slam.fg, Symbol(n), DX, cov, ready=USEREADY)
   return n
 end
 
