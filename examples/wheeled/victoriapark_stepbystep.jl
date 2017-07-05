@@ -15,10 +15,8 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 
 T=30 # 1400
-fg = emptyFactorGraph();
+fg = Caesar.initfg();
 idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:unimodal, MM=MMr);
-
-
 
 
 # Start with a fresh factor graph
@@ -29,11 +27,17 @@ fg = Caesar.initfg();
 # add prior information as a factor to X1 is found in d[1]...
 d[1]
 
+# Go look at what this function,
+#  function appendFactorGraph!(fg::FactorGraph,
+# is doing and see if you can build the new pose functions line by line, similar to
+# what you had done in the first ROV example.
+
+
 # you should have one node X1 with a solid dot prior factor attached
 Graphs.plot(fg.g)
 
 # you can also draw the result with plotting using
-drawPosesLandms(fg)
+drawPoses(fg)
 # # alternative
 # vc = startdefaultvisualization()
 # visualizeallposes!(vc, fg, drawlandms=false)
