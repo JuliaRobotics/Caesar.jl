@@ -14,9 +14,9 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 
 
-T=30 # 1400
-fg = Caesar.initfg();
-idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:unimodal, MM=MMr);
+# T=30 # 1400
+# fg = Caesar.initfg();
+# idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:unimodal, MM=MMr);
 
 
 # Start with a fresh factor graph
