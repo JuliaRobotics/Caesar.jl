@@ -1,5 +1,5 @@
 # Victoria Park
-
+addprocs(3)
 using HDF5, JLD, Gadfly, Colors, Cairo
 using KernelDensityEstimate, Distributions
 using Caesar, IncrementalInference, RoME
@@ -46,7 +46,7 @@ lcmode=:unimodal
 lsrNoise=diagm([0.1;1.0])
 
 
-for idx=2:6
+for idx=2:50
   prev, X, nextn = getLastPose2D(fg)
   vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N)
   # add landmarks
@@ -56,8 +56,12 @@ for idx=2:6
 end
 
 tree = prepBatchTree!(fg, drawpdf=true);
+run(`evince bt.pdf`)
 @time inferOverTree!(fg,tree, N=100);
-drawPosesLandms(fg)
+
+pl=drawPosesLandms(fg)
+draw(PDF("test.pdf",20cm,20cm),pl)
+
 
 
 
