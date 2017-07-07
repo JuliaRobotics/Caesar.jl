@@ -15,7 +15,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 # p = drawFeatTrackers( d[1], f[1] );
 
 
-T=30 # 1400
+T=40 # 1400
 fg = emptyFactorGraph();
 idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:unimodal, MM=MMr);
 
