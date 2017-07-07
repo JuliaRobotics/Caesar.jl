@@ -39,12 +39,12 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
   # init pose
   fg = Caesar.initfg()
-
 prevn = initFactorGraph!(fg, init=d[1][1:3])
 Podo=diagm([0.5;0.5;0.005])
 N=100
 lcmode=:unimodal
 lsrNoise=diagm([0.1;1.0])
+
 
 for idx=2:6
   prev, X, nextn = getLastPose2D(fg)
@@ -55,6 +55,9 @@ for idx=2:6
 
 end
 
+tree = prepBatchTree!(fg, drawpdf=true);
+@time inferOverTree!(fg,tree, N=100);
+drawPosesLandms(fg)
 
 
 
