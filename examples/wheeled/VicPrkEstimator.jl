@@ -34,12 +34,12 @@ function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
             println("Adding bimodal factor")
             if !haskey(fg.IDs, lsy)
               vlm = projNewLandm!(fg, prevn, lsy, [pfez[2];pfez[1]], lsrNoise, addfactor=false)
-              addMMBRFG!(fg, prevn, [lsymm;lsy], [pfez[2];pfez[1]], lsrNoise, w=[0.5;0.5] )
+              addMMBRFG!(fg, string(prevn), [lsymm;lsy], [pfez[2];pfez[1]], lsrNoise, w=[0.5;0.5] )
             end
-            addMMBRFG!(fg, nextn, [lsymm;lsy], [fez[2];fez[1]], lsrNoise, w=[0.5;0.5] )
+            addMMBRFG!(fg, string(nextn), [lsymm;lsy], [fez[2];fez[1]], lsrNoise, w=[0.5;0.5] )
           elseif lcmode == :unimodal
             println("adding unimodal loop closure")
-            addBRFG!(fg, nextn, lsymm, [fez[2];fez[1]], lsrNoise)
+            addBRFG!(fg, string(nextn), lsymm, [fez[2];fez[1]], lsrNoise)
           end
         end
       end
