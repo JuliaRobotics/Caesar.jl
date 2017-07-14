@@ -4,6 +4,30 @@ using HDF5, JLD, Gadfly, Colors, Cairo
 using KernelDensityEstimate, Distributions
 using Caesar, IncrementalInference, RoME
 
+
+
+
+# Evaluate the likelihood of a point on the marginal belief of some variable
+# note the dimensions must match
+function evalLikelihood(fg::FactorGraph, sym::Symbol, point::Vector{Float64})
+  p = getVertKDE(fg, sym)
+  Ndim(p) == length(point) ? nothing : error("point (dim=$(length(point))) must have same dimension as belief (dim=$(Ndim(p)))")
+  evaluateDualTree(p, (point')')[1]
+end
+
+# Evaluate the likelihood of an Array{2} of points on the marginal belief of some variable
+# note the dimensions must match
+function evalLikelihood(fg::FactorGraph, sym::Symbol, points::Array{Float64,2})
+  p = getVertKDE(fg, sym)
+  Ndim(p) == size(points,1) ? nothing : error("points (dim=$(size(points,1))) must have same dimension as belief (dim=$(Ndim(p)))")
+  evaluateDualTree(p, (points))
+end
+
+
+
+
+
+
 # load all the model data
 # d = odometry information
 # f = laser scanner detections
@@ -38,7 +62,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 
   # init pose
-  fg = Caesar.initfg()
+fg = Caesar.initfg()
 prevn = initFactorGraph!(fg, init=d[1][1:3])
 Podo=diagm([0.5;0.5;0.005])
 N=100
@@ -52,12 +76,58 @@ for idx=2:50
   # add landmarks
   addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
   prevn = nextn
-
+  # if (idx%10==0)
+  #    Solve
+  #    tree = prepBatchTree!(fg, drawpdf=true);
+  #   @time inferOverTree!(fg,tree, N=100);
+  # end
 end
 
-tree = prepBatchTree!(fg, drawpdf=true);
-run(`evince bt.pdf`)
-@time inferOverTree!(fg,tree, N=100);
+
+pl=drawPosesLandms(fg)
+draw(PDF("test.pdf",20cm,20cm),pl)
+
+
+:l1
+plotKDE(getVertKDE(fg,:l125))
+
+b=getKDEMax(getVertKDE(fg,:l125))
+
+evalLikelihood(fg, :l125 , b)
+
+X,L = ls(fg)
+d=0
+t=[]
+z=zeros(length(L),length(L))
+
+j=1;
+for l in L
+  i=1
+  for l2 in L
+    b=getKDEMax(getVertKDE(fg, l))
+    c=evalLikelihood(fg, l2 , b)
+    if ( c>0.002 && l!=l2 )
+      d+=1
+      #Replace this with A delete and replace
+      #what the hell should i do now
+      push!(t,(l,l2))
+      z[i,j]=1
+    elseif (l==l2)
+      z[i,j]=2
+    end
+    i+=1
+  end
+  j+=1
+end
+@show d
+@show t
+@show z
+Gadfly.spy(z)
+
+
+#tree = prepBatchTree!(fg, drawpdf=true);
+#run(`evince bt.pdf`)
+#@time inferOverTree!(fg,tree, N=100);
 
 pl=drawPosesLandms(fg)
 draw(PDF("test.pdf",20cm,20cm),pl)
