@@ -98,21 +98,23 @@ evalLikelihood(fg, :l125 , b)
 X,L = ls(fg)
 d=0
 t=[]
-z=zeros(length(L),length(L))
+z=zeros(length(L)+1,length(L)+1)
 
 j=1;
-for l in L
+for l1 in L
   i=1
   for l2 in L
-    b=getKDEMax(getVertKDE(fg, l))
+    b=getKDEMax(getVertKDE(fg, l1))
     c=evalLikelihood(fg, l2 , b)
-    if ( c>0.002 && l!=l2 )
+    if ( c>0.002 && l1!=l2 )
       d+=1
       #Replace this with A delete and replace
       #what the hell should i do now
-      push!(t,(l,l2))
+      addSoftEqualityPoint2D(fg, l1, l2 )
+
+      push!(t,(l1,l2))
       z[i,j]=1
-    elseif (l==l2)
+    elseif (l1==l2)
       z[i,j]=2
     end
     i+=1
@@ -132,8 +134,9 @@ Gadfly.spy(z)
 pl=drawPosesLandms(fg)
 draw(PDF("test.pdf",20cm,20cm),pl)
 
-
-
+# draw the factor graph in a different way
+writeGraphPdf(fg)
+@async run(`evince fg.pdf`)
 
 
 appendFactorGraph()
