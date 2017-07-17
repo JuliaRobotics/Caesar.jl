@@ -36,7 +36,8 @@ export
   appendvertbigdata!,
   # visualization exports
   getPointCloudFromKinect,
-  getPointCloudFromBSON
+  getPointCloudFromBSON,
+  deleteServerSession!
 
 
 """
@@ -1011,6 +1012,13 @@ function db2jld(filename::AbstractString; addrdict::VoidUnion{Dict{AbstractStrin
   db2jld(cg, cr["session"], filename)
 end
 
+
+function deleteServerSession!(cloudGraph::CloudGraph, session::AbstractString)
+  query =  "match (n:$(session))
+            detach delete n
+            return count(n)"
+  return executeQuery(cloudGraph.neo4j.connection, query)
+end
 
 # function syncmongos()
 #
