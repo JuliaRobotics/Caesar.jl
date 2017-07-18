@@ -23,7 +23,10 @@ function evalLikelihood(fg::FactorGraph, sym::Symbol, points::Array{Float64,2})
   evaluateDualTree(p, (points))
 end
 
-
+function batchSolve(fgl)
+  tree = prepBatchTree!(fgl, drawpdf=true);
+  @time inferOverTree!(fgl,tree, N=100);
+end
 
 
 
@@ -137,6 +140,13 @@ draw(PDF("test.pdf",20cm,20cm),pl)
 # draw the factor graph in a different way
 writeGraphPdf(fg)
 @async run(`evince fg.pdf`)
+
+
+batchSolve(fg)
+pl1=drawPosesLandms(fg)
+draw(PDF("after.pdf",20cm,20cm),pl1)
+
+
 
 
 appendFactorGraph()
