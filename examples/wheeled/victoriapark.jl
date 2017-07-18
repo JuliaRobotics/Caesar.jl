@@ -15,7 +15,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 # p = drawFeatTrackers( d[1], f[1] );
 
 
-T=40 # 1400
+T=30 # 1400
 fg = emptyFactorGraph();
 idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:unimodal, MM=MMr);
 
@@ -31,10 +31,26 @@ vc = startdefaultvisualization()
 visualizeallposes!(vc, fg, drawlandms=false)
 
 
+# Evaluate the likelihood of a point on the marginal belief of some variable
+# note the dimensions must match
+function evalLikelihood(fg::FactorGraph, sym::Symbol, point::Vector{Float64})
+  p = getVertKDE(fg, sym)
+  Ndim(p) == length(point) ? nothing : error("point (dim=$(length(point))) must have same dimension as belief (dim=$(Ndim(p)))")
+  evaluateDualTree(p, (point')')[1]
+end
+
+# Evaluate the likelihood of an Array{2} of points on the marginal belief of some variable
+# note the dimensions must match
+function evalLikelihood(fg::FactorGraph, sym::Symbol, points::Array{Float64,2})
+  p = getVertKDE(fg, sym)
+  Ndim(p) == size(points,1) ? nothing : error("points (dim=$(size(points,1))) must have same dimension as belief (dim=$(Ndim(p)))")
+  evaluateDualTree(p, (points))
+end
 
 
+evalLikelihood(fg, :l1, [1.0;0.2])
 
-
+evalLikelihood(fg, :l1, zeros(2,3))
 
 
 tree = prepBatchTree!(fg, drawpdf=true);
