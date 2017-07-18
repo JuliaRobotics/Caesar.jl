@@ -22,7 +22,7 @@ function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
         if !haskey(MM,i)
           if !haskey(fg.IDs, lsy)    # has landmark
             # add from previous and latest factor here
-            projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise , N=N )
+            projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise , N=N, labels=["LANDMARK"])
             addBRFG!(fg, string(nextn), lsy, [fez[2];fez[1]], lsrNoise)
           else
             # previous already added, only add the new factor here
