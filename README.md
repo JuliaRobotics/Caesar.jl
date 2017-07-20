@@ -133,6 +133,8 @@ And many more, please see the examples folder.
 Dependency Status
 -----------------
 
+**Note**, we are in the process of updating all dependencies to support both Julia 0.5 and the new Julia 0.6 on Linux and Mac (@dehann July 2017). The solution is stable for Julia 0.5 on Linux.
+
 | **Major Dependencies** |     **Status**     |    **Test Coverage**    |
 |:-----------------------:|:------------------:|:------------------:|
 | Caesar.jl | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] |
