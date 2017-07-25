@@ -71,7 +71,7 @@ addOdoFG!(fg, Pose3Pose3(MvNormal(veeEuler(tf), odoCov) ) )
 
 visualizeallposes!(vc, fg, drawlandms=false)
 
-addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
+addLinearArrayConstraint(fg, (4.0, 0.0), :x0, :l1, rangecov=rangecov,bearingcov=bearingcov)
 visualizeDensityMesh!(vc, fg, :l1)
 addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
@@ -132,6 +132,8 @@ And many more, please see the examples folder.
 
 Dependency Status
 -----------------
+
+**Note**, we are in the process of updating all dependencies to support both Julia 0.5 and the new Julia 0.6 on Linux and Mac (@dehann July 2017). The solution is stable for Julia 0.5 on Linux.
 
 | **Major Dependencies** |     **Status**     |    **Test Coverage**    |
 |:-----------------------:|:------------------:|:------------------:|
