@@ -71,7 +71,7 @@ addOdoFG!(fg, Pose3Pose3(MvNormal(veeEuler(tf), odoCov) ) )
 
 visualizeallposes!(vc, fg, drawlandms=false)
 
-addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l1, rangecov=rangecov,bearingcov=bearingcov)
+addLinearArrayConstraint(fg, (4.0, 0.0), :x0, :l1, rangecov=rangecov,bearingcov=bearingcov)
 visualizeDensityMesh!(vc, fg, :l1)
 addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
