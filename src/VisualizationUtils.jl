@@ -22,7 +22,7 @@ function visualizeDensityMesh!(vc::DrakeVisualizer.Visualizer, fgl::FactorGraph,
 
   pl1 = marginal(getVertKDE(fgl,lbl),[1;2;3])
 
-  gg = (x, a=0.0) -> evaluateDualTree(pl1, ([x[1];x[2];x[3]]')')[1]-a
+  gg = (x, a=0.0) -> evaluateDualTree(pl1, [x[1] x[2] x[3]]')[1]-a  #([x[1];x[2];x[3]]')'
 
   x = getKDEMax(pl1)
   maxval = gg(x)
