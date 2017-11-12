@@ -36,7 +36,8 @@ export
   appendvertbigdata!,
   # visualization exports
   getPointCloudFromKinect,
-  getPointCloudFromBSON
+  getPointCloudFromBSON,
+  deleteServerSession!
 
 
 """
@@ -355,6 +356,7 @@ function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRange{Distributions.Normal,Distributions.Normal}}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DRange}}, FunctionNodeData{Pose2DPoint2DRange}, encodingConverter=passTypeThrough, decodingConverter=passTypeThrough)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPoint2D}}, PackedFunctionNodeData{PackedPriorPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Point2DPoint2D}}, PackedFunctionNodeData{PackedPoint2DPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
 
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPoint2DensityNH}}, PackedFunctionNodeData{PackedPriorPoint2DensityNH}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   #acoustic types
@@ -1011,6 +1013,13 @@ function db2jld(filename::AbstractString; addrdict::VoidUnion{Dict{AbstractStrin
   db2jld(cg, cr["session"], filename)
 end
 
+
+function deleteServerSession!(cloudGraph::CloudGraph, session::AbstractString)
+  query =  "match (n:$(session))
+            detach delete n
+            return count(n)"
+  return executeQuery(cloudGraph.neo4j.connection, query)
+end
 
 # function syncmongos()
 #

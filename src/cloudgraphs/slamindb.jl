@@ -18,7 +18,8 @@ function slamindb(;addrdict=nothing,
             loopctrl::Vector{Bool}=Bool[true],
             iterations::Int=-1,
             multisession::Bool=false,
-            savejlds::Bool=false  )
+            savejlds::Bool=false,
+            recursivesolver::Bool=false  )
   #
 
   nparticles = false
@@ -61,7 +62,11 @@ function slamindb(;addrdict=nothing,
       (savejlds && itercount == 0) ? slamindbsavejld(fg, addrdict["session"], itercount) : nothing
       itercount += 1
       tree = wipeBuildNewTree!(fg,drawpdf=true)
-      inferOverTree!(fg, tree, N=N)
+      if !recursivesolver
+        inferOverTree!(fg, tree, N=N)
+      else
+        inferOverTreeR!(fg, tree, N=N)
+      end
       savejlds ? slamindbsavejld(fg, addrdict["session"], itercount) : nothing
     else
       sleep(0.2)

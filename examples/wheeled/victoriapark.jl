@@ -1,35 +1,61 @@
 # Victoria Park
 
 using HDF5, JLD, Gadfly, Colors, Cairo
-using KernelDensityEstimate
+using KernelDensityEstimate, Distributions
 using Caesar, IncrementalInference, RoME
 
+# load all the model data
+# d = odometry information
+# f = laser scanner detections
+# MM = multi-modal individual id references
+# MMr = reworked to map to only one previous feature
+# examplefolder, datafolder
+include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
-include("VicPrkEstimator.jl")
+# p = drawFeatTrackers( d[1], f[1] );
 
-d = jldopen("test/data/VicPrkBasic.jld", "r") do file
-  read(file, "dBasic")
-end
-f = jldopen("test/data/VicPrkBasic.jld", "r") do file
-  read(file, "fBasic")
-end
-# MM = jldopen("test/data/VicPrkBasic.jld", "r") do file
-#   read(file, "MMBasic")
-# end
-include("test/data/Vic120MM.jl")
-MMr = MMwithRedirects(MM);
-isamdict = jldopen("test/data/fgWithISAMrefERR01.jld", "r") do file
-  read(file, "isamdict")
-end
-fgu = jldopen("test/data/fgWithISAMrefERR01.jld", "r") do file
-  read(file, "fgu")
-end
-T=40 # 1400
+
+T=30 # 1400
 fg = emptyFactorGraph();
-idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:mmodal, MM=MMr);
-tree = prepBatchTree!(fg, ordering=:qr,drawpdf=true);
+idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:unimodal, MM=MMr);
+
+
+drawPosesLandms(fg)
+
+
+Graphs.plot(fg.g)
+
+
+vc = startdefaultvisualization()
+
+visualizeallposes!(vc, fg, drawlandms=false)
+
+
+# Evaluate the likelihood of a point on the marginal belief of some variable
+# note the dimensions must match
+function evalLikelihood(fg::FactorGraph, sym::Symbol, point::Vector{Float64})
+  p = getVertKDE(fg, sym)
+  Ndim(p) == length(point) ? nothing : error("point (dim=$(length(point))) must have same dimension as belief (dim=$(Ndim(p)))")
+  evaluateDualTree(p, (point')')[1]
+end
+
+# Evaluate the likelihood of an Array{2} of points on the marginal belief of some variable
+# note the dimensions must match
+function evalLikelihood(fg::FactorGraph, sym::Symbol, points::Array{Float64,2})
+  p = getVertKDE(fg, sym)
+  Ndim(p) == size(points,1) ? nothing : error("points (dim=$(size(points,1))) must have same dimension as belief (dim=$(Ndim(p)))")
+  evaluateDualTree(p, (points))
+end
+
+
+evalLikelihood(fg, :l1, [1.0;0.2])
+
+evalLikelihood(fg, :l1, zeros(2,3))
+
+
+tree = prepBatchTree!(fg, drawpdf=true);
 @time inferOverTree!(fg,tree, N=100);
-@save "fgT1400v09err.jld" fg
+# @save "fgT1400v09err.jld" fg
 
 # include("examples/dev/ISAMRemoteSolve.jl")
 # T=1400
