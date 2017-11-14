@@ -3,15 +3,17 @@ dist: trusty
 sudo: required
 os:
   - linux
+  - osx
 julia:
   - 0.5
+  - 0.6
   - nightly
 notifications:
   email: false
 matrix:
   allow_failures:
+    - os: osx
     - julia: nightly
-
 after_success:
   - julia -e 'cd(Pkg.dir("Caesar")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
   - julia -e 'Pkg.add("Documenter")'
