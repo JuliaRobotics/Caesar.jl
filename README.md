@@ -184,7 +184,7 @@ And an [example service script for CollectionsRender](https://github.com/dehann/
 
 ## Contributors
 
-D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, J. Terblanche, M. Kaess, J. Leonard
 
 
 Future targets
