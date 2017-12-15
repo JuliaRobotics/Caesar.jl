@@ -7,8 +7,6 @@
 ```
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
-
-[![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)
 
 Towards non-parametric / parametric state estimation and navigation solutions. Implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages like C/[C++](http://github.com/pvazteixeira/caesar-lcm) or [Python](http://github.com/dehann/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py), as listed in features below. Multi-modal (quasi-multi-hypothesis) navigation and mapping solutions, using various sensor data, is a corner stone of this package. Multi-sensor fusion is made possible via vertically integrated [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
@@ -123,12 +121,13 @@ solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
 
 | **Major Dependencies** |     **Status**     |    **Test Coverage**    |
 |:-----------------------:|:------------------:|:------------------:|
-| Caesar.jl | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] |
-| [RoME.jl][rome-url] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] |
-| [IncrementalInference.jl][iif-url] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] |
-| [KernelDensityEstimate.jl][kde-url] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] |
-| [TransformUtils.jl][tf-url] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] |
-| [DrakeVisualizer.jl][dvis-url] | [![Build Status][dvis-build-img]][dvis-build-url] | [![codecov.io][dvis-cov-img]][dvis-cov-url] |
+| Caesar.jl | [![Build Status][https://travis-ci.org/dehann/Caesar.jl.svg?branch=master]][https://travis-ci.org/dehann/Caesar.jl] | [![codecov.io][https://codecov.io/github/dehann/Caesar.jl/coverage.svg?branch=master]][https://codecov.io/github/dehann/Caesar.jl?branch=master] |
+| [RoME.jl][http://www.github.com/dehann/RoME.jl] | [![Build Status][https://travis-ci.org/dehann/RoME.jl.svg?branch=master]][https://travis-ci.org/dehann/RoME.jl] | [![codecov.io][https://codecov.io/github/dehann/RoME.jl/coverage.svg?branch=master]][https://codecov.io/github/dehann/RoME.jl?branch=master] |
+| [IncrementalInference.jl][http://www.github.com/dehann/IncrementalInference.jl] | [![Build Status][https://travis-ci.org/dehann/IncrementalInference.jl.svg?branch=master]][https://travis-ci.org/dehann/IncrementalInference.jl] | [![codecov.io][[iif-cov-img]: https://codecov.io/github/dehann/IncrementalInference.jl/coverage.svg?branch=master
+]][https://codecov.io/github/dehann/IncrementalInference.jl?branch=master] |
+| [KernelDensityEstimate.jl][http://www.github.com/dehann/KernelDensityEstimate.jl] | [![Build Status][https://travis-ci.org/dehann/KernelDensityEstimate.jl.svg?branch=master]][https://travis-ci.org/dehann/KernelDensityEstimate.jl] | [![codecov.io][https://codecov.io/github/dehann/KernelDensityEstimate.jl/coverage.svg?branch=master]][https://codecov.io/github/dehann/KernelDensityEstimate.jl?branch=master] |
+| [TransformUtils.jl][http://www.github.com/dehann/TransformUtils.jl] | [![Build Status][https://travis-ci.org/dehann/TransformUtils.jl.svg?branch=master]][https://travis-ci.org/dehann/TransformUtils.jl] | [![codecov.io][https://codecov.io/github/dehann/TransformUtils.jl/coverage.svg?branch=master]][https://codecov.io/github/dehann/TransformUtils.jl?branch=master] |
+| [DrakeVisualizer.jl][http://www.github.com/rdeits/DrakeVisualizer.jl] | [![Build Status][https://travis-ci.org/rdeits/DrakeVisualizer.jl.svg?branch=master]][https://travis-ci.org/rdeits/DrakeVisualizer.jl] | [![codecov.io][https://codecov.io/github/rdeits/DrakeVisualizer.jl/coverage.svg?branch=master]][https://codecov.io/github/rdeits/DrakeVisualizer.jl?branch=master] |
 
 ## Database interaction layer
 ---
