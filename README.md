@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/julia_caesar 001_eyes_thres_wtitle_smaller_centered_low.png" width="480" border="0" />
+<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/julia_caesar 001_eyes_thres_wtitle_smaller_centered_low.png" width="480" border="0" />
 </p>
 
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
@@ -20,15 +20,15 @@ Comments, questions and issues welcome.
 
 Intersection of ambiguous elevation angle from planar SONAR sensor:
 
-<a href="http://vimeo.com/198237738" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/rovasfm02.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
+<a href="http://vimeo.com/198237738" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/rovasfm02.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 
 Bi-modal belief
 
-<a href="http://vimeo.com/198872855" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/rovyaw90.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
+<a href="http://vimeo.com/198872855" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/rovyaw90.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 
 Multi-session [Turtlebot](http://www.turtlebot.com/) example of the second floor in the [Stata Center](https://en.wikipedia.org/wiki/Ray_and_Maria_Stata_Center):
 
-<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/doc/imgs/turtlemultisession.gif" alt="Turtlebot Multi-session animation" width="480" border="0" /></a>
+<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/turtlemultisession.gif" alt="Turtlebot Multi-session animation" width="480" border="0" /></a>
 
 Multi-modal range only example:
 
