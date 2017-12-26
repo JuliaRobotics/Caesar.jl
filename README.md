@@ -5,7 +5,7 @@
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
 [![Build Status][build-img]][build-url]
-<!-- [![Caesar](http://pkg.julialang.org/badges/Caesar_0.5.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.5)
+<!-- 
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)-->
 
 Please [documentation](http://dehann.github.io/Caesar.jl/latest/) in progress.
