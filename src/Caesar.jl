@@ -9,9 +9,11 @@ import RoME: getRangeKDEMax2D, getLastPose
 
 using
   RoME,
+  RoMEPlotting,
   IncrementalInference,
   Graphs,
   KernelDensityEstimate,
+  KernelDensityEstimatePlotting,
   Distributions,
   DrakeVisualizer,
   TransformUtils,
