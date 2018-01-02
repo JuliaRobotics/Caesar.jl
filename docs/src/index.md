@@ -1,5 +1,3 @@
-# Caesar.jl
-
 ```@raw html
 <p align="center">
 <img src="assets/logo.png" width="480" border="0" />
@@ -113,21 +111,6 @@ addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=
 solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
 ```
 
-
-## Dependency Status
----
-
-**Note**, we are in the process of updating all dependencies to support both Julia 0.5 and the new Julia 0.6 on Linux and Mac (@dehann July 2017). The solution is stable for Julia 0.5 on Linux.
-
-| **Major Dependencies** |     **Status**     |    **Test Coverage**    |
-|:-----------------------:|:------------------:|:------------------:|
-| Caesar.jl | [![Build Status][https://travis-ci.org/dehann/Caesar.jl.svg?branch=master]][https://travis-ci.org/dehann/Caesar.jl] | [![codecov.io][https://codecov.io/github/dehann/Caesar.jl/coverage.svg?branch=master]][https://codecov.io/github/dehann/Caesar.jl?branch=master] |
-| [RoME.jl][http://www.github.com/dehann/RoME.jl] | [![Build Status][https://travis-ci.org/dehann/RoME.jl.svg?branch=master]][https://travis-ci.org/dehann/RoME.jl] | [![codecov.io][https://codecov.io/github/dehann/RoME.jl/coverage.svg?branch=master]][https://codecov.io/github/dehann/RoME.jl?branch=master] |
-| [IncrementalInference.jl][http://www.github.com/dehann/IncrementalInference.jl] | [![Build Status][https://travis-ci.org/dehann/IncrementalInference.jl.svg?branch=master]][https://travis-ci.org/dehann/IncrementalInference.jl] | [![codecov.io][[iif-cov-img]: https://codecov.io/github/dehann/IncrementalInference.jl/coverage.svg?branch=master
-]][https://codecov.io/github/dehann/IncrementalInference.jl?branch=master] |
-| [KernelDensityEstimate.jl][http://www.github.com/dehann/KernelDensityEstimate.jl] | [![Build Status][https://travis-ci.org/dehann/KernelDensityEstimate.jl.svg?branch=master]][https://travis-ci.org/dehann/KernelDensityEstimate.jl] | [![codecov.io][https://codecov.io/github/dehann/KernelDensityEstimate.jl/coverage.svg?branch=master]][https://codecov.io/github/dehann/KernelDensityEstimate.jl?branch=master] |
-| [TransformUtils.jl][http://www.github.com/dehann/TransformUtils.jl] | [![Build Status][https://travis-ci.org/dehann/TransformUtils.jl.svg?branch=master]][https://travis-ci.org/dehann/TransformUtils.jl] | [![codecov.io][https://codecov.io/github/dehann/TransformUtils.jl/coverage.svg?branch=master]][https://codecov.io/github/dehann/TransformUtils.jl?branch=master] |
-| [DrakeVisualizer.jl][http://www.github.com/rdeits/DrakeVisualizer.jl] | [![Build Status][https://travis-ci.org/rdeits/DrakeVisualizer.jl.svg?branch=master]][https://travis-ci.org/rdeits/DrakeVisualizer.jl] | [![codecov.io][https://codecov.io/github/rdeits/DrakeVisualizer.jl/coverage.svg?branch=master]][https://codecov.io/github/rdeits/DrakeVisualizer.jl?branch=master] |
 
 ## Database interaction layer
 ---
