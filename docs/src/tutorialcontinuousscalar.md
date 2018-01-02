@@ -20,6 +20,8 @@ using IncrementalInference
 This tutorial calls for multiple variable nodes connected through algebraic functions stochastic uncertainty.
 User scope `Prior`, `LinearOffset`, and `MultiModalOffset` with arbitrary distributions are defined as:
 ```julia
+import IncrementalInference: getSample
+
 struct Prior{T} <: IncrementalInference.FunctorSingleton where T <: Distribution
   z::T
 end
@@ -48,7 +50,7 @@ function (s::MultiModalOffset)(res::Array{Float64},
       X1::Array{Float64,2},
       X2::Array{Float64,2}  )
   #
-  res[1] = meas[meas[3][idx]][idx] - (X2[1,idx] - X1[1,idx])
+  res[1] = meas[meas[end][idx]][idx] - (X2[1,idx] - X1[1,idx])
   nothing
 end
 ```
@@ -88,7 +90,7 @@ The two node factor graph is shown in the image below.
 Automatic initialization of variables depend on how the factor graph model is constructed.
 This tutorial demonstrates this behavior by first showing that `:x0` is not initialized:
 ```julia
-@show isInitialized(fg, :x0)
+@show isInitialized(fg, :x0) # false
 ```
 Why is `:x0` not initialized?
 Since no other variable nodes have been 'connected to' (or depend) on `:x0` and future intentions of the user are unknown, the initialization of `:x0` is deferred until the latest possible moment.
@@ -201,6 +203,12 @@ addFactor!(fg, [:x3, :x0], LinearOffset(Normal(40, 1)))
 Pay close attention to what this last factor means in terms of the probability density traces shown in the previous figure.
 The blue trace for `:x3` has two major modes, one that overlaps with `:x0, :x1` near 0 and a second mode further to the left at -40.
 The last factor introduces a shift `LinearOffset(Normal(40,1))` which essentially aligns the left most mode of `:x3` back onto `:x0`.
+```@raw html
+<p align="center">
+<img src="assets/tutorials/ContinuousScalar/fgx0123c.png" width="480" border="0" />
+</p>
+```
+
 This last factor forces a mode selection through consensus.
 By doing global inference, the new information obtained in `:x3` will be equally propagated to `:x2` where only one of the two modes will remain.
 
