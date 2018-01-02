@@ -7,8 +7,8 @@ makedocs(
     pages = Any[
         "Home" => "index.md",
         "Examples" => "examples.md",
+        "Tutorial 1: ContinuousScalar" => "tutorialcontinuousscalar.md",
         "Functions" => "func_ref.md"
-
     ]
     # html_prettyurls = !("local" in ARGS),
     )
