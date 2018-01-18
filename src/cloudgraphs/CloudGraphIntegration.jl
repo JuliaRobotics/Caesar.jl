@@ -148,7 +148,9 @@ function getfnctype(cvl::CloudGraphs.CloudVertex)
 end
 
 function initfg(;sessionname="NA",cloudgraph=nothing)
-  fgl = RoME.initfg(sessionname=sessionname)
+  # fgl = RoME.initfg(sessionname=sessionname)
+  fgl = IncrementalInference.emptyFactorGraph()
+  fgl.sessionname = sessionname
   fgl.cg = cloudgraph
   return fgl
 end
@@ -185,7 +187,8 @@ end
 
 function updateFullCloudVertData!(fgl::FactorGraph,
         nv::Graphs.ExVertex;
-        updateMAPest::Bool=false  )
+        updateMAPest::Bool=false,
+        bigdata::Bool=false  )
  #
   # TODO -- this get_vertex seems excessive, but we need the CloudVertex
   neoID = fgl.cgIDs[nv.index]
@@ -209,7 +212,7 @@ function updateFullCloudVertData!(fgl::FactorGraph,
   # also make sure our local copy is updated, need much better refactoring here
   fgl.g.vertices[nv.index].attributes["data"] = nv.attributes["data"]
 
-  CloudGraphs.update_vertex!(fgl.cg, vert)
+  CloudGraphs.update_vertex!(fgl.cg, vert, bigdata)
 end
 
 function makeAddCloudEdge!(fgl::FactorGraph, v1::Graphs.ExVertex, v2::Graphs.ExVertex)
@@ -234,14 +237,16 @@ function getCloudOutNeighbors(fgl::FactorGraph,
       backendset::Int=1,
       needdata::Bool=false  )
   #
-  cgid = fgl.cgIDs[exVertId]
+  println("Looking for cloud out neighbors")
+  @show cgid = fgl.cgIDs[exVertId]
   cv = CloudGraphs.get_vertex(fgl.cg, cgid, false)
   neighs = CloudGraphs.get_neighbors(fgl.cg, cv)
   neExV = Graphs.ExVertex[]
   for n in neighs
     cgn = CloudGraphs.cloudVertex2ExVertex(n)
-    if (cgn.attributes["ready"] == ready &&
-       cgn.attributes["backendset"] == backendset &&
+    if (
+       #cgn.attributes["ready"] == ready &&
+       #cgn.attributes["backendset"] == backendset &&
        (!needdata || haskey(cgn.attributes, "data") )  )
       push!(neExV, cgn )
     end
@@ -604,12 +609,17 @@ end
 Obtain Neo4j global database address and login credientials from STDIN, then insert and return in the addrdict colletion.
 """
 function askneo4jcredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
-  need = ["neo4j addr";"neo4j usr";"neo4j pwd";"session"]
+  need = ["neo4jHost";"neo4jPort";"neo4jUsername";"neo4jPassword";"session"]
   info("Please enter information for Neo4j DB:")
   for n in need
     info(n)
     str = readline(STDIN)
-    addrdict[n] = str[1:(end-1)]
+    addrdict[n] = str
+    if length(str) > 0
+      if str[end] == "\n"
+        addrdict[n] = str[1:(end-1)]
+      end
+    end
   end
   return addrdict
 end
@@ -620,17 +630,23 @@ end
 Obtain Mongo database address and login credientials from STDIN, then insert and return in the addrdict colletion.
 """
 function askmongocredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
-  need = ["mongo addr";"mongo usr";"mongo pwd"]
+  need = ["mongoHost";"mongoPort";"mongoUsername";"mongoPassword"]
   info("Please enter information for MongoDB:")
   for n in need
     info(n)
-    n == "mongo addr" && haskey(addrdict, "neo4j addr") ? print(string("[",addrdict["neo4j addr"],"]: ")) : nothing
+    n == "mongoHost" && haskey(addrdict, "neo4jHost") ? print(string("[",addrdict["neo4jHost"],"]: ")) : nothing
     str = readline(STDIN)
-    addrdict[n] = str[1:(end-1)]
+    addrdict[n] = str
+    if length(str) > 0
+      if str[end] == "\n"
+        addrdict[n] = str[1:(end-1)]
+      end
+    end
   end
-  if addrdict["mongo addr"] == "" && haskey(addrdict, "neo4j addr")
-    addrdict["mongo addr"] = addrdict["neo4j addr"]
-  elseif addrdict["mongo addr"] != ""
+  addrdict["mongoIsUsingCredentials"] = false,
+  if addrdict["mongoHost"] == "" && haskey(addrdict, "neo4jHost")
+    addrdict["mongoHost"] = addrdict["neo4jHost"]
+  elseif addrdict["mongoHost"] != ""
     nothing
   else
     error("Don't know how to get to MongoDB address.")
@@ -645,7 +661,7 @@ end
 Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
 """
 function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false, multisession=false, drawedges=false)
-  addrdict = Dict{AbstractString, Union{AbstractString, Vector{String}}}()
+  addrdict = Dict{AbstractString, Any}()  #Union{AbstractString, Vector{String}}
   askneo4jcredentials!(addrdict=addrdict)
   askmongocredentials!(addrdict=addrdict)
   need = String[]
@@ -665,7 +681,12 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
     n == "clearslamindb" ? print("yes/[no]: ") : nothing
     n == "multisession" ? print("comma separated list session names/[n]: ") : nothing
     str = readline(STDIN)
-    addrdict[n] = str[1:(end-1)]
+    addrdict[n] = str
+    if length(str) > 0
+      if str[end] == "\n"
+        addrdict[n] = str[1:(end-1)]
+      end
+    end
   end
   if drawdepth
     addrdict["draw depth"] = addrdict["draw depth"]=="" || addrdict["draw depth"]=="y" || addrdict["draw depth"]=="yes" ? "y" : "n"
@@ -702,10 +723,12 @@ function standardcloudgraphsetup(;addrdict=nothing,
     addrdict = consoleaskuserfordb(nparticles=nparticles, drawdepth=drawdepth, clearslamindb=clearslamindb, multisession=multisession, drawedges=drawedges)
   end
 
+  warn("Not considering field: addrdict[\"mongoIsUsingCredentials\"]")
   # Connect to database
+  # addrdict["mongoIsUsingCredentials"]
   configuration = CloudGraphs.CloudGraphConfiguration(
-                            addrdict["neo4j addr"], 7474, addrdict["neo4j usr"], addrdict["neo4j pwd"],
-                            addrdict["mongo addr"], 27017, false, addrdict["mongo usr"], addrdict["mongo pwd"]);
+                             addrdict["neo4jHost"], parse(Int, addrdict["neo4jPort"]), addrdict["neo4jUsername"], addrdict["neo4jPassword"],
+                             addrdict["mongoHost"], parse(Int, addrdict["mongoPort"]), false, addrdict["mongoUsername"], addrdict["mongoPassword"]);
   cloudGraph = connect(configuration);
   # conn = cloudGraph.neo4j.connection
   # register types of interest in CloudGraphs

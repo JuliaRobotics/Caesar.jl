@@ -33,7 +33,7 @@ function getnewvertdict(conn, session::AbstractString)
   # loadresult = commit(loadtx)
   # @show cph.results[1]
 
-  newvertdict = SortedDict{Int, Dict{Symbol, Dict{AbstractString,Any}}, Base.Order.ForwardOrdering}()
+  newvertdict = DataStructures.SortedDict{Int, Dict{Symbol, Dict{AbstractString,Any}}, Base.Order.ForwardOrdering}(Base.Order.ForwardOrdering())
   # mongokeydict = Dict{Int, Dict{AbstractString,Any}}()
 
   for val in cph.results[1]["data"]
