@@ -61,6 +61,11 @@ function slamindb(;addrdict=nothing,
     if fullLocalGraphCopy!(fg)
       (savejlds && itercount == 0) ? slamindbsavejld(fg, addrdict["session"], itercount) : nothing
       itercount += 1
+
+      println("-------------Ensure Initialization-----------")
+      ensureAllInitialized!(fg)
+
+      println("------------Bayes (Junction) Tree------------")
       tree = wipeBuildNewTree!(fg,drawpdf=true)
       if !recursivesolver
         inferOverTree!(fg, tree, N=N)
