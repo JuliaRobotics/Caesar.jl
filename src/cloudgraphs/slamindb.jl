@@ -19,7 +19,8 @@ function slamindb(;addrdict=nothing,
             iterations::Int=-1,
             multisession::Bool=false,
             savejlds::Bool=false,
-            recursivesolver::Bool=false  )
+            recursivesolver::Bool=false,
+            drawbayestree::Bool=false  )
   #
 
   nparticles = false
@@ -66,7 +67,7 @@ function slamindb(;addrdict=nothing,
       ensureAllInitialized!(fg)
 
       println("------------Bayes (Junction) Tree------------")
-      tree = wipeBuildNewTree!(fg,drawpdf=true)
+      tree = wipeBuildNewTree!(fg,drawpdf=drawbayestree)
       if !recursivesolver
         inferOverTree!(fg, tree, N=N)
       else
