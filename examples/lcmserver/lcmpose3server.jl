@@ -191,7 +191,7 @@ runlistener(flags, slam, vc, until=:x5)
 # # flags[1] = false
 # #
 # #
-# solveandvisualize(slam.fg, vc, drawtype=:fit) #, densitymeshes=[:x1;:x33;:x60])
+# solve(slam.fg) #, densitymeshes=[:x1;:x33;:x60])
 # #
 # visualizeallposes!(vc, slam.fg, drawtype=:fit)
 #
