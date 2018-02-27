@@ -209,7 +209,7 @@ function updateFullCloudVertData!(fgl::FactorGraph,
   # also make sure our local copy is updated, need much better refactoring here
   fgl.g.vertices[nv.index].attributes["data"] = nv.attributes["data"]
 
-  CloudGraphs.update_vertex!(fgl.cg, vert)
+  CloudGraphs.update_vertex!(fgl.cg, vert, false)
 end
 
 function makeAddCloudEdge!(fgl::FactorGraph, v1::Graphs.ExVertex, v2::Graphs.ExVertex)

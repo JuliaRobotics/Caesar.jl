@@ -180,8 +180,8 @@ function mergeValuesIntoCloudVert!{T <: AbstractString}(fgl::FactorGraph,
   cv = mergeCloudVertex!(fgl.cg, v, neoNodeId, alreadyexists, neo4jNode, existlbs, mongos, labels=labels )
 
   # update merged vertex to database
-  CloudGraphs.update_vertex!(fgl.cg, cv)
-  CloudGraphs.update_NeoBigData!(fgl.cg, cv)
+  CloudGraphs.update_vertex!(fgl.cg, cv, true)
+  # CloudGraphs.update_NeoBigData!(fgl.cg, cv)
   nothing
 end
 
