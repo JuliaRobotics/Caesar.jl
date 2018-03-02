@@ -58,7 +58,7 @@ type ArcPointsRangeSolve <: Function
   ArcPointsRangeSolve(x1::Vector{Float64}, x2::Vector{Float64}, x3::Vector{Float64}, r::Float64) = new(x1,x2,x3,r, zeros(3), 0.0, zeros(3))
 end
 
-function (as::ArcPointsRangeSolve)(x::Vector{Float64}, res::Vector{Float64})
+function (as::ArcPointsRangeSolve)(res::Vector{Float64}, x::Vector{Float64})
   res[1] = norm(x-as.x1)^2 - as.r^2
   res[2] = norm(x-as.x2)^2 - as.r^2
   if length(res) == 3
