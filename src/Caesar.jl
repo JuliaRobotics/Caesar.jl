@@ -180,7 +180,7 @@ export
   rmInstMultisessionPriors!,
   removeMultisessions!
 
-typealias VoidUnion{T} Union{Void, T}
+VoidUnion{T} = Union{Void, T}
 
 include("BearingRangeTrackingServer.jl")
 
