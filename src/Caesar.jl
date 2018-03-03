@@ -197,7 +197,7 @@ include("cloudgraphs/slamindb.jl")
 # include("cloudgraphs/DBVisualizationUtils.jl")
 # include("cloudgraphs/DirectorVisService.jl")
 include("cloudgraphs/MultisessionUtils.jl")
-include("cloudgraphs/ImageUtils.jl")
+# include("cloudgraphs/ImageUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
 
 
