@@ -76,7 +76,8 @@ visualizeDensityMesh!(vc, fg, :l2)
 sleep(3)
 
 
-solveandvisualize(fg, vc, densitymeshes=[:l1, :l2], N=N, drawlandms=false)
+batchSolve(fg)
+visualize(fg, vc, densitymeshes=[:l1, :l2], N=N, drawlandms=false)
 
 # should just be the point where landmark likelihoods sightings intersect
 deletemeshes!(vc)
