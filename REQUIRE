@@ -1,30 +1,23 @@
 julia 0.6
 RoME 0.1.0
-#RoMEPlotting
 IncrementalInference 0.3.0
 Graphs 0.9.0
 KernelDensityEstimate 0.3.0
-#KernelDensityEstimatePlotting
 Distributions
-#DrakeVisualizer 0.1.2
 CloudGraphs 0.0.2
 Neo4j 1.0.0
 LibBSON
 Mongo 0.2.3
 TransformUtils 0.1.0
+Rotations
 CoordinateTransformations
-#GeometryTypes
-#Rotations
-#Gadfly
-#Colors
-#ColorTypes
 JLD
 HDF5
 JSON
-#MeshIO
 FileIO
 NLsolve
 PyLCM
+LCMCore
 PyCall
 DataStructures
 ProgressMeter
