@@ -16,10 +16,15 @@ There may be some package documentation glitches where the `using Arena` depende
 
 ## Installation
 
-Requires via ```sudo apt-get install```, see [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) for more details.
+
+This package will soon be registed with Julia METADATA which will make it available with the standard package management tools.  Within [Julia](http://www.julialang.org) or ([JuliaPro](http://www.juliacomputing.com)) type:
+```julia
+julia> Pkg.add("Arena")
+```
+
+Depending on the system, the following `sudo apt-get install` packages may be required, see [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) for more details:
 
     libvtk5-qt4-dev python-vtk
-
 
 ## 2D Visualization
 
