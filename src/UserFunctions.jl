@@ -24,39 +24,39 @@ function identitypose6fg(;fg=nothing,
 end
 
 
-function solveandvisualize(fg::FactorGraph,
-      vc::DrakeVisualizer.Visualizer;
-      refresh::Number=1.0,
-      densitymeshes::Vector{Symbol}=Symbol[],
-      drawlandms::Bool=true,
-      N::Int=100,
-      drawtype::Symbol=:max,
-      gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}}=Dict{Symbol, Tuple{Symbol,Vector{Float64}}}() )
-  #
-  deletemeshes!(vc)
-
-  # draw while solving[1]==true
-  solving = [true]
-  @async begin
-    while solving[1]
-      println(".")
-      visualizeallposes!(vc, fg, drawlandms=drawlandms, drawtype=drawtype, gt=gt)
-      i = 1
-      deletemeshes!(vc)
-      for dm in densitymeshes
-        i+=1
-        visualizeDensityMesh!(vc, fg, dm)
-      end
-      sleep(1)
-    end
-  end
-
-  # solve
-  tree = wipeBuildNewTree!(fg)
-  @time inferOverTree!(fg, tree, N=N)
-  solving[1]=false;
-  nothing
-end
+# function solveandvisualize(fg::FactorGraph,
+#       vc::DrakeVisualizer.Visualizer;
+#       refresh::Number=1.0,
+#       densitymeshes::Vector{Symbol}=Symbol[],
+#       drawlandms::Bool=true,
+#       N::Int=100,
+#       drawtype::Symbol=:max,
+#       gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}}=Dict{Symbol, Tuple{Symbol,Vector{Float64}}}() )
+#   #
+#   deletemeshes!(vc)
+#
+#   # draw while solving[1]==true
+#   solving = [true]
+#   @async begin
+#     while solving[1]
+#       println(".")
+#       visualizeallposes!(vc, fg, drawlandms=drawlandms, drawtype=drawtype, gt=gt)
+#       i = 1
+#       deletemeshes!(vc)
+#       for dm in densitymeshes
+#         i+=1
+#         visualizeDensityMesh!(vc, fg, dm)
+#       end
+#       sleep(1)
+#     end
+#   end
+#
+#   # solve
+#   tree = wipeBuildNewTree!(fg)
+#   @time inferOverTree!(fg, tree, N=N)
+#   solving[1]=false;
+#   nothing
+# end
 
 function hasval(d::Dict, va)
   for (k,v) in d

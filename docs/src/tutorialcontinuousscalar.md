@@ -25,7 +25,7 @@ import IncrementalInference: getSample
 struct Prior{T} <: IncrementalInference.FunctorSingleton where T <: Distribution
   z::T
 end
-getSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,N), )
+getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 struct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: Distribution
   z::T
 end

@@ -66,7 +66,8 @@ visualizeallposes!(vc, fg, drawlandms=false)
 pose2prior = PriorPose3( MvNormal(veeEuler(tfx2), initCov) )
 addFactor!(fg,[getVert(fg, :x2)], pose2prior)
 
-solveandvisualize(fg, vc, densitymeshes=[:l1], N=N)
+batchSolve(fg)
+visualize(fg, vc, densitymeshes=[:l1], N=N)
 
 
 deletemeshes!(vc)

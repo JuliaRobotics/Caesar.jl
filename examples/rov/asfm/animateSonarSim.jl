@@ -98,7 +98,6 @@ rho3, bearing3, elev3 = projectrbe(fg,:x3,gt[:l1])
 addLinearArrayConstraint(fg, (rho3, bearing3), :x3, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
 
-# solveandvisualize(fg, vc, densitymeshes=[:l1;:x3])
 
 
 visualizeDensityMesh!(vc, fg, :l1, meshid=2)
@@ -111,7 +110,6 @@ bearing4 = 0.0
 addLinearArrayConstraint(fg, (rho4, bearing4), :x4, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
 
-# solveandvisualize(fg, vc, densitymeshes=[:l1;:x3;:x4])
 
 
 addOdoFG!(fg, Pose3Pose3(MvNormal([2.0;4.0;0.0;0.0;0.0;-pi/3], odoCov) )
@@ -122,9 +120,9 @@ bearing5 = 0.0
 addLinearArrayConstraint(fg, (rho5, bearing5), :x5, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
 
-solveandvisualize(fg, vc, densitymeshes=[:l1;:x5])
+batchSolve(fg)
 
-
+# visualize(fg, vc, densitymeshes=[:l1;:x5])
 visualizeallposes!(vc, fg, drawlandms=false)
 
 visualizeDensityMesh!(vc, fg, :x4, meshid=3)

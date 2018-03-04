@@ -217,7 +217,6 @@ plotKDE(fgnew, :x3, dims=[1;2], title="$(veeEuler(wTx3))")
 
 
 visualizeallposes!(vis, fgnew)
-# solveandvisualize(fgnew, vis)
 
 
 
@@ -243,7 +242,8 @@ plotKDE(fgnew, :x5, dims=[1;2], title="$(veeEuler(wTx5))")
 
 
 visualizeallposes!(vis, fgnew)
-solveandvisualize(fgnew, vis)
+solve(fgnew)
+
 
 treenew = wipeBuildNewTree!(fgnew, drawpdf=true)
 inferOverTreeR!(fgnew, treenew, N=100, dbg=true)
