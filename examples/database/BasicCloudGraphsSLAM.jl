@@ -11,7 +11,7 @@ using IncrementalInference
 # session = addrdict["session"]
 
 
-interactive operation
+# interactive operation
 session = "SESSROX"
 Nparticles = 100
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))

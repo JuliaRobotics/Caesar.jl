@@ -19,7 +19,8 @@ function slamindb(;addrdict=nothing,
             iterations::Int=-1,
             multisession::Bool=false,
             savejlds::Bool=false,
-            recursivesolver::Bool=false  )
+            recursivesolver::Bool=false,
+            drawbayestree::Bool=false  )
   #
 
   nparticles = false
@@ -61,7 +62,12 @@ function slamindb(;addrdict=nothing,
     if fullLocalGraphCopy!(fg)
       (savejlds && itercount == 0) ? slamindbsavejld(fg, addrdict["session"], itercount) : nothing
       itercount += 1
-      tree = wipeBuildNewTree!(fg,drawpdf=true)
+
+      println("-------------Ensure Initialization-----------")
+      ensureAllInitialized!(fg)
+
+      println("------------Bayes (Junction) Tree------------")
+      tree = wipeBuildNewTree!(fg,drawpdf=drawbayestree)
       if !recursivesolver
         inferOverTree!(fg, tree, N=N)
       else
