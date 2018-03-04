@@ -5,7 +5,7 @@ using IncrementalInference</code></pre><p>This tutorial calls for multiple varia
 struct Prior{T} &lt;: IncrementalInference.FunctorSingleton where T &lt;: Distribution
   z::T
 end
-getSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,N), )
+getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 struct LinearOffset{T} &lt;: IncrementalInference.FunctorPairwise where T &lt;: Distribution
   z::T
 end
