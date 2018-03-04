@@ -13,16 +13,7 @@ Critically, this package can operate in the conventional SLAM manner, using loca
 
 Comments, questions and issues welcome.
 
-## Contributors
----
-
-Authors directly involved with this package are:
-
-D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
-
-We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
-
-## Major features
+# Major features
 ---
 
 * Performing multi-core inference with Multi-modal iSAM over factor graphs, supporting `Pose2, Pose3, Point2, Point3, Null hypothesis, Multi-modal, KDE density, partial constraints`, and more.
@@ -48,7 +39,7 @@ savejld(fg, file="test.jld", groundtruth=gt)
 loadjld(file="test.jld")
 ```
 
-* Visualization through [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl).
+* Visualization through [Arena.jl](https://github.com/dehann/Arena.jl).
 ```julia
 visualizeallposes(fg) # from local dictionary
 drawdbdirector()      # from database held factor graph
@@ -72,7 +63,7 @@ end
 julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
 ```
 
-And many more, please see the examples folder.
+And many more, please see the [examples](/examples) folder.
 
 ## Installation
 ---
@@ -97,7 +88,30 @@ This is a work in progress package. Please file issues here as needed to help re
 
 Hybrid parametric and non-parametric optimization. Incrementalized update rules and properly marginalized 'forgetting' for sliding window type operation. We defined interprocess interface for multi-language front-end development.
 
-## References
+# Contributors
+---
+
+Authors directly involved with this package are:
+
+D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+
+We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
+
+# Cite
+---
+
+Consider citing our work:
+
+```
+@misc{caesarjl,
+  author = "Dehann Fourie, John Leonard, Micheal Kaess, and contributors",
+  title =  "Caesar.jl",
+  year =   2017,
+  url =    "https://github.com/dehann/Caesar.jl"
+}
+```
+
+# References
 ---
 
     [1]  Fourie, D.: "Multi-modal and Inertial Sensor Solutions to Navigation-type Factor Graph",
@@ -105,7 +119,6 @@ Hybrid parametric and non-parametric optimization. Incrementalized update rules 
     [2]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: "SLAMinDB: Centralized graph
          databases for mobile robotics" IEEE International Conference on Robotics and Automation (ICRA),
          Singapore, 2017.
-
 
 ## Manual Outline
 
