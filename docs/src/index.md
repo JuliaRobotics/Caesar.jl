@@ -13,6 +13,15 @@ Critically, this package can operate in the conventional SLAM manner, using loca
 
 Comments, questions and issues welcome.
 
+## Contributors
+---
+
+Authors directly involved with this package are:
+
+D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+
+We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
+
 ## Major features
 ---
 
@@ -67,91 +76,18 @@ And many more, please see the examples folder.
 
 ## Installation
 ---
-Requires via ```sudo apt-get install```, see [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) for more details.
 
-    libvtk5-qt4-dev python-vtk
+Caesar.jl is registered with the regular Julia METADATA and can be installed as follows:
+```julia
+julia> Pkg.add("Caesar")
+```
 
-Then install required Julia packages  
-
-    julia> Pkg.add("Caesar")
-
-Note that Database related packages will not be automatically installed. Please see section below for details.
-
+Please note that visualizations have been moved to the [Arena.jl](https://github.com/dehann/Arena.jl) package and documentation can be found on the visualization page of this documentation.
 
 ## Basic usage
 ---
 
-Here is a basic example of using visualization and multi-core factor graph solving:
-
-```julia
-addprocs(2)
-using Caesar, RoME, TransformUtils, Distributions
-
-# load scene and ROV model (might experience UDP packet loss LCM buffer not set)
-vc = startdefaultvisualization()
-sc1 = loadmodel(:scene01); sc1(vc)
-rovt = loadmodel(:rov); rovt(vc)
-
-
-initCov = 0.001*eye(6); [initCov[i,i] = 0.00001 for i in 4:6];
-odoCov = 0.0001*eye(6); [odoCov[i,i] = 0.00001 for i in 4:6];
-rangecov, bearingcov = 3e-4, 2e-3
-
-# start and add to a factor graph
-fg = identitypose6fg(initCov=initCov)
-tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
-addOdoFG!(fg, Pose3Pose3(MvNormal(veeEuler(tf), odoCov) ) )
-
-visualizeallposes!(vc, fg, drawlandms=false)
-
-addLinearArrayConstraint(fg, (4.0, 0.0), :x0, :l1, rangecov=rangecov,bearingcov=bearingcov)
-visualizeDensityMesh!(vc, fg, :l1)
-addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
-
-solveBatch!(fg)
-visualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
-```
-
-
-## Database interaction layer
----
-
-For using the solver on a Database layer, you simply need to switch the working API. This can be done by calling the database connection function, and following the prompt:
-
-```julia
-using Caesar
-backend_config, user_config = standardcloudgraphsetup()
-fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
-# and then continue as normal with the fg object, to add variables and factors, draw etc.
-```
-
-If you have access to Neo4j and Mongo services you should be able to run the [four door test](https://github.com/dehann/Caesar.jl/blob/master/test/fourdoortestcloudgraph.jl).
-
-Go to your browser at localhost:7474 and run one of the Cypher queries to either retrieve
-
-    match (n) return n
-
-or delete everything:
-
-    match (n) detach delete n
-
-You can run the multi-modal iSAM solver against the DB using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl):
-```
-$ julia -p20
-julia> using Caesar
-julia> slamindb() # iterations=-1
-```
-
-Database driven Visualization can be done with either MIT's [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl) (prefered), or Collections Render which additionally relies on [Pybot](http://www.github.com/spillai/pybot). For visualization using Director/DrakeVisualizer.jl:
-```
-$ julia -e "using Caesar; drawdbdirector()"
-```
-
-And an [example service script for CollectionsRender](https://github.com/dehann/Caesar.jl/blob/master/examples/database/DBCollectionsViewerService.jl) is also available.
-
-## Contributors
-
-D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+The basic example has been moved to the visualization page.
 
 
 ## Future targets
