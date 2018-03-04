@@ -61,11 +61,12 @@ addLinearArrayConstraint(fg, (4.0, 0.0), :x7, :l3, rangecov=rangecov,bearingcov=
 addLinearArrayConstraint(fg, (4.0, 0.0), :x8, :l4, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (4.0, 0.0), :x9, :l4, rangecov=rangecov,bearingcov=bearingcov)
 
-#solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
-solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l2;:x4])
-solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l3;:x7])
+batchSolve(fg)
 
-solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l4;:x9])
+# visualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
+visualize(fg, vc, drawlandms=true, densitymeshes=[:l2;:x4])
+visualize(fg, vc, drawlandms=true, densitymeshes=[:l3;:x7])
+visualize(fg, vc, drawlandms=true, densitymeshes=[:l4;:x9])
 
 Graphs.plot(fg.g)
 

@@ -4,31 +4,22 @@ module Caesar
 
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
-import DrakeVisualizer: Triad
+# import DrakeVisualizer: Triad
 import RoME: getRangeKDEMax2D, getLastPose, initfg
 
 using
   RoME,
-  RoMEPlotting,
   IncrementalInference,
   Graphs,
   KernelDensityEstimate,
-  KernelDensityEstimatePlotting,
   Distributions,
-  DrakeVisualizer,
   TransformUtils,
   CoordinateTransformations,
-  GeometryTypes,
   Rotations,
-  Gadfly,
-  Colors,
-  ColorTypes,
   JLD,
   HDF5,
   JSON,
-  MeshIO,
   FileIO,
-  NLsolve,
   DataStructures,
   ProgressMeter,
   ImageMagick,
@@ -45,7 +36,6 @@ using CloudGraphs,
 export
   # pass through from KDE
   kde!,
-  plotKDE,
   getPoints,
   getBW,
   Ndim,
@@ -87,51 +77,9 @@ export
   loadSlam,
   haselement,
 
-  # drawing functions
-  VisualizationContainer,
-  startdefaultvisualization,
-  newtriad!,
-  visualizetriads,
-  visualizeallposes!,
-  visualizeDensityMesh!,
-  updaterealtime!,
-  visualizerealtime,
-  # new tree interface
-  drawpose!,
-  drawposepoints!,
-  drawLine!,
-  drawLineBetween!,
-  drawAllOdometryEdges!,
-  pointToColor,
-  findAllBinaryFactors,
-  drawAllBinaryFactorEdges!,
-
-  # for models
-  loadmodel,
-  DrawModel,
-  DrawROV,
-  DrawScene,
-  #deleting functions
-  deletemeshes!,
-
-  # more drawing utils
-  ArcPointsRangeSolve,
-  findaxiscenter!,
-  parameterizeArcAffineMap,
-  animatearc,
-
-  # vis service
-  # drawdbsession,
-  drawdbdirector,
-  meshgrid,
-  DepthCamera,
-  buildmesh!,
-  reconstruct,
-
   # user functions
   identitypose6fg,
   projectrbe,
-  solveandvisualize,
   hasval,
 
   # repeats from RoME and IIF
@@ -181,32 +129,19 @@ export
   rmInstMultisessionPriors!,
   removeMultisessions!
 
-typealias VoidUnion{T} Union{Void, T}
+VoidUnion{T} = Union{Void, T}
 
 include("BearingRangeTrackingServer.jl")
 
 include("SlamServer.jl")
 include("DataUtils.jl")
-include("VisualizationUtils.jl")
-include("ModelVisualizationUtils.jl")
-
-
-include("BearingRangeTrackingServer.jl")
-
-include("SlamServer.jl")
-include("DataUtils.jl")
-include("VisualizationUtils.jl")
-include("ModelVisualizationUtils.jl")
 include("UserFunctions.jl")
 
 # using CloudGraphs
 include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
 include("cloudgraphs/ConvertGeneralSlaminDB.jl")
 include("cloudgraphs/slamindb.jl")
-include("cloudgraphs/DBVisualizationUtils.jl")
-include("cloudgraphs/DirectorVisService.jl")
 include("cloudgraphs/MultisessionUtils.jl")
-include("cloudgraphs/ImageUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
 
 

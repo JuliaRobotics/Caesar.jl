@@ -108,7 +108,8 @@ addLinearArrayConstraint(fg, (4.0, 0.0), :x0, :l1, rangecov=rangecov,bearingcov=
 visualizeDensityMesh!(vc, fg, :l1)
 addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
-solveandvisualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
+solveBatch!(fg)
+visualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
 ```
 
 

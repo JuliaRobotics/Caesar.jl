@@ -89,7 +89,6 @@ f1  = addFactor!(fg,[v0], initPosePrior)
 rangecov, bearingcov=3e-3, 3e-3
 println("Adding :l1 LinearRangeBearingElevation to graph...")
 addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
-# solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l1])
 visualizeDensityMesh!(vc, fg, :l1, meshid=2)
 
 # @async begin
@@ -121,7 +120,8 @@ addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l3, rangecov=rangecov,bearingcov=
 # visualizeDensityMesh!(vc, fg, :l2, meshid=3)
 
 
-solveandvisualize(fg, vc, drawlandms=false, densitymeshes=[:l3;:l2], N=N)
+batchSolve(fg)
+visualize(fg, vc, drawlandms=false, densitymeshes=[:l3;:l2], N=N)
 visualizeDensityMesh!(vc, fg, :x2, meshid=3)
 
 #

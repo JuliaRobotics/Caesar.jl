@@ -346,16 +346,8 @@ run(`evince spycliqmatx61.pdf`)
 run(`cp hauv67.jld /home/dehann/Pictures/hauv/`)
 
 
-
-
-0
-
-#
-[solveandvisualize(slam.fg, vc, drawtype=:fit) for i in 1:1] #, densitymeshes=[:x1;:x33;:x60])
-#
-#
-#
-# println("Debugging functions")
+[solve(slam.fg) for i in 1:1] #, densitymeshes=[:x1;:x33;:x60])
+visualize(slam.fg, vc, drawtype=:fit)
 
 using IncrementalInference
 
