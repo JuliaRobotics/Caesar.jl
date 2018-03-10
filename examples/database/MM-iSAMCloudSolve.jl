@@ -1,17 +1,25 @@
 # addprocs(7)
 # ask first for user convenience
 using Caesar
-cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true)
+
+include("/home/dehann/Documents/blandauthlocal.jl")
+cloudGraph, addrdict = standardcloudgraphsetup(nparticles=true, addrdict=addrdict)
 
 using RoME
 using CloudGraphs, Neo4j
 
 # using IncrementalInference
 
-session = addrdict["session"]
+# session = addrdict["session"]
+session = "TestHexagonalDrive11"
+addrdict["num particles"] = "100"
 Nparticles = parse(Int, addrdict["num particles"])
 println("Attempting to solve session $(session) with $(Nparticles) particles per marginal...")
 
+
+fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+
+setBackendWorkingSet!(fg.cg.neo4j.connection, session)
 
 # TODO -- incremental graph and subgraphs are works in progress
 while true
