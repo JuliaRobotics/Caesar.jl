@@ -219,20 +219,14 @@ function updateFullCloudVertData!(fgl::FactorGraph,
 end
 
 function makeAddCloudEdge!(fgl::FactorGraph, v1::Graphs.ExVertex, v2::Graphs.ExVertex)
-    println("makeAddCloudEdge: Looking for cgID's $(v1.index) and $(v2.index) in set...")
-    @show fgl.cgIDs
   cv1 = CloudGraphs.get_vertex(fgl.cg, fgl.cgIDs[v1.index], false)
   cv2 = CloudGraphs.get_vertex(fgl.cg, fgl.cgIDs[v2.index], false)
-  println("makeAddCloudEdge: HERE!")
   ce = CloudGraphs.CloudEdge(cv1, cv2, "DEPENDENCE");
   retrel = CloudGraphs.add_edge!(fgl.cg, ce);
-  println("makeAddCloudEdge: NOW HERE!")
 
   # TODO -- keep this edge id in function node data, must refactor
   push!(v2.attributes["data"].edgeIDs, retrel.id) # TODO -- not good way to do this
   updateFullCloudVertData!(fgl, v2)
-
-  println("makeAddCloudEdge: NOW HERE AGAIN!")
 
   IncrementalInference.makeAddEdge!(fgl, v1, v2, saveedgeID=false)
   retrel.id
