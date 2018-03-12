@@ -192,10 +192,12 @@ function updateFullCloudVertData!(fgl::FactorGraph,
         bigdata::Bool=false  )
  #
   # TODO -- this get_vertex seems excessive, but we need the CloudVertex
-  neoID = fgl.cgIDs[nv.index]
+
+  if(!haskey(fgl.cgIDs, nv.index))
+      error("Cannot find $(nv.index) in $(fgl.cgIDs)...")
+  end
   # println("updateFullCloudVertData! -- trying to get $(neoID)")
   vert = CloudGraphs.get_vertex(fgl.cg, neoID, false)
-
   if typeof(getData(nv)) == VariableNodeData && updateMAPest
     mv = getKDEMax(getKDE(nv))
     nv.attributes["MAP_est"] = mv
@@ -211,7 +213,7 @@ function updateFullCloudVertData!(fgl::FactorGraph,
   end
 
   # also make sure our local copy is updated, need much better refactoring here
-  fgl.g.vertices[nv.index].attributes["data"] = nv.attributes["data"]
+  fgl.stateless ? nothing : fgl.g.vertices[nv.index].attributes["data"] = nv.attributes["data"]
 
   CloudGraphs.update_vertex!(fgl.cg, vert, bigdata)
 end
@@ -232,8 +234,7 @@ function makeAddCloudEdge!(fgl::FactorGraph, v1::Graphs.ExVertex, v2::Graphs.ExV
 
   println("makeAddCloudEdge: NOW HERE AGAIN!")
 
-  # I can't process this line... I don't have a full graph.
-  # IncrementalInference.makeAddEdge!(fgl, v1, v2, saveedgeID=false)
+  IncrementalInference.makeAddEdge!(fgl, v1, v2, saveedgeID=false)
   retrel.id
 end
 
@@ -366,7 +367,7 @@ function registerGeneralVariableTypes!(cloudGraph::CloudGraph)
   # Pose2
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPose2}}, PackedFunctionNodeData{PackedPriorPose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2Pose2}}, PackedFunctionNodeData{PackedPose2Pose2}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
-  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRange{Distributions.Normal,Distributions.Normal}}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
+  CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DBearingRange{Distributions.Normal{Float64},Distributions.Normal{Float64}}}}, PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Pose2DPoint2DRange}}, FunctionNodeData{Pose2DPoint2DRange}, encodingConverter=passTypeThrough, decodingConverter=passTypeThrough)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{PriorPoint2D}}, PackedFunctionNodeData{PackedPriorPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
   CloudGraphs.registerPackedType!(cloudGraph, FunctionNodeData{GenericWrapParam{Point2DPoint2D}}, PackedFunctionNodeData{PackedPoint2DPoint2D}, encodingConverter=FNDencode, decodingConverter=FNDdecode)
@@ -407,13 +408,17 @@ function getAllExVertexNeoIDs(conn;
         ready::Int=1,
         backendset::Int=1,
         sessionname::AbstractString="",
-        reqbackendset::Bool=true  )
+        reqbackendset::Bool=true,
+        reqready::Bool=true  )
   #
   loadtx = transaction(conn)
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   # query = "match (n$(sn)) where n.ready=$(ready) and n.backendset=$(backendset) return n"
-  query = "match (n$(sn)) where n.ready=$(ready)"
-  query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
+  query = "match (n$(sn)) where not n:SESSION"
+  query = reqbackendset || reqready ? query*" and" : query
+  query = reqready ? query*" n.ready=$(ready)" : query
+  query = reqbackendset && reqready ? query*" and" : query
+  query = reqbackendset ? " n.backendset=$(backendset)" : query
   # query = query*" return n"
   query = query*" return n.exVertexId, id(n), n.label"
 
@@ -556,9 +561,9 @@ function copyAllNodes!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::
   nothing
 end
 
-function fullLocalGraphCopy!(fgl::FactorGraph; reqbackendset::Bool=true)
+function fullLocalGraphCopy!(fgl::FactorGraph; reqbackendset::Bool=true, reqready::Bool=true)
   conn = fgl.cg.neo4j.connection
-  IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, reqbackendset=reqbackendset)
+  IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready)
   if length(IDs) > 1
     cverts = Dict{Int64, CloudVertex}()
     unsorted = Int64[]

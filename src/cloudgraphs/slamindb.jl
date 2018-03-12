@@ -48,6 +48,10 @@ function slamindb(;addrdict=nothing,
     updatenewverts!(fg, N=N)
     println()
 
+    println("=============ENSURE INITIALIZED==============")
+    ensureAllInitialized!(fg)
+    println()
+
     println("================MULTI-SESSION================")
     rmInstMultisessionPriors!(cloudGraph, session=session, multisessions=addrdict["multisession"])
     println()
