@@ -194,6 +194,7 @@ function updateFullCloudVertData!(fgl::FactorGraph,
   if(!haskey(fgl.cgIDs, nv.index))
       error("Cannot find $(nv.index) in $(fgl.cgIDs)...")
   end
+  neoID = fgl.cgIDs[nv.index]
   # println("updateFullCloudVertData! -- trying to get $(neoID)")
   vert = CloudGraphs.get_vertex(fgl.cg, neoID, false)
   if typeof(getData(nv)) == VariableNodeData && updateMAPest
