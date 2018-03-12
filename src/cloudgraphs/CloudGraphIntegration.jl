@@ -171,7 +171,6 @@ function getExVertFromCloud(fgl::FactorGraph,
         fgid::Int64;
         bigdata::Bool=false  )
   #
-  println("CGIntegration - Looking in fgl.cgIDs for ID $fgid...")
   neoID = fgl.cgIDs[fgid]
   cvr = CloudGraphs.get_vertex(fgl.cg, neoID, false)
   CloudGraphs.cloudVertex2ExVertex(cvr)
@@ -181,7 +180,6 @@ function getExVertFromCloud(fgl::FactorGraph,
         lbl::Symbol;
         nt::Symbol=:var,
         bigdata::Bool=false  )
-  println("CGIntegration - Looking in fgl.IDs[lbl] for ID $lbl...")
   # getExVertFromCloud(fgl, fgl.IDs[lbl], bigdata=bigdata)
   getExVertFromCloud(fgl, (nt==:var ? fgl.IDs[lbl] : fgl.fIDs[lbl]), bigdata=bigdata)
 end
