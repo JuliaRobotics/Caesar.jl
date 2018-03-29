@@ -8,7 +8,7 @@ A modern robotic toolkit for localization and mapping -- reducing the barrier of
 <!--
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)-->
 
-Please see the [documentation](http://dehann.github.io/Caesar.jl/latest/) (work in progress).
+# Introduction
 
 Towards non-parametric / parametric state estimation and navigation solutions [1]. Implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages like C/[C++](http://github.com/pvazteixeira/caesar-lcm) or [Python](http://github.com/dehann/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py), as listed in features below. Multi-modal (quasi-multi-hypothesis) navigation and mapping solutions, using various sensor data, is a corner stone of this package. Multi-sensor fusion is made possible via vertically integrated [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
 
@@ -16,127 +16,24 @@ Critically, this package can operate in the conventional SLAM manner, using loca
 
 Comments, questions and issues welcome.
 
-## Examples
+# Documentation
 
-Intersection of ambiguous elevation angle from planar SONAR sensor:
+Please see the [documentation](http://dehann.github.io/Caesar.jl/latest/):
 
-<a href="http://vimeo.com/198237738" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/rovasfm02.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
+[![docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://dehann.github.io/Caesar.jl/latest/)
 
-Bi-modal belief
+# Visualization
 
-<a href="http://vimeo.com/198872855" target="_blank"><img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/rovyaw90.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
+Please see the [Arena.jl](http://www.github.com/dehann/Arena.jl) package for the concentration of all 2D and 3D visualization utilities of the Caesar.jl robot navigation packages.
 
-Multi-session [Turtlebot](http://www.turtlebot.com/) example of the second floor in the [Stata Center](https://en.wikipedia.org/wiki/Ray_and_Maria_Stata_Center):
+# Installation
 
-<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/turtlemultisession.gif" alt="Turtlebot Multi-session animation" width="480" border="0" /></a>
-
-Multi-modal range only example:
-
-<a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
-
-Installation
-------------
-
-Requires via ```sudo apt-get install```, see [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) for more details.
-
-    libvtk5-qt4-dev python-vtk
-
-Then install required Julia packages  
-
-    julia> Pkg.add("Caesar")
-
-Note that Database related packages will not be automatically installed. Please see section below for details.
-
-Basic usage
------------
-
-Here is a basic example of using visualization and multi-core factor graph solving:
-
+Caesar can be installed with:
 ```julia
-addprocs(2)
-using Caesar, RoME, TransformUtils, Distributions
-
-# load scene and ROV model (might experience UDP packet loss LCM buffer not set)
-vc = startdefaultvisualization()
-sc1 = loadmodel(:scene01); sc1(vc)
-rovt = loadmodel(:rov); rovt(vc)
-
-
-initCov = 0.001*eye(6); [initCov[i,i] = 0.00001 for i in 4:6];
-odoCov = 0.0001*eye(6); [odoCov[i,i] = 0.00001 for i in 4:6];
-rangecov, bearingcov = 3e-4, 2e-3
-
-# start and add to a factor graph
-fg = identitypose6fg(initCov=initCov)
-tf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )
-addOdoFG!(fg, Pose3Pose3(MvNormal(veeEuler(tf), odoCov) ) )
-
-visualizeallposes!(vc, fg, drawlandms=false)
-
-addLinearArrayConstraint(fg, (4.0, 0.0), :x0, :l1, rangecov=rangecov,bearingcov=bearingcov)
-visualizeDensityMesh!(vc, fg, :l1)
-addLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)
-
-batchSolve(fg)
-visualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
+julia> Pkg.add("Caesar")
 ```
 
-Major features
---------------
-
-* Performing multi-core inference with Multi-modal iSAM over factor graphs, supporting `Pose2, Pose3, Point2, Point3, Null hypothesis, Multi-modal, KDE density, partial constraints`, and more.
-```julia
-tree = wipeBuildBayesTree!(fg, drawpdf=true)
-inferOverTree!(fg, tree)
-```
-
-* Or directcly on a database, allowing for separation of concerns
-```julia
-slamindb()
-```
-
-* Local copy of database held FactorGraph
-```julia
-fg = Caesar.initfg(cloudGraph, session)
-fullLocalGraphCopy(fg)
-```
-
-* Saving and loading FactorGraph objects to file
-```julia
-savejld(fg, file="test.jld", groundtruth=gt)
-loadjld(file="test.jld")
-```
-
-* Visualization through [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl).
-```julia
-visualizeallposes(fg) # from local dictionary
-drawdbdirector()      # from database held factor graph
-```
-
-* [Foveation queries](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) to quickly organize, extract and work with big data blobs, for example looking at images from multiple sessions predicted to see the same point `[-9.0,9.0]` in the map:
-```julia
-neoids, syms = foveateQueryToPoint(cloudGraph,["SESS21";"SESS38";"SESS45"], point=[-9.0;9.0], fovrad=0.5 )
-for neoid in neoids
-    cloudimshow(cloudGraph, neoid=neoid)
-end
-```
-
-* Operating on data from a thin client processes, such as a Python front-end
- [examples/database/python/neo_interact_example.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py)
-
-* A `caesar-lcm` server interface for C++ applications is [available here](http://github.com/pvazteixeira/caesar-lcm).
-
-* A multicore Bayes 2D feature tracking server over tcp
-```
-julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
-```
-
-And many more, please see the examples folder.
-
-Dependency Status
------------------
-
-**Note**, we are in the process of updating all dependencies to support both Julia 0.5 and the new Julia 0.6 on Linux and Mac (@dehann July 2017). The solution is stable for Julia 0.5 on Linux.
+# Dependency Status
 
 | **Major Dependencies** |     **Status**     |    **Test Coverage**    |
 |:-----------------------:|:------------------:|:------------------:|
@@ -145,64 +42,30 @@ Dependency Status
 | [IncrementalInference.jl][iif-url] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] |
 | [KernelDensityEstimate.jl][kde-url] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] |
 | [TransformUtils.jl][tf-url] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] |
-| [DrakeVisualizer.jl][dvis-url] | [![Build Status][dvis-build-img]][dvis-build-url] | [![codecov.io][dvis-cov-img]][dvis-cov-url] |
+| [Graphs.jl][graphs-url] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] |
+| [CloudGraphs.jl][cloudgraphs-url] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] |
 
-Database interaction layer
-==========================
+# Contributors
 
-For using the solver on a Database layer, you simply need to switch the working API. This can be done by calling the database connection function, and following the prompt:
+Authors directly involved with this package are:
 
-```julia
-using Caesar
-backend_config, user_config = standardcloudgraphsetup()
-fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
-# and then continue as normal with the fg object, to add variables and factors, draw etc.
+D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
+
+We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
+
+# Cite
+
+Consider citing our work:
+
+```
+@misc{caesarjl,
+  author = "Dehann Fourie, John Leonard, Micheal Kaess, and contributors",
+  title =  "Caesar.jl",
+  year =   2017,
+  url =    "https://github.com/dehann/Caesar.jl"
+}
 ```
 
-If you have access to Neo4j and Mongo services you should be able to run the [four door test](https://github.com/dehann/Caesar.jl/blob/master/test/fourdoortestcloudgraph.jl).
-
-Go to your browser at localhost:7474 and run one of the Cypher queries to either retrieve
-
-    match (n) return n
-
-or delete everything:
-
-    match (n) detach delete n
-
-You can run the multi-modal iSAM solver against the DB using the example [MM-iSAMCloudSolve.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/MM-iSAMCloudSolve.jl):
-```
-$ julia -p20
-julia> using Caesar
-julia> slamindb() # iterations=-1
-```
-
-Database driven Visualization can be done with either MIT's [MIT Director](https://github.com/rdeits/DrakeVisualizer.jl) (prefered), or Collections Render which additionally relies on [Pybot](http://www.github.com/spillai/pybot). For visualization using Director/DrakeVisualizer.jl:
-```
-$ julia -e "using Caesar; drawdbdirector()"
-```
-
-And an [example service script for CollectionsRender](https://github.com/dehann/Caesar.jl/blob/master/examples/database/DBCollectionsViewerService.jl) is also available.
-
-## Contributors
-
-D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, J. Terblanche, M. Kaess, J. Leonard
-
-
-Future targets
---------------
-
-This is a work in progress package. Please file issues here as needed to help resolve problems for everyone!
-
-Hybrid parametric and non-parametric optimization. Incrementalized update rules and properly marginalized 'forgetting' for sliding window type operation. We defined interprocess interface for multi-language front-end development.
-
-References
-==========
-
-    [1]  Fourie, D.: "Multi-modal and Inertial Sensor Solutions to Navigation-type Factor Graphs",
-         Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.
-    [2]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: "SLAMinDB: Centralized graph
-         databases for mobile robotics" IEEE International Conference on Robotics and Automation (ICRA),
-         Singapore, 2017.
 
 [cov-img]: https://codecov.io/github/dehann/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/dehann/Caesar.jl?branch=master
@@ -233,8 +96,21 @@ References
 [tf-build-url]: https://travis-ci.org/dehann/TransformUtils.jl
 [tf-url]: http://www.github.com/dehann/TransformUtils.jl
 
+<!-- | [DrakeVisualizer.jl][dvis-url] | [![Build Status][dvis-build-img]][dvis-build-url] | [![codecov.io][dvis-cov-img]][dvis-cov-url] |
 [dvis-cov-img]: https://codecov.io/github/rdeits/DrakeVisualizer.jl/coverage.svg?branch=master
 [dvis-cov-url]: https://codecov.io/github/rdeits/DrakeVisualizer.jl?branch=master
 [dvis-build-img]: https://travis-ci.org/rdeits/DrakeVisualizer.jl.svg?branch=master
 [dvis-build-url]: https://travis-ci.org/rdeits/DrakeVisualizer.jl
-[dvis-url]: http://www.github.com/rdeits/DrakeVisualizer.jl
+[dvis-url]: http://www.github.com/rdeits/DrakeVisualizer.jl -->
+
+[graphs-cov-img]: https://codecov.io/github/JuliaArchive/Graphs.jl/coverage.svg?branch=master
+[graphs-cov-url]: https://codecov.io/github/JuliaArchive/Graphs.jl?branch=master
+[graphs-build-img]: https://travis-ci.org/JuliaArchive/Graphs.jl.svg?branch=master
+[graphs-build-url]: https://travis-ci.org/JuliaArchive/Graphs.jl
+[graphs-url]: http://www.github.com/JuliaArchive/Graphs.jl
+
+[cloudgraphs-cov-img]: https://codecov.io/github/GearsAD/CloudGraphs.jl/coverage.svg?branch=master
+[cloudgraphs-cov-url]: https://codecov.io/github/GearsAD/CloudGraphs.jl?branch=master
+[cloudgraphs-build-img]: https://travis-ci.org/GearsAD/CloudGraphs.jl.svg?branch=master
+[cloudgraphs-build-url]: https://travis-ci.org/GearsAD/CloudGraphs.jl
+[cloudgraphs-url]: http://www.github.com/GearsAD/CloudGraphs.jl
