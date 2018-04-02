@@ -92,9 +92,9 @@ function startSlamInDb()
         println(" --- Caesar is configured for continuous operation, starting webserver on $(sysConfig.caesarConfig.webserverConfig.port)!")
         runWebServer(sysConfig, cloudGraph)
     else
-        println(" --- Caesar is configured for a finite run of $(sysConfig.finiteRunConfig.iterationCount) on session '$(sysConfig.finiteRunConfig.sessionName)'...")
         sessionName = parsedArgs["--session"]
         iterationCount = parsedArgs["--iterationCount"]
+        println(" --- Caesar is configured for a finite run of $iterationCount iterations on session '$sessionName'...")
         runSlamInDbOnSession(sysConfig.caesarConfig, cloudGraph, sessionName, iterationCount)
     end
 end
