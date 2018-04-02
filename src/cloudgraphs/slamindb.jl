@@ -27,7 +27,7 @@ function parse_commandline()
         "executionMode"
             help = "Either webserver or finiteiterations - if finiteiterations, then a session and iteration count must be specified"
             arg_type = String
-            range_tester = (op->lowercase(op)=="webserver"||lowercase(x)=="finiteiterations")
+            range_tester = (op->lowercase(op)=="webserver"||lowercase(op)=="finiteiterations")
             default = "webserver"
         "--session", "-s"
             help = "The session name, required if running as finitesessions"
