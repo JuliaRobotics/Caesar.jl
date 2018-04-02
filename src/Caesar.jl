@@ -1,7 +1,5 @@
 module Caesar
 
-
-
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 # import DrakeVisualizer: Triad
@@ -31,7 +29,9 @@ using CloudGraphs,
   Mongo,
   LibBSON
 
-
+using
+  ArgParse,
+  HttpServer
 
 export
   # pass through from KDE
@@ -113,6 +113,7 @@ export
 
   # solver service SLAMinDB
   getcredentials,
+  startSlamInDb,
   slamindb,
   convertdb,
   resetconvertdb,
@@ -137,13 +138,14 @@ include("SlamServer.jl")
 include("DataUtils.jl")
 include("UserFunctions.jl")
 
+# Configuration
+include("config/SystemConfig.jl")
+
 # using CloudGraphs
 include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
 include("cloudgraphs/ConvertGeneralSlaminDB.jl")
 include("cloudgraphs/slamindb.jl")
 include("cloudgraphs/MultisessionUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
-
-
 
 end
