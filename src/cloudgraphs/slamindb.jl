@@ -103,7 +103,11 @@ end
     runSlamInDbOnSession(sysConfig::SystemConfig, cloudGraph::CloudGraph)
 Runs SlamInDb for given number of iterations against a specific session.
 """
-function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph, sessionName::String, iterations::Int64)::Void
+function runSlamInDbOnSession(caesarConfig::CaesarConfig,
+            cloudGraph::CloudGraph,
+            sessionName::String,
+            iterations::Int64;
+            loopctrl::Vector{Bool}=Bool[true],)::Void
     N = caesarConfig.numParticles
 
     itercount = 0
