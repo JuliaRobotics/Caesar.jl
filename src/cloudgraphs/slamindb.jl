@@ -99,7 +99,8 @@ function startSlamInDb()
         runDbSolver(cloudGraph,
                     sessionName,
                     N=sysConfig.caesarConfig.numParticles,
-                    iterations=iterationCount)
+                    iterations=iterationCount,
+                    multisession=sysConfig.caesarConfig.multisession)
     end
 end
 
@@ -111,7 +112,7 @@ function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
             N::Int=100,
             loopctrl::Vector{Bool}=Bool[true],
             iterations::Int=-1,
-            multisession::Bool=false,
+            multisession::Vector{A}=Sting[""],
             savejlds::Bool=false,
             recursivesolver::Bool=false,
             drawbayestree::Bool=false  ) where {A <: AbstractString}
@@ -129,7 +130,7 @@ function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
     println()
 
     println("================MULTI-SESSION================")
-    rmInstMultisessionPriors!(cloudGraph, session=sessionName, multisessions=caesarConfig.multiSession)
+    rmInstMultisessionPriors!(cloudGraph, session=sessionName, multisessions=multisession)
     println()
 
     println("====================SOLVE====================")
@@ -219,7 +220,7 @@ function slamindb(;addrdict=nothing,
               N=N,
               loopctrl=loopctrl,
               iterations=iterations,
-              multisession=multisession,
+              multisession=addrdict["multisession"],
               savejlds=savejlds,
               recursivesolver=recursivesolver,
               drawbayestree=drawbayestree)
