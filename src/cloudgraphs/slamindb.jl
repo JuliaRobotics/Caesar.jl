@@ -107,7 +107,10 @@ function runSlamInDbOnSession(caesarConfig::CaesarConfig,
             cloudGraph::CloudGraph,
             sessionName::String,
             iterations::Int64;
-            loopctrl::Vector{Bool}=Bool[true],)::Void
+            loopctrl::Vector{Bool}=Bool[true],
+            savejlds::Bool=false,
+            recursivesolver::Bool=false,
+            drawbayestree::Bool=false  )::Void
     N = caesarConfig.numParticles
 
     itercount = 0
