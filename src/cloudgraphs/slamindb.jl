@@ -222,7 +222,7 @@ function slamindb(;addrdict=nothing,
               multisession=multisession,
               savejlds=savejlds,
               recursivesolver=recursivesolver,
-              drawbayestree=drawbayestree
+              drawbayestree=drawbayestree)
   nothing
 end
 
