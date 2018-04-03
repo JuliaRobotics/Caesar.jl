@@ -890,7 +890,7 @@ Insert into and return dict `res` with Neo4j IDs of ExVertex labels as stored pe
 """
 function getVertNeoIDs!(cloudGraph::CloudGraph, res::Dict{Symbol, Int}; session::AbstractString="NA")
   loadtx = transaction(cloudGraph.neo4j.connection)
-  @show syms = collect(keys(res))
+  syms = collect(keys(res))
   query = "match (n:$(session)) where "
   for i in 1:length(syms)
     sym = syms[i]
@@ -901,7 +901,6 @@ function getVertNeoIDs!(cloudGraph::CloudGraph, res::Dict{Symbol, Int}; session:
   end
   query = query*"return id(n), n.label"
   cph = loadtx(query, submit=true)
-  @show cph
   for qr in cph.results[1]["data"]
     res[Symbol(qr["row"][2])] = qr["row"][1]
   end
