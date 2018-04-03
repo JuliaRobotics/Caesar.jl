@@ -95,68 +95,98 @@ function startSlamInDb()
         sessionName = parsedArgs["session"]
         iterationCount = parsedArgs["iterationCount"]
         println(" --- Caesar is configured for a finite run of $iterationCount iterations on session '$sessionName'...")
-        runSlamInDbOnSession(sysConfig.caesarConfig, cloudGraph, sessionName, iterationCount)
+        # runSlamInDbOnSession(sysConfig.caesarConfig, cloudGraph, sessionName, iterationCount)
+        runDbSolver(cloudGraph,
+                    sessionName,
+                    N=sysConfig.caesarConfig.numParticles,
+                    iterations=iterationCount)
     end
 end
 
 """
-    runSlamInDbOnSession(sysConfig::SystemConfig, cloudGraph::CloudGraph)
-Runs SlamInDb for given number of iterations against a specific session.
+Low-level call to iterate the SlamInDb solver for given number of iterations against a specific session and keyword parameters.
 """
-function runSlamInDbOnSession(caesarConfig::CaesarConfig,
-            cloudGraph::CloudGraph,
-            sessionName::String,
-            iterations::Int64;
+function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
+            sessionName::A;
+            N::Int=100,
             loopctrl::Vector{Bool}=Bool[true],
+            iterations::Int=-1,
+            multisession::Bool=false,
             savejlds::Bool=false,
             recursivesolver::Bool=false,
-            drawbayestree::Bool=false  )::Void
-    N = caesarConfig.numParticles
+            drawbayestree::Bool=false  ) where {A <: AbstractString}
 
-    itercount = 0
-    while loopctrl[1] && (iterations > 0 || iterations == -1) # loopctrl for future use
-      iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
-      println("===================CONVERT===================")
-      fg = Caesar.initfg(sessionname=sessionName, cloudgraph=cloudGraph)
-      updatenewverts!(fg, N=N)
-      println()
+  itercount = 0
+  while loopctrl[1] && (iterations > 0 || iterations == -1) # loopctrl for future use
+    iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
+    println("===================CONVERT===================")
+    fgl = Caesar.initfg(sessionname=sessionName, cloudgraph=cloudGraph)
+    updatenewverts!(fgl, N=N)
+    println()
 
-      println("=============ENSURE INITIALIZED==============")
-      ensureAllInitialized!(fg)
-      println()
+    println("=============ENSURE INITIALIZED==============")
+    ensureAllInitialized!(fgl)
+    println()
 
-      println("================MULTI-SESSION================")
-      rmInstMultisessionPriors!(cloudGraph, session=sessionName, multisessions=caesarConfig.multiSession)
-      println()
+    println("================MULTI-SESSION================")
+    rmInstMultisessionPriors!(cloudGraph, session=sessionName, multisessions=caesarConfig.multiSession)
+    println()
 
-      println("====================SOLVE====================")
-      fg = Caesar.initfg(sessionname=sessionName, cloudgraph=cloudGraph)
+    println("====================SOLVE====================")
+    fgl = Caesar.initfg(sessionname=sessionName, cloudgraph=cloudGraph)
 
-      setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionName)
+    setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionName)
 
-      println("get local copy of graph")
+    println("get local copy of graph")
 
-      if fullLocalGraphCopy!(fg)
-        (savejlds && itercount == 0) ? slamindbsavejld(fg, sessionName, itercount) : nothing
-        itercount += 1
+    if fullLocalGraphCopy!(fgl)
+      (savejlds && itercount == 0) ? slamindbsavejld(fgl, sessionName, itercount) : nothing
+      itercount += 1
 
-        println("-------------Ensure Initialization-----------")
-        ensureAllInitialized!(fg)
+      println("-------------Ensure Initialization-----------")
+      ensureAllInitialized!(fgl)
 
-        println("------------Bayes (Junction) Tree------------")
-        tree = wipeBuildNewTree!(fg,drawpdf=drawbayestree)
-        if !recursivesolver
-          inferOverTree!(fg, tree, N=N)
-        else
-          inferOverTreeR!(fg, tree, N=N)
-        end
-        savejlds ? slamindbsavejld(fg, sessionName, itercount) : nothing
+      println("------------Bayes (Junction) Tree------------")
+      tree = wipeBuildNewTree!(fgl,drawpdf=drawbayestree)
+      if !recursivesolver
+        inferOverTree!(fgl, tree, N=N)
       else
-        sleep(0.2)
+        inferOverTreeR!(fgl, tree, N=N)
       end
+      savejlds ? slamindbsavejld(fgl, sessionName, itercount) : nothing
+    else
+      sleep(0.2)
     end
+  end
 end
 
+# """
+#     runSlamInDbOnSession(sysConfig::SystemConfig, cloudGraph::CloudGraph)
+# Runs SlamInDb for given number of iterations against a specific session.
+# """
+# function runSlamInDbOnSession(caesarConfig::CaesarConfig,
+#             cloudGraph::CloudGraph,
+#             sessionName::String,
+#             iterations::Int64;
+#             loopctrl::Vector{Bool}=Bool[true],
+#             savejlds::Bool=false,
+#             recursivesolver::Bool=false,
+#             drawbayestree::Bool=false  )::Void
+#
+#     runDbSolver(cloudGraph,
+#                 sessionName,
+#                 N=caesarConfig.numParticles,
+#                 loopctrl=loopctrl,
+#                 iterations=iterations,
+#                 multisession=multisession,
+#                 savejlds=savejlds,
+#                 recursivesolver=recursivesolver,
+#                 drawbayestree=drawbayestree)
+# end
+
+"""
+Manually call the SLAMinDB solver to perform inference on a specified session given the keyword parameter settings.
+"""
 function slamindb(;addrdict=nothing,
             N::Int=-1,
             loopctrl::Vector{Bool}=Bool[true],
@@ -184,48 +214,15 @@ function slamindb(;addrdict=nothing,
     addrdict["multisession"]=String[]
   end
 
-  itercount = 0
-  while loopctrl[1] && (iterations > 0 || iterations == -1) # loopctrl for future use
-    iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
-    println("===================CONVERT===================")
-    fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
-    updatenewverts!(fg, N=N)
-    println()
-
-    println("=============ENSURE INITIALIZED==============")
-    ensureAllInitialized!(fg)
-    println()
-
-    println("================MULTI-SESSION================")
-    rmInstMultisessionPriors!(cloudGraph, session=session, multisessions=addrdict["multisession"])
-    println()
-
-    println("====================SOLVE====================")
-    fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
-
-    setBackendWorkingSet!(fg.cg.neo4j.connection, session)
-
-    println("get local copy of graph")
-
-    if fullLocalGraphCopy!(fg)
-      (savejlds && itercount == 0) ? slamindbsavejld(fg, addrdict["session"], itercount) : nothing
-      itercount += 1
-
-      println("-------------Ensure Initialization-----------")
-      ensureAllInitialized!(fg)
-
-      println("------------Bayes (Junction) Tree------------")
-      tree = wipeBuildNewTree!(fg,drawpdf=drawbayestree)
-      if !recursivesolver
-        inferOverTree!(fg, tree, N=N)
-      else
-        inferOverTreeR!(fg, tree, N=N)
-      end
-      savejlds ? slamindbsavejld(fg, addrdict["session"], itercount) : nothing
-    else
-      sleep(0.2)
-    end
-  end
+  runDbSolver(cloudGraph,
+              session,
+              N=N,
+              loopctrl=loopctrl,
+              iterations=iterations,
+              multisession=multisession,
+              savejlds=savejlds,
+              recursivesolver=recursivesolver,
+              drawbayestree=drawbayestree
   nothing
 end
 
