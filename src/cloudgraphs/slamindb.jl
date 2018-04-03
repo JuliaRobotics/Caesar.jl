@@ -68,8 +68,8 @@ end
 
 """
     startSlamInDb()
-Main function for SlamInDb - arguments are parsed from command-line, pass it
-a sysConfig path argument.
+Main function for SlamInDb - arguments are parsed from command-line, pass
+a sysConfig path during invocation.
 """
 function startSlamInDb()
     # 1. Parse command lines.
@@ -96,11 +96,12 @@ function startSlamInDb()
         iterationCount = parsedArgs["iterationCount"]
         println(" --- Caesar is configured for a finite run of $iterationCount iterations on session '$sessionName'...")
         # runSlamInDbOnSession(sysConfig.caesarConfig, cloudGraph, sessionName, iterationCount)
+        @show sysConfig.caesarConfig.multiSession
         runDbSolver(cloudGraph,
                     sessionName,
                     N=sysConfig.caesarConfig.numParticles,
                     iterations=iterationCount,
-                    multisession=sysConfig.caesarConfig.multisession)
+                    multisession=string.(sysConfig.caesarConfig.multiSession))
     end
 end
 
