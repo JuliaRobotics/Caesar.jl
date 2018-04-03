@@ -23,7 +23,7 @@ end
 
 struct CaesarConfig
     numParticles::Int64
-    multiSession::Bool
+    multiSession::Vector{AbstractString}
     webserverConfig::CaesarWebServerConfig
     visualizationConfig::VisualizationConfig
 end
