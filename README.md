@@ -33,7 +33,7 @@ Caesar can be installed with:
 julia> Pkg.add("Caesar")
 ```
 
-# Dependency Status
+# Bleeding-edge Development Dependency Status
 
 | **Major Dependencies** |     **Status**     |    **Test Coverage**    |
 |:-----------------------:|:------------------:|:------------------:|
