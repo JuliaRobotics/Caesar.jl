@@ -411,7 +411,7 @@ function getAllExVertexNeoIDs(conn;
   query = reqbackendset || reqready ? query*" and" : query
   query = reqready ? query*" n.ready=$(ready)" : query
   query = reqbackendset && reqready ? query*" and" : query
-  query = reqbackendset ? " n.backendset=$(backendset)" : query
+  query = reqbackendset ? query*" n.backendset=$(backendset)" : query
   # query = query*" return n"
   query = query*" return n.exVertexId, id(n), n.label"
 
