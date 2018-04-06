@@ -114,10 +114,16 @@ export
   # solver service SLAMinDB
   getcredentials,
   startSlamInDb,
+  runSlamInDbOnSession,
   slamindb,
   convertdb,
   resetconvertdb,
   getmaxfactorid,
+
+  # webserver
+  SolverStatus,
+  CaesarConfig,
+  VisualizationConfig,
 
   # multisession utils
   multisessionquery,
@@ -139,9 +145,11 @@ include("DataUtils.jl")
 include("UserFunctions.jl")
 
 # Configuration
-include("config/SystemConfig.jl")
+include("config/CaesarConfig.jl")
+
 
 # using CloudGraphs
+include("cloudgraphs/SolverStatus.jl")
 include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
 include("cloudgraphs/ConvertGeneralSlaminDB.jl")
 include("cloudgraphs/slamindb.jl")
