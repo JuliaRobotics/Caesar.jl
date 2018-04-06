@@ -8,6 +8,6 @@ end
 
 struct CaesarConfig
     numParticles::Int64
-    multiSession::Bool
+    multiSession::Vector{AbstractString}
     visualizationConfig::VisualizationConfig
 end

@@ -2,7 +2,7 @@
 
 
 
-function multisessionquery{T <: AbstractString}(conn, session::T, multisessions::Vector{T})
+function multisessionquery(conn, session::T, multisessions::Vector{T}) where {T <: AbstractString}
   len = length(multisessions)
   loadtx = transaction(conn)
   # construct the query
@@ -49,17 +49,21 @@ end
 
 Return dict of dict of Neo4j vertex IDs by session and landmark symbols.
 """
-function getLandmOtherSessNeoIDs{T <: AbstractString}(cg::CloudGraph;
+function getLandmOtherSessNeoIDs(cg::CloudGraph;
       session::T="",
-      multisessions::Vector{T}=String[]  )
+      multisessions::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   lm2others = Dict{Symbol, Dict{Symbol, Int}}()
 
   len = length(multisessions)
   len > 0 ? nothing : (return lm2others)
 
-  cph = multisessionquery(cg.neo4j.connection, session, multisessions)
-  parsemultisessionqueryresult!(lm2others, cph)
+  if length(multisessions)==0
+    cph = multisessionquery(cg.neo4j.connection, session, multisessions)
+    parsemultisessionqueryresult!(lm2others, cph)
+  else
+    info("Ignoring multisession")
+  end
 
   return lm2others
 end
@@ -119,17 +123,23 @@ end
 Return subgraph copy of type FactorGraph contaning values from session in lm2others, and Vector{Symbol} of primary
 key symbols used for graph exstraction.
 """
-function getLocalSubGraphMultisession{T <: AbstractString}(cg::CloudGraph, lm2others; session::T="", numneighbors::Int=0)
+function getLocalSubGraphMultisession(cg::CloudGraph,
+            lm2others;
+            session::T="",
+            numneighbors::Int=0  ) where {T <: AbstractString}
+  #
   res = Dict{Symbol, Int}()
-  for (sess,ms) in lm2others
-    for (sym, neoid) in ms
-      res[sym] = 0
-    end
-  end
-  getVertNeoIDs!(cg, res, session=session)
-  fullcurrneolist = collect(values(res))
   sfg = Caesar.initfg(sessionname=session, cloudgraph=cg)
-  fetchsubgraph!(sfg, fullcurrneolist, numneighbors=numneighbors) # can set numneighbors=0
+  if length(lm2others) > 0
+    for (sess,ms) in lm2others
+      for (sym, neoid) in ms
+        res[sym] = 0
+      end
+    end
+    getVertNeoIDs!(cg, res, session=session)
+    fullcurrneolist = collect(values(res))
+    fetchsubgraph!(sfg, fullcurrneolist, numneighbors=numneighbors) # can set numneighbors=0
+  end
   return sfg, collect(keys(res))
 end
 
@@ -181,11 +191,11 @@ end
 
 
 """
-    rmInstMultisessionPriors!{T <: AbstractString}(::CloudGraph; session::T=, multisessions:Vector{T}= )
+    rmInstMultisessionPriors!(::CloudGraph; session<:AbstractString=, multisessions::Vector{<:AbstractString}= )
 """
-function rmInstMultisessionPriors!{T <: AbstractString}(cloudGraph::CloudGraph;
+function rmInstMultisessionPriors!(cloudGraph::CloudGraph;
       session::T="NA",
-      multisessions::Vector{T}=String[]  )
+      multisessions::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   session!="NA" ? nothing : error("Please specify a valid session, currently = $(session)")
 
