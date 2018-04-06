@@ -21,6 +21,10 @@ Runs SlamInDb for given number of iterations against a specific session.
 function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph, userId::String, robotId::String, sessionId::String, iterations::Int64, solverStatus::SolverStatus)::Void
     N = caesarConfig.numParticles
 
+    # TODO: Constants to refactor
+    recursivesolver = false
+    drawbayestree = false
+
     # Update the status parameters
     solverStatus.isAttached = true
     solverStatus.attachedSessionTimestamp = string(unix2datetime(time()))
@@ -48,7 +52,7 @@ function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph
 
       println("================MULTI-SESSION================")
       solverStatus.currentStep = "Prep_MultiSession"
-      rmInstMultisessionPriors!(cloudGraph, session=sessionId, multisessions=String[])
+      rmInstMultisessionPriors!(cloudGraph, session=sessionId, multisessions=caesarConfig.multiSession)
       println()
 
       println("====================SOLVE====================")
@@ -61,7 +65,7 @@ function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph
 
       solverStatus.currentStep = "Init_LocalGraphCopy"
       if fullLocalGraphCopy!(fg)
-        (savejlds && itercount == 0) ? slamindbsavejld(fg, sessionId, itercount) : nothing
+        # (savejlds && itercount == 0) ? slamindbsavejld(fg, sessionId, itercount) : nothing
         itercount += 1
 
         println("-------------Ensure Initialization-----------")
@@ -78,7 +82,7 @@ function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph
         else
           inferOverTreeR!(fg, tree, N=N)
         end
-        savejlds ? slamindbsavejld(fg, sessionId, itercount) : nothing
+        # savejlds ? slamindbsavejld(fg, sessionId, itercount) : nothing
       else
         sleep(0.2)
       end
