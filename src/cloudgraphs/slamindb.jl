@@ -33,7 +33,7 @@ function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph
     solverStatus.sessionId = sessionId
 
     itercount = 0
-    while (iterations > 0 || iterations == -1) # loopctrl for future use
+    while ((iterations > 0 || iterations == -1) && solverStatus.isAttached)
       iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
 
       tic()
