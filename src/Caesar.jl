@@ -29,10 +29,6 @@ using CloudGraphs,
   Mongo,
   LibBSON
 
-using
-  ArgParse,
-  HttpServer
-
 export
   # pass through from KDE
   kde!,
