@@ -6,6 +6,8 @@ export SolverStatus
 A simple structure for monitoring a running solver.
 """
 mutable struct SolverStatus
+    id::String
+    host::String
     isAttached::Bool
     userId::String
     robotId::String
@@ -17,5 +19,5 @@ mutable struct SolverStatus
     detachedSessionTimestamp::String
     lastUpdatedTimestamp::String
     lastIterationDurationSeconds::Float64
-    SolverStatus() = new(false, "", "", "", 0, "", string(unix2datetime(time())), "", "", "", 0)
+    SolverStatus() = new(string(Base.Random.uuid4()), "", false, "", "", "", 0, "", string(unix2datetime(time())), "", "", "", 0)
 end

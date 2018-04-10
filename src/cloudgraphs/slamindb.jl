@@ -15,14 +15,13 @@ function slamindbsavejld(fgl::FactorGraph, session::AbstractString, itercount::I
 end
 
 """
-    runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph, userId::String, robotId::String, sessionId::String, iterations::Int64, solverStatus::SolverStatus)::Void
+    runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph, userId::String, robotId::String, sessionId::String, iterations::Int64, isRecursiveSolver::Bool, solverStatus::SolverStatus)::Void
 Runs SlamInDb for given number of iterations against a specific session.
 """
-function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph, userId::String, robotId::String, sessionId::String, iterations::Int64, solverStatus::SolverStatus)::Void
+function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph, userId::String, robotId::String, sessionId::String, iterations::Int64, isRecursiveSolver::Bool, solverStatus::SolverStatus)::Void
     N = caesarConfig.numParticles
 
     # TODO: Constants to refactor
-    recursivesolver = false
     drawbayestree = false
 
     # Update the status parameters
@@ -77,7 +76,7 @@ function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph
         tree = wipeBuildNewTree!(fg,drawpdf=drawbayestree)
 
         solverStatus.currentStep = "Solve_InferOverTree"
-        if !recursivesolver
+        if !isRecursiveSolver
           inferOverTree!(fg, tree, N=N)
         else
           inferOverTreeR!(fg, tree, N=N)
