@@ -18,7 +18,16 @@ end
     runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph, userId::String, robotId::String, sessionId::String, iterations::Int64, isRecursiveSolver::Bool, solverStatus::SolverStatus)::Void
 Runs SlamInDb for given number of iterations against a specific session.
 """
-function runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph, userId::String, robotId::String, sessionId::String, iterations::Int64, isRecursiveSolver::Bool, solverStatus::SolverStatus)::Void
+function runSlamInDbOnSession(
+            caesarConfig::CaesarConfig,
+            cloudGraph::CloudGraph,
+            userId::String,
+            robotId::String,
+            sessionId::String,
+            iterations::Int64,
+            isRecursiveSolver::Bool,
+            solverStatus::SolverStatus  )::Void
+    #
     N = caesarConfig.numParticles
 
     # TODO: Constants to refactor
