@@ -12,6 +12,9 @@ It supports the following factor types:
 
 There is also limited support for sensor data; at the moment only RGB point clouds are supported, via `caesar_point_cloud_t.lcm`.
 
+## CaesarLCMTypes
+
+Find LCMType definitions at [JuliaRobotics/CaesarLCMTypes.jl repo](https://github.com/JuliaRobotics/CaesarLCMTypes.jl).
 
 ## Running the example
 
