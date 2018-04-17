@@ -999,7 +999,7 @@ function fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString)
   vsym, neoid = getfirstpose(cg, session)
   cv = CloudGraphs.get_vertex(cg, neoid, true)
   bde = Caesar.getBigDataElement(cv, "robot_description")
-  resp = JSON.parse(takebuf_string(IOBuffer(bde.data)))
+  resp = JSON.parse(String(take!(IOBuffer(bde.data))))
   tryunpackalltypes!(resp)
   return resp
 end

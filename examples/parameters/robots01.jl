@@ -25,7 +25,7 @@ turtlebot["bTc"] = [0.0;0.0;0.6; 0.5; -0.5; 0.5; -0.5]
 turtlebot["bTc_format"] = "xyzqwqxqyqz"
 
 # robotdata = json(turtlebot).data
-# resp = JSON.parse(takebuf_string(IOBuffer(robotdata)))
+# resp = JSON.parse(String(take!(IOBuffer(robotdata))))
 # tryunpackalltypes!(resp)
 # resp
 
