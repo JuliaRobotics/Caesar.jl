@@ -1,0 +1,9 @@
+# Julia variables
+*.jld
+# lcmlog preferences
+*.jlp
+*.txt
+# lcmlogs
+lcmlog*
+# language bindings
+lcmtypes/caesar
