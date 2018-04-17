@@ -101,7 +101,7 @@ typeof(mkf["val"])
 
 buf = IOBuffer(mkf["val"])
 
-st = takebuf_string(buf)
+st = String(take!(buf))
 bb = BSONObject(st)
 typeof(bb)
 bba = convert(Array, bb["pointcloud"][1])
