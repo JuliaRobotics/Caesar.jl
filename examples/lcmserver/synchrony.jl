@@ -14,11 +14,11 @@ using LibBSON
 using RobotTestDatasets
 
 """
-    CaesarSLAM
+    SyncrSLAM
 
 An object definition containing the require variables to leverage the server side SLAM solution per user, robot, and session.
 """
-mutable struct CaesarSLAM
+mutable struct SyncrSLAM
   userId::AbstractString
   robotId::AbstractString
   sessionId::AbstractString
@@ -27,7 +27,7 @@ mutable struct CaesarSLAM
   session
 
   # Constructor
-  CaesarSLAM(;
+  SyncrSLAM(;
     userId::AbstractString="",
     robotId::AbstractString="",
     sessionId::AbstractString="",
@@ -117,7 +117,7 @@ $(SIGNATURES)
 
 Intialize the `cslaml` object using configuration file defined in `syncrconfpath`.
 """
-function initialize!(cslaml::CaesarSLAM;
+function initialize!(cslaml::SyncrSLAM;
             syncrconfpath::AS=joinpath(ENV["HOME"],"Documents","synchronyConfig.json")
          ) where {AS <: AbstractString}
   # 1. Get a Synchrony configuration
@@ -137,11 +137,11 @@ end
 # TODO -- code below untested
 
 """
-    setRobotParameters!(::CaesarSLAM)
+    setRobotParameters!(::SyncrSLAM)
 
 Store robot parameters in the centralized database system.
 """
-function setRobotParameters!(cslaml::CaesarSLAM)
+function setRobotParameters!(cslaml::SyncrSLAM)
   hauvconfig = Dict()
   hauvconfig["robot"] = "hauv"
   hauvconfig["bTc"] = [0.0;0.0;0.0; 1.0; 0.0; 0.0; 0.0]
@@ -157,11 +157,11 @@ function setRobotParameters!(cslaml::CaesarSLAM)
 end
 
 """
-    handle_poses!(::CaesarSLAM, ::pose_node_t)
+    handle_poses!(::SyncrSLAM, ::pose_node_t)
 
 Adds pose nodes to graph with a prior on Z, pitch, and roll.
 """
-function handle_poses!(slaml::CaesarSLAM,
+function handle_poses!(slaml::SyncrSLAM,
                        msg::pose_node_t)
     #
     id = msg.id
@@ -198,11 +198,11 @@ function handle_poses!(slaml::CaesarSLAM,
 end
 
 """
-    handle_priors!(::CaesarSLAM, ::prior_zpr_t)
+    handle_priors!(::SyncrSLAM, ::prior_zpr_t)
 
 Handle ZPR priors on poses.
 """
-function handle_priors!(slam::CaesarSLAM,
+function handle_priors!(slam::SyncrSLAM,
                          msg::prior_zpr_t)
 
     id = msg.id
@@ -226,11 +226,11 @@ function handle_priors!(slam::CaesarSLAM,
 end
 
 """
-    handle_partials!(::CaesarSLAM, ::pose_pose_xyh_t)
+    handle_partials!(::SyncrSLAM, ::pose_pose_xyh_t)
 
 Handle partial x, y, and heading odometry constraints between Pose3 variables.
 """
-function handle_partials!(slam::CaesarSLAM,
+function handle_partials!(slam::SyncrSLAM,
                          msg::pose_pose_xyh_t)
 
     origin_id = msg.node_1_id
@@ -261,11 +261,11 @@ function handle_partials!(slam::CaesarSLAM,
 end
 
 """
-   handle_loops!(::CaesarSLAM, ::pose_pose_xyh_nh_t)
+   handle_loops!(::SyncrSLAM, ::pose_pose_xyh_nh_t)
 
 Handle loop closure proposals with chance of being a null hypothesis likelihood.
 """
-function handle_loops!(slaml::CaesarSLAM,
+function handle_loops!(slaml::SyncrSLAM,
                        msg::pose_pose_xyh_nh_t)
 
     origin_id = msg.node_1_id
@@ -310,7 +310,7 @@ end
 #     colors::
 # end
 
-# function add_pointcloud!(slaml::CaesarSLAM, nodeID::Symbol, cloud::Cloud )
+# function add_pointcloud!(slaml::SyncrSLAM, nodeID::Symbol, cloud::Cloud )
 #     # fetch from database
 #     vert = getVert(slaml.fg, nodeID, api=IncrementalInference.dlapi)
 
@@ -326,11 +326,11 @@ end
 
 
 """
-   handle_clouds(slam::CaesarSLAM, msg_data)
+   handle_clouds(slam::SyncrSLAM, msg_data)
 
    Callback for caesar_point_cloud_t msgs. Adds point cloud to SLAM_Client
 """
-function handle_clouds!(slaml::CaesarSLAM,
+function handle_clouds!(slaml::SyncrSLAM,
                         msg::point_cloud_t)
     # TODO: interface here should be as simple as slam_client.add_pointcloud(nodeID, pc::SomeCloudType)
 
@@ -374,7 +374,7 @@ robotId = "HAUV"
 sessionId = "LCM_01"
 
 # create a SLAM container object
-slam_client = CaesarSLAM(userId=userId,robotId=robotId,sessionId=sessionId)
+slam_client = SyncrSLAM(userId=userId,robotId=robotId,sessionId=sessionId)
 
 # initialize a new session ready for SLAM using the built in SynchronySDK
 println("[Caesar.jl] Setting up remote solver")
