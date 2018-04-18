@@ -4,24 +4,155 @@ LCM Server: an LCM interface to Caesar.jl
 =#
 
 using Caesar, SynchronySDK
+using Unmarshal
 using CaesarLCMTypes
 using TransformUtils, Rotations, CoordinateTransformations
 using Distributions
 using LCMCore
 using LibBSON
-# using CloudGraphs # for sorryPedro
+
+using RobotTestDatasets
 
 
+mutable struct CaesarSLAM
+  userId::AbstractString
+  robotId::AbstractString
+  sessionId::AbstractString
+  syncrconf::Union{Void, SynchronySDK.SynchronyConfig}
+  robot
+  session
 
-# ... Change all functions to use Synchrony instead
-
-function initialize!(backend_config,
-                    user_config)
-    println("[Caesar.jl] Setting up factor graph")
-    fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
-    println("[Caesar.jl] Creating SLAM client/object")
-    return  SLAMWrapper(fg, nothing, 0)
+  # Constructor
+  CaesarSLAM(;
+    userId::AbstractString="",
+    robotId::AbstractString="",
+    sessionId::AbstractString="",
+    syncrconf::Union{Void, SynchronySDK.SynchronyConfig}=nothing,
+    robot=nothing,
+    session=nothing
+   ) = new(
+        userId,
+        robotId,
+        sessionId,
+        syncrconf,
+        robot,
+        session
+      )
 end
+
+
+"""
+$(SIGNATURES)
+
+Get  Synchrony configuration, default filepath location assumed as `~/Documents/synchronyConfig.json`.
+"""
+function loadSyncrConfig(;
+            filepath::AS=joinpath(ENV["HOME"],"Documents","synchronyConfig.json")
+         ) where {AS <: AbstractString}
+  #
+  println(" - Retrieving Synchrony Configuration...")
+  configFile = open(filepath)
+  configData = JSON.parse(readstring(configFile))
+  close(configFile)
+  Unmarshal.unmarshal(SynchronyConfig, configData) # synchronyConfig =
+end
+
+"""
+$(SIGNATURES)
+
+Confirm that the robot already exists, create if it doesn't.
+"""
+function syncrRobot(
+           synchronyConfig::SynchronyConfig,
+           robotId::AS
+         ) where {AS <: AbstractString}
+  #
+  println(" - Creating or retrieving robot '$robotId'...")
+  robot = nothing
+  if(SynchronySDK.isRobotExisting(synchronyConfig, robotId))
+      println(" -- Robot '$robotId' already exists, retrieving it...")
+      robot = getRobot(synchronyConfig, robotId)
+  else
+      # Create a new one
+      println(" -- Robot '$robotId' doesn't exist, creating it...")
+      newRobot = RobotRequest(robotId, "My New Bot", "Description of my neat robot", "Active")
+      robot = createRobot(synchronyConfig, newRobot)
+  end
+  println(robot)
+  robot
+end
+
+"""
+$(SIGNATURES)
+
+Get sessions, if it already exists, add to it.
+"""
+function syncrSession(
+            synchronyConfig::SynchronyConfig,
+            robotId::AS,
+            sessionId::AS
+         ) where {AS<: AbstractString}
+  #
+  println(" - Creating or retrieving data session '$sessionId' for robot...")
+  session = nothing
+  if(SynchronySDK.isSessionExisting(synchronyConfig, robotId, sessionId))
+      println(" -- Session '$sessionId' already exists for robot '$robotId', retrieving it...")
+      session = getSession(synchronyConfig, robotId, sessionId)
+  else
+      # Create a new one
+      println(" -- Session '$sessionId' doesn't exist for robot '$robotId', creating it...")
+      newSessionRequest = SessionDetailsRequest(sessionId, "A test dataset demonstrating data ingestion for a   wheeled vehicle driving in a hexagon.")
+      session = createSession(synchronyConfig, robotId, newSessionRequest)
+  end
+  println(session)
+  session
+end
+
+"""
+$(SIGNATURES)
+
+Intialize the `cslaml` object using configuration file defined in `syncrconfpath`.
+"""
+function initialize!(cslaml::CaesarSLAM;
+            syncrconfpath::AS=joinpath(ENV["HOME"],"Documents","synchronyConfig.json")
+         ) where {AS <: AbstractString}
+  # 1. Get a Synchrony configuration
+  cslaml.syncrconf = loadSyncrConfig(filepath=syncrconfpath)
+
+  # 2. Confirm that the robot already exists, create if it doesn't.
+  cslaml.robot = syncrRobot(cslaml.syncrconf, cslaml.robotId)
+
+  # 3. Create or retrieve the session.
+  cslaml.session = syncrSession(cslaml.syncrconf, cslaml.robotId, cslaml.sessionId)
+
+  nothing
+end
+
+
+# create a SLAM container object
+cslam = CaesarSLAM(userId=userId,robotId=robotId,sessionId=sessionId)
+
+# initialize a new session ready for SLAM using the built in SynchronySDK
+initialize!(cslam)
+
+
+# TEMPORARY CHECK THAT THNGS ARE WORKING (albeit 2D / need 3D)
+for i in 0:5
+    deltaMeasurement = [10.0;0;pi/3]
+    pOdo = Float64[[0.1 0 0] [0 0.1 0] [0 0 0.1]]
+    println(" - Measurement $i: Adding new odometry measurement '$deltaMeasurement'...")
+    newOdometryMeasurement = AddOdometryRequest(deltaMeasurement, pOdo)
+    @time odoResponse = addOdometryMeasurement(cslam.syncrconf, cslam.robotId, cslam.sessionId, newOdometryMeasurement)
+end
+
+
+# TODO -- MUST UPDATE Synchr to allow 3D and not auto create x0 with prior since 2D or 3D are very different
+
+
+
+# OLD CLOUD GRAPHS CODE STILL TO BE CONVERTED BELOW
+
+
 
 function setRobotParameters!(cg::CloudGraph, session::AbstractString)
   hauvconfig = Dict()
@@ -242,7 +373,14 @@ function listener!(slam::SLAMWrapper,
 end
 
 
-#println("[Caesar.jl] Prompting user for configuration")
+# 0. Constants
+println("[Caesar.jl] defining constants.")
+data = robotdata("rovlcm_singlesession_01")
+userId = "ROVUser"
+robotId = "HAUV"
+sessionId = "LCM_01"
+
+
 #@load "usercfg.jld"
 #user_config["session"] = "SESSHAUVDEV3"
 @load "liljon17.jld"
