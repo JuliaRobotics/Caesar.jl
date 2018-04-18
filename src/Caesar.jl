@@ -22,7 +22,8 @@ using
   ProgressMeter,
   ImageMagick,
   ImageCore,
-  PyCall
+  PyCall, # obsolete and will be removed soon
+  DocStringExtensions
 
 using CloudGraphs,
   Neo4j,
