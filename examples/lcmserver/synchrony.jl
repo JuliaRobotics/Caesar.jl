@@ -10,8 +10,11 @@ using TransformUtils, Rotations, CoordinateTransformations
 using Distributions
 using LCMCore
 using LibBSON
+using DocStringExtensions # temporary while $(SIGNATURES) is in use in this file
 
 using RobotTestDatasets
+
+const Syncr = SynchronySDK
 
 """
     SyncrSLAM
@@ -115,20 +118,42 @@ end
 """
 $(SIGNATURES)
 
-Intialize the `cslaml` object using configuration file defined in `syncrconfpath`.
+Intialize the `sslaml` object using configuration file defined in `syncrconfpath`.
 """
-function initialize!(cslaml::SyncrSLAM;
+function initialize!(sslaml::SyncrSLAM;
             syncrconfpath::AS=joinpath(ENV["HOME"],"Documents","synchronyConfig.json")
          ) where {AS <: AbstractString}
   # 1. Get a Synchrony configuration
-  cslaml.syncrconf = loadSyncrConfig(filepath=syncrconfpath)
+  sslaml.syncrconf = loadSyncrConfig(filepath=syncrconfpath)
 
   # 2. Confirm that the robot already exists, create if it doesn't.
-  cslaml.robot = syncrRobot(cslaml.syncrconf, cslaml.robotId)
+  sslaml.robot = syncrRobot(sslaml.syncrconf, sslaml.robotId)
 
   # 3. Create or retrieve the session.
-  cslaml.session = syncrSession(cslaml.syncrconf, cslaml.robotId, cslaml.sessionId)
+  sslaml.session = syncrSession(sslaml.syncrconf, sslaml.robotId, sslaml.sessionId)
 
+  nothing
+end
+
+
+"""
+$(SIGNATURES)
+
+Store robot parameters in the centralized database system.
+"""
+function setRobotParameters!(sslaml::SyncrSLAM)
+  rovconf = Dict{String, String}() # TODO relax to Dict{String, Any}
+  rovconf["robot"] = "hauv"
+  rovconf["bTc"] = "[0.0;0.0;0.0; 1.0; 0.0; 0.0; 0.0]"
+  rovconf["bTc_format"] = "xyzqwqxqyqz"
+  # currently unused, but upcoming
+  rovconf["pointcloud_description_name"] = "BSONpointcloud"
+  rovconf["pointcloud_color_description_name"] = "BSONcolors"
+
+  # Actually modify the databases
+  Syncr.updateRobotConfig(sslaml.syncrconf, sslaml.robotId, rovconf)
+
+  # insertrobotdatafirstpose!(cg, session, hauvconfig)
   nothing
 end
 
@@ -136,28 +161,10 @@ end
 
 # TODO -- code below untested
 
-"""
-    setRobotParameters!(::SyncrSLAM)
 
-Store robot parameters in the centralized database system.
-"""
-function setRobotParameters!(cslaml::SyncrSLAM)
-  hauvconfig = Dict()
-  hauvconfig["robot"] = "hauv"
-  hauvconfig["bTc"] = [0.0;0.0;0.0; 1.0; 0.0; 0.0; 0.0]
-  hauvconfig["bTc_format"] = "xyzqwqxqyqz"
-  # currently unused, but upcoming
-  hauvconfig["pointcloud_description_name"] = "BSONpointcloud"
-  hauvconfig["pointcloud_color_description_name"] = "BSONcolors"
-  # robotdata = json(hauvconfig).data
-
-  # Actually modify the databases
-  insertrobotdatafirstpose!(cg, session, hauvconfig)
-  nothing
-end
 
 """
-    handle_poses!(::SyncrSLAM, ::pose_node_t)
+$(SIGNATURES)
 
 Adds pose nodes to graph with a prior on Z, pitch, and roll.
 """
@@ -198,7 +205,7 @@ function handle_poses!(slaml::SyncrSLAM,
 end
 
 """
-    handle_priors!(::SyncrSLAM, ::prior_zpr_t)
+$(SIGNATURES)
 
 Handle ZPR priors on poses.
 """
@@ -226,7 +233,7 @@ function handle_priors!(slam::SyncrSLAM,
 end
 
 """
-    handle_partials!(::SyncrSLAM, ::pose_pose_xyh_t)
+$(SIGNATURES)
 
 Handle partial x, y, and heading odometry constraints between Pose3 variables.
 """
@@ -261,7 +268,7 @@ function handle_partials!(slam::SyncrSLAM,
 end
 
 """
-   handle_loops!(::SyncrSLAM, ::pose_pose_xyh_nh_t)
+$(SIGNATURES)
 
 Handle loop closure proposals with chance of being a null hypothesis likelihood.
 """
@@ -326,9 +333,9 @@ end
 
 
 """
-   handle_clouds(slam::SyncrSLAM, msg_data)
+$(SIGNATURES)
 
-   Callback for caesar_point_cloud_t msgs. Adds point cloud to SLAM_Client
+Callback for caesar_point_cloud_t msgs. Adds point cloud to SLAM_Client
 """
 function handle_clouds!(slaml::SyncrSLAM,
                         msg::point_cloud_t)
@@ -379,6 +386,8 @@ slam_client = SyncrSLAM(userId=userId,robotId=robotId,sessionId=sessionId)
 # initialize a new session ready for SLAM using the built in SynchronySDK
 println("[Caesar.jl] Setting up remote solver")
 initialize!(slam_client)
+
+setRobotParameters!(sslaml::SyncrSLAM)
 
 # TODO - should have a function that allows first pose and prior to be set by user.
 
