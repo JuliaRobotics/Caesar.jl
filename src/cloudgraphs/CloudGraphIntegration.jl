@@ -411,7 +411,7 @@ function getAllExVertexNeoIDs(conn;
   query = reqbackendset || reqready ? query*" and" : query
   query = reqready ? query*" n.ready=$(ready)" : query
   query = reqbackendset && reqready ? query*" and" : query
-  query = reqbackendset ? " n.backendset=$(backendset)" : query
+  query = reqbackendset ? query*" n.backendset=$(backendset)" : query
   # query = query*" return n"
   query = query*" return n.exVertexId, id(n), n.label"
 
@@ -419,11 +419,15 @@ function getAllExVertexNeoIDs(conn;
   cph = loadtx(query, submit=true)
   ret = Array{Tuple{Int64,Int64,Symbol},1}()
 
-  @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
-    exvid, neoid, sym = data["row"][1], data["row"][2], Symbol(data["row"][3])
-    push!(ret, (exvid,neoid,sym)  )
+  # If no results, return empty array...
+  if length(cph.results) > 0
+      if length(cph.results[1]["data"]) > 0
+          @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
+            exvid, neoid, sym = data["row"][1], data["row"][2], Symbol(data["row"][3])
+            push!(ret, (exvid,neoid,sym)  )
+          end
+      end
   end
-
   # @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
   #   metadata = data["meta"][1]
   #   rowdata = data["row"][1]
@@ -557,6 +561,7 @@ end
 function fullLocalGraphCopy!(fgl::FactorGraph; reqbackendset::Bool=true, reqready::Bool=true)
   conn = fgl.cg.neo4j.connection
   IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready)
+  println("fullLocalGraphCopy: $(length(IDs)) nodes in session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
   if length(IDs) > 1
     cverts = Dict{Int64, CloudVertex}()
     unsorted = Int64[]
@@ -994,7 +999,7 @@ function fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString)
   vsym, neoid = getfirstpose(cg, session)
   cv = CloudGraphs.get_vertex(cg, neoid, true)
   bde = Caesar.getBigDataElement(cv, "robot_description")
-  resp = JSON.parse(takebuf_string(IOBuffer(bde.data)))
+  resp = JSON.parse(String(take!(IOBuffer(bde.data))))
   tryunpackalltypes!(resp)
   return resp
 end

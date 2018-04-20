@@ -1,7 +1,5 @@
 module Caesar
 
-
-
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 # import DrakeVisualizer: Triad
@@ -24,14 +22,13 @@ using
   ProgressMeter,
   ImageMagick,
   ImageCore,
-  PyCall
+  PyCall, # obsolete and will be removed soon
+  DocStringExtensions
 
 using CloudGraphs,
   Neo4j,
   Mongo,
   LibBSON
-
-
 
 export
   # pass through from KDE
@@ -113,10 +110,17 @@ export
 
   # solver service SLAMinDB
   getcredentials,
+  startSlamInDb,
+  runSlamInDbOnSession,
   slamindb,
   convertdb,
   resetconvertdb,
   getmaxfactorid,
+
+  # webserver
+  SolverStatus,
+  CaesarConfig,
+  VisualizationConfig,
 
   # multisession utils
   multisessionquery,
@@ -137,13 +141,16 @@ include("SlamServer.jl")
 include("DataUtils.jl")
 include("UserFunctions.jl")
 
+# Configuration
+include("config/CaesarConfig.jl")
+
+
 # using CloudGraphs
+include("cloudgraphs/SolverStatus.jl")
 include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
 include("cloudgraphs/ConvertGeneralSlaminDB.jl")
 include("cloudgraphs/slamindb.jl")
 include("cloudgraphs/MultisessionUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
-
-
 
 end

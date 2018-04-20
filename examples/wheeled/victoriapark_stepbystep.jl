@@ -12,7 +12,7 @@ using Caesar, IncrementalInference, RoME
 function evalLikelihood(fg::FactorGraph, sym::Symbol, point::Vector{Float64})
   p = getVertKDE(fg, sym)
   Ndim(p) == length(point) ? nothing : error("point (dim=$(length(point))) must have same dimension as belief (dim=$(Ndim(p)))")
-  evaluateDualTree(p, (point')')[1]
+  evaluateDualTree(p, reshape(point,Ndim(p),1))[1]
 end
 
 # Evaluate the likelihood of an Array{2} of points on the marginal belief of some variable
