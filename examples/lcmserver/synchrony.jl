@@ -22,7 +22,6 @@ const Syncr = SynchronySDK
 An object definition containing the require variables to leverage the server side SLAM solution per user, robot, and session.
 """
 mutable struct SyncrSLAM
-  userId::AbstractString
   robotId::AbstractString
   sessionId::AbstractString
   syncrconf::Union{Void, SynchronySDK.SynchronyConfig}
@@ -376,18 +375,19 @@ end
 
 # 0. Constants
 println("[Caesar.jl] defining constants.")
-userId = "ROVUser"
 robotId = "HAUV"
 sessionId = "LCM_01"
 
 # create a SLAM container object
-slam_client = SyncrSLAM(userId=userId,robotId=robotId,sessionId=sessionId)
+slam_client = SyncrSLAM(robotId=robotId,sessionId=sessionId)
 
 # initialize a new session ready for SLAM using the built in SynchronySDK
 println("[Caesar.jl] Setting up remote solver")
 initialize!(slam_client)
 
-setRobotParameters!(sslaml::SyncrSLAM)
+setRobotParameters!(slam_client)
+# TEST: Getting robotConfig
+@show robotConfig = Syncr.getRobotConfig(slam_client.syncrconf, slam_client.robotId)
 
 # TODO - should have a function that allows first pose and prior to be set by user.
 
