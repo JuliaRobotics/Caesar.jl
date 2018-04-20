@@ -375,7 +375,7 @@ end
 
 # 0. Constants
 println("[Caesar.jl] defining constants.")
-robotId = "HAUVSam"
+robotId = "HAUV"
 sessionId = "LCM_01"
 
 # create a SLAM container object
@@ -386,6 +386,8 @@ println("[Caesar.jl] Setting up remote solver")
 initialize!(slam_client)
 
 setRobotParameters!(slam_client)
+# TEST: Getting robotConfig
+@show robotConfig = Syncr.getRobotConfig(slam_client.syncrconf, slam_client.robotId)
 
 # TODO - should have a function that allows first pose and prior to be set by user.
 
