@@ -24,7 +24,7 @@ Please see the [documentation](http://dehann.github.io/Caesar.jl/latest/):
 
 # Visualization
 
-Please see the [Arena.jl](http://www.github.com/dehann/Arena.jl) package for the concentration of all 2D and 3D visualization utilities of the Caesar.jl robot navigation packages.
+Please see the [Arena.jl](http://www.github.com/JuliaRobotics/Arena.jl) package for the concentration of all 2D and 3D visualization utilities of the Caesar.jl robot navigation packages.
 
 # Installation
 
