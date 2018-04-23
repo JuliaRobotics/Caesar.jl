@@ -84,11 +84,11 @@ Consider citing our work:
 [iif-build-url]: https://travis-ci.org/dehann/IncrementalInference.jl
 [iif-url]: http://www.github.com/dehann/IncrementalInference.jl
 
-[kde-cov-img]: https://codecov.io/github/dehann/KernelDensityEstimate.jl/coverage.svg?branch=master
-[kde-cov-url]: https://codecov.io/github/dehann/KernelDensityEstimate.jl?branch=master
-[kde-build-img]: https://travis-ci.org/dehann/KernelDensityEstimate.jl.svg?branch=master
-[kde-build-url]: https://travis-ci.org/dehann/KernelDensityEstimate.jl
-[kde-url]: http://www.github.com/dehann/KernelDensityEstimate.jl
+[kde-cov-img]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl/coverage.svg?branch=master
+[kde-cov-url]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl?branch=master
+[kde-build-img]: https://travis-ci.org/JuliaRobotics/KernelDensityEstimate.jl.svg?branch=master
+[kde-build-url]: https://travis-ci.org/JuliaRobotics/KernelDensityEstimate.jl
+[kde-url]: http://www.github.com/JuliaRobotics/KernelDensityEstimate.jl
 
 [tf-cov-img]: https://codecov.io/github/dehann/TransformUtils.jl/coverage.svg?branch=master
 [tf-cov-url]: https://codecov.io/github/dehann/TransformUtils.jl?branch=master
