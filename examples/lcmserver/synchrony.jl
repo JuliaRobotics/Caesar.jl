@@ -375,7 +375,7 @@ end
 
 # 0. Constants
 println("[Caesar.jl] defining constants.")
-robotId = "HAUV"
+robotId = "HROV"
 sessionId = "LCM_01"
 
 # create a SLAM container object
