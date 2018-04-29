@@ -117,7 +117,7 @@ lcm_node = LCMLog(logfile) # for direct log file access
 # lcm_node = LCM() # for UDP Ethernet traffic version
 
 # poses
-subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_pose_nh_t)
+subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_node_t)
 
 # factors
 # subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler, pose_pose_xyh_t)
