@@ -200,8 +200,6 @@ end
 
 
 """
-$(SIGNATURES)
-
 Callback for caesar_point_cloud_t msgs. Adds point cloud to SLAM_Client
 """
 function handle_clouds!(slaml::SyncrSLAM,
