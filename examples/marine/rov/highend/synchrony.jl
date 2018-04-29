@@ -271,13 +271,15 @@ lcm_node = LCMLog(logfile) # for direct log file access
 
 # poses
 subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_pose_nh_t)
+
 # factors
-subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler, pose_pose_xyh_t)
-subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
+# subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler, pose_pose_xyh_t)
+# subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
 # loop closures come in via p3p3nh factors
-subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler, pose_pose_xyh_nh_t)
+# subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler, pose_pose_xyh_nh_t)
+
 # sensor data
-subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
+# subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
 
 
 println("[Caesar.jl] Running LCM listener")
