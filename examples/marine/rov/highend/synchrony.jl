@@ -42,20 +42,21 @@ Adds pose nodes to graph with a prior on Z, pitch, and roll.
 """
 function handle_poses!(slaml::SyncrSLAM,
                        msg::pose_node_t)
-    #
     id = msg.id
     println("[Caesar.jl] Received pose msg for x$(id)")
 
-    # mean = msg.mean
-    # covar = msg.covar
-    # t = [mean[1], mean[2], mean[3]]
-    # qw = mean[4]
-    # qxyz = [mean[5], mean[6], mean[7]]
-    # q = Quaternion(qw,qxyz) # why not a (w,x,y,z) constructor?
-    # pose = SE3(t,q)
-    # euler = Euler(q)
+    mean = msg.mean
+    covar = msg.covar
+    t = [mean[1], mean[2], mean[3]]
+    qw = mean[4]
+    qxyz = [mean[5], mean[6], mean[7]]
+    q = Quaternion(qw,qxyz) # why not a (w,x,y,z) constructor?
+    pose = SE3(t,q)
+    euler = Euler(q)
     #
-    # node_label = Symbol("x$(id)")
+    node_label = Symbol("x$(id)")
+    varRequest = VariableRequest(node_label, "Pose3", nothing, ["POSE"])
+    resp = addVariable(slaml.syncrconf, slaml.robotId, slaml.sessionId, varRequest)
     # xn = addNode!(slaml, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
     # slaml.lastposesym = node_label; # update object
     #
