@@ -18,15 +18,13 @@ mutable struct SyncrSLAM
   session
 
   # Constructor
-  SyncrSLAM(;
-    userId::AbstractString="",
-    robotId::AbstractString="",
-    sessionId::AbstractString="",
-    syncrconf::Union{Void, SynchronySDK.SynchronyConfig}=nothing,
+  SyncrSLAM(
+    robotId::AbstractString,
+    sessionId::AbstractString,
+    syncrconf::Union{Void, SynchronySDK.SynchronyConfig};
     robot=nothing,
     session=nothing
    ) = new(
-        userId,
         robotId,
         sessionId,
         syncrconf,
@@ -71,7 +69,7 @@ function syncrRobot(
       # Create a new one
       println(" -- Robot '$robotId' doesn't exist, creating it...")
       newRobot = RobotRequest(robotId, "My New Bot", "Description of my neat robot", "Active")
-      robot = createRobot(synchronyConfig, newRobot)
+      robot = addRobot(synchronyConfig, newRobot)
   end
   println(robot)
   robot
@@ -97,7 +95,7 @@ function syncrSession(
       # Create a new one
       println(" -- Session '$sessionId' doesn't exist for robot '$robotId', creating it...")
       newSessionRequest = SessionDetailsRequest(sessionId, "A test dataset demonstrating data ingestion for a   wheeled vehicle driving in a hexagon.")
-      session = createSession(synchronyConfig, robotId, newSessionRequest)
+      session = addSession(synchronyConfig, robotId, newSessionRequest)
   end
   println(session)
   session

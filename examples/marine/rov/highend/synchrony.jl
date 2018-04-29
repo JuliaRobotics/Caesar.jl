@@ -46,36 +46,92 @@ function handle_poses!(slaml::SyncrSLAM,
     id = msg.id
     println("[Caesar.jl] Received pose msg for x$(id)")
 
-    mean = msg.mean
-    covar = msg.covar
-    t = [mean[1], mean[2], mean[3]]
-    qw = mean[4]
-    qxyz = [mean[5], mean[6], mean[7]]
-    q = Quaternion(qw,qxyz) # why not a (w,x,y,z) constructor?
-    pose = SE3(t,q)
-    euler = Euler(q)
+    # mean = msg.mean
+    # covar = msg.covar
+    # t = [mean[1], mean[2], mean[3]]
+    # qw = mean[4]
+    # qxyz = [mean[5], mean[6], mean[7]]
+    # q = Quaternion(qw,qxyz) # why not a (w,x,y,z) constructor?
+    # pose = SE3(t,q)
+    # euler = Euler(q)
+    #
+    # node_label = Symbol("x$(id)")
+    # xn = addNode!(slaml, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
+    # slaml.lastposesym = node_label; # update object
+    #
+    # if id == 1
+    #     println("[Caesar.jl] First pose")
+    #     # this is the first msg, and it does not carry odometry, but the prior on the first node.
+    #
+    #     # add 6dof prior
+    #     initPosePrior = PriorPose3( MvNormal( veeEuler(pose), diagm([covar...]) ) )
+    #     addFactor!(slaml, [xn], initPosePrior)
+    #
+    #     # auto init is coming, this code will likely be removed
+    #     initializeNode!(slaml, node_label)
+    #
+    #     # set robot parameters in the first pose, this will become a separate node in the future
+    #     println("[Caesar.jl] Setting robot parameters")
+    #     setRobotParameters!(slaml)
+    # end
+end
 
-    node_label = Symbol("x$(id)")
-    xn = addNode!(slaml, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
-    slaml.lastposesym = node_label; # update object
-
-    if id == 1
-        println("[Caesar.jl] First pose")
-        # this is the first msg, and it does not carry odometry, but the prior on the first node.
-
-        # add 6dof prior
-        initPosePrior = PriorPose3( MvNormal( veeEuler(pose), diagm([covar...]) ) )
-        addFactor!(slaml, [xn], initPosePrior)
-
-        # auto init is coming, this code will likely be removed
-        initializeNode!(slaml, node_label)
-
-        # set robot parameters in the first pose, this will become a separate node in the future
-        println("[Caesar.jl] Setting robot parameters")
-        setRobotParameters!(slaml)
+# this function handles lcm msgs
+function listener!(lcm_node::Union{LCMCore.LCM, LCMCore.LCMLog})
+    # handle traffic
+    # TODO: handle termination
+    while true
+        handle(lcm_node)
     end
 end
 
+
+# 0. Constants
+println("[Caesar.jl] defining constants.")
+robotId = "HROV"
+sessionId = "LCM_01"
+
+# create a SLAM container object
+slam_client = SyncrSLAM(robotId,sessionId, nothing)
+
+# initialize a new session ready for SLAM using the built in SynchronySDK
+println("[Caesar.jl] Setting up remote solver")
+initialize!(slam_client)
+
+setRobotParameters!(slam_client)
+# TEST: Getting robotConfig
+@show robotConfig = Syncr.getRobotConfig(slam_client.syncrconf, slam_client.robotId)
+
+# TODO - should have a function that allows first pose and prior to be set by user.
+
+# create new handlers to pass in additional data
+lcm_pose_handler = (channel, message_data) -> handle_poses!(slam_client, message_data )
+# lcm_odom_handler = (channel, message_data) -> handle_partials!(slam_client, message_data )
+# lcm_prior_handler = (channel, message_data) -> handle_priors!(slam_client, message_data )
+# lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, message_data )
+# lcm_loop_handler = (channel, message_data) -> handle_loops!(slam_client, message_data )
+
+# create LCM object and subscribe to messages on the following channels
+logfile = robotdata("rovlcm_singlesession_01")
+lcm_node = LCMLog(logfile) # for direct log file access
+# lcm_node = LCM() # for UDP Ethernet traffic version
+
+# poses
+subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_pose_nh_t)
+
+# factors
+# subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler, pose_pose_xyh_t)
+# subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
+# loop closures come in via p3p3nh factors
+# subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler, pose_pose_xyh_nh_t)
+
+# sensor data
+# subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
+
+println("[Caesar.jl] Running LCM listener")
+listener!(lcm_node)
+
+#### TODO stuff
 
 """
 Handle ZPR priors on poses.
@@ -197,8 +253,6 @@ end
 #     appendvertbigdata!(slaml.fg, vert, "BSONcolors", string(serialized_colors).data)
 # end
 
-
-
 """
 Callback for caesar_point_cloud_t msgs. Adds point cloud to SLAM_Client
 """
@@ -228,59 +282,3 @@ function handle_clouds!(slaml::SyncrSLAM,
     serialized_colors = BSONObject(Dict("colors" => colors))
     appendvertbigdata!(slaml, vert, "BSONcolors", string(serialized_colors).data)
 end
-
-# this function handles lcm msgs
-function listener!(lcm_node::Union{LCMCore.LCM, LCMCore.LCMLog})
-    # handle traffic
-    # TODO: handle termination
-    while true
-        handle(lcm_node)
-    end
-end
-
-
-# 0. Constants
-println("[Caesar.jl] defining constants.")
-robotId = "HROV"
-sessionId = "LCM_01"
-
-# create a SLAM container object
-slam_client = SyncrSLAM(robotId=robotId,sessionId=sessionId)
-
-# initialize a new session ready for SLAM using the built in SynchronySDK
-println("[Caesar.jl] Setting up remote solver")
-initialize!(slam_client)
-
-setRobotParameters!(slam_client)
-# TEST: Getting robotConfig
-@show robotConfig = Syncr.getRobotConfig(slam_client.syncrconf, slam_client.robotId)
-
-# TODO - should have a function that allows first pose and prior to be set by user.
-
-# create new handlers to pass in additional data
-lcm_pose_handler = (channel, message_data) -> handle_poses!(slam_client, message_data )
-lcm_odom_handler = (channel, message_data) -> handle_partials!(slam_client, message_data )
-lcm_prior_handler = (channel, message_data) -> handle_priors!(slam_client, message_data )
-lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, message_data )
-lcm_loop_handler = (channel, message_data) -> handle_loops!(slam_client, message_data )
-
-# create LCM object and subscribe to messages on the following channels
-logfile = robotdata("rovlcm_singlesession_01")
-lcm_node = LCMLog(logfile) # for direct log file access
-# lcm_node = LCM() # for UDP Ethernet traffic version
-
-# poses
-subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_pose_nh_t)
-
-# factors
-# subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler, pose_pose_xyh_t)
-# subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
-# loop closures come in via p3p3nh factors
-# subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler, pose_pose_xyh_nh_t)
-
-# sensor data
-# subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
-
-
-println("[Caesar.jl] Running LCM listener")
-listener!(lcm_node)
