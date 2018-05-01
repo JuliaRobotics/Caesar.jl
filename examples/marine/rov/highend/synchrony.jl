@@ -60,21 +60,52 @@ function handle_poses!(slaml::SyncrSLAM,
     # xn = addNode!(slaml, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
     # slaml.lastposesym = node_label; # update object
     #
-    # if id == 1
-    #     println("[Caesar.jl] First pose")
-    #     # this is the first msg, and it does not carry odometry, but the prior on the first node.
-    #
-    #     # add 6dof prior
-    #     initPosePrior = PriorPose3( MvNormal( veeEuler(pose), diagm([covar...]) ) )
-    #     addFactor!(slaml, [xn], initPosePrior)
-    #
-    #     # auto init is coming, this code will likely be removed
-    #     initializeNode!(slaml, node_label)
-    #
-    #     # set robot parameters in the first pose, this will become a separate node in the future
-    #     println("[Caesar.jl] Setting robot parameters")
-    #     setRobotParameters!(slaml)
-    # end
+    if id == 1
+        println("[Caesar.jl] First pose")
+        # this is the first msg, and it does not carry odometry, but the prior on the first node.
+
+        # add 6dof prior
+        initPosePrior = PriorPose3( MvNormal( veeEuler(pose), diagm([covar...]) ) )
+        addFactor!(slaml, [xn], initPosePrior)
+
+        # auto init is coming, this code will likely be removed
+        initializeNode!(slaml, node_label)
+
+        # set robot parameters in the first pose, this will become a separate node in the future
+        println("[Caesar.jl] Setting robot parameters")
+        setRobotParameters!(slaml)
+    end
+end
+
+"""
+Handle ZPR priors on poses.
+"""
+function handle_priors!(slam::SyncrSLAM,
+                         msg::prior_zpr_t)
+
+    id = msg.id
+    println("[Caesar.jl] Adding prior on RPZ to x$(id)")
+
+    node_label = Symbol("x$(id)")
+    # xn = getVert(slam,node_label)
+
+    z = msg.z
+    pitch = msg.pitch
+    roll = msg.roll
+
+    var_z = msg.var_z
+    var_pitch = msg.var_pitch
+    var_roll = msg.var_roll
+
+    rp_dist = MvNormal( [roll;pitch], diagm([var_roll, var_pitch]))
+    z_dist = Normal(z, var_z)
+    prior_rpz = RoME.PartialPriorRollPitchZ(rp_dist, z_dist)
+
+    # Build the factor request
+    fctBody = FactorBody(string(typeof(prior_rpz)), "JSON", JSON.json(prior_rpz))
+    fctRequest = FactorRequest([node_label], fctBody, false, false)
+    @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
+    # addFactor!(slam, [xn], prior_rpz)
 end
 
 # this function handles lcm msgs
@@ -90,7 +121,7 @@ end
 # 0. Constants
 println("[Caesar.jl] defining constants.")
 robotId = "HROV"
-sessionId = "LCM_01"
+sessionId = "LCM_09"
 
 # create a SLAM container object
 slam_client = SyncrSLAM(robotId,sessionId, nothing)
@@ -100,15 +131,14 @@ println("[Caesar.jl] Setting up remote solver")
 initialize!(slam_client)
 
 setRobotParameters!(slam_client)
-# TEST: Getting robotConfig
-@show robotConfig = Syncr.getRobotConfig(slam_client.syncrconf, slam_client.robotId)
+robotConfig = Syncr.getRobotConfig(slam_client.syncrconf, slam_client.robotId)
 
 # TODO - should have a function that allows first pose and prior to be set by user.
 
 # create new handlers to pass in additional data
-lcm_pose_handler = (channel, message_data) -> handle_poses!(slam_client, message_data )
+# lcm_pose_handler = (channel, message_data) -> handle_poses!(slam_client, message_data )
 # lcm_odom_handler = (channel, message_data) -> handle_partials!(slam_client, message_data )
-# lcm_prior_handler = (channel, message_data) -> handle_priors!(slam_client, message_data )
+lcm_prior_handler = (channel, message_data) -> handle_priors!(slam_client, message_data )
 # lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, message_data )
 # lcm_loop_handler = (channel, message_data) -> handle_loops!(slam_client, message_data )
 
@@ -118,11 +148,11 @@ lcm_node = LCMLog(logfile) # for direct log file access
 # lcm_node = LCM() # for UDP Ethernet traffic version
 
 # poses
-subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_node_t)
+# subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_node_t)
 
 # factors
 # subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler, pose_pose_xyh_t)
-# subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
+subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
 # loop closures come in via p3p3nh factors
 # subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler, pose_pose_xyh_nh_t)
 
@@ -133,32 +163,6 @@ println("[Caesar.jl] Running LCM listener")
 listener!(lcm_node)
 
 #### TODO stuff
-
-"""
-Handle ZPR priors on poses.
-"""
-function handle_priors!(slam::SyncrSLAM,
-                         msg::prior_zpr_t)
-
-    id = msg.id
-    println("[Caesar.jl] Adding prior on RPZ to x$(id)")
-
-    node_label = Symbol("x$(id)")
-    xn = getVert(slam,node_label)
-
-    z = msg.z
-    pitch = msg.pitch
-    roll = msg.roll
-
-    var_z = msg.var_z
-    var_pitch = msg.var_pitch
-    var_roll = msg.var_roll
-
-    rp_dist = MvNormal( [roll;pitch], diagm([var_roll, var_pitch]))
-    z_dist = Normal(z, var_z)
-    prior_rpz = PartialPriorRollPitchZ(rp_dist, z_dist)
-    addFactor!(slam, [xn], prior_rpz)
-end
 
 """
 Handle partial x, y, and heading odometry constraints between Pose3 variables.
