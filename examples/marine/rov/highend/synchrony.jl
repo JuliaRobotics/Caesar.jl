@@ -40,7 +40,7 @@ end
 """
 Adds pose nodes to graph with a prior on Z, pitch, and roll.
 """
-function handle_poses!(slaml::SyncrSLAM,
+function handle_poses!(slam::SyncrSLAM,
                        msg::pose_node_t)
     id = msg.id
     println("[Caesar.jl] Received pose msg for x$(id)")
@@ -56,25 +56,32 @@ function handle_poses!(slaml::SyncrSLAM,
     #
     node_label = Symbol("x$(id)")
     varRequest = VariableRequest(node_label, "Pose3", nothing, ["POSE"])
-    resp = addVariable(slaml.syncrconf, slaml.robotId, slaml.sessionId, varRequest)
+    resp = addVariable(slam.syncrconf, slam.robotId, slam.sessionId, varRequest)
     # xn = addNode!(slaml, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
     # slaml.lastposesym = node_label; # update object
     #
-    if id == 1
+    if id == 0
         println("[Caesar.jl] First pose")
         # this is the first msg, and it does not carry odometry, but the prior on the first node.
 
         # add 6dof prior
-        initPosePrior = PriorPose3( MvNormal( veeEuler(pose), diagm([covar...]) ) )
-        addFactor!(slaml, [xn], initPosePrior)
+        initPosePrior = RoME.PriorPose3( MvNormal( veeEuler(pose), diagm([covar...]) ) )
+        packedPrior = convert(RoME.PackedPriorPose3, initPosePrior)
+
+        # 3. Build the factor request (again, we can make this way easier and transparent once it's stable)
+        fctBody = FactorBody(string(typeof(initPosePrior)), string(typeof(packedPrior)), "JSON", JSON.json(packedPrior))
+        fctRequest = FactorRequest([node_label], fctBody, false, false)
+        @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
 
         # auto init is coming, this code will likely be removed
-        initializeNode!(slaml, node_label)
+        # initializeNode!(slaml, node_label)
 
         # set robot parameters in the first pose, this will become a separate node in the future
         println("[Caesar.jl] Setting robot parameters")
         setRobotParameters!(slaml)
     end
+
+    sleep(5)
 end
 
 """
@@ -89,23 +96,26 @@ function handle_priors!(slam::SyncrSLAM,
     node_label = Symbol("x$(id)")
     # xn = getVert(slam,node_label)
 
+    # 1. Build up the prior
     z = msg.z
     pitch = msg.pitch
     roll = msg.roll
-
     var_z = msg.var_z
     var_pitch = msg.var_pitch
     var_roll = msg.var_roll
-
     rp_dist = MvNormal( [roll;pitch], diagm([var_roll, var_pitch]))
     z_dist = Normal(z, var_z)
     prior_rpz = RoME.PartialPriorRollPitchZ(rp_dist, z_dist)
 
-    # Build the factor request
-    fctBody = FactorBody(string(typeof(prior_rpz)), "JSON", JSON.json(prior_rpz))
+    # 2. Pack the prior (we can automate this step soon, but for now it's hand cranking)
+    packed_prior_rpz = convert(RoME.PackedPartialPriorRollPitchZ, prior_rpz)
+
+    # 3. Build the factor request (again, we can make this way easier and transparent once it's stable)
+    fctBody = FactorBody(string(typeof(prior_rpz)), string(typeof(packed_prior_rpz)), "JSON", JSON.json(packed_prior_rpz))
     fctRequest = FactorRequest([node_label], fctBody, false, false)
     @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
-    # addFactor!(slam, [xn], prior_rpz)
+
+    sleep(5)
 end
 
 # this function handles lcm msgs
@@ -121,22 +131,29 @@ end
 # 0. Constants
 println("[Caesar.jl] defining constants.")
 robotId = "HROV"
-sessionId = "LCM_09"
+sessionId = "LCM_13"
 
 # create a SLAM container object
-slam_client = SyncrSLAM(robotId,sessionId, nothing)
+slam_client = SyncrSLAM(robotId, sessionId, nothing)
 
 # initialize a new session ready for SLAM using the built in SynchronySDK
 println("[Caesar.jl] Setting up remote solver")
 initialize!(slam_client)
 
+# Make sure that this session is not already populated
+existingSessions = getSessions(slam_client.syncrconf, sessionId)
+if count(session -> session.id == sessionId, existingSessions.sessions) > 0
+    error("There is already a session named '$sessionId' for robot '$robotId'. This example will fail if it tries to add duplicate nodes. We strongly recommend providing a new session name.")
+end
+
+# Set up the robot
 setRobotParameters!(slam_client)
 robotConfig = Syncr.getRobotConfig(slam_client.syncrconf, slam_client.robotId)
 
 # TODO - should have a function that allows first pose and prior to be set by user.
 
 # create new handlers to pass in additional data
-# lcm_pose_handler = (channel, message_data) -> handle_poses!(slam_client, message_data )
+lcm_pose_handler = (channel, message_data) -> handle_poses!(slam_client, message_data )
 # lcm_odom_handler = (channel, message_data) -> handle_partials!(slam_client, message_data )
 lcm_prior_handler = (channel, message_data) -> handle_priors!(slam_client, message_data )
 # lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, message_data )
@@ -145,10 +162,9 @@ lcm_prior_handler = (channel, message_data) -> handle_priors!(slam_client, messa
 # create LCM object and subscribe to messages on the following channels
 logfile = robotdata("rovlcm_singlesession_01")
 lcm_node = LCMLog(logfile) # for direct log file access
-# lcm_node = LCM() # for UDP Ethernet traffic version
 
 # poses
-# subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_node_t)
+subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_node_t)
 
 # factors
 # subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler, pose_pose_xyh_t)
@@ -161,6 +177,7 @@ subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
 
 println("[Caesar.jl] Running LCM listener")
 listener!(lcm_node)
+
 
 #### TODO stuff
 
