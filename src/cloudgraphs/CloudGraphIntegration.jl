@@ -562,7 +562,7 @@ function fullLocalGraphCopy!(fgl::FactorGraph; reqbackendset::Bool=true, reqread
   conn = fgl.cg.neo4j.connection
   IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready)
   println("fullLocalGraphCopy: $(length(IDs)) nodes in session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
-  if length(IDs) > 1
+  if length(IDs) > 0
     cverts = Dict{Int64, CloudVertex}()
     unsorted = Int64[]
     # TODO ensure this is row is sorted

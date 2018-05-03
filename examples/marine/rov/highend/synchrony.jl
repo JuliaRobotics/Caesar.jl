@@ -78,10 +78,8 @@ function handle_poses!(slam::SyncrSLAM,
 
         # set robot parameters in the first pose, this will become a separate node in the future
         println("[Caesar.jl] Setting robot parameters")
-        setRobotParameters!(slaml)
+        setRobotParameters!(slam)
     end
-
-    sleep(5)
 end
 
 """
@@ -114,8 +112,6 @@ function handle_priors!(slam::SyncrSLAM,
     fctBody = FactorBody(string(typeof(prior_rpz)), string(typeof(packed_prior_rpz)), "JSON", JSON.json(packed_prior_rpz))
     fctRequest = FactorRequest([node_label], fctBody, false, false)
     @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
-
-    sleep(5)
 end
 
 # this function handles lcm msgs
@@ -131,7 +127,7 @@ end
 # 0. Constants
 println("[Caesar.jl] defining constants.")
 robotId = "HROV"
-sessionId = "LCM_13"
+sessionId = "LCM_17"
 
 # create a SLAM container object
 slam_client = SyncrSLAM(robotId, sessionId, nothing)
@@ -178,8 +174,16 @@ subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
 println("[Caesar.jl] Running LCM listener")
 listener!(lcm_node)
 
+####################################
+########### TESTING ################
+####################################
 
+
+
+
+####################################
 #### TODO stuff
+####################################
 
 """
 Handle partial x, y, and heading odometry constraints between Pose3 variables.
