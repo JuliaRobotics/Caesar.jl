@@ -115,6 +115,18 @@ function initialize!(sslaml::SyncrSLAM;
   # 2. Confirm that the robot already exists, create if it doesn't.
   sslaml.robot = syncrRobot(sslaml.syncrconf, sslaml.robotId)
 
+  # Make sure that this session is not already populated
+  if isSessionExisting(slam_client.syncrconf, sslaml.robotId, sslaml.sessionId)
+      warn("There is already a session named '$sessionId' for robot '$robotId'. This example will fail if it tries to add duplicate nodes. We strongly recommend providing a new session name.")
+      print(" Should we delete it? [Y/N] - ")
+      if lowercase(strip(readline(STDIN))) == "y"
+          deleteSession(sslaml.syncrconf, sslaml.robotId, sslaml.sessionId)
+          println(" -- Session '$sessionId' deleted!")
+      else
+          warn("Okay, but this may break the example! Caveat Userus!")
+      end
+  end
+
   # 3. Create or retrieve the session.
   sslaml.session = syncrSession(sslaml.syncrconf, sslaml.robotId, sslaml.sessionId)
 

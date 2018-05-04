@@ -79,7 +79,7 @@ end
 Handle partial x, y, and heading odometry constraints between Pose3 variables.
 """
 function handle_partials!(slam::SyncrSLAM,
-                         msg::pose_pose_xyh_t)
+                         msg::Any)
     println(" --- Handling odometry change...")
     return
 
@@ -170,4 +170,35 @@ function handle_loops!(slam::SyncrSLAM,
     # lcf_label = Symbol[origin_label;destination_label]
 
     # addFactor!(slaml, lcf_label, lcf)
+end
+
+"""
+Callback for caesar_point_cloud_t msgs. Adds point cloud to SLAM_Client
+"""
+function handle_clouds!(slaml::SyncrSLAM,
+                        msg::point_cloud_t)
+    # TODO: interface here should be as simple as slam_client.add_pointcloud(nodeID, pc::SomeCloudType)
+
+    # TODO: check for empty clouds!
+
+    id = msg.id
+
+    last_pose = Symbol("x$(id)")
+    println("[Caesar.jl] Got cloud $id")
+    return
+
+    # 2d arrays of points and colors (from LCM data into arrays{arrays})
+    points = [[pt[1], pt[2], pt[3]] for pt in msg.points]
+    colors = [[UInt8(c.data[1]),UInt8(c.data[2]),UInt8(c.data[3])] for c in msg.colors]
+
+
+    # TODO: check if vert exists or not (may happen if msgs are lost or out of order)
+    vert = getVert(slaml, last_pose, api=IncrementalInference.dlapi) # fetch from database
+
+    # push to mongo (using BSON as a quick fix)
+    # (for deserialization, see src/DirectorVisService.jl:cachepointclouds!)
+    serialized_point_cloud = BSONObject(Dict("pointcloud" => points))
+    appendvertbigdata!(slaml, vert, "BSONpointcloud", string(serialized_point_cloud).data)
+    serialized_colors = BSONObject(Dict("colors" => colors))
+    appendvertbigdata!(slaml, vert, "BSONcolors", string(serialized_colors).data)
 end
