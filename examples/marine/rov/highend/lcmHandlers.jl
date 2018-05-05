@@ -18,8 +18,6 @@ function handle_poses!(slam::SyncrSLAM,
     node_label = Symbol("x$(id)")
     varRequest = VariableRequest(node_label, "Pose3", nothing, ["POSE"])
     resp = addVariable(slam.syncrconf, slam.robotId, slam.sessionId, varRequest)
-    # xn = addNode!(slaml, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
-    # slaml.lastposesym = node_label; # update object
     #
     if id == 0
         println("[Caesar.jl] First pose")
@@ -33,9 +31,6 @@ function handle_poses!(slam::SyncrSLAM,
         fctBody = FactorBody(string(typeof(initPosePrior)), string(typeof(packedPrior)), "JSON", JSON.json(packedPrior))
         fctRequest = FactorRequest([node_label], fctBody, false, false)
         @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
-
-        # auto init is coming, this code will likely be removed
-        # initializeNode!(slaml, node_label)
 
         # set robot parameters in the first pose, this will become a separate node in the future
         println("[Caesar.jl] Setting robot parameters")
@@ -53,8 +48,6 @@ function handle_priors!(slam::SyncrSLAM,
     println("[Caesar.jl] Adding prior on RPZ to x$(id)")
 
     node_label = Symbol("x$(id)")
-    # xn = getVert(slam,node_label)
-
     # 1. Build up the prior
     z = msg.z
     pitch = msg.pitch
@@ -70,9 +63,9 @@ function handle_priors!(slam::SyncrSLAM,
     packed_prior_rpz = convert(RoME.PackedPartialPriorRollPitchZ, prior_rpz)
 
     # 3. Build the factor request (again, we can make this way easier and transparent once it's stable)
-    # fctBody = FactorBody(string(typeof(prior_rpz)), string(typeof(packed_prior_rpz)), "JSON", JSON.json(packed_prior_rpz))
-    # fctRequest = FactorRequest([node_label], fctBody, false, false)
-    # @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
+    fctBody = FactorBody(string(typeof(prior_rpz)), string(typeof(packed_prior_rpz)), "JSON", JSON.json(packed_prior_rpz))
+    fctRequest = FactorRequest([node_label], fctBody, false, false)
+    @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
 end
 
 """
@@ -98,10 +91,6 @@ function handle_partials!(slam::SyncrSLAM,
     var_y = msg.var_y
     var_yaw = msg.var_yaw
 
-    origin_label, destination_label
-    # @show xo = getVert(slam,origin_label)
-    # @show xd = getVert(slam,destination_label)
-
     xyh_dist = MvNormal([delta_x, delta_y, delta_yaw], diagm([var_x, var_y, var_yaw]))
     xyh_factor = PartialPose3XYYaw(xyh_dist)
     # 2. Pack the prior (we can automate this step soon, but for now it's hand cranking)
@@ -111,11 +100,6 @@ function handle_partials!(slam::SyncrSLAM,
     fctBody = FactorBody(string(typeof(xyh_factor)), string(typeof(packed_xyh_factor)), "JSON", JSON.json(packed_xyh_factor))
     fctRequest = FactorRequest([origin_label; destination_label], fctBody, false, false)
     @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
-
-    # addFactor!(slam, [xo;xd], xyh_factor)
-    #
-    # initializeNode!(slam, destination_label)
-    # println()
 end
 
 """
@@ -141,14 +125,6 @@ function handle_loops!(slam::SyncrSLAM,
     var_yaw = msg.var_yaw
     confidence = msg.confidence
 
-    # @show xo = getVert(slam.fg,origin_label)
-    # @show xd = getVert(slam.fg,destination_label)
-
-    # if (destination_id - origin_id == 1)
-    #     warn("Avoiding parallel factor! See: https://github.com/dehann/IncrementalInference.jl/issues/63To ")
-    #     return
-    # end
-
     println("[Caesar.jl] Adding XYH-NH loop closure constraint between (x$(origin_id), x$(destination_id))")
     xyh_dist = MvNormal([delta_x, delta_y, delta_yaw], diagm([var_x, var_y, var_yaw]))
     xyh_factor = RoME.PartialPose3XYYawNH(xyh_dist ,[1.0-confidence, confidence]) # change to NH
@@ -159,46 +135,33 @@ function handle_loops!(slam::SyncrSLAM,
     fctBody = FactorBody(string(typeof(xyh_factor)), string(typeof(packed_xyh_factor)), "JSON", JSON.json(packed_xyh_factor))
     fctRequest = FactorRequest([origin_label; destination_label], fctBody, false, false)
     @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
-
-    # addFactor!(slaml, [xo;xd], xyh_factor )
-
-    # NOT USED
-    # println("[Caesar.jl] Adding P3P3NH loop closure constraint between (x$(origin_id), x$(destination_id))")
-
-    # # line below fails!
-    # lcf = Pose3Pose3NH( MvNormal(veeEuler(rel_pose), diagm(1.0./covar)), [0.5;0.5]) # define 50/50% hypothesis
-    # lcf_label = Symbol[origin_label;destination_label]
-
-    # addFactor!(slaml, lcf_label, lcf)
 end
 
 """
 Callback for caesar_point_cloud_t msgs. Adds point cloud to SLAM_Client
 """
-function handle_clouds!(slaml::SyncrSLAM,
+function handle_clouds!(slam::SyncrSLAM,
                         msg::point_cloud_t)
-    # TODO: interface here should be as simple as slam_client.add_pointcloud(nodeID, pc::SomeCloudType)
-
-    # TODO: check for empty clouds!
-
     id = msg.id
-
-    last_pose = Symbol("x$(id)")
+    last_pose = "x$(id)"
     println("[Caesar.jl] Got cloud $id")
-    return
 
     # 2d arrays of points and colors (from LCM data into arrays{arrays})
-    points = [[pt[1], pt[2], pt[3]] for pt in msg.points]
-    colors = [[UInt8(c.data[1]),UInt8(c.data[2]),UInt8(c.data[3])] for c in msg.colors]
+    # @show size(msg.points)
+    # @show size(msg.colors)
+    # points = [[pt[1], pt[2], pt[3]] for pt in msg.points]
+    points = JSON.json(msg.points)
+    # @show "HERREEEEEE"
+    # colors = [[UInt8(c.data[1]),UInt8(c.data[2]),UInt8(c.data[3])] for c in msg.colors]
+    colors = JSON.json(msg.colors)
 
-
-    # TODO: check if vert exists or not (may happen if msgs are lost or out of order)
-    vert = getVert(slaml, last_pose, api=IncrementalInference.dlapi) # fetch from database
-
-    # push to mongo (using BSON as a quick fix)
-    # (for deserialization, see src/DirectorVisService.jl:cachepointclouds!)
-    serialized_point_cloud = BSONObject(Dict("pointcloud" => points))
-    appendvertbigdata!(slaml, vert, "BSONpointcloud", string(serialized_point_cloud).data)
-    serialized_colors = BSONObject(Dict("colors" => colors))
-    appendvertbigdata!(slaml, vert, "BSONcolors", string(serialized_colors).data)
+    node = getNode(slam.syncrconf, slam.robotId, slam.sessionId, last_pose)
+    pointCloud = BigDataElementRequest("PointCloud", "Mongo", "Pointcloud from HAUV", points, "application/binary")
+    colors = BigDataElementRequest("Colors", "Mongo", "Colors from HAUV", colors, "application/binary")
+    addDataElement(slam.syncrconf, slam.robotId, slam.sessionId, node.id, pointCloud)
+    addDataElement(slam.syncrconf, slam.robotId, slam.sessionId, node.id, colors)
+    # serialized_point_cloud = BSONObject(Dict("pointcloud" => points))
+    # appendvertbigdata!(slaml, vert, "BSONpointcloud", string(serialized_point_cloud).data)
+    # serialized_colors = BSONObject(Dict("colors" => colors))
+    # appendvertbigdata!(slaml, vert, "BSONcolors", string(serialized_colors).data)
 end
