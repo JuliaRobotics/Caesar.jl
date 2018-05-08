@@ -23,7 +23,7 @@ function apriltag_converter(a::AprilTag)
     msg.p=P
     msg.cxy= a.c;
     msg.homography= a.H;
-    msg.pose = homography_to_pose(a.H, -100.,100.,320.,240.)
+    msg.pose = homography_to_pose(a.H, -50.,50.,320.,240.)
     return msg
 end
 
@@ -31,8 +31,8 @@ end
 
 # This colour mapping may be wrong for the PS3eye.
 ycrcb = Video4Linux.YUYV(640,480)
-vidchan = Channel((c::Channel) -> videoproducer(c, ycrcb, devicename = "/dev/video2",
-                                         iomethod = Video4Linux.IO_METHOD_MMAP, N=100 ))
+vidchan = Channel((c::Channel) -> videoproducer(c, ycrcb, devicename = "/dev/video1",
+                                         iomethod = Video4Linux.IO_METHOD_MMAP, N=1000 ))
 
 ##
 #capture one frame to create im1 and canvas needed to diplay
