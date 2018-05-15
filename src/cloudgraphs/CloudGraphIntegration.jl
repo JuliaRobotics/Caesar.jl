@@ -673,18 +673,19 @@ end
 """
     $(SIGNATURES)
 
-Copy sub graph portion defined by, and including a depth of neighbors, from the lbls vector. WORK IN PROGRESS.
+Copy sub graph portion defined by, and including a depth of neighbors, from the lbls vector.
 """
-function subGraphCopy!(
+function subLocalGraphCopy!(
             fgl::FactorGraph,
-            lbls::Vector{Symbol};
+            lbls::Union{Vector{AS}, Vector{Symbol}};
             reqbackendset::Bool=true,
-            reqready::Bool=true )
+            reqready::Bool=true ) where {AS <: AbstractString}
   #
   warn("subGraphCopy! is a work in progress")
   conn = fgl.cg.neo4j.connection
-  IDs = getLblExVertexNeoIDs(conn, lbls, session=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready )
-
+  IDs = getLblExVertexNeoIDs(conn, string.(lbls), session=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready )
+  println("fullSubGraphCopy: $(length(IDs)) nodes in session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
+  copyGraphNodesEdges!(fgl, IDs)
   nothing
 end
 
