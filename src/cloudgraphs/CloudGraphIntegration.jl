@@ -442,6 +442,88 @@ end
 """
     $(SIGNATURES)
 
+Build query to fetch sub graph and neighboring nodes.  For example:
+```
+match (n0:Hackathon)-[]-(n1:Hackathon)
+where n0.label IN ['x1', 'x2']
+with collect([
+  {id: id(n0)},
+  {id: id(n1)}
+  ]) as nodes
+unwind nodes as no
+unwind no as n
+match (m:Hackathon{ready:1,backendset:1})
+where id(m)=n.id
+return distinct id(m), m.label, m.exVertexId
+```
+"""
+function buildSubGraphIdsQuery(;
+            lbls::Vector{AS}=String[""],
+            session::AS="",
+            label::AS="",
+            ready::Int=1,
+            reqbackendset::Bool=true,
+            backendset::Int=1,
+            neighbors::Int=0  ) where {AS <: AbstractString}
+  #
+  sn = length(session) > 0 ? ":"*session : ""
+  lb = length(label) > 0 ? ":"*label : ""
+  query = "match (n0$(sn)$(lb))"
+  for d in 1:neighbors
+    query *= "-[]-(n$(d)$(sn)$(lb))"
+  end
+  query *= " "
+  query *= "where n0.label IN ["
+  for lbl in lbls
+    query *= "'$(lbl)', "
+  end
+  query = chop(chop(query))*"]"
+  query *= "with collect(["
+  query *= "  {id: id(n0)},"
+  for d in 1:neighbors
+    query *= "  {id: id(n$(d))},"
+  end
+  query = chop(query)*"  ]) as nodes "
+  query *= "unwind nodes as no "
+  query *= "unwind no as n "
+  query *= "match (m$(sn)$(lb){ready:$(ready) "
+  query *= reqbackendset ? ",backendset:$(backendset)}" : "}"
+  query *= ") "
+  query *= "where id(m)=n.id "
+  query *= "return distinct m.exVertexId, id(m), m.label"
+  return query
+end
+
+"""
+    $(SIGNATURES)
+
+Return array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.
+"""
+function getLblExVertexNeoIDs(
+        conn::Neo4j.Connection;
+        lbls::Vector{AS}=String[""],
+        session::AS="",
+        label::AS="",
+        ready::Int=1,
+        backendset::Int=1,
+        reqbackendset::Bool=true,
+        neighbors::Int=0 ) where {AS <: AbstractString}
+  #
+
+  query = buildSubGraphIdsQuery(lbls=lbls, session=session, label=label, neighbors=neighbors, ready=ready, reqbackendset=reqbackendset, backendset=backendset)
+  cph, = executeQuery(conn, query)
+
+  ret = Array{Tuple{Int64,Int64,Symbol},1}()
+  @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
+    exvid, neoid, vsym = data["row"][1], data["row"][2], Symbol(data["row"][3])
+    push!(ret, (exvid,neoid,vsym)  )
+  end
+  return ret
+end
+
+"""
+    $(SIGNATURES)
+
 Return array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.
 """
 function getExVertexNeoIDs(
@@ -601,7 +683,7 @@ function subGraphCopy!(
   #
   warn("subGraphCopy! is a work in progress")
   conn = fgl.cg.neo4j.connection
-  IDs = getLblExVertexNeoIDs(conn, lbls, sessionname=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready )
+  IDs = getLblExVertexNeoIDs(conn, lbls, session=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready )
 
   nothing
 end
