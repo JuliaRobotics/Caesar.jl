@@ -41,20 +41,27 @@ export
 
 
 """
-    executeQuery(cg::CloudGraph, query::AbstractString)
+    $(SIGNATURES)
 
 Run Neo4j Cypher queries on the cloudGraph database, andreturn Tuple with the
 unparsed (results, loadresponse).
 """
-function executeQuery(connection::Neo4j.Connection, query::AbstractString)
+function executeQuery(
+            connection::Neo4j.Connection,
+            query::AS ) where {AS <: AbstractString}
+  #
   loadtx = transaction(connection)
   cph = loadtx(query, submit=true)
   loadresult = commit(loadtx)
   return cph, loadresult
 end
-executeQuery(cg::CloudGraph, query::AbstractString) = executeQuery(cg.neo4j.connection, query)
+executeQuery(cg::CloudGraph, query::AS) where {AS <:AbstractString} = executeQuery(cg.neo4j.connection, query)
 
-function getCloudVert(cg::CloudGraph, session::AbstractString, vsym::Symbol; bigdata::Bool=false)
+function getCloudVert(
+            cg::CloudGraph,
+            session::AbstractString,
+            vsym::Symbol; bigdata::Bool=false )
+  #
   warn("getCloudVert(cg, sess, sym) will be deprecated, use getCloudVert(cg, sess, sym=sym) instead.")
   # query = " and n.ready=$(ready) and n.label=$(vsym) "
   # query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
@@ -115,7 +122,7 @@ function getCloudNeighbors(cgl::CloudGraph, cv::CloudVertex; needdata=false, ret
 end
 
 """
-    ls(cgl::CloudGraph, session::AbstractString; sym::Symbol=, neoid::Int=,exvid::Int=)
+    $(SIGNATURES)
 
 List neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take
 any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes
@@ -396,27 +403,27 @@ function removeGenericMarginals!(conn)
   nothing
 end
 
+"""
+    $(SIGNATURES)
 
-function getAllExVertexNeoIDs(conn;
+Get all Neo4j node IDs in current session.
+"""
+function getAllExVertexNeoIDs(conn::Neo4j.Connection;
         ready::Int=1,
         backendset::Int=1,
-        sessionname::AbstractString="",
+        sessionname::AS="",
         reqbackendset::Bool=true,
-        reqready::Bool=true  )
+        reqready::Bool=true  ) where {AS <: AbstractString}
   #
-  loadtx = transaction(conn)
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  # query = "match (n$(sn)) where n.ready=$(ready) and n.backendset=$(backendset) return n"
   query = "match (n$(sn)) where not n:SESSION"
   query = reqbackendset || reqready ? query*" and" : query
   query = reqready ? query*" n.ready=$(ready)" : query
   query = reqbackendset && reqready ? query*" and" : query
   query = reqbackendset ? query*" n.backendset=$(backendset)" : query
-  # query = query*" return n"
   query = query*" return n.exVertexId, id(n), n.label"
 
-    ## query = "match (n) where n.ready=1 and n.backendset=1 and not(n.packedType = 'IncrementalInference.FunctionNodeData{IncrementalInference.GenericMarginal}') return n"
-  cph = loadtx(query, submit=true)
+  cph, = executeQuery(conn, query)
   ret = Array{Tuple{Int64,Int64,Symbol},1}()
 
   # If no results, return empty array...
@@ -428,25 +435,22 @@ function getAllExVertexNeoIDs(conn;
           end
       end
   end
-  # @showprogress 1 "Get ExVertex IDs..." for data in cph.results[1]["data"]
-  #   metadata = data["meta"][1]
-  #   rowdata = data["row"][1]
-  #   push!(ret, (rowdata["exVertexId"],metadata["id"])  )
-  # end
+
   return ret
 end
 
 """
-    getExVertexNeoIDs(neo4j.connection, label="", session="")
+    $(SIGNATURES)
 
 Return array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.
 """
-function getExVertexNeoIDs(conn::Neo4j.Connection;
-        label::AbstractString="",
+function getExVertexNeoIDs(
+        conn::Neo4j.Connection;
+        label::AS="",
         ready::Int=1,
         backendset::Int=1,
-        session::AbstractString="",
-        reqbackendset::Bool=true  )
+        session::AS="",
+        reqbackendset::Bool=true  ) where {AS <: AbstractString}
   #
   sn = length(session) > 0 ? ":"*session : ""
   lb = length(label) > 0 ? ":"*label : ""
@@ -467,17 +471,17 @@ function getExVertexNeoIDs(conn::Neo4j.Connection;
 end
 
 """
-    getPoseExVertexNeoIDs(neo4j.connection)
+    $(SIGNATURES)
 
 Return array of tuples with ExVertex IDs and Neo4j IDs for all poses.
 """
 function getPoseExVertexNeoIDs(conn::Neo4j.Connection;
         ready::Int=1,
         backendset::Int=1,
-        session::AbstractString="",
-        reqbackendset::Bool=true  )
+        session::AS="",
+        reqbackendset::Bool=true  ) where {AS <: AbstractString}
   #
-  getPoseExVertexNeoIDs(conn;
+  getPoseExVertexNeoIDs(conn,
           label="POSE",
           ready=ready,
           backendset=backendset,
@@ -485,9 +489,6 @@ function getPoseExVertexNeoIDs(conn::Neo4j.Connection;
           reqbackendset=reqbackendset  )
 end
 
-# function getDBAdjMatrix()
-#
-# end
 
 function checkandinsertedges!(fgl::FactorGraph, exvid::Int, nei::CloudVertex; ready::Int=1, backendset::Int=1)
   if nei.properties["ready"]==ready && nei.properties["backendset"] == backendset #&& nei.exVertexId <= length(fgl.g.vertices)
@@ -538,41 +539,41 @@ function insertnodefromcv!(fgl::FactorGraph, cvert::CloudGraphs.CloudVertex)
   nothing
 end
 
-function copyAllNodes!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64, Symbol},1}, conn)
+"""
+    $(SIGNATURES)
+
+Copy all variable and factor nodes from DB into fgl as listed in IDs vector.
+"""
+function copyAllNodes!(
+            fgl::FactorGraph,
+            cverts::Dict{Int64, CloudVertex},
+            IDs::Array{Tuple{Int64,Int64, Symbol},1},
+            conn::Neo4j.Connection  )
+  #
   @showprogress 1 "Copy all nodes..." for ids in IDs
     cvert = CloudGraphs.get_vertex(fgl.cg, ids[2], false)
     cverts[ids[2]] = cvert
     insertnodefromcv!(fgl, cvert)
-    # exvert = cloudVertex2ExVertex(cvert)
-    # Graphs.add_vertex!(fgl.g, exvert)
-    # fgl.id < exvert.index ? fgl.id = exvert.index : nothing
-    # fgl.cgIDs[ids[1]] = ids[2]
-    # if typeof(exvert.attributes["data"]) == VariableNodeData  # variable node
-    #   fgl.IDs[Symbol(exvert.label)] = ids[1]
-    #   push!(fgl.nodeIDs, ids[1])
-    # else # function node
-    #   fgl.fIDs[Symbol(exvert.label)] = ids[1]
-    #   push!(fgl.factorIDs, ids[1])
-    # end
   end
   nothing
 end
 
-function fullLocalGraphCopy!(fgl::FactorGraph; reqbackendset::Bool=true, reqready::Bool=true)
-  conn = fgl.cg.neo4j.connection
-  IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready)
-  println("fullLocalGraphCopy: $(length(IDs)) nodes in session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
+"""
+    $(SIGNATURES)
+
+Copy nodes into `fgl` from DB as listed in the `IDs` vector.
+"""
+function copyGraphNodesEdges!(
+            fgl::FactorGraph,
+            IDs::Array{Tuple{Int64,Int64, Symbol},1}  )
+  #
   if length(IDs) > 0
     cverts = Dict{Int64, CloudVertex}()
     unsorted = Int64[]
-    # TODO ensure this is row is sorted
-    for ids in IDs push!(unsorted, ids[1]) end
+    for ids in IDs
+      push!(unsorted, ids[1])
+    end
     perm = sortperm(unsorted)
-    # testlist = deepcopy(unsorted)
-    # if testlist != sort(unsorted)
-    #   # TODO -- maybe not required, but being safe for now
-    #   error("Must be sorted list for elimination...")
-    # end
 
     # get and add all the nodes
     sortedIDs = IDs[perm]
@@ -587,13 +588,54 @@ function fullLocalGraphCopy!(fgl::FactorGraph; reqbackendset::Bool=true, reqread
   end
 end
 
-function setDBAllReady!(conn::Neo4j.Connection, sessionname::AbstractString)
+"""
+    $(SIGNATURES)
+
+Copy sub graph portion defined by, and including a depth of neighbors, from the lbls vector. WORK IN PROGRESS.
+"""
+function subGraphCopy!(
+            fgl::FactorGraph,
+            lbls::Vector{Symbol};
+            reqbackendset::Bool=true,
+            reqready::Bool=true )
+  #
+  warn("subGraphCopy! is a work in progress")
+  conn = fgl.cg.neo4j.connection
+  IDs = getLblExVertexNeoIDs(conn, lbls, sessionname=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready )
+
+  nothing
+end
+
+
+"""
+    $(SIGNATURES)
+
+Fetch a full copy of the DB factor graph under fgl.sessionname.
+"""
+function fullLocalGraphCopy!(
+            fgl::FactorGraph;
+            reqbackendset::Bool=true,
+            reqready::Bool=true  )
+  #
+  conn = fgl.cg.neo4j.connection
+  IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, reqbackendset=reqbackendset, reqready=reqready)
+  println("fullLocalGraphCopy: $(length(IDs)) nodes in session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
+  copyGraphNodesEdges!(fgl, IDs)
+end
+
+"""
+    $(SIGNATURES)
+
+Set all Neo4j nodes in this session ready = 1, warning function does not support new SynchronySDK data storage formats.
+"""
+function setDBAllReady!(
+            conn::Neo4j.Connection,
+            sessionname::AS) where {AS <: AbstractString}
+  #
+  warn("Obsolete setDBAllReady! function, see SynchronySDK for example ready function instead.")
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   query = "match (n$(sn)) set n.ready=1"
   cph, loadresult = executeQuery(conn, query)
-  # loadtx = transaction(conn)
-  # cph = loadtx(query, submit=true)
-  # loadresult = commit(loadtx)
   nothing
 end
 
@@ -603,19 +645,19 @@ function setDBAllReady!(fgl::FactorGraph)
 end
 
 
-function setBackendWorkingSet!(conn::Neo4j.Connection, sessionname::AbstractString)
+function setBackendWorkingSet!(
+            conn::Neo4j.Connection,
+            sessionname::AbstractString  )
+  #
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   query = "match (n$(sn)) where not (n:NEWDATA) set n.backendset=1"
 
   cph, loadresult = executeQuery(conn, query)
-  # loadtx = transaction(conn)
-  # cph = loadtx(query, submit=true)
-  # loadresult = commit(loadtx)
   nothing
 end
 
 """
-    askneo4jcredentials!(;addrdict::Dict{AbstractString, AbstractString})
+    $(SIGNATURES)
 
 Obtain Neo4j global database address and login credientials from STDIN, then insert and return in the addrdict colletion.
 """
@@ -636,7 +678,7 @@ function askneo4jcredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
 end
 
 """
-    askmongocredentials!(addrdict=Dict{AbstractString, AbstractString})
+    $(SIGNATURES)
 
 Obtain Mongo database address and login credientials from STDIN, then insert and return in the addrdict colletion.
 """
@@ -667,7 +709,7 @@ end
 
 
 """
-    consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=false)
+    $(SIGNATURES)
 
 Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
 """
