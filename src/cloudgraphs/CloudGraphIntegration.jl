@@ -444,7 +444,7 @@ end
 
 Build query to fetch sub graph and neighboring nodes.  For example:
 ```
-match (n0:Hackathon)-[]-(n1:Hackathon)
+match (n0:Hackathon)-[:DEPENDENCE]-(n1:Hackathon)
 where n0.label IN ['x1', 'x2']
 with collect([
   {id: id(n0)},
@@ -470,7 +470,7 @@ function buildSubGraphIdsQuery(;
   lb = length(label) > 0 ? ":"*label : ""
   query = "match (n0$(sn)$(lb))"
   for d in 1:neighbors
-    query *= "-[]-(n$(d)$(sn)$(lb))"
+    query *= "-[:DEPENDENCE]-(n$(d)$(sn)$(lb))"
   end
   query *= " "
   query *= "where n0.label IN ["
