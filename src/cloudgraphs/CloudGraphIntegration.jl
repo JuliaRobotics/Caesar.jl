@@ -760,7 +760,7 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
 end
 
 """
-    standardcloudgraphsetup(;addrdict=nothing, nparticles=false, drawdepth=false, clearslamindb=false)
+    $(SIGNATURES)
 
 Connect to databases via network according to addrdict, or ask user for credentials and return
 active cloudGraph object, as well as addrdict.
@@ -792,7 +792,7 @@ function standardcloudgraphsetup(;addrdict=nothing,
 end
 
 """
-    getBigDataElement(vertex::CloudVertex, description)
+    $(SIGNATURES)
 
 Walk through vertex bigDataElements and return the last matching description.
 """
@@ -807,7 +807,7 @@ function getBigDataElement(vertex::CloudVertex, description::AbstractString)
 end
 
 """
-    hasBigDataElement(vertex, description)
+    $(SIGNATURES)
 
 Return true if vertex has bigDataElements with matching description.
 """
@@ -821,7 +821,7 @@ function hasBigDataElement(vertex::CloudVertex, description::AbstractString)
 end
 
 """
-    appendvertbigdata!(cloudGraph, cloudvert, descr, data)
+    $(SIGNATURES)
 
 Append big data element into current blob store and update associated global
 vertex information.
@@ -838,7 +838,7 @@ function appendvertbigdata!(cloudGraph::CloudGraph,
 end
 
 """
-    appendvertbigdata!(fg, vert, descr, data)
+    $(SIGNATURES)
 
 Append big data element into current blob store and update associated global
 vertex information.
