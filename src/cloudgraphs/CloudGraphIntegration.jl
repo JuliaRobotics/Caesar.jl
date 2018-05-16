@@ -155,7 +155,7 @@ function getfnctype(cvl::CloudGraphs.CloudVertex)
   return getfnctype(vert)
 end
 
-function initfg(;sessionname="NA",robotname="NA",cloudgraph=nothing)
+function initfg(;sessionname="NA",robotname="",cloudgraph=nothing)
   # fgl = RoME.initfg(sessionname=sessionname)
   fgl = IncrementalInference.emptyFactorGraph()
   fgl.sessionname = sessionname
@@ -249,7 +249,7 @@ function getCloudOutNeighbors(fgl::FactorGraph,
       needdata::Bool=false  )
   #
   println("Looking for cloud out neighbors")
-  @show cgid = fgl.cgIDs[exVertId]
+  cgid = fgl.cgIDs[exVertId]
   cv = CloudGraphs.get_vertex(fgl.cg, cgid, false)
   neighs = CloudGraphs.get_neighbors(fgl.cg, cv)
   neExV = Graphs.ExVertex[]
@@ -443,22 +443,89 @@ function getAllExVertexNeoIDs(conn::Neo4j.Connection;
   return ret
 end
 
+# """
+#     $(SIGNATURES)
+#
+# Build query to fetch sub graph and neighboring nodes.  For example:
+# FAILS IN SOME CASES
+# ```
+# match (n0:Hackathon)-[:DEPENDENCE]-(n1:Hackathon)
+# where n0.label IN ['x1', 'x2']
+# with collect([
+#   {id: id(n0)},
+#   {id: id(n1)}
+#   ]) as nodes
+# unwind nodes as no
+# unwind no as n
+# match (m:Hackathon{ready:1,backendset:1})
+# where id(m)=n.id
+# return distinct id(m), m.label, m.exVertexId
+# ```
+# """
+# function buildSubGraphIdsQueryOLD(;
+#             lbls::Vector{AS}=String[""],
+#             session::AS="",
+#             robot::AS="",
+#             label::AS="",
+#             reqready::Bool=true,
+#             ready::Int=1,
+#             reqbackendset::Bool=true,
+#             backendset::Int=1,
+#             neighbors::Int=0  ) where {AS <: AbstractString}
+#   #
+#   sn = length(session) > 0 ? ":"*session : ""
+#   rn = length(robot) > 0 ? ":"*robot : ""
+#   lb = length(label) > 0 ? ":"*label : ""
+#   query = "match (n0$(sn)$(rn)$(lb))"
+#   for d in 1:neighbors
+#     query *= "-[:DEPENDENCE]-(n$(d)$(sn)$(rn)$(lb))"
+#   end
+#   query *= " "
+#   query *= "where n0.label IN ["
+#   for lbl in lbls
+#     query *= "'$(lbl)', "
+#   end
+#   query = chop(chop(query))*"]"
+#   query *= "with collect(["
+#   query *= "  {id: id(n0)},"
+#   for d in 1:neighbors
+#     query *= "  {id: id(n$(d))},"
+#   end
+#   query = chop(query)*"  ]) as nodes "
+#   query *= "unwind nodes as no "
+#   query *= "unwind no as n "
+#   query *= "match (m$(sn)$(rn)$(lb)"
+#   query *= reqready || reqbackendset ? "{" : ""
+#   query *= reqready ? "ready:$(ready)" : ""
+#   query *= reqready && reqbackendset ? ", " : ""
+#   query *= reqbackendset ? "backendset:$(backendset)" : ""
+#   query *= reqready || reqbackendset ? "}" : ""
+#   query *= ") "
+#   query *= "where id(m)=n.id "
+#   query *= "return distinct m.exVertexId, id(m), m.label"
+#   return query
+# end
+
 """
     $(SIGNATURES)
 
 Build query to fetch sub graph and neighboring nodes.  For example:
+FAILS IN SOME CASES
 ```
-match (n0:Hackathon)-[:DEPENDENCE]-(n1:Hackathon)
-where n0.label IN ['x1', 'x2']
-with collect([
-  {id: id(n0)},
-  {id: id(n1)}
-  ]) as nodes
-unwind nodes as no
-unwind no as n
-match (m:Hackathon{ready:1,backendset:1})
-where id(m)=n.id
-return distinct id(m), m.label, m.exVertexId
+match (n0:Hackathon:HexagonalDrive)
+where n0.label IN ['x0']
+with n0 as m
+return m.exVertexId, id(m), m.label
+UNION
+match (n0:Hackathon:HexagonalDrive)-[:DEPENDENCE]-(n1:HexagonalDrive)
+where n0.label IN ['x0']
+with n1 as m
+return m.exVertexId, id(m), m.label
+UNION
+match (n0:Hackathon:HexagonalDrive)-[:DEPENDENCE]-(n1:HexagonalDrive)-[:DEPENDENCE]-(n2:HexagonalDrive)
+where n0.label IN ['x0']
+with n2 as m
+return m.exVertexId, id(m), m.label
 ```
 """
 function buildSubGraphIdsQuery(;
@@ -475,35 +542,29 @@ function buildSubGraphIdsQuery(;
   sn = length(session) > 0 ? ":"*session : ""
   rn = length(robot) > 0 ? ":"*robot : ""
   lb = length(label) > 0 ? ":"*label : ""
-  query = "match (n0$(sn)$(rn)$(lb))"
-  for d in 1:neighbors
-    query *= "-[:DEPENDENCE]-(n$(d)$(sn)$(rn)$(lb))"
+
+  query = ""
+  for nei in 0:(neighbors)
+    query *= "match (n0$(sn)$(rn)$(lb))"
+    outerd = 0
+    for d in 1:(nei)
+      query *= "-[:DEPENDENCE]-(n$(d)$(sn)$(rn)$(lb))"
+      outerd = d
+    end
+    query *= " "
+    query *= "where n0.label IN ["
+    for lbl in lbls
+      query *= "'$(lbl)',"
+    end
+    query = chop(query)*"] "
+    query *= "with n$(outerd) as m "
+    query *= "return m.exVertexId, id(m), m.label"
+    query *= nei != (neighbors) ? " UNION " : ""
   end
-  query *= " "
-  query *= "where n0.label IN ["
-  for lbl in lbls
-    query *= "'$(lbl)', "
-  end
-  query = chop(chop(query))*"]"
-  query *= "with collect(["
-  query *= "  {id: id(n0)},"
-  for d in 1:neighbors
-    query *= "  {id: id(n$(d))},"
-  end
-  query = chop(query)*"  ]) as nodes "
-  query *= "unwind nodes as no "
-  query *= "unwind no as n "
-  query *= "match (m$(sn)$(rn)$(lb)"
-  query *= reqready || reqbackendset ? "{" : ""
-  query *= reqready ? "ready:$(ready)" : ""
-  query *= reqready && reqbackendset ? ", " : ""
-  query *= reqbackendset ? "backendset:$(backendset)" : ""
-  query *= reqready || reqbackendset ? "}" : ""
-  query *= ") "
-  query *= "where id(m)=n.id "
-  query *= "return distinct m.exVertexId, id(m), m.label"
   return query
 end
+# qu = buildSubGraphIdsQuery(lbls=["x0";], session="HexagonalDrive", neighbors=3)
+# @show qu
 
 """
     $(SIGNATURES)
