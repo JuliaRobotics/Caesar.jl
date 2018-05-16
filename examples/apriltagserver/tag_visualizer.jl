@@ -30,7 +30,6 @@ function tagPicture(vis::Visualizer,msg::apriltag_t, drawdict)
 end
 
 function typed_callback(channel::String, msg::apriltag_t, drawdict)
-    @show keys(drawdict)
     tagPicture(vis,msg, drawdict)
 end
 
