@@ -1,6 +1,4 @@
 language: julia
-dist: trusty
-sudo: required
 os:
   - linux
   - osx
@@ -9,6 +7,10 @@ julia:
   - nightly
 notifications:
   email: false
+addons:
+  apt:
+    packages:
+    - hdf5-tools
 matrix:
   allow_failures:
     - os: osx
