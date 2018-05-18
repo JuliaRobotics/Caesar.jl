@@ -1,7 +1,7 @@
 # Debug packed type conversions
 
 # 0. Load required packages
-using Caesar, CloudGraphs, RoME
+using Caesar, Distributions
 
 
 
@@ -28,23 +28,46 @@ addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
 
 
 addNode!(fg, :x1, Pose2)
-
 addFactor!(fg, [:x0;:x1], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0]), autoinit=true )
 
 
-
+addNode!(fg, :x2, Pose2)
+addFactor!(fg, [:x1;:x2], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0]), autoinit=true )
 
 
 
 ## Test by solving locally
 
-using IncrementalInference
-
 tree = wipeBuildNewTree!(fg)
 inferOverTreeR!(fg, tree)
 
 
+
+# newLandmark = VariableRequest("l1", "Point2", nothing, ["LANDMARK"])
+# response = addVariable(synchronyConfig, robotId, sessionId, newLandmark)
+# newBearingRangeFactor = BearingRangeRequest("x1", "l1",
+#                           DistributionRequest("Normal", Float64[0; 0.1]),
+#                           DistributionRequest("Normal", Float64[20; 1.0]))
+
+addNode!(fg, :l1, Point2)
+
+br = Pose2DPoint2DBearingRange(Normal(0, 0.1), Normal(20, 1.0))
+
+addFactor!(fg, [:x1;:l1], br, autoinit=true )
+
+
+
+
+
+
+
+
+
+
+
 0
+
+
 
 
 
