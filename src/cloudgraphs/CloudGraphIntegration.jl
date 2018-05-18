@@ -922,6 +922,7 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   return addrdict
 end
 
+
 """
     $(SIGNATURES)
 
@@ -945,7 +946,7 @@ function standardcloudgraphsetup(;addrdict=nothing,
   configuration = CloudGraphs.CloudGraphConfiguration(
                              addrdict["neo4jHost"], parse(Int, addrdict["neo4jPort"]), addrdict["neo4jUsername"], addrdict["neo4jPassword"],
                              addrdict["mongoHost"], parse(Int, addrdict["mongoPort"]), false, addrdict["mongoUsername"], addrdict["mongoPassword"]);
-  cloudGraph = connect(configuration);
+  cloudGraph = connect(configuration, IncrementalInference.encodePackedType, IncrementalInference.getpackedtype, IncrementalInference.decodePackedType);
   # conn = cloudGraph.neo4j.connection
   # register types of interest in CloudGraphs
   registerGeneralVariableTypes!(cloudGraph)

@@ -50,6 +50,9 @@ export
   # Victoria Park example -- batch
   loadVicPrkDataset,
 
+  # passthrough variable and factor types
+  Pose2,
+
   # insitu component
   GenericInSituSystem,
   makeGenericInSituSys,

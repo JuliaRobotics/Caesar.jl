@@ -5,7 +5,7 @@ using CloudGraphs
 
 @show dbaddress = ARGS[1]
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, "", "", dbaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
+cloudGraph = connect(configuration, encodePackedType, getpackedtype, decodePackedType);
 
 # register types of interest in CloudGraphs
 registerGeneralVariableTypes!(cloudGraph)

@@ -16,7 +16,7 @@ Nparticles = 200
 println("Attempting to solve session $(session)...")
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
+cloudGraph = connect(configuration, encodePackedType, getpackedtype, decodePackedType);
 # register types of interest in CloudGraphs
 registerGeneralVariableTypes!(cloudGraph)
 Caesar.usecloudgraphsdatalayer!()
