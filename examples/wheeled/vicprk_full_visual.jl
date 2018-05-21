@@ -35,7 +35,7 @@ include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","loadVicPrkData.jl"))
 
 include(joinpath(ENV["HOME"],"Documents","blandauthlocal.jl"))
 backend_config, user_config = standardcloudgraphsetup(addrdict=addrdict)
-addrdict["sessionId"] = "VICPRK_TEST"
+addrdict["sessionId"] = "VICPRK_VID"
 addrdict["robotId"] = "Ute"
 
 
@@ -45,7 +45,7 @@ addrdict["robotId"] = "Ute"
 
 fg = Caesar.initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
 
-# deleteServerSession!(fg.cg, user_config["session"])
+# deleteServerSession!(fg.cg, user_config["sessionId"])
 
 # init pose
 prevn = initFactorGraph!(fg, init=d[1][1:3])[1]
@@ -133,15 +133,14 @@ for l1 in L
   j+=1
 end
 #run Server Code
-fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+fg = Caesar.initfg(sessionname=user_config["sessionId"], cloudgraph=backend_config)
 fullLocalGraphCopy!(fg)
 pl2=drawPosesLandms(fg)
 draw(PDF("daniel.pdf",20cm,20cm),pl2)
 
 
 # Remove the new session from the server
-deleteServerSession!(fg.cg, user_config["session"])
-
+deleteServerSession!(fg.cg, user_config["sessionId"])
 
 
 
