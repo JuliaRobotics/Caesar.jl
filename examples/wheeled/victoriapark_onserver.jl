@@ -93,11 +93,16 @@ draw(PDF("/tmp/before.pdf",20cm,20cm),pl)
 
 # fetch a local copy
 
-fg = Caesar.initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
+fg = Caesar.initfg(sessionname=user_config["sessionId"], cloudgraph=backend_config) #, robotname=user_config["robotId"]
 fullLocalGraphCopy!(fg)
 pl1=drawPosesLandms(fg)
 
-draw(PDF("after.pdf",20cm,20cm),pl1)
+
+Gadfly.draw(PDF("/tmp/after.pdf",20cm,20cm),pl1)
+
+@async run(`evince /tmp/after.pdf`)
+
+subLocalGraphCopy!(fg, string.([:x1,:x2,:x3,:x4,:x5]), neighbors=1)
 
 
 
