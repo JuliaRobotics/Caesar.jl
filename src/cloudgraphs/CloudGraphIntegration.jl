@@ -248,7 +248,7 @@ function getCloudOutNeighbors(fgl::FactorGraph,
       backendset::Int=1,
       needdata::Bool=false  )
   #
-  println("Looking for cloud out neighbors")
+  # println("Looking for cloud out neighbors")
   cgid = fgl.cgIDs[exVertId]
   cv = CloudGraphs.get_vertex(fgl.cg, cgid, false)
   neighs = CloudGraphs.get_neighbors(fgl.cg, cv)

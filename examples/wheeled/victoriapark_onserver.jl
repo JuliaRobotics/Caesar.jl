@@ -1,14 +1,18 @@
 # Victoria Park using-server
 
+using IncrementalInference
 using HDF5, JLD, Gadfly, Colors, Cairo
 using KernelDensityEstimate, Distributions
-using Caesar, IncrementalInference, RoME
-# load all the model data
+using Caesar, RoME
+using RoMEPlotting
+
+## load all the model data
 # d = odometry information
 # f = laser scanner detections
 # MM = multi-modal individual id references
 # MMr = reworked to map to only one previous feature
 # examplefolder, datafolder
+
 function evalLikelihood(fg::FactorGraph, sym::Symbol, point::Vector{Float64})
   p = getVertKDE(fg, sym)
   Ndim(p) == length(point) ? nothing : error("point (dim=$(length(point))) must have same dimension as belief (dim=$(Ndim(p)))")
@@ -28,32 +32,40 @@ end
 include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","loadVicPrkData.jl"))
 
 
-include(joinpath(Pkg.dir("Caesar"),"examples","database","blandauthremote.jl"))
-user_config["session"] = "SESSVICPRK_DANIEL"
-backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
-
+include(joinpath(ENV["HOME"],"Documents","blandauthlocal.jl"))
+backend_config, user_config = standardcloudgraphsetup(addrdict=addrdict)
+addrdict["sessionId"] = "VICPRK_VID"
+addrdict["robotId"] = "Ute"
 
 
 # Start new session
 
-Graphs.plot(fg.g)
+# Graphs.plot(fg.g)
 
-fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+fg = Caesar.initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
 
 # deleteServerSession!(fg.cg, user_config["session"])
 
 # init pose
-prevn = initFactorGraph!(fg, init=d[1][1:3])
+prevn = initFactorGraph!(fg, init=d[1][1:3])[1]
 Podo=diagm([0.5;0.5;0.005])
 N=100
 lcmode=:unimodal
 lsrNoise=diagm([0.1;1.0])
 
 
+# # test dev code ================================================================
+# idx = 2
+# prev, X, nextn = getLastPose2D(fg)
+# vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N)
+# addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
+# # ==============================================================================
+
+
 #build :# poses for the factorGraph
-for idx=2:50
+for idx=2:5
   prev, X, nextn = getLastPose2D(fg)
-  vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N, labels=["POSE"])
+  vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N)
   # add landmarks
   addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
   prevn = nextn
@@ -65,16 +77,21 @@ for idx=2:50
 end
 
 
-pl=drawPosesLandms(fg)
-draw(PDF("before.pdf",20cm,20cm),pl)
+pl=drawPosesLandms(fg);
+draw(PDF("/tmp/before.pdf",20cm,20cm),pl)
 
 
 # batchSolve(fg)
 # on ssh terminal, run slamindb(iterations=1)
 
+
+
+
+
+
 # fetch a local copy
 
-fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+fg = Caesar.initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
 fullLocalGraphCopy!(fg)
 pl1=drawPosesLandms(fg)
 

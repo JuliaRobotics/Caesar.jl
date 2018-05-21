@@ -16,7 +16,6 @@ addrdict["robotId"] = "TestRobot"
 
 
 # Start with an empty graph (local dictionary version) # fg = initfg(sessionname="SLAM2D_TUTORIAL")
-## TODO -- ISSUE Julia 0.6.0-0.6.2 dives into some StackOverflow problem using the functions, but fine when called separately.
 fg = Caesar.initfg(sessionname=user_config["session"], robotname=addrdict["robotId"], cloudgraph=backend_config)
 
 
@@ -25,6 +24,13 @@ addNode!(fg, :x0, Pose2)
 
 # also add a PriorPose2 to pin the first pose at a fixed location
 addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
+
+
+
+
+p1 = getVert(fg, :x0f1, nt=:fnc)
+p1.attributes["data"]
+
 
 
 addNode!(fg, :x1, Pose2)
@@ -40,6 +46,7 @@ addFactor!(fg, [:x1;:x2], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1
 
 tree = wipeBuildNewTree!(fg)
 inferOverTreeR!(fg, tree)
+
 
 
 
@@ -61,38 +68,11 @@ addFactor!(fg, [:x1;:l1], br, autoinit=true )
 
 
 
+using RoMEPlotting
 
 
 
-
-0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+drawPoses(fg)
 
 
 
