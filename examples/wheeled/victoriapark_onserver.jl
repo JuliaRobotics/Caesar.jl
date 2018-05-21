@@ -6,6 +6,7 @@ using KernelDensityEstimate, Distributions
 using Caesar, RoME
 using RoMEPlotting
 
+
 ## load all the model data
 # d = odometry information
 # f = laser scanner detections
@@ -75,6 +76,7 @@ for idx=2:5
   #   @time inferOverTree!(fg,tree, N=100);
   # end
 end
+
 
 
 pl=drawPosesLandms(fg);
