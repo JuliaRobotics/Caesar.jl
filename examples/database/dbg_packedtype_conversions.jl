@@ -56,7 +56,7 @@ inferOverTreeR!(fg, tree)
 #                           DistributionRequest("Normal", Float64[0; 0.1]),
 #                           DistributionRequest("Normal", Float64[20; 1.0]))
 
-addNode!(fg, :l1, Point2)
+addNode!(fg, :l1, Point2, labels=["LANDMARK";])
 
 br = Pose2DPoint2DBearingRange(Normal(0, 0.1), Normal(20, 1.0))
 
@@ -73,6 +73,9 @@ using RoMEPlotting
 
 
 drawPoses(fg)
+
+drawPosesLandms(fg)
+
 
 
 
