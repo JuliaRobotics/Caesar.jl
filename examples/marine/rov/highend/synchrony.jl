@@ -93,6 +93,38 @@ subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
 println("[Caesar.jl] Running LCM listener")
 listener!(lcm_node)
 
+println(" --- Now we can set all the nodes to ready so the solver picks up on them.")
+putReady(slam_client.syncrconf, robotId, sessionId, true)
+
 println(" --- Done! Now we can run the solver on this dataset!")
+# TODO: Tell PilotFish to solve.
 
 # Todo - call Sychrony to start the solver
+
+#############################
+####### Visualization #######
+#############################
+
+# Ref: https://github.com/rdeits/MeshCat.jl/blob/master/demo.ipynb
+
+# NOTE: WIP!
+# I'd like the SDK to do this natively...
+
+using MeshCat
+using CoordinateTransformations
+import GeometryTypes: HyperRectangle, Vec, Point, HomogenousMesh, SignedDistanceField
+import ColorTypes: RGBA, RGB
+
+# Create a new visualizer instance
+vis = Visualizer()
+open(vis)
+
+# Retrieve all variables and render them.
+println("Retrieving all variables and rendering them...")
+nodes = getNodes(slam_client.syncrconf, robotId, sessionId)
+for node in nodes
+    println(" - Rendering $node")
+    triad = Triad()
+    setobject!(vis["Triad $node"], triad)
+    settransform!(vis["Triad $node"], Translation(node,node,node))
+end
