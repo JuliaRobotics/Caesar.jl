@@ -2,7 +2,6 @@ module Caesar
 
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
-# import DrakeVisualizer: Triad
 import RoME: getRangeKDEMax2D, getLastPose, initfg
 
 using
@@ -22,12 +21,12 @@ using
   ProgressMeter,
   ImageMagick,
   ImageCore,
-  DocStringExtensions
-
-using CloudGraphs,
+  DocStringExtensions,
+  CloudGraphs,
   Neo4j,
   Mongo,
   LibBSON
+
 
 export
   # pass through from KDE
@@ -44,11 +43,23 @@ export
   getVert,
   getVal,
   saveplot,
+  wipeBuildNewTree!,
+  inferOverTree!,
+  inferOverTreeR!,
   # callbacks for datalayer changes
   localapi,
   dlapi,
   # Victoria Park example -- batch
   loadVicPrkDataset,
+
+  # passthrough variable and factor types
+  Pose2,
+  Point2,
+
+  # passthrough RoME factor types
+  PriorPose2,
+  Pose2Pose2,
+  Pose2DPoint2DBearingRange,
 
   # insitu component
   GenericInSituSystem,
@@ -83,8 +94,7 @@ export
   addNode!,
   addFactor!,
 
-  # Using CloudGraphs
-  # helper functions
+  # CloudGraphs helper functions
   insertnodefromcv!,
   checkandinsertedges!,
   getbinarraymongo,

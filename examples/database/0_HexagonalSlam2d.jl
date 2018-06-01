@@ -1,38 +1,20 @@
 # tutorial on conventional 2D SLAM example
 
-# addprocs(3)
-
-# This tutorial shows how to use some of the commonly used factor types
-# This tutorial follows from the ContinuousScalar example from IncrementalInference
-
-# @everywhere begin
-# using RoME
-  # using IncrementalInference, Distributions
-  # using TransformUtils
-# end # everywhere
-
-
+# 0. Load required packages
 using Caesar, RoME
-# function initialize!(backend_config,
-#                     user_config)
-#     println("[Caesar.jl] Setting up factor graph")
-#     fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
-#     println("[Caesar.jl] Creating SLAM client/object")
-#     return  SLAMWrapper(fg, nothing, 0)
-# end
 
-# include("$(ENV["HOME"])/Documents/blandauth.jl")
-include("$(ENV["HOME"])/Documents/blandauthlocal.jl"); user_config = addrdict
+
+# 1. Get the authentication and session information
+include(joinpath(ENV["HOME"],"Documents","blandauthlocal.jl"))
 backend_config, user_config = standardcloudgraphsetup(addrdict=addrdict)
-user_config["session"] = "SESSSLAM2D_TUTORIAL"
-
-
+user_config["session"] = "SLAM2D_TUTORIAL"
+addrdict["robotId"] = "TestRobot"
 
 
 
 # Start with an empty graph (local dictionary version) # fg = initfg(sessionname="SLAM2D_TUTORIAL")
 ## TODO -- ISSUE Julia 0.6.0-0.6.2 dives into some StackOverflow problem using the functions, but fine when called separately.
-fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+fg = Caesar.initfg(sessionname=user_config["session"], robotname=addrdict["robotId"], cloudgraph=backend_config)
 
 # fg = RoME.initfg(sessionname=addrdict["session"])
 # fg = IncrementalInference.emptyFactorGraph()
@@ -42,7 +24,7 @@ fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config
 # fg.cg = backend_config
 
 # also add a PriorPose2 to pin the first pose at a fixed location
-addNode!(fg, :x0, Pose2, labels=["VARIABLE";"POSE"])
+addNode!(fg, :x0, Pose2) # , labels=["POSE"]
 addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
 
 # ls(fg, :x0)
@@ -56,7 +38,7 @@ addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
 for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
-  addNode!(fg, nsym, Pose2, labels=["VARIABLE";"POSE"])
+  addNode!(fg, nsym, Pose2) # , labels=["VARIABLE";"POSE"]
   addFactor!(fg, [psym;nsym], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0]), autoinit=true )
   # Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
 end
