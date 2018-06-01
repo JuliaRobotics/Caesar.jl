@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/julia_caesar 001_eyes_thres_wtitle_smaller_centered_low.png" width="480" border="0" />
+<img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/julia_caesar 001_eyes_thres_wtitle_smaller_centered_low.png" width="480" border="0" />
 </p>
 
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
@@ -10,7 +10,7 @@ A modern robotic toolkit for localization and mapping -- reducing the barrier of
 
 # Introduction
 
-Towards non-parametric / parametric state estimation and navigation solutions [1]. Implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages like C/[C++](http://github.com/pvazteixeira/caesar-lcm) or [Python](http://github.com/dehann/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py), as listed in features below. Multi-modal (quasi-multi-hypothesis) navigation and mapping solutions, using various sensor data, is a corner stone of this package. Multi-sensor fusion is made possible via vertically integrated [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
+Towards non-parametric / parametric state estimation and navigation solutions [1]. Implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages like C/[C++](http://github.com/pvazteixeira/caesar-lcm) or [Python](http://github.com/JuliaRobotics/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py), as listed in features below. Multi-modal (quasi-multi-hypothesis) navigation and mapping solutions, using various sensor data, is a corner stone of this package. Multi-sensor fusion is made possible via vertically integrated [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
 
 Critically, this package can operate in the conventional SLAM manner, using local dictionaries, or centralize around the `FactorGraph` through a graph database using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git), as [discussed here](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf)[2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate [RoME.jl][rome-url] and back-end solver [IncrementalInference.jl][iif-url].
 
@@ -18,9 +18,9 @@ Comments, questions and issues welcome.
 
 # Documentation
 
-Please see the [documentation](http://dehann.github.io/Caesar.jl/latest/):
+Please see the [documentation](http://juliarobotics.github.io/Caesar.jl/latest/):
 
-[![docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://dehann.github.io/Caesar.jl/latest/)
+[![docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://juliarobotics.github.io/Caesar.jl/latest/)
 
 # Visualization
 
@@ -33,7 +33,7 @@ Caesar can be installed with:
 julia> Pkg.add("Caesar")
 ```
 
-# Bleeding-edge Development Dependency Status
+# Bleeding-edge Development Status
 
 | **Major Dependencies** |     **Status**     |    **Test Coverage**    |
 |:-----------------------:|:------------------:|:------------------:|
@@ -62,15 +62,15 @@ Consider citing our work:
   author = "Dehann Fourie, John Leonard, Micheal Kaess, and contributors",
   title =  "Caesar.jl",
   year =   2017,
-  url =    "https://github.com/dehann/Caesar.jl"
+  url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
 
 
-[cov-img]: https://codecov.io/github/dehann/Caesar.jl/coverage.svg?branch=master
-[cov-url]: https://codecov.io/github/dehann/Caesar.jl?branch=master
-[build-img]: https://travis-ci.org/dehann/Caesar.jl.svg?branch=master
-[build-url]: https://travis-ci.org/dehann/Caesar.jl
+[cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
+[cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
+[build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
+[build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
 
 [rome-url]: http://www.github.com/JuliaRobotics/RoME.jl
 [r-cov-img]: https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master
