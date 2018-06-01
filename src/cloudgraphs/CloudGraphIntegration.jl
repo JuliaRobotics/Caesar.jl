@@ -829,7 +829,7 @@ end
 Obtain Neo4j global database address and login credientials from STDIN, then insert and return in the addrdict colletion.
 """
 function askneo4jcredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
-  need = ["neo4jHost";"neo4jPort";"neo4jUsername";"neo4jPassword";"session"]
+  need = ["neo4jHost";"neo4jPort";"neo4jUsername";"neo4jPassword";"session";"robotId"]
   info("Please enter information for Neo4j DB:")
   for n in need
     info(n)

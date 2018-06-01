@@ -15,7 +15,8 @@ function slamindbsavejld(fgl::FactorGraph, session::AbstractString, itercount::I
 end
 
 """
-    runSlamInDbOnSession(caesarConfig::CaesarConfig, cloudGraph::CloudGraph, userId::String, robotId::String, sessionId::String, iterations::Int64, isRecursiveSolver::Bool, solverStatus::SolverStatus)::Void
+    $(SIGNATURES)
+
 Runs SlamInDb for given number of iterations against a specific session.
 """
 function runSlamInDbOnSession(
@@ -49,7 +50,7 @@ function runSlamInDbOnSession(
 
       println("===================CONVERT===================")
       solverStatus.currentStep = "Prep_Convert"
-      fg = Caesar.initfg(sessionname=sessionId, cloudgraph=cloudGraph)
+      fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, cloudgraph=cloudGraph)
       updatenewverts!(fg, N=N)
       println()
 
@@ -107,9 +108,12 @@ function runSlamInDbOnSession(
 end
 
 """
+    $(SIGNATURES)
+
 Low-level call to iterate the SlamInDb solver for given number of iterations against a specific session and keyword parameters.
 """
 function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
+            robotname::A,
             sessionName::A;
             N::Int=100,
             loopctrl::Vector{Bool}=Bool[true],
@@ -123,7 +127,7 @@ function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
   while loopctrl[1] && (iterations > 0 || iterations == -1) # loopctrl for future use
     iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
     println("===================CONVERT===================")
-    fgl = Caesar.initfg(sessionname=sessionName, cloudgraph=cloudGraph)
+    fgl = Caesar.initfg(sessionname=sessionName, robotname=robotname, cloudgraph=cloudGraph)
     updatenewverts!(fgl, N=N)
     println()
 
@@ -194,6 +198,7 @@ function slamindb(;addrdict=nothing,
   end
 
   runDbSolver(cloudGraph,
+              addrdict["robotId"],
               session,
               N=N,
               loopctrl=loopctrl,
