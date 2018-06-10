@@ -8,6 +8,7 @@ makedocs(
         "Home" => "index.md",
         "Examples" => "examples.md",
         "Tutorial 1: ContinuousScalar" => "tutorialcontinuousscalar.md",
+        "Tutorial: Defining Factors" => "definingfactors.md", 
         "Arena Visualization" => "arena_visualizations.md",
         "Database Layer" => "database_interactions.md",
         "Functions" => "func_ref.md"
