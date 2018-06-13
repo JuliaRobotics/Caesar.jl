@@ -1,6 +1,6 @@
 julia 0.6
-RoME 0.1.0
-IncrementalInference 0.3.1
+RoME 0.1.3
+IncrementalInference 0.3.4
 Graphs 0.9.0
 KernelDensityEstimate 0.3.0
 Distributions
@@ -16,9 +16,7 @@ HDF5
 JSON
 FileIO
 NLsolve
-PyLCM
 LCMCore
-PyCall
 DataStructures
 ProgressMeter
 ImageMagick

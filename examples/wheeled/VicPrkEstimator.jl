@@ -13,7 +13,7 @@ end
 
 function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
                     lcmode=:mmodal, lsrNoise=diagm([0.1;1.0]), N::Int=100, MM=Union{})
-    I = intersect(keys(f[idx-1]),keys(f[idx]))
+    @show I = intersect(keys(f[idx-1]),keys(f[idx]))
     for i in I
       pfez = f[idx-1][i]
       fez = f[idx][i]
@@ -22,7 +22,8 @@ function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
         if !haskey(MM,i)
           if !haskey(fg.IDs, lsy)    # has landmark
             # add from previous and latest factor here
-            projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise , N=N, labels=["LANDMARK"])
+            @show string(prevn), lsy
+            projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise , N=N, labels=["LANDMARK";])
             addBRFG!(fg, string(nextn), lsy, [fez[2];fez[1]], lsrNoise)
           else
             # previous already added, only add the new factor here
@@ -33,7 +34,7 @@ function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
           if lcmode == :mmodal
             println("Adding bimodal factor")
             if !haskey(fg.IDs, lsy)
-              vlm = projNewLandm!(fg, prevn, lsy, [pfez[2];pfez[1]], lsrNoise, addfactor=false)
+              vlm = projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise, addfactor=false, labels=["LANDMARK";])
               addMMBRFG!(fg, string(prevn), [lsymm;lsy], [pfez[2];pfez[1]], lsrNoise, w=[0.5;0.5] )
             end
             addMMBRFG!(fg, string(nextn), [lsymm;lsy], [fez[2];fez[1]], lsrNoise, w=[0.5;0.5] )

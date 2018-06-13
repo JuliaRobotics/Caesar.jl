@@ -1,5 +1,5 @@
 # Victoria Park using-server
-
+addprocs(3)
 using IncrementalInference
 using HDF5, JLD, Gadfly, Colors, Cairo
 using KernelDensityEstimate, Distributions
@@ -35,67 +35,66 @@ include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","loadVicPrkData.jl"))
 
 include(joinpath(ENV["HOME"],"Documents","blandauthlocal.jl"))
 backend_config, user_config = standardcloudgraphsetup(addrdict=addrdict)
-addrdict["sessionId"] = "VICPRK_TEST"
+# Start new session
+addrdict["sessionId"] = "VICPRK_VID"
 addrdict["robotId"] = "Ute"
 
 
-# Start new session
+# Figure export folder
+currdirtime = now()
+imgdir = joinpath(ENV["HOME"], "Pictures", "vicprkimgs", "$(currdirtime)")
+mkdir(imgdir)
 
-# Graphs.plot(fg.g)
 
 fg = Caesar.initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
-
-# deleteServerSession!(fg.cg, user_config["session"])
+deleteServerSession!(fg.cg, user_config["sessionId"])
 
 # init pose
 prevn = initFactorGraph!(fg, init=d[1][1:3])[1]
 Podo=diagm([0.5;0.5;0.005])
 N=100
-lcmode=:unimodal
+lcmode=:mmodal
 lsrNoise=diagm([0.1;1.0])
 
 
-# # test dev code ================================================================
-# idx = 2
-# prev, X, nextn = getLastPose2D(fg)
-# vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N)
-# addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
-# # ==============================================================================
-
-
 #build :# poses for the factorGraph
-for idx=2:5
+for idx=9:30
   prev, X, nextn = getLastPose2D(fg)
   vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N)
   # add landmarks
   addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
   prevn = nextn
-  # if (idx%10==0)
-  #    Solve
-  #    tree = prepBatchTree!(fg, drawpdf=true);
-  #   @time inferOverTree!(fg,tree, N=100);
-  # end
+  if (idx%10==0)
+     # Solve
+     tree = wipeBuildNewTree!(fg, drawpdf=false);
+    @time inferOverTree!(fg,tree, N=100);
+  end
+  pl=drawPosesLandms(fg,window=(nextn,25))
+  Gadfly.draw(PNG(joinpath(imgdir,"$(nextn).png"),20cm,20cm),pl)
 end
 
 
+0
 
-pl=drawPosesLandms(fg);
-Gadfly.draw(PDF("/tmp/before.pdf",20cm,20cm),pl)
+# run(`ffmpeg -y -i x%d.png -threads 4 -vcodec libx264 -s 1920x1080 -b:v 2M -filter:v "setpts=10*PTS" /home/dehann/Videos/vicprk_test.mp4`)
+
+
+# pl=drawPosesLandms(fg);
+# Gadfly.draw(PDF("/tmp/before.pdf",20cm,20cm),pl)
 
 
 # batchSolve(fg)
 # on ssh terminal, run slamindb(iterations=1)
 
 
-
-
-
-
 # fetch a local copy
 
 fg = Caesar.initfg(sessionname=user_config["sessionId"], cloudgraph=backend_config) #, robotname=user_config["robotId"]
 fullLocalGraphCopy!(fg)
-pl1=drawPosesLandms(fg)
+# pl1=drawPosesLandms(fg)
+
+
+pl1=drawPosesLandms(fg,window=(:x9,25))
 
 
 Gadfly.draw(PDF("/tmp/after.pdf",20cm,20cm),pl1)
@@ -133,15 +132,14 @@ for l1 in L
   j+=1
 end
 #run Server Code
-fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+fg = Caesar.initfg(sessionname=user_config["sessionId"], cloudgraph=backend_config)
 fullLocalGraphCopy!(fg)
 pl2=drawPosesLandms(fg)
 draw(PDF("daniel.pdf",20cm,20cm),pl2)
 
 
 # Remove the new session from the server
-deleteServerSession!(fg.cg, user_config["session"])
-
+deleteServerSession!(fg.cg, user_config["sessionId"])
 
 
 

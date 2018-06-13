@@ -13,6 +13,17 @@ Critically, this package can operate in the conventional SLAM manner, using loca
 
 Comments, questions and issues welcome.
 
+# Dependency Structure
+
+[IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl) supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself. [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) introduces nodes and factors that are useful to robotic navigation. [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) are a set of scripts that provide MATLAB style plotting of factor graph beliefs, mostly supporting 2D visualization with some support for projections of 3D.
+
+[Caesar.jl](http://www.github.com/JuliaRobotics/Caesar.jl) is the umbrella repo that depends on RoME.jl and others to support that 'passes through' the same functionality while introducing more. For example, interaction with database server systems, [LCMCore.jl](http://www.github.com/JuliaRobotics/LCMCore.jl), (future ROS support), and more.
+
+[Arena.jl](http://www.github.com/JuliaRobotics/Arena.jl) is a collection of 3D visualization tools and also depends on RoMEPlotting.jl for 2D visualizations.
+
+
+In the future, Caesar.jl would likely interact more closely with repo's such as [SensorFeatureTracking.jl](http://www.github.com/JuliaRobotics/SensorFeatureTracking.jl), [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl), and [RecursiveFiltering.jl](http://www.github.com/JuliaRobotics/RecursiveFiltering.jl)
+
 # Major features
 ---
 
