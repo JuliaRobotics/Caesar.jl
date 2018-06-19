@@ -39,8 +39,7 @@ include(joinpath(dirname(@__FILE__), "lcmHandlers.jl"))
 
 # this function handles lcm msgs
 function listener!(lcm_node::Union{LCMCore.LCM, LCMCore.LCMLog})
-    # handle traffic
-        # TODO: handle termination
+    # handle traffic until no data.
     while true
         if !handle(lcm_node)
             break
@@ -75,20 +74,22 @@ lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, messa
 lcm_loop_handler = (channel, message_data) -> handle_loops!(slam_client, message_data )
 
 # create LCM object and subscribe to messages on the following channels
-logfile = robotdata("rovlcm_singlesession_01")
+# logfile = robotdata("rovlcm_singlesession_01")
+
+logfile = joinpath(dirname(@__FILE__), "lcmlog-2018-03-15.00_fg-only")
 lcm_node = LCMLog(logfile) # for direct log file access
 
 # poses
 subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_node_t)
 
 # factors
-subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler)
+subscribe(lcm_node, "CAESAR_FACTORS", lcm_odom_handler, pose_pose_nh_t)
 subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
 # loop closures come in via p3p3nh factors
 subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler, pose_pose_xyh_nh_t)
 
 # sensor data
-subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
+# subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
 
 println("[Caesar.jl] Running LCM listener")
 listener!(lcm_node)
@@ -105,26 +106,6 @@ println(" --- Done! Now we can run the solver on this dataset!")
 ####### Visualization #######
 #############################
 
-# Ref: https://github.com/rdeits/MeshCat.jl/blob/master/demo.ipynb
-
-# NOTE: WIP!
-# I'd like the SDK to do this natively...
-
-using MeshCat
-using CoordinateTransformations
-import GeometryTypes: HyperRectangle, Vec, Point, HomogenousMesh, SignedDistanceField
-import ColorTypes: RGBA, RGB
-
-# Create a new visualizer instance
-vis = Visualizer()
-open(vis)
-
-# Retrieve all variables and render them.
-println("Retrieving all variables and rendering them...")
-nodes = getNodes(slam_client.syncrconf, robotId, sessionId)
-for node in nodes
-    println(" - Rendering $node")
-    triad = Triad()
-    setobject!(vis["Triad $node"], triad)
-    settransform!(vis["Triad $node"], Translation(node,node,node))
-end
+# 9. Great, solver has updated it! We can render this.
+# Using the bigdata key 'TestImage' as the camera image
+visualizeSession(slam_client.syncrconf, robotId, sessionId)
