@@ -50,7 +50,7 @@ end
 # 0. Constants
 println("[Caesar.jl] defining constants.")
 robotId = "HROV"
-sessionId = "LCM_27"
+sessionId = "LCM_31"
 sessionId = strip(sessionId)
 
 # create a SLAM container object
@@ -76,7 +76,8 @@ lcm_loop_handler = (channel, message_data) -> handle_loops!(slam_client, message
 # create LCM object and subscribe to messages on the following channels
 # logfile = robotdata("rovlcm_singlesession_01")
 
-logfile = joinpath(dirname(@__FILE__), "lcmlog-2018-03-15.00_fg-only")
+logfile = joinpath(dirname(@__FILE__), "lcmlog-2018-03-15.00-full")
+# logfile = joinpath(dirname(@__FILE__), "lcmlog-2018-03-15.00_fg-only")
 lcm_node = LCMLog(logfile) # for direct log file access
 
 # poses
@@ -89,7 +90,7 @@ subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
 subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler, pose_pose_xyh_nh_t)
 
 # sensor data
-# subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
+subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
 
 println("[Caesar.jl] Running LCM listener")
 listener!(lcm_node)

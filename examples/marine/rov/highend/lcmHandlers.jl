@@ -29,7 +29,7 @@ function handle_poses!(slam::SyncrSLAM,
         # 3. Build the factor request (again, we can make this way easier and transparent once it's stable)
         fctBody = FactorBody(string(typeof(initPosePrior)), string(typeof(packedPrior)), "JSON", JSON.json(packedPrior))
         fctRequest = FactorRequest([node_label], fctBody, false, false)
-        @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
+        resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
 
         # set robot parameters in the first pose, this will become a separate node in the future
         println("[Caesar.jl] Setting robot parameters")
@@ -64,7 +64,7 @@ function handle_priors!(slam::SyncrSLAM,
     # 3. Build the factor request (again, we can make this way easier and transparent once it's stable)
     fctBody = FactorBody(string(typeof(prior_rpz)), string(typeof(packed_prior_rpz)), "JSON", JSON.json(packed_prior_rpz))
     fctRequest = FactorRequest([node_label], fctBody, false, false)
-    @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
+    resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
 end
 
 """
@@ -100,7 +100,7 @@ function handle_partials!(slam::SyncrSLAM,
     # 3. Build the factor request (again, we can make this way easier and transparent once it's stable)
     fctBody = FactorBody(string(typeof(xyh_factor)), string(typeof(packed_xyh_factor)), "JSON", JSON.json(packed_xyh_factor))
     fctRequest = FactorRequest([origin_label; destination_label], fctBody, false, false)
-    @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
+    resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
 end
 
 """
@@ -135,7 +135,7 @@ function handle_loops!(slam::SyncrSLAM,
     # 3. Build the factor request (again, we can make this way easier and transparent once it's stable)
     fctBody = FactorBody(string(typeof(xyh_factor)), string(typeof(packed_xyh_factor)), "JSON", JSON.json(packed_xyh_factor))
     fctRequest = FactorRequest([origin_label; destination_label], fctBody, false, false)
-    @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
+    resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
 end
 
 """
