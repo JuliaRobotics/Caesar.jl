@@ -64,7 +64,7 @@ function handle_priors!(slam::SyncrSLAM,
     # 3. Build the factor request (again, we can make this way easier and transparent once it's stable)
     fctBody = FactorBody(string(typeof(prior_rpz)), string(typeof(packed_prior_rpz)), "JSON", JSON.json(packed_prior_rpz))
     fctRequest = FactorRequest([node_label], fctBody, false, false)
-    # @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
+    @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
 end
 
 """
@@ -135,7 +135,7 @@ function handle_loops!(slam::SyncrSLAM,
     # 3. Build the factor request (again, we can make this way easier and transparent once it's stable)
     fctBody = FactorBody(string(typeof(xyh_factor)), string(typeof(packed_xyh_factor)), "JSON", JSON.json(packed_xyh_factor))
     fctRequest = FactorRequest([origin_label; destination_label], fctBody, false, false)
-    # @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
+    @show resp = addFactor(slam.syncrconf, slam.robotId, slam.sessionId, fctRequest)
 end
 
 """
@@ -147,13 +147,7 @@ function handle_clouds!(slam::SyncrSLAM,
     last_pose = "x$(id)"
     println("[Caesar.jl] Got cloud $id")
 
-    # 2d arrays of points and colors (from LCM data into arrays{arrays})
-    # @show size(msg.points)
-    # @show size(msg.colors)
-    # points = [[pt[1], pt[2], pt[3]] for pt in msg.points]
     points = JSON.json(msg.points)
-    # @show "HERREEEEEE"
-    # colors = [[UInt8(c.data[1]),UInt8(c.data[2]),UInt8(c.data[3])] for c in msg.colors]
     colors = JSON.json(msg.colors)
 
     node = getNode(slam.syncrconf, slam.robotId, slam.sessionId, last_pose)
