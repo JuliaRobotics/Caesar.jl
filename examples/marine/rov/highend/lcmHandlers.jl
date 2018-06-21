@@ -14,10 +14,11 @@ function handle_poses!(slam::SyncrSLAM,
     q = Quaternion(qw,qxyz) # why not a (w,x,y,z) constructor?
     pose = SE3(t,q)
     euler = Euler(q)
-    #
+
     node_label = Symbol("x$(id)")
     varRequest = VariableRequest(node_label, "Pose3", nothing, ["POSE"])
     resp = addVariable(slam.syncrconf, slam.robotId, slam.sessionId, varRequest)
+    
     if id == 0
         println("[Caesar.jl] First pose")
         # this is the first msg, and it does not carry odometry, but the prior on the first node.
