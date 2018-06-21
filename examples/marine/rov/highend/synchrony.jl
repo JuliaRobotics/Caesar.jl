@@ -1,5 +1,5 @@
 #=
-LCM Server: an LCM interface to Caesar.jl
+NaviSdk Example for Pedro's HAUV.
 =#
 
 using Base.Dates
@@ -11,10 +11,13 @@ using Distributions
 using LCMCore
 using LibBSON
 
-using RobotTestDatasets
-
 include(joinpath(dirname(@__FILE__), "synchronySDKIntegration.jl"))
 
+# 0. Constants
+println("[Caesar.jl] defining constants.")
+robotId = "HROV"
+sessionId = "LCM_34"
+sessionId = strip(sessionId)
 
 """
 Store robot parameters in the centralized database system.
@@ -39,20 +42,13 @@ include(joinpath(dirname(@__FILE__), "lcmHandlers.jl"))
 
 # this function handles lcm msgs
 function listener!(lcm_node::Union{LCMCore.LCM, LCMCore.LCMLog})
-    # handle traffic
-        # TODO: handle termination
+    # handle traffic until no data.
     while true
         if !handle(lcm_node)
             break
         end
     end
 end
-
-# 0. Constants
-println("[Caesar.jl] defining constants.")
-robotId = "HROV"
-sessionId = "LCM_27"
-sessionId = strip(sessionId)
 
 # create a SLAM container object
 slam_client = SyncrSLAM(robotId, sessionId, nothing)
@@ -75,14 +71,17 @@ lcm_cloud_handler = (channel, message_data) -> handle_clouds!(slam_client, messa
 lcm_loop_handler = (channel, message_data) -> handle_loops!(slam_client, message_data )
 
 # create LCM object and subscribe to messages on the following channels
-logfile = robotdata("rovlcm_singlesession_01")
+# logfile = robotdata("rovlcm_singlesession_01")
+
+logfile = joinpath(dirname(@__FILE__), "lcmlog-2018-03-15.00-full")
+# logfile = joinpath(dirname(@__FILE__), "lcmlog-2018-03-15.00_fg-only")
 lcm_node = LCMLog(logfile) # for direct log file access
 
 # poses
 subscribe(lcm_node, "CAESAR_POSES", lcm_pose_handler, pose_node_t)
 
 # factors
-subscribe(lcm_node, "CAESAR_PARTIAL_XYH", lcm_odom_handler)
+subscribe(lcm_node, "CAESAR_FACTORS", lcm_odom_handler, pose_pose_nh_t)
 subscribe(lcm_node, "CAESAR_PARTIAL_ZPR", lcm_prior_handler, prior_zpr_t)
 # loop closures come in via p3p3nh factors
 subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler, pose_pose_xyh_nh_t)
@@ -90,9 +89,36 @@ subscribe(lcm_node, "CAESAR_PARTIAL_XYH_NH", lcm_loop_handler, pose_pose_xyh_nh_
 # sensor data
 subscribe(lcm_node, "CAESAR_POINT_CLOUDS", lcm_cloud_handler, point_cloud_t)
 
-println("[Caesar.jl] Running LCM listener")
+println("[Caesar.jl] Running LCM listener to process all data...")
 listener!(lcm_node)
 
+println(" --- Now we can set all the nodes to ready so the solver picks up on them.")
+putReady(slam_client.syncrconf, robotId, sessionId, true)
+
 println(" --- Done! Now we can run the solver on this dataset!")
+# TODO: Tell PilotFish to solve.
 
 # Todo - call Sychrony to start the solver
+
+#############################
+####### Visualization #######
+#############################
+
+# 9. Great, solver has updated it! We can render this.
+# Using the bigdata key 'TestImage' as the camera image
+visualizeSession(slam_client.syncrconf, robotId, sessionId, "", "PointCloud")
+
+
+#############################
+####### #### WIP #### #######
+#############################
+
+# WIP! Confirming types and initialization
+node_x0 = getNode(slam_client.syncrconf, robotId, sessionId, "x0")
+bigEntries = getDataEntries(slam_client.syncrconf, robotId, sessionId, node_x0.id)
+bigEntry = getDataElement(slam_client.syncrconf, robotId, sessionId, node_x0.id, bigEntries[1].id)
+f = open("/home/gearsad/writeout.txt", "w")
+write(f, bigEntry.data)
+close(f)
+
+node_x1 = getNode(slam_client.syncrconf, robotId, sessionId, "x1")

@@ -94,7 +94,7 @@ function syncrSession(
   else
       # Create a new one
       println(" -- Session '$sessionId' doesn't exist for robot '$robotId', creating it...")
-      newSessionRequest = SessionDetailsRequest(sessionId, "Submersible vehicle.")
+      newSessionRequest = SessionDetailsRequest(sessionId, "Submersible vehicle.", "Pose3", false)
       session = addSession(synchronyConfig, robotId, newSessionRequest)
   end
   println(session)
