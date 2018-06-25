@@ -11,8 +11,16 @@ function loadVicPrkDataset(filename::AbstractString="datasets/VicPrk.jld")
   return DRS,GPS,LsrFeats,d,f
 end
 
-function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
-                    lcmode=:mmodal, lsrNoise=diagm([0.1;1.0]), N::Int=100, MM=Union{})
+function addLandmarksFactorGraph!(fg::FactorGraph,
+                                 f,
+                                 idx,
+                                 prevn,
+                                 nextn;
+                                 lcmode=:mmodal,
+                                 lsrNoise=diagm([0.1;1.0]),
+                                 N::Int=100,
+                                 MM=nothing  )
+    #
     @show I = intersect(keys(f[idx-1]),keys(f[idx]))
     for i in I
       pfez = f[idx-1][i]
@@ -23,7 +31,7 @@ function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
           if !haskey(fg.IDs, lsy)    # has landmark
             # add from previous and latest factor here
             @show string(prevn), lsy
-            projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise , N=N, labels=["LANDMARK";])
+            projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise , N=N)
             addBRFG!(fg, string(nextn), lsy, [fez[2];fez[1]], lsrNoise)
           else
             # previous already added, only add the new factor here
@@ -34,10 +42,10 @@ function addLandmarksFactoGraph!(fg::FactorGraph, f, idx, prevn, nextn;
           if lcmode == :mmodal
             println("Adding bimodal factor")
             if !haskey(fg.IDs, lsy)
-              vlm = projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise, addfactor=false, labels=["LANDMARK";])
-              addMMBRFG!(fg, string(prevn), [lsymm;lsy], [pfez[2];pfez[1]], lsrNoise, w=[0.5;0.5] )
+              # vlm = projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise, addfactor=false, labels=["LANDMARK";])
+              addMMBRFG!(fg, Symbol.([string(prevn);lsymm;lsy]), [pfez[2];pfez[1]], lsrNoise, w=[0.5;0.5] )
             end
-            addMMBRFG!(fg, string(nextn), [lsymm;lsy], [fez[2];fez[1]], lsrNoise, w=[0.5;0.5] )
+            addMMBRFG!(fg, Symbol.([string(prevn);lsymm;lsy]), [fez[2];fez[1]], lsrNoise, w=[0.5;0.5] )
           elseif lcmode == :unimodal
             println("adding unimodal loop closure")
             addBRFG!(fg, string(nextn), lsymm, [fez[2];fez[1]], lsrNoise)
@@ -82,7 +90,7 @@ function appendFactorGraph!(fg::FactorGraph, d, f;
     vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N)
 
     # add landmarks
-    addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
+    addLandmarksFactorGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
     prevn = nextn
   end
   if fgpdf   writeGraphPdf(fg); end
@@ -100,7 +108,7 @@ function doBatchRun(d, f; toT=30)
   return fg, tree, p
 end
 
-# function saveImgSeq(d::Dict{Int64,Dict{Int64,Feature}}, lsrFeats::Dict{Int64,LaserFeatures}; from::Int=1,to::Int=10,step::Int=1)
+# function saveImgSeq(d::Dict{Int,Dict{Int,Feature}}, lsrFeats::Dict{Int,LaserFeatures}; from::Int=1,to::Int=10,step::Int=1)
 #   for i in from:step:to
 #     p = drawFeatTrackers(d[i], lsrFeats[i].feats);
 #     Gadfly.draw(PNG(string("imgs/img",i,".png"),35cm,25cm),p)

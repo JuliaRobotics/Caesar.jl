@@ -1,8 +1,8 @@
 # Victoria Park
 
-using HDF5, JLD, Gadfly, Colors, Cairo
-using KernelDensityEstimate, Distributions
-using Caesar, IncrementalInference, RoME
+using Caesar
+using RoMEPlotting
+using Distributions
 
 # load all the model data
 # d = odometry information
@@ -17,7 +17,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 T=30 # 1400
 fg = emptyFactorGraph();
-idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:unimodal, MM=MMr);
+idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:mmodal, MM=MMr);
 
 
 drawPosesLandms(fg)
