@@ -1,6 +1,6 @@
 # Victoria Park
 
-using Caesar
+using Caesar, RoME
 using RoMEPlotting
 using Distributions
 
@@ -16,7 +16,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 
 T=30 # 1400
-fg = emptyFactorGraph();
+fg = RoME.emptyFactorGraph();
 idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:mmodal, MM=MMr);
 
 

@@ -30,8 +30,8 @@ function addLandmarksFactorGraph!(fg::FactorGraph,
         if !haskey(MM,i)
           if !haskey(fg.IDs, lsy)    # has landmark
             # add from previous and latest factor here
-            @show string(prevn), lsy
-            projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise , N=N)
+            @show string(prevn[1]), lsy
+            projNewLandm!(fg, string(prevn[1]), lsy, [pfez[2];pfez[1]], lsrNoise , N=N)
             addBRFG!(fg, string(nextn), lsy, [fez[2];fez[1]], lsrNoise)
           else
             # previous already added, only add the new factor here
@@ -43,9 +43,9 @@ function addLandmarksFactorGraph!(fg::FactorGraph,
             println("Adding bimodal factor")
             if !haskey(fg.IDs, lsy)
               # vlm = projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise, addfactor=false, labels=["LANDMARK";])
-              addMMBRFG!(fg, Symbol.([string(prevn);lsymm;lsy]), [pfez[2];pfez[1]], lsrNoise, w=[0.5;0.5] )
+              addMMBRFG!(fg, Symbol.([string(prevn[1]);lsymm;lsy]), [pfez[2];pfez[1]], lsrNoise, w=[0.5;0.5] )
             end
-            addMMBRFG!(fg, Symbol.([string(prevn);lsymm;lsy]), [fez[2];fez[1]], lsrNoise, w=[0.5;0.5] )
+            addMMBRFG!(fg, Symbol.([string(prevn[1]);lsymm;lsy]), [fez[2];fez[1]], lsrNoise, w=[0.5;0.5] )
           elseif lcmode == :unimodal
             println("adding unimodal loop closure")
             addBRFG!(fg, string(nextn), lsymm, [fez[2];fez[1]], lsrNoise)
