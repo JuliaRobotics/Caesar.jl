@@ -98,15 +98,15 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "tutorialcontinuousscalar.html#",
-    "page": "Tutorial 1: ContinuousScalar",
-    "title": "Tutorial 1: ContinuousScalar",
+    "page": "Entry Tutorial: ContinuousScalar",
+    "title": "Entry Tutorial: ContinuousScalar",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "tutorialcontinuousscalar.html#Tutorials-1",
-    "page": "Tutorial 1: ContinuousScalar",
+    "page": "Entry Tutorial: ContinuousScalar",
     "title": "Tutorials",
     "category": "section",
     "text": ""
@@ -114,23 +114,39 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "tutorialcontinuousscalar.html#IncrementalInference.jl-ContinuousScalar-1",
-    "page": "Tutorial 1: ContinuousScalar",
+    "page": "Entry Tutorial: ContinuousScalar",
     "title": "IncrementalInference.jl ContinuousScalar",
     "category": "section",
     "text": "This tutorial illustrates how IncrementalInference enables algebraic relations between stochastic variables, and how a final posterior belief estimate is calculated from several pieces of information. This tutorial is rather abstract and the user is free to imagine any system of relationships, for example a robot driving in a one dimensional world, or a time traveler making uncertain jumps forwards and backwards in time. The tutorial implicitly shows a multi-modal uncertainty introduced and transmitted. The tutorial also illustrates consensus through an additional piece of information, which reduces all stochastic variable marginal beliefs to unimodal only beliefs. The example will also illustrate the use of non-Gaussian beliefs and global inference. The tutorial also shows how to create user defined functions. Lastly, the tutorial demonstrates how automatic initialization of variables works.This tutorial requires IncrementalInference v0.3.0+, RoME v0.1.0, RoMEPlotting packages be installed. In addition, the optional GraphViz package will allow easy visualization of the FactorGraph object structure.To start, the two major mathematical packages are brought into scope.using Distributions\nusing IncrementalInferenceThis tutorial calls for multiple variable nodes connected through algebraic functions stochastic uncertainty. User scope Prior, LinearOffset, and MultiModalOffset with arbitrary distributions are defined as:import IncrementalInference: getSample\n\nstruct Prior{T} <: IncrementalInference.FunctorSingleton where T <: Distribution\n  z::T\nend\ngetSample(s::Prior, N::Int=1) = (rand(s.z,N), )\nstruct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: Distribution\n  z::T\nend\ngetSample(s::LinearOffset, N::Int=1) = (rand(s.z,N), )\nfunction (s::LinearOffset)(res::Array{Float64},\n      idx::Int,\n      meas::Tuple{Array{Float64, 1}},\n      X1::Array{Float64,2},\n      X2::Array{Float64,2}  )\n  #\n  res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])\n  nothing\nend\nstruct MultiModalOffset <: IncrementalInference.FunctorPairwise\n  z::Vector{Distribution}\n  c::Categorical\nend\ngetSample(s::MultiModalOffset, N::Int=1) = (rand.(s.z, N)..., rand(s.c, N))\nfunction (s::MultiModalOffset)(res::Array{Float64},\n      idx::Int,\n      meas::Tuple,\n      X1::Array{Float64,2},\n      X2::Array{Float64,2}  )\n  #\n  res[1] = meas[meas[end][idx]][idx] - (X2[1,idx] - X1[1,idx])\n  nothing\nendNotice the residual function relating to the two PairwiseFunctor derived definitions. The one dimensional residual functions, res[1] = measurement - prediction, are used during inference to approximate the convolution of conditional beliefs from the sample approximate marginal beliefs of the connected variables.Guidelines for developing your own functions are discussed here (TBD), and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package RoME.jl.The next step is to describe the inference problem with a graphical model of type IncrementalInference.FactorGraph. The first step is to create an empty factor graph object and start populating it with variable nodes. The variable nodes are identified by Symbols, namely :x0, :x1, :x2, :x3.# Start with an empty factor graph\nfg = emptyFactorGraph()\n\n# add the first node\naddNode!(fg, :x0, ContinuousScalar)\n\n# this is unary (prior) factor and does not immediately trigger autoinit of :x0.\naddFactor!(fg, [:x0], Prior(Normal(0,1)))Factor graphs are bipartite graphs with factors that act as mathematical structure between interacting variables. After adding node :x0, a singleton factor of type Prior (which was defined by the user earlier) is \'connected to\' variable node :x0. This unary factor is taken as a Distributions.Normal distribution with zero mean and a standard devitation of 1. GraphViz.jl can be used to visualize the factor graph structure, although the package is not installed by default. Furthermore, the writeGraphPdf member definition is given at the end of this tutorial, which allows the user to store the graph image in graphviz supported image types.Graphs.plot(fg.g)\n# writeGraphPdf(fg, file=\"fgx01.pdf\") # file=\"fgx01.png\"The two node factor graph is shown in the image below.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx0.png\" width=\"120\" border=\"0\" />\n</p>Automatic initialization of variables depend on how the factor graph model is constructed. This tutorial demonstrates this behavior by first showing that :x0 is not initialized:@show isInitialized(fg, :x0) # falseWhy is :x0 not initialized? Since no other variable nodes have been \'connected to\' (or depend) on :x0 and future intentions of the user are unknown, the initialization of :x0 is deferred until the latest possible moment. IncrementalInference.jl assumes that the user will generally populate new variable nodes with most of the associated factors before moving to the next variable. By delaying initialization of a new variable (say :x0) until a second newer uninitialized variable (say :x1) depends on :x0, the IncrementalInference algorithms hope to then initialize :x0 with the more information from previous and surrounding variables and factors. Also note that initialization of variables is a local operation based only on the neighboring nodes – global inference will over the entire graph is shows later in this tutorial.By adding :x1 and connecting it through the LinearOffset and Normal distributed factor, the automatic initialization of :x0 is triggered.addNode!(fg, :x1, ContinuousScalar)\n# P(Z | :x1 - :x0 ) where Z ~ Normal(10,1)\naddFactor!(fg, [:x0, :x1], LinearOffset(Normal(10.0,1)))\n@show isInitialized(fg, :x0) # trueNote that the automatic initialization of :x0 is aware that :x1 is not initialized and therefore only used the Prior(Normal(0,1)) unary factor to initialize the marginal belief estimate for :x0. The structure of the graph has now been updated to two variable nodes and two factors.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx01.png\" width=\"240\" border=\"0\" />\n</p>Global inference requires that the entire factor graph be initialized before the numerical belief computation algorithms can be performed. Notice how the new :x1 variable is not yet initialized:@show isInitialized(fg, :x1) # falseThe RoMEPlotting.jl package allows visualization (plotting) of the belief state over any of the variable nodes. Remember the first time executions are slow given required code compilation, and that future versions of these package will use more precompilation to reduce first execution running cost.using RoMEPlotting\n\nplotKDE(fg, :x0)<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx0.png\" width=\"360\" border=\"0\" />\n</p>By forcing the initialization of :x1 and plotting its belief estimate,ensureAllInitialized!(fg)\nplotKDE(fg, [:x0, :x1])the predicted influence of the P(Z| X1 - X0) = LinearOffset(Normal(10, 1)) is shown by the red trace.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx01.png\" width=\"360\" border=\"0\" />\n</p>The red trace (predicted belief of :x1) is noting more than the approximated convolution of the current marginal belief of :x0 with the conditional belief described by P(Z | X1 - X0).Another ContinuousScalar variable :x2 is \'connected\' to :x1 through a more complicated MultiModalOffset likelihood function.addNode!(fg, :x2, ContinuousScalar)\nmmo = MultiModalOffset([Rayleigh(3); Uniform(30,55)], Categorical([0.4; 0.6]))\naddFactor!(fg, [:x1, :x2], mmo)<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx012.png\" width=\"360\" border=\"0\" />\n</p>The mmo variable illustrates how a near arbitrary mixture probability distribution can be used as a conditional relationship between variable nodes in the factor graph. In this case, a 40%/60% balance of a Rayleigh and truncated Uniform distribution which acts as a multi-modal conditional belief. Interpret carefully what a conditional belief of this nature actually means.Following the tutorial\'s practical example frameworks (robot navigation or time travel), this multi-modal belief implies that moving from one of the probable locations in :x1 to a location in :x2 by some processes defined by mmo=P(Z | X2, X1) is uncertain to the same 40%/60% ratio. In practical terms, collapsing (through observation of an event) the probabilistic likelihoods of the transition from :x1 to :x2 may result in the :x2 location being at either 15-20, or 40-65-ish units. The predicted belief over :x2 is illustrated by plotting the predicted belief (green trace), after forcing initialization.ensureAllInitialized!(fg)\nplotKDE(fg, [:x0, :x1, :x2])<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx012.png\" width=\"360\" border=\"0\" />\n</p>Adding one more variable :x3 through another LinearOffset(Normal(-50,1))addNode!(fg, :x3, ContinuousScalar)\naddFactor!(fg, [:x2, :x3], LinearOffset(Normal(-50, 1)))expands the factor graph to to four variables and four factors.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx0123.png\" width=\"480\" border=\"0\" />\n</p>This part of the tutorial shows how a unimodal likelihood (conditional belief) can transmit the bimodal belief currently contained in :x2.ensureAllInitialized!(fg)\nplotKDE(fg, [:x0, :x1, :x2, :x3])Notice the blue trace (:x3) is a shifted and slightly spread out version of the initialized belief on :x2, through the convolution with the conditional belief P(Z | X2, X3).<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx0123.png\" width=\"480\" border=\"0\" />\n</p>Global inference over the entire factor graph has still not occurred, and will at this stage produce roughly similar results to the predicted beliefs shown above. Only by introducing more information into the factor graph can inference extract more precise marginal belief estimates for each of the variables. A final piece of information added to this graph is a factor directly relating :x3 with :x0.addFactor!(fg, [:x3, :x0], LinearOffset(Normal(40, 1)))Pay close attention to what this last factor means in terms of the probability density traces shown in the previous figure. The blue trace for :x3 has two major modes, one that overlaps with :x0, :x1 near 0 and a second mode further to the left at -40. The last factor introduces a shift LinearOffset(Normal(40,1)) which essentially aligns the left most mode of :x3 back onto :x0.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx0123c.png\" width=\"480\" border=\"0\" />\n</p>This last factor forces a mode selection through consensus. By doing global inference, the new information obtained in :x3 will be equally propagated to :x2 where only one of the two modes will remain.Global inference is achieved with local computation using two function calls, as follows.tree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n# and visualization\nplotKDE(fg, [:x0, :x1, :x2, :x3])The resulting posterior marginal beliefs over all the system variables are:<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx0123infr.png\" width=\"480\" border=\"0\" />\n</p>It is import to note that although this tutorial ends with all marginal beliefs having near Gaussian shape and are unimodal, that the package supports multi-modal belief estimates during both the prediction and global inference processes. In fact, many of the same underlying inference functions are involved with the automatic initialization process and the global multi-modal iSAM inference procedure. This concludes the ContinuousScalar tutorial particular to the IncrementalInference package."
 },
 
 {
+    "location": "tut_hexagonal2d.html#",
+    "page": "Entry Tutorial: Hexagonal 2D SLAM",
+    "title": "Entry Tutorial: Hexagonal 2D SLAM",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "tut_hexagonal2d.html#Tutorial:-Hexagonal-2D-Example-(Local-Compute)-1",
+    "page": "Entry Tutorial: Hexagonal 2D SLAM",
+    "title": "Tutorial: Hexagonal 2D Example (Local Compute)",
+    "category": "section",
+    "text": "A simple 2D robot trajectory example is:# add more julia processes\nnprocs() < 3 ? addprocs(4-nprocs()) : nothing\n\n# tell Julia that you want to use these namespaces\nusing RoME, Distributions\n\n# start with an empty factor graph object\nfg = initfg()\n\n# Add the first pose :x0\naddNode!(fg, :x0, Pose2)\n# Add at a fixed location PriorPose2 to pin :x0 to a starting location\naddFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))\n\n# Drive around in a hexagon\nfor i in 0:5\n  psym = Symbol(\"x$i\")\n  nsym = Symbol(\"x$(i+1)\")\n  addNode!(fg, nsym, Pose2)\n  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))\n  addFactor!(fg, [psym;nsym], pp )\nend\n\n# perform inference, and remember first runs are slower owing to Julia\'s just-in-time compiling\nbatchSolve!(fg)\n\n\n## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist\nusing RoMEPlotting\n\n# For Juno/Jupyter style use\npl = drawPoses(fg)\n\n# For scripting use-cases you can export the image\nGadfly.draw(Gadfly.PDF(\"/tmp/test.pdf\", 20cm, 10cm),pl)  # or PNG(...)(Image: test)See further discussion on visualizations and packages here."
+},
+
+{
     "location": "definingfactors.html#",
-    "page": "Tutorial: Defining Factors",
-    "title": "Tutorial: Defining Factors",
+    "page": "Moderate Tutorial: Defining Factors",
+    "title": "Moderate Tutorial: Defining Factors",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "definingfactors.html#IncrementalInference.jl-Defining-Factors-(2017-API)-1",
-    "page": "Tutorial: Defining Factors",
+    "page": "Moderate Tutorial: Defining Factors",
     "title": "IncrementalInference.jl Defining Factors (2017 API)",
     "category": "section",
     "text": "This tutorial describes how a new factor can be developed, beyond the pre-existing implementation in RoME.jl.  Factors can accept any number of variable dependencies and allow for a wide class of allowable function calls can be used.  Our intention is to make it as easy as possible for users to create their own factor types.A factor graph is a bipartite representation where variables (denoted by larger nodes) are interconnected by a set of factors (smaller nodes) that represent some algebraic interaction between the variables.  Factors must adhere to the limits of probabilistic models – for example conditional likelihoods (between multiple variables) or priors (unary to one variable).  A more heterogeneous factor graph example is shown below, and a broader discussion here (author disclosure): (Image: factorgraphexample)"
@@ -138,7 +154,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "definingfactors.html#Example:-Adding-Velocity-to-Point2D-1",
-    "page": "Tutorial: Defining Factors",
+    "page": "Moderate Tutorial: Defining Factors",
     "title": "Example: Adding Velocity to Point2D",
     "category": "section",
     "text": "A smaller example in two dimensions where we wish to estimate the velocity of some target:  Consider two variables :x0 with a prior as well as a conditional–-likelihood for short–-to variable :x1.  Priors are in the \"global\" reference frame (how ever you choose to define it), while likelihoods are in the \"local\" / \"relative\" frame that only exist between variables.(Image: dynpoint2fg)"
@@ -146,7 +162,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "definingfactors.html#Brief-on-Variable-Node-softtypes-1",
-    "page": "Tutorial: Defining Factors",
+    "page": "Moderate Tutorial: Defining Factors",
     "title": "Brief on Variable Node softtypes",
     "category": "section",
     "text": "Variable nodes retain meta data (so called \"soft types\") describing the type of variable.  Common VariableNode types are RoME.Point2D, RoME.Pose3D.  VariableNode soft types are passed during construction of the factor graph, for example:v1 = addNode!(fg, :x1, Pose2)Certain cases require that more information be retained for each VariableNode, and velocity calculations are a clear example where time stamp data across positions is required.  Note Larger data can also be stored under the bigdata framework which is discussed here (TBD).If the required VariableNode does not exist, then one can be created, such as adding velocity states with DynPoint2:mutable struct DynPoint2 <: IncrementalInference.InferenceVariable\n  ut::Int64 # microsecond time\n  dims::Int\n  labels::Vector{String}\n  DynPoint2(;ut::Int64=0, labels::Vector{<:AbstractString}=String[]) = new(ut, 4, labels)\nendThe dims field is permanently set to 4, i.e. [x, y, dx/dt, dy/dt].  Labels represent special labels that can be used for more efficient indexing in database systems.  The utparameter is for storing the microsecond time stamp for that variable node.In order to implement your own factor type outside IncrementalInference you should import the required identifiers, as follows:using IncrementalInference\nimport IncrementalInference: getSampleNote that new factor types can be defined at any time, even after you have started to construct the FactorGraph object."
@@ -154,7 +170,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "definingfactors.html#DynPoint2VelocityPrior-1",
-    "page": "Tutorial: Defining Factors",
+    "page": "Moderate Tutorial: Defining Factors",
     "title": "DynPoint2VelocityPrior",
     "category": "section",
     "text": "Work in progress.mutable struct DynPoint2VelocityPrior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}\n  z::T\n  DynPoint2VelocityPrior{T}() where {T <: Distribution} = new{T}()\n  DynPoint2VelocityPrior(z1::T) where {T <: Distribution} = new{T}(z1)\nend\ngetSample(dp2v::DynPoint2VelocityPrior, N::Int=1) = (rand(dp2v.z,N), )"
@@ -162,7 +178,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "definingfactors.html#DynPoint2DynPoint2-(preintegration)-1",
-    "page": "Tutorial: Defining Factors",
+    "page": "Moderate Tutorial: Defining Factors",
     "title": "DynPoint2DynPoint2 (preintegration)",
     "category": "section",
     "text": "The basic idea is that change in position is composed of three components (originating from double integration of Newton\'s second law):(Image: deltapositionplus) ( eq. 1)DynPoint2DynPoint2 factor is using the above equation to define the difference in position between the two DynPoint2s.  The position part stored in DynPoint2DynPoint2 factor corresponds to (Image: deltaposplusonly).  A new multi-variable (so called \"pairwise\") factor between any number of variables is defined with three elements:Factor type definition that inherits either IncrementalInference.FunctorPairwise or IncrementalInference.FunctorPairwiseMinimize;mutable struct DynPoint2DynPoint2{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}\n  z::T\n  DynPoint2DynPoint2{T}() where {T <: Distribution} = new{T}()\n  DynPoint2DynPoint2(z1::T) where {T <: Distribution} = new{T}(z1)\nendA sampling function with exactly the signature: getSample(dp2dp2::DynPoint2DynPoint2, N::Int=1) and returning a Tuple (legacy reasons);getSample(dp2dp2::DynPoint2DynPoint2, N::Int=1) = (rand(dp2dp2.z,N), )A residual or minimization function with exactly the signature described below.Residual (related to FunctorPairwise) or factor minimization function (related to FunctorPairwiseMinimize) signatures should match this dp2dp2::DynPoint2DynPoint2 example:function (dp2dp2::DynPoint2DynPoint2)(\n            res::Array{Float64},\n            userdata,\n            idx::Int,\n            meas::Tuple,\n            Xs...  )::Voidwhere Xs can be expanded to the particular number of variable nodes this factor will be associated, and note they are order sensitive at addFactor!(fg, ...) time.  The res parameter is a vector of the same dimension defined by the largest of the Xs terms.  The userdata value contains the small metadata / userdata portions of information that was introduced to the factor graph at construction time – please consult error(string(fieldnames(userdata))) for details at this time.  This is a relatively new feature in the code and likely to be improved.  The idx parameter represents a legacy index into the measurement meas[1] and variables Xs to select the desired marginal sample value.  Future versions of the code plan to remove the idx parameter entirely.  The Xs array of parameter are each of type ::Array{Float64,2} and contain the estimated samples from each of the current best marginal belief estimates of the factor graph variable node.  function (dp2dp2::DynPoint2DynPoint2)(\n            res::Array{Float64},\n            userdata,\n            idx::Int,\n            meas::Tuple,\n            Xi::Array{Float64,2},\n            Xj::Array{Float64,2}  )\n  #\n  z = meas[1][:,idx]\n  xi, xj = Xi[:,idx], Xj[:,idx]\n  dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata\n  res[1:2] = z[1:2] - (xj[1:2] - (xi[1:2]+dt*xi[3:4]))\n  res[3:4] = z[3:4] - (xj[3:4] - xi[3:4])\n  nothing\nendA brief usage example looks as follows, and further questions about how the preintegration strategy was implemented can be traced through the original issue JuliaRobotics/RoME.jl#60 or the literature associated with this project, or contact for more information.using RoME, Distributions\nfg = initfg()\nv0 = addNode!(fg, :x0, DynPoint2(ut=0))\n\n# Prior factor as boundary condition\npp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*eye(4)))\nf0 = addFactor!(fg, [:x0;], pp0)\n\n# conditional likelihood between Dynamic Point2\nv1 = addNode!(fg, :x1, DynPoint2(ut=1000_000)) # time in microseconds\ndp2dp2 = DynPoint2DynPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))\nf1 = addFactor!(fg, [:x0;:x1], dp2dp2)\n\nensureAllInitialized!(fg)\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\nusing KernelDensityEstimate\n@show x0 = getKDEMax(getVertKDE(fg, :x0))\n# julia> ... = [-0.19441, 0.0187019, 10.0082, 10.0901]\n@show x1 = getKDEMax(getVertKDE(fg, :x1))\n # julia> ... = [19.9072, 19.9765, 10.0418, 10.0797]"
@@ -170,7 +186,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "definingfactors.html#VelPoint2VelPoint2-(back-differentiation)-1",
-    "page": "Tutorial: Defining Factors",
+    "page": "Moderate Tutorial: Defining Factors",
     "title": "VelPoint2VelPoint2 (back-differentiation)",
     "category": "section",
     "text": "In case the preintegrated approach is not the first choice, we include VelPoint2VelPoint2 <: IncrementalInference.FunctorPairwiseMinimize as a second likelihood factor example which may seem more intuitive:mutable struct VelPoint2VelPoint2{T} <: IncrementalInference.FunctorPairwiseMinimize where {T <: Distribution}\n  z::T\n  VelPoint2VelPoint2{T}() where {T <: Distribution} = new{T}()\n  VelPoint2VelPoint2(z1::T) where {T <: Distribution} = new{T}(z1)\nend\ngetSample(vp2vp2::VelPoint2VelPoint2, N::Int=1) = (rand(vp2vp2.z,N), )\nfunction (vp2vp2::VelPoint2VelPoint2)(\n                res::Array{Float64},\n                userdata,\n                idx::Int,\n                meas::Tuple,\n                Xi::Array{Float64,2},\n                Xj::Array{Float64,2}  )\n  #\n  z = meas[1][:,idx]\n  xi, xj = Xi[:,idx], Xj[:,idx]\n  dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata\n  dp = (xj[1:2]-xi[1:2])\n  dv = (xj[3:4]-xi[3:4])\n  res[1] = 0.0\n  res[1] += sum((z[1:2] - dp).^2)\n  res[1] += sum((z[3:4] - dv).^2)\n  res[1] += sum((dp/dt - xi[3:4]).^2)  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration\n  res[1]\nendA similar usage example here shows:fg = initfg()\n\n# add three point locations\nv0 = addNode!(fg, :x0, DynPoint2(ut=0))\nv1 = addNode!(fg, :x1, DynPoint2(ut=1000_000))\nv2 = addNode!(fg, :x2, DynPoint2(ut=2000_000))\n\n# Prior factor as boundary condition\npp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*eye(4)))\nf0 = addFactor!(fg, [:x0;], pp0)\n\n# conditional likelihood between Dynamic Point2\ndp2dp2 = VelPoint2VelPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))\nf1 = addFactor!(fg, [:x0;:x1], dp2dp2)\n\n# conditional likelihood between Dynamic Point2\ndp2dp2 = VelPoint2VelPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))\nf2 = addFactor!(fg, [:x1;:x2], dp2dp2)\n\n# Graphs.plot(fg.g)\nensureAllInitialized!(fg)\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n# see the output\n@show x0 = getKDEMax(getVertKDE(fg, :x0))\n@show x1 = getKDEMax(getVertKDE(fg, :x1))\n@show x2 = getKDEMax(getVertKDE(fg, :x2))Producing output:x0 = getKDEMax(getVertKDE(fg, :x0)) = [0.101503, -0.0273216, 9.86718, 9.91146]\nx1 = getKDEMax(getVertKDE(fg, :x1)) = [10.0087, 9.95139, 10.0622, 10.0195]\nx2 = getKDEMax(getVertKDE(fg, :x2)) = [19.9381, 19.9791, 10.0056, 9.92442]"
@@ -178,7 +194,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "definingfactors.html#IncrementalInference.jl-Defining-Factors-(Future-API)-1",
-    "page": "Tutorial: Defining Factors",
+    "page": "Moderate Tutorial: Defining Factors",
     "title": "IncrementalInference.jl Defining Factors (Future API)",
     "category": "section",
     "text": "We would like to remove the idx indexing from the residual function calls, since that is an unnecessary burden on the user.  Instead, the package will use views and SubArray types to simplify the interface.  Please contact author for more details (8 June 2018)."
@@ -186,7 +202,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "definingfactors.html#Contributions-1",
-    "page": "Tutorial: Defining Factors",
+    "page": "Moderate Tutorial: Defining Factors",
     "title": "Contributions",
     "category": "section",
     "text": "Thanks to mc2922 for raising the catalyst issue and conversations that followed from JuliaRobotics/RoME.jl#60."
@@ -205,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Arena Visualization",
     "title": "Visualization with Arena.jl",
     "category": "section",
-    "text": "Caesar.jl uses the Arena.jl package for all the visualization requirements.  This part of the documentation discusses the robotic visualization aspects supported by Arena.jl. Arena.jl supports a wide variety of general visualization as well as developer visualization tools more focused on research and development.Over time, Caesar.jl has used a least three different 3D visualization technologies, with the most recent based on WebGL and three.js by means of the MeshCat.jl package. The previous incarnation used a client side installation of VTK  by means of the DrakeVisualizer.jl and Director libraries. Different 2D plotting libraries have also been used, with evolutions to improve usability for a wider user base. Each epoch has aimed at reducing dependencies and increasing multi-platform support.The sections below discuss 2D and 3D visualization techniques available to the Caesar.jl robot navigation system. Visualization examples will be seen throughout the Caesar.jl package documentation.Note that all visualizations used to be part of the Caesar.jl package itself, but was separated out to Arena.jl in early. There may be some package documentation glitches where the using Arena dependency has not been added – please file issues or suggest changes accordingly."
+    "text": "Caesar.jl uses the Arena.jl package for all the visualization requirements.  This part of the documentation discusses the robotic visualization aspects supported by Arena.jl. Arena.jl supports a wide variety of general visualization as well as developer visualization tools more focused on research and development.Over time, Caesar.jl has used a least three different 3D visualization technologies, with the most recent based on WebGL and three.js by means of the MeshCat.jl package. The previous incarnation used a client side installation of VTK  by means of the DrakeVisualizer.jl and Director libraries. Different 2D plotting libraries have also been used, with evolutions to improve usability for a wider user base. Each epoch has aimed at reducing dependencies and increasing multi-platform support.The sections below discuss 2D and 3D visualization techniques available to the Caesar.jl robot navigation system. Visualization examples will be seen throughout the Caesar.jl package documentation.Note that all visualizations used to be part of the Caesar.jl package itself, but was separated out to Arena.jl in early 2018."
 },
 
 {
@@ -213,7 +229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Arena Visualization",
     "title": "Installation",
     "category": "section",
-    "text": "This package will soon be registed with Julia METADATA which will make it available with the standard package management tools.  Within Julia or (JuliaPro) type:julia> Pkg.add(\"Arena\")Depending on the system, the following sudo apt-get install packages may be required, see DrakeVisualizer.jl for more details:libvtk5-qt4-dev python-vtk"
+    "text": "The current version of Arena has a rather large VTK dependency (which compile just fine on Ubuntu/Debian, or maybe even MacOS) wrapped in the DrakeVisualizer.jl package.  This requires the following preinstalled packages:    sudo apt-get install libvtk5-qt4-dev python-vtkNOTE Smaller individual 2D packages can be installed instead – i.e.:Pkg.add(\"RoMEPlotting\")For the full 2D/3D visualization tools used by Caesar.jl–-in a Julia or (JuliaPro) terminal/REPL–-type:julia> Pkg.add(\"Arena\")NOTE Current development will allow the user to choose a three.jl WebGL based viewer instead MeshCat.jl."
 },
 
 {
@@ -221,7 +237,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Arena Visualization",
     "title": "2D Visualization",
     "category": "section",
-    "text": "2D plot visualizations are generally useful for repeated analysis of a algorithm or data set being studied. These visualizations are often manipulated to emphasize particular aspects of mobile platform navigation. Arena.jl is intended to simplify the process 2D plotting for robot trajectories in two or three dimensions. The visualizations are also intended to help with subgraph plotting for finding loop closures in data or compare two datasets."
+    "text": "2D plot visualizations, provided by RoMEPlotting.jl and KernelDensityEstimatePlotting.jl, are generally useful for repeated analysis of a algorithm or data set being studied. These visualizations are often manipulated to emphasize particular aspects of mobile platform navigation. Arena.jl is intended to simplify the process 2D plotting for robot trajectories in two or three dimensions. The visualizations are also intended to help with subgraph plotting for finding loop closures in data or compare two datasets."
 },
 
 {
@@ -229,7 +245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Arena Visualization",
     "title": "Hexagonal 2D SLAM example visualization",
     "category": "section",
-    "text": "This simplest example for visualizing a 2D robot trajectory is:using RoME, Arena  \n\nfg = initfg()\n\n# also add a PriorPose2 to pin the first pose at a fixed location\naddNode!(fg, :x0, Pose2, labels=[\"VARIABLE\";\"POSE\"])\naddFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))\n\n# Drive around in a hexagon\nfor i in 0:5\n  psym = Symbol(\"x$i\")\n  nsym = Symbol(\"x$(i+1)\")\n  addNode!(fg, nsym, Pose2, labels=[\"VARIABLE\";\"POSE\"])\n  addFactor!(fg, [psym;nsym], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0]), autoinit=true )\n  # Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))\nend\n\nensureAllInitialized!(fg)\nsolveBatch!(fg)\n\n# The RoME and IncrementalInference\n\n# RoMEPlotting, KernelDensityEstimatePlotting and Gadfly packages provide the 2D visualization\ndrawPoses(fg)"
+    "text": "The major 2D plotting functions between RoMEPlotting.jl:drawPoses\ndrawPosesLandms\ndrawSubmapsand KernelDensityEstimatePlotting.jl:plotKDE / plot(::KernelDensityEstimate)This simplest example for visualizing a 2D robot trajectory–-such as first running the Hexagonal 2D SLAM example–-# Assuming some fg::FactorGraph has been loaded/constructed\n# ...\n\nusing RoMEPlotting\n\n# For Juno/Jupyter style use\npl = drawPosesLandms(fg)\n\n# For scripting use-cases you can export the image\nGadfly.draw(PDF(\"/tmp/test.pdf\", 20cm, 10cm),pl)  # or PNG(...)(Image: test)"
 },
 
 {
@@ -242,18 +258,18 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "database_interactions.html#",
-    "page": "Database Layer",
-    "title": "Database Layer",
+    "page": "Offloading to Server",
+    "title": "Offloading to Server",
     "category": "page",
     "text": ""
 },
 
 {
-    "location": "database_interactions.html#Database-interaction-layer-1",
-    "page": "Database Layer",
-    "title": "Database interaction layer",
+    "location": "database_interactions.html#Common-Data-Persistence-and-Inference-1",
+    "page": "Offloading to Server",
+    "title": "Common Data Persistence and Inference",
     "category": "section",
-    "text": "For using the solver on a Database layer, you simply need to switch the working API. This can be done by calling the database connection function, and following the prompt:using Caesar\nbackend_config, user_config = standardcloudgraphsetup()\nfg = Caesar.initfg(sessionname=user_config[\"session\"], cloudgraph=backend_config)\n# and then continue as normal with the fg object, to add variables and factors, draw etc.If you have access to Neo4j and Mongo services you should be able to run the four door test.Go to your browser at localhost:7474 and run one of the Cypher queries to either retrievematch (n) return nor delete everything:match (n) detach delete nYou can run the multi-modal iSAM solver against the DB using the example MM-iSAMCloudSolve.jl:$ julia -p20\njulia> using Caesar\njulia> slamindb() # iterations=-1Database driven Visualization can be done with either MIT\'s MIT Director (prefered), or Collections Render which additionally relies on Pybot. For visualization using Director/DrakeVisualizer.jl:$ julia -e \"using Caesar; drawdbdirector()\"And an example service script for CollectionsRender is also available."
+    "text": "Coming soon!"
 },
 
 {
@@ -269,7 +285,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Functions",
     "title": "Function Reference",
     "category": "section",
-    "text": "Pages = [\n    \"func_ref.md\"\n]\nDepth = 3"
+    "text": "NOTE WORK IN PROGRESSPages = [\n    \"func_ref.md\"\n]\nDepth = 3"
 },
 
 {
