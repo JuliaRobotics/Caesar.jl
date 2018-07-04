@@ -11,59 +11,64 @@ Each epoch has aimed at reducing dependencies and increasing multi-platform supp
 The sections below discuss 2D and 3D visualization techniques available to the Caesar.jl robot navigation system.
 Visualization examples will be seen throughout the Caesar.jl package documentation.
 
-**Note** that all visualizations used to be part of the Caesar.jl package itself, but was separated out to Arena.jl in early.
-There may be some package documentation glitches where the `using Arena` dependency has not been added -- please file issues or suggest changes accordingly.
+**Note** that all visualizations used to be part of the Caesar.jl package itself, but was separated out to Arena.jl in early 2018.
 
 ## Installation
 
+The current version of `Arena` has a rather large VTK dependency (which compile just fine on Ubuntu/Debian, or maybe even MacOS) wrapped in the [DrakeVisualizer.jl package](https://github.com/rdeits/DrakeVisualizer.jl).  This requires the following preinstalled packages:
+```bash
+    sudo apt-get install libvtk5-qt4-dev python-vtk
+```
 
-This package will soon be registed with Julia METADATA which will make it available with the standard package management tools.  Within [Julia](http://www.julialang.org) or ([JuliaPro](http://www.juliacomputing.com)) type:
+**NOTE** Smaller individual 2D packages can be installed instead -- i.e.:
+```julia
+Pkg.add("RoMEPlotting")
+```
+
+For the full 2D/3D visualization tools used by Caesar.jl---in a [Julia](http://www.julialang.org) or ([JuliaPro](http://www.juliacomputing.com)) terminal/REPL---type:
 ```julia
 julia> Pkg.add("Arena")
 ```
 
-Depending on the system, the following `sudo apt-get install` packages may be required, see [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) for more details:
-
-    libvtk5-qt4-dev python-vtk
+**NOTE** Current development will allow the user to choose a `three.jl` WebGL based viewer instead [MeshCat.jl](https://github.com/rdeits/MeshCat.jl).
 
 ## 2D Visualization
 
-2D plot visualizations are generally useful for repeated analysis of a algorithm or data set being studied.
+2D plot visualizations, provided by `RoMEPlotting.jl` and `KernelDensityEstimatePlotting.jl`, are generally useful for repeated analysis of a algorithm or data set being studied.
 These visualizations are often manipulated to emphasize particular aspects of mobile platform navigation.
 Arena.jl is intended to simplify the process 2D plotting for robot trajectories in two or three dimensions.
 The visualizations are also intended to help with subgraph plotting for finding loop closures in data or compare two datasets.
 
 ### Hexagonal 2D SLAM example visualization
 
-This simplest example for visualizing a 2D robot trajectory is:
+The major 2D plotting functions between `RoMEPlotting.jl`:
+- `drawPoses`
+- `drawPosesLandms`
+- `drawSubmaps`
+
+and `KernelDensityEstimatePlotting.jl`:
+- `plotKDE` / `plot(::KernelDensityEstimate)`
+
+
+This simplest example for visualizing a 2D robot trajectory---such as first running [the Hexagonal 2D SLAM example](http://www.juliarobotics.org/Caesar.jl/latest/tut_hexagonal2d.html)---
 ```julia
-using RoME, Arena  
+# Assuming some fg::FactorGraph has been loaded/constructed
+# ...
 
-fg = initfg()
+using RoMEPlotting
 
-# also add a PriorPose2 to pin the first pose at a fixed location
-addNode!(fg, :x0, Pose2, labels=["VARIABLE";"POSE"])
-addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
+# For Juno/Jupyter style use
+pl = drawPosesLandms(fg)
 
-# Drive around in a hexagon
-for i in 0:5
-  psym = Symbol("x$i")
-  nsym = Symbol("x$(i+1)")
-  addNode!(fg, nsym, Pose2, labels=["VARIABLE";"POSE"])
-  addFactor!(fg, [psym;nsym], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0]), autoinit=true )
-  # Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
-end
-
-ensureAllInitialized!(fg)
-solveBatch!(fg)
-
-# The RoME and IncrementalInference
-
-# RoMEPlotting, KernelDensityEstimatePlotting and Gadfly packages provide the 2D visualization
-drawPoses(fg)
+# For scripting use-cases you can export the image
+Gadfly.draw(PDF("/tmp/test.pdf", 20cm, 10cm),pl)  # or PNG(...)
 ```
 
+![test](https://user-images.githubusercontent.com/6412556/42294545-c6c80f70-7faf-11e8-8167-017889cee932.png)
+
 ## 3D Visualization
+
+
 
 Factor graphs of two or three dimensions can be visualized with the 3D visualizations provided by Arena.jl and it's dependencies.
 The 2D example above and also be visualized in a 3D space with the commands:
