@@ -129,11 +129,59 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "tut_hexagonal2d.html#Tutorial:-Hexagonal-2D-Example-(Local-Compute)-1",
+    "location": "tut_hexagonal2d.html#Tutorial:-Hexagonal-2D-SLAM-Example-(Local-Compute)-1",
     "page": "Entry Tutorial: Hexagonal 2D SLAM",
-    "title": "Tutorial: Hexagonal 2D Example (Local Compute)",
+    "title": "Tutorial: Hexagonal 2D SLAM Example (Local Compute)",
     "category": "section",
-    "text": "A simple 2D robot trajectory example is:# add more julia processes\nnprocs() < 3 ? addprocs(4-nprocs()) : nothing\n\n# tell Julia that you want to use these namespaces\nusing RoME, Distributions\n\n# start with an empty factor graph object\nfg = initfg()\n\n# Add the first pose :x0\naddNode!(fg, :x0, Pose2)\n# Add at a fixed location PriorPose2 to pin :x0 to a starting location\naddFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))\n\n# Drive around in a hexagon\nfor i in 0:5\n  psym = Symbol(\"x$i\")\n  nsym = Symbol(\"x$(i+1)\")\n  addNode!(fg, nsym, Pose2)\n  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))\n  addFactor!(fg, [psym;nsym], pp )\nend\n\n# perform inference, and remember first runs are slower owing to Julia\'s just-in-time compiling\nbatchSolve!(fg)\n\n\n## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist\nusing RoMEPlotting\n\n# For Juno/Jupyter style use\npl = drawPoses(fg)\n\n# For scripting use-cases you can export the image\nGadfly.draw(Gadfly.PDF(\"/tmp/test.pdf\", 20cm, 10cm),pl)  # or PNG(...)(Image: test)See further discussion on visualizations and packages here."
+    "text": "A simple 2D robot trajectory example is expanded below using techniques developed in simultaneous localization and mapping (SLAM). This example is available as a single script here."
+},
+
+{
+    "location": "tut_hexagonal2d.html#Creating-the-Factor-Graph-with-Pose2-1",
+    "page": "Entry Tutorial: Hexagonal 2D SLAM",
+    "title": "Creating the Factor Graph with Pose2",
+    "category": "section",
+    "text": "The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  # add more julia processes\nnprocs() < 3 ? addprocs(4-nprocs()) : nothing\n\n# tell Julia that you want to use these modules/namespaces\nusing RoME, DistributionsAfter loading the RoME and Distributions modules, we construct a local factor graph object in memory:# start with an empty factor graph object\nfg = initfg()\n\n# Add the first pose :x0\naddNode!(fg, :x0, Pose2)\n\n# Add at a fixed location PriorPose2 to pin :x0 to a starting location\naddFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))A factor graph object fg (of type ::FactorGraph) has been constructed; the first pose :x0 has been added; and a prior factor setting the origin at [0,0,0] over variable node dimensions [x,y,θ] in the world frame. The type Pose2 is used to indicate what variable is stored in the node. Caesar.jl allows a little more freedom in how factor and variable nodes can be connected, while still allowing for type-assertion to occur.NOTE Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first a function is called, but fast from the second call since the static function is cached and ready for use.The next 6 nodes are added with odometry in an counter-clockwise hexagonal manner. Note how variables are denoted with symbols, :x2 == Symbol(\"x2\"):# Drive around in a hexagon\nfor i in 0:5\n  psym = Symbol(\"x$i\")\n  nsym = Symbol(\"x$(i+1)\")\n  addNode!(fg, nsym, Pose2)\n  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))\n  addFactor!(fg, [psym;nsym], pp )\nendAt this point it would be good to see what the factor graph actually looks like:writeGraphPdf(fg)You should see the program evince open with this visual: (Image: exfg2d)"
+},
+
+{
+    "location": "tut_hexagonal2d.html#Performing-Inference-1",
+    "page": "Entry Tutorial: Hexagonal 2D SLAM",
+    "title": "Performing Inference",
+    "category": "section",
+    "text": "Let\'s run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this fg object:# perform inference, and remember first runs are slower owing to Julia\'s just-in-time compiling\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n# batchSolve!(fg) # coming soonThis will take a couple of seconds (including first time compiling for all Julia processes)."
+},
+
+{
+    "location": "tut_hexagonal2d.html#Some-Visualization-Plot-1",
+    "page": "Entry Tutorial: Hexagonal 2D SLAM",
+    "title": "Some Visualization Plot",
+    "category": "section",
+    "text": "2D plots of the factor graph contents is provided by the RoMEPlotting package. See further discussion on visualizations and packages here.## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist\nusing RoMEPlotting\n\n# For Juno/Jupyter style use\npl = drawPoses(fg)\n\n# For scripting use-cases you can export the image\nGadfly.draw(Gadfly.PDF(\"/tmp/test.pdf\", 20cm, 10cm),pl)  # or PNG(...)(Image: test)"
+},
+
+{
+    "location": "tut_hexagonal2d.html#Adding-Landmarks-as-Point2-1",
+    "page": "Entry Tutorial: Hexagonal 2D SLAM",
+    "title": "Adding Landmarks as Point2",
+    "category": "section",
+    "text": "Suppose some sensor detected a feature of interest with an associated range and bearing measurement The new variable and measurement can be included into the factor graph as follows:# Add landmarks with Bearing range measurements\naddNode!(fg, :l1, Point2, labels=[\"LANDMARK\"])\np2br = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))\naddFactor!(fg, [:x0; :l1], p2br)\n\n# Initialize :l1 numerical values but do not rerun solver\nensureAllInitialized!(fg)NOTE The default behavior for initialization of variable nodes implies the last variable noded added will not have any numerical values yet, please see ContinuousScalar Tutorial for deeper discussion on automatic initialization (autoinit). A slightly expanded plotting function will draw both poses and landmarks (and currently assumes labels starting with :x and :l respectively) – notice the new landmark bottom right:drawPosesLandms(fg)(Image: test)"
+},
+
+{
+    "location": "tut_hexagonal2d.html#One-type-of-Loop-Closure-1",
+    "page": "Entry Tutorial: Hexagonal 2D SLAM",
+    "title": "One type of Loop-Closure",
+    "category": "section",
+    "text": "Loop-closures are a major part of SLAM based state estimation. One illustration is to take a second sighting of the same :l1 landmark from the last pose :x6; followed by repeating the inference and re-plotting the result – notice the tighter confidences over all variables:# Add landmarks with Bearing range measurements\np2br2 = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))\naddFactor!(fg, [:x6; :l1], p2br2)\n\n# solve\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n# redraw\npl = drawPosesLandms(fg)(Image: test)This concludes the Hexagonal 2D SLAM example."
+},
+
+{
+    "location": "tut_hexagonal2d.html#Interest:-The-Bayes-(Junction)-tree-1",
+    "page": "Entry Tutorial: Hexagonal 2D SLAM",
+    "title": "Interest: The Bayes (Junction) tree",
+    "category": "section",
+    "text": "The Bayes (Junction) tree is used as an acyclic (has no loops) computational object, an exact algebraic refactorizating of factor graph, to perform the associated sum-product inference. The visual structure of the tree can extracted by modifying the command tree = wipeBuildNewTree!(fg, drawpdf=true) to produce representations such as this in bt.pdf.(Image: exbt2d)"
 },
 
 {
