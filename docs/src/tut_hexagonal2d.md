@@ -3,7 +3,7 @@
 A simple 2D robot trajectory example is expanded below using techniques developed in simultaneous localization and mapping (SLAM).
 This example is available as a [single script here](JuliaRobotics/RoME.jl/examples/Hexagonal2D_SLAM.jl).
 
-## Creating the Factor Graph with Pose2
+## Creating the Factor Graph with `Pose2`
 
 The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  
 ```julia
@@ -48,6 +48,7 @@ At this point it would be good to see what the factor graph actually looks like:
 writeGraphPdf(fg)
 ```
 You should see the program `evince` open with this visual:
+
 ![exfg2d](https://user-images.githubusercontent.com/6412556/42296063-0cd056a8-7fbf-11e8-9745-8589446c38f9.png)
 
 ## Performing Inference

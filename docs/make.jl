@@ -9,6 +9,7 @@ makedocs(
         "Examples" => "examples.md",
         "Entry Tutorial: ContinuousScalar" => "tutorialcontinuousscalar.md",
         "Entry Tutorial: Hexagonal 2D SLAM" => "tut_hexagonal2d.md",
+        "Entry Tutorial: Singular Ranges-only SLAM" => "tut_slamedonut.md",
         "Moderate Tutorial: Defining Factors" => "definingfactors.md",
         "Arena Visualization" => "arena_visualizations.md",
         "Offloading to Server" => "database_interactions.md",
