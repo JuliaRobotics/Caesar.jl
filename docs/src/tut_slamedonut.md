@@ -1,5 +1,6 @@
 # Tutorial: Singular Ranges-only SLAM Solution (i.e. "Under-Constrained")
 
+
 This tutorial describes a range-only system where there are always more variable dimensions than range measurements made.
 The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point -- other examples show inference results where highly non-Gaussian error distributions are used.
 The one pre-baked result of this of this singular range-only illustration can be seen in this video:
@@ -8,6 +9,11 @@ Multi-modal range only example ([click here or image for full Vimeo](http://vime
 ```@raw html
 <a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="640" border="0" /></a>
 ```
+
+## REQUIRES
+
+- `RoME v0.1.5`
+- `RoMEPlotting v0.0.2`
 
 ## Loading The Data
 
@@ -149,19 +155,29 @@ The video above gives away the vehicle position with the cyan line, showing trav
 Finally, to speed things up, lets write a function that handles the travel (pseudo odometry factors between positions) and ranging measurement factors to beacons.
 
 ```julia
-
-# Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks
-function vehicle_drives_to!(fgl::FactorGraph, possym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R <: Real}
-  @show beacons = keys(GTl)
+function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R <: Real}
+  currvar = union(ls(fgl)...)
+  prev_sym = Symbol("l$(maximum(Int[parse(Int,string(currvar[i])[2:end]) for i in 2:length(currvar)]))")
+  if !(pos_sym in currvar)
+    println("Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.")
+    addNode!(fgl, pos_sym, Point2)
+    @show rho = norm(GTp[prev_sym] - GTp[pos_sym])
+    ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+    addFactor!(fgl, [prev_sym;pos_sym], ppr)
+  else
+    warn("Variable node $pos_sym already in the factor graph.")
+  end
+  beacons = keys(GTl)
   for ll in beacons
-    rho = norm(GTl[ll] - GTp[possym])
+    rho = norm(GTl[ll] - GTp[pos_sym])
+    # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks
     if rho < measurelimit
-      ppr = Point2DPoint2DRange([norm(GTl[ll] - GTp[possym])], 3.0, [1.0])
-      if !(:l4 in union(ls(fgl)...))
+      ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+      if !(ll in currvar)
         println("Adding variable vertex $ll, not yet in fgl::FactorGraph.")
-        addNode!(fgl, ll, Point2, N=N, ready=0)
+        addNode!(fgl, ll, Point2)
       end
-      addFactor!(fgl, [possym;ll], ppr, ready=0)
+      addFactor!(fgl, [pos_sym;ll], ppr)
     end
   end
   nothing
@@ -176,15 +192,124 @@ Instead, the exclamation serves as a Julia community convention to tell the call
 Now the actual driving event can be added to the factor graph:
 
 ```julia
-#drive to next location :l101
+#drive to location :l101, then :l102
 vehicle_drives_to!(fg, :l101, GTp, GTl)
-```
+vehicle_drives_to!(fg, :l102, GTp, GTl)
 
+# see the graph
+writeGraphPdf(fg)
+```
 
 **NOTE** The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.
 
+The marginal posterior estimates are found by repeating inference over the factor graph, followed drawing all vehicle locations as a contour map:
+
+```julia
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+# draw all vehicle locations
+pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:2], dims=[1;2])
+# Gadfly.draw(PDF("/tmp/testL100_102.pdf", 20cm, 10cm),pl) # for storing image to disk
+
+pl = plotKDE(fg, [:l3;:l4], dims=[1;2], levels=4)
+# Gadfly.draw(PNG("/tmp/testL3_4.png", 20cm, 10cm),pl)
+```
+
+Notice how the vehicle positions have two hypotheses, one left to right and one diagonal right to bottom left -- both are valid solutions!
+
+![testl100_102](https://user-images.githubusercontent.com/6412556/42428772-722555b6-8303-11e8-9931-d3e2e89e3206.png)
+
+The two "free" beacons/landmarks `:l3,:l4` still have several modes each, implying insufficient data to constrain either to a strong unimodal belief.
+
+![testl3_4](https://user-images.githubusercontent.com/6412556/42428800-a5ac86f2-8303-11e8-984c-8952f7cdf839.png)
+
+```julia
+
+vehicle_drives_to!(fg, :l103, GTp, GTl)
+vehicle_drives_to!(fg, :l104, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2])
+# Gadfly.draw(PDF("/tmp/testL100_104.pdf", 20cm, 10cm),pl)
+```
+
+Moving up to position `:l104` still shows strong multiodality in the vehicle position estimates:
+
+![testl100_105](https://user-images.githubusercontent.com/6412556/42428903-2f0b7e4e-8304-11e8-94b2-44fbee4d1961.png)
+
+```julia
+vehicle_drives_to!(fg, :l105, GTp, GTl)
+vehicle_drives_to!(fg, :l106, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
 
 
+vehicle_drives_to!(fg, :l107, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
 
 
-**WORK IN PROGRESS -- AND DEBUGGING**
+vehicle_drives_to!(fg, :l108, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+
+pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 2:8], dims=[1;2], levels=6)
+# Gadfly.draw(PDF("/tmp/testL103_108.pdf", 20cm, 10cm),pl)
+```
+
+Next we see a strong return to a single dominant mode in all vehicle position estimates, owing to the increased measurements to beacons/landmarks as well as more unimodal estimates in `:l3, :l4` beacon/landmark positions.
+
+```julia
+vehicle_drives_to!(fg, :l109, GTp, GTl)
+vehicle_drives_to!(fg, :l110, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+
+vehicle_drives_to!(fg, :l111, GTp, GTl)
+vehicle_drives_to!(fg, :l112, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree, N=200)
+
+
+pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 7:12], dims=[1;2])
+# Gadfly.draw(PDF("/tmp/testL106_112.pdf", 20cm, 10cm),pl)
+
+pl = plotKDE(fg, [:l1;:l2;:l3;:l4], dims=[1;2], levels=4)
+# Gadfly.draw(PDF("/tmp/testL1234.pdf", 20cm, 10cm),pl)
+
+pl = drawLandms(fg, from=100)
+# Gadfly.draw(PDF("/tmp/testLocsAll.pdf", 20cm, 10cm),pl)
+```
+
+Several location belief estimates exhibit multimodality as the trajectory progresses (not shown), but collapses and finally collapses to a stable set of dominant position estimates.
+
+![testl106_112](https://user-images.githubusercontent.com/6412556/42429138-7576dea4-8305-11e8-9a0c-a56984805126.png)
+
+Landmark estimates are also stable at one estimate:
+
+![testl1234](https://user-images.githubusercontent.com/6412556/42429149-85ee3bf6-8305-11e8-8a39-6af5b7496f3c.png)
+
+In addition, the SLAM 2D landmark visualization can be re-used to plot more information at once:
+
+```julia
+# pl = drawLandms(fg, from=100, to=200)
+# Gadfly.draw(PDF("/tmp/testLocsAll.pdf", 20cm, 10cm),pl)
+
+pl = drawLandms(fg)
+# Gadfly.draw(PDF("/tmp/testAll.pdf", 20cm, 10cm),pl)
+```
+
+![testall](https://user-images.githubusercontent.com/6412556/42429216-d3b8b73a-8305-11e8-89ba-bb790b0963d5.png)
+
+This example used the default of `N=200` particles per marginal belief.
+By increasing the number to `N=300` throughout the test many more modes and interesting features can be explored, and we refer the reader to an alternative and longer discussion on the same example, in [Chapter 6 here](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1).
