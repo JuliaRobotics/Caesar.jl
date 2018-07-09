@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Entry Tutorial: Singular Ranges-only SLAM · Caesar.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="index.html"><img class="logo" src="assets/logo.png" alt="Caesar.jl logo"/></a><h1>Caesar.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="index.html">Home</a></li><li><a class="toctext" href="examples.html">Examples</a></li><li><a class="toctext" href="tutorialcontinuousscalar.html">Entry Tutorial: ContinuousScalar</a></li><li><a class="toctext" href="tut_hexagonal2d.html">Entry Tutorial: Hexagonal 2D SLAM</a></li><li class="current"><a class="toctext" href="tut_slamedonut.html">Entry Tutorial: Singular Ranges-only SLAM</a><ul class="internal"><li><a class="toctext" href="#REQUIRES-1">REQUIRES</a></li><li><a class="toctext" href="#Loading-The-Data-1">Loading The Data</a></li><li><a class="toctext" href="#Creating-the-Factor-Graph-with-Point2-1">Creating the Factor Graph with <code>Point2</code></a></li><li><a class="toctext" href="#Adding-Range-Measurements-Between-Variables-1">Adding Range Measurements Between Variables</a></li><li><a class="toctext" href="#Inference-and-Visualizations-1">Inference and Visualizations</a></li><li><a class="toctext" href="#Stochastic-Growth-and-Decay-of-Modes-(i.e.-Hypotheses)-1">Stochastic Growth and Decay of Modes (i.e. Hypotheses)</a></li></ul></li><li><a class="toctext" href="definingfactors.html">Moderate Tutorial: Defining Factors</a></li><li><a class="toctext" href="arena_visualizations.html">Arena Visualization</a></li><li><a class="toctext" href="database_interactions.html">Offloading to Server</a></li><li><a class="toctext" href="func_ref.html">Functions</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href="tut_slamedonut.html">Entry Tutorial: Singular Ranges-only SLAM</a></li></ul><a class="edit-page" href="https://github.com/JuliaRobotics/Caesar.jl/blob/master/docs/src/tut_slamedonut.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Entry Tutorial: Singular Ranges-only SLAM</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Tutorial:-Singular-Ranges-only-SLAM-Solution-(i.e.-&quot;Under-Constrained&quot;)-1" href="#Tutorial:-Singular-Ranges-only-SLAM-Solution-(i.e.-&quot;Under-Constrained&quot;)-1">Tutorial: Singular Ranges-only SLAM Solution (i.e. &quot;Under-Constrained&quot;)</a></h1><p>This tutorial describes a range-only system where there are always more variable dimensions than range measurements made. The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point – other examples show inference results where highly non-Gaussian error distributions are used. The one pre-baked result of this of this singular range-only illustration can be seen in this video:</p><p>Multi-modal range only example (<a href="http://vimeo.com/190052649">click here or image for full Vimeo</a>):   </p><a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="640" border="0" /></a><p>This example is also available as a script <a href="https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/RangesExample.jl">here in RoME.jl</a>.</p><h2><a class="nav-anchor" id="REQUIRES-1" href="#REQUIRES-1">REQUIRES</a></h2><ul><li><p><code>RoME v0.1.5</code></p></li><li><p><code>RoMEPlotting v0.0.2</code></p></li></ul><h2><a class="nav-anchor" id="Loading-The-Data-1" href="#Loading-The-Data-1">Loading The Data</a></h2><p>Starting a Juno IDE or Julia REPL session, the ground truth positions for vehicle positions <code>GTp</code> and landmark positions <code>GTl</code> can be loaded into memory directly with these values:</p><pre><code class="language-julia">GTp = Dict{Symbol, Vector{Float64}}()
+GTp[:l100] = [0.0;0]
+GTp[:l101] = [50.0;0]
+GTp[:l102] = [100.0;0]
+GTp[:l103] = [100.0;50.0]
+GTp[:l104] = [100.0;100.0]
+GTp[:l105] = [50.0;100.0]
+GTp[:l106] = [0.0;100.0]
+GTp[:l107] = [0.0;50.0]
+GTp[:l108] = [0.0;-50.0]
+GTp[:l109] = [0.0;-100.0]
+GTp[:l110] = [50.0;-100.0]
+GTp[:l111] = [100.0;-100.0]
+GTp[:l112] = [100.0;-50.0]
+
+GTl = Dict{Symbol, Vector{Float64}}()
+GTl[:l1] = [10.0;30]
+GTl[:l2] = [30.0;-30]
+GTl[:l3] = [80.0;40]
+GTl[:l4] = [120.0;-50]</code></pre><p><strong>NOTE 1.</strong> that by using location indicators <code>:l1, :l2, ...</code> or <code>:l100, :l101, ...</code> is of practical benefit when visualizing with existing <a href="https://github.com/JuliaRobotics/RoMEPlotting.jl">RoMEPlotting</a> functions.</p><p><strong>NOTE 2.</strong> Landmarks must be in range before range measurements can be made to them.</p><h2><a class="nav-anchor" id="Creating-the-Factor-Graph-with-Point2-1" href="#Creating-the-Factor-Graph-with-Point2-1">Creating the Factor Graph with <code>Point2</code></a></h2><p>The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  </p><pre><code class="language-julia"># add more julia processes
+nprocs() &lt; 7 ? addprocs(7-nprocs()) : nothing
+
+# tell Julia that you want to use these modules/namespaces
+using RoME, Distributions</code></pre><p><strong>NOTE</strong> Julia uses just-in-time compiling (<a href="https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module">unless pre-compiled</a>), therefore each time a new function call on a Julia process will be slow, but all following calls to the same functions will be as fast as the statically compiled code.</p><p>This example exclusively uses <code>Point2</code> variable node types, which have dimension <code>2</code> and represent <code>[x, y]</code> position estimates in the world frame.</p><p>Next construct the factor graph containing the first pose <code>:l100</code> (without any knowledge of where it is) and three measured beacons/landmarks <code>:l1,:l2,:l3</code> – with prior location knowledge for <code>:l1</code> and <code>:l2</code>:</p><pre><code class="language-julia"># create the factor graph object
+fg = initfg()
+
+# first pose with no initial estimate
+addNode!(fg, :l100, Point2)
+
+# add three landmarks
+addNode!(fg, :l1, Point2)
+addNode!(fg, :l2, Point2)
+addNode!(fg, :l3, Point2)
+
+# and put priors on :l101 and :l102
+addFactor!(fg, [:l1;], PriorPoint2D(GTl[:l1], eye(2), [1.0]))
+addFactor!(fg, [:l2;], PriorPoint2D(GTl[:l2], eye(2), [1.0]))</code></pre><p>The <code>PriorPoint2D</code> is assumed to be a multivariate normal distribution of covariance <code>eye(2)</code>, as well as a weighting factor of <code>[1.0]</code>.</p><p><strong>NOTE</strong> Upcoming API change: <code>PriorPoint2D</code> will be changed to accept distribution objects and discard the weighting parameter (likely <code>RoME v0.1.5</code> – see <a href="https://github.com/JuliaRobotics/RoME.jl/issues/72">issue 72 here</a>).</p><h2><a class="nav-anchor" id="Adding-Range-Measurements-Between-Variables-1" href="#Adding-Range-Measurements-Between-Variables-1">Adding Range Measurements Between Variables</a></h2><p>Next we connect the three range measurements from the vehicle location <code>:l0</code> to the three beacons, respectively – and consider that the range measurements are completely relative between the vehicle and beacon position estimates:</p><pre><code class="language-julia"># first range measurement
+rhoZ1 = norm(GTl[:l1]-GTp[:l100])
+ppr = Point2DPoint2DRange([rhoZ1], 2.0, [1.0])
+addFactor!(fg, [:l100;:l101], ppr)
+
+# second range measurement
+rhoZ2 = norm(GTl[:l2]-GTp[:l100])
+ppr = Point2DPoint2DRange([rhoZ2], 3.0, [1.0])
+addFactor!(fg, [:l100; :l2], ppr)
+
+# second range measurement
+rhoZ3 = norm(GTl[:l3]-GTp[:l100])
+ppr = Point2DPoint2DRange([rhoZ3], 3.0, [1.0])
+addFactor!(fg, [:l100; :l3], ppr)</code></pre><p>The ranging measurement standard deviation of <code>2.0</code> or <code>3.0</code> is taken, assuming a Gaussian measurement assumption.   Again, any distribution could have been used. The factor graph should look as follows:</p><pre><code class="language-julia">writeGraphPdf(fg) # show the factor graph</code></pre><p><img src="https://user-images.githubusercontent.com/6412556/42350352-1f36072e-807e-11e8-997b-846223cc5262.png" alt="exranges01"/></p><h2><a class="nav-anchor" id="Inference-and-Visualizations-1" href="#Inference-and-Visualizations-1">Inference and Visualizations</a></h2><p>At this point we can call the solver start interpreting the first results:</p><pre><code class="language-julia">tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)</code></pre><p>The factor graph figure above showed the structure between variables and factors. In order to see the numerical values contained in the factor graph, a set of tools are provided by the <code>RoMEPlotting</code> and <code>KernelDensityEstimatePlotting</code> packages. For more details, please see the <a href="http://www.juliarobotics.org/Caesar.jl/latest/arena_visualizations.html">dedicated visualization discussion here</a>.</p><p>First look at the two landmark positions <code>:l1, :l2</code> at <code>(10.0,30)</code>,<code>(30.0,-30)</code> respectively.</p><pre><code class="language-julia">using KernelDensityEstimatePlotting
+
+plotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)</code></pre><p><img src="https://user-images.githubusercontent.com/6412556/42423068-ca8690c2-82c1-11e8-8f9c-d5df13cca264.png" alt="testl1_2"/></p><p>Similarly, the belief estimate for the first vehicle position <code>:l100</code> is bi-modal, due to the intersection of two range measurements:</p><pre><code class="language-julia">plotKDE(fg, :l100, dims=[1;2])</code></pre><p><img src="https://user-images.githubusercontent.com/6412556/42423069-d188212e-82c1-11e8-8af6-7b82f3f14030.png" alt="testl100"/></p><p>An alternative plotting interface can also be used, that shows a histogram of desired elements instead:</p><pre><code class="language-julia">drawLandms(fg, from=1, to=101)</code></pre><p><img src="https://user-images.githubusercontent.com/6412556/42423113-aec928d0-82c2-11e8-9852-c231d1e880fe.png" alt="testlall"/></p><p>Notice the ring of particles which represents the belief on the third beacon/landmark <code>:l3</code>, which was not constrained by a prior factor. Instead, the belief over the position of <code>:l3</code> is being estimated simultaneous to estimating the vehicle position <code>:l100</code>.</p><h2><a class="nav-anchor" id="Stochastic-Growth-and-Decay-of-Modes-(i.e.-Hypotheses)-1" href="#Stochastic-Growth-and-Decay-of-Modes-(i.e.-Hypotheses)-1">Stochastic Growth and Decay of Modes (i.e. Hypotheses)</a></h2><p>Next consider the vehicle moving a distance of <code>50</code> units–-and by design the direction of travel is not known–-to the next true position. The video above gives away the vehicle position with the cyan line, showing travel in the shape of a lower case &#39;e&#39;. Finally, to speed things up, lets write a function that handles the travel (pseudo odometry factors between positions) and ranging measurement factors to beacons.</p><pre><code class="language-julia">function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R &lt;: Real}
+  currvar = union(ls(fgl)...)
+  prev_sym = Symbol(&quot;l$(maximum(Int[parse(Int,string(currvar[i])[2:end]) for i in 2:length(currvar)]))&quot;)
+  if !(pos_sym in currvar)
+    println(&quot;Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.&quot;)
+    addNode!(fgl, pos_sym, Point2)
+    @show rho = norm(GTp[prev_sym] - GTp[pos_sym])
+    ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+    addFactor!(fgl, [prev_sym;pos_sym], ppr)
+  else
+    warn(&quot;Variable node $pos_sym already in the factor graph.&quot;)
+  end
+  beacons = keys(GTl)
+  for ll in beacons
+    rho = norm(GTl[ll] - GTp[pos_sym])
+    # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks
+    if rho &lt; measurelimit
+      ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+      if !(ll in currvar)
+        println(&quot;Adding variable vertex $ll, not yet in fgl::FactorGraph.&quot;)
+        addNode!(fgl, ll, Point2)
+      end
+      addFactor!(fgl, [pos_sym;ll], ppr)
+    end
+  end
+  nothing
+end</code></pre><p>After pasting (or running) this function in the Julia, a new member definition exists for <code>vehicle_drives_to!</code>.</p><p><strong>NOTE</strong> The exclamation mark at the end of the function name has no syntactic significance in Julia, since the full UTF8 character set is available for functions or variables. Instead, the exclamation serves as a Julia community convention to tell the caller that this function will modify the contents of at least some of the variables being passed into it – in this case the factor graph <code>fg</code> will be modified.</p><p>Now the actual driving event can be added to the factor graph:</p><pre><code class="language-julia">#drive to location :l101, then :l102
+vehicle_drives_to!(fg, :l101, GTp, GTl)
+vehicle_drives_to!(fg, :l102, GTp, GTl)
+
+# see the graph
+writeGraphPdf(fg)</code></pre><p><strong>NOTE</strong> The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.</p><p>The marginal posterior estimates are found by repeating inference over the factor graph, followed drawing all vehicle locations as a contour map:</p><pre><code class="language-julia">tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+# draw all vehicle locations
+pl = plotKDE(fg, [Symbol(&quot;l$(100+i)&quot;) for i in 0:2], dims=[1;2])
+# Gadfly.draw(PDF(&quot;/tmp/testL100_102.pdf&quot;, 20cm, 10cm),pl) # for storing image to disk
+
+pl = plotKDE(fg, [:l3;:l4], dims=[1;2], levels=4)
+# Gadfly.draw(PNG(&quot;/tmp/testL3_4.png&quot;, 20cm, 10cm),pl)</code></pre><p>Notice how the vehicle positions have two hypotheses, one left to right and one diagonal right to bottom left – both are valid solutions!</p><p><img src="https://user-images.githubusercontent.com/6412556/42428772-722555b6-8303-11e8-9931-d3e2e89e3206.png" alt="testl100_102"/></p><p>The two &quot;free&quot; beacons/landmarks <code>:l3,:l4</code> still have several modes each, implying insufficient data to constrain either to a strong unimodal belief.</p><p><img src="https://user-images.githubusercontent.com/6412556/42428800-a5ac86f2-8303-11e8-984c-8952f7cdf839.png" alt="testl3_4"/></p><pre><code class="language-julia">
+vehicle_drives_to!(fg, :l103, GTp, GTl)
+vehicle_drives_to!(fg, :l104, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+pl = plotKDE(fg, [Symbol(&quot;l$(100+i)&quot;) for i in 0:4], dims=[1;2])
+# Gadfly.draw(PDF(&quot;/tmp/testL100_104.pdf&quot;, 20cm, 10cm),pl)</code></pre><p>Moving up to position <code>:l104</code> still shows strong multiodality in the vehicle position estimates:</p><p><img src="https://user-images.githubusercontent.com/6412556/42428903-2f0b7e4e-8304-11e8-94b2-44fbee4d1961.png" alt="testl100_105"/></p><pre><code class="language-julia">vehicle_drives_to!(fg, :l105, GTp, GTl)
+vehicle_drives_to!(fg, :l106, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+
+vehicle_drives_to!(fg, :l107, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+
+vehicle_drives_to!(fg, :l108, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+
+pl = plotKDE(fg, [Symbol(&quot;l$(100+i)&quot;) for i in 2:8], dims=[1;2], levels=6)
+# Gadfly.draw(PDF(&quot;/tmp/testL103_108.pdf&quot;, 20cm, 10cm),pl)</code></pre><p>Next we see a strong return to a single dominant mode in all vehicle position estimates, owing to the increased measurements to beacons/landmarks as well as more unimodal estimates in <code>:l3, :l4</code> beacon/landmark positions.</p><pre><code class="language-julia">vehicle_drives_to!(fg, :l109, GTp, GTl)
+vehicle_drives_to!(fg, :l110, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+
+vehicle_drives_to!(fg, :l111, GTp, GTl)
+vehicle_drives_to!(fg, :l112, GTp, GTl)
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree, N=200)
+
+
+pl = plotKDE(fg, [Symbol(&quot;l$(100+i)&quot;) for i in 7:12], dims=[1;2])
+# Gadfly.draw(PDF(&quot;/tmp/testL106_112.pdf&quot;, 20cm, 10cm),pl)
+
+pl = plotKDE(fg, [:l1;:l2;:l3;:l4], dims=[1;2], levels=4)
+# Gadfly.draw(PDF(&quot;/tmp/testL1234.pdf&quot;, 20cm, 10cm),pl)
+
+pl = drawLandms(fg, from=100)
+# Gadfly.draw(PDF(&quot;/tmp/testLocsAll.pdf&quot;, 20cm, 10cm),pl)</code></pre><p>Several location belief estimates exhibit multimodality as the trajectory progresses (not shown), but collapses and finally collapses to a stable set of dominant position estimates.</p><p><img src="https://user-images.githubusercontent.com/6412556/42429138-7576dea4-8305-11e8-9a0c-a56984805126.png" alt="testl106_112"/></p><p>Landmark estimates are also stable at one estimate:</p><p><img src="https://user-images.githubusercontent.com/6412556/42429149-85ee3bf6-8305-11e8-8a39-6af5b7496f3c.png" alt="testl1234"/></p><p>In addition, the SLAM 2D landmark visualization can be re-used to plot more information at once:</p><pre><code class="language-julia"># pl = drawLandms(fg, from=100, to=200)
+# Gadfly.draw(PDF(&quot;/tmp/testLocsAll.pdf&quot;, 20cm, 10cm),pl)
+
+pl = drawLandms(fg)
+# Gadfly.draw(PDF(&quot;/tmp/testAll.pdf&quot;, 20cm, 10cm),pl)</code></pre><p><img src="https://user-images.githubusercontent.com/6412556/42429216-d3b8b73a-8305-11e8-89ba-bb790b0963d5.png" alt="testall"/></p><p>This example used the default of <code>N=200</code> particles per marginal belief. By increasing the number to <code>N=300</code> throughout the test many more modes and interesting features can be explored, and we refer the reader to an alternative and longer discussion on the same example, in <a href="https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1">Chapter 6 here</a>.</p><footer><hr/><a class="previous" href="tut_hexagonal2d.html"><span class="direction">Previous</span><span class="title">Entry Tutorial: Hexagonal 2D SLAM</span></a><a class="next" href="definingfactors.html"><span class="direction">Next</span><span class="title">Moderate Tutorial: Defining Factors</span></a></footer></article></body></html>
