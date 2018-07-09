@@ -10,6 +10,8 @@ Multi-modal range only example ([click here or image for full Vimeo](http://vime
 <a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="640" border="0" /></a>
 ```
 
+This example is also available as a script [here in RoME.jl](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/RangesExample.jl).
+
 ## REQUIRES
 
 - `RoME v0.1.5`
