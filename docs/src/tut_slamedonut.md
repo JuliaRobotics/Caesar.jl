@@ -75,12 +75,13 @@ addNode!(fg, :l2, Point2)
 addNode!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
-addFactor!(fg, [:l1;], PriorPoint2D(GTl[:l1], eye(2), [1.0]))
-addFactor!(fg, [:l2;], PriorPoint2D(GTl[:l2], eye(2), [1.0]))
+addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], eye(2))) )
+addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], eye(2))) )
 ```
-The `PriorPoint2D` is assumed to be a multivariate normal distribution of covariance `eye(2)`, as well as a weighting factor of `[1.0]`.
+The `PriorPoint2` is assumed to be a multivariate normal distribution of covariance `eye(2)`, as well as a weighting factor of `[1.0]`.
 
-**NOTE** Upcoming API change: `PriorPoint2D` will be changed to accept distribution objects and discard the weighting parameter (likely `RoME v0.1.5` -- see [issue 72 here](https://github.com/JuliaRobotics/RoME.jl/issues/72)).
+
+**NOTE** API change: `PriorPoint2D` changed to `PriorPoint2{T}` to accept distribution objects and discard (standard in `RoME v0.1.5` -- see [issue 72 here](https://github.com/JuliaRobotics/RoME.jl/issues/72)).
 
 ## Adding Range Measurements Between Variables
 
