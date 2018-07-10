@@ -127,7 +127,7 @@ For more details, please see the [dedicated visualization discussion here](http:
 First look at the two landmark positions `:l1, :l2` at `(10.0,30)`,`(30.0,-30)` respectively.
 
 ```julia
-using KernelDensityEstimatePlotting
+using RoMEPlotting
 
 plotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)
 ```
