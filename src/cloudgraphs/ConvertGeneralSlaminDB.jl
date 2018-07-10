@@ -224,7 +224,7 @@ function recoverConstraintType(cgl::CloudGraph,
     cov[1,1], cov[2,2] = parse(Float64, msm[3])^2, parse(Float64, msm[5])^2
     zi = zeros(2)
     zi[1:2] = [parse(msm[1]);parse(msm[2])]
-    return PriorPoint2D(zi, cov, [1.0])
+    return PriorPoint2{MvNormal}(MvNormal(zi, cov))
   elseif lkl[1]=="PP2"
     return parsePose2Pose2Constraint(lkl, elem)
     # msm = split(elem["meas"], ' ')
