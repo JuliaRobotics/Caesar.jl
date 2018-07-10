@@ -25,7 +25,7 @@ fg = Caesar.initfg(sessionname=user_config["session"], robotname=addrdict["robot
 
 # also add a PriorPose2 to pin the first pose at a fixed location
 addNode!(fg, :x0, Pose2) # , labels=["POSE"]
-addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
+addFactor!(fg, [:x0], PriorPose2{MvNormal}(MvNormal(zeros(3), 0.01*eye(3))) )
 
 # ls(fg, :x0)
 # isInitialized(fg, :x0)

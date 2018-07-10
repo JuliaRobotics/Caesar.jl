@@ -8,7 +8,7 @@ This example is available as a [single script here](JuliaRobotics/RoME.jl/exampl
 The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  
 ```julia
 # add more julia processes
-nprocs() < 3 ? addprocs(4-nprocs()) : nothing
+nprocs() < 4 ? addprocs(4-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
 using RoME, Distributions
@@ -22,7 +22,7 @@ fg = initfg()
 addNode!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
+addFactor!(fg, [:x0], PriorPose2{MvNormal}(MvNormal(zeros(3), 0.01*eye(3))) )
 ```
 A factor graph object `fg` (of type `::FactorGraph`) has been constructed; the first pose `:x0` has been added; and a prior factor setting the origin at `[0,0,0]` over variable node dimensions `[x,y,θ]` in the world frame.
 The type `Pose2` is used to indicate what variable is stored in the node.
