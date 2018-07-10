@@ -75,8 +75,8 @@ addNode!(fg, :l2, Point2)
 addNode!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
-addFactor!(fg, [:l1;], PriorPoint2{MvNormal}(MvNormal(GTl[:l1], eye(2))) )
-addFactor!(fg, [:l2;], PriorPoint2{MvNormal}(MvNormal(GTl[:l2], eye(2))) )
+addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], eye(2))) )
+addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], eye(2))) )
 ```
 The `PriorPoint2` is assumed to be a multivariate normal distribution of covariance `eye(2)`, as well as a weighting factor of `[1.0]`.
 

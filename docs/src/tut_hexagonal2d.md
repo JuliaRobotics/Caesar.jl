@@ -22,7 +22,7 @@ fg = initfg()
 addNode!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-addFactor!(fg, [:x0], PriorPose2{MvNormal}(MvNormal(zeros(3), 0.01*eye(3))) )
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )
 ```
 A factor graph object `fg` (of type `::FactorGraph`) has been constructed; the first pose `:x0` has been added; and a prior factor setting the origin at `[0,0,0]` over variable node dimensions `[x,y,θ]` in the world frame.
 The type `Pose2` is used to indicate what variable is stored in the node.

@@ -66,9 +66,33 @@ Gadfly.draw(PDF("/tmp/test.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 ![test](https://user-images.githubusercontent.com/6412556/42294545-c6c80f70-7faf-11e8-8167-017889cee932.png)
 
+## Density Contour Map
+
+`KernelDensityEstimatePlotting` (as used in `RoMEPlotting`) provides an interface to visualize belief densities as counter plots.
+The following basic example shows some of features of the API, where `plotKDE(..., dims=[1;2])` implies the marginal over variables `(x,y)`:
+
+```julia
+using RoME, Distributions
+using KernelDensityEstimatePlotting
+
+fg = initfg()
+addNode!(fg, :x0, Pose2)
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(2), eye(2))))
+addNode!(fg, :x1, Pose2)
+addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal(zeros(2), eye(2))))
+
+ensureAllInitialized!(fg)
+
+# plot one contour density
+X0 = plotKDE(fg, :x1, dims=[1;2])
+```
+
+
+
+Multiple beliefs can be plotted at the same time
+
+
 ## 3D Visualization
-
-
 
 Factor graphs of two or three dimensions can be visualized with the 3D visualizations provided by Arena.jl and it's dependencies.
 The 2D example above and also be visualized in a 3D space with the commands:
