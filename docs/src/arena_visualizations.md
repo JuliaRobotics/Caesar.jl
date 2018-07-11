@@ -30,7 +30,7 @@ For the full 2D/3D visualization tools used by Caesar.jl---in a [Julia](http://w
 julia> Pkg.add("Arena")
 ```
 
-**NOTE** Current development will allow the user to choose a `three.jl` WebGL based viewer instead [MeshCat.jl](https://github.com/rdeits/MeshCat.jl).
+**NOTE** Current development will allow the user to choose a [three.js](https://threejs.org/) WebGL based viewer instead [MeshCat.jl](https://github.com/rdeits/MeshCat.jl).
 
 ## 2D Visualization
 
