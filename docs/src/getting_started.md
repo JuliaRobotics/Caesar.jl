@@ -106,6 +106,9 @@ Unregistered packages can also be installed with using only the `Pkg.clone` func
 Pkg.clone("https://github.com/JuliaRobotics/Caesar.jl.git")
 ```
 
+Unless you change the default environment variable `JULIA_PKG_DIR`, all packages (git repos) are cloned/installed to `~/.julia`.
+You can work with the packages as regular git repositories there.
+
 ## Install Visualization Utils (e.g. Arena.jl)
 
 Visualizations were removed from Caesar by popular demand and moved to a new package [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) instead.
