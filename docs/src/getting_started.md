@@ -98,7 +98,7 @@ To install a Julia package, simply open a `julia` REPL (equally the julia REPL i
 Pkg.add("Caesar")
 ```
 
-These are registered packages maintained by [JuliaLang/METADATA.jl](http://www.github.com/JuliaLang/METADATA.jl).
+These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaLang/METADATA.jl](http://www.github.com/JuliaLang/METADATA.jl).
 Unregistered packages can also be installed with using only the `Pkg.clone` function:
 
 ```julia
