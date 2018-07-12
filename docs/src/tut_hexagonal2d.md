@@ -29,7 +29,7 @@ The type `Pose2` is used to indicate what variable is stored in the node.
 Caesar.jl allows a little more freedom in how factor and variable nodes can be connected, while still allowing for type-assertion to occur.
 
 **NOTE** Julia uses just-in-time compilation ([unless pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
- which is slow the first a function is called, but fast from the second call since the static function is cached and ready for use.
+ which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use.
 
 The next 6 nodes are added with odometry in an counter-clockwise hexagonal manner. Note how variables are denoted with symbols, `:x2 == Symbol("x2")`:
 ```julia
