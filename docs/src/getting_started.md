@@ -25,12 +25,12 @@ This should allow any terminal or process on the computer to run the Julia REPL:
 ```
 user@...$ julia
 
-_       _ _(_)_     |  A fresh approach to technical computing
-(_)     | (_) (_)    |  Documentation: https://docs.julialang.org
-_ _   _| |_  __ _   |  Type "?help" for help.
-| | | | | | |/ _` |  |
-| | |_| | | | (_| |  |  Version 0.6.3 (2018-05-28 20:20 UTC)
-_/ |\__'_|_|_|\__'_|  |  Official http://julialang.org/ release
+   _       _ _(_)_     |  A fresh approach to technical computing
+  (_)     | (_) (_)    |  Documentation: https://docs.julialang.org
+   _ _   _| |_  __ _   |  Type "?help" for help.
+  | | | | | | |/ _` |  |
+  | | |_| | | | (_| |  |  Version 0.6.3 (2018-05-28 20:20 UTC)
+ _/ |\__'_|_|_|\__'_|  |  Official http://julialang.org/ release
 |__/                   |  x86_64-pc-linux-gnu
 
 julia> println("hello world")
@@ -52,7 +52,7 @@ one more time.
 **NOTE** When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.
 For example, search for 'julialang workflow tips' or 'julialang performance tips'.
 
-## Just-In-Time Compiling (i.e. why are first runs are slow)
+## Just-In-Time Compiling (i.e. why are first runs slow?)
 
 Julia uses just-in-time compilation ([unless pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use.
