@@ -81,6 +81,70 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "getting_started.html#",
+    "page": "Getting Started",
+    "title": "Getting Started",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "getting_started.html#Getting-Started-1",
+    "page": "Getting Started",
+    "title": "Getting Started",
+    "category": "section",
+    "text": "Caesar.jl is one of the packages within the JuliaRobotics community, and adheres to the code-of-conduct."
+},
+
+{
+    "location": "getting_started.html#Local-copy-of-Julia-1",
+    "page": "Getting Started",
+    "title": "Local copy of Julia",
+    "category": "section",
+    "text": "Although Julia (or JuliaPro) can be installed on a Linux computer using the apt package manager, we are striving for a fully local installation environment which is highly reproducible on a variety of platforms.The easiest method is–-via the terminal–-to download the desired version of Julia as a binary, extract, setup a symbolic link, and run:cd ~\nmkdir -p julia-software\ncd julia-software\nwget https://julialang-s3.julialang.org/bin/linux/x64/0.6/julia-0.6.4-linux-x86_64.tar.gz\ntar -xvf julia-0.6.4-linux-x86_64\ncd /usr/bin\nsudo ln -s ~/julia-software/julia-9d11f62bcb/bin/julia julia064\nsudo ln -s julia064 juliaNOTE Feel free to modify this setup as you see fit.This should allow any terminal or process on the computer to run the Julia REPL:user@...$ julia\n\n_       _ _(_)_     |  A fresh approach to technical computing\n(_)     | (_) (_)    |  Documentation: https://docs.julialang.org\n_ _   _| |_  __ _   |  Type \"?help\" for help.\n| | | | | | |/ _` |  |\n| | |_| | | | (_| |  |  Version 0.6.3 (2018-05-28 20:20 UTC)\n_/ |\\__\'_|_|_|\\__\'_|  |  Official http://julialang.org/ release\n|__/                   |  x86_64-pc-linux-gnu\n\njulia> println(\"hello world\")\nhello worldMaybe a script, or command:user@...$ echo \"println(\\\"hello again\\\")\" > myscript.jl\nuser@...$ julia myscript.jl\nhello again\nuser@...$ rm myscript.jl\n\nuser@...$ julia -e \"println(\\\"one more time.\\\")\"\none more time.NOTE When searching for Julia related help online, use the phrase \'julialang\' instead of just \'julia\'. For example, search for \'julialang workflow tips\' or \'julialang performance tips\'."
+},
+
+{
+    "location": "getting_started.html#Just-In-Time-Compiling-(i.e.-why-are-first-runs-are-slow)-1",
+    "page": "Getting Started",
+    "title": "Just-In-Time Compiling (i.e. why are first runs are slow)",
+    "category": "section",
+    "text": "Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use."
+},
+
+{
+    "location": "getting_started.html#Setup-Juno-IDE-Environment-1",
+    "page": "Getting Started",
+    "title": "Setup Juno IDE Environment",
+    "category": "section",
+    "text": "Juno IDE allows for interactive development of Julia code by extending the Atom text editor with a few packages. Download and install Atom as instructed on the website, or via command line:cd ~/Downloads\nwget https://atom.io/download/deb\ndpkg -i atom-amd64.debAfter installing and running Atom, you can choose to either install uber-juno package in one go or install the three associated packages individually. In Atom, open the command pallette by pressing Ctrl + Shft + p and typing settings. Go to the install tab, search for and install these packages:ink\njulia-client\njulia-languageNOTE Some situations have required separately installing the Atom.jl Julia package via command line and Julia REPL; this is done with Julia\'s package manager and Pkg.add(\"Atom\"):$ julia\n...\njulia> Pkg.add(\"Atom\")There are a variety of useful packages in Atom, such as minimap and minimap-git.To install the Julia packages related to Caesar.jl–-which are independent of the Atom packages installed above–-please follow instructions below."
+},
+
+{
+    "location": "getting_started.html#Julia-Packages-1",
+    "page": "Getting Started",
+    "title": "Julia Packages",
+    "category": "section",
+    "text": "The philosophy around Julia packages are discussed at length in the Julia core documentation, where each Julia package relates to a git repository likely found on Github.com. To install a Julia package, simply open a julia REPL (equally the julia REPL in Atom/Juno) and type:Pkg.add(\"Caesar\")These are registered packages maintained by JuliaLang/METADATA.jl. Unregistered packages can also be installed with using only the Pkg.clone function:# Just using Caesar URL as an example --  Caesar is already registered with METADATA\nPkg.clone(\"https://github.com/JuliaRobotics/Caesar.jl.git\")Unless you change the default environment variable JULIA_PKG_DIR, all packages (git repos) are cloned/installed to ~/.julia. You can work with the packages as regular git repositories there."
+},
+
+{
+    "location": "getting_started.html#Install-Visualization-Utils-(e.g.-Arena.jl)-1",
+    "page": "Getting Started",
+    "title": "Install Visualization Utils (e.g. Arena.jl)",
+    "category": "section",
+    "text": "Visualizations were removed from Caesar by popular demand and moved to a new package Arena.jl instead. Please follow instructions on the Visualizations page for a variety of 2D / 3D utilities."
+},
+
+{
+    "location": "getting_started.html#Contributing,-Issues,-or-Comments-1",
+    "page": "Getting Started",
+    "title": "Contributing, Issues, or Comments",
+    "category": "section",
+    "text": "Please feel free to open issues with Caesar.jl or even Fork and Pull Request as required. General conversations or comments can be made in the Caesar Gist."
+},
+
+{
     "location": "examples.html#",
     "page": "Examples",
     "title": "Examples",
@@ -93,7 +157,31 @@ var documenterSearchIndex = {"docs": [
     "page": "Examples",
     "title": "Examples",
     "category": "section",
-    "text": "Intersection of ambiguous elevation angle from planar SONAR sensor:   <a href=\"http://vimeo.com/198237738\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/rovasfm02.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>Bi-modal belief   <a href=\"http://vimeo.com/198872855\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/rovyaw90.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>Multi-session Turtlebot example of the second floor in the Stata Center:   <img src=\"https://raw.githubusercontent.com/dehann/Caesar.jl/master/docs/imgs/turtlemultisession.gif\" alt=\"Turtlebot Multi-session animation\" width=\"480\" border=\"0\" /></a>Multi-modal range only example:   <a href=\"http://vimeo.com/190052649\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>"
+    "text": "#$ Multi-modal range only example:   Click gif below for link to Vimeo, also see tutorial for this example here:<a href=\"http://vimeo.com/190052649\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>"
+},
+
+{
+    "location": "examples.html#Mutli-session-Use-case-1",
+    "page": "Examples",
+    "title": "Mutli-session Use-case",
+    "category": "section",
+    "text": "Multi-session Turtlebot example of the second floor in the Stata Center:   <img src=\"https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/turtlemultisession.gif\" alt=\"Turtlebot Multi-session animation\" width=\"480\" border=\"0\" /></a>"
+},
+
+{
+    "location": "examples.html#Simulated-Ambiguous-SONAR-in-3D-1",
+    "page": "Examples",
+    "title": "Simulated Ambiguous SONAR in 3D",
+    "category": "section",
+    "text": "Intersection of ambiguous elevation angle from planar SONAR sensor:   <a href=\"http://vimeo.com/198237738\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/rovasfm02.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>Bi-modal belief   <a href=\"http://vimeo.com/198872855\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/rovyaw90.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>"
+},
+
+{
+    "location": "examples.html#More-Examples-1",
+    "page": "Examples",
+    "title": "More Examples",
+    "category": "section",
+    "text": "Please see examples folders for Caesar and RoME for more examples, with expanded documentation in the works."
 },
 
 {
@@ -141,7 +229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Entry Tutorial: Hexagonal 2D SLAM",
     "title": "Creating the Factor Graph with Pose2",
     "category": "section",
-    "text": "The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  # add more julia processes\nnprocs() < 4 ? addprocs(4-nprocs()) : nothing\n\n# tell Julia that you want to use these modules/namespaces\nusing RoME, DistributionsAfter loading the RoME and Distributions modules, we construct a local factor graph object in memory:# start with an empty factor graph object\nfg = initfg()\n\n# Add the first pose :x0\naddNode!(fg, :x0, Pose2)\n\n# Add at a fixed location PriorPose2 to pin :x0 to a starting location\naddFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )A factor graph object fg (of type ::FactorGraph) has been constructed; the first pose :x0 has been added; and a prior factor setting the origin at [0,0,0] over variable node dimensions [x,y,θ] in the world frame. The type Pose2 is used to indicate what variable is stored in the node. Caesar.jl allows a little more freedom in how factor and variable nodes can be connected, while still allowing for type-assertion to occur.NOTE Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first a function is called, but fast from the second call since the static function is cached and ready for use.The next 6 nodes are added with odometry in an counter-clockwise hexagonal manner. Note how variables are denoted with symbols, :x2 == Symbol(\"x2\"):# Drive around in a hexagon\nfor i in 0:5\n  psym = Symbol(\"x$i\")\n  nsym = Symbol(\"x$(i+1)\")\n  addNode!(fg, nsym, Pose2)\n  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))\n  addFactor!(fg, [psym;nsym], pp )\nendAt this point it would be good to see what the factor graph actually looks like:writeGraphPdf(fg)You should see the program evince open with this visual:(Image: exfg2d)"
+    "text": "The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  # add more julia processes\nnprocs() < 4 ? addprocs(4-nprocs()) : nothing\n\n# tell Julia that you want to use these modules/namespaces\nusing RoME, DistributionsAfter loading the RoME and Distributions modules, we construct a local factor graph object in memory:# start with an empty factor graph object\nfg = initfg()\n\n# Add the first pose :x0\naddNode!(fg, :x0, Pose2)\n\n# Add at a fixed location PriorPose2 to pin :x0 to a starting location\naddFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )A factor graph object fg (of type ::FactorGraph) has been constructed; the first pose :x0 has been added; and a prior factor setting the origin at [0,0,0] over variable node dimensions [x,y,θ] in the world frame. The type Pose2 is used to indicate what variable is stored in the node. Caesar.jl allows a little more freedom in how factor and variable nodes can be connected, while still allowing for type-assertion to occur.NOTE Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use.The next 6 nodes are added with odometry in an counter-clockwise hexagonal manner. Note how variables are denoted with symbols, :x2 == Symbol(\"x2\"):# Drive around in a hexagon\nfor i in 0:5\n  psym = Symbol(\"x$i\")\n  nsym = Symbol(\"x$(i+1)\")\n  addNode!(fg, nsym, Pose2)\n  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))\n  addFactor!(fg, [psym;nsym], pp )\nendAt this point it would be good to see what the factor graph actually looks like:writeGraphPdf(fg)You should see the program evince open with this visual:(Image: exfg2d)"
 },
 
 {
@@ -197,7 +285,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Entry Tutorial: Singular Ranges-only SLAM",
     "title": "Tutorial: Singular Ranges-only SLAM Solution (i.e. \"Under-Constrained\")",
     "category": "section",
-    "text": "This tutorial describes a range-only system where there are always more variable dimensions than range measurements made. The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point – other examples show inference results where highly non-Gaussian error distributions are used. The one pre-baked result of this of this singular range-only illustration can be seen in this video:Multi-modal range only example (click here or image for full Vimeo):   <a href=\"http://vimeo.com/190052649\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"640\" border=\"0\" /></a>This example is also available as a script here in RoME.jl."
+    "text": "This tutorial describes a range-only system where there are always more variable dimensions than range measurements made. The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point – other examples show inference results where highly non-Gaussian error distributions are used. The one pre-baked result of this of this singular range-only illustration can be seen in this video:Multi-modal range only example (click here or image for full Vimeo):   <a href=\"http://vimeo.com/190052649\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"640\" border=\"0\" /></a>This example is also available as a script here in RoME.jl."
 },
 
 {
@@ -237,7 +325,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Entry Tutorial: Singular Ranges-only SLAM",
     "title": "Inference and Visualizations",
     "category": "section",
-    "text": "At this point we can call the solver start interpreting the first results:tree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)The factor graph figure above showed the structure between variables and factors. In order to see the numerical values contained in the factor graph, a set of tools are provided by the RoMEPlotting and KernelDensityEstimatePlotting packages. For more details, please see the dedicated visualization discussion here.First look at the two landmark positions :l1, :l2 at (10.0,30),(30.0,-30) respectively.using KernelDensityEstimatePlotting\n\nplotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)(Image: testl1_2)Similarly, the belief estimate for the first vehicle position :l100 is bi-modal, due to the intersection of two range measurements:plotKDE(fg, :l100, dims=[1;2])(Image: testl100)An alternative plotting interface can also be used, that shows a histogram of desired elements instead:drawLandms(fg, from=1, to=101)(Image: testlall)Notice the ring of particles which represents the belief on the third beacon/landmark :l3, which was not constrained by a prior factor. Instead, the belief over the position of :l3 is being estimated simultaneous to estimating the vehicle position :l100."
+    "text": "At this point we can call the solver start interpreting the first results:tree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)The factor graph figure above showed the structure between variables and factors. In order to see the numerical values contained in the factor graph, a set of tools are provided by the RoMEPlotting and KernelDensityEstimatePlotting packages. For more details, please see the dedicated visualization discussion here.First look at the two landmark positions :l1, :l2 at (10.0,30),(30.0,-30) respectively.using RoMEPlotting\n\nplotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)(Image: testl1_2)Similarly, the belief estimate for the first vehicle position :l100 is bi-modal, due to the intersection of two range measurements:plotKDE(fg, :l100, dims=[1;2])(Image: testl100)An alternative plotting interface can also be used, that shows a histogram of desired elements instead:drawLandms(fg, from=1, to=101)(Image: testlall)Notice the ring of particles which represents the belief on the third beacon/landmark :l3, which was not constrained by a prior factor. Instead, the belief over the position of :l3 is being estimated simultaneous to estimating the vehicle position :l100."
 },
 
 {
@@ -341,7 +429,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Arena Visualization",
     "title": "Installation",
     "category": "section",
-    "text": "The current version of Arena has a rather large VTK dependency (which compile just fine on Ubuntu/Debian, or maybe even MacOS) wrapped in the DrakeVisualizer.jl package.  This requires the following preinstalled packages:    sudo apt-get install libvtk5-qt4-dev python-vtkNOTE Smaller individual 2D packages can be installed instead – i.e.:Pkg.add(\"RoMEPlotting\")For the full 2D/3D visualization tools used by Caesar.jl–-in a Julia or (JuliaPro) terminal/REPL–-type:julia> Pkg.add(\"Arena\")NOTE Current development will allow the user to choose a three.jl WebGL based viewer instead MeshCat.jl."
+    "text": "The current version of Arena has a rather large VTK dependency (which compile just fine on Ubuntu/Debian, or maybe even MacOS) wrapped in the DrakeVisualizer.jl package.  This requires the following preinstalled packages:    sudo apt-get install libvtk5-qt4-dev python-vtkNOTE Smaller individual 2D packages can be installed instead – i.e.:Pkg.add(\"RoMEPlotting\")For the full 2D/3D visualization tools used by Caesar.jl–-in a Julia or (JuliaPro) terminal/REPL–-type:julia> Pkg.add(\"Arena\")NOTE Current development will allow the user to choose a three.js WebGL based viewer instead MeshCat.jl."
 },
 
 {
