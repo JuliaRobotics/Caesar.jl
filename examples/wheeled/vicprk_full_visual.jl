@@ -7,6 +7,7 @@ using KernelDensityEstimate, Distributions
 using Caesar, RoME
 using RoMEPlotting
 using DocStringExtensions
+using ArgParse
 
 ## load all the model data
 # d = odometry information
@@ -31,8 +32,13 @@ include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","VicPrk_FrontEndUtils.jl
 
 
 
+
 # run using local inference
 function mainrun(dd,ff; frames=3)
+
+    currdirtime = now()
+    imgdir = joinpath(ENV["HOME"], "Pictures", "vicprkimgs", "$(currdirtime)")
+    mkdir(imgdir)
 
     ddd = deepcopy(dd)
     fff = deepcopy(ff)
@@ -59,6 +65,8 @@ function mainrun(dd,ff; frames=3)
 
     for i in 2:frames
       PL[i] = donextframe!(fg, i, ddd, fff, lmoccur, Podo, N=N)
+      Gadfly.draw(PDF(imgdir*"/x$(i).pdf", 30cm,20cm),PL[i])
+      Gadfly.draw(PNG(imgdir*"/x$(i).png", 30cm,20cm),PL[i])
     end
     PL
 end
@@ -67,18 +75,8 @@ end
 
 
 # @async run('evince bt.pdf')
-@async PL = mainrun(d,f; frames=30)
+PL = mainrun(d,f; frames=10)
 
-
-
-
-
-
-
-
-
-# PLL = deepcopy(PL)
-PLL[10]
 
 
 #
