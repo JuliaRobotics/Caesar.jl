@@ -76,8 +76,8 @@ elem = sortedvd[110592][:frtend]
 #
 rn = recoverConstraintType(elem)
 
-# pty = convert(PackedPose2DPoint2DBearingRangeDensity, rn)
-# upt = convert(Pose2DPoint2DBearingRangeDensity, pty)
+# pty = convert(PackedPose2Point2BearingRangeDensity, rn)
+# upt = convert(Pose2Point2BearingRangeDensity, pty)
 
 # @test norm(getPoints(rn.bearing)-getPoints(upt.bearing)) < 1e-10
 # @test norm(getPoints(rn.range)-getPoints(upt.range)) < 1e-10

@@ -59,7 +59,7 @@ export
   # passthrough RoME factor types
   PriorPose2,
   Pose2Pose2,
-  Pose2DPoint2DBearingRange,
+  Pose2Point2BearingRange,
 
   # insitu component
   GenericInSituSystem,
