@@ -6,11 +6,14 @@ makedocs(
     sitename = "Caesar.jl",
     pages = Any[
         "Home" => "index.md",
+        "Getting Started" => "getting_started.md",
         "Examples" => "examples.md",
-        "Tutorial 1: ContinuousScalar" => "tutorialcontinuousscalar.md",
-        "Tutorial: Defining Factors" => "definingfactors.md",
+        "Entry Tutorial: ContinuousScalar" => "tutorialcontinuousscalar.md",
+        "Entry Tutorial: Hexagonal 2D SLAM" => "tut_hexagonal2d.md",
+        "Entry Tutorial: Singular Ranges-only SLAM" => "tut_slamedonut.md",
+        "Moderate Tutorial: Defining Factors" => "definingfactors.md",
         "Arena Visualization" => "arena_visualizations.md",
-        "Database Layer" => "database_interactions.md",
+        "Offloading to Server" => "database_interactions.md",
         "Functions" => "func_ref.md"
     ]
     # html_prettyurls = !("local" in ARGS),

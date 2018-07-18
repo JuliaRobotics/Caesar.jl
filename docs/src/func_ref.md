@@ -1,5 +1,7 @@
 ## Function Reference
 
+**NOTE** WORK IN PROGRESS
+
 ```@contents
 Pages = [
     "func_ref.md"
