@@ -61,7 +61,7 @@ findAddLandmFactorsByPose!(fg, :x0, f[1], N=N)
 # f = addFactor!(fg, [vps;vlm], pbr, ready=ready, autoinit=true ) #[vps;vlm],
 
 
-drive!(fg, 2, d, f, lmoccur, N=N)
+drive!(fg, 2, d, f, lmoccur, Podo, N=N)
 
 
 ls(fg)
@@ -81,39 +81,62 @@ PL = Dict{Int, Any}()
 PL[2] = drawPosesLandms(fg)
 
 
-PL[3] = donextframe!(fg, 3, d, f, lmoccur)
+PL[3] = donextframe!(fg, 3, d, f, lmoccur, Podo, N=N)
 
-PL[4] = donextframe!(fg, 4, d, f, lmoccur)
+PL[4] = donextframe!(fg, 4, d, f, lmoccur, Podo, N=N)
 
-PL[5] = donextframe!(fg, 5, d, f, lmoccur)
+PL[5] = donextframe!(fg, 5, d, f, lmoccur, Podo, N=N)
 
-PL[6] = donextframe!(fg, 6, d, f, lmoccur)
+PL[6] = donextframe!(fg, 6, d, f, lmoccur, Podo, N=N)
 
-PL[7] = donextframe!(fg, 7, d, f, lmoccur)
+PL[7] = donextframe!(fg, 7, d, f, lmoccur, Podo, N=N)
 
-PL[8] = donextframe!(fg, 8, d, f, lmoccur)
+PL[8] = donextframe!(fg, 8, d, f, lmoccur, Podo, N=N)
 
-PL[9] = donextframe!(fg, 9, d, f, lmoccur)
+PL[9] = donextframe!(fg, 9, d, f, lmoccur, Podo, N=N)
 
-PL[10] = donextframe!(fg, 10, d, f, lmoccur)
+PL[10] = donextframe!(fg, 10, d, f, lmoccur, Podo, N=N)
 
-PL[11] = donextframe!(fg, 11, d, f, lmoccur)
+PL[11] = donextframe!(fg, 11, d, f, lmoccur, Podo, N=N)
 
-PL[12] = donextframe!(fg, 12, d, f, lmoccur)
+PL[12] = donextframe!(fg, 12, d, f, lmoccur, Podo, N=N)
 
-PL[13] = donextframe!(fg, 13, d, f, lmoccur)
+PL[13] = donextframe!(fg, 13, d, f, lmoccur, Podo, N=N)
 
-PL[14] = donextframe!(fg, 14, d, f, lmoccur)
+PL[14] = donextframe!(fg, 14, d, f, lmoccur, Podo, N=N)
 
-PL[15] = donextframe!(fg, 15, d, f, lmoccur)
-PL[16] = donextframe!(fg, 16, d, f, lmoccur)
-PL[17] = donextframe!(fg, 17, d, f, lmoccur)
-PL[17] = donextframe!(fg, 17, d, f, lmoccur)
-PL[18] = donextframe!(fg, 18, d, f, lmoccur)
-PL[19] = donextframe!(fg, 19, d, f, lmoccur)
-PL[20] = donextframe!(fg, 20, d, f, lmoccur)
+PL[15] = donextframe!(fg, 15, d, f, lmoccur, Podo, N=N)
+
+PL[16] = donextframe!(fg, 16, d, f, lmoccur, Podo, N=N)
+
+PL[17] = donextframe!(fg, 17, d, f, lmoccur, Podo, N=N)
+
+PL[18] = donextframe!(fg, 18, d, f, lmoccur, Podo, N=N)
+
+PL[19] = donextframe!(fg, 19, d, f, lmoccur, Podo, N=N)
+
+PL[20] = donextframe!(fg, 20, d, f, lmoccur, Podo, N=N)
+
+PL[21] = donextframe!(fg, 21, d, f, lmoccur, Podo, N=N)
+
+PL[22] = donextframe!(fg, 22, d, f, lmoccur, Podo, N=N)
+
+PL[23] = donextframe!(fg, 23, d, f, lmoccur, Podo, N=N)
+
+# importall RoMEPlotting
+# drawSubmaps(fg, [1; ], spread=5, m2hist=true)
 
 
+# get almost smallest neighboring landmarks to last pose
+nhbls = ls2(fg, ls(fg)[1][end])
+nhbls = nhbls[symbolmatch.(nhbls, 'l')]
+lmn = landmarknumber.(nhbls)
+minwindow = round(Int, quantile(lmn,0.04, sorted=false))
+
+# largest landmark number
+lmmax = landmarknumber(ls(fg)[2][end])
+
+drawSubmaps(fg, [1  minwindow-1; minwindow lmmax], m2hist=true)
 
 
 

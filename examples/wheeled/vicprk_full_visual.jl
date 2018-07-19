@@ -34,7 +34,7 @@ include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","VicPrk_FrontEndUtils.jl
 
 
 # run using local inference
-function mainrun(dd,ff; frames=3)
+function mainrun(dd,ff; frames=3, coord=Coord.Cartesian(xmin=-100,xmax=100,ymin=-150,ymax=50))
 
     currdirtime = now()
     imgdir = joinpath(ENV["HOME"], "Pictures", "vicprkimgs", "$(currdirtime)")
@@ -62,9 +62,12 @@ function mainrun(dd,ff; frames=3)
     tree = wipeBuildNewTree!(fg, drawpdf=true)
     inferOverTree!(fg, tree, N=N)
     PL[1] = drawPoses(fg)
+    Gadfly.draw(PDF(imgdir*"/x1.pdf", 30cm,20cm),PL[1])
+    Gadfly.draw(PNG(imgdir*"/x1.png", 30cm,20cm),PL[1])
 
     for i in 2:frames
       PL[i] = donextframe!(fg, i, ddd, fff, lmoccur, Podo, N=N)
+      PL[i].coord = coord
       Gadfly.draw(PDF(imgdir*"/x$(i).pdf", 30cm,20cm),PL[i])
       Gadfly.draw(PNG(imgdir*"/x$(i).png", 30cm,20cm),PL[i])
     end
@@ -75,7 +78,7 @@ end
 
 
 # @async run('evince bt.pdf')
-PL = mainrun(d,f; frames=10)
+PL = mainrun(d,f; frames=40)
 
 
 
