@@ -131,7 +131,7 @@ PL[23] = donextframe!(fg, 23, d, f, lmoccur, Podo, N=N)
 nhbls = ls2(fg, ls(fg)[1][end])
 nhbls = nhbls[symbolmatch.(nhbls, 'l')]
 lmn = landmarknumber.(nhbls)
-minwindow = round(Int, quantile(lmn,0.04, sorted=false))
+minwindow = round(Int, quantile(lmn,0.01, sorted=false))
 
 # largest landmark number
 lmmax = landmarknumber(ls(fg)[2][end])
