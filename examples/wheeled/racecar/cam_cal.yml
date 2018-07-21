@@ -1,0 +1,4 @@
+date: 2018-07-20
+extrinsics:
+  # bV = bRc*cV      bodyXYZ=FWD-PRT-OVH, cameraXYZ=STB-DWN-FWD
+  bRc: [0 0 1; -1 0 0; 0 -1 0]
