@@ -2,3 +2,12 @@ date: 2018-07-20
 extrinsics:
   # bV = bRc*cV      bodyXYZ=FWD-PRT-OVH, cameraXYZ=STB-DWN-FWD
   bRc: [0 0 1; -1 0 0; 0 -1 0]
+
+# taken from ROS topic and ROS ZED driver process. 
+intrinsics:
+  width: 672
+  height: 376
+  camera_matrix: [340.97913 0.00000 330.41730; 0.00000 340.97913 196.32587; 0.00000 0.00000 1.00000]
+  distortion: [0.00000 0.00000 0.00000 0.00000 0.00000]
+  rectification: [1.00000 0.00000 0.00000; 0.00000 1.00000 0.00000; 0.00000 0.00000 1.00000]
+  projection: [340.97913 0.00000 330.41730 -0.04092; 0.00000 340.97913 196.32587 0.00000; 0.00000 0.00000 1.00000 0.00000]
