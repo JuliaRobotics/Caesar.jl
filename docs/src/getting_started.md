@@ -75,6 +75,7 @@ Go to the `install` tab, search for and install these packages:
 ink
 julia-client
 julia-language
+latex-completions
 ```
 
 **NOTE** Some situations have required separately installing the `Atom.jl` Julia package via command line and Julia REPL; this is done with Julia's package manager and `Pkg.add("Atom")`:
