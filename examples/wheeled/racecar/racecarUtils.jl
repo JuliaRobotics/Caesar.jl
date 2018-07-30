@@ -6,14 +6,48 @@ function loadConfig()
   cfg = Dict{Symbol,Any}()
   data =   YAML.load(open(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","cam_cal.yml")))
   bRc = eval(parse("["*data["extrinsics"]["bRc"][1]*"]"))
-  cfg[:bRc] = bRc
+  # convert to faster symbol lookup
+  cfg[:extrinsics] = Dict{Symbol,Any}()
+  cfg[:extrinsics][:bRc] = bRc
   cfg[:intrinsics] = Dict{Symbol,Any}()
   cfg[:intrinsics][:height] = data["intrinsics"]["height"]
   cfg[:intrinsics][:width] = data["intrinsics"]["width"]
-  cfg[:intrinsics][:cam_matrix] = data["intrinsics"]["camera_matrix"]
+  haskey(data["intrinsics"], "camera_matrix") ? (cfg[:intrinsics][:cam_matrix] = data["intrinsics"]["camera_matrix"]) : nothing
+  cfg[:intrinsics][:cx] = data["intrinsics"]["cx"]
+  cfg[:intrinsics][:cy] = data["intrinsics"]["cy"]
+  cfg[:intrinsics][:fx] = data["intrinsics"]["fx"]
+  cfg[:intrinsics][:fy] = data["intrinsics"]["fy"]
+  cfg[:intrinsics][:k1] = data["intrinsics"]["k1"]
+  cfg[:intrinsics][:k2] = data["intrinsics"]["k2"]
   cfg
 end
 
+
+# add AprilTag sightings from this pose
+function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1 )
+  currtags = ls(fg)[2]
+  for lmid in keys(posetags)
+    @show lmsym = Symbol("l$lmid")
+    if !(lmsym in currtags)
+      addNode!(fg, lmsym, Point2)
+    end
+    ppbr = Pose2Point2BearingRange(Normal(posetags[lmid][:bearing][1],bnoise),
+                                   Normal(posetags[lmid][:range][1],rnoise))
+    addFactor!(fg, [pssym; lmsym], ppbr, autoinit=false)
+  end
+  nothing
+end
+
+function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag)
+  prev_pssym = Symbol("x$(prev_psid)")
+  new_pssym = Symbol("x$(new_psid)")
+  # first pose with zero prior
+  addNode!(fg, new_pssym, Pose2)
+  addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.4;0.5].^2))))
+
+  addApriltags!(fg, new_pssym, pose_tag_bag)
+  new_pssym
+end
 
 
 function drawThickLine!(image, startpoint, endpoint, colour, thickness)

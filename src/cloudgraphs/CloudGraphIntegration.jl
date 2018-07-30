@@ -155,11 +155,12 @@ function getfnctype(cvl::CloudGraphs.CloudVertex)
   return getfnctype(vert)
 end
 
-function initfg(;sessionname="NA",robotname="",cloudgraph=nothing)
+function initfg(;sessionname="NA",robotname="",username="",cloudgraph=nothing)
   # fgl = RoME.initfg(sessionname=sessionname)
   fgl = IncrementalInference.emptyFactorGraph()
   fgl.sessionname = sessionname
   fgl.robotname = robotname
+  fgl.username = username
   fgl.cg = cloudgraph
   return fgl
 end

@@ -1,57 +1,34 @@
-# Local compute version
+    # Local compute version
 
 # add more julia processes
-nprocs() < 4 ? addprocs(4-nprocs()) : nothing
+nprocs() < 5 ? addprocs(5-nprocs()) : nothing
 
-using Caesar, Distributions
+using Caesar, RoME, Distributions
 using YAML, JLD, HDF5
 # for drawing
 using RoMEPlotting, Gadfly
 
+# const IIF = IncrementalInference
 
+include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","racecarUtils.jl"))
 
-function loadConfig()
-  cfg = Dict{Symbol,Any}()
-  data =   YAML.load(open(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","cam_cal.yml")))
-  bRc = eval(parse("["*data["extrinsics"]["bRc"][1]*"]"))
-  cfg[:bRc] = bRc
-  cfg[:intrinsics] = Dict{Symbol,Any}()
-  cfg[:intrinsics][:height] = data["intrinsics"]["height"]
-  cfg[:intrinsics][:width] = data["intrinsics"]["width"]
-  cfg[:intrinsics][:cam_matrix] = data["intrinsics"]["camera_matrix"]
-  cfg
-end
-
-# add AprilTag sightings from this pose
-function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.3 )
-  currtags = ls(fg)[2]
-  for lmid in keys(posetags)
-    @show lmsym = Symbol("l$lmid")
-    if !(lmsym in currtags)
-      addNode!(fg, lmsym, Point2)
-    end
-    ppbr = Pose2Point2BearingRange(Normal(posetags[lmid][:bearing][1],bnoise),
-                                   Normal(posetags[lmid][:range][1],rnoise))
-    addFactor!(fg, [pssym;lmsym], ppbr, autoinit=false)
-  end
-  nothing
-end
-
-function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag)
-  prev_pssym = Symbol("x$(prev_psid)")
-  new_pssym = Symbol("x$(new_psid)")
-  # first pose with zero prior
-  addNode!(fg, new_pssym, Pose2)
-  addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.5;0.5;0.3].^2))))
-
-  addApriltags!(fg, new_pssym, pose_tag_bag)
-  new_pssym
-end
+# function loadConfig()
+#   cfg = Dict{Symbol,Any}()
+#   data =   YAML.load(open(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","cam_cal.yml")))
+#   bRc = eval(parse("["*data["extrinsics"]["bRc"][1]*"]"))
+#   cfg[:bRc] = bRc
+#   cfg[:intrinsics] = Dict{Symbol,Any}()
+#   cfg[:intrinsics][:height] = data["intrinsics"]["height"]
+#   cfg[:intrinsics][:width] = data["intrinsics"]["width"]
+#   cfg[:intrinsics][:cam_matrix] = data["intrinsics"]["camera_matrix"]
+#   cfg
+# end
 
 
 cfg = loadConfig()
 
-datafolder = ENV["HOME"]*"/data/racecar/smallloop/"
+# datafolder = ENV["HOME"]*"/data/racecar/smallloop/"
+datafolder = ENV["HOME"]*"/data/racecar/thursday/"
 @load datafolder*"tag_det_per_pose.jld" tag_bag
 # tag_bag[0]
 
@@ -81,55 +58,56 @@ tree = wipeBuildNewTree!(fg, drawpdf=true)
 inferOverTree!(fg,tree, N=N)
 
 #
-#
-# drawPosesLandms(fg)
 # plotKDE(getVertKDE(fg, :x0), dims=[1;2])
 # plotKDE(getVertKDE(fg, :x0), dims=[1;2])
+
+delete!(tag_bag[61], 18)
+delete!(tag_bag[77], 18)
+delete!(tag_bag[86], 16)
+delete!(tag_bag[110], 6)
+delete!(tag_bag[123], 0)
+delete!(tag_bag[124], 16)
+
 
 @async run(`evince bt.pdf`)
 
 prev_psid = 0
 # add other positions
-for psid in 1:1:59
+for psid in 1:1:115 #length(tag_bag)
   addnextpose!(fg, prev_psid, psid, tag_bag[psid])
   # writeGraphPdf(fg)
-  tree = wipeBuildNewTree!(fg, drawpdf=true)
-  inferOverTree!(fg,tree, N=N)
+  if psid % 25 == 0 || psid == 115
+    tree = wipeBuildNewTree!(fg, drawpdf=true)
+    inferOverTree!(fg,tree, N=N)
 
-  pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
-  Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),30cm, 25cm),pl)
-  pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
-  Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
+    pl = drawPosesLandms(fg, spscale=0.1, drawhist=false,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+    Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),30cm, 25cm),pl)
+    pl = drawPosesLandms(fg, spscale=0.1,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+    Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
+  end
   prev_psid = psid
 end
 
+IncrementalInference.savejld(fg, file="racecar_fg_$(currdirtime).jld")
 
+# fg, = IncrementalInference.loadjld(file="30jul18_9AM.jld")
+# addFactor!(fg, [:l5;:l16], Point2Point2Range(Normal(0.5,1.0)))
+# ls(fg,:l5)
 
-for i in 1:3
-tree = wipeBuildNewTree!(fg, drawpdf=true)
-inferOverTree!(fg,tree, N=N)
+const KDE = KernelDensityEstimate
+
+fid = open("results.csv","w")
+for sym in [ls(fg)[1]...;ls(fg)[2]...]
+  p = getVertKDE(fg, sym)
+  val = string(KDE.getKDEMax(p))
+  println(fid, "$sym, $(val[2:(end-1)])")
 end
-
-drawPosesLandms(fg,spscale=0.1, drawhist=false,xmin=-3,xmax=6,ymin=-5,ymax=2)
-
-
-
-# add second position
-psid = 20
-addnextpose!(fg, 10, psid, tag_bag[psid])
-
-writeGraphPdf(fg)
-
-
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg,tree, N=N)
-
-
-drawPosesLandms(fg)
+close(fid)
 
 
 
 
+0
 
 # debugging
 #
