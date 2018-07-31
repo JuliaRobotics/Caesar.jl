@@ -6,10 +6,7 @@ using Colors
 
 using AprilTags
 
-using PyCall
 
-@pyimport numpy as np
-@pyimport cv2
 
 include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","racecarUtils.jl"))
 

@@ -12,17 +12,7 @@ using RoMEPlotting, Gadfly
 
 include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","racecarUtils.jl"))
 
-# function loadConfig()
-#   cfg = Dict{Symbol,Any}()
-#   data =   YAML.load(open(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","cam_cal.yml")))
-#   bRc = eval(parse("["*data["extrinsics"]["bRc"][1]*"]"))
-#   cfg[:bRc] = bRc
-#   cfg[:intrinsics] = Dict{Symbol,Any}()
-#   cfg[:intrinsics][:height] = data["intrinsics"]["height"]
-#   cfg[:intrinsics][:width] = data["intrinsics"]["width"]
-#   cfg[:intrinsics][:cam_matrix] = data["intrinsics"]["camera_matrix"]
-#   cfg
-# end
+
 
 
 cfg = loadConfig()
