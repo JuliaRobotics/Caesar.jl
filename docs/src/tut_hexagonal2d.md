@@ -1,7 +1,7 @@
 # Tutorial: Hexagonal 2D SLAM Example (Local Compute)
 
 A simple 2D robot trajectory example is expanded below using techniques developed in simultaneous localization and mapping (SLAM).
-This example is available as a [single script here](JuliaRobotics/RoME.jl/examples/Hexagonal2D_SLAM.jl).
+This example is available as a [single script here](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/Hexagonal2D_SLAM.jl).
 
 ## Creating the Factor Graph with `Pose2`
 
