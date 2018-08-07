@@ -14,6 +14,8 @@ using PyCall
 
 include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","cameraUtils.jl"))
 include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","racecarUtils.jl"))
+include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","visualizationUtils.jl"))
+
 
 cfg = loadConfig()
 
@@ -59,32 +61,6 @@ setobject!(vis["home"], Triad(1.0))
 
 
 
-function drawTagDetection(vis::Visualizer, tagname, Q, T, bTc, bP2t; posename=:test)
-  # draw tag triad
-  setobject!(vis[currtag], Triad(0.2))
-  settransform!(vis[currtag], bTt)
-
-  # draw ray to tag
-  v = vis[posename][:lines][tagname]
-  geometry = PointCloud(
-  Point.([bTt.translation[1];0],
-       [bTt.translation[2];0],
-       [0.0;0])
-  )
-  setobject!(v, LineSegments(geometry, LineBasicMaterial()))
-  settransform!(v, Translation(0.0,0,0))
-
-  # draw orientation tail for tag
-  v = vis[posename][:orient][tagname]
-  geometry = PointCloud(
-  Point.([0.1;0],
-         [0.0;0],
-         [0.0;0])
-  )
-  setobject!(v, LineSegments(geometry, LineBasicMaterial()))
-  settransform!(v, bP2t) #
-  nothing
-end
 
 
 tidx = 1
@@ -110,7 +86,6 @@ bP2t = getTagPP2(bTt)
 # dt = convert(RotXYZ, bP2t.linear).theta3
 
 drawTagDetection(vis, currtag, Q, T, bTc, bP2t, posename=:x5)
-
 
 end
 

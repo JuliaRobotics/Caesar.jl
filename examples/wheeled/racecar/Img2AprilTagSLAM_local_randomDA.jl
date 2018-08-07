@@ -105,7 +105,7 @@ maxlen = (length(tag_bag)-1)
 # psid = 5
 for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   @show psid
-  addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2)
+  addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, DAerrors=0.2)
   # writeGraphPdf(fg)
   if psid % 3 == 0 || psid == maxlen
     tree = wipeBuildNewTree!(fg, drawpdf=true)

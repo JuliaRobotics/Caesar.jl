@@ -24,15 +24,16 @@ end
 
 
 # add AprilTag sightings from this pose
-function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2 )
-  currtags = ls(fg)[2]
+function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0 )
+  @show currtags = ls(fg)[2]
   for lmid in keys(posetags)
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
+      info("adding node $lmsym")
       addNode!(fg, lmsym, lmtype)
     end
     ppbr = nothing
-    if lmtype == Point2
+    if lmtype == RoME.Point2
       ppbr = Pose2Point2BearingRange(Normal(posetags[lmid][:bearing][1],bnoise),
                                      Normal(posetags[lmid][:range][1],rnoise))
     elseif lmtype == Pose2
@@ -43,18 +44,29 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
       #                     -posetags[lmid][:pos][1];
       #                      posetags[lmid][:tRYc]],
       #                    diagm([0.1;0.1;0.05].^2)) )
-      ppbr = Pose2Pose2(
+      ppbr = fcttype(
                 MvNormal([dx;
                           dy;
                           dth],
-                         diagm([0.3;0.1;0.1].^2)) )
+                         diagm([0.1;0.1;0.01].^2)) )
     end
-    addFactor!(fg, [pssym; lmsym], ppbr, autoinit=false)
+    if rand() > DAerrors
+      # regular single hypothesis
+      addFactor!(fg, [pssym; lmsym], ppbr, autoinit=false)
+    else
+      # artificial errors to data association occur
+      info("Forcing bad data association with $lmsym")
+      xx,ll = ls(fg)
+      @show ll2 = setdiff(ll, [lmsym])
+      @show daidx = round(Int, (length(ll2)-1)*rand()+1)
+      @show rda = ll2[daidx]
+      addFactor!(fg, [pssym; lmsym; rda], ppbr, autoinit=false, multihypo=[1.0;0.5;0.5])
+    end
   end
   nothing
 end
 
-function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odotype=Pose2Pose2)
+function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odotype=Pose2Pose2, fcttype=Pose2Pose2, DAerrors=0.0)
   prev_pssym = Symbol("x$(prev_psid)")
   new_pssym = Symbol("x$(new_psid)")
   # first pose with zero prior
@@ -62,106 +74,54 @@ function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odot
     addNode!(fg, new_pssym, Pose2)
     addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))))
   elseif odotype == VelPose2VelPose2
-    addNode!(fg, new_pssym, DynPose2(ut=round(Int, 1000_000*(new_psid/6.0))))
-    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2)),
-                                                             MvNormal(zeros(2),diagm([0.1;0.01].^2))))
+    addNode!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
+    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),diagm([0.3;0.07;0.1].^2)),
+                                                             MvNormal(zeros(2),diagm([0.2;0.05].^2))))
   end
 
-  addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype)
+  addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors)
   new_pssym
 end
 
 
-function drawThickLine!(image, startpoint, endpoint, colour, thickness)
-    (row, col) = size(image)
-    x1 = startpoint.x
-    y1 = startpoint.y
-    x2 = endpoint.x
-    y2 = endpoint.y
-
-    draw!(image, LineSegment(x1,y1,x2,y2), colour)
-
-    if x1 != x2 && (y2-y1)/(x2-x1) < 1
-        for tn = 1:thickness
-            i = tn ÷ 2
-
-            x1mi = x1-i
-            x1pi = x1+i
-            y1mi = y1-i
-            y1pi = y1+i
-            x2mi = x2-i
-            x2pi = x2+i
-            y2mi = y2-i
-            y2pi = y2+i
-            #clip to protect bounds
-            (x1mi < 1) && (x1mi = 1)
-            (y1mi < 1) && (y1mi = 1)
-            (x1pi > col) && (x1pi = col)
-            (y1pi > row) && (y1pi = row)
-            (x2mi < 1) && (x2mi = 1)
-            (y2mi < 1) && (y2mi = 1)
-            (x2pi > col) && (x2pi = col)
-            (y2pi > row) && (y2pi = row)
-
-            iseven(tn) && draw!(image, LineSegment(x1,y1mi,x2,y2mi), colour)
-            isodd(tn)  && draw!(image, LineSegment(x1,y1pi,x2,y2pi), colour)
-        end
-    else
-        for tn = 1:thickness
-            i = tn ÷ 2
-
-            x1mi = x1-i
-            x1pi = x1+i
-            y1mi = y1-i
-            y1pi = y1+i
-            x2mi = x2-i
-            x2pi = x2+i
-            y2mi = y2-i
-            y2pi = y2+i
-            #clip to protect bounds
-            (x1mi < 1) && (x1mi = 1)
-            (y1mi < 1) && (y1mi = 1)
-            (x1pi > col) && (x1pi = col)
-            (y1pi > row) && (y1pi = row)
-            (x2mi < 1) && (x2mi = 1)
-            (y2mi < 1) && (y2mi = 1)
-            (x2pi > col) && (x2pi = col)
-            (y2pi > row) && (y2pi = row)
-
-            iseven(tn) && draw!(image, LineSegment(x1mi,y1,x2mi,y2), colour)
-            isodd(tn)  && draw!(image, LineSegment(x1pi,y1,x2pi,y2), colour)
-        end
-    end
+function prepCamLookup(imgseq; filenamelead="camera_image")
+  # camcount = readdlm(datafolder*"$(imgfolder)/cam-count.csv",',')
+  camlookup = Dict{Int, String}()
+  count = -1
+  for i in imgseq
+    count += 1
+    camlookup[count] = "$(filenamelead)$(i).jpeg"
+    # camlookup[camcount[i,1]] = strip(camcount[i,2])
+  end
+  return camlookup
 end
 
 
 
+function detectTagsViaCamLookup(camlookup, imgfolder, imgsavedir)
+  # AprilTag detector
+  detector = AprilTagDetector()
 
+  # extract tags from images
+  IMGS = []
+  TAGS = []
+  psid = 1
+  for psid in 0:(length(camlookup)-1)
+    img = load("$(imgfolder)/$(camlookup[psid])")
+    tags = detector(img)
+    push!(TAGS, deepcopy(tags))
+    push!(IMGS, deepcopy(img))
+    foreach(tag->drawTagBox!(IMGS[psid+1],tag, width = 5, drawReticle = false), tags)
+    save(imgsavedir*"/tags/img_$(psid).jpg", IMGS[psid+1])
+  end
+  # psid = 1
+  # img = load(datafolder*"$(imgfolder)/$(camlookup[psid])")
 
+  # free the detector memory
+  freeDetector!(detector)
 
-function drawTagLine!(imgl, tag_detection)
-  # naive
-  # ch, cw = round(Int, height/2), round(Int, width/2)
-  cw, ch = 330.4173, 196.32587  # from ZED driver config
-  focal = 340.97913
-  imheight = 376
-
-  tagsize = 0.172
-
-  bearing0 = tag_detection[:bearing][1]
-
-  # convert bearing to position on image
-  tag_u_coord = cw + focal*tan(-bearing0)
-  tag_u_coord = round(Int, tag_u_coord)
-
-  c1 = Point(tag_u_coord, 1)
-  c2 = Point(tag_u_coord, imheight)
-  drawThickLine!(imgl, c1, c2, RGB{N0f8}(0.8,0.0,0.4), 10)
-
-  nothing
+  return IMGS, TAGS
 end
-
-
 
 
 

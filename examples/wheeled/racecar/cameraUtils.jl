@@ -119,6 +119,23 @@ function getAprilTagTransform(tag::AprilTag;
 end
 
 
+function prepTagBag(TAGS)
+  tvec = Translation(0.0,0,0)
+  q = Quat(1.0,0,0,0)
+  # package tag detections for all keyframes in a tag_bag
+  tag_bag = Dict{Int, Any}()
+  for psid in 0:(length(TAGS)-1)
+    tag_det = Dict{Int, Any}()
+    for tag in TAGS[psid+1]
+      q, tvec = getAprilTagTransform(tag, camK, k1, k2, tagsize)
+      cTt = tvec ∘ CoordinateTransformations.LinearMap(q)
+      tag_det[tag.id] = buildtagdict(cTt, q, tvec, tagsize, bTc)
+    end
+    tag_bag[psid] = tag_det
+  end
+  return tag_bag
+end
+
 # get Pose2Pose2 tag orientation transform
 function getTagPP2(bTt)
   @show bTt
