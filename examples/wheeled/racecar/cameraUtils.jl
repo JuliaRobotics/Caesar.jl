@@ -33,23 +33,35 @@ function rodrigues!(Rmat::Array{Float64,2}, rvec::Vector{Float64})
   nothing
 end
 
-function buildtagdict(q::Rotations.Quat,
-                      tvec::Union{Vector{Float64},StaticArrays.SArray{Tuple{3},<:Real,1,3}},
-                      tagsize::Float64 )
+function buildtagdict(cTt,
+                      Ql::Rotations.Quat,
+                      tvec, # ::Union{Vector{Float64},StaticArrays.SArray{Tuple{3},<:Real,1,3}}
+                      tagsize::Float64,
+                      bTcl )
   #
+  # @show tvec, q
+  # @show cTt = tvec ∘ LinearMap(Ql)
+  @show bTcl, cTt
+  @show bTt = bTcl ∘ cTt
+  bP2t = getTagPP2(bTt)
+
   onetag = Dict{Symbol, Any}()
-  onetag[:pos] = tvec[:]
-  onetag[:quat] = Float64[q.w; q.x; q.y; q.z]
+  onetag[:pos] = tvec.translation[:]
+  onetag[:quat] = Float64[Ql.w; Ql.x; Ql.y; Ql.z]
   onetag[:tagxy] = Float64[tagsize; tagsize]
-  onetag[:bearing] = [atan2(-tvec[1], tvec[3]);]
-  onetag[:range] = [norm(tvec[[1;3]]);]
+  onetag[:bearing] = [atan2(-tvec.translation[1], tvec.translation[3]);]
+  onetag[:range] = [norm(tvec.translation[[1;3]]);]
+  # onetag[:tRYc] = convert(RotXYZ, q).theta2
+  onetag[:bP2t] = bP2t
   onetag
 end
-function buildtagdict(q::Rotations.Quat,
-                      tvec::CoordinateTransformations.Translation{T},
-                      tagsize::Float64 ) where T
-  buildtagdict(q, tvec.v, tagsize)
-end
+# function buildtagdict(cTt,
+#                       q::Rotations.Quat,
+#                       tvec::CoordinateTransformations.Translation{T},
+#                       tagsize::Float64,
+#                       bTcl ) where T
+#   buildtagdict(cTt, q, tvec, tagsize, bTcl )
+# end
 
 function getAprilTagTransform(tag::AprilTag,
                               camK::Array{Float64,2},
@@ -79,7 +91,7 @@ function getAprilTagTransform(tag::AprilTag,
   Rmat = zeros(3,3)
   rodrigues!(Rmat,rvec[:])
   q = convert(Quat, RotMatrix{3}(Rmat))
-  return q, Translation(SVector(tvec...))
+  return q, Translation(SVector(tvec...)), camK
 end
 # objPts.push_back(cv::Point3f(-s,-s, 0));
 # objPts.push_back(cv::Point3f( s,-s, 0));
@@ -89,3 +101,31 @@ end
 # objectPoints = np.random[:random]((4,3,1))
 # imagePoints = np.random[:random]((4,2,1))
 # cameraMatrix = np.eye(3)
+
+function getAprilTagTransform(tag::AprilTag;
+                              fx::Float64=100.0,
+                              fy::Float64=100.0,
+                              cx::Float64=320.0,
+                              cy::Float64=240.0,
+                              k1::Float64=0.0,
+                              k2::Float64=0.0,
+                              tagsize::Float64=0.172 )
+  camK = [fx 0 cx; 0 fy cy; 0 0 1]
+  getAprilTagTransform(tag,
+                       camK,
+                       k1,
+                       k2,
+                       tagsize )
+end
+
+
+# get Pose2Pose2 tag orientation transform
+function getTagPP2(bTt)
+  @show bTt
+  cVz = LinearMap(Quat(bTt.linear))([1.0;0;0])
+  wYt = atan2(cVz[2],cVz[1])
+  Translation(bTt.translation[1],bTt.translation[2],0) ∘ LinearMap(RotZ(wYt))
+end
+
+
+#

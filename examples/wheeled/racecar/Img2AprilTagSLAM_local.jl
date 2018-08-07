@@ -12,6 +12,7 @@ using CoordinateTransformations, Rotations, StaticArrays
 
 const KDE = KernelDensityEstimate
 const IIF = IncrementalInference
+const TU = TransformUtils
 
 using PyCall
 
@@ -30,8 +31,13 @@ cw, ch = cfg[:intrinsics][:cx], cfg[:intrinsics][:cy]
 fx = fy = cfg[:intrinsics][:fx]
 camK = [fx 0 cw; 0 fy ch; 0 0 1]
 tagsize = 0.172
-k1,k2 = cfg[:intrinsics][:k1], cfg[:intrinsics][:k2]
+# k1,k2 = cfg[:intrinsics][:k1], cfg[:intrinsics][:k2] # makes it worse
+k1, k2 = 0.0, 0.0
 
+# tag extrinsic rotation
+Rx = RotX(-pi/2)
+Rz = RotZ(-pi/2)
+bTc= LinearMap(Rz) ∘ LinearMap(Rx)
 
 datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"
 # tag_bag[0]
@@ -80,23 +86,25 @@ freeDetector!(detector)
 
 # IMGS[1]
 # TAGS[1]
-
+tvec = Translation(0.0,0,0)
+q = Quat(1.0,0,0,0)
 # package tag detections for all keyframes in a tag_bag
 tag_bag = Dict{Int, Any}()
 for psid in 0:(length(TAGS)-1)
   tag_det = Dict{Int, Any}()
   for tag in TAGS[psid+1]
     q, tvec = getAprilTagTransform(tag, camK, k1, k2, tagsize)
-    tag_det[tag.id] = buildtagdict(q, tvec, tagsize)
+    cTt = tvec ∘ CoordinateTransformations.LinearMap(q)
+    tag_det[tag.id] = buildtagdict(cTt, q, tvec, tagsize, bTc)
   end
   tag_bag[psid] = tag_det
 end
-# tag_bag[0]
+tag_bag[0]
+TAGS[1]
+
 
 # save the tag bag file for future use
 @save imgdir*"/tag_det_per_pose.jld" tag_bag
-
-
 
 
 
@@ -108,26 +116,35 @@ psid = 0
 pssym = Symbol("x$psid")
 # first pose with zero prior
 addNode!(fg, pssym, Pose2)
-addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
+# addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
+addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2)),
+                                              MvNormal(zeros(2),diagm([0.01;0.01].^2))))
 
-addApriltags!(fg, pssym, tag_bag[psid])
+addApriltags!(fg, pssym, tag_bag[psid], lmtype=Pose2)
 
 # writeGraphPdf(fg)
 
 # quick solve as sanity check
 tree = wipeBuildNewTree!(fg, drawpdf=true)
-inferOverTree!(fg,tree, N=N)
+inferOverTreeR!(fg,tree, N=N)
 
+plotKDE(fg, :l1, dims=[3])
+
+# ls(fg)
+#
+# val = getVal(fg, :l11)
+
+drawPosesLandms(fg, spscale=0.25)
 
 # @async run(`evince bt.pdf`)
 
 prev_psid = 0
 # add other positions
 maxlen = (length(tag_bag)-1)
-for psid in 1:1:maxlen
-  addnextpose!(fg, prev_psid, psid, tag_bag[psid])
+for psid in [5;9;13;17] #17:4:21 #maxlen
+  addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=DynPose2)
   # writeGraphPdf(fg)
-  if psid % 5 == 0 || psid == maxlen
+  if psid % 1 == 0 || psid == maxlen
     tree = wipeBuildNewTree!(fg, drawpdf=true)
     inferOverTree!(fg,tree, N=N)
 
@@ -140,6 +157,26 @@ for psid in 1:1:maxlen
 end
 
 IIF.savejld(fg, file=imgdir*"/racecar_fg_$(currdirtime).jld")
+
+ls(fg, :l7)
+
+stuff = IIF.localProduct(fg, :l7)
+plotKDE(stuff[2], levels=3, dims=[3])
+
+tag_bag[28][7][:tRYc]
+tag_bag[31][7][:tRYc]
+
+
+plotKDE(fg, :l1, dims=[3])
+
+getfnctype(getVert(fg, :x28l7f1, nt=:fnc)).z.μ
+getfnctype(getVert(fg, :x31l7f1, nt=:fnc)).z.μ
+
+ls(fg, :l17)
+
+getfnctype(getVert(fg, :x28l17f1, nt=:fnc)).z.μ
+getfnctype(getVert(fg, :x30l17f1, nt=:fnc)).z.μ
+
 
 # fg, = IncrementalInference.loadjld(file="30jul18_9AM.jld")
 # addFactor!(fg, [:l5;:l16], Point2Point2Range(Normal(0.5,1.0)))

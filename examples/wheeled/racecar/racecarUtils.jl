@@ -10,42 +10,64 @@ function loadConfig()
   cfg[:extrinsics] = Dict{Symbol,Any}()
   cfg[:extrinsics][:bRc] = bRc
   cfg[:intrinsics] = Dict{Symbol,Any}()
-  cfg[:intrinsics][:height] = data["intrinsics"]["height"]
-  cfg[:intrinsics][:width] = data["intrinsics"]["width"]
-  haskey(data["intrinsics"], "camera_matrix") ? (cfg[:intrinsics][:cam_matrix] = data["intrinsics"]["camera_matrix"]) : nothing
-  cfg[:intrinsics][:cx] = data["intrinsics"]["cx"]
-  cfg[:intrinsics][:cy] = data["intrinsics"]["cy"]
-  cfg[:intrinsics][:fx] = data["intrinsics"]["fx"]
-  cfg[:intrinsics][:fy] = data["intrinsics"]["fy"]
-  cfg[:intrinsics][:k1] = data["intrinsics"]["k1"]
-  cfg[:intrinsics][:k2] = data["intrinsics"]["k2"]
+  cfg[:intrinsics][:height] = data["left"]["intrinsics"]["height"]
+  cfg[:intrinsics][:width] = data["left"]["intrinsics"]["width"]
+  haskey(data["left"]["intrinsics"], "camera_matrix") ? (cfg[:intrinsics][:cam_matrix] = data["left"]["intrinsics"]["camera_matrix"]) : nothing
+  cfg[:intrinsics][:cx] = data["left"]["intrinsics"]["cx"]
+  cfg[:intrinsics][:cy] = data["left"]["intrinsics"]["cy"]
+  cfg[:intrinsics][:fx] = data["left"]["intrinsics"]["fx"]
+  cfg[:intrinsics][:fy] = data["left"]["intrinsics"]["fy"]
+  cfg[:intrinsics][:k1] = data["left"]["intrinsics"]["k1"]
+  cfg[:intrinsics][:k2] = data["left"]["intrinsics"]["k2"]
   cfg
 end
 
 
 # add AprilTag sightings from this pose
-function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1 )
+function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2 )
   currtags = ls(fg)[2]
   for lmid in keys(posetags)
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
-      addNode!(fg, lmsym, Point2)
+      addNode!(fg, lmsym, lmtype)
     end
-    ppbr = Pose2Point2BearingRange(Normal(posetags[lmid][:bearing][1],bnoise),
-                                   Normal(posetags[lmid][:range][1],rnoise))
+    ppbr = nothing
+    if lmtype == Point2
+      ppbr = Pose2Point2BearingRange(Normal(posetags[lmid][:bearing][1],bnoise),
+                                     Normal(posetags[lmid][:range][1],rnoise))
+    elseif lmtype == Pose2
+      dx, dy = posetags[lmid][:bP2t].translation[1], posetags[lmid][:bP2t].translation[2]
+      dth = convert(RotXYZ, posetags[lmid][:bP2t].linear).theta3
+      # ppbr = Pose2Pose2(
+      #           MvNormal([ posetags[lmid][:pos][3];
+      #                     -posetags[lmid][:pos][1];
+      #                      posetags[lmid][:tRYc]],
+      #                    diagm([0.1;0.1;0.05].^2)) )
+      ppbr = Pose2Pose2(
+                MvNormal([dx;
+                          dy;
+                          dth],
+                         diagm([0.3;0.1;0.1].^2)) )
+    end
     addFactor!(fg, [pssym; lmsym], ppbr, autoinit=false)
   end
   nothing
 end
 
-function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag)
+function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odotype=Pose2Pose2)
   prev_pssym = Symbol("x$(prev_psid)")
   new_pssym = Symbol("x$(new_psid)")
   # first pose with zero prior
-  addNode!(fg, new_pssym, Pose2)
-  addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.4;0.5].^2))))
+  if odotype == Pose2Pose2
+    addNode!(fg, new_pssym, Pose2)
+    addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))))
+  elseif odotype == VelPose2VelPose2
+    addNode!(fg, new_pssym, DynPose2(ut=round(Int, 1000_000*(new_psid/6.0))))
+    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2)),
+                                                             MvNormal(zeros(2),diagm([0.1;0.01].^2))))
+  end
 
-  addApriltags!(fg, new_pssym, pose_tag_bag)
+  addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype)
   new_pssym
 end
 
@@ -140,6 +162,18 @@ function drawTagLine!(imgl, tag_detection)
 end
 
 
+
+
+
+
+function plotPose2Vels(fgl::FactorGraph, sym::Symbol; coord=nothing)
+  X = getVertKDE(fgl, sym)
+  px = plotKDE(X, dims=[4], title="Velx")
+  coord != nothing ? (px.coord = coord) : nothing
+  py = plotKDE(X, dims=[5], title="Vely")
+  coord != nothing ? (py.coord = coord) : nothing
+  hstack(px, py)
+end
 
 
 
