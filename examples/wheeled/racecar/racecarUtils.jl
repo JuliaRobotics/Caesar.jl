@@ -166,16 +166,6 @@ end
 
 
 
-function plotPose2Vels(fgl::FactorGraph, sym::Symbol; coord=nothing)
-  X = getVertKDE(fgl, sym)
-  px = plotKDE(X, dims=[4], title="Velx")
-  coord != nothing ? (px.coord = coord) : nothing
-  py = plotKDE(X, dims=[5], title="Vely")
-  coord != nothing ? (py.coord = coord) : nothing
-  hstack(px, py)
-end
-
-
 
 
 #
