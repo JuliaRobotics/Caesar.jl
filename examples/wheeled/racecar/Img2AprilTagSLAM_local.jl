@@ -104,25 +104,29 @@ prev_psid = 0
 maxlen = (length(tag_bag)-1)
 # psid = 5
 for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
-  @show psid
+  @show psym = Symbol("x$psid")
   addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2)
   # writeGraphPdf(fg)
   if psid % 3 == 0 || psid == maxlen
     tree = wipeBuildNewTree!(fg, drawpdf=true)
     inferOverTree!(fg,tree, N=N)
   end
-    ensureAllInitialized!(fg)
-    pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
-    Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),15cm, 10cm),pl)
-    pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
-    Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),15cm, 10cm),pl)
-    pl = plotPose2Vels(fg, Symbol("x$(psid)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
-    Gadfly.draw(PNG(joinpath(imgdir,"vels_x$(psid).png"),15cm, 10cm),pl)
+
+  # save factor graph for later testing and evaluation
+  IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym).jld")
+  ensureAllInitialized!(fg)
+  pl = drawPosesLandms(fg, spscale=0.1, drawhist=false,xmin=-1.0,xmax=5.0,ymin=-2.0,ymax=2.0)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+  Gadfly.draw(PNG(joinpath(imgdir,"$(psym).png"),15cm, 10cm),pl)
+  pl = drawPosesLandms(fg, spscale=0.1,xmin=-1.0,xmax=5.0,ymin=-2.0,ymax=2.0)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+  Gadfly.draw(PNG(joinpath(imgdir,"hist_$(psym).png"),15cm, 10cm),pl)
+  pl = plotPose2Vels(fg, Symbol("$(psym)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
+  Gadfly.draw(PNG(joinpath(imgdir,"vels_$(psym).png"),15cm, 10cm),pl)
+
+  # prepare for next iteration
   prev_psid = psid
 end
 
 
-IIF.savejld(fg, file=imgdir*"/racecar_fg_$(currdirtime).jld")
 
 
 
