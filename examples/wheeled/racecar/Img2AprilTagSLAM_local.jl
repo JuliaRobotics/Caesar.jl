@@ -43,7 +43,11 @@ Rz = RotZ(-pi/2)
 bTc= LinearMap(Rz) ∘ LinearMap(Rx)
 
 
-datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"
+# datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"
+# datafolder = ENV["HOME"]*"/data/racecar/labrun2/"
+# datafolder = ENV["HOME"]*"/data/racecar/labrun3/"
+# datafolder = ENV["HOME"]*"/data/racecar/labrun5/"
+datafolder = ENV["HOME"]*"/data/racecar/labrun6/"
 imgfolder = "images"
 
 
@@ -55,7 +59,8 @@ mkdir(imgdir*"/tags")
 
 
 # process images
-camlookup = prepCamLookup(175:5:370)
+# camlookup = prepCamLookup(175:5:370)
+camlookup = prepCamLookup(0:5:1795)
 IMGS, TAGS = detectTagsViaCamLookup(camlookup, datafolder*imgfolder, imgdir)
 # IMGS[1]
 # TAGS[1]
@@ -115,9 +120,9 @@ for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   # save factor graph for later testing and evaluation
   IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym).jld")
   ensureAllInitialized!(fg)
-  pl = drawPosesLandms(fg, spscale=0.1, drawhist=false,xmin=-1.0,xmax=5.0,ymin=-2.0,ymax=2.0)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+  pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
   Gadfly.draw(PNG(joinpath(imgdir,"$(psym).png"),15cm, 10cm),pl)
-  pl = drawPosesLandms(fg, spscale=0.1,xmin=-1.0,xmax=5.0,ymin=-2.0,ymax=2.0)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+  pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
   Gadfly.draw(PNG(joinpath(imgdir,"hist_$(psym).png"),15cm, 10cm),pl)
   pl = plotPose2Vels(fg, Symbol("$(psym)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
   Gadfly.draw(PNG(joinpath(imgdir,"vels_$(psym).png"),15cm, 10cm),pl)

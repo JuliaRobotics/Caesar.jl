@@ -4,8 +4,9 @@ using Caesar, Distributions, RoME
 
 const KDE = KernelDensityEstimate
 
-datadir = "/home/dehann/Pictures/racecarimgs/2018-08-08T10:29:13.58/"
-filename = datadir*"racecar_fg_2018-08-08T10:29:13.58.jld"
+datetimestamp = "2018-08-09T00:04:36.373"
+datadir = "/home/dehann/Pictures/racecarimgs/$(datetimestamp)/"
+filename = datadir*"racecar_fg_x237.jld"
 
 fg, = loadjld(file=filename)
 
@@ -16,7 +17,7 @@ fg, = loadjld(file=filename)
 xx,ll = ls(fg)
 
 
-fid = open(datadir*"results_x39.csv","w")
+fid = open(datadir*"results_$(datetimestamp).csv","w")
 for x in xx
   # @show x,
   mx = KDE.getKDEMean(getVertKDE(fg, x))
