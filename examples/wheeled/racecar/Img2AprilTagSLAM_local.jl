@@ -47,12 +47,14 @@ bTc= LinearMap(Rz) ∘ LinearMap(Rx)
 # datafolder = ENV["HOME"]*"/data/racecar/labrun2/"
 # datafolder = ENV["HOME"]*"/data/racecar/labrun3/"
 # datafolder = ENV["HOME"]*"/data/racecar/labrun5/"
-datafolder = ENV["HOME"]*"/data/racecar/labrun6/"
+# datafolder = ENV["HOME"]*"/data/racecar/labrun6/"
+datafolder = ENV["HOME"]*"/data/racecar/labfull/"
 imgfolder = "images"
 
 
 # Figure export folder
 currdirtime = now()
+# currdirtime = "2018-08-14T00:52:01.534"
 imgdir = joinpath(ENV["HOME"], "Pictures", "racecarimgs", "$(currdirtime)")
 mkdir(imgdir)
 mkdir(imgdir*"/tags")
@@ -60,7 +62,7 @@ mkdir(imgdir*"/tags")
 
 # process images
 # camlookup = prepCamLookup(175:5:370)
-camlookup = prepCamLookup(0:5:1795)
+camlookup = prepCamLookup(0:5:1765)
 IMGS, TAGS = detectTagsViaCamLookup(camlookup, datafolder*imgfolder, imgdir)
 # IMGS[1]
 # TAGS[1]
@@ -71,7 +73,7 @@ tag_bag = prepTagBag(TAGS)
 
 # save the tag bag file for future use
 @save imgdir*"/tag_det_per_pose.jld" tag_bag
-
+# @load imgdir*"/tag_det_per_pose.jld" tag_bag
 
 
 # Factor graph construction
@@ -84,7 +86,7 @@ pssym = Symbol("x$psid")
 addNode!(fg, pssym, DynPose2(ut=0))
 # addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
 addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2)),
-                                              MvNormal(zeros(2),diagm([0.3;0.01].^2))))
+                                              MvNormal(zeros(2),diagm([0.05;0.05].^2))))
 
 addApriltags!(fg, pssym, tag_bag[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 
@@ -112,7 +114,7 @@ for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   @show psym = Symbol("x$psid")
   addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2)
   # writeGraphPdf(fg)
-  if psid % 3 == 0 || psid == maxlen
+  if psid % 30 == 0 || psid == maxlen
     tree = wipeBuildNewTree!(fg, drawpdf=true)
     inferOverTree!(fg,tree, N=N)
   end
@@ -120,9 +122,9 @@ for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   # save factor graph for later testing and evaluation
   IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym).jld")
   ensureAllInitialized!(fg)
-  pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+  pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
   Gadfly.draw(PNG(joinpath(imgdir,"$(psym).png"),15cm, 10cm),pl)
-  pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+  pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
   Gadfly.draw(PNG(joinpath(imgdir,"hist_$(psym).png"),15cm, 10cm),pl)
   pl = plotPose2Vels(fg, Symbol("$(psym)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
   Gadfly.draw(PNG(joinpath(imgdir,"vels_$(psym).png"),15cm, 10cm),pl)
@@ -131,12 +133,22 @@ for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   prev_psid = psid
 end
 
+tree = wipeBuildNewTree!(fg, drawpdf=true)
+# @async run(`evince bt.pdf`)
+inferOverTree!(fg,tree, N=N)
+inferOverTree!(fg,tree, N=N)
+
+# save factor graph for later testing and evaluation
+IIF.savejld(fg, file=imgdir*"/racecar_fg_final.jld")
+
+pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
+Gadfly.draw(PNG(joinpath(imgdir,"final.png"),15cm, 10cm),pl)
+pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
+Gadfly.draw(PNG(joinpath(imgdir,"hist_final.png"),15cm, 10cm),pl)
 
 
-
-
-
-#
+0
+#0
 #
 # ls(fg, :l7)
 #
