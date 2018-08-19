@@ -29,7 +29,7 @@ getSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,:), )
 struct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: Distribution
   z::T
 end
-getSample(s::LinearOffset, N::Int=1) = (rand(s.z,N), )
+getSample(s::LinearOffset, N::Int=1) = (reshape(rand(s.z,N),1,:), )
 function (s::LinearOffset)(res::Array{Float64},
                            userdata::FactorMetadata,
                            idx::Int,
