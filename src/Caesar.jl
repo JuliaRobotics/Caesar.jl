@@ -129,6 +129,7 @@ export
   # webserver
   SolverStatus,
   CaesarConfig,
+  IterationStatistics,
   VisualizationConfig,
 
   # multisession utils
@@ -156,6 +157,7 @@ include("config/CaesarConfig.jl")
 
 # using CloudGraphs
 include("cloudgraphs/SolverStatus.jl")
+include("cloudgraphs/IterationStatistics.jl")
 include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
 include("cloudgraphs/ConvertGeneralSlaminDB.jl")
 include("cloudgraphs/slamindb.jl")

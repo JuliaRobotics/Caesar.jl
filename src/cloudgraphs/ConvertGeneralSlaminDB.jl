@@ -3,9 +3,9 @@
 
 
 
-function getmaxfactorid(conn, session::AbstractString)
+function getmaxfactorid(conn, session::AbstractString, robot::AbstractString, user::AbstractString)
   loadtx = transaction(conn)
-  query =  "match (n:$(session):FACTOR)
+  query =  "match (n:$(session):$robot:$user:FACTOR)
             where not (n:NEWDATA)
             with id(n) as idn, n.exVertexId as nexvid
             order by nexvid desc limit 1
@@ -20,15 +20,15 @@ function getmaxfactorid(conn, session::AbstractString)
 end
 
 """
-    getnewvertdict(conn, session)
+    getnewvertdict(conn, session::AbstractString, robot::AbstractString, user::AbstractString)
 
 Return a dictionary with frtend and mongo_keys json string information for :NEWDATA
 elements in Neo4j database.
 """
-function getnewvertdict(conn, session::AbstractString)
+function getnewvertdict(conn, session::AbstractString, robot::AbstractString, user::AbstractString)
 
   loadtx = transaction(conn)
-  query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) where n.ready=1 or f.ready=1 return distinct n, f"
+  query = "match (n:$(session):$robot:$user)-[:DEPENDENCE]-(f:NEWDATA:$(session):$robot:$user:FACTOR) where n.ready=1 or f.ready=1 return distinct n, f"
   cph = loadtx(query, submit=true)
   # loadresult = commit(loadtx)
   # @show cph.results[1]
@@ -361,25 +361,25 @@ Convert vertices of session in Neo4j DB with Caesar.jl's required data elements
 in preparation for MM-iSAMCloudSolve process.
 """
 function updatenewverts!(fgl::FactorGraph; N::Int=100)
-  sortedvd = getnewvertdict(fgl.cg.neo4j.connection, fgl.sessionname)
+  sortedvd = getnewvertdict(fgl.cg.neo4j.connection, fgl.sessionname, fgl.robotname, fgl.username)
   populatenewvariablenodes!(fgl, sortedvd, N=N)
-  maxfuid = getmaxfactorid(fgl.cg.neo4j.connection, fgl.sessionname)
+  maxfuid = getmaxfactorid(fgl.cg.neo4j.connection, fgl.sessionname, fgl.robotname, fgl.username)
   populatenewfactornodes!(fgl, sortedvd, maxfuid)
   nothing
 end
 
 
 """
-    resetentireremotesession(conn, session)
+    resetentireremotesession(conn, session, robot, user)
 
 match (n:\$(session))
 remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width
 set n :NEWDATA
 return n
 """
-function resetentireremotesession(conn, session::AbstractString; segment::AbstractString="")
+function resetentireremotesession(conn, session::AbstractString, robot::AbstractString, user::AbstractString; segment::AbstractString="")
   loadtx = transaction(conn)
-  query = segment == "" ? "match (n:$(session)) " : "match (n:$(session):$(segment)) "
+  query = segment == "" ? "match (n:$(session):$robot:$user) " : "match (n:$(session):$robot:$user:$(segment)) "
   query = query*"where exists(n.frtend)
            remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width, n.MAP_est
            set n :NEWDATA"

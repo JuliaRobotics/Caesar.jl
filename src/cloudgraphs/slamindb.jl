@@ -27,7 +27,8 @@ function runSlamInDbOnSession(
             sessionId::String,
             iterations::Int64,
             isRecursiveSolver::Bool,
-            solverStatus::SolverStatus  )::Void
+            solverStatus::SolverStatus,
+            iterationCompleteCallback)::Void
     #
     N = caesarConfig.numParticles
 
@@ -45,12 +46,13 @@ function runSlamInDbOnSession(
     while ((iterations > 0 || iterations == -1) && solverStatus.isAttached)
       iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
 
+      iterationStats = IterationStatistics()
       tic()
       solverStatus.iteration = itercount
 
       println("===================CONVERT===================")
       solverStatus.currentStep = "Prep_Convert"
-      fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, cloudgraph=cloudGraph)
+      fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
       updatenewverts!(fg, N=N)
       println()
 
@@ -61,19 +63,20 @@ function runSlamInDbOnSession(
 
       println("================MULTI-SESSION================")
       solverStatus.currentStep = "Prep_MultiSession"
-      rmInstMultisessionPriors!(cloudGraph, session=sessionId, multisessions=caesarConfig.multiSession)
+      rmInstMultisessionPriors!(cloudGraph, session=sessionId, robot=robotId, user=userId, multisessions=caesarConfig.multiSession)
       println()
 
       println("====================SOLVE====================")
       solverStatus.currentStep = "Init_Solve"
-      fg = Caesar.initfg(sessionname=sessionId, cloudgraph=cloudGraph)
+      fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
 
-      setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionId)
+      setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionId, robotId, userId)
 
       println("Get local copy of graph")
 
       solverStatus.currentStep = "Init_LocalGraphCopy"
       if fullLocalGraphCopy!(fg)
+          println("------ Count of nodes: $(fg.nodeIDs)")
         # (savejlds && itercount == 0) ? slamindbsavejld(fg, sessionId, itercount) : nothing
         itercount += 1
 
@@ -113,8 +116,9 @@ end
 Low-level call to iterate the SlamInDb solver for given number of iterations against a specific session and keyword parameters.
 """
 function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
-            robotname::A,
-            sessionName::A;
+            robotId::A,
+            sessionId::A,
+            userId::A;
             N::Int=100,
             loopctrl::Vector{Bool}=Bool[true],
             iterations::Int=-1,
@@ -127,7 +131,7 @@ function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
   while loopctrl[1] && (iterations > 0 || iterations == -1) # loopctrl for future use
     iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
     println("===================CONVERT===================")
-    fgl = Caesar.initfg(sessionname=sessionName, robotname=robotname, cloudgraph=cloudGraph)
+    fgl = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
     updatenewverts!(fgl, N=N)
     println()
 
@@ -136,13 +140,13 @@ function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
     println()
 
     println("================MULTI-SESSION================")
-    rmInstMultisessionPriors!(cloudGraph, session=sessionName, multisessions=multisession)
+    rmInstMultisessionPriors!(cloudGraph, session=sessionId, robot=robotId, user=userId, multisessions=multisession)
     println()
 
     println("====================SOLVE====================")
-    fgl = Caesar.initfg(sessionname=sessionName, cloudgraph=cloudGraph)
+    fgl = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
 
-    setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionName)
+    setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionId, robotId, userId)
 
     println("get local copy of graph")
 
@@ -192,6 +196,8 @@ function slamindb(;addrdict=nothing,
 
   N = parse(Int, addrdict["num particles"])
   session = addrdict["session"]
+  robot = addrdict["robot"]
+  user = addrdict["user"]
 
   if !haskey(addrdict, "multisession")
     addrdict["multisession"]=String[]
