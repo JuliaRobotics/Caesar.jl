@@ -76,7 +76,7 @@ function runSlamInDbOnSession(
 
       solverStatus.currentStep = "Init_LocalGraphCopy"
       if fullLocalGraphCopy!(fg)
-          println("------ Count of nodes: $(fg.nodeIDs)")
+        iterationStats.numNodes = length(fg.IDs) + length(fg.fIDs) #Variables and factors
         # (savejlds && itercount == 0) ? slamindbsavejld(fg, sessionId, itercount) : nothing
         itercount += 1
 
@@ -94,12 +94,16 @@ function runSlamInDbOnSession(
         else
           inferOverTreeR!(fg, tree, N=N)
         end
-        # savejlds ? slamindbsavejld(fg, sessionId, itercount) : nothing
+
       else
         sleep(0.2)
       end
+
+      # Notify iteration update.
       solverStatus.lastIterationDurationSeconds = toc()
       solverStatus.currentStep = "Idle"
+      iterationStats.endTimestamp = Dates.now()
+      iterationCompleteCallback(iterationStats)
     end
 
     solverStatus.isAttached = false
