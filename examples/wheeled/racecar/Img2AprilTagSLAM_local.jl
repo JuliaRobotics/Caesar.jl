@@ -1,7 +1,7 @@
     # Local compute version
 
 # add more julia processes
-nprocs() < 5 ? addprocs(5-nprocs()) : nothing
+# nprocs() < 5 ? addprocs(5-nprocs()) : nothing
 
 using Caesar, RoME, Distributions
 using YAML, JLD, HDF5
@@ -55,14 +55,26 @@ imgfolder = "images"
 # Figure export folder
 currdirtime = now()
 # currdirtime = "2018-08-14T00:52:01.534"
-imgdir = joinpath(ENV["HOME"], "Pictures", "racecarimgs", "$(currdirtime)")
+resultsdir = joinpath(ENV["HOME"], "Pictures", "racecarimgs")
+imgdir = joinpath(resultsdir, "$(currdirtime)")
 mkdir(imgdir)
 mkdir(imgdir*"/tags")
+
+camidxs = 0:5:1765
+
+fid = open(imgdir*"/readme.txt", "w")
+println(fid, datafolder)
+println(fid, camidxs)
+close(fid)
+
+fid = open(resultsdir*"/racecar.log", "a")
+println(fid, "$(currdirtime), $datafolder")
+close(fid)
 
 
 # process images
 # camlookup = prepCamLookup(175:5:370)
-camlookup = prepCamLookup(0:5:1765)
+camlookup = prepCamLookup(camidxs)
 IMGS, TAGS = detectTagsViaCamLookup(camlookup, datafolder*imgfolder, imgdir)
 # IMGS[1]
 # TAGS[1]
@@ -96,58 +108,59 @@ addApriltags!(fg, pssym, tag_bag[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 tree = wipeBuildNewTree!(fg, drawpdf=true)
 inferOverTreeR!(fg,tree, N=N)
 
+
 # plotKDE(fg, :l1, dims=[3])
-
 # ls(fg)
-#
 # val = getVal(fg, :l11)
-
 # drawPosesLandms(fg, spscale=0.25)
-
 # @async run(`evince bt.pdf`)
+
 
 prev_psid = 0
 # add other positions
 maxlen = (length(tag_bag)-1)
 # psid = 5
-for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
+for psid in 1:1:50 #maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   @show psym = Symbol("x$psid")
-  addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2)
+  addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
   # writeGraphPdf(fg)
-  if psid % 30 == 0 || psid == maxlen
+  if psid % 1000 == 0 || psid == maxlen
     tree = wipeBuildNewTree!(fg, drawpdf=true)
-    inferOverTree!(fg,tree, N=N)
+    # inferOverTree!(fg,tree, N=N)
   end
 
-  # save factor graph for later testing and evaluation
+  ## save factor graph for later testing and evaluation
   IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym).jld")
-  ensureAllInitialized!(fg)
-  pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
-  Gadfly.draw(PNG(joinpath(imgdir,"$(psym).png"),15cm, 10cm),pl)
-  pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
-  Gadfly.draw(PNG(joinpath(imgdir,"hist_$(psym).png"),15cm, 10cm),pl)
-  pl = plotPose2Vels(fg, Symbol("$(psym)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
-  Gadfly.draw(PNG(joinpath(imgdir,"vels_$(psym).png"),15cm, 10cm),pl)
+  # ensureAllInitialized!(fg)
+  # pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
+  # Gadfly.draw(PNG(joinpath(imgdir,"$(psym).png"),15cm, 10cm),pl)
+  # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
+  # Gadfly.draw(PNG(joinpath(imgdir,"hist_$(psym).png"),15cm, 10cm),pl)
+  # pl = plotPose2Vels(fg, Symbol("$(psym)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
+  # Gadfly.draw(PNG(joinpath(imgdir,"vels_$(psym).png"),15cm, 10cm),pl)
 
   # prepare for next iteration
   prev_psid = psid
 end
 
-tree = wipeBuildNewTree!(fg, drawpdf=true)
-# @async run(`evince bt.pdf`)
-inferOverTree!(fg,tree, N=N)
-inferOverTree!(fg,tree, N=N)
-
 # save factor graph for later testing and evaluation
 IIF.savejld(fg, file=imgdir*"/racecar_fg_final.jld")
 
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
-Gadfly.draw(PNG(joinpath(imgdir,"final.png"),15cm, 10cm),pl)
-pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
-Gadfly.draw(PNG(joinpath(imgdir,"hist_final.png"),15cm, 10cm),pl)
+tree = wipeBuildNewTree!(fg, drawpdf=true)
+# # @async run(`evince bt.pdf`)
+inferOverTreeR!(fg,tree, N=N)
+# inferOverTree!(fg,tree, N=N)
 
 
-0
+# pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
+# Gadfly.draw(PNG(joinpath(imgdir,"final.png"),15cm, 10cm),pl)
+# pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
+# Gadfly.draw(PNG(joinpath(imgdir,"hist_final.png"),15cm, 10cm),pl)
+
+
+
+
+
 #0
 #
 # ls(fg, :l7)

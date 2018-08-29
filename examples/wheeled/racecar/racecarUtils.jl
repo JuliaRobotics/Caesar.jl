@@ -24,7 +24,7 @@ end
 
 
 # add AprilTag sightings from this pose
-function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0 )
+function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true )
   @show currtags = ls(fg)[2]
   for lmid in keys(posetags)
     @show lmsym = Symbol("l$lmid")
@@ -52,7 +52,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
     end
     if rand() > DAerrors
       # regular single hypothesis
-      addFactor!(fg, [pssym; lmsym], ppbr, autoinit=false)
+      addFactor!(fg, [pssym; lmsym], ppbr, autoinit=false, autoinit=autoinit)
     else
       # artificial errors to data association occur
       info("Forcing bad data association with $lmsym")
@@ -60,23 +60,23 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
       @show ll2 = setdiff(ll, [lmsym])
       @show daidx = round(Int, (length(ll2)-1)*rand()+1)
       @show rda = ll2[daidx]
-      addFactor!(fg, [pssym; lmsym; rda], ppbr, autoinit=false, multihypo=[1.0;0.5;0.5])
+      addFactor!(fg, [pssym; lmsym; rda], ppbr, autoinit=false, multihypo=[1.0;0.5;0.5], autoinit=autoinit)
     end
   end
   nothing
 end
 
-function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odotype=Pose2Pose2, fcttype=Pose2Pose2, DAerrors=0.0)
+function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odotype=Pose2Pose2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true)
   prev_pssym = Symbol("x$(prev_psid)")
   new_pssym = Symbol("x$(new_psid)")
   # first pose with zero prior
   if odotype == Pose2Pose2
     addNode!(fg, new_pssym, Pose2)
-    addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))))
+    addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))), autoinit=autoinit)
   elseif odotype == VelPose2VelPose2
     addNode!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
     addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),diagm([0.4;0.07;0.1].^2)),
-                                                             MvNormal(zeros(2),diagm([0.2;0.2].^2))))
+                                                             MvNormal(zeros(2),diagm([0.2;0.2].^2))), autoinit=autoinit)
   end
 
   addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors)
