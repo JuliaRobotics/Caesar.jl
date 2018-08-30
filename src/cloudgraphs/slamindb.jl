@@ -44,66 +44,74 @@ function runSlamInDbOnSession(
 
     itercount = 0
     while ((iterations > 0 || iterations == -1) && solverStatus.isAttached)
-      iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
+        iterationStats = IterationStatistics()
+        try
+          iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
 
-      iterationStats = IterationStatistics()
-      tic()
-      solverStatus.iteration = itercount
+          tic()
+          solverStatus.iteration = itercount
 
-      println("===================CONVERT===================")
-      solverStatus.currentStep = "Prep_Convert"
-      fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
-      updatenewverts!(fg, N=N)
-      println()
+          println("===================CONVERT===================")
+          solverStatus.currentStep = "Prep_Convert"
+          fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
+          updatenewverts!(fg, N=N)
+          println()
 
-      println("=============ENSURE INITIALIZED==============")
-      solverStatus.currentStep = "Prep_EnsureInitialized"
-      ensureAllInitialized!(fg)
-      println()
+          println("=============ENSURE INITIALIZED==============")
+          solverStatus.currentStep = "Prep_EnsureInitialized"
+          ensureAllInitialized!(fg)
+          println()
 
-      println("================MULTI-SESSION================")
-      solverStatus.currentStep = "Prep_MultiSession"
-      rmInstMultisessionPriors!(cloudGraph, session=sessionId, robot=robotId, user=userId, multisessions=caesarConfig.multiSession)
-      println()
+          println("================MULTI-SESSION================")
+          solverStatus.currentStep = "Prep_MultiSession"
+          rmInstMultisessionPriors!(cloudGraph, session=sessionId, robot=robotId, user=userId, multisessions=caesarConfig.multiSession)
+          println()
 
-      println("====================SOLVE====================")
-      solverStatus.currentStep = "Init_Solve"
-      fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
+          println("====================SOLVE====================")
+          solverStatus.currentStep = "Init_Solve"
+          fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
 
-      setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionId, robotId, userId)
+          setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionId, robotId, userId)
 
-      println("Get local copy of graph")
+          println("Get local copy of graph")
 
-      solverStatus.currentStep = "Init_LocalGraphCopy"
-      if fullLocalGraphCopy!(fg)
-        iterationStats.numNodes = length(fg.IDs) + length(fg.fIDs) #Variables and factors
-        # (savejlds && itercount == 0) ? slamindbsavejld(fg, sessionId, itercount) : nothing
-        itercount += 1
+          solverStatus.currentStep = "Init_LocalGraphCopy"
+          if fullLocalGraphCopy!(fg)
+            iterationStats.numNodes = length(fg.IDs) + length(fg.fIDs) #Variables and factors
+            # (savejlds && itercount == 0) ? slamindbsavejld(fg, sessionId, itercount) : nothing
+            itercount += 1
 
-        println("-------------Ensure Initialization-----------")
-        solverStatus.currentStep = "Solve_EnsureInitialized"
-        ensureAllInitialized!(fg)
+            println("-------------Ensure Initialization-----------")
+            solverStatus.currentStep = "Solve_EnsureInitialized"
+            ensureAllInitialized!(fg)
 
-        println("------------Bayes (Junction) Tree------------")
-        solverStatus.currentStep = "Solve_BuildBayesTree"
-        tree = wipeBuildNewTree!(fg,drawpdf=drawbayestree)
+            println("------------Bayes (Junction) Tree------------")
+            solverStatus.currentStep = "Solve_BuildBayesTree"
+            tree = wipeBuildNewTree!(fg,drawpdf=drawbayestree)
 
-        solverStatus.currentStep = "Solve_InferOverTree"
-        if !isRecursiveSolver
-          inferOverTree!(fg, tree, N=N)
-        else
-          inferOverTreeR!(fg, tree, N=N)
-        end
+            solverStatus.currentStep = "Solve_InferOverTree"
+            if !isRecursiveSolver
+              inferOverTree!(fg, tree, N=N)
+            else
+              inferOverTreeR!(fg, tree, N=N)
+            end
 
-      else
-        sleep(0.2)
+          else
+            sleep(0.2)
+          end
+
+          # Notify iteration update.
+          solverStatus.lastIterationDurationSeconds = toc()
+          solverStatus.currentStep = "Idle"
+          iterationStats.result = "GOOD"
+      catch ex
+          stack = catch_stacktrace()
+          msg = "ERROR\r\nMessage: $(ex.msg)\r\nStacktrace:\r\n$(stack)"
+          iterationStats.result = msg
+      finally
+          iterationStats.endTimestamp = Dates.now()
+          iterationCompleteCallback(iterationStats)
       end
-
-      # Notify iteration update.
-      solverStatus.lastIterationDurationSeconds = toc()
-      solverStatus.currentStep = "Idle"
-      iterationStats.endTimestamp = Dates.now()
-      iterationCompleteCallback(iterationStats)
     end
 
     solverStatus.isAttached = false
