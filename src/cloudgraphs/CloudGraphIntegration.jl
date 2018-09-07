@@ -44,7 +44,7 @@ export
 """
     $(SIGNATURES)
 
-Run Neo4j Cypher queries on the cloudGraph database, andreturn Tuple with the
+Run Neo4j Cypher queries on the cloudGraph database, and return Tuple with the
 unparsed (results, loadresponse).
 """
 function executeQuery(
@@ -543,6 +543,7 @@ function buildSubGraphIdsQuery(;
             lbls::Vector{AS}=String[""],
             session::AS="",
             robot::AS="",
+            user::AS="",
             label::AS="",
             reqready::Bool=true,
             ready::Int=1,
@@ -552,14 +553,15 @@ function buildSubGraphIdsQuery(;
   #
   sn = length(session) > 0 ? ":"*session : ""
   rn = length(robot) > 0 ? ":"*robot : ""
+  un = length(user) > 0 ? ":"*user : ""
   lb = length(label) > 0 ? ":"*label : ""
 
   query = ""
   for nei in 0:(neighbors)
-    query *= "match (n0$(sn)$(rn)$(lb))"
+    query *= "match (n0$(sn)$(rn)$(un)$(lb))"
     outerd = 0
     for d in 1:(nei)
-      query *= "-[:DEPENDENCE]-(n$(d)$(sn)$(rn)$(lb))"
+      query *= "-[:DEPENDENCE]-(n$(d)$(sn)$(rn)$(un)$(lb))"
       outerd = d
     end
     query *= " "
@@ -596,7 +598,7 @@ function getLblExVertexNeoIDs(
         neighbors::Int=0 ) where {AS <: AbstractString}
   #
 
-  query = buildSubGraphIdsQuery(lbls=lbls, session=session, robot=robot, label=label, neighbors=neighbors, reqready=reqready, ready=ready, reqbackendset=reqbackendset, backendset=backendset)
+  query = buildSubGraphIdsQuery(lbls=lbls, session=session, robot=robot, user=user, label=label, neighbors=neighbors, reqready=reqready, ready=ready, reqbackendset=reqbackendset, backendset=backendset)
   cph, = executeQuery(conn, query)
 
   ret = Array{Tuple{Int64,Int64,Symbol},1}()
@@ -618,11 +620,15 @@ function getExVertexNeoIDs(
         ready::Int=1,
         backendset::Int=1,
         session::AS="",
+        robot::AS="",
+        user::AS="",
         reqbackendset::Bool=true  ) where {AS <: AbstractString}
   #
   sn = length(session) > 0 ? ":"*session : ""
+  rn = length(robot) > 0 ? ":"*robot : ""
+  un = length(user) > 0 ? ":"*user : ""
   lb = length(label) > 0 ? ":"*label : ""
-  query = "match (n$(sn)$(lb)) where n.ready=$(ready) and exists(n.exVertexId)"
+  query = "match (n$(sn)$(rn)$(un)$(lb)) where n.ready=$(ready) and exists(n.exVertexId)"
   query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
   query = query*" return n.exVertexId, id(n), n.label"
 
@@ -1284,8 +1290,8 @@ function db2jld(filename::AbstractString; addrdict::VoidUnion{Dict{AbstractStrin
 end
 
 
-function deleteServerSession!(cloudGraph::CloudGraph, session::AbstractString)
-  query =  "match (n:$(session))
+function deleteServerSession!(cloudGraph::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)
+  query =  "match (n:$(session):$robot:$user)
             detach delete n
             return count(n)"
   return executeQuery(cloudGraph.neo4j.connection, query)

@@ -5,6 +5,8 @@ using IncrementalInference
 
 include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 addrdict["session"] = "SESSSHARK_16_11_14"  # "SESSROX"
+addrdict["robot"] = "robot"
+addrdict["user"] = "user"
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 
 
@@ -49,8 +51,8 @@ h2 = plotKDE(fncvar.bearing, xlbl="Bearing [rad]", fill=true )
 Gadfly.draw(PDF("factor_x1710l200050_stack.pdf",15cm,20cm),vstack(h1,h2))
 
 
-
-ret = whosNear2D(cloudGraph, "SESSSHARK_16_11_14", x=21.7, y=-54.0)
+# TODO: Please fix with correct session for example.
+ret = whosNear2D(cloudGraph, "SESSSHARK_16_11_14", "robot", "user" x=21.7, y=-54.0)
 
 
 sort(collect(keys(ret)))

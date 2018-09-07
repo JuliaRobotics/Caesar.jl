@@ -154,11 +154,9 @@ end
 Return Dict{Symbol, Int} of vertex symbol to Neo4j node ID of MULTISESSION constraints in this `fgl.sessionname`.
 """
 function findExistingMSConstraints(fgl::FactorGraph)
-  loadtx = transaction(fgl.cg.neo4j.connection)
   query =  "match (n:$(fgl.sessionname):$(fgl.robotname):$(fgl.username):MULTISESSION)
             return id(n), n.exVertexId, n.label"
-  cph = loadtx(query, submit=true)
-
+  cph, = executeQuery(cg, query)
   # parse the response into a dictionary
   existingms = Dict{Symbol, Int}() # symlbl => neoid
   for res in cph.results[1]["data"]
