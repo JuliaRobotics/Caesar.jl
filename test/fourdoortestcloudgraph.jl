@@ -44,11 +44,14 @@ cov = 3.0*ones(1,1)
 v1 = addNode!(fg,:x1,ContinuousScalar,N=N, labels=["POSE"])
 
 # add a prior for the initial position of the robot
-f0  = addFactor!(fg,[v1], Obsv2(doors, cov', [1.0]))
+fct = Obsv2(doors, cov, [1.0])
+# TODO: Fix here - what's up with it failing to encode?
+#WIP
+f1  = addFactor!(fg,[v1], fct)
 
 # add second pose vertex
 tem = 2.0*randn(1,N)+getVal(v1)+50.0
-v2 = addNode!(fg, :x2, tem, N=N,labels=["POSE"])
+v2 = addNode!(fg, :x2, ContinuousScalar, N=N,labels=["POSE"])
 
 # now add the odometry factor between them
 f1 = addFactor!(fg,[v1;v2],Odo([50.0]',[2.0]',[1.0]))
