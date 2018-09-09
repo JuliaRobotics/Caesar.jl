@@ -5,25 +5,11 @@ using Interpolations
 
 using RoMEPlotting
 using Gadfly, DataFrames
+using ProgressMeter
 
 datadir = joinpath(ENV["HOME"],"data","sandshark","sample_wombat_2018_09_07","processed","extracted")
 matcheddir = joinpath(datadir, "matchedfilter", "particles")
 beamdir = joinpath(datadir, "beamformer", "particles")
-# matchedFilter
-# 1531152812000000000.csv
-matchedFiles = readdir(matcheddir)
-beamFiles = readdir(beamdir)
-timestamps = map(a -> parse(a[1:end-4]), matchedFiles)
-beamtimestamps = map(a -> parse(a[1:end-4]), beamFiles)
-unionTs = intersect(timestamps, beamtimestamps)
-
-# load all data into dictionaries
-rangedata = Dict{Int,Array{Float64}}()
-azidata = Dict{Int,Array{Float64}}()
-# rangeT0 = 1531152812000000000
-
-mints = min(timestamps...)
-maxts = max(timestamps...)
 
 function loaddircsvs(datadir)
   # https://docs.julialang.org/en/v0.6.1/stdlib/file/#Base.Filesystem.walkdir
@@ -40,11 +26,8 @@ function loaddircsvs(datadir)
 end
 
 rangedata = loaddircsvs(matcheddir)
-rangekeys = sort(collect(keys(rangedata)))
-
 azidata = loaddircsvs(beamdir)
-azikeys = sort(collect(keys(azidata)))
-
+timestamps = intersect(sort(collect(keys(rangedata))), sort(collect(keys(azidata))))
 
 # NAV data
 navdata = Dict{Int, Vector{Float64}}()
@@ -55,31 +38,9 @@ for row in navfile
     # round(Int, 1000 * parse(s[1])) = 1531153292381
     navdata[id] = parse.(s)
 end
-# navdata[first(keys(navdata))]
-
 navkeys = sort(collect(keys(navdata)))
-
-# latency is crazy - yep keys are timestamps
 # NAV colums are X,Y = 7,8
-#                lat,long = 9,10
-# e.g.
-# 10-element Array{Float64,1}:
-#    1.53115e9
-#   -6.33978
-#    0.449772
-#  129.62
-#    0.650937
-#    1.156
-#   51.9071
-#  -33.1335
-#   42.3582
-#  -71.087
-
-
-
-
-
-
+# lat,long = 9,10
 
 X = Float64[]
 Y = Float64[]
@@ -95,27 +56,16 @@ end
 # pl = Gadfly.plot(navdf, x=:x, y=:y, Geom.path())
 # Gadfly.draw(Gadfly.PNG("/tmp/navss.png", 30cm, 20cm),pl)
 
-
 interp_x = LinearInterpolation(navkeys, X)
 interp_y = LinearInterpolation(navkeys, Y)
-
-interp_x(sum(navkeys[1:2])/2)
-
-navkeys[1]
-epochs[1]
-
-interp_x(epochs[1])
 
 ## SELECT SEGMENT OF DATA TO WORK WITH
 ppbrDict = Dict{Int, Pose2Point2BearingRange}()
 
-
-epochs = rangekeys # [51:60]
+epochs = timestamps # [51:60]
 GPS = Dict{Int, Vector{Float64}}()
-# almost there -- be right back.
-for ep in epochs
-  x, y = interp_x(ep), interp_y(ep)
-  GPS[ep] = [x;y]
+@showprogress for ep in epochs
+  GPS[ep] = [interp_x(ep); interp_y(ep)]
   rangepts = rangedata[ep][:]
   rangeprob = kde!(rangepts)
   azipts = azidata[ep][:,1]
@@ -125,12 +75,9 @@ for ep in epochs
 end
 
 
-GPS_X[7:8]
-GPS_Y[7:8]
-
+GPS[timestamps[1]]
 
 ## build the factor graph
-
 fg = initfg()
 
 # Add a central beacon
