@@ -2,6 +2,7 @@
 
 using Caesar, RoME, KernelDensityEstimate
 using Interpolations
+using Distributions
 
 using RoMEPlotting
 using Gadfly, DataFrames
@@ -41,13 +42,17 @@ end
 navkeys = sort(collect(keys(navdata)))
 # NAV colums are X,Y = 7,8
 # lat,long = 9,10
+# time,pitch,roll,yaw,speed,internal_x,internal_y,internal_lat,internal_long
 
 X = Float64[]
 Y = Float64[]
+yaw = Float64[]
 for id in navkeys
+  push!(yaw, getindex(navdata[id],4))
   push!(X, getindex(navdata[id],7))
   push!(Y, getindex(navdata[id],8))
 end
+
 # navdf = DataFrame(
 #   ts = navkeys - navkeys[1],
 #   x = X,
@@ -58,44 +63,57 @@ end
 
 interp_x = LinearInterpolation(navkeys, X)
 interp_y = LinearInterpolation(navkeys, Y)
+interp_yaw = LinearInterpolation(navkeys, yaw)
 
 ## SELECT SEGMENT OF DATA TO WORK WITH
 ppbrDict = Dict{Int, Pose2Point2BearingRange}()
+odoDict = Dict{Int, Pose2Pose2}()
 
-epochs = timestamps # [51:60]
-GPS = Dict{Int, Vector{Float64}}()
+epochs = timestamps[51:60]
+NAV = Dict{Int, Vector{Float64}}()
+lastepoch = 0
 @showprogress for ep in epochs
-  GPS[ep] = [interp_x(ep); interp_y(ep)]
+  if lastepoch != 0
+    NAV[ep] = [
+        interp_x(ep) - interp_x(lastepoch);
+        interp_y(ep) - interp_y(lastepoch);
+        TransformUtils.wrapRad(deg2rad(interp_yaw(ep) - interp_yaw(lastepoch)))] # Bearing?
+    odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], diagm([0.1;0.1;0.005].^2)))
+  end
   rangepts = rangedata[ep][:]
   rangeprob = kde!(rangepts)
   azipts = azidata[ep][:,1]
   aziprob = kde!(azipts)
   # prep the factor functions
   ppbrDict[ep] = Pose2Point2BearingRange(aziprob, rangeprob)
+
+  lastepoch = ep
 end
 
-
-GPS[timestamps[1]]
 
 ## build the factor graph
 fg = initfg()
 
 # Add a central beacon
 addNode!(fg, :l1, Point2)
-# addFactor()
 index = 0
-for ep in epochs
+epoch_slice = epochs
+for ep in epoch_slice
   # Correct variable type Pose2?
   curvar = Symbol("x$index")
   addNode!(fg, curvar, Pose2)
-  addFactor!(fg, [curvar; :l1], ppbrDict[ep]) # that makes sense - gotcha -- I was on odo sorry
+  # addFactor!(fg, [curvar; :l1], ppbrDict[ep]) # that makes sense - gotcha -- I was on odo sorry
+  if ep != epoch_slice[1]
+      addFactor!(fg, [Symbol("x$(index-1)") curvar], odoDict[ep])
+  else
+      # add a prior to the first pose location (a "GPS" prior)
+      addFactor!(fg, [curvar], Prior(MvNormal([interp_x(ep);interp_y(ep);interp_yaw(ep)], diagm([0.1;0.1;0.005].^2)))
+  end
   index+=1
 end
 
 
 writeGraphPdf(fg)
-
-
 batchSolve!(fg)
 
 
