@@ -119,6 +119,7 @@ fg = initfg()
 # Add a central beacon
 # addNode!(fg, :l1, Point2)
 # Pinger location is x=16, y=0.6
+# addFactor!(fg, [curvar], IIF.Prior( MvNormal([16;0.6], diagm([0.1;0.1].^2)) ))
 
 index = 0
 epoch_slice = epochs
