@@ -32,7 +32,7 @@ timestamps = intersect(sort(collect(keys(rangedata))), sort(collect(keys(azidata
 
 # NAV data
 navdata = Dict{Int, Vector{Float64}}()
-navfile = readdlm(joinpath(datadir, "new_nav_data2.csv"))
+navfile = readdlm(joinpath(datadir, "nav_data2.csv"))
 for row in navfile
     s = split(row, ",")
     id = round(Int, 1000*parse(s[1]))
@@ -42,7 +42,7 @@ end
 navkeys = sort(collect(keys(navdata)))
 # NAV colums are X,Y = 7,8
 # lat,long = 9,10
-# time,pitch,roll,yaw,speed,[Something], internal_x,internal_y,internal_lat,internal_long
+# time,pitch,roll,yaw,speed,[Something], internal_x,internal_y,internal_lat,internal_long, yaw_rad
 
 # heading_to_pi(val)
 #     ret = val;
@@ -57,7 +57,7 @@ X = Float64[]
 Y = Float64[]
 yaw = Float64[]
 for id in navkeys
-  push!(yaw, getindex(navdata[id],10))
+  push!(yaw, getindex(navdata[id],11))
   push!(X, getindex(navdata[id],7))
   push!(Y, getindex(navdata[id],8))
 end
