@@ -1,4 +1,6 @@
 # new Sandshark example
+# add more julia processes
+nprocs() < 7 ? addprocs(8-nprocs()) : nothing
 
 using Caesar, RoME, KernelDensityEstimate, IncrementalInference
 using Interpolations
@@ -79,6 +81,7 @@ interp_yaw = LinearInterpolation(navkeys, yaw)
 ppbrDict = Dict{Int, Pose2Point2BearingRange}()
 odoDict = Dict{Int, Pose2Pose2}()
 
+# We have 261 timestamps
 epochs = timestamps[51:60]
 NAV = Dict{Int, Vector{Float64}}()
 lastepoch = 0
@@ -112,41 +115,102 @@ for ep in epochs
     println("$ep, $x, $y, $yaw")
 end
 
-
 ## build the factor graph
-fg = initfg()
+function buildGraphOdoOnly(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)::IncrementalInference.FactorGraph
+    fg = initfg()
 
-# Add a central beacon
-# addNode!(fg, :l1, Point2)
-# Pinger location is x=16, y=0.6
-# addFactor!(fg, [curvar], IIF.Prior( MvNormal([16;0.6], diagm([0.1;0.1].^2)) ))
+    # Don't care about beacon right now
+    # addNode!(fg, :l1, Point2)
+    # Pinger location is x=16, y=0.6
+    # addFactor!(fg, [curvar], IIF.Prior( MvNormal([16;0.6], diagm([0.1;0.1].^2)) ))
 
-index = 0
-epoch_slice = epochs
-for ep in epoch_slice
-    curvar = Symbol("x$index")
-    addNode!(fg, curvar, Pose2)
-    # addFactor!(fg, [curvar; :l1], ppbrDict[ep])
-    if ep != epoch_slice[1]
-      addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
-    else
-      # add a prior to the first pose location (a "GPS" prior)
-      println("Adding a prior at $curvar, x=$(interp_x(ep)), y=$(interp_y(ep)), yaw=$(interp_yaw(ep))")
-      addFactor!(fg, [curvar], IIF.Prior( MvNormal([interp_x(ep);interp_y(ep);interp_yaw(ep)], diagm([0.1;0.1;0.05].^2)) ))
+    index = 0
+    for ep in epochs
+        curvar = Symbol("x$index")
+        addNode!(fg, curvar, Pose2)
+        # addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+        if ep != epochs[1]
+          addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
+        else
+          # add a prior to the first pose location (a "GPS" prior)
+          println("Adding a prior at $curvar, x=$(interp_x(ep)), y=$(interp_y(ep)), yaw=$(interp_yaw(ep))")
+          addFactor!(fg, [curvar], IIF.Prior( MvNormal([interp_x(ep);interp_y(ep);interp_yaw(ep)], diagm([0.1;0.1;0.05].^2)) ))
+        end
+        index+=1
     end
-    index+=1
+
+    return fg
 end
 
+## build the factor graph
+function buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)::IncrementalInference.FactorGraph
+    fg = initfg()
+
+    # Add a central beacon with a prior
+    addNode!(fg, :l1, Point2)
+    # Pinger location is x=16, y=0.6
+    addFactor!(fg, [:l1], IIF.Prior( MvNormal([16;0.6], diagm([0.1;0.1].^2)) ))
+
+    index = 0
+    for ep in epochs
+        curvar = Symbol("x$index")
+        addNode!(fg, curvar, Pose2)
+        addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+        if ep != epochs[1]
+          addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
+        else
+          # add a prior to the first pose location (a "GPS" prior)
+          println("Adding a prior at $curvar, x=$(interp_x(ep)), y=$(interp_y(ep)), yaw=$(interp_yaw(ep))")
+          addFactor!(fg, [curvar], IIF.Prior( MvNormal([interp_x(ep);interp_y(ep);interp_yaw(ep)], diagm([0.1;0.1;0.05].^2)) ))
+        end
+        index+=1
+    end
+
+    return fg
+end
+
+## build the factor graph
+function buildGraphSurveyInBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)::IncrementalInference.FactorGraph
+    fg = initfg()
+
+    # Add a central beacon, no prior
+    addNode!(fg, :l1, Point2)
+
+    index = 0
+    for ep in epochs
+        curvar = Symbol("x$index")
+        addNode!(fg, curvar, Pose2)
+        addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+        if ep != epochs[1]
+          addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
+        end
+        index+=1
+    end
+    # add a prior to the first pose location (a "GPS" prior)
+    println("Adding a prior at $curvar, x=$(interp_x(ep)), y=$(interp_y(ep)), yaw=$(interp_yaw(ep))")
+    addFactor!(fg, [curvar], IIF.Prior( MvNormal([interp_x(epochs[1]);interp_y(epochs[1]);interp_yaw(epochs[1])], diagm([0.1;0.1;0.05].^2)) ))
+
+    return fg
+end
+
+# Various graph options - choose one
+fg = buildGraphOdoOnly(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
+# fg = buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
+# fg = buildGraphSurveyInBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
+
+# Solvery! Roll dice for solvery check
 writeGraphPdf(fg)
 IIF.batchSolve!(fg) #, N=100
 
-# see pictures
+# Roll again for inspiration check
 drawPoses(fg, spscale=0.75)
-drawPosesLandms(fg, spscale=0.75)
+drawPosesLandms(fg, spscale=0.75) #Means so we don't run into MM == Union() || Dict{} in
+# You rolled 20!
 
+# Roll agin for debug check
 ## Debugging strange headings
 posePts = get2DPoseMeans(fg)
-
+landPts = get2DLandmMeans(fg)
 ## Debugging landmark bearing range
 
 # ppbrDict[epoch_slice[1]]
