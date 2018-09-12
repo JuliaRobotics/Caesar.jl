@@ -100,7 +100,7 @@ ppbrDict = Dict{Int, Pose2Point2BearingRange}()
 odoDict = Dict{Int, Pose2Pose2}()
 
 # We have 261 timestamps
-epochs = timestamps[51:100]
+epochs = timestamps[50:2:261]
 NAV = Dict{Int, Vector{Float64}}()
 lastepoch = 0
 for ep in epochs
@@ -174,7 +174,7 @@ function buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, in
     # Add a central beacon with a prior
     addNode!(fg, :l1, Point2)
     # Pinger location is x=16, y=0.6
-    addFactor!(fg, [:l1], IIF.Prior( MvNormal([16;0.6], diagm([0.1;0.1].^2)) ))
+    addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], diagm([0.1;0.1].^2)) ))
 
     index = 0
     for ep in epochs
@@ -220,9 +220,57 @@ function buildGraphSurveyInBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y,
     return fg
 end
 
+function layerBeamPatternRose(bear::BallTreeDensity; scale::Float64=1.0, c=colorant"magenta", wRr=TU.R(0.0),wTRr=zeros(2))
+  tp = reshape([0:0.01:(2pi);], 1, :)
+  belp = scale*bear(tp)
+  Gadfly.plot(x=tp, y=belp, Geom.path)
+  belRose = zeros(2, length(tp))
+  belRose[1,:] = belp
+
+  idx = 0
+  for rRc in TU.R.(tp)
+    idx += 1
+    belRose[:,idx] = wRr*rRc*belRose[:,idx] + wTRr
+  end
+
+  Gadfly.layer(x=belRose[1,:], y=belRose[2,:], Geom.path, Theme(default_color=c))
+end
+
+
+# pl = drawPoses(fg, spscale=2.5)
+function drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y)
+    PLL = []
+    xx, = ls(fg)
+    idx = 0
+    for ep in epochs
+      idx += 1
+      theta = getKDEMax(getVertKDE(fg, xx[idx]))
+      wRr = TU.R(theta[3])
+      pll = layerBeamPatternRose(ppbrDict[ep].bearing, wRr=wRr, wTRr=theta[1:2], scale=5.0)
+      push!(PLL, pll)
+    end
+
+    pllandmarks = drawPosesLandms(fg, spscale=2.5)
+    # Add odo
+    navdf = DataFrame(
+      ts = navkeys,
+      x = X,
+      y = Y
+    )
+    # pl = Gadfly.layer(navdf, x=:x, y=:y, Geom.path())
+    push!(pllandmarks.layers, Gadfly.layer(navdf, x=:x, y=:y, Geom.path(), Theme(default_color=colorant"red"))[1])
+    # Gadfly.plot(pl.layers)
+
+    push!(PLL, Coord.Cartesian(xmin=-150.0,xmax=10.0,ymin=-120.0,ymax=20.0))
+    pla = plot([PLL;pllandmarks.layers; ]...)
+    return pla
+end
+
+
+
 # Various graph options - choose one
-fg = buildGraphOdoOnly(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
-# fg = buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
+# fg = buildGraphOdoOnly(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
+fg = buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
 # fg = buildGraphSurveyInBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
 
 # Solvery! Roll dice for solvery check
@@ -231,7 +279,7 @@ writeGraphPdf(fg)
 IIF.batchSolve!(fg) #, N=100
 
 # Roll again for inspiration check
-drawPoses(fg, spscale=0.75)
+pl = drawPoses(fg, spscale=2.75)
 drawPosesLandms(fg, spscale=0.75) #Means so we don't run into MM == Union() || Dict{} in
 # You rolled 20!
 
@@ -258,14 +306,75 @@ fct.fnc.zDim
 
 
 
+## PLOT BEAM PATTERNS
+
+Gadfly.push_theme(:default)
+pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y)
+Gadfly.draw(PDF("sandshark-beacon.pdf", 12cm, 15cm), pla)
+Gadfly.draw(PNG("sandshark-beacon.png", 12cm, 15cm), pla)
+
+
+# dev
+# ep = epochs[1]
+# # azidata[ep][:,1]
+# pll = layerBeamPatternRose(ppbrDict[ep].bearing)
+# Gadfly.plot(pll...)
+#
+# pll = layerBeamPatternRose(ppbrDict[ep].bearing, wRr=TU.R(pi/2))
+# Gadfly.plot(pll...)
+
+
+diff(epochs[[end;1]])
 
 
 
+## GADFLY EXAMPLE
+
+
+PL = []
+
+push!(PL, Gadfly.layer(x=collect(1:10), y=randn(10), Geom.path, Theme(default_color=colorant"red"))[1])
+push!(PL, Gadfly.layer(x=collect(1:10), y=randn(10), Geom.path, Theme(default_color=colorant"green"))[1])
+push!(PL, Coord.Cartesian(xmin=-1.0,xmax=11, ymin=-5.0, ymax=5.0))
+push!(PL, Guide.ylabel("test"))
+push!(PL, Guide.ylabel("test"))
+pl = drawPoses(fg)
+push!(pl.layers, )
 
 
 
+pl = drawPoses(fg)
+pl = Gadfly.plot(pl.layers...)
 
 
+
+pl = Gadfly.plot(PL...)
+
+@show fieldnames(pl)
+push!(pl.layers, Gadfly.layer(x=collect(1:10), y=randn(10), Geom.path, Theme(default_color=colorant"magenta"))[1] )
+
+pl
+# vstasck, hstack
+
+
+Gadfly.push_theme(:default)
+# SVG, PDF, PNG
+Gadfly.draw(PDF("/tmp/testfig.pdf", 12cm, 8cm), pl)
+run(`evince /tmp/testfig.pdf`)
+
+
+### PATH + Poses
+
+pl = drawPosesLandms(fg, spscale=2.5)
+# Add odo
+navdf = DataFrame(
+  ts = navkeys,
+  x = X,
+  y = Y
+)
+# pl = Gadfly.layer(navdf, x=:x, y=:y, Geom.path())
+push!(pl.layers, Gadfly.layer(navdf, x=:x, y=:y, Geom.path())[1])
+Gadfly.plot(pl.layers)
 
 
 ####  DEBUGGGGG====================
