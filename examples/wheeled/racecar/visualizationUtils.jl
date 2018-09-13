@@ -123,5 +123,101 @@ end
 
 
 
+# tan(bear) = u/f
+
+
+
+
+
+# L = X + DX  =>  X\L = DX
+
+function imageFactor(fg, fsym, im, cfg)
+  img = Gray.(im)
+
+  zmeas = getData(getVert(fg, fsym,nt=:fnc)).fnc.usrfnc!.Zpose.z.μ
+
+  # @show IIF.lsf(fg, fsym)
+  XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
+  @show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
+  bear= TU.wrapRad(atan2(-xyt[2],xyt[1]) - XX[3])
+  # bear = 0.0
+  focal= cfg[:intrinsics][:fx]
+  cu = cfg[:intrinsics][:cx]
+  #
+  @show bu = tan(bear)*focal  +  cu
+  intens = pdf.(Distributions.Normal(bu,30.0), collect(1:size(img,2)))
+  intens ./= maximum(intens)
+
+  zbear= TU.wrapRad(atan2(-zmeas[2],zmeas[1]) - 0.0)
+
+  @show zbu = tan(zbear)*focal  +  cu
+  zintens = pdf.(Distributions.Normal(zbu,30.0), collect(1:size(img,2)))
+  zintens ./= maximum(zintens)
+
+
+  for i in 1:round(Int,0.3*size(img, 1))
+    img[i, :] .*= intens
+  end
+  for i in round(Int,0.3*size(img, 1)):size(img,1)
+    img[i, :] .*= zintens
+  end
+
+  img
+end
+
+
+function drawAllBearingImgs(fg, IMGS, cfg)
+  BRIMGS = Dict{Symbol,Dict{Symbol, Any}}()
+  XX, LL = ls(fg)
+
+  idx = 0
+  for x in XX
+    idx += 1
+    BRIMGS[x] = Dict{Symbol,Any}()
+    for l in LL
+      try
+        fsym = Symbol("$(x)$(l)f1")
+        im = imageFactor(fg, fsym, IMGS[idx], cfg)
+        BRIMGS[x][l] = im
+      catch Er
+        #
+      end
+    end
+  end
+  return BRIMGS
+end
+
+
+function genGifLandm(fg, sym, IMGS; show=true, delay=50)
+  BIM = drawAllBearingImgs(fg, IMGS, cfg)
+  TEMP = []
+  for ss in split.(string.(ls(fg,sym)),string(sym))
+    push!(TEMP, BIM[Symbol(ss[1])][sym])
+  end
+
+  # mkdir("/tmp/animate_tags")
+  # Base.rm("/tmp/animate_tags")
+  run(`rm -fr /tmp/animate_tags`)
+  mkdir("/tmp/animate_tags")
+  for i in 1:length(TEMP)
+    save("/tmp/animate_tags/im$(i).png", TEMP[i])
+  end
+
+  run(`convert -delay $(delay) /tmp/animate_tags/im*.png $(sym).gif`)
+
+  !show ? nothing : @async run(`eog $(sym).gif`)
+  return "$(sym).gif"
+end
+
+
+function getAllLandmGifs(fg, IMGS; show=false)
+  info("Dropping gifs here $(Base.pwd())")
+  for l in ls(fg)[2]
+    genGifLandm(fg, l, IMGS, show=show)
+  end
+  nothing
+end
+
+
 
 #

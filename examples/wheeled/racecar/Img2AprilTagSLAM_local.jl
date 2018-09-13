@@ -1,7 +1,7 @@
     # Local compute version
 
 # add more julia processes
-# nprocs() < 5 ? addprocs(5-nprocs()) : nothing
+nprocs() < 5 ? addprocs(5-nprocs()) : nothing
 
 using Caesar, RoME, Distributions
 using YAML, JLD, HDF5
@@ -43,24 +43,27 @@ Rz = RotZ(-pi/2)
 bTc= LinearMap(Rz) ∘ LinearMap(Rx)
 
 
-# datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"
+datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"
 # datafolder = ENV["HOME"]*"/data/racecar/labrun2/"
 # datafolder = ENV["HOME"]*"/data/racecar/labrun3/"
 # datafolder = ENV["HOME"]*"/data/racecar/labrun5/"
 # datafolder = ENV["HOME"]*"/data/racecar/labrun6/"
-datafolder = ENV["HOME"]*"/data/racecar/labfull/"
+# datafolder = ENV["HOME"]*"/data/racecar/labfull/"
 imgfolder = "images"
 
 
 # Figure export folder
 currdirtime = now()
 # currdirtime = "2018-08-14T00:52:01.534"
+# currdirtime = "2018-09-10T09:22:00.922"
 resultsdir = joinpath(ENV["HOME"], "Pictures", "racecarimgs")
 imgdir = joinpath(resultsdir, "$(currdirtime)")
+
 mkdir(imgdir)
 mkdir(imgdir*"/tags")
+mkdir(imgdir*"/images")
 
-camidxs = 0:5:1765
+camidxs = 175:5:370  #0:5:1765
 
 fid = open(imgdir*"/readme.txt", "w")
 println(fid, datafolder)
@@ -98,7 +101,7 @@ pssym = Symbol("x$psid")
 addNode!(fg, pssym, DynPose2(ut=0))
 # addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
 addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2)),
-                                              MvNormal(zeros(2),diagm([0.05;0.05].^2))))
+                                              MvNormal(zeros(2),diagm([0.1;0.05].^2))))
 
 addApriltags!(fg, pssym, tag_bag[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 
@@ -120,13 +123,16 @@ prev_psid = 0
 # add other positions
 maxlen = (length(tag_bag)-1)
 # psid = 5
-for psid in 1:1:50 #maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
+for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   @show psym = Symbol("x$psid")
   addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
   # writeGraphPdf(fg)
-  if psid % 1000 == 0 || psid == maxlen
+
+
+  if psid % 20 == 0 || psid == maxlen
+    IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym)_presolve.jld")
     tree = wipeBuildNewTree!(fg, drawpdf=true)
-    # inferOverTree!(fg,tree, N=N)
+    inferOverTree!(fg,tree, N=N)
   end
 
   ## save factor graph for later testing and evaluation
@@ -143,25 +149,153 @@ for psid in 1:1:50 #maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   prev_psid = psid
 end
 
-# save factor graph for later testing and evaluation
 IIF.savejld(fg, file=imgdir*"/racecar_fg_final.jld")
+# fg, = loadjld(file=imgdir*"/racecar_fg_final.jld")
 
-tree = wipeBuildNewTree!(fg, drawpdf=true)
-# # @async run(`evince bt.pdf`)
-inferOverTreeR!(fg,tree, N=N)
-# inferOverTree!(fg,tree, N=N)
+# save factor graph for later testing and evaluation
+batchSolve!(fg, drawpdf=true, N=N)
+
+IIF.savejld(fg, file=imgdir*"/racecar_fg_final_resolve.jld")
+# fgr, = loadjld(file=imgdir*"/racecar_fg_final_resolve.jld")
 
 
-# pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
-# Gadfly.draw(PNG(joinpath(imgdir,"final.png"),15cm, 10cm),pl)
+
+#,xmin=-3,xmax=6,ymin=-5,ymax=2);
+Gadfly.push_theme(:default)
+pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean, to=3)
+Gadfly.draw(SVG(joinpath(imgdir,"images","final.svg"),15cm, 10cm),pl)
 # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
 # Gadfly.draw(PNG(joinpath(imgdir,"hist_final.png"),15cm, 10cm),pl)
 
+drawPoses(fg, spscale=1.0)
+drawPosesLandms(fg, spscale=0.5)
+
+
+sym = :x2
+ls(fg, sym)
+pl = plotLocalProduct(fg, sym, dims=[1])
+Gadfly.draw(SVG(joinpath(imgdir,"images","localp_$sym.svg"),15cm, 3*10cm),pl)
+
+
+stuff = IIF.localProduct(fg, :l0)
+
+
+P = *(stuff[3][1])
+
+plotKDE([P;stuff[3][1]], c=["red";["cyan" for j in 1:length(stuff[3][1])]])
+
+getVal(fg, :l1)
+
+
+
+##
 
 
 
 
-#0
+genGifLandm(fg, :l1, IMGS)
+
+
+
+fsym = :x0l0f1
+getData(getVert(fg, fsym,nt=:fnc)).fnc.usrfnc!.Zpose.z.μ
+
+XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
+@show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
+bear= TU.wrapRad(atan2(-xyt[2],xyt[1]) - XX[3])
+
+
+
+
+im = imageFactor(fg, :x0l1f1, IMGS[1], cfg)
+BRIMGS = Dict{Symbol,Dict{Symbol, Any}}()
+BRIMGS[:x0] = Dict{Symbol,Any}()
+BRIMGS[:x0][:l1] = im
+
+BIM = drawAllBearingImgs(fg, IMGS, cfg)
+
+BIM[:x0][:l1]
+
+sym = :l1
+
+
+imageFactor(fg, :x3l0f1, IMGS[4], cfg)
+imageFactor(fg, :x3l1f1, IMGS[4], cfg)
+imageFactor(fg, :x3l2f1, IMGS[4], cfg)
+
+
+
+0
+
+#j
+# # using KernelDensityEstimate
+# # import IncrementalInference: localProduct, proposalbeliefs!, productbelief,findRelatedFromPotential
+# function localProduct(fgl::FactorGraph,
+#                       sym::Symbol;
+#                       N::Int=100,
+#                       dbg::Bool=false,
+#                       api::DataLayerAPI=IncrementalInference.dlapi  )
+#   # TODO -- converge this function with predictbelief for this node
+#   # TODO -- update to use getVertId
+#   destvertid = fgl.IDs[sym] #destvert.index
+#   dens = Array{BallTreeDensity,1}()
+#   partials = Dict{Int, Vector{BallTreeDensity}}()
+#   lb = String[]
+#   fcts = Vector{Graphs.ExVertex}()
+#   cf = ls(fgl, sym, api=api)
+#   for f in cf
+#     vert = getVert(fgl,f, nt=:fnc, api=api)
+#     push!(fcts, vert)
+#     push!(lb, vert.label)
+#   end
+#
+#   # get proposal beliefs
+#   proposalbeliefs!(fgl, destvertid, fcts, dens, partials, N=N, dbg=dbg)
+#   # @show length(dens), length(partials)
+#
+#   # take the product
+#   pGM = productbelief(fgl, destvertid, dens, partials, N, dbg=dbg )
+#   pp = kde!(pGM)
+#
+#   return pp, dens, partials, lb
+# end
+#
+#
+# function proposalbeliefs!(fgl::FactorGraph,
+#       destvertid::Int,
+#       factors::Vector{Graphs.ExVertex},
+#       dens::Vector{BallTreeDensity},
+#       partials::Dict{Int, Vector{BallTreeDensity}};
+#       N::Int=100,
+#       dbg::Bool=false )
+#   #
+#   for fct in factors
+#     data = getData(fct)
+#     p = findRelatedFromPotential(fgl, fct, destvertid, N, dbg)
+#     if data.fnc.partial   # partial density
+#       pardims = data.fnc.usrfnc!.partial
+#       for dimnum in pardims
+#         if haskey(partials, dimnum)
+#           push!(partials[dimnum], marginal(p,[dimnum]))
+#         else
+#           partials[dimnum] = BallTreeDensity[marginal(p,[dimnum])]
+#         end
+#       end
+#     else # full density
+#       push!(dens, p)
+#     end
+#   end
+#   nothing
+# end
+#
+
+
+
+
+
+
+
+0
 #
 # ls(fg, :l7)
 #
@@ -196,6 +330,13 @@ inferOverTreeR!(fg,tree, N=N)
 #   println(fid, "$sym, $(val[2:(end-1)])")
 # end
 # close(fid)
+
+
+
+
+
+
+
 
 
 
