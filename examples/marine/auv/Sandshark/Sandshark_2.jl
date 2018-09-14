@@ -12,7 +12,8 @@ using ProgressMeter
 
 const TU = TransformUtils
 
-datadir = joinpath(ENV["HOME"],"data","sandshark","sample_wombat_2018_09_07","processed","extracted")
+# datadir = joinpath(ENV["HOME"],"data","sandshark","sample_wombat_2018_09_07","processed","extracted")
+datadir = joinpath(ENV["HOME"],"data","sandshark","full_wombat_2018_07_09","extracted")
 matcheddir = joinpath(datadir, "matchedfilter", "particles")
 beamdir = joinpath(datadir, "beamformer", "particles")
 
@@ -49,14 +50,19 @@ navkeys = sort(collect(keys(navdata)))
 # lat,long = 9,10
 # time,pitch,roll,heading,speed,[Something], internal_x,internal_y,internal_lat,internal_long, yaw_rad
 
-# heading_to_pi(val)
-#     ret = val;
-#     ret = 2*pi - ret;
-#     ret = ret - 1.5*pi;
-#     if ret < -pi
-#         ret = ret + 2*pi;
-#     end
-# end
+# LBL data - note the timestamps need to be exported as float in future.
+lbldata = Dict{Int,  Vector{Float64}}()
+lblfile = readdlm(joinpath(datadir, "lbl.csv"))
+for row in lblfile
+    s = split(row, ",")
+    id = round(Int, 1000*parse(s[1]))
+    @show s
+    if s[2] != "NaN"
+        lbldata[id] = parse.(s)
+    end
+end
+lblkeys = sort(collect(keys(lbldata)))
+
 
 # GET Y = north,  X = East,  Heading along +Y clockwise [0,360)]
 east = Float64[]
@@ -81,16 +87,32 @@ for id in navkeys
   push!(yaw, TU.wrapRad(-deg2rad(getindex(navdata[id],4))) )  # rotation about +Z
 end
 
+lblX = Float64[]
+lblY = Float64[]
+for id in lblkeys
+    push!(lblX, getindex(lbldata[id],3) )
+    push!(lblY, -getindex(lbldata[id],2) )
+end
 
-# tssubset = navkeys[51:60]
-# navdf = DataFrame(
-#   ts = navkeys - navkeys[1],
-#   x = X,
-#   y = Y
-# )
-# pl = Gadfly.plot(navdf, x=:x, y=:y, Geom.path())
+# Plot LBL vs. NAV
+tssubset = navkeys
+navdf = DataFrame(
+  ts = navkeys - navkeys[1],
+  x = X,
+  y = Y
+)
+pl = []
+push!(pl, Gadfly.layer(navdf, x=:x, y=:y, Geom.path(), Theme(default_color=colorant"red")))
+
+lbldf = DataFrame(
+  ts = lblkeys - lblkeys[1],
+  x = lblX,
+  y = lblY
+)
+push!(pl, Gadfly.layer(lbldf, x=:x, y=:y, Geom.path()), Theme(default_color=colorant"green"))
+Gadfly.plot(pl...)
 # Gadfly.draw(Gadfly.PNG("/tmp/navss.png", 30cm, 20cm),pl)
-#
+
 interp_x = LinearInterpolation(navkeys, X)
 interp_y = LinearInterpolation(navkeys, Y)
 interp_yaw = LinearInterpolation(navkeys, yaw)
@@ -100,7 +122,7 @@ ppbrDict = Dict{Int, Pose2Point2BearingRange}()
 odoDict = Dict{Int, Pose2Pose2}()
 
 # We have 261 timestamps
-epochs = timestamps[50:2:261]
+epochs = timestamps[11:2:200]
 NAV = Dict{Int, Vector{Float64}}()
 lastepoch = 0
 for ep in epochs
@@ -144,10 +166,10 @@ end
 function buildGraphOdoOnly(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)::IncrementalInference.FactorGraph
     fg = initfg()
 
-    # Don't care about beacon right now
-    # addNode!(fg, :l1, Point2)
+    # Add a central beacon with a prior
+    addNode!(fg, :l1, Point2)
     # Pinger location is x=16, y=0.6
-    # addFactor!(fg, [curvar], IIF.Prior( MvNormal([16;0.6], diagm([0.1;0.1].^2)) ))
+    addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], diagm([0.1;0.1].^2)) ))
 
     index = 0
     for ep in epochs
@@ -161,6 +183,7 @@ function buildGraphOdoOnly(epochs, ppbrDict, odoDict, interp_x, interp_y, interp
           println("Adding a prior at $curvar, x=$(interp_x(ep)), y=$(interp_y(ep)), yaw=$(interp_yaw(ep))")
           addFactor!(fg, [curvar], IIF.Prior( MvNormal([interp_x(ep);interp_y(ep);interp_yaw(ep)], diagm([0.1;0.1;0.05].^2)) ))
         end
+        addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
         index+=1
     end
 
@@ -180,7 +203,9 @@ function buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, in
     for ep in epochs
         curvar = Symbol("x$index")
         addNode!(fg, curvar, Pose2)
-        addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+        # if ep in epochs[50]
+        # addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+        # end
         if ep != epochs[1]
           addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
         else
@@ -188,6 +213,7 @@ function buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, in
           println("Adding a prior at $curvar, x=$(interp_x(ep)), y=$(interp_y(ep)), yaw=$(interp_yaw(ep))")
           addFactor!(fg, [curvar], IIF.Prior( MvNormal([interp_x(ep);interp_y(ep);interp_yaw(ep)], diagm([0.1;0.1;0.05].^2)) ))
         end
+        addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
         index+=1
     end
 
@@ -238,12 +264,12 @@ end
 
 
 # pl = drawPoses(fg, spscale=2.5)
-function drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y)
+function drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY, rosePlotStep=5)
     PLL = []
     xx, = ls(fg)
     idx = 0
-    for ep in epochs
-      idx += 1
+    for ep in epochs[1:rosePlotStep:end]
+      idx += rosePlotStep
       theta = getKDEMax(getVertKDE(fg, xx[idx]))
       wRr = TU.R(theta[3])
       pll = layerBeamPatternRose(ppbrDict[ep].bearing, wRr=wRr, wTRr=theta[1:2], scale=5.0)
@@ -259,13 +285,21 @@ function drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y)
     )
     # pl = Gadfly.layer(navdf, x=:x, y=:y, Geom.path())
     push!(pllandmarks.layers, Gadfly.layer(navdf, x=:x, y=:y, Geom.path(), Theme(default_color=colorant"red"))[1])
+    lbldf = DataFrame(
+      ts = lblkeys - lblkeys[1],
+      x = lblX,
+      y = lblY
+    )
+    push!(pllandmarks.layers, Gadfly.layer(lbldf, x=:x, y=:y, Geom.path(), Theme(default_color=colorant"green"))[1])
     # Gadfly.plot(pl.layers)
 
-    push!(PLL, Coord.Cartesian(xmin=-150.0,xmax=10.0,ymin=-120.0,ymax=20.0))
-    pla = plot([PLL;pllandmarks.layers; ]...)
+    # Make X/Y range same so no distorted
+    # push!(PLL, Coord.Cartesian(xmin=-160.0,xmax=10.0,ymin=-135.0,ymax=35.0))
+    pla = plot([PLL;pllandmarks.layers; ]...,
+        Guide.manual_color_key("Legend",
+            ["Particle Filter Est.", "LBL Path", "Non-Gaussian SLAM"], ["red", "green", "light blue"]))
     return pla
 end
-
 
 
 # Various graph options - choose one
@@ -274,45 +308,85 @@ fg = buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp
 # fg = buildGraphSurveyInBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
 
 # Solvery! Roll dice for solvery check
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 # ensureAllInitialized!(fg)
+t = string(now())
+savejld(fg, file="presolve_$t.jld")
 IIF.batchSolve!(fg) #, N=100
+savejld(fg, file="postsolve_$t.jld")
 
+# pl = drawPoses(fg, spscale=2.75) # Just for odo plot
 # Roll again for inspiration check
-pl = drawPoses(fg, spscale=2.75)
-drawPosesLandms(fg, spscale=0.75) #Means so we don't run into MM == Union() || Dict{} in
+## PLOT BEAM PATTERNS
+Gadfly.push_theme(:default)
+pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
+Gadfly.draw(PDF("sandshark-beacon_$t.pdf", 12cm, 15cm), pla)
+Gadfly.draw(PNG("sandshark-beacon_$t.png", 12cm, 15cm), pla)
+
+####  DEBUGGGGG PPBRDict ====================
+
+LL = [0.6; -16; 0]
+function expectedLocalBearing(curPose, LL)
+    v = [LL[1] - curPose[1]; LL[2] - curPose[2]]
+    world = atan2(v[2], v[1])
+    loc = rad2deg(TU.wrapRad(world - curPose[3]))
+    while loc < 0
+        loc += 360
+    end
+    return loc
+end
+# println("$(interp_x[ep]), $(interp_y[ep]), world yaw = $(interp_yaw[ep] * 180 / pi)")
+# XX = [interp_x(ep); interp_y[ep]; interp_yaw[ep]]
+# expectedLocalBearing(XX, LL)
+# println("Expected local yaw = $(expectedLocalBearing(XX, LL)). Sonar local yaw = $(rad2deg(getKDEMax(ppbr.bearing)[1]))")
+# xyt = se2vee(SE2(XX[1:3]) \ SE2(LL))
+# bear = rad2deg(TU.wrapRad(atan2(xyt[2],xyt[1]) -XX[3]))
+
+bearExp = []
+bearAcoustics = []
+for ep in epochs
+    XX = [interp_x(ep); interp_y[ep]; interp_yaw[ep]]
+    ppbr = ppbrDict[ep]
+    push!(bearExp, expectedLocalBearing(XX, LL))
+    push!(bearAcoustics, rad2deg(getKDEMax(ppbr.bearing)[1]))
+    println("local beacon heading: Expected = $(expectedLocalYaw(XX, LL)). Sonar = $(rad2deg(getKDEMax(ppbr.bearing)[1]))")
+end
+
+layers = []
+push!(layers, Gadfly.layer(x=1:length(bearExp), y=bearExp, Geom.path())[1], Theme(default_color=color("red")))
+push!(layers, Gadfly.layer(x=1:length(bearAcoustics), y=bearAcoustics, Geom.path(), Theme(default_color=color("blue"))))
+Gadfly.plot(layers...)
+# end
+
+####################################
+
+
+
+######################################################
+
+# pl = drawPoses(fg, spscale=2.75)
+# drawPosesLandms(fg, spscale=0.75) #Means so we don't run into MM == Union() || Dict{} in
 # You rolled 20!
 
-# Roll agin for debug check
+# Roll again for debug check
 ## Debugging strange headings
-posePts = get2DPoseMeans(fg)
-landPts = get2DLandmMeans(fg)
+# posePts = get2DPoseMeans(fg)
+# landPts = get2DLandmMeans(fg)
 ## Debugging landmark bearing range
 
 # ppbrDict[epoch_slice[1]]
-getSample(ppbrDict[epoch_slice[1]],100)
-
-
-addNode!(fg, :l1, Point2)
-addFactor!(fg, [:x0; :l1], ppbrDict[epoch_slice[1]])
-
-ls(fg, :l1)
-pts = IIF.approxConv(fg, :x0l1f1, :l1)
-
-fct = getData(getVert(fg, :x0l1f1, nt=:fnc))
-
-fct.fnc.zDim
-
-
-
-
-## PLOT BEAM PATTERNS
-
-Gadfly.push_theme(:default)
-pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y)
-Gadfly.draw(PDF("sandshark-beacon.pdf", 12cm, 15cm), pla)
-Gadfly.draw(PNG("sandshark-beacon.png", 12cm, 15cm), pla)
-
+# getSample(ppbrDict[epoch_slice[1]],100)
+#
+#
+# addNode!(fg, :l1, Point2)
+# addFactor!(fg, [:x0; :l1], ppbrDict[epoch_slice[1]])
+#
+# ls(fg, :l1)
+# pts = IIF.approxConv(fg, :x0l1f1, :l1)
+#
+# fct = getData(getVert(fg, :x0l1f1, nt=:fnc))
+#
+# fct.fnc.zDim
 
 # dev
 # ep = epochs[1]
@@ -323,130 +397,84 @@ Gadfly.draw(PNG("sandshark-beacon.png", 12cm, 15cm), pla)
 # pll = layerBeamPatternRose(ppbrDict[ep].bearing, wRr=TU.R(pi/2))
 # Gadfly.plot(pll...)
 
-
-diff(epochs[[end;1]])
-
+#
+# diff(epochs[[end;1]])
 
 
 ## GADFLY EXAMPLE
-
-
-PL = []
-
-push!(PL, Gadfly.layer(x=collect(1:10), y=randn(10), Geom.path, Theme(default_color=colorant"red"))[1])
-push!(PL, Gadfly.layer(x=collect(1:10), y=randn(10), Geom.path, Theme(default_color=colorant"green"))[1])
-push!(PL, Coord.Cartesian(xmin=-1.0,xmax=11, ymin=-5.0, ymax=5.0))
-push!(PL, Guide.ylabel("test"))
-push!(PL, Guide.ylabel("test"))
-pl = drawPoses(fg)
-push!(pl.layers, )
-
-
-
-pl = drawPoses(fg)
-pl = Gadfly.plot(pl.layers...)
-
-
-
-pl = Gadfly.plot(PL...)
-
-@show fieldnames(pl)
-push!(pl.layers, Gadfly.layer(x=collect(1:10), y=randn(10), Geom.path, Theme(default_color=colorant"magenta"))[1] )
-
-pl
-# vstasck, hstack
-
-
-Gadfly.push_theme(:default)
-# SVG, PDF, PNG
-Gadfly.draw(PDF("/tmp/testfig.pdf", 12cm, 8cm), pl)
-run(`evince /tmp/testfig.pdf`)
-
-
-### PATH + Poses
-
-pl = drawPosesLandms(fg, spscale=2.5)
-# Add odo
-navdf = DataFrame(
-  ts = navkeys,
-  x = X,
-  y = Y
-)
-# pl = Gadfly.layer(navdf, x=:x, y=:y, Geom.path())
-push!(pl.layers, Gadfly.layer(navdf, x=:x, y=:y, Geom.path())[1])
-Gadfly.plot(pl.layers)
-
-
-####  DEBUGGGGG====================
-
-# timestamps[51]
+# plotLocalProduct(fg, :x49, dims=[1;2])
+# stuff = IncrementalInference.localProduct(fg, :x49)
+# plotKDE(stuff[2], dims=[1;2], levels=10)
 #
-# fg_demo = RoME.initfg()
+# # STUFF
+# fsym = :x49l1f1
+# const TU = TransformUtils
+# XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
+# @show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
+# bear= rad2deg(TU.wrapRad(atan2(-xyt[2],xyt[1]) -XX[3]))
+# b = IncrementalInference.getData(fg, fsym, nt=:fnc).fnc.usrfnc!
+# b.bearing
+# p = plotKDE(b.range)
+# Gadfly.draw(PDF("multimodal_bearing_range.pdf", 12cm, 15cm), p)
 #
-# addNode!(fg_demo, :x1, Pose2)
-# addFactor!(fg_demo, [:x1], IIF.Prior(MvNormal(zeros(3), 0.01^2*eye(3))))
+# # SAVE THIS PLOT
+# # epochs = timestamps[11:2:200]
+# g = getVertKDE.(fg, [:l1, :x49])
+# m1 = KDE.marginal(g[1], [1;2])
+# m2 = KDE.marginal(g[2], [1;2])
+# norm(diff(KDE.getKDEMax.([m1; m2])))
 #
-# ensureAllInitialized!(fg_demo)
+# kde!(rand(Normal(4.0, 0.1),100))
 #
-# drawPoses(fg_demo)
+# ###############
+#
+# PL = []
+#
+# push!(PL, Gadfly.layer(x=collect(1:10), y=randn(10), Geom.path, Theme(default_color=colorant"red"))[1])
+# push!(PL, Gadfly.layer(x=collect(1:10), y=randn(10), Geom.path, Theme(default_color=colorant"green"))[1])
+# push!(PL, Coord.Cartesian(xmin=-1.0,xmax=11, ymin=-5.0, ymax=5.0))
+# push!(PL, Guide.ylabel("test"))
+# push!(PL, Guide.ylabel("test"))
+# pl = drawPoses(fg)
+# push!(pl.layers, )
+#
+# pl = drawPoses(fg)
+# pl = Gadfly.plot(pl.layers...)
 #
 #
 #
+# pl = Gadfly.plot(PL...)
+#
+# @show fieldnames(pl)
+# push!(pl.layers, Gadfly.layer(x=collect(1:10), y=randn(10), Geom.path, Theme(default_color=colorant"magenta"))[1] )
+#
+# pl
+# # vstasck, hstack
 #
 #
-# fg = RoME.initfg()
-#
-# addNode!(fg, :x51, Pose2)
-# addFactor!(fg, [:x51], IIF.Prior(MvNormal([X[1259];Y[1259];yaw[1259]], 0.001^2*eye(3))))
-#
-# addNode!(fg, :x52, Pose2)
-# wXi = TU.SE2([X[1259];Y[1259];yaw[1259]])
-# wXj = TU.SE2([X[1269];Y[1269];yaw[1269]])
-# iDXj = se2vee(wXi\wXj)
-# pp = Pose2Pose2(MvNormal([iDXj...], 0.001^2*eye(3)) )
-# addFactor!(fg, [:x51;:x52], pp)
-#
-# addNode!(fg, :x53, Pose2)
-# wXi = TU.SE2([X[1269];Y[1269];yaw[1269]])
-# wXj = TU.SE2([X[1279];Y[1279];yaw[1279]])
-# iDXj = se2vee(wXi\wXj)
-# pp = Pose2Pose2(MvNormal([iDXj...], 0.001^2*eye(3)) )
-# addFactor!(fg, [:x52;:x53], pp)
-#
-# addNode!(fg, :x54, Pose2)
-# wXi = TU.SE2([X[1279];Y[1279];yaw[1279]])
-# wXj = TU.SE2([X[1289];Y[1289];yaw[1289]])
-# iDXj = se2vee(wXi\wXj)
-# pp = Pose2Pose2(MvNormal([iDXj...], 0.001^2*eye(3)) )
-# addFactor!(fg, [:x53;:x54], pp)
-#
-# addNode!(fg, :x55, Pose2)
-# wXi = TU.SE2([X[1289];Y[1289];yaw[1289]])
-# wXj = TU.SE2([X[1299];Y[1299];yaw[1299]])
-# iDXj = se2vee(wXi\wXj)
-# pp = Pose2Pose2(MvNormal([iDXj...], 0.001^2*eye(3)) )
-# addFactor!(fg, [:x54;:x55], pp)
-#
-# ensureAllInitialized!(fg)
-#
-# # addNode!(fg, :x56, Pose2)
-# # addNode!(fg, :x57, Pose2)
-# # addNode!(fg, :x58, Pose2)
-# # addNode!(fg, :x59, Pose2)
-# # addNode!(fg, :x60, Pose2)
-#
-# drawPoses(fg, spscale=0.1)
-#
-# yaw[1259]*180.0/pi
-# navdata[navkeys[1259]][4]
-# yaw[1259]
+# Gadfly.push_theme(:default)
+# # SVG, PDF, PNG
+# Gadfly.draw(PDF("/tmp/testfig.pdf", 12cm, 8cm), pl)
+# run(`evince /tmp/testfig.pdf`)
 #
 #
-# 0
+# ### PATH + Poses
 #
-# Gadfly.plot(x=X, x=Y, Geom.path)
+# pl = drawPosesLandms(fg, spscale=2.5)
+# # Add odo
+# navdf = DataFrame(
+#   ts = navkeys,
+#   x = X,
+#   y = Y
+# )
+# # pl = Gadfly.layer(navdf, x=:x, y=:y, Geom.path())
+# push!(pl.layers, Gadfly.layer(navdf, x=:x, y=:y, Geom.path())[1])
+# Gadfly.plot(pl.layers)
 
-
-
+fsym = :x49l1f1
+const TU = TransformUtils
+XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
+@show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
+bear= rad2deg(TU.wrapRad(atan2(-xyt[2],xyt[1]) -XX[3]))
 
 #
