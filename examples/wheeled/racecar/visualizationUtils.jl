@@ -188,11 +188,15 @@ function drawAllBearingImgs(fg, IMGS, cfg)
 end
 
 
-function genGifLandm(fg, sym, IMGS; show=true, delay=50)
+function genGifLandm(fg, sym, IMGS; show=true, delay=50, dir="")
   BIM = drawAllBearingImgs(fg, IMGS, cfg)
   TEMP = []
   for ss in split.(string.(ls(fg,sym)),string(sym))
-    push!(TEMP, BIM[Symbol(ss[1])][sym])
+    if haskey(BIM, Symbol(ss[1]))
+      if haskey(BIM[Symbol(ss[1])], sym)
+       push!(TEMP, BIM[Symbol(ss[1])][sym])
+      end
+    end
   end
 
   # mkdir("/tmp/animate_tags")
@@ -203,21 +207,38 @@ function genGifLandm(fg, sym, IMGS; show=true, delay=50)
     save("/tmp/animate_tags/im$(i).png", TEMP[i])
   end
 
-  run(`convert -delay $(delay) /tmp/animate_tags/im*.png $(sym).gif`)
+  run(`convert -delay $(delay) /tmp/animate_tags/im*.png $(dir)$(sym).gif`)
 
   !show ? nothing : @async run(`eog $(sym).gif`)
   return "$(sym).gif"
 end
 
 
-function getAllLandmGifs(fg, IMGS; show=false)
+function getAllLandmGifs(fg, IMGS; show=false, dir="")
   info("Dropping gifs here $(Base.pwd())")
   for l in ls(fg)[2]
-    genGifLandm(fg, l, IMGS, show=show)
+    genGifLandm(fg, l, IMGS, show=show, dir=dir)
   end
   nothing
 end
 
+function plotPoseVelAsMax(fg, poserange)
 
+  xx = Symbol.(string.("x",collect(poserange)))
+
+  len = length(xx)
+  VV = zeros(len, 2)
+
+  i = 0
+  for state in KDE.getKDEMax.(getVertKDE.(fg, xx))
+    i += 1
+    VV[i,:] = state[4:5]
+  end
+
+  Gadfly.plot(
+    Gadfly.layer(x=poserange, y=VV[:,1], Geom.line, Theme(default_color=colorant"red")),
+    Gadfly.layer(x=poserange, y=VV[:,2], Geom.line, Theme(default_color=colorant"green"))
+  )
+end
 
 #

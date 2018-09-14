@@ -1,7 +1,7 @@
     # Local compute version
 
 # add more julia processes
-nprocs() < 5 ? addprocs(5-nprocs()) : nothing
+nprocs() < 4 ? addprocs(4-nprocs()) : nothing
 
 using Caesar, RoME, Distributions
 using YAML, JLD, HDF5
@@ -43,12 +43,12 @@ Rz = RotZ(-pi/2)
 bTc= LinearMap(Rz) ∘ LinearMap(Rx)
 
 
-datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"
+# datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"  # 175:5:370
 # datafolder = ENV["HOME"]*"/data/racecar/labrun2/"
 # datafolder = ENV["HOME"]*"/data/racecar/labrun3/"
 # datafolder = ENV["HOME"]*"/data/racecar/labrun5/"
-# datafolder = ENV["HOME"]*"/data/racecar/labrun6/"
-# datafolder = ENV["HOME"]*"/data/racecar/labfull/"
+datafolder = ENV["HOME"]*"/data/racecar/labrun6/" # 0:5:1795
+# datafolder = ENV["HOME"]*"/data/racecar/labfull/"  # 0:5:1765
 imgfolder = "images"
 
 
@@ -63,7 +63,7 @@ mkdir(imgdir)
 mkdir(imgdir*"/tags")
 mkdir(imgdir*"/images")
 
-camidxs = 175:5:370  #0:5:1765
+camidxs = 0:5:1795
 
 fid = open(imgdir*"/readme.txt", "w")
 println(fid, datafolder)
@@ -129,7 +129,7 @@ for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   # writeGraphPdf(fg)
 
 
-  if psid % 20 == 0 || psid == maxlen
+  if psid % 50 == 0 || psid == maxlen
     IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym)_presolve.jld")
     tree = wipeBuildNewTree!(fg, drawpdf=true)
     inferOverTree!(fg,tree, N=N)
@@ -149,26 +149,59 @@ for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
   prev_psid = psid
 end
 
+
 IIF.savejld(fg, file=imgdir*"/racecar_fg_final.jld")
 # fg, = loadjld(file=imgdir*"/racecar_fg_final.jld")
+results2csv(fg; dir=imgdir, filename="results.csv")
+
 
 # save factor graph for later testing and evaluation
 batchSolve!(fg, drawpdf=true, N=N)
 
 IIF.savejld(fg, file=imgdir*"/racecar_fg_final_resolve.jld")
 # fgr, = loadjld(file=imgdir*"/racecar_fg_final_resolve.jld")
+results2csv(fg; dir=imgdir, filename="results_resolve.csv")
 
 
 
 #,xmin=-3,xmax=6,ymin=-5,ymax=2);
 Gadfly.push_theme(:default)
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean, to=3)
+pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean)
+# Gadfly.set(:default_theme)
 Gadfly.draw(SVG(joinpath(imgdir,"images","final.svg"),15cm, 10cm),pl)
 # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
 # Gadfly.draw(PNG(joinpath(imgdir,"hist_final.png"),15cm, 10cm),pl)
 
+
+
+
+
+
 drawPoses(fg, spscale=1.0)
 drawPosesLandms(fg, spscale=0.5)
+
+
+getAllLandmGifs(fg, IMGS, show=false, dir=imgdir*"/")
+
+
+ls(fg)
+
+poserange = 1:39
+
+
+
+
+plotPoseVelAsMax(fg, 1:39)
+
+
+
+plotPose(fg, [:x1;:x5;:x10;:x15;:x20;:x25;:x30;:x35], levels=1)
+
+
+plotPose(fg, [:x15;:x20], levels=1)
+
+
+
 
 
 sym = :x2
@@ -323,15 +356,6 @@ imageFactor(fg, :x3l2f1, IMGS[4], cfg)
 #
 #
 #
-# fid = open("results.csv","w")
-# for sym in [ls(fg)[1]...;ls(fg)[2]...]
-#   p = getVertKDE(fg, sym)
-#   val = string(KDE.getKDEMax(p))
-#   println(fid, "$sym, $(val[2:(end-1)])")
-# end
-# close(fid)
-
-
 
 
 

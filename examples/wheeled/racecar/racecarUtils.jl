@@ -48,7 +48,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
                 MvNormal([dx;
                           dy;
                           dth],
-                         diagm([0.1;0.1;0.01].^2)) )
+                         diagm([0.05;0.05;0.03].^2)) )
     end
     if rand() > DAerrors
       # regular single hypothesis
@@ -75,8 +75,8 @@ function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odot
     addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))), autoinit=autoinit)
   elseif odotype == VelPose2VelPose2
     addNode!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
-    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),diagm([0.4;0.4;0.2].^2)),
-                                                             MvNormal(zeros(2),diagm([0.4;0.1].^2))), autoinit=autoinit)
+    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),diagm([0.3;0.1;0.15].^2)),
+                                                             MvNormal(zeros(2),diagm([0.2;0.1].^2))), autoinit=autoinit)
   end
 
   addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors)
@@ -125,6 +125,21 @@ end
 
 
 
+
+function results2csv(fg; dir=".", filename="results.csv")
+
+if !isdir(dir*"/results")
+  mkdir(dir*"/results")
+end
+fid = open(dir*"/results/"*filename,"w")
+for sym in [ls(fg)[1]...;ls(fg)[2]...]
+  p = getVertKDE(fg, sym)
+  val = string(KDE.getKDEMax(p))
+  println(fid, "$sym, $(val[2:(end-1)])")
+end
+close(fid)
+
+end
 
 
 
