@@ -166,7 +166,7 @@ results2csv(fg; dir=imgdir, filename="results_resolve.csv")
 
 #,xmin=-3,xmax=6,ymin=-5,ymax=2);
 Gadfly.push_theme(:default)
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean)
+pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max)
 # Gadfly.set(:default_theme)
 Gadfly.draw(SVG(joinpath(imgdir,"images","final.svg"),15cm, 10cm),pl)
 # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
@@ -181,7 +181,7 @@ drawPoses(fg, spscale=1.0)
 drawPosesLandms(fg, spscale=0.5)
 
 
-getAllLandmGifs(fg, IMGS, show=false, dir=imgdir*"/")
+getAllLandmGifs(fg, IMGS, show=false, dir=imgdir*"/images/")
 
 
 ls(fg)
