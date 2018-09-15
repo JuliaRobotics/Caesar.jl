@@ -125,9 +125,9 @@ for ep in epochs
   rangeprob = kde!(rangepts)
   azipts = azidata[ep][:,1]
   aziprob = kde!(azipts)
+
   # prep the factor functions
   ppbrDict[ep] = Pose2Point2BearingRange(aziprob, rangeprob)
-
   lastepoch = ep
 end
 
@@ -144,7 +144,7 @@ for ep in epochs
     addNode!(fg, curvar, Pose2)
 
     # xi -> l1 - nonparametric factor
-    # addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+    addFactor!(fg, [curvar; :l1], ppbrDict[ep])
 
     if ep != epochs[1]
       # Odo factor x(i-1) -> xi
