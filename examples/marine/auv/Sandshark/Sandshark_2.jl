@@ -12,6 +12,8 @@ using ProgressMeter
 
 const TU = TransformUtils
 
+include("Plotting.jl")
+
 # datadir = joinpath(ENV["HOME"],"data","sandshark","sample_wombat_2018_09_07","processed","extracted")
 datadir = joinpath(ENV["HOME"],"data","sandshark","full_wombat_2018_07_09","extracted")
 matcheddir = joinpath(datadir, "matchedfilter", "particles")
@@ -65,21 +67,20 @@ lblkeys = sort(collect(keys(lbldata)))
 
 
 # GET Y = north,  X = East,  Heading along +Y clockwise [0,360)]
-east = Float64[]
-north = Float64[]
-heading = Float64[]
+# east = Float64[]
+# north = Float64[]
+# heading = Float64[]
 
 # WANT X = North,  Y = West,  Yaw is right and rule from +X (0) towards +Y pi/2, [-pi,pi)
 # so the drawPoses picture will look flipped from Nicks picture
 # remember theta = atan2(y,x)    # this is right hand rule
-
 X = Float64[]
 Y = Float64[]
 yaw = Float64[]
 for id in navkeys
-  push!(east, getindex(navdata[id],7)) # x-column csv
-  push!(north, getindex(navdata[id],8)) # y-column csv
-  push!(heading, getindex(navdata[id],4))
+  # push!(east, getindex(navdata[id],7)) # x-column csv
+  # push!(north, getindex(navdata[id],8)) # y-column csv
+  # push!(heading, getindex(navdata[id],4))
   # push!(yaw, TU.wrapRad(-deg2rad(getindex(navdata[id],4))))
 
   push!(X, getindex(navdata[id],8) )
@@ -94,54 +95,30 @@ for id in lblkeys
     push!(lblY, -getindex(lbldata[id],2) )
 end
 
-# Plot LBL vs. NAV
-tssubset = navkeys
-navdf = DataFrame(
-  ts = navkeys - navkeys[1],
-  x = X,
-  y = Y
-)
-pl = []
-push!(pl, Gadfly.layer(navdf, x=:x, y=:y, Geom.path(), Theme(default_color=colorant"red")))
-
-lbldf = DataFrame(
-  ts = lblkeys - lblkeys[1],
-  x = lblX,
-  y = lblY
-)
-push!(pl, Gadfly.layer(lbldf, x=:x, y=:y, Geom.path()), Theme(default_color=colorant"green"))
-Gadfly.plot(pl...)
-# Gadfly.draw(Gadfly.PNG("/tmp/navss.png", 30cm, 20cm),pl)
-
+# Build interpolators for x, y, yaw
 interp_x = LinearInterpolation(navkeys, X)
 interp_y = LinearInterpolation(navkeys, Y)
 interp_yaw = LinearInterpolation(navkeys, yaw)
 
-## SELECT SEGMENT OF DATA TO WORK WITH
+## Caching factors
 ppbrDict = Dict{Int, Pose2Point2BearingRange}()
 odoDict = Dict{Int, Pose2Pose2}()
-
-# We have 261 timestamps
-epochs = timestamps[11:2:200]
 NAV = Dict{Int, Vector{Float64}}()
+
+# Step: Selecting a subset for processing and build up a cache of the factors.
+epochs = timestamps[11:2:200]
 lastepoch = 0
 for ep in epochs
   if lastepoch != 0
     # @show interp_yaw(ep)
     deltaAng = interp_yaw(ep) - interp_yaw(lastepoch)
-    # wDXij =
-    #     [interp_x(ep) - interp_x(lastepoch);
-    #      interp_y(ep) - interp_y(lastepoch)]
+
     wXi = TU.SE2([interp_x(lastepoch);interp_y(lastepoch);interp_yaw(lastepoch)])
     wXj = TU.SE2([interp_x(ep);interp_y(ep);interp_yaw(ep)])
     iDXj = se2vee(wXi\wXj)
-    # odoVec = iDXj
-    # odoVec = [
-    #     mag;
-    #     mag;
-    #     TransformUtils.wrapRad(deltaAng)]
     NAV[ep] = iDXj
-    println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
+    # println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
+
     odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], diagm([0.1;0.1;0.005].^2)))
   end
   rangepts = rangedata[ep][:]
@@ -154,158 +131,34 @@ for ep in epochs
   lastepoch = ep
 end
 
-# Sanity check....
+## Step: Building the factor graph
+fg = initfg()
+# Add a central beacon with a prior
+addNode!(fg, :l1, Point2)
+# Pinger location is (0.6; -16)
+addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], 0.1^2*eye(2)) ))
+
+index = 0
 for ep in epochs
-    x = interp_x(ep)
-    y = interp_y(ep)
-    yaw = interp_yaw(ep)
-    println("$ep, $x, $y, $yaw")
-end
+    curvar = Symbol("x$index")
+    addNode!(fg, curvar, Pose2)
 
-## build the factor graph
-function buildGraphOdoOnly(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)::IncrementalInference.FactorGraph
-    fg = initfg()
+    # xi -> l1 - nonparametric factor
+    # addFactor!(fg, [curvar; :l1], ppbrDict[ep])
 
-    # Add a central beacon with a prior
-    addNode!(fg, :l1, Point2)
-    # Pinger location is x=16, y=0.6
-    addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], diagm([0.1;0.1].^2)) ))
-
-    index = 0
-    for ep in epochs
-        curvar = Symbol("x$index")
-        addNode!(fg, curvar, Pose2)
-        # addFactor!(fg, [curvar; :l1], ppbrDict[ep])
-        if ep != epochs[1]
-          addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
-        else
-          # add a prior to the first pose location (a "GPS" prior)
-          println("Adding a prior at $curvar, x=$(interp_x(ep)), y=$(interp_y(ep)), yaw=$(interp_yaw(ep))")
-          addFactor!(fg, [curvar], IIF.Prior( MvNormal([interp_x(ep);interp_y(ep);interp_yaw(ep)], diagm([0.1;0.1;0.05].^2)) ))
-        end
-        addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
-        index+=1
+    if ep != epochs[1]
+      # Odo factor x(i-1) -> xi
+      addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
+    else
+      # Prior to the first pose location (a "GPS" prior)
+      initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
+      println("Adding a prior at $curvar, $initLoc")
+      addFactor!(fg, [curvar], IIF.Prior( MvNormal(initLoc, diagm([0.1;0.1;0.05].^2)) ))
     end
-
-    return fg
+    # Heading partial prior
+    addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
+    index+=1
 end
-
-## build the factor graph
-function buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)::IncrementalInference.FactorGraph
-    fg = initfg()
-
-    # Add a central beacon with a prior
-    addNode!(fg, :l1, Point2)
-    # Pinger location is x=16, y=0.6
-    addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], diagm([0.1;0.1].^2)) ))
-
-    index = 0
-    for ep in epochs
-        curvar = Symbol("x$index")
-        addNode!(fg, curvar, Pose2)
-        # if ep in epochs[50]
-        # addFactor!(fg, [curvar; :l1], ppbrDict[ep])
-        # end
-        if ep != epochs[1]
-          addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
-        else
-          # add a prior to the first pose location (a "GPS" prior)
-          println("Adding a prior at $curvar, x=$(interp_x(ep)), y=$(interp_y(ep)), yaw=$(interp_yaw(ep))")
-          addFactor!(fg, [curvar], IIF.Prior( MvNormal([interp_x(ep);interp_y(ep);interp_yaw(ep)], diagm([0.1;0.1;0.05].^2)) ))
-        end
-        addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
-        index+=1
-    end
-
-    return fg
-end
-
-## build the factor graph
-function buildGraphSurveyInBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)::IncrementalInference.FactorGraph
-    fg = initfg()
-
-    # Add a central beacon, no prior
-    addNode!(fg, :l1, Point2)
-    # addFactor!(fg, [:l1], IIF.Prior( MvNormal([16;0.6], diagm([0.1;0.1].^2)) ))
-    setVal!(fg, :l1, zeros(2,100))
-
-    index = 0
-    for ep in epochs
-        curvar = Symbol("x$index")
-        addNode!(fg, curvar, Pose2)
-        addFactor!(fg, [curvar; :l1], ppbrDict[ep])
-        if ep != epochs[1]
-          addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep], autoinit=false)
-        end
-        index+=1
-    end
-    # add a prior to the first pose location (a "GPS" prior)
-    println("Adding a prior")
-    addFactor!(fg, [:x0], IIF.Prior( MvNormal([interp_x(epochs[1]);interp_y(epochs[1]);interp_yaw(epochs[1])], diagm([0.1;0.1;0.05].^2)) ), autoinit=false)
-
-    return fg
-end
-
-function layerBeamPatternRose(bear::BallTreeDensity; scale::Float64=1.0, c=colorant"magenta", wRr=TU.R(0.0),wTRr=zeros(2))
-  tp = reshape([0:0.01:(2pi);], 1, :)
-  belp = scale*bear(tp)
-  Gadfly.plot(x=tp, y=belp, Geom.path)
-  belRose = zeros(2, length(tp))
-  belRose[1,:] = belp
-
-  idx = 0
-  for rRc in TU.R.(tp)
-    idx += 1
-    belRose[:,idx] = wRr*rRc*belRose[:,idx] + wTRr
-  end
-
-  Gadfly.layer(x=belRose[1,:], y=belRose[2,:], Geom.path, Theme(default_color=c))
-end
-
-
-# pl = drawPoses(fg, spscale=2.5)
-function drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY, rosePlotStep=5)
-    PLL = []
-    xx, = ls(fg)
-    idx = 0
-    for ep in epochs[1:rosePlotStep:end]
-      idx += rosePlotStep
-      theta = getKDEMax(getVertKDE(fg, xx[idx]))
-      wRr = TU.R(theta[3])
-      pll = layerBeamPatternRose(ppbrDict[ep].bearing, wRr=wRr, wTRr=theta[1:2], scale=5.0)
-      push!(PLL, pll)
-    end
-
-    pllandmarks = drawPosesLandms(fg, spscale=2.5)
-    # Add odo
-    navdf = DataFrame(
-      ts = navkeys,
-      x = X,
-      y = Y
-    )
-    # pl = Gadfly.layer(navdf, x=:x, y=:y, Geom.path())
-    push!(pllandmarks.layers, Gadfly.layer(navdf, x=:x, y=:y, Geom.path(), Theme(default_color=colorant"red"))[1])
-    lbldf = DataFrame(
-      ts = lblkeys - lblkeys[1],
-      x = lblX,
-      y = lblY
-    )
-    push!(pllandmarks.layers, Gadfly.layer(lbldf, x=:x, y=:y, Geom.path(), Theme(default_color=colorant"green"))[1])
-    # Gadfly.plot(pl.layers)
-
-    # Make X/Y range same so no distorted
-    # push!(PLL, Coord.Cartesian(xmin=-160.0,xmax=10.0,ymin=-135.0,ymax=35.0))
-    pla = plot([PLL;pllandmarks.layers; ]...,
-        Guide.manual_color_key("Legend",
-            ["Particle Filter Est.", "LBL Path", "Non-Gaussian SLAM"], ["red", "green", "light blue"]))
-    return pla
-end
-
-
-# Various graph options - choose one
-# fg = buildGraphOdoOnly(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
-fg = buildGraphUsingBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
-# fg = buildGraphSurveyInBeacon(epochs, ppbrDict, odoDict, interp_x, interp_y, interp_yaw)
 
 # Solvery! Roll dice for solvery check
 # writeGraphPdf(fg)
@@ -323,7 +176,7 @@ pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
 Gadfly.draw(PDF("sandshark-beacon_$t.pdf", 12cm, 15cm), pla)
 Gadfly.draw(PNG("sandshark-beacon_$t.png", 12cm, 15cm), pla)
 
-####  DEBUGGGGG PPBRDict ====================
+####  DEBUG PPBRDict ====================
 
 LL = [0.6; -16; 0]
 function expectedLocalBearing(curPose, LL)
