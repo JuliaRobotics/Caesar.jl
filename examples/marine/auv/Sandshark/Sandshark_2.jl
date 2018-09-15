@@ -1,6 +1,6 @@
 # new Sandshark example
 # add more julia processes
-nprocs() < 7 ? addprocs(8-nprocs()) : nothing
+# nprocs() < 7 ? addprocs(7-nprocs()) : nothing
 
 using Caesar, RoME, KernelDensityEstimate, IncrementalInference
 using Interpolations
@@ -12,7 +12,7 @@ using ProgressMeter
 
 const TU = TransformUtils
 
-include("Plotting.jl")
+include(joinpath(Pkg.dir("Caesar"), "examples", "marine", "auv", "Sandshark","Plotting.jl"))
 
 # datadir = joinpath(ENV["HOME"],"data","sandshark","sample_wombat_2018_09_07","processed","extracted")
 datadir = joinpath(ENV["HOME"],"data","sandshark","full_wombat_2018_07_09","extracted")
@@ -106,7 +106,7 @@ odoDict = Dict{Int, Pose2Pose2}()
 NAV = Dict{Int, Vector{Float64}}()
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[11:2:200]
+epochs = timestamps[50:2:100]
 lastepoch = 0
 for ep in epochs
   if lastepoch != 0
@@ -131,6 +131,7 @@ for ep in epochs
   lastepoch = ep
 end
 
+
 ## Step: Building the factor graph
 fg = initfg()
 # Add a central beacon with a prior
@@ -144,7 +145,7 @@ for ep in epochs
     addNode!(fg, curvar, Pose2)
 
     # xi -> l1 - nonparametric factor
-    addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+    # addFactor!(fg, [curvar; :l1], ppbrDict[ep]) #  #Hierdie lyk soos die nagmerrie
 
     if ep != epochs[1]
       # Odo factor x(i-1) -> xi
@@ -159,6 +160,79 @@ for ep in epochs
     addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
     index+=1
 end
+
+# Just adding the first one...
+addFactor!(fg, [:x0; :l1], ppbrDict[epochs[1]])
+
+addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]])
+
+addFactor!(fg, [:x10; :l1], ppbrDict[epochs[11]])
+
+addFactor!(fg, [:x13; :l1], ppbrDict[epochs[14]])
+
+addFactor!(fg, [:x15; :l1], ppbrDict[epochs[16]])
+
+addFactor!(fg, [:x17; :l1], ppbrDict[epochs[18]])
+addFactor!(fg, [:x18; :l1], ppbrDict[epochs[19]])
+addFactor!(fg, [:x19; :l1], ppbrDict[epochs[20]])
+addFactor!(fg, [:x20; :l1], ppbrDict[epochs[21]])
+# addFactor!(fg, [:x21; :l1], ppbrDict[epochs[22]]) # breaks it!
+addFactor!(fg, [:x22; :l1], ppbrDict[epochs[23]])
+addFactor!(fg, [:x23; :l1], ppbrDict[epochs[24]])
+addFactor!(fg, [:x24; :l1], ppbrDict[epochs[25]])
+addFactor!(fg, [:x25; :l1], ppbrDict[epochs[26]])
+
+
+plotKDE(ppbrDict[epochs[22]].bearing)
+plotKDE(ppbrDict[epochs[22]].range)
+
+plotKDE(ppbrDict[epochs[23]].bearing)
+plotKDE(ppbrDict[epochs[23]].range)
+
+
+plotKDE([ppbrDict[epochs[21]].bearing; ppbrDict[epochs[22]].bearing; ppbrDict[epochs[23]].bearing], c=["red";"black";"green"])
+plotKDE([ppbrDict[epochs[21]].range; ppbrDict[epochs[22]].range; ppbrDict[epochs[23]].range], c=["red";"black";"green"])
+
+
+writeGraphPdf(fg, engine="dot")
+
+ensureAllInitialized!(fg)
+batchSolve!(fg)
+
+drawPosesLandms(fg)
+
+
+# IIF.wipeBuildNewTree!(fg, drawpdf=true)
+# run(`evince bt.pdf`)
+# run(`evince /tmp/bt.pdf`)
+
+# And I'll redefine anywhere
+# Anywhere I RoME
+# Where I lay my head is home
+# Carved upon my stone
+# My body lies, but still I RoME :D
+endDogLeg = [interp_x[epochs[end]]; interp_y[epochs[end]]]
+estDogLeg = [get2DPoseMeans(fg)[1][end]; get2DPoseMeans(fg)[2][end]]
+endDogLeg - estDogLeg
+
+drawPosesLandms(fg)
+
+
+
+ls(fg, :x25)
+
+#To Boldly Believe... The Good, the Bad, and the Unbeliefable
+X25 = getVertKDE(fg, :x25)
+
+# i
+pts = predictbelief(fg, :x21, [:x20x21f1; :x21l1f1])
+plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
+
+
+pts = predictbelief(fg, :x25, :)
+plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
+plotKDE([kde!(pts);X25], dims=[3], levels=1, c=["red";"green"])
+
 
 # Solvery! Roll dice for solvery check
 # writeGraphPdf(fg)
@@ -175,6 +249,26 @@ Gadfly.push_theme(:default)
 pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
 Gadfly.draw(PDF("sandshark-beacon_$t.pdf", 12cm, 15cm), pla)
 Gadfly.draw(PNG("sandshark-beacon_$t.png", 12cm, 15cm), pla)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ####  DEBUG PPBRDict ====================
 
@@ -329,5 +423,16 @@ const TU = TransformUtils
 XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
 @show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
 bear= rad2deg(TU.wrapRad(atan2(-xyt[2],xyt[1]) -XX[3]))
+
+
+
+
+
+
+
+
+
+
+
 
 #

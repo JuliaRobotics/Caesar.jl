@@ -157,7 +157,7 @@ for ep in epochs
       addFactor!(fg, [curvar], IIF.Prior( MvNormal(initLoc, diagm([0.1;0.1;0.05].^2)) ))
     end
     # Heading partial prior
-    addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
+    # addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
     index+=1
 end
 
@@ -183,8 +183,8 @@ addFactor!(fg, [:x24; :l1], ppbrDict[epochs[25]])
 addFactor!(fg, [:x25; :l1], ppbrDict[epochs[26]])
 
 
-plotKDE(ppbrDict[epochs[22]].bearing)
-plotKDE(ppbrDict[epochs[22]].range)
+plotKDE(ppbrDict[epochs[26]].bearing)
+plotKDE(ppbrDict[epochs[26]].range)
 
 plotKDE(ppbrDict[epochs[23]].bearing)
 plotKDE(ppbrDict[epochs[23]].range)
@@ -249,10 +249,95 @@ Gadfly.draw(PNG("sandshark-beacon_$t.png", 12cm, 15cm), pla)
 
 
 
+## resolve funky 21
+
+
+# shows all the proposals based on the clique in the tree -- similar to plotLocalProduct on factor graph
+plotTreeProduct(fg, tree, :x25)
+#
+# using IncrementalInference
+#
+#
+# import RoMEPlotting: spyCliqMat
+#
+# function spyCliqMat(cliq::Graphs.ExVertex; showmsg=true)
+#   mat = deepcopy(IIF.getCliqMat(cliq, showmsg=showmsg))
+#   # TODO -- add improved visualization here, iter vs skip
+#   mat = map(Float64, mat)*2.0-1.0
+#   numlcl = size(IIF.getCliqAssocMat(cliq),1)
+#   mat[(numlcl+1):end,:] *= 0.9
+#   mat[(numlcl+1):end,:] -= 0.1
+#   numfrtl1 = floor(Int,length(cliq.attributes["data"].frontalIDs)+1)
+#   mat[:,numfrtl1:end] *= 0.9
+#   mat[:,numfrtl1:end] -= 0.1
+#   @show cliq.attributes["data"].itervarIDs
+#   @show cliq.attributes["data"].directvarIDs
+#   @show cliq.attributes["data"].msgskipIDs
+#   @show cliq.attributes["data"].directFrtlMsgIDs
+#   @show cliq.attributes["data"].directPriorMsgIDs
+#   sp = Gadfly.spy(mat)
+#   push!(sp.guides, Gadfly.Guide.title("$(cliq.attributes["label"]) || $(cliq.attributes["data"].frontalIDs) :$(cliq.attributes["data"].conditIDs)"))
+#   push!(sp.guides, Gadfly.Guide.xlabel("fmcmcs $(cliq.attributes["data"].itervarIDs)"))
+#   push!(sp.guides, Gadfly.Guide.ylabel("lcl=$(numlcl) || msg=$(size(IIF.getCliqMsgMat(cliq),1))" ))
+#   return sp
+# end
+# function spyCliqMat(bt::BayesTree, lbl::Symbol; showmsg=true)
+#   spyCliqMat(IIF.whichCliq(bt,lbl), showmsg=showmsg)
+# end
+#
 
 
 
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
+
+import IncrementalInference: getCliqMat
+
+sym = :x25
+# get clique sym is in
+whichCliq(tree, sym).attributes["label"]
+spyCliqMat(tree, sym)
+
+# get all variables in clique
+syms = union(getCliqSymbols(tree, sym)...)
+varnum = findfirst(syms, sym)
+whichpot = getData(whichCliq(tree, sym)).cliqAssocMat[:,varnum]
+
+# get factor ids
+fids = getData(whichCliq(tree, sym)).potentials[whichpot]
+
+# get all factors in clique
+fsyms = Symbol[]
+for factor in getVert.(fg, fids)
+  push!(fsyms, Symbol(factor.label))
+end
+
+# get KDEs for the factors
+pp = kde!.(approxConv.(fg, fsyms, sym))
+
+# plot the actual KDE
+plotKDE(pp, dims=[1;2], levels=2)
+
+plotKDE(pp, dims=[1;2], levels=2, legend=string.(fsyms))
+
+
+# Colors should not appear more than once
+# in  at base/<missing>
+# in #plotKDE#13 at KernelDensityEstimatePlotting/src/KernelDensityEstimatePlotting.jl:299
+# in Gadfly.Guide.ManualColorKey at Gadfly/src/guide.jl:501
+
+ls(fg, :x25)
+
+
+getData(fg, :x25f1, nt=:fnc).fnc.usrfnc!
+
+
+
+getData(whichCliq(tree, sym))
+
+
+
+0
 
 
 
@@ -419,5 +504,19 @@ const TU = TransformUtils
 XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
 @show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
 bear= rad2deg(TU.wrapRad(atan2(-xyt[2],xyt[1]) -XX[3]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #
