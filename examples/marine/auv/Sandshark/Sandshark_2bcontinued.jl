@@ -101,11 +101,11 @@ interp_y = LinearInterpolation(navkeys, Y)
 interp_yaw = LinearInterpolation(navkeys, yaw)
 
 ## Caching factors
-ppbrDict = Dict{Int, Pose2Point2BearingRange}()
+ppbrDict = Dict{Int, Pose2Point2Range}()
 odoDict = Dict{Int, Pose2Pose2}()
 NAV = Dict{Int, Vector{Float64}}()
 # Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[50:25:1000]
+epochs = timestamps[50:2:100]
 lastepoch = 0
 for ep in epochs
   if lastepoch != 0
@@ -122,11 +122,11 @@ for ep in epochs
   end
   rangepts = rangedata[ep][:]
   rangeprob = kde!(rangepts)
-  azipts = azidata[ep][:,1]
-  aziprob = kde!(azipts)
+  # azipts = azidata[ep][:,1]
+  # aziprob = kde!(azipts)
 
   # prep the factor functions
-  ppbrDict[ep] = Pose2Point2BearingRange(aziprob, rangeprob)
+  ppbrDict[ep] = Pose2Point2Range(rangeprob)
   lastepoch = ep
 end
 
