@@ -46,8 +46,8 @@ bTc= LinearMap(Rz) ∘ LinearMap(Rx)
 # datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"  # 175:5:370
 # datafolder = ENV["HOME"]*"/data/racecar/labrun2/"
 # datafolder = ENV["HOME"]*"/data/racecar/labrun3/"
-# datafolder = ENV["HOME"]*"/data/racecar/labrun5/"
-datafolder = ENV["HOME"]*"/data/racecar/labrun6/" # 0:5:1795
+datafolder = ENV["HOME"]*"/data/racecar/labrun5/" # 0:5:1020
+# datafolder = ENV["HOME"]*"/data/racecar/labrun6/" # 0:5:1795
 # datafolder = ENV["HOME"]*"/data/racecar/labfull/"  # 0:5:1765
 imgfolder = "images"
 
@@ -63,7 +63,7 @@ mkdir(imgdir)
 mkdir(imgdir*"/tags")
 mkdir(imgdir*"/images")
 
-camidxs = 0:5:1795
+camidxs = 0:5:1020
 
 fid = open(imgdir*"/readme.txt", "w")
 println(fid, datafolder)
@@ -89,6 +89,12 @@ tag_bag = prepTagBag(TAGS)
 # save the tag bag file for future use
 @save imgdir*"/tag_det_per_pose.jld" tag_bag
 # @load imgdir*"/tag_det_per_pose.jld" tag_bag
+
+fid=open(imgdir*"/tags/pose_tags.csv","w")
+for pose in sort(collect(keys(tag_bag)))
+  println(fid, "$pose, $(collect(keys(tag_bag[pose])))")
+end
+close(fid)
 
 
 # Factor graph construction
@@ -131,12 +137,12 @@ for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
 
   if psid % 50 == 0 || psid == maxlen
     IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym)_presolve.jld")
-    tree = wipeBuildNewTree!(fg, drawpdf=true)
-    inferOverTree!(fg,tree, N=N)
+    # tree = wipeBuildNewTree!(fg, drawpdf=true)
+    # inferOverTree!(fg,tree, N=N)
   end
+  IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym).jld")
 
   ## save factor graph for later testing and evaluation
-  IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym).jld")
   # ensureAllInitialized!(fg)
   # pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
   # Gadfly.draw(PNG(joinpath(imgdir,"$(psym).png"),15cm, 10cm),pl)
@@ -174,6 +180,41 @@ Gadfly.draw(SVG(joinpath(imgdir,"images","final.svg"),15cm, 10cm),pl)
 
 
 
+
+# artificial loops  THIS IS FOR labrun 5
+ppr = Point2Point2Range(Distributions.Normal(1.0, 0.5))
+pprm = Point2Point2Range(Distributions.Normal(2.0, 1.0))
+
+addFactor!(fg, [:l12; :l10], ppr)
+addFactor!(fg, [:l12; :l16], ppr)
+addFactor!(fg, [:l7; :l2], ppr)
+
+addFactor!(fg, [:l1; :l16], pprm)
+addFactor!(fg, [:l1; :l10], pprm)
+addFactor!(fg, [:l1; :l2], pprm)
+
+addFactor!(fg, [:l0; :l16], pprm)
+
+addFactor!(fg, [:l6; :l9], pprm)
+
+addFactor!(fg, [:l6; :l3], ppr)
+addFactor!(fg, [:l6; :l19], ppr)
+addFactor!(fg, [:l12; :l3], ppr)
+addFactor!(fg, [:l12; :l19], ppr)
+
+ensureAllInitialized!(fg)
+
+
+IIF.savejld(fg, file=imgdir*"/racecar_fg_presolve.jld")
+results2csv(fg; dir=imgdir, filename="results_presolve_nloops.csv")
+
+batchSolve!(fg, drawpdf=true, N=N)
+
+IIF.savejld(fg, file=imgdir*"/racecar_fg_solved1_nloops.jld")
+results2csv(fg; dir=imgdir, filename="results_solved_nloops.csv")
+# Gadfly.push_theme(:default)
+pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max)
+Gadfly.draw(SVG(joinpath(imgdir,"images","solve_nloops1.svg"),15cm, 10cm),pl)
 
 
 
