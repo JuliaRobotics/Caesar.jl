@@ -14,7 +14,7 @@ function layerBeamPatternRose(bear::BallTreeDensity; scale::Float64=1.0, c=color
   Gadfly.layer(x=belRose[1,:], y=belRose[2,:], Geom.path, Theme(default_color=c))
 end
 
-function drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
+function drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY, gTitle)
     PLL = []
     xx, = ls(fg)
     idx = 0
@@ -26,7 +26,7 @@ function drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
       push!(PLL, pll)
     end
 
-    pllandmarks = drawPosesLandms(fg, spscale=2.5)
+    pllandmarks = drawPosesLandms(fg, spscale=2.5, drawhist=false)
     # Add odo
     navdf = DataFrame(
       ts = navkeys,
@@ -46,7 +46,7 @@ function drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
     # Make X/Y range same so no distorted
     # push!(PLL, Coord.Cartesian(xmin=-160.0,xmax=10.0,ymin=-135.0,ymax=35.0))
     pla = plot([PLL;pllandmarks.layers; ]...,
-        Guide.manual_color_key("Legend",
-            ["Particle Filter Est.", "LBL Path", "Non-Gaussian SLAM"], ["red", "green", "light blue"]))
+        Guide.manual_color_key("Legend", ["Particle Filter Est.", "LBL Path", "Non-Gaussian SLAM"], ["red", "green", "light blue"]),
+        Guide.title(gTitle))
     return pla
 end
