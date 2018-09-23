@@ -12,9 +12,9 @@ cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 
 
 
-
+#TODO: Please replace with correct robot and user name.
 neoids, syms = foveateQueryToPoint(cloudGraph,
-        ["SESSTURT21";"SESSTURT38";"SESSTURT45"],
+        ["SESSTURT21";"SESSTURT38";"SESSTURT45"], "robot", "user"
         point=[-9.0;9.0], fovrad=0.5)
 
 

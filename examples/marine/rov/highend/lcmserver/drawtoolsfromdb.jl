@@ -5,6 +5,8 @@ using Caesar
 
 include(joinpath(dirname(@__FILE__),"..","database","blandauthremote.jl"))
 addrdict["session"] = "SESS??"
+addrdict["robot"] = "robot"
+addrdict["user"] = "user"
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 
 
@@ -35,8 +37,8 @@ Gadfly.draw(PDF("test.pdf",40cm, 40cm),pl)
 using IncrementalInference
 
 fncvar = getfnctype(getVert(fg,fg.fIDs[:x1710l200050]))
-
-ret = whosNear2D(cloudGraph, "SESS??", x=9.8, y=15.2, dist=0.5)
+#TODO: Please fix with correct session for example
+ret = whosNear2D(cloudGraph, "SESS??", "robot", "user", x=9.8, y=15.2, dist=0.5)
 plotLocalProduct(fg, :x1, dims=[1;2], api=localapi)
 
 plotKDEresiduals(fg, :x1x2, dims=[1;2], api=localapi)

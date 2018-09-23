@@ -2,11 +2,11 @@
 
 
 
-function multisessionquery(conn, session::T, multisessions::Vector{T}) where {T <: AbstractString}
+function multisessionquery(conn, session::T, robot::T, user::T, multisessions::Vector{T}) where {T <: AbstractString}
   len = length(multisessions)
   loadtx = transaction(conn)
   # construct the query
-  query = "match (m:$(session):LANDMARK) "*
+  query = "match (m:$(session):$robot:$user:LANDMARK) "*
           "with m.label as mlb "*
           "order by mlb asc "*
           "match (n:LANDMARK) "*
@@ -45,12 +45,14 @@ function parsemultisessionqueryresult!(lm2others::Dict{Symbol, Dict{Symbol, Int}
 end
 
 """
-    getLandmOtherSessNeoIDs{T <: AbstractString}(::CloudGraph, session::T="", multisessions=Vector{T}())
+    getLandmOtherSessNeoIDs{T <: AbstractString}(::CloudGraph, session::T="", robot::T="", user::T="", multisessions=Vector{T}())
 
 Return dict of dict of Neo4j vertex IDs by session and landmark symbols.
 """
 function getLandmOtherSessNeoIDs(cg::CloudGraph;
       session::T="",
+      robot::T="",
+      user::T="",
       multisessions::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   lm2others = Dict{Symbol, Dict{Symbol, Int}}()
@@ -59,7 +61,7 @@ function getLandmOtherSessNeoIDs(cg::CloudGraph;
   len > 0 ? nothing : (return lm2others)
 
   if length(multisessions)==0
-    cph = multisessionquery(cg.neo4j.connection, session, multisessions)
+    cph = multisessionquery(cg.neo4j.connection, session, robot, user, multisessions)
     parsemultisessionqueryresult!(lm2others, cph)
   else
     info("Ignoring multisession")
@@ -126,17 +128,19 @@ key symbols used for graph exstraction.
 function getLocalSubGraphMultisession(cg::CloudGraph,
             lm2others;
             session::T="",
+            robot::T="",
+            user::T="",
             numneighbors::Int=0  ) where {T <: AbstractString}
   #
   res = Dict{Symbol, Int}()
-  sfg = Caesar.initfg(sessionname=session, cloudgraph=cg)
+  sfg = Caesar.initfg(sessionname=session, robotname=robot, username=user, cloudgraph=cg)
   if length(lm2others) > 0
     for (sess,ms) in lm2others
       for (sym, neoid) in ms
         res[sym] = 0
       end
     end
-    getVertNeoIDs!(cg, res, session=session)
+    getVertNeoIDs!(cg, res, session=session, robot=robot, user=user)
     fullcurrneolist = collect(values(res))
     fetchsubgraph!(sfg, fullcurrneolist, numneighbors=numneighbors) # can set numneighbors=0
   end
@@ -150,11 +154,9 @@ end
 Return Dict{Symbol, Int} of vertex symbol to Neo4j node ID of MULTISESSION constraints in this `fgl.sessionname`.
 """
 function findExistingMSConstraints(fgl::FactorGraph)
-  loadtx = transaction(fgl.cg.neo4j.connection)
-  query =  "match (n:$(fgl.sessionname):MULTISESSION)
+  query =  "match (n:$(fgl.sessionname):$(fgl.robotname):$(fgl.username):MULTISESSION)
             return id(n), n.exVertexId, n.label"
-  cph = loadtx(query, submit=true)
-
+  cph, = executeQuery(cg, query)
   # parse the response into a dictionary
   existingms = Dict{Symbol, Int}() # symlbl => neoid
   for res in cph.results[1]["data"]
@@ -195,26 +197,30 @@ end
 """
 function rmInstMultisessionPriors!(cloudGraph::CloudGraph;
       session::T="NA",
+      robot::T="NA",
+      user::T="NA",
       multisessions::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   session!="NA" ? nothing : error("Please specify a valid session, currently = $(session)")
+  robot!="NA" ? nothing : error("Please specify a valid robot, currently = $(robot)")
+  user!="NA" ? nothing : error("Please specify a valid user, currently = $(user)")
 
   multisessionsl = Vector{String}(setdiff(multisessions, [session]))
   length(multisessionsl) > 0 ? nothing : (return nothing)
   # get the landmarks of interest from neighboring sessions
   lm2others = getLandmOtherSessNeoIDs(cloudGraph,
-                  session=session,multisessions=multisessionsl)
+                  session=session, robot=robot, user=user, multisessions=multisessionsl)
   #
 
   # grab local subgraph using NeoIDs
   sfg, lms = getLocalSubGraphMultisession(cloudGraph, lm2others,
-                  session=session, numneighbors=1)
+                  session=session, robot=robot, user=user,numneighbors=1)
   #
 
   # get dict(sym => neoid) of exiting multisession constraints which may be removed during this update
   exims = findExistingMSConstraints(sfg)
   # get highest factor exvid
-  mfn4jid = getmaxfactorid(cloudGraph.neo4j.connection, session)
+  mfn4jid = getmaxfactorid(cloudGraph.neo4j.connection, session, robot, user)
 
   println("Multisession constraints in $(session), from $(multisessionsl), on $(lms)")
   for sym in lms
@@ -227,11 +233,13 @@ function rmInstMultisessionPriors!(cloudGraph::CloudGraph;
 end
 
 
-function removeMultisessions!(cloudGraph::CloudGraph; session::AbstractString="NA")
+function removeMultisessions!(cloudGraph::CloudGraph; session::AbstractString="NA", robot::AbstractString="NA", user::AbstractString="NA")
   session!="NA" ? nothing : error("Please specify a valid session, currently = $(session)")
+  robot!="NA" ? nothing : error("Please specify a valid robot, currently = $(robot)")
+  user!="NA" ? nothing : error("Please specify a valid user, currently = $(user)")
 
   loadtx = transaction(cloudGraph.neo4j.connection)
-  query =  "match (n:$(session):MULTISESSION)
+  query =  "match (n:$(session):$robot:$user:MULTISESSION)
             detach delete n
             return count(n)"
   cph = loadtx(query, submit=true)
