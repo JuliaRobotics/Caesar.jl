@@ -59,7 +59,8 @@ export
   # passthrough RoME factor types
   PriorPose2,
   Pose2Pose2,
-  Pose2DPoint2DBearingRange,
+  Pose2DPoint2DBearingRange, # deprecated
+  Pose2Point2BearingRange, # deprecated
 
   # insitu component
   GenericInSituSystem,
