@@ -4,8 +4,11 @@ module Caesar
 import Distributions: Normal
 import RoME: getRangeKDEMax2D, getLastPose, initfg
 
+using Reexport
+
+@reexport using RoME
+
 using
-  RoME,
   IncrementalInference,
   Graphs,
   KernelDensityEstimate,
