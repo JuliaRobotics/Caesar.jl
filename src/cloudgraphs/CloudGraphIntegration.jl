@@ -643,7 +643,7 @@ function subLocalGraphCopy!(
   #
   warn("subGraphCopy! is a work in progress")
   conn = fgl.cg.neo4j.connection
-  IDs = getLblExVertexNeoIDs(conn, string.(lbls), session=fgl.sessionname, robot=fgl.robotname, user=fg.username, reqbackendset=reqbackendset, reqready=reqready, neighbors=neighbors )
+  IDs = getLblExVertexNeoIDs(conn, string.(lbls), session=fgl.sessionname, robot=fgl.robotname, user=fgl.username, reqbackendset=reqbackendset, reqready=reqready, neighbors=neighbors )
   println("fullSubGraphCopy: $(length(IDs)) nodes in session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
   copyGraphNodesEdges!(fgl, IDs)
   nothing
