@@ -30,17 +30,17 @@ function showImage(image, tags)
     imageCol
 end
 
-function apriltag_converter(a::AprilTag, utime::Int64)
+function apriltag_converter(tag::AprilTag, utime::Int64)
     msg=apriltag_t();
     msg.utime = utime
-    msg.id=a.id;
-    msg.familyName=a.family;
-    msg.hammingDistance=a.hamming;
-    P = reshape([a.p...;],2,4)'
+    msg.id=tag.id;
+    msg.familyName=tag.family;
+    msg.hammingDistance=tag.hamming;
+    P = reshape([tag.p...;],2,4)'
     msg.p=P
-    msg.cxy= a.c;
-    msg.homography= a.H;
-    msg.pose = homography_to_pose(a.H, -80.,80.,320.,240.)
+    msg.cxy= tag.c;
+    msg.homography= tag.H;
+    msg.pose = homography_to_pose(tag.H, -80.,80.,320.,240.)
     return msg
 end
 

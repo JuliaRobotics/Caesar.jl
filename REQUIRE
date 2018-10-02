@@ -10,7 +10,7 @@ LibBSON
 Mongo 0.2.3
 TransformUtils 0.1.0
 Rotations
-CoordinateTransformations
+CoordinateTransformations 0.5.0
 JLD
 HDF5
 JSON

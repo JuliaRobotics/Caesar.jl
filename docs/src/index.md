@@ -58,7 +58,7 @@ drawdbdirector()      # from database held factor graph
 
 * [Foveation queries](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) to quickly organize, extract and work with big data blobs, for example looking at images from multiple sessions predicted to see the same point `[-9.0,9.0]` in the map:
 ```julia
-neoids, syms = foveateQueryToPoint(cloudGraph,["SESS21";"SESS38";"SESS45"], point=[-9.0;9.0], fovrad=0.5 )
+neoids, syms = foveateQueryToPoint(cloudGraph,["SESS21";"SESS38";"SESS45"], "robot", "user" point=[-9.0;9.0], fovrad=0.5 )
 for neoid in neoids
     cloudimshow(cloudGraph, neoid=neoid)
 end

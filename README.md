@@ -103,11 +103,11 @@ Consider citing our work:
 [dvis-build-url]: https://travis-ci.org/rdeits/DrakeVisualizer.jl
 [dvis-url]: http://www.github.com/rdeits/DrakeVisualizer.jl -->
 
-[graphs-cov-img]: https://codecov.io/github/JuliaArchive/Graphs.jl/coverage.svg?branch=master
-[graphs-cov-url]: https://codecov.io/github/JuliaArchive/Graphs.jl?branch=master
-[graphs-build-img]: https://travis-ci.org/JuliaArchive/Graphs.jl.svg?branch=master
-[graphs-build-url]: https://travis-ci.org/JuliaArchive/Graphs.jl
-[graphs-url]: http://www.github.com/JuliaArchive/Graphs.jl
+[graphs-cov-img]: https://codecov.io/github/JuliaAttic/Graphs.jl/coverage.svg?branch=master
+[graphs-cov-url]: https://codecov.io/github/JuliaAttic/Graphs.jl?branch=master
+[graphs-build-img]: https://travis-ci.org/JuliaAttic/Graphs.jl.svg?branch=master
+[graphs-build-url]: https://travis-ci.org/JuliaAttic/Graphs.jl
+[graphs-url]: http://www.github.com/JuliaAttic/Graphs.jl
 
 [cloudgraphs-cov-img]: https://codecov.io/github/GearsAD/CloudGraphs.jl/coverage.svg?branch=master
 [cloudgraphs-cov-url]: https://codecov.io/github/GearsAD/CloudGraphs.jl?branch=master

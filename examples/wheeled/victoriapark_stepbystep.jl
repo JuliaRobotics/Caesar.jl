@@ -26,7 +26,6 @@ end
 
 
 
-
 # load all the model data
 # d = odometry information
 # f = laser scanner detections

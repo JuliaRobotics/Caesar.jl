@@ -11,14 +11,16 @@ using KernelDensityEstimate
 # dbpwd = ""
 # mongoaddress = "localhost"
 session = "SESSTEST"
+robot = "TESTROBOT"
+user = "TESTUSER"
 include(joinpath(dirname(@__FILE__) ,"blandauth.jl"))
 Nparticles = 200
 println("Attempting to solve session $(session)...")
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration, encodePackedType, getpackedtype, decodePackedType);
+cloudGraph = connect(configuration, IncrementalInference.encodePackedType, Caesar.getpackedtype, IncrementalInference.decodePackedType);
 # register types of interest in CloudGraphs
-registerGeneralVariableTypes!(cloudGraph)
+# registerGeneralVariableTypes!(cloudGraph)
 Caesar.usecloudgraphsdatalayer!()
 
 # Uncomment out for command line operation
@@ -29,23 +31,27 @@ Caesar.usecloudgraphsdatalayer!()
 
 
 # this is being replaced by cloudGraph, added here for development period
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = Caesar.initfg(sessionname=session, robotname=robot, username=user, cloudgraph=cloudGraph)
 
 
 # Robot navigation and inference type stuff
 N=Nparticles
-doors = [-100.0;0.0;100.0;300.0]'
-cov = [3.0]
+doors = reshape([-100.0;0.0;100.0;300.0],1,4)
+cov = 3.0*ones(1,1)
 
+#TODO: WIP
 # robot style, add first pose vertex
-v1 = addNode!(fg,:x1,doors,N=N,labels=["POSE"])
+v1 = addNode!(fg,:x1,ContinuousScalar,N=N, labels=["POSE"])
 
 # add a prior for the initial position of the robot
-f0  = addFactor!(fg,[v1], Obsv2(doors, cov', [1.0]))
+fct = Obsv2(doors, cov, [1.0])
+# TODO: Fix here - what's up with it failing to encode?
+#WIP
+f1  = addFactor!(fg,[v1], fct)
 
 # add second pose vertex
 tem = 2.0*randn(1,N)+getVal(v1)+50.0
-v2 = addNode!(fg, :x2, tem, N=N,labels=["POSE"])
+v2 = addNode!(fg, :x2, ContinuousScalar, N=N,labels=["POSE"])
 
 # now add the odometry factor between them
 f1 = addFactor!(fg,[v1;v2],Odo([50.0]',[2.0]',[1.0]))
