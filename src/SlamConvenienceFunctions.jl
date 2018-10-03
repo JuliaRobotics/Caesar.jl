@@ -118,7 +118,6 @@ function parseLandmarkXY!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString
   nothing
 end
 
-
 function batchSolve!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   println("batchSolve -- wiping tree and solving")
   slam.tree = wipeBuildNewTree!(slam.fg)

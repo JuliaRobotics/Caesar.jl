@@ -3,6 +3,7 @@ module Caesar
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 import RoME: getRangeKDEMax2D, getLastPose, initfg
+import IncrementalInference: batchSolve!
 
 using Reexport
 
@@ -62,7 +63,8 @@ export
   # passthrough RoME factor types
   PriorPose2,
   Pose2Pose2,
-  Pose2DPoint2DBearingRange,
+  Pose2DPoint2DBearingRange, # deprecated
+  Pose2Point2BearingRange, # deprecated
 
   # insitu component
   GenericInSituSystem,
@@ -132,6 +134,7 @@ export
   # webserver
   SolverStatus,
   CaesarConfig,
+  IterationStatistics,
   VisualizationConfig,
 
   # multisession utils
@@ -159,6 +162,7 @@ include("config/CaesarConfig.jl")
 
 # using CloudGraphs
 include("cloudgraphs/SolverStatus.jl")
+include("cloudgraphs/IterationStatistics.jl")
 include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
 include("cloudgraphs/ConvertGeneralSlaminDB.jl")
 include("cloudgraphs/slamindb.jl")
