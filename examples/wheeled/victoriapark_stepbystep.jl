@@ -23,11 +23,6 @@ function evalLikelihood(fg::FactorGraph, sym::Symbol, points::Array{Float64,2})
   evaluateDualTree(p, (points))
 end
 
-# function batchSolve(fgl)
-#   tree = prepBatchTree!(fgl, drawpdf=true);
-#   @time inferOverTree!(fgl,tree, N=100);
-# end
-
 
 
 
