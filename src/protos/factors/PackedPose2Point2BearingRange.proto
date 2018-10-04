@@ -1,0 +1,4 @@
+message PackedPose2Point2BearingRange {
+  required PackedDistribution bearing;
+  required PackedDistribution range;
+}

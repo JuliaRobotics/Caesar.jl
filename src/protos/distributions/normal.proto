@@ -1,0 +1,4 @@
+message Normal {
+  required double mean;
+  required double std;
+}
