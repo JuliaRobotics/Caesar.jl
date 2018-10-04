@@ -4,6 +4,7 @@ os:
   - osx
 julia:
   - 0.6
+  - 0.7
   - nightly
 notifications:
   email: false
@@ -14,6 +15,7 @@ addons:
 matrix:
   allow_failures:
     - os: osx
+    - julia: 0.7
     - julia: nightly
 after_success:
   - julia -e 'cd(Pkg.dir("Caesar")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
