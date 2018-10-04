@@ -5,8 +5,11 @@ import Distributions: Normal
 import RoME: getRangeKDEMax2D, getLastPose, initfg
 import IncrementalInference: batchSolve!
 
+using Reexport
+
+@reexport using RoME
+
 using
-  RoME,
   IncrementalInference,
   Graphs,
   KernelDensityEstimate,
