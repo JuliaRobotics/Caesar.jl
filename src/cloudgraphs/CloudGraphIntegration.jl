@@ -44,7 +44,7 @@ export
 """
     $(SIGNATURES)
 
-Run Neo4j Cypher queries on the cloudGraph database, andreturn Tuple with the
+Run Neo4j Cypher queries on the cloudGraph database, and return Tuple with the
 unparsed (results, loadresponse).
 """
 function executeQuery(
@@ -61,12 +61,14 @@ executeQuery(cg::CloudGraph, query::AS) where {AS <:AbstractString} = executeQue
 function getCloudVert(
             cg::CloudGraph,
             session::AbstractString,
+            robot::AbstractString,
+            user::AbstractString,
             vsym::Symbol; bigdata::Bool=false )
   #
   warn("getCloudVert(cg, sess, sym) will be deprecated, use getCloudVert(cg, sess, sym=sym) instead.")
   # query = " and n.ready=$(ready) and n.label=$(vsym) "
   # query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
-  query = "match (n:$(session)) where n.label='$(vsym)' return id(n)"
+  query = "match (n:$(session):$robot:$user) where n.label='$(vsym)' return id(n)"
 
   cph, = executeQuery(cg, query)
   # loadtx = transaction(cg.neo4j.connection)
@@ -76,13 +78,15 @@ function getCloudVert(
 end
 
 function getCloudVert(cgl::CloudGraph,
-        session::AbstractString;
+        session::AbstractString,
+        robot::AbstractString,
+        user::AbstractString;
         exvid::VoidUnion{Int}=nothing,
         neoid::VoidUnion{Int}=nothing,
         sym::VoidUnion{Symbol}=nothing,
         bigdata=false  )
   #
-  query = "match (n:$(session)) "
+  query = "match (n:$(session):$robot:$user) "
 
   if sym != nothing
     query = query*" where n.label='$(sym)' "
@@ -102,9 +106,9 @@ function getCloudVert(cgl::CloudGraph,
 end
 
 
-function listAllVariables(cgl::CloudGraph, session::AbstractString)
+function listAllVariables(cgl::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)
   #
-  query = "match (n:$(session)) where not (n:FACTOR) and exists(n.exVertexId) and n.ready=1 return n.label, n.exVertexId, id(n), labels(n)"
+  query = "match (n:$(session):$robot:$user) where not (n:FACTOR) and exists(n.exVertexId) and n.ready=1 return n.label, n.exVertexId, id(n), labels(n)"
   cph, = executeQuery(cgl.neo4j.connection, query)
 
   dd = Dict{Symbol, Tuple{Int, Int, Vector{Symbol}}}()
@@ -129,7 +133,7 @@ List neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, 
 any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes
 being returned.
 """
-function ls(cgl::CloudGraph, session::AbstractString;
+function ls(cgl::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString;
       sym::VoidUnion{Symbol}=nothing,
       neoid::VoidUnion{Int64}=nothing,
       exvid::VoidUnion{Int64}=nothing  )
@@ -137,9 +141,9 @@ function ls(cgl::CloudGraph, session::AbstractString;
 
   if sym == nothing && exvid == nothing && neoid == nothing
     # interrupt and just return all variable nodes
-    return listAllVariables(cgl, session)
+    return listAllVariables(cgl, session, robot, user)
   end
-  cv = getCloudVert(cgl, session, sym=sym, neoid=neoid, exvid=exvid, bigdata=false )
+  cv = getCloudVert(cgl, session, robot, user, sym=sym, neoid=neoid, exvid=exvid, bigdata=false )
 
   neis = get_neighbors(cgl, cv, needdata=false)
   dd = Dict{Symbol, Tuple{Int, Int, Vector{Symbol}}}()
@@ -155,11 +159,12 @@ function getfnctype(cvl::CloudGraphs.CloudVertex)
   return getfnctype(vert)
 end
 
-function initfg(;sessionname="NA",robotname="",cloudgraph=nothing)
+function initfg(;sessionname="NA",robotname="",username="",cloudgraph=nothing)
   # fgl = RoME.initfg(sessionname=sessionname)
   fgl = IncrementalInference.emptyFactorGraph()
   fgl.sessionname = sessionname
   fgl.robotname = robotname
+  fgl.username = username
   fgl.cg = cloudgraph
   return fgl
 end
@@ -342,12 +347,14 @@ function getAllExVertexNeoIDs(conn::Neo4j.Connection;
         backendset::Int=1,
         sessionname::AS="",
         robotname::AS="",
+        username::AS="",
         reqbackendset::Bool=true,
         reqready::Bool=true  ) where {AS <: AbstractString}
   #
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   rn = length(robotname) > 0 ? ":"*robotname : ""
-  query = "match (n$(sn)$(rn)) where not n:SESSION and exists(n.exVertexId)"
+  un = length(username) > 0 ? ":"*username : ""
+  query = "match (n$(sn)$(rn)$(un)) where not n:SESSION and exists(n.exVertexId)"
   query = reqbackendset || reqready ? query*" and" : query
   query = reqready ? query*" n.ready=$(ready)" : query
   query = reqbackendset && reqready ? query*" and" : query
@@ -398,6 +405,7 @@ function buildSubGraphIdsQuery(;
             lbls::Vector{AS}=String[""],
             session::AS="",
             robot::AS="",
+            user::AS="",
             label::AS="",
             reqready::Bool=true,
             ready::Int=1,
@@ -407,14 +415,15 @@ function buildSubGraphIdsQuery(;
   #
   sn = length(session) > 0 ? ":"*session : ""
   rn = length(robot) > 0 ? ":"*robot : ""
+  un = length(user) > 0 ? ":"*user : ""
   lb = length(label) > 0 ? ":"*label : ""
 
   query = ""
   for nei in 0:(neighbors)
-    query *= "match (n0$(sn)$(rn)$(lb))"
+    query *= "match (n0$(sn)$(rn)$(un)$(lb))"
     outerd = 0
     for d in 1:(nei)
-      query *= "-[:DEPENDENCE]-(n$(d)$(sn)$(rn)$(lb))"
+      query *= "-[:DEPENDENCE]-(n$(d)$(sn)$(rn)$(un)$(lb))"
       outerd = d
     end
     query *= " "
@@ -442,6 +451,7 @@ function getLblExVertexNeoIDs(
         lbls::Vector{AS};
         session::AS="",
         robot::AS="",
+        user::AS="",
         label::AS="",
         reqready::Bool=true,
         ready::Int=1,
@@ -450,7 +460,7 @@ function getLblExVertexNeoIDs(
         neighbors::Int=0 ) where {AS <: AbstractString}
   #
 
-  query = buildSubGraphIdsQuery(lbls=lbls, session=session, robot=robot, label=label, neighbors=neighbors, reqready=reqready, ready=ready, reqbackendset=reqbackendset, backendset=backendset)
+  query = buildSubGraphIdsQuery(lbls=lbls, session=session, robot=robot, user=user, label=label, neighbors=neighbors, reqready=reqready, ready=ready, reqbackendset=reqbackendset, backendset=backendset)
   cph, = executeQuery(conn, query)
 
   ret = Array{Tuple{Int64,Int64,Symbol},1}()
@@ -472,11 +482,15 @@ function getExVertexNeoIDs(
         ready::Int=1,
         backendset::Int=1,
         session::AS="",
+        robot::AS="",
+        user::AS="",
         reqbackendset::Bool=true  ) where {AS <: AbstractString}
   #
   sn = length(session) > 0 ? ":"*session : ""
+  rn = length(robot) > 0 ? ":"*robot : ""
+  un = length(user) > 0 ? ":"*user : ""
   lb = length(label) > 0 ? ":"*label : ""
-  query = "match (n$(sn)$(lb)) where n.ready=$(ready) and exists(n.exVertexId)"
+  query = "match (n$(sn)$(rn)$(un)$(lb)) where n.ready=$(ready) and exists(n.exVertexId)"
   query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
   query = query*" return n.exVertexId, id(n), n.label"
 
@@ -629,7 +643,7 @@ function subLocalGraphCopy!(
   #
   warn("subGraphCopy! is a work in progress")
   conn = fgl.cg.neo4j.connection
-  IDs = getLblExVertexNeoIDs(conn, string.(lbls), session=fgl.sessionname, robot=fgl.robotname, reqbackendset=reqbackendset, reqready=reqready, neighbors=neighbors )
+  IDs = getLblExVertexNeoIDs(conn, string.(lbls), session=fgl.sessionname, robot=fgl.robotname, user=fgl.username, reqbackendset=reqbackendset, reqready=reqready, neighbors=neighbors )
   println("fullSubGraphCopy: $(length(IDs)) nodes in session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
   copyGraphNodesEdges!(fgl, IDs)
   nothing
@@ -647,8 +661,8 @@ function fullLocalGraphCopy!(
             reqready::Bool=true  )
   #
   conn = fgl.cg.neo4j.connection
-  IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, robotname=fgl.robotname, reqbackendset=reqbackendset, reqready=reqready)
-  println("fullLocalGraphCopy: $(length(IDs)) nodes in robot=$(fgl.robotname), session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
+  IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, robotname=fgl.robotname, username=fgl.username, reqbackendset=reqbackendset, reqready=reqready)
+  println("fullLocalGraphCopy: $(length(IDs)) nodes in subgraph for user=$(fgl.username), robot=$(fgl.robotname), session=$(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
   copyGraphNodesEdges!(fgl, IDs)
 end
 
@@ -659,11 +673,15 @@ Set all Neo4j nodes in this session ready = 1, warning function does not support
 """
 function setDBAllReady!(
             conn::Neo4j.Connection,
-            sessionname::AS) where {AS <: AbstractString}
+            sessionname::AS,
+            robotname::AS,
+            username::AS) where {AS <: AbstractString}
   #
   warn("Obsolete setDBAllReady! function, see SynchronySDK for example ready function instead.")
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn)) set n.ready=1"
+  rn = length(robotname) > 0 ? ":"*robotname : ""
+  un = length(username) > 0 ? ":"*username : ""
+  query = "match (n$(sn)$(rn)$(un)) set n.ready=1"
   cph, loadresult = executeQuery(conn, query)
   nothing
 end
@@ -676,10 +694,14 @@ end
 
 function setBackendWorkingSet!(
             conn::Neo4j.Connection,
-            sessionname::AbstractString  )
+            sessionname::AbstractString,
+            robotname::AbstractString,
+            username::AbstractString  )
   #
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
-  query = "match (n$(sn)) where not (n:NEWDATA) set n.backendset=1"
+  rn = length(robotname) > 0 ? ":"*robotname : ""
+  un = length(username) > 0 ? ":"*username : ""
+  query = "match (n$(sn)$(rn)$(un)) where not (n:NEWDATA) set n.backendset=1"
 
   cph, loadresult = executeQuery(conn, query)
   nothing
@@ -750,6 +772,8 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   !nparticles ? nothing : push!(need, "num particles")
   !drawdepth ? nothing : push!(need, "draw depth")
   !clearslamindb ? nothing : push!(need, "clearslamindb")
+  !user ? nothing : push!(need, "user")
+  !robot ? nothing : push!(need, "robot")
   !multisession ? nothing : push!(need, "multisession")
   !drawedges ? nothing : push!(need, "draw edges")
 
@@ -761,6 +785,8 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
     n == "draw edges" ? print("[y]/n: ") : nothing
     n == "num particles" ? print("[100]: ") : nothing
     n == "clearslamindb" ? print("yes/[no]: ") : nothing
+    n == "user" ? print("[]: ") : nothing
+    n == "robot" ? print("[]: ") : nothing
     n == "multisession" ? print("comma separated list session names/[n]: ") : nothing
     str = readline(STDIN)
     addrdict[n] = str
@@ -773,7 +799,7 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   if drawdepth
     addrdict["draw depth"] = addrdict["draw depth"]=="" || addrdict["draw depth"]=="y" || addrdict["draw depth"]=="yes" ? "y" : "n"
   end
-  if drawdepth
+  if drawedges
     addrdict["draw edges"] = addrdict["draw edges"]=="" || addrdict["draw edges"]=="y" || addrdict["draw edges"]=="yes" ? "y" : "n"
   end
   if nparticles
@@ -781,6 +807,12 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
   end
   if clearslamindb
     addrdict["clearslamindb"] = addrdict["clearslamindb"]=="" || addrdict["clearslamindb"]=="n" || addrdict["clearslamindb"]=="no" ? "n" : addrdict["clearslamindb"]
+  end
+  if user
+      addrdict["user"] = addrdict["user"]!="" ? addrdict["user"] : ""
+  end
+  if robot
+    addrdict["robot"] = addrdict["robot"]!="" ? addrdict["robot"] : ""
   end
   if multisession
     addrdict["multisession"] = strip.(Vector{String}(split(addrdict["multisession"],',')))
@@ -961,14 +993,14 @@ function fetchsubgraph!(fgl::FactorGraph,
 end
 
 """
-    getVertNeoIDs!(::CloudGraph, res::Dict{Symbol, Int}; session::AbstractString="NA")
+    getVertNeoIDs!(::CloudGraph, res::Dict{Symbol, Int}; session::AbstractString="NA", robot::AbstractString="NA", user::AbstractString="NA")
 
 Insert into and return dict `res` with Neo4j IDs of ExVertex labels as stored per session in Neo4j database.
 """
-function getVertNeoIDs!(cloudGraph::CloudGraph, res::Dict{Symbol, Int}; session::AbstractString="NA")
+function getVertNeoIDs!(cloudGraph::CloudGraph, res::Dict{Symbol, Int}; session::AbstractString="NA", robot::AbstractString="NA", user::AbstractString="NA")
   loadtx = transaction(cloudGraph.neo4j.connection)
   syms = collect(keys(res))
-  query = "match (n:$(session)) where "
+  query = "match (n:$(session):$robot:$user) where "
   for i in 1:length(syms)
     sym = syms[i]
     query =query*"n.label='$(sym)' "
@@ -1005,26 +1037,26 @@ end
 
 
 """
-    getfirstpose(cg::CloudGraph, session::AbstractString)
+    getfirstpose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)
 
 Return Tuple{Symbol, Int} of first pose symbol and Neo4j node ID.
 """
-function getfirstpose(cg::CloudGraph, session::AbstractString)
-  query = "match (n:$(session):POSE) with n.label as nlbl, n.exVertexId as exvid, id(n) as neoid order by exvid asc limit 1 return nlbl, neoid"
+function getfirstpose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)
+  query = "match (n:$(session):$(robot):$(user):POSE) with n.label as nlbl, n.exVertexId as exvid, id(n) as neoid order by exvid asc limit 1 return nlbl, neoid"
   cph, = executeQuery(cg, query)
   # loadtx = transaction(cg.neo4j.connection)
   # cph = loadtx(query, submit=true)
   Symbol(cph.results[1]["data"][1]["row"][1]), cph.results[1]["data"][1]["row"][2]
 end
-getFirstPose(cg::CloudGraph, session::AbstractString) = getfirstpose(cg, session)
+getFirstPose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString) = getfirstpose(cg, session, robot, user)
 
 """
-    getLastPose(cg::CloudGraph, session::AbstractString)
+    getLastPose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)
 
 Return Tuple{Symbol, Int} of first pose symbol and Neo4j node ID.
 """
-function getLastPose(cg::CloudGraph, session::AbstractString)
-  query = "match (n:$(session):POSE) with n.label as nlbl, n.exVertexId as exvid, id(n) as neoid order by exvid desc limit 1 return nlbl, neoid"
+function getLastPose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)
+  query = "match (n:$(session):$robot:$user:POSE) with n.label as nlbl, n.exVertexId as exvid, id(n) as neoid order by exvid desc limit 1 return nlbl, neoid"
   cph, = executeQuery(cg, query)
   # loadtx = transaction(cg.neo4j.connection)
   # cph = loadtx(query, submit=true)
@@ -1033,14 +1065,14 @@ end
 
 
 """
-    insertrobotdatafirstpose!(cg::CloudGraph, session::AbstractString, robotdict::Dict)
+    insertrobotdatafirstpose!(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString, robotdict::Dict)
 
 Saves robotdict via JSON to first pose in a SESSION in the database. Used for
 storing general robot specific data in easily accessible manner. Can fetch later
 retrieve same dict with counterpart `fetchrobotdatafirstpose` function.
 """
-function insertrobotdatafirstpose!(cg::CloudGraph, session::AbstractString, robotdict::Dict)
-  vsym, neoid = getfirstpose(cg, session)
+function insertrobotdatafirstpose!(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString, robotdict::Dict)
+  vsym, neoid = getfirstpose(cg, session, robot, user)
   cv = CloudGraphs.get_vertex(cg, neoid, true)
   appendvertbigdata!(cg, cv, "robot_description", json(robotdict).data  )
 end
@@ -1061,14 +1093,14 @@ function tryunpackalltypes!(resp::Dict)
 end
 
 """
-    fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString)
+    fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)
 
 Return dict of JSON parsed "robot_description" field as was inserted by counterpart
 `insertrobotdatafirstpose!` function. Used for storing general robot specific data
 in easily accessible manner.
 """
-function fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString)
-  vsym, neoid = getfirstpose(cg, session)
+function fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)
+  vsym, neoid = getfirstpose(cg, session, robot, user)
   cv = CloudGraphs.get_vertex(cg, neoid, true)
   bde = Caesar.getBigDataElement(cv, "robot_description")
   resp = JSON.parse(String(take!(IOBuffer(bde.data))))
@@ -1120,8 +1152,8 @@ function db2jld(filename::AbstractString; addrdict::VoidUnion{Dict{AbstractStrin
 end
 
 
-function deleteServerSession!(cloudGraph::CloudGraph, session::AbstractString)
-  query =  "match (n:$(session))
+function deleteServerSession!(cloudGraph::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)
+  query =  "match (n:$(session):$robot:$user)
             detach delete n
             return count(n)"
   return executeQuery(cloudGraph.neo4j.connection, query)
