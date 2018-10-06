@@ -3,8 +3,8 @@ os:
   - linux
   - osx
 julia:
-  - 0.6
   - 0.7
+  - 1.0
   - nightly
 notifications:
   email: false
@@ -15,9 +15,8 @@ addons:
 matrix:
   allow_failures:
     - os: osx
-    - julia: 0.7
     - julia: nightly
 after_success:
-  - julia -e 'cd(Pkg.dir("Caesar")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
-  - julia -e 'Pkg.add("Documenter")'
-  - julia -e 'cd(Pkg.dir("Caesar")); include(joinpath("docs", "make.jl"))'
+  - julia -e 'using Pkg; cd(Pkg.dir("Caesar")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+  - julia -e 'using Pkg; Pkg.add("Documenter")'
+  - julia -e 'using Pkg; cd(Pkg.dir("Caesar")); include(joinpath("docs", "make.jl"))'

@@ -81,9 +81,9 @@ function getCloudVert(cgl::CloudGraph,
         session::AbstractString,
         robot::AbstractString,
         user::AbstractString;
-        exvid::VoidUnion{Int}=nothing,
-        neoid::VoidUnion{Int}=nothing,
-        sym::VoidUnion{Symbol}=nothing,
+        exvid::NothingUnion{Int}=nothing,
+        neoid::NothingUnion{Int}=nothing,
+        sym::NothingUnion{Symbol}=nothing,
         bigdata=false  )
   #
   query = "match (n:$(session):$robot:$user) "
@@ -134,9 +134,9 @@ any of the three as input node identifier. Not specifying an identifier will res
 being returned.
 """
 function ls(cgl::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString;
-      sym::VoidUnion{Symbol}=nothing,
-      neoid::VoidUnion{Int64}=nothing,
-      exvid::VoidUnion{Int64}=nothing  )
+      sym::NothingUnion{Symbol}=nothing,
+      neoid::NothingUnion{Int64}=nothing,
+      exvid::NothingUnion{Int64}=nothing  )
   #
 
   if sym == nothing && exvid == nothing && neoid == nothing
@@ -1142,11 +1142,11 @@ function db2jld(cgl::CloudGraph, session::AbstractString, filename::AbstractStri
 end
 
 """
-    db2jld(filename::AbstractString; addrdict::VoidUnion{Dict{AbstractString, AbstractString}}=nothing )
+    db2jld(filename::AbstractString; addrdict::NothingUnion{Dict{AbstractString, AbstractString}}=nothing )
 
 Fetch and save a FactorGraph session to a jld, using or asking STDIN for credentials in the addrdict field.
 """
-function db2jld(filename::AbstractString; addrdict::VoidUnion{Dict{AbstractString, AbstractString}}=nothing )
+function db2jld(filename::AbstractString; addrdict::NothingUnion{Dict{AbstractString, AbstractString}}=nothing )
   cg, cr = standardcloudgraphsetup(addrdict=addrdict)
   db2jld(cg, cr["session"], filename)
 end
