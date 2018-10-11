@@ -1,20 +1,20 @@
 # receive messages on ZMQ
 
-using Caesar
 using ZMQ, JSON
+using Caesar
+using Unmarshal
 
 
-# 1. Import the initialization code.
-include(joinpath(Pkg.dir("SynchronySDK"),"examples", "0_Initialization.jl"))
+# getfield(Caesar, :registerRobot)
 
 # 1a. Create a Configuration
 # synchronyConfig = loadConfig("synchronyConfig_Local.json")
-robotId = ""  # bad Sam
+robotId = ""
 sessionId = ""
-synchronyConfig = loadConfig(joinpath(ENV["HOME"],"Documents","synchronyConfig.json"))
+# synchronyConfig = loadConfig(joinpath(ENV["HOME"],"Documents","synchronyConfig.json"))
 
 # 1b. Check the credentials and the service status
-@show serviceStatus = getStatus(synchronyConfig)
+# @show serviceStatus = getStatus(synchronyConfig)
 
 # set up a context for zmq
 ctx=Context()
@@ -22,23 +22,56 @@ s1=Socket(ctx, REP)
 
 ZMQ.bind(s1, "tcp://*:5555")
 
+configverbs = Symbol[
+  :registerRobot;
+  :registerSession;
+]
+
+sessionverbs = [
+  :addOdometry2D;
+  :addLandmark2D;
+  :addFactorBearingRangeNormal;
+  :setReady;
+  :addVariable;
+  :addFactor
+]
+
+
+0
+
+fg = Caesar.initfg()
+
+config = Dict{String, String}()
+
 try
   while true
+    println("waiting to receive...")
     msg = ZMQ.recv(s1)
     out=convert(IOStream, msg)
 
-    str = takebuf_string(out)
+    @show str = String(take!(out))
+    @show request = JSON.parse(str)
 
-    dict = JSON.parse(str)
+    @show cmdtype = Symbol(request["type"])
+    if cmdtype in union(configverbs, sessionverbs)
+      @show cmd = getfield(Caesar, cmdtype)
 
-    robotId = dict["robotId"]  # bad Sam
-    sessionId = dict["sessionId"]
+      if cmdtype in configverbs
+        resp = cmd(config, request)
+      elseif cmdtype in sessionverbs
+        resp = cmd(config, fg, request)
+      end
 
-    @show dict["type"]
-    @show cmd = getfield(SynchronySDK, Symbol(dict["type"]))
-
-    args = (synchronyConfig,)
-    @show cmd(args...)
+      d = Dict{String, String}()
+      d["status"] = length(resp) == 0 ? "OK" : resp
+      oks = json(d)
+      ZMQ.send(s1, oks)
+    else
+      warn("received invalid command $cmdtype")
+      d = Dict{String, String}("status" => "KO")
+      oks = json(d)
+      ZMQ.send(s1, oks)
+    end
   end
 catch ex
   warn("Something in the zmq/json/rest pipeline broke")
@@ -48,6 +81,22 @@ finally
   # ZMQ.close(s2)
   ZMQ.close(ctx)
 end
+
+0
+
+
+# registerRobot
+# registerSession
+# addOdometry2D # specialized convenience
+# addLandmark2D # specialized convenience
+# addFactorBearingRangeNormal # specialized convenience
+# setReady # be wary, require full atomic transactions across graph segments
+# addVariable
+# addFactor
+# getBelief
+# getBeliefMax
+# triggerSolve
+
 
 
 

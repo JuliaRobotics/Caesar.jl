@@ -169,4 +169,7 @@ include("cloudgraphs/slamindb.jl")
 include("cloudgraphs/MultisessionUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
 
+# these are the ZMQ endpoints
+include("endpoints/Services.jl")
+
 end
