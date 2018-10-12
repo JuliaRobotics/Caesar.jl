@@ -40,7 +40,7 @@ function prepareSAS2DFactor(totalPhones::Int,
   w = exp(-2im*pi*(fCeil-fFloor)/(nFFT_czt*fSampling))
   a = exp(2im*pi*fFloor/fSampling)
 
-  chirpFile = joinpath(Pkg.dir("ProprietaryFactors"),"src","beamforming","chirp250.txt");
+  chirpFile = joinpath(Pkg.dir("Caesar"),"test","testdata","template.txt");
   chirpIn = readdlm(chirpFile,',',Float64,'\n')
 
   #Matched Filter on Data In
@@ -53,7 +53,7 @@ function prepareSAS2DFactor(totalPhones::Int,
   filterCZT = prepCZTFilter(nFFT_full,totalPhones,w,nFFT_czt,a)
   filterCZT(mfData,cztData)
 
-  #CBF Filter shared by ProprietaryFactors
+  #CBF Filter shared by Caesar
   FFTfreqs = linspace(fFloor,fCeil,nFFT_czt)
   cfgCBF_init = CBFFilterConfig(fFloor,fCeil,nFFT_czt,totalPhones,azimuths,soundSpeed, FFTfreqs)
   cfgCBF_init_LIE = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones,Float64[0.0;],soundSpeed, FFTfreqs)
