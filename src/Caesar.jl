@@ -146,7 +146,30 @@ export
   findExistingMSConstraints,
   getprpt2kde,
   rmInstMultisessionPriors!,
-  removeMultisessions!
+  removeMultisessions!,
+
+  # sas-slam
+  CBFFilterConfig,
+  CZTFilter,
+  prepCZTFilter,
+  getCBFFilter2Dsize,
+  constructCBFFilter2D!,
+  CBF2D_DelaySum!,
+  MatchedFilter,
+  SASBearing2D,
+  PackedSASBearing2D,
+  compare,
+  SASDebug,
+  reset!,
+  prepMF,
+  loadConfigFile,
+  prepareSAS2DFactor,
+  wrapRad,
+  phaseShiftSingle!,
+  liebf!,
+  SASDebug
+
+
 
 VoidUnion{T} = Union{Void, T}
 
@@ -168,5 +191,13 @@ include("cloudgraphs/ConvertGeneralSlaminDB.jl")
 include("cloudgraphs/slamindb.jl")
 include("cloudgraphs/MultisessionUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
+
+# SAS-SLAM
+include("beamforming/czt.jl")
+include("beamforming/CBF.jl")
+include("beamforming/MatchedFilter.jl")
+include("beamforming/SASBearing2D.jl")
+include("beamforming/SASUtils.jl")
+
 
 end

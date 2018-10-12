@@ -1,0 +1,126 @@
+# Conventional Beamformer (CBF)
+# Construct filter before beamforming
+
+mutable struct CBFFilterConfig
+  fFloor::Float64
+  fCeil::Float64
+  dataLen::Int
+  nPhones::Int
+  azimuths::Array{Float64}
+  soundSpeed::Float64
+  FFTfreqs::Array{Float64}
+end
+
+function compare(a::CBFFilterConfig,b::CBFFilterConfig)
+  TP = true
+  TP = TP && a.fFloor == b.fFloor       # Float64
+  TP = TP && a.fCeil == b.fCeil       # Float64
+  TP = TP && a.dataLen == b.dataLen       # Int
+  TP = TP && a.nPhones == b.nPhones       # Int
+  TP = TP && a.azimuths == b.azimuths       # Array{Float64}
+  TP = TP && a.soundSpeed == b.soundSpeed       # Float64
+  TP = TP && a.FFTfreqs == b.FFTfreqs
+  TP
+end
+
+function getCBFFilter2Dsize(thisCfg::CBFFilterConfig)
+    return (length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
+end
+
+function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array)
+    if size(filterOut)!=(length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
+        error("Provided Filter has wrong dimensions.")
+    end
+    #Allocations
+    tDelays = zeros(thisCfg.nPhones)
+    sourceXY = zeros(2)
+    dataTemp = zeros(Complex{Float64}, thisCfg.nPhones,thisCfg.dataLen)
+
+    # combination of fCeil and fSampling limit information content extracted by thirsCfg.azimuths. Sample faster to get higher res BF
+    for iter in eachindex(thisCfg.azimuths)
+        sourceXY[1] = -cos(thisCfg.azimuths[iter])
+        sourceXY[2] = -sin(thisCfg.azimuths[iter])
+
+        tDelays[:] = (arrayPos * sourceXY)/thisCfg.soundSpeed
+
+        for piter in 1:thisCfg.nPhones
+            for fftiter in 1:thisCfg.dataLen
+                dataTemp[piter,fftiter] = exp(-2im*pi*tDelays[piter]*thisCfg.FFTfreqs[fftiter])
+            end
+        end
+
+        # @time filterOut[iter,:,:] = transpose(conj!(exp.(-2im*pi*tDelays*FFTfreqs'))) #conjugate transpose in place
+        ctranspose!(view(filterOut,iter,:,:),dataTemp)
+    end
+    nothing
+end
+
+function CBF2D_DelaySum!(thisCfg::CBFFilterConfig,dataIn::Array,dataOut::Array,thisFilter::Array)
+    if size(dataIn,1) !=thisCfg.dataLen || size(dataIn,2)!=thisCfg.nPhones
+        error("Data Array wrong dimensions")
+    end
+    if size(thisFilter)!=(length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
+        error("Provided Filter does not match provided config.")
+    end
+    for iter in eachindex(thisCfg.azimuths)
+        dataOut[iter] = sum(norm.(sum(dataIn.*thisFilter[iter,:,:],2),2),1)[1]
+    end
+    nothing
+end
+
+
+
+
+
+"""
+    $(SIGNATURES)
+
+Phase shifting ztransWave contents of leave one out element of `elemPositions` (positions of array elements)
+based on dx,dy position perturbation.  The ztransWave is chirp z-transform of LOO elements's waveform data,
+and only considering subset of frequencies in ztransWave (i.e. smaller than size of raw waveform data)
+"""
+function phaseShiftSingle!(thisCfg::CBFFilterConfig,
+                            azi::R,
+                            positions::Array,
+                            ztransWave::Array{Complex{R2}}  ) where {R <: Real, R2 <: Real}
+  #
+  sourceXY = zeros(2)
+  FFTfreqs = linspace(thisCfg.fFloor,thisCfg.fCeil,thisCfg.dataLen)
+  sourceXY[1] = -cos(azi) # unit vector in azimuth direction
+  sourceXY[2] = -sin(azi)
+  dt = (positions' * sourceXY)/thisCfg.soundSpeed
+  # @assert thisCfg.dataLen == length(ztransWave)
+  for j in 1:thisCfg.dataLen
+    ztransWave[j] *= conj(exp(-2im*pi*dt*FFTfreqs[j]))
+  end
+  nothing
+end
+
+
+
+
+"""
+    $(SIGNATURES)
+
+Generate the incoming waveform (into `bfOutLIEl`) at the desired look angle `aziInd`.
+"""
+function liebf!(bfOutLIEl, cztWaveLIEl, bfFilterLIEl, aziIndl; normalize::Bool=false)
+
+  # perform conventional beam forming with single look angle (on leave-ins)
+  bfOutLIEl[:] = sum(cztWaveLIEl.*bfFilterLIEl[aziIndl,:,:],2)
+
+  # OPTIONAL normalize according to number of leave in elements
+  # REQUIRED when doing residual rather than corr of waveform (measured - predict)
+  if normalize
+    bfOutLIEl ./= size(cztWaveLIEl,2) # corrWaveLIEl
+  end
+
+  # predict time series of beam formed output of leave-in elements
+  # ifft!(bfOutLIE)
+  nothing
+end
+
+
+
+
+#
