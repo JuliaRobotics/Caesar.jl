@@ -2,7 +2,7 @@
 
 # 0. Load required packages
 using Revise
-using Caesar, RoME
+using RoME, Distributions
 using DistributedFactorGraphs
 
 
@@ -25,7 +25,7 @@ info(dfg)
 # fg = Caesar.initfg()
 
 # Add a first pose variable - x0
-addV!(dfg, :x0, DistributedFactorGraphs.Pose2()) # , labels=["POSE"]
+addV!(dfg, :x0, Pose2()) # , labels=["POSE"]
 # Add a PriorPose2 to pin the first pose at a fixed location
 addF!(dfg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )
 
