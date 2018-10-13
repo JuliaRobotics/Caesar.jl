@@ -7,34 +7,30 @@ using Unmarshal
 
 # getfield(Caesar, :registerRobot)
 
-# 1a. Create a Configuration
-# synchronyConfig = loadConfig("synchronyConfig_Local.json")
-robotId = ""
-sessionId = ""
-# synchronyConfig = loadConfig(joinpath(ENV["HOME"],"Documents","synchronyConfig.json"))
-
-# 1b. Check the credentials and the service status
-# @show serviceStatus = getStatus(synchronyConfig)
+# DFG Configuration
+# # synchronyConfig = loadConfig("synchronyConfig_Local.json")
+# robotId = ""
+# sessionId = ""
+# # synchronyConfig = loadConfig(joinpath(ENV["HOME"],"Documents","synchronyConfig.json"))
 
 systemverbs = Symbol[
     :shutdown
 ]
 configverbs = Symbol[
-  :registerRobot;
-  :registerSession;
+    :initDfg;
+    :toggleMockServer;
+    :registerRobot;
+    :registerSession;
 ]
 
 sessionverbs = [
-  :addOdometry2D;
-  :addLandmark2D;
-  :addFactorBearingRangeNormal;
-  :setReady;
-  :addVariable;
-  :addFactor
+    :addOdometry2D;
+    :addLandmark2D;
+    :addFactorBearingRangeNormal;
+    :setReady;
+    :addVariable;
+    :addFactor
 ]
-
-
-0
 
 fg = Caesar.initfg()
 config = Dict{String, String}()
@@ -60,39 +56,47 @@ try
         str = String(take!(out))
         request = JSON.parse(str)
 
-        @show cmdtype = haskey(request, "type") ? Symbol(request["type"]) : :NOTYPEKEY
-        info("Received command '$cmdtype' in payload '$str'...")
+        cmdtype = haskey(request, "type") ? Symbol(request["type"]) : :ERROR_NOCOMMANDPROVIDED
+        info("[ZMQ Server] REQUEST: Received command '$cmdtype' in payload '$str'...")
         if cmdtype in union(configverbs, sessionverbs)
-            @show cmd = getfield(Caesar, cmdtype)
-
             resp = Dict{String, Any}()
             try
-                resp = cmd(config, fg, request)
+                # Mocking server
+                if haskey(config, "isMockServer") && config["isMockServer"] == "true" && cmdtype != :toggleMockServer
+                    warn("[ZMQ Server] MOCKING ENABLED - Ignoring request!")
+                else
+                    # Otherwise actually perform the command
+                    @show cmd = getfield(Caesar, cmdtype)
+                    resp = cmd(config, fg, request)
+                end
                 if !haskey(resp, "status")
                     resp["status"] = "OK"
                 end
             catch ex
                 io = IOBuffer()
-                showerror(io, e, catch_backtrace())
+                showerror(io, ex, catch_backtrace())
                 err = String(take!(io))
                 warn("[ZMQ Server] Exception: $err")
                 resp["status"] = "ERROR"
                 resp["error"] = err
             end
+            info("[ZMQ Server] RESPONSE: $(JSON.json(resp))")
             ZMQ.send(s1, JSON.json(resp))
         elseif cmdtype in systemverbs
             if cmdtype == :shutdown
-                shutdown(config, fg, request)
+                resp = shutdown(config, fg, request)
+                # Send response before shutting down.
+                ZMQ.send(s1, JSON.json(resp))
             end
         else
-            warn("received invalid command $cmdtype")
-            d = Dict{String, String}("status" => "ERROR")
+            warn("[ZMQ Server] Received invalid command $cmdtype")
+            d = Dict{String, String}("status" => "ERROR", "error" => "Command '$cmdtype' not a valid command.")
             oks = json(d)
             ZMQ.send(s1, oks)
         end
     end
 catch ex
-    warn("Something in the zmq/json/rest pipeline broke")
+    warn("[ZMQ Server] Something in the zmq/json/rest pipeline broke")
     showerror(STDERR, ex, catch_backtrace())
 finally
     warn("[ZMQ Server] Shutting down server")
@@ -102,8 +106,6 @@ finally
     ZMQ.close(ctx)
     warn("[ZMQ Server] Shut down!")
 end
-
-0
 
 
 # registerRobot

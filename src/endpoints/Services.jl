@@ -1,10 +1,5 @@
 #
 
-export
-  addVariable,
-  addFactor
-
-
 # registerRobot
 # registerSession
 # addOdometry2D # specialized convenience
@@ -20,15 +15,3 @@ export
 # struct addPose3
 #
 # end
-
-function addVariable(config::Dict, fgl::FactorGraph, request::Dict)::Dict{String, Any}
-  @show request
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, request)
-  error("Not implemented yet!")
-end
-
-function addFactor(config::Dict, fgl::FactorGraph, request::Dict)::Dict{String, Any}
-  @show request
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, request)
-  error("Not implemented yet!")
-end
