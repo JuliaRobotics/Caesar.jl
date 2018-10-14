@@ -1,7 +1,7 @@
 using Revise
 using JSON, ZMQ
 using Base.Test
-# using Caesar
+using Caesar
 using Unmarshal
 
 addOdo2DJson = "{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addOdometry2D\"\n}";
@@ -12,6 +12,7 @@ shutdownCmd = Dict{String, Any}("type" => "shutdown")
 emptyCmd = Dict{String, Any}()
 unknownCmd = Dict{String, Any}("type" => "NOPENOPENOPE")
 mockServerCmd = Dict{String, Any}("type" => "toggleMockServer", "isMockServer" => "true")
+addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
 
 ## ....
 # addOdometry2D()
@@ -35,10 +36,11 @@ end
 @test sendCmd(emptyCmd) == "{\"status\":\"ERROR\",\"error\":\"Command 'ERROR_NOCOMMANDPROVIDED' not a valid command.\"}"
 
 # All our tests
+@test sendCmd(addVariableCmd) == "{\"label\":\"x0\",\"status\":\"OK\"}"
 
 # Lastly mock server test
 @test sendCmd(mockServerCmd) == "{\"status\":\"OK\",\"isMockServer\":\"true\"}"
-@test sendCmd(addOdo2DCmd) == "{\"status\":\"OK\"}"
+@test sendCmd(addOdo2DCmd) == "{\"status\":\"OK\", \"label\": \"x0\"}"
 # Disable it
 mockServerCmd["isMockServer"]="false"
 @test sendCmd(mockServerCmd) == "{\"status\":\"OK\",\"isMockServer\":\"false\"}"

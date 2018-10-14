@@ -29,6 +29,8 @@ sessionverbs = [
     :addOdometry2D;
     :addLandmark2D;
     :addFactorBearingRangeNormal;
+    :ls;
+    :getVert;
     :setReady;
     :batchSolve;
     # per variable

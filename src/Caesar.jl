@@ -29,7 +29,8 @@ using
   CloudGraphs,
   Neo4j,
   Mongo,
-  LibBSON
+  LibBSON,
+  Unmarshal
 
 
 export
@@ -172,6 +173,9 @@ include("cloudgraphs/FoveationUtils.jl")
 # these are the ZMQ endpoints
 # include("endpoints/Models.jl")
 include("endpoints/Services.jl")
+include("endpoints/models/config.jl")
+include("endpoints/models/session.jl")
 include("endpoints/services/config.jl")
+include("endpoints/services/session.jl")
 
 end
