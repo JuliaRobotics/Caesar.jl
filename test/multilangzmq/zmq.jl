@@ -13,6 +13,7 @@ emptyCmd = Dict{String, Any}()
 unknownCmd = Dict{String, Any}("type" => "NOPENOPENOPE")
 mockServerCmd = Dict{String, Any}("type" => "toggleMockServer", "isMockServer" => "true")
 addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
+lsCmd = Dict{String, Any}("type" => "ls", "filter" => Dict{String, Any}("variables" => "true", "factors" => "true"))
 
 ## ....
 # addOdometry2D()
@@ -36,7 +37,8 @@ end
 @test sendCmd(emptyCmd) == "{\"status\":\"ERROR\",\"error\":\"Command 'ERROR_NOCOMMANDPROVIDED' not a valid command.\"}"
 
 # All our tests
-@test sendCmd(addVariableCmd) == "{\"label\":\"x0\",\"status\":\"OK\"}"
+@test sendCmd(addVariableCmd) == "{\"status\":\"OK\", \"label\": \"x0\"}"
+@test sendCmd(lsCmd)
 
 # Lastly mock server test
 @test sendCmd(mockServerCmd) == "{\"status\":\"OK\",\"isMockServer\":\"true\"}"

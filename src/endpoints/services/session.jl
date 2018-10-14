@@ -24,7 +24,7 @@ function addVariable(configDict, fg, requestDict)::Dict{String, Any}
   varType = getfield(RoME, Symbol(varRequest.variableType))
 
   vnext = addNode!(fg, varLabel, varType, N=(isnull(varRequest.N)?100:get(varRequest.N)), ready=0, labels=[varRequest.labels; "VARIABLE"])
-  return Dict{String, Any}("status" => "OK", "label" => vnext.label)
+  return Dict{String, Any}("status" => "OK", "id" => vnext.label)
   # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
 end
 
@@ -53,9 +53,29 @@ function addFactorBearingRangeNormal(configDict, fg, requestDict)::Dict{String, 
 end
 
 function ls(configDict, fg, requestDict)::Dict{String, Any}
-  @show requestDict
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
-  error("Not implemented yet!")
+    @show requestDict
+    filterRequest = Unmarshal.unmarshal(lsRequest, requestDict)
+
+    resp = Dict{String, Any}()
+    if filterRequest.variables
+        vars = ls(fg)
+        vars = map(v -> String(v), vars[1])
+        resp["variables"] = vars
+    end
+    if filterRequest.factors
+        factors = lsf(fg)
+        @show factors
+        factors = String.(factors)
+        resp["factors"] = factors
+    end
+    if filterRequest.landmarks
+        landmarks = landmarks(fg)
+        @show landmarks
+        landmarks = String.(landmarks)
+        resp["landmarks"] = landmarks
+    end
+
+    return resp
 end
 
 function getVert(configDict, fg, requestDict)::Dict{String, Any}
