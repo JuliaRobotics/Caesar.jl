@@ -29,8 +29,19 @@ sessionverbs = [
     :addFactorBearingRangeNormal;
     :setReady;
     :addVariable;
-    :addFactor
+    :addFactor;
+    :batchSolve;
+    # per variable
+    :setVarKDE; # needed for workaround on bad autoinit -- sorry
+    :getVarMAPKDE; # marginal belief points (KDE)
+    :getVarMAPMax; # Future, how many maxes should you get?
+    :getVarMAPMean;
+    # fancy future stuff
+    :getVarMAPFit; # defaul=Normal
 ]
+
+
+
 
 fg = Caesar.initfg()
 config = Dict{String, String}()
