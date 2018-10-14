@@ -54,21 +54,21 @@ end
 
 function ls(configDict, fg, requestDict)::Dict{String, Any}
     @show requestDict
-    filterRequest = Unmarshal.unmarshal(lsRequest, requestDict)
+    lsRequest = Unmarshal.unmarshal(lsRequest, requestDict)
 
     resp = Dict{String, Any}()
-    if filterRequest.variables
+    if lsRequest.filter.variables == "true"
         vars = ls(fg)
         vars = map(v -> String(v), vars[1])
         resp["variables"] = vars
     end
-    if filterRequest.factors
+    if lsRequest.filter.factors == "true"
         factors = lsf(fg)
         @show factors
         factors = String.(factors)
         resp["factors"] = factors
     end
-    if filterRequest.landmarks
+    if lsRequest.filter.landmarks == "true"
         landmarks = landmarks(fg)
         @show landmarks
         landmarks = String.(landmarks)
