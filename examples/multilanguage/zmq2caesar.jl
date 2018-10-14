@@ -24,12 +24,12 @@ configverbs = Symbol[
 ]
 
 sessionverbs = [
+    :addVariable;
+    :addFactor;
     :addOdometry2D;
     :addLandmark2D;
     :addFactorBearingRangeNormal;
     :setReady;
-    :addVariable;
-    :addFactor;
     :batchSolve;
     # per variable
     :setVarKDE; # needed for workaround on bad autoinit -- sorry
@@ -39,9 +39,6 @@ sessionverbs = [
     # fancy future stuff
     :getVarMAPFit; # defaul=Normal
 ]
-
-
-
 
 fg = Caesar.initfg()
 config = Dict{String, String}()
