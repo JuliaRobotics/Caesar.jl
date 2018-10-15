@@ -107,14 +107,18 @@ function convert(::Type{Packed_MvNormal}, mvNormal::Distributions.MvNormal)
 end
 
 function convert(::Type{Distributions.MvNormal}, pv::Dict)
-  @show len = length(pv["mean"])
-  @show mat = reshape(Float64.(pv["cov"]), len, len)
-  @show pv["mean"]
-  return Distributions.MvNormal(Float64.(pv["mean"]), mat)
+  len = length(pv["mean"])
+  mat = reshape(Float64.(pv["cov"]), len, len)
+  return Distributions.MvNormal(Float64.(pv["mean"]), mat, "MvNormal")
 end
 
 function evalType(pt::String)
   getfield(Main, Symbol(pt))
+end
+
+function convert(::Type{Prior}, pv::Dict)
+    @show pv
+    return Prior(MvNormal)
 end
 
 function convert(::Type{BearingRange}, pv::Dict)

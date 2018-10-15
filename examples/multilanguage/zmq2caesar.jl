@@ -30,7 +30,7 @@ sessionverbs = [
     :addLandmark2D;
     :addFactorBearingRangeNormal;
     :ls;
-    :getVert;
+    :getNode;
     :setReady;
     :batchSolve;
     # per variable

@@ -16,7 +16,7 @@ export
   # fancy future stuff
   getVarMAPFit # defaul=Normal
 
-
+okResponse = Dict{String, Any}("status" => "OK")
 
 function addVariable(configDict, fg, requestDict)::Dict{String, Any}
   varRequest = Unmarshal.unmarshal(VariableRequest, requestDict["variable"])
@@ -25,13 +25,21 @@ function addVariable(configDict, fg, requestDict)::Dict{String, Any}
 
   vnext = addNode!(fg, varLabel, varType, N=(isnull(varRequest.N)?100:get(varRequest.N)), ready=0, labels=[varRequest.labels; "VARIABLE"])
   return Dict{String, Any}("status" => "OK", "id" => vnext.label)
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
 end
 
 function addFactor(configDict, fg, requestDict)::Dict{String, Any}
-  @show requestDict
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
-  error("Not implemented yet!")
+    if !haskey(requestDict, "factor")
+        error("A factor body is required in the request.")
+    end
+    # Handling the weird overflow issue with measurements
+    measurement = requestDict["factor"]["measurement"]
+    requestDict["factor"]["measurement"] = []
+    @show factorRequest = Unmarshal.unmarshal(FactorRequest, requestDict["factor"])
+    factorRequest.measurement = measurement
+
+    # Right, carrying on...
+    @show factorRequest
+    return okResponse
 end
 
 function addOdometry2D(configDict, fg, requestDict)::Dict{String, Any}
@@ -54,34 +62,31 @@ end
 
 function ls(configDict, fg, requestDict)::Dict{String, Any}
     @show requestDict
-    lsRequest = Unmarshal.unmarshal(lsRequest, requestDict)
+    if !haskey(requestDict, "filter")
+        error("The reques does not contain a filter parameter and this is required for the command")
+    end
+    lsRequest = Unmarshal.unmarshal(Caesar.lsRequest, requestDict["filter"])
 
     resp = Dict{String, Any}()
-    if lsRequest.filter.variables == "true"
+    if lsRequest.variables == "true"
         vars = ls(fg)
-        vars = map(v -> String(v), vars[1])
-        resp["variables"] = vars
+        @show vars
+        resp["variables"] = map(v -> Dict{String, Any}("id" => v), vars[1])
     end
-    if lsRequest.filter.factors == "true"
-        factors = lsf(fg)
-        @show factors
-        factors = String.(factors)
-        resp["factors"] = factors
+    if lsRequest.factors == "true"
+        # Variables
+        for vDict in resp["variables"]
+            factors = lsf(fg, Symbol(vDict["id"]))
+            @show factors
+            vDict["factors"] = String.(factors)
+        end
     end
-    if lsRequest.filter.landmarks == "true"
-        landmarks = landmarks(fg)
-        @show landmarks
-        landmarks = String.(landmarks)
-        resp["landmarks"] = landmarks
-    end
-
     return resp
 end
 
-function getVert(configDict, fg, requestDict)::Dict{String, Any}
-  @show requestDict
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
-  error("Not implemented yet!")
+function getNode(configDict, fg, requestDict)::Dict{String, Any}
+    # TODO: Build a cleaner contract to return this value.
+    return RoME.getVert(fg, Symbol(requestDict["id"]))
 end
 
 function setReady(configDict, fg, requestDict)::Dict{String, Any}
@@ -91,9 +96,12 @@ function setReady(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function batchSolve(configDict, fg, requestDict)::Dict{String, Any}
-  @show requestDict
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
-  error("Not implemented yet!")
+    resp = Dict{String, Any}("startTime" => now())
+    # Call solve
+    batchSolve(fg)
+    resp["endTime"] = now()
+    resp["durationSec"] = Dates.value(resp["endTime"] - resp["startTime"])/1000.0
+    return resp
 end
 
 function setVarKDE(configDict, fg, requestDict)::Dict{String, Any}
