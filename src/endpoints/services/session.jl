@@ -34,7 +34,7 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
     # Handling the weird overflow issue with measurements
     measurement = requestDict["factor"]["measurement"]
     requestDict["factor"]["measurement"] = []
-    @show factorRequest = Unmarshal.unmarshal(FactorRequest, requestDict["factor"])
+    factorRequest = Unmarshal.unmarshal(FactorRequest, requestDict["factor"])
     factorRequest.measurement = measurement
 
     # Right, carrying on...

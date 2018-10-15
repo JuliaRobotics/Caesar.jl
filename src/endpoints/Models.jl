@@ -51,10 +51,10 @@ export
 # C++:
 # dist["distType"] =  "MvNormal"
 # dist["dist"] = d.ToJson() # specialiezed by inherited distribution
-mutable struct Packed_Distribution
-  distType::String # MvNormal, Categorical, Rayleigh,
-  dist::Dict
-end
+# mutable struct Packed_Distribution
+#   distType::String # MvNormal, Categorical, Rayleigh,
+#   dist::Dict
+# end
 
 # "
 #     bearing: {
@@ -112,7 +112,7 @@ function convert(::Type{Distributions.MvNormal}, pv::Dict)
   return Distributions.MvNormal(Float64.(pv["mean"]), mat, "MvNormal")
 end
 
-function evalType(pt::String)
+function evalType(pt::String)::Type
   getfield(Main, Symbol(pt))
 end
 

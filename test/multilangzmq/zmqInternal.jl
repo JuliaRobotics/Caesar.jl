@@ -33,6 +33,9 @@ dist = Dict{String, Any}("type" => "Normal", "mean" => [0.0 0.0 0.0], "cov" => z
 factCmd = Dict{String, Any}("type" => "addFactor", "factor" => JSON.parse(JSON.json(FactorRequest("Prior", ["x0", "x1"], [dist]))))
 sendCmd(config, fg, factCmd)
 
+# Testing
+factorRequest = Caesar.FactorRequest("Prior", String["x0", "x1"], Dict{String,Any}[Dict{String,Any}(Pair{String,Any}("type", "Normal"),Pair{String,Any}("mean", Any[Any[0.0], Any[0.0], Any[0.0]]),Pair{String,Any}("cov", Any[Any[0.0, 0.0, 0.0], Any[0.0, 0.0, 0.0], Any[0.0, 0.0, 0.0]]))])
+
 #######
 ### STATE OF THE ART. BEYOND HERE THERE BE KRAKENS (AND EXCEPTIONS, YAAARGH!)
 #######
