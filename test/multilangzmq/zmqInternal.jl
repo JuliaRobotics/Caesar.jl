@@ -2,6 +2,7 @@ using Revise
 using JSON, ZMQ
 using Base.Test
 using Caesar
+using Distributions, RoME, IncrementalInference
 using Unmarshal
 
 addOdo2DJson = "{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addOdometry2D\"\n}";
@@ -19,22 +20,39 @@ function sendCmd(config, fg, cmd::Dict{String, Any})::String
     return JSON.json(resp)
 end
 
-# Add two variables.
-for x in ["x0", "x1", "x2"]
-    addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest(x, "Pose2", 100, ["TEST"]))))
-    @test sendCmd(config, fg, addVariableCmd) == "{\"status\":\"OK\",\"id\":\"$x\"}"
-end
-# ls to see that they are added to the graph.
+# Add an initial variable.
+addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
+@test sendCmd(config, fg, addVariableCmd) == "{\"status\":\"OK\",\"id\":\"x0\"}"
+
+# ls to see that it is added to the graph.
 lsCmd = Dict{String, Any}("type" => "ls", "filter" => JSON.parse(JSON.json(lsRequest("true", "true"))))
-@test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[],\"id\":\"x0\"},{\"factors\":[],\"id\":\"x1\"},{\"factors\":[],\"id\":\"x2\"}]}"
+@test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[],\"id\":\"x0\"}]}"
 
 # Add a prior factor
-dist = Dict{String, Any}("type" => "Normal", "mean" => [0.0 0.0 0.0], "cov" => zeros(3,3))
-factCmd = Dict{String, Any}("type" => "addFactor", "factor" => JSON.parse(JSON.json(FactorRequest("Prior", ["x0", "x1"], [dist]))))
-sendCmd(config, fg, factCmd)
+dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
+priorFactCmd = Dict{String, Any}("type" => "addFactor", "factor" => JSON.parse(JSON.json(FactorRequest("Prior", ["x0"], [dist]))))
+@test sendCmd(config, fg, priorFactCmd) == "{\"status\":\"OK\",\"id\":\"x0f1\"}"
+
+sendCmd(config, fg, lsCmd)
+# How do i get a list of all factors?
+
+# Now let's add all 6 hexagonal nodes
+odo = Dict{String, Any}(
+    "distType" => "MvNormal",
+    "mean" => [10.0,0,pi/3.0],
+    "cov" => [0.1,0,0,0,0.1,0,0,0,0.1])
+for i in 1:6
+    # Add variable
+    addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest("x$i", "Pose2", 100, ["TEST"]))))
+    @test sendCmd(config, fg, addVariableCmd) == "{\"status\":\"OK\",\"id\":\"x$i\"}"
+
+    # Now adding odo factor
+    @show odoFactCmd = Dict{String, Any}("type" => "addFactor", "factor" => JSON.parse(JSON.json(FactorRequest("Pose2Pose2", ["x$(i-1)", "x$i"], [odo]))))
+    @test sendCmd(config, fg, odoFactCmd) == "{\"status\":\"OK\",\"id\":\"x$(i-1)x$(i)f1\"}"
+end
 
 # Testing
-factorRequest = Caesar.FactorRequest("Prior", String["x0", "x1"], Dict{String,Any}[Dict{String,Any}(Pair{String,Any}("type", "Normal"),Pair{String,Any}("mean", Any[Any[0.0], Any[0.0], Any[0.0]]),Pair{String,Any}("cov", Any[Any[0.0, 0.0, 0.0], Any[0.0, 0.0, 0.0], Any[0.0, 0.0, 0.0]]))])
+# factorRequest = factCmd["factor"]
 
 #######
 ### STATE OF THE ART. BEYOND HERE THERE BE KRAKENS (AND EXCEPTIONS, YAAARGH!)

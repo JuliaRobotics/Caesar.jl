@@ -21,7 +21,17 @@ okResponse = Dict{String, Any}("status" => "OK")
 function addVariable(configDict, fg, requestDict)::Dict{String, Any}
   varRequest = Unmarshal.unmarshal(VariableRequest, requestDict["variable"])
   varLabel = Symbol(varRequest.label)
-  varType = getfield(RoME, Symbol(varRequest.variableType))
+  varType = nothing
+  try
+      varType = getfield(RoME, Symbol(varRequest.variableType))
+  catch ex
+      io = IOBuffer()
+      showerror(io, ex, catch_backtrace())
+      err = String(take!(io))
+      error("addVariable: Unable to locate variable type '$(varRequest.variableType)'. Please check that it exists in main context. Stack trace = $err")
+  end
+
+  info("Adding variable of type '$(varRequest.variableType)' with id '$(varRequest.label)'...")
 
   vnext = addNode!(fg, varLabel, varType, N=(isnull(varRequest.N)?100:get(varRequest.N)), ready=0, labels=[varRequest.labels; "VARIABLE"])
   return Dict{String, Any}("status" => "OK", "id" => vnext.label)
@@ -31,15 +41,21 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
     if !haskey(requestDict, "factor")
         error("A factor body is required in the request.")
     end
-    # Handling the weird overflow issue with measurements
-    measurement = requestDict["factor"]["measurement"]
-    requestDict["factor"]["measurement"] = []
-    factorRequest = Unmarshal.unmarshal(FactorRequest, requestDict["factor"])
-    factorRequest.measurement = measurement
+    info("Adding factor of type '$(requestDict["factor"]["factorType"])' to variables '$(requestDict["factor"]["variables"])'...")
 
     # Right, carrying on...
-    @show factorRequest
-    return okResponse
+    @show factType = _evalType(requestDict["factor"]["factorType"])
+    factor = nothing
+    try
+        @show factor = convert(factType, requestDict["factor"])
+    catch ex
+        io = IOBuffer()
+        showerror(io, ex, catch_backtrace())
+        err = String(take!(io))
+        error("addFactor: Unable to convert packed factor data to type '$factType'. Please check that a converter exists to deserialize '$factType'. Stack trace = $err")
+    end
+    f = addFactor!(fg, Symbol.(requestDict["factor"]["variables"]), factor)
+    return Dict{String, Any}("status" => "OK", "id" => f.label)
 end
 
 function addOdometry2D(configDict, fg, requestDict)::Dict{String, Any}

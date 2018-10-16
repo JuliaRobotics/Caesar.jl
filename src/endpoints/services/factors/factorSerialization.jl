@@ -4,17 +4,6 @@ using IncrementalInference
 import Unmarshal: unmarshal
 import Base: convert
 
-function _evalType(pt::String)::Type
-    try
-        getfield(Main, Symbol(pt))
-    catch ex
-        io = IOBuffer()
-        showerror(io, ex, catch_backtrace())
-        err = String(take!(io))
-        error("_evalType: Unable to locate factor type '$pt' in main context. Please check that this factor type is loaded into main. Stack trace = $err")
-    end
-end
-
 """
 Converter: Prior -> Packed_Prior
 """
@@ -29,9 +18,26 @@ Converter: PackedPrior::Dict{String, Any} -> Prior
 """
 function convert(::Type{Prior}, prior::Any)
     # Genericize to any packed type next.
-    z=convert(evalType(pv["bearing"]["distType"]), prior.Z)
+    z = prior["measurement"][1]
+    z = convert(_evalType(z["distType"]), z)
     return Prior(z)
 end
+
+"""
+Converter: PackedPose2Pose2::Dict{String, Any} -> Pose2Pose2
+"""
+function convert(::Type{Pose2Pose2}, prior::Any)
+    # Genericize to any packed type next.
+    z = prior["measurement"][1]
+    z = convert(_evalType(z["distType"]), z)
+    return Prior(z)
+end
+
+# import Base.convert
+# function factorRequest2Factor(factorRequest::FactorRequest)
+# t = _evalType(factorRequest["factorType"])
+# p = convert(t, factorRequest)
+# end
 
 # """
 # Converter: Packed_BearingRange -> BearingRange
