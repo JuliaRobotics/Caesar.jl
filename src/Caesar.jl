@@ -26,8 +26,7 @@ using
   DocStringExtensions,
   CloudGraphs, # TODO: will be removed
   Neo4j, # TODO: will be removed
-  Mongo, # TODO: will be removed
-  LibBSON # TODO: will be removed
+  Mongoc # TODO: will be removed
 
 
 export
