@@ -102,7 +102,9 @@ end
 
 function getNode(configDict, fg, requestDict)::Dict{String, Any}
     # TODO: Build a cleaner contract to return this value.
-    return RoME.getVert(fg, Symbol(requestDict["id"]))
+    vert = RoME.getVert(fg, Symbol(requestDict["id"]))
+
+    return JSON.parse(JSON.json(vert))
 end
 
 function setReady(configDict, fg, requestDict)::Dict{String, Any}
@@ -144,18 +146,21 @@ function setVarKDE(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function getVarMAPKDE(configDict, fg, requestDict)::Dict{String, Any}
+    # getVertKDE(fg, :x0)
   @show requestDict
   # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
   error("Not implemented yet!")
 end
 
 function getVarMAPMax(configDict, fg, requestDict)::Dict{String, Any}
+    # KDE.getKDEMax(getVertKDE(fg, :x0))
   @show requestDict
   # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
   error("Not implemented yet!")
 end
 
 function getVarMAPMean(configDict, fg, requestDict)::Dict{String, Any}
+    #KDE.getKDEMean(getVertKDE(fg, :x0))
   @show requestDict
   # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
   error("Not implemented yet!")

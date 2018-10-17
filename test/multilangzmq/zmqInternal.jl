@@ -33,8 +33,7 @@ dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), 
 priorFactCmd = Dict{String, Any}("type" => "addFactor", "factor" => JSON.parse(JSON.json(FactorRequest("Prior", ["x0"], [dist]))))
 @test sendCmd(config, fg, priorFactCmd) == "{\"status\":\"OK\",\"id\":\"x0f1\"}"
 
-sendCmd(config, fg, lsCmd)
-# How do i get a list of all factors?
+@test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\"],\"id\":\"x0\"}]}"
 
 # Now let's add all 6 hexagonal nodes
 odo = Dict{String, Any}(
@@ -51,6 +50,8 @@ for i in 1:6
     @test sendCmd(config, fg, odoFactCmd) == "{\"status\":\"OK\",\"id\":\"x$(i-1)x$(i)f1\"}"
 end
 
+@test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\",\"x0x1f1\"],\"id\":\"x0\"},{\"factors\":[\"x0x1f1\",\"x1x2f1\"],\"id\":\"x1\"},{\"factors\":[\"x1x2f1\",\"x2x3f1\"],\"id\":\"x2\"},{\"factors\":[\"x2x3f1\",\"x3x4f1\"],\"id\":\"x3\"},{\"factors\":[\"x3x4f1\",\"x4x5f1\"],\"id\":\"x4\"},{\"factors\":[\"x4x5f1\",\"x5x6f1\"],\"id\":\"x5\"},{\"factors\":[\"x5x6f1\"],\"id\":\"x6\"}]}"
+
 # Set all variables ready
 setReadyCmd = Dict{String, Any}("type" => "setReady", "params" => JSON.parse(JSON.json(SetReadyRequest(nothing, 1))))
 @test sendCmd(config, fg, setReadyCmd) == "{\"status\":\"OK\"}"
@@ -58,9 +59,11 @@ setReadyCmd = Dict{String, Any}("type" => "setReady", "params" => JSON.parse(JSO
 # Call batch solve
 batchSolveCmd = Dict{String, Any}("type" => "batchSolve")
 result = sendCmd(config, fg, batchSolveCmd)
-@test result["status"] == "OK"
+@test JSON.parse(result)["status"] == "OK"
 
-
+# Just for fun
+getNodeCmd = Dict{String, Any}("type" => "getNode", "id" => "x0")
+x0Ret = JSON.parse(sendCmd(config, fg, getNodeCmd))
 
 #######
 ### STATE OF THE ART. BEYOND HERE THERE BE KRAKENS (AND EXCEPTIONS, YAAARGH!)
