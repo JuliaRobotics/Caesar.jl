@@ -1,3 +1,5 @@
+export
+    ZmqServer
 
 struct ZmqServer
     fg::IncrementalInference.FactorGraph

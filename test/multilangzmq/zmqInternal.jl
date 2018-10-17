@@ -67,9 +67,9 @@ x0Ret = JSON.parse(sendCmd(config, fg, getNodeCmd))
 
 # Get the KDEs
 getMAPCmd = Dict{String, Any}("type" => "getVarMAPKDE", "id" => "x0")
-map = sendCmd(config, fg, getMAPCmd)
+mapResult = sendCmd(config, fg, getMAPCmd)
 getMAPMeanCmd = Dict{String, Any}("type" => "getVarMAPMean", "id" => "x0")
-map = sendCmd(config, fg, getMAPMeanCmd)
+mapResult = sendCmd(config, fg, getMAPMeanCmd)
 
 #######
 ### STATE OF THE ART. BEYOND HERE THERE BE KRAKENS (AND EXCEPTIONS, YAAARGH!)

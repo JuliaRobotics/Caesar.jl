@@ -1,6 +1,8 @@
 export
     start
 
+import Base: start
+
 systemverbs = Symbol[
     :shutdown
 ]
@@ -44,7 +46,7 @@ function start(zmqServer::ZmqServer)
     ZMQ.bind(s1, "tcp://*:5555")
 
     try
-        while isServerActive
+        while zmqServer.isServerActive
             println("waiting to receive...")
             msg = ZMQ.recv(s1)
             out=convert(IOStream, msg)
