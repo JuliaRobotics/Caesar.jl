@@ -170,16 +170,6 @@ include("cloudgraphs/slamindb.jl")
 include("cloudgraphs/MultisessionUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
 
-# these are the ZMQ endpoints
-# include("endpoints/Models.jl")
-include("endpoints/models/distributions.jl")
-include("endpoints/models/factors.jl")
-include("endpoints/models/config.jl")
-include("endpoints/models/session.jl")
-include("endpoints/services/factors/common.jl")
-include("endpoints/services/factors/distributionSerialization.jl")
-include("endpoints/services/factors/factorSerialization.jl")
-include("endpoints/services/config.jl")
-include("endpoints/services/session.jl")
-
+# ZMQ server and endpoints
+include("zmq/ZmqCaesar.jl")
 end

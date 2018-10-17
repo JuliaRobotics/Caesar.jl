@@ -79,21 +79,19 @@ end
 function ls(configDict, fg, requestDict)::Dict{String, Any}
     @show requestDict
     if !haskey(requestDict, "filter")
-        error("The reques does not contain a filter parameter and this is required for the command")
+        error("The request does not contain a filter parameter and this is required for the command")
     end
-    lsRequest = Unmarshal.unmarshal(Caesar.lsRequest, requestDict["filter"])
+    lsr = Unmarshal.unmarshal(lsRequest, requestDict["filter"])
 
     resp = Dict{String, Any}()
-    if lsRequest.variables == "true"
-        vars = ls(fg)
-        @show vars
+    if lsr.variables == "true"
+        vars = Caesar.ls(fg)
         resp["variables"] = map(v -> Dict{String, Any}("id" => v), vars[1])
     end
-    if lsRequest.factors == "true"
+    if lsr.factors == "true"
         # Variables
         for vDict in resp["variables"]
-            factors = ls(fg, Symbol(vDict["id"]))
-            @show factors
+            factors = Caesar.ls(fg, Symbol(vDict["id"]))
             vDict["factors"] = String.(factors)
         end
     end
@@ -103,7 +101,6 @@ end
 function getNode(configDict, fg, requestDict)::Dict{String, Any}
     # TODO: Build a cleaner contract to return this value.
     vert = RoME.getVert(fg, Symbol(requestDict["id"]))
-
     return JSON.parse(JSON.json(vert))
 end
 
@@ -118,7 +115,7 @@ function setReady(configDict, fg, requestDict)::Dict{String, Any}
     # Validation of payload
 
     # Action
-    varLabels = isnull(readyRequest.variables) ? union(ls(fg)...) : Symbol.(get(requestDict.variables))
+    varLabels = isnull(readyRequest.variables) ? union(Caesar.ls(fg)...) : Symbol.(get(requestDict.variables))
     # Do specific variables
     for varLabel in varLabels
         v = getVert(fg, varLabel)
@@ -146,24 +143,20 @@ function setVarKDE(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function getVarMAPKDE(configDict, fg, requestDict)::Dict{String, Any}
-    # getVertKDE(fg, :x0)
-  @show requestDict
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
-  error("Not implemented yet!")
+    map = KDE.getKDEMax(getVertKDE(fg, Symbol(Symbol(requestDict["id"]))))
+    return Dict{String, Any}("MAP" => JSON.parse(JSON.json(map)))
 end
 
 function getVarMAPMax(configDict, fg, requestDict)::Dict{String, Any}
     # KDE.getKDEMax(getVertKDE(fg, :x0))
   @show requestDict
   # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
-  error("Not implemented yet!")
+  error("Get all KDE modes - Not implemented yet!")
 end
 
 function getVarMAPMean(configDict, fg, requestDict)::Dict{String, Any}
-    #KDE.getKDEMean(getVertKDE(fg, :x0))
-  @show requestDict
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
-  error("Not implemented yet!")
+    map = KDE.getKDEMean(getVertKDE(fg, Symbol(Symbol(requestDict["id"]))))
+    return Dict{String, Any}("MAP" => JSON.parse(JSON.json(map)))
 end
 
 # Fancy future stuff

@@ -1,7 +1,7 @@
 using Revise
 using JSON, ZMQ
 using Base.Test
-using Caesar
+using Caesar, Caesar.ZmqCaesar
 using Distributions, RoME, IncrementalInference
 using Unmarshal
 
@@ -15,7 +15,7 @@ config = Dict{String, String}()
 
 # Send a command locally.
 function sendCmd(config, fg, cmd::Dict{String, Any})::String
-    callback = getfield(Caesar, Symbol(cmd["type"]))
+    callback = getfield(Caesar.ZmqCaesar, Symbol(cmd["type"]))
     resp = callback(config, fg, cmd)
     return JSON.json(resp)
 end
@@ -64,6 +64,12 @@ result = sendCmd(config, fg, batchSolveCmd)
 # Just for fun
 getNodeCmd = Dict{String, Any}("type" => "getNode", "id" => "x0")
 x0Ret = JSON.parse(sendCmd(config, fg, getNodeCmd))
+
+# Get the KDEs
+getMAPCmd = Dict{String, Any}("type" => "getVarMAPKDE", "id" => "x0")
+map = sendCmd(config, fg, getMAPCmd)
+getMAPMeanCmd = Dict{String, Any}("type" => "getVarMAPMean", "id" => "x0")
+map = sendCmd(config, fg, getMAPMeanCmd)
 
 #######
 ### STATE OF THE ART. BEYOND HERE THERE BE KRAKENS (AND EXCEPTIONS, YAAARGH!)
