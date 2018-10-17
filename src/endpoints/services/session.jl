@@ -92,7 +92,7 @@ function ls(configDict, fg, requestDict)::Dict{String, Any}
     if lsRequest.factors == "true"
         # Variables
         for vDict in resp["variables"]
-            factors = lsf(fg, Symbol(vDict["id"]))
+            factors = ls(fg, Symbol(vDict["id"]))
             @show factors
             vDict["factors"] = String.(factors)
         end
@@ -106,17 +106,34 @@ function getNode(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function setReady(configDict, fg, requestDict)::Dict{String, Any}
-  @show requestDict
-  # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
-  error("Not implemented yet!")
+    @show requestDict
+
+    # Unmarshal if necessary
+    if !haskey(requestDict, "params")
+        error("Request must contain a ReadyRequest in a field called 'param'")
+    end
+    readyRequest = Unmarshal.unmarshal(SetReadyRequest, requestDict["params"])
+    # Validation of payload
+
+    # Action
+    varLabels = isnull(readyRequest.variables) ? union(ls(fg)...) : Symbol.(get(requestDict.variables))
+    # Do specific variables
+    for varLabel in varLabels
+        v = getVert(fg, varLabel)
+        v.attributes["ready"] = readyRequest.isReady
+    end
+
+    # Generate return payload
+    return okResponse
 end
 
 function batchSolve(configDict, fg, requestDict)::Dict{String, Any}
     resp = Dict{String, Any}("startTime" => now())
     # Call solve
-    batchSolve(fg)
+    batchSolve!(fg)
     resp["endTime"] = now()
     resp["durationSec"] = Dates.value(resp["endTime"] - resp["startTime"])/1000.0
+    resp["status"] = "OK"
     return resp
 end
 

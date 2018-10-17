@@ -2,7 +2,8 @@
 export
     VariableRequest,
     FactorRequest,
-    lsRequest
+    lsRequest,
+    SetReadyRequest
 
 struct VariableRequest
     label::String
@@ -20,4 +21,9 @@ end
 struct lsRequest
     variables::String
     factors::String
+end
+
+struct SetReadyRequest
+    variables::Nullable{Vector{String}}
+    isReady::Int
 end

@@ -51,8 +51,16 @@ for i in 1:6
     @test sendCmd(config, fg, odoFactCmd) == "{\"status\":\"OK\",\"id\":\"x$(i-1)x$(i)f1\"}"
 end
 
-# Testing
-# factorRequest = factCmd["factor"]
+# Set all variables ready
+setReadyCmd = Dict{String, Any}("type" => "setReady", "params" => JSON.parse(JSON.json(SetReadyRequest(nothing, 1))))
+@test sendCmd(config, fg, setReadyCmd) == "{\"status\":\"OK\"}"
+
+# Call batch solve
+batchSolveCmd = Dict{String, Any}("type" => "batchSolve")
+result = sendCmd(config, fg, batchSolveCmd)
+@test result["status"] == "OK"
+
+
 
 #######
 ### STATE OF THE ART. BEYOND HERE THERE BE KRAKENS (AND EXCEPTIONS, YAAARGH!)
@@ -60,8 +68,3 @@ end
 
 # Get a node to make sure it's all good.
 # getNodeCmd = Dict{String, Any}("type" => "ls", "id" => "x0")
-
-# Call batch solve.
-# batchSolveCmd = Dict{String, Any}("type" => "batchSolve")
-# result = sendCmd(config, fg, lsCmd)
-# @test result["status"] == "OK"
