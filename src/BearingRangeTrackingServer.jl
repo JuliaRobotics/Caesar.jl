@@ -1,7 +1,7 @@
 
 # BearingRangeTrackingServer
 
-function parseProcTracking!{T <: AbstractString}(instSys::InSituSystem, d::Dict{T, Any})
+function parseProcTracking!(instSys::InSituSystem, d::Dict{T, Any}) where {T <: AbstractString}
     # parameters
     lsrnoise = []
 
