@@ -5,16 +5,16 @@ using ZMQ, JSON
 
 
 # 1. Import the initialization code.
-include(joinpath(Pkg.dir("SynchronySDK"),"examples", "0_Initialization.jl"))
+include(joinpath(Pkg.dir("GraffSDK"),"examples", "0_Initialization.jl"))
 
 # 1a. Create a Configuration
-# synchronyConfig = loadConfig("synchronyConfig_Local.json")
+# graffConfig = loadConfig("graffConfig_Local.json")
 robotId = ""  # bad Sam
 sessionId = ""
-synchronyConfig = loadConfig(joinpath(ENV["HOME"],"Documents","synchronyConfig.json"))
+graffConfig = loadConfig(joinpath(ENV["HOME"],"Documents","graffConfig.json"))
 
 # 1b. Check the credentials and the service status
-@show serviceStatus = getStatus(synchronyConfig)
+@show serviceStatus = getStatus(graffConfig)
 
 # set up a context for zmq
 ctx=Context()
@@ -35,9 +35,9 @@ try
     sessionId = dict["sessionId"]
 
     @show dict["type"]
-    @show cmd = getfield(SynchronySDK, Symbol(dict["type"]))
+    @show cmd = getfield(GraffSDK, Symbol(dict["type"]))
 
-    args = (synchronyConfig,)
+    args = (graffConfig,)
     @show cmd(args...)
   end
 catch ex
