@@ -1,5 +1,5 @@
 # SLAMinDB service functions
-using Base.Dates
+using Dates
 
 function getcredentials(;nparticles=true, drawdepth=true, multisession=false, drawedges=true)
   cloudGraph, addrdict = standardcloudgraphsetup(nparticles=nparticles, drawdepth=drawdepth, drawedges=drawedges, multisession=multisession)

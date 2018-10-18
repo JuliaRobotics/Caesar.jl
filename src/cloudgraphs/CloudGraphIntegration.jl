@@ -65,7 +65,7 @@ function getCloudVert(
             user::AbstractString,
             vsym::Symbol; bigdata::Bool=false )
   #
-  warn("getCloudVert(cg, sess, sym) will be deprecated, use getCloudVert(cg, sess, sym=sym) instead.")
+  @warn "getCloudVert(cg, sess, sym) will be deprecated, use getCloudVert(cg, sess, sym=sym) instead."
   # query = " and n.ready=$(ready) and n.label=$(vsym) "
   # query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
   query = "match (n:$(session):$robot:$user) where n.label='$(vsym)' return id(n)"
@@ -169,9 +169,9 @@ function initfg(;sessionname="NA",robotname="",username="",cloudgraph=nothing)
   return fgl
 end
 
-function addCloudVert!{T <: AbstractString}(fgl::FactorGraph,
+function addCloudVert!(fgl::FactorGraph,
         exvert::Graphs.ExVertex;
-        labels::Vector{T}=String[]  )
+        labels::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   cv = CloudGraphs.exVertex2CloudVertex(exvert);
   cv.labels = labels
@@ -641,7 +641,7 @@ function subLocalGraphCopy!(
             reqbackendset::Bool=true,
             reqready::Bool=true ) where {AS <: AbstractString}
   #
-  warn("subGraphCopy! is a work in progress")
+  @warn "subGraphCopy! is a work in progress"
   conn = fgl.cg.neo4j.connection
   IDs = getLblExVertexNeoIDs(conn, string.(lbls), session=fgl.sessionname, robot=fgl.robotname, user=fgl.username, reqbackendset=reqbackendset, reqready=reqready, neighbors=neighbors )
   println("fullSubGraphCopy: $(length(IDs)) nodes in session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
@@ -677,7 +677,7 @@ function setDBAllReady!(
             robotname::AS,
             username::AS) where {AS <: AbstractString}
   #
-  warn("Obsolete setDBAllReady! function, see SynchronySDK for example ready function instead.")
+  @warn "Obsolete setDBAllReady! function, see SynchronySDK for example ready function instead."
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   rn = length(robotname) > 0 ? ":"*robotname : ""
   un = length(username) > 0 ? ":"*username : ""
@@ -838,7 +838,7 @@ function standardcloudgraphsetup(;addrdict=nothing,
     addrdict = consoleaskuserfordb(nparticles=nparticles, drawdepth=drawdepth, clearslamindb=clearslamindb, multisession=multisession, drawedges=drawedges)
   end
 
-  warn("Not considering field: addrdict[\"mongoIsUsingCredentials\"]")
+  @warn "Not considering field: addrdict[\"mongoIsUsingCredentials\"]"
   # Connect to database
   # addrdict["mongoIsUsingCredentials"]
   configuration = CloudGraphs.CloudGraphConfiguration(

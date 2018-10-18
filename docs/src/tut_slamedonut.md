@@ -168,7 +168,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
     ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
     addFactor!(fgl, [prev_sym;pos_sym], ppr)
   else
-    warn("Variable node $pos_sym already in the factor graph.")
+    @warn "Variable node $pos_sym already in the factor graph."
   end
   beacons = keys(GTl)
   for ll in beacons

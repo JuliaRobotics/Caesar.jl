@@ -8,12 +8,15 @@ import IncrementalInference: batchSolve!
 using Reexport
 
 @reexport using RoME
+@reexport using KernelDensityEstimate
+@reexport using Distributions
 
 using
+  Distributed,
+  Statistics,
+  LinearAlgebra,
   IncrementalInference,
   Graphs,
-  KernelDensityEstimate,
-  Distributions,
   TransformUtils,
   CoordinateTransformations,
   Rotations,
@@ -24,9 +27,9 @@ using
   ImageMagick,
   ImageCore,
   DocStringExtensions,
-  CloudGraphs, # TODO: will be removed
-  Neo4j, # TODO: will be removed
-  Mongoc # TODO: will be removed
+  CloudGraphs, # TODO: will be movedd to DFG
+  Neo4j, # TODO: will be movedd to DFG
+  Mongoc # TODO: will be movedd to DFG
 
 
 export
@@ -48,8 +51,8 @@ export
   tcpStringBRTrackingServer,
 
   # save and load data
-  saveSlam,
-  loadSlam,
+  saveSlam, # TODO deprecate
+  loadSlam, # TODO deprecate
   haselement,
 
   # user functions

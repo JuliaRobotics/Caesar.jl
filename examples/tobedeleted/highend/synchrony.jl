@@ -156,7 +156,7 @@ function handle_loops!(slaml::SyncrSLAM,
     xd = getVert(slaml.fg,destination_label)
 
     # if (destination_id - origin_id == 1)
-    #     warn("Avoiding parallel factor! See: https://github.com/dehann/IncrementalInference.jl/issues/63To ")
+    #     @warn "Avoiding parallel factor! See: https://github.com/dehann/IncrementalInference.jl/issues/63To "
     #     return
     # end
 

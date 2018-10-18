@@ -41,7 +41,7 @@ try
     @show cmd(args...)
   end
 catch ex
-  warn("Something in the zmq/json/rest pipeline broke")
+  @warn "Something in the zmq/json/rest pipeline broke"
   showerror(STDERR, ex, catch_backtrace())
 finally
   ZMQ.close(s1)

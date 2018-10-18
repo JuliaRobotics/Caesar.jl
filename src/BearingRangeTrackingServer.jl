@@ -51,11 +51,11 @@ function parseTCP!(insitu::InSituSystem, line::AbstractString)
         println("parseTCP -- should quit now")
         return false, string("")
       else
-        warn("parseTCP -- I don't know what $(cmd) means")
+        @warn "parseTCP -- I don't know what $(cmd) means"
         goahead = false
       end
     catch
-      warn("parseTCP! -- json parse and command failed: $(line)")
+      @warn "parseTCP! -- json parse and command failed: $(line)"
       goahead = false
     end
     retstr = nothing

@@ -100,7 +100,7 @@ end
 function drawTagLine!(imgl, tag_detection)
   # naive
   # ch, cw = round(Int, height/2), round(Int, width/2)
-  warn("Using hard-coded camera calibration parameters in drawTagLine!")
+  @warn "Using hard-coded camera calibration parameters in drawTagLine!"
   cw, ch = 330.4173, 196.32587  # from ZED driver config
   focal = 340.97913
   imheight = 376
