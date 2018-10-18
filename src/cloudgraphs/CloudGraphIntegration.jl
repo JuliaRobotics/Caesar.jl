@@ -669,7 +669,7 @@ end
 """
     $(SIGNATURES)
 
-Set all Neo4j nodes in this session ready = 1, warning function does not support new SynchronySDK data storage formats.
+Set all Neo4j nodes in this session ready = 1, warning function does not support new GraffSDK data storage formats.
 """
 function setDBAllReady!(
             conn::Neo4j.Connection,
@@ -677,7 +677,7 @@ function setDBAllReady!(
             robotname::AS,
             username::AS) where {AS <: AbstractString}
   #
-  @warn "Obsolete setDBAllReady! function, see SynchronySDK for example ready function instead."
+  @warn "Obsolete setDBAllReady! function, see GraffSDK for example ready function instead."
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   rn = length(robotname) > 0 ? ":"*robotname : ""
   un = length(username) > 0 ? ":"*username : ""
