@@ -13,7 +13,7 @@ An object definition containing the require variables to leverage the server sid
 mutable struct SyncrSLAM
   robotId::AbstractString
   sessionId::AbstractString
-  syncrconf::Union{Void, SynchronySDK.SynchronyConfig}
+  syncrconf::Union{Nothing, SynchronySDK.SynchronyConfig}
   robot
   session
 
@@ -21,7 +21,7 @@ mutable struct SyncrSLAM
   SyncrSLAM(
     robotId::AbstractString,
     sessionId::AbstractString,
-    syncrconf::Union{Void, SynchronySDK.SynchronyConfig};
+    syncrconf::Union{Nothing, SynchronySDK.SynchronyConfig};
     robot=nothing,
     session=nothing
    ) = new(

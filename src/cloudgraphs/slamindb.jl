@@ -28,7 +28,7 @@ function runSlamInDbOnSession(
             iterations::Int64,
             isRecursiveSolver::Bool,
             solverStatus::SolverStatus,
-            iterationCompleteCallback)::Void
+            iterationCompleteCallback)::Nothing
     #
     N = caesarConfig.numParticles
 

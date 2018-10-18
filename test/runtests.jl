@@ -1,7 +1,6 @@
 using Caesar
-using IncrementalInference, RoME
-using HDF5, JLD
-using Base.Test
+# using IncrementalInference, RoME
+using Test
 
 
 
