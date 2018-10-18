@@ -1,3 +1,6 @@
+using ZMQ
+using Caesar, Caesar.ZmqCaesar
+
 export
     start
 
@@ -26,10 +29,10 @@ sessionverbs = [
     # per variable
     :setVarKDE; # needed for workaround on bad autoinit -- sorry
     :getVarMAPKDE; # marginal belief points (KDE)
-    :getVarMAPMax; # Future, how many maxes should you get?
     :getVarMAPMean;
     # fancy future stuff
-    :getVarMAPFit; # defaul=Normal
+    :getVarMAPMax; # Future, how many maxes should you get?
+    :getVarMAPFit; # default=Normal
 ]
 
 function shutdown(zmqServer, request)::Dict{String, Any}
@@ -49,7 +52,7 @@ function start(zmqServer::ZmqServer)
         while zmqServer.isServerActive
             println("waiting to receive...")
             msg = ZMQ.recv(s1)
-            out=convert(IOStream, msg)
+            out = ZMQ.convert(IOStream, msg)
             str = String(take!(out))
             request = JSON.parse(str)
 
@@ -59,12 +62,12 @@ function start(zmqServer::ZmqServer)
                 resp = Dict{String, Any}()
                 try
                     # Mocking server
-                    if haskey(config, "isMockServer") && config["isMockServer"] == "true" && cmdtype != :toggleMockServer
+                    if haskey(zmqServer.config, "isMockServer") && zmqServer.config["isMockServer"] == "true" && cmdtype != :toggleMockServer
                         warn("[ZMQ Server] MOCKING ENABLED - Ignoring request!")
                     else
                         # Otherwise actually perform the command
-                        @show cmd = getfield(Caesar, cmdtype)
-                        resp = cmd(config, fg, request)
+                        @show cmd = getfield(Caesar.ZmqCaesar, cmdtype)
+                        resp = cmd(zmqServer.config, zmqServer.fg, request)
                     end
                     if !haskey(resp, "status")
                         resp["status"] = "OK"
@@ -81,7 +84,10 @@ function start(zmqServer::ZmqServer)
                 ZMQ.send(s1, JSON.json(resp))
             elseif cmdtype in systemverbs
                 if cmdtype == :shutdown
-                    resp = shutdown(config, fg, request)
+                    #TODO: Call shutdown from here.
+                    info("Shutting down ZMQ server on request...")
+                    zmqServer.isServerActive  = false
+                    resp = Dict{String, Any}("status" => "OK")
                     # Send response before shutting down.
                     ZMQ.send(s1, JSON.json(resp))
                 end
@@ -97,7 +103,8 @@ function start(zmqServer::ZmqServer)
         showerror(STDERR, ex, catch_backtrace())
     finally
         warn("[ZMQ Server] Shutting down server")
-        if isopen(s1)
+        # TODO: Figure out why I can't use Base.isopen here...
+        if getfield(s1, :data) != C_NULL
             ZMQ.close(s1)
         end
         ZMQ.close(ctx)

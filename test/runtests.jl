@@ -7,6 +7,8 @@ using Base.Test
     include("multilangzmq/callbackCompatibilityTest.jl")
     # Integration tests
     include("multilangzmq/zmqInternal.jl")
+    # End to end tests
+    include("multilangzmq/serverTest.jl")
 end
 
 # println("[TEST] CloudGraphs API calls...")
