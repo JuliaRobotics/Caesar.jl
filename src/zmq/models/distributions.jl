@@ -11,6 +11,6 @@ end
 mutable struct Packed_AliasingScalarSampler
   samples::Vector{Float64}
   weights::Vector{Float64}
-  snrFloor::Nullable{Float64}
+  quantile::Nullable{Float64}
   distType::String # AliasingScalarSampler
 end

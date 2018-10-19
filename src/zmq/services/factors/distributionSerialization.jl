@@ -1,3 +1,4 @@
+import Base.convert
 
 """
 Converter: Packed_MvNormal -> MvNormal
@@ -20,7 +21,7 @@ end
 Converter: Packed_AliasingScalarSampler -> AliasingScalarSampler
 """
 function convert(::Type{IncrementalInference.AliasingScalarSampler}, pv::Dict)
-    sampler = IncrementalInference.AliasingScalarSampler(Float64.(pv["samples"]), Float64.(pv["weights"]); SNRfloor=pv["snrFloor"])
+    sampler = IncrementalInference.AliasingScalarSampler(Float64.(pv["samples"]), Float64.(pv["weights"]); SNRfloor=pv["quantile"])
     return sampler
 end
 
@@ -28,6 +29,6 @@ end
 Converter: AliasingScalarSampler -> Packed_AliasingScalarSampler
 """
 function convert(::Type{Packed_AliasingScalarSampler}, sampler::IncrementalInference.AliasingScalarSampler)
-    packed = Packed_AliasingScalarSampler(sampler.domain, sampler.weights.values, 0.0)
+    packed = Packed_AliasingScalarSampler(sampler.domain, sampler.weights.values, 0.0, "AliasingScalarSampler")
     return packed
 end
