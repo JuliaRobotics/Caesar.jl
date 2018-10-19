@@ -15,3 +15,19 @@ function convert(::Type{Packed_MvNormal}, mvNormal::Distributions.MvNormal)
     v = mvNormal.Σ.mat[:]
     return Packed_MvNormal(mvNormal.μ, v, "MvNormal")
 end
+
+"""
+Converter: Packed_AliasingScalarSampler -> AliasingScalarSampler
+"""
+function convert(::Type{IncrementalInference.AliasingScalarSampler}, pv::Dict)
+    sampler = IncrementalInference.AliasingScalarSampler(Float64.(pv["samples"]), Float64.(pv["weights"]); SNRfloor=pv["snrFloor"])
+    return sampler
+end
+
+"""
+Converter: AliasingScalarSampler -> Packed_AliasingScalarSampler
+"""
+function convert(::Type{Packed_AliasingScalarSampler}, sampler::IncrementalInference.AliasingScalarSampler)
+    packed = Packed_AliasingScalarSampler(sampler.domain, sampler.weights.values, 0.0)
+    return packed
+end

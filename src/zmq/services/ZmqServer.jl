@@ -35,6 +35,20 @@ sessionverbs = [
     :getVarMAPFit; # default=Normal
 ]
 
+plottingVerbs = [];
+try
+    # Test - if passed, declare verbs
+    getfield(Main, :RoMEPlotting)
+    plottingVerbs = [
+        :plotKDE;
+        :plotPose;
+        :drawPoses;
+        :drawPosesLandms
+    ];
+catch ex
+    info("[ZMQ Server] Plotting is disabled!")
+end
+
 function shutdown(zmqServer, request)::Dict{String, Any}
     info("Shutting down ZMQ server on request...")
     zmqServer.isServerActive  = false

@@ -32,20 +32,3 @@ function convert(::Type{Pose2Pose2}, prior::Any)
     z = convert(_evalType(z["distType"]), z)
     return Prior(z)
 end
-
-# import Base.convert
-# function factorRequest2Factor(factorRequest::FactorRequest)
-# t = _evalType(factorRequest["factorType"])
-# p = convert(t, factorRequest)
-# end
-
-# """
-# Converter: Packed_BearingRange -> BearingRange
-# """
-# function convert(::Type{Pose2Point2BearingRange}, pv::Dict)
-#     @show bearing = convert(evalType(pv["bearing"]["distType"]), pv["bearing"])
-#     # bearing = convert(eval(parse(pv["bearingType"])), pv["bearing"])
-#     range = convert(evalType(pv["range"]["distType"]), pv["range"])
-#     # range = convert(eval(parse(pv["rangeType"])), pv["range"])
-#     return Pose2Point2BearingRange(bearing, range)
-# end

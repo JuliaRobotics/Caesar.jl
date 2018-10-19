@@ -1,57 +1,55 @@
 using JSON, ZMQ
-using Base.Test
-using Caesar, Caesar.ZmqCaesar
 using Unmarshal
 
 @testset "ZMQ End-To-End Test" begin
 
-    emptyCmd = Dict{String, Any}()
-    unknownCmd = Dict{String, Any}("type" => "NOPENOPENOPE")
-    mockServerCmd = Dict{String, Any}("type" => "toggleMockServer", "isMockServer" => "true")
-    addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
-    lsCmd = Dict{String, Any}("type" => "ls", "filter" => Dict{String, Any}("variables" => "true", "factors" => "true"))
-    shutdownCmd = Dict{String, Any}("type" => "shutdown")
-    addOdo2DJson = "{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addOdometry2D\"\n}";
-    addOdo2DCmd = JSON.parse(addOdo2DJson)
+emptyCmd = Dict{String, Any}()
+unknownCmd = Dict{String, Any}("type" => "NOPENOPENOPE")
+mockServerCmd = Dict{String, Any}("type" => "toggleMockServer", "isMockServer" => "true")
+addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
+lsCmd = Dict{String, Any}("type" => "ls", "filter" => Dict{String, Any}("variables" => "true", "factors" => "true"))
+shutdownCmd = Dict{String, Any}("type" => "shutdown")
+addOdo2DJson = "{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addOdometry2D\"\n}";
+addOdo2DCmd = JSON.parse(addOdo2DJson)
 
-    info("Starting the ZMQ server in an @async...")
-    @async begin
-        fg = Caesar.initfg()
-        config = Dict{String, String}()
-        zmqConfig = ZmqServer(fg, config, true, "tcp://*:5555")
-        start(zmqConfig)
-    end
-    info("Started the ZMQ server!")
+info("Starting the ZMQ server in an @async...")
+@async begin
+    fg = Caesar.initfg()
+    config = Dict{String, String}()
+    zmqConfig = ZmqServer(fg, config, true, "tcp://*:5555")
+    start(zmqConfig)
+end
+info("Started the ZMQ server!")
 
 
-    function sendCmd(cmd::Dict{String, Any})::String
-        ctx=Context()
-        sock=Socket(ctx, REQ)
-        ZMQ.connect(sock, "tcp://localhost:5555")
-        ZMQ.send(sock, JSON.json(cmd))
-        msg = ZMQ.recv(sock)
-        out=convert(IOStream, msg)
-        str = String(take!(out))
-        ZMQ.close(sock)
-        return str
-    end
+function sendCmd(cmd::Dict{String, Any})::String
+    ctx=Context()
+    sock=Socket(ctx, REQ)
+    ZMQ.connect(sock, "tcp://localhost:5555")
+    ZMQ.send(sock, JSON.json(cmd))
+    msg = ZMQ.recv(sock)
+    out=convert(IOStream, msg)
+    str = String(take!(out))
+    ZMQ.close(sock)
+    return str
+end
 
-    # Send various failure commands
-    @test sendCmd(unknownCmd) == "{\"status\":\"ERROR\",\"error\":\"Command 'NOPENOPENOPE' not a valid command.\"}"
+# Send various failure commands
+@test sendCmd(unknownCmd) == "{\"status\":\"ERROR\",\"error\":\"Command 'NOPENOPENOPE' not a valid command.\"}"
 
-    @test sendCmd(emptyCmd) == "{\"status\":\"ERROR\",\"error\":\"Command 'ERROR_NOCOMMANDPROVIDED' not a valid command.\"}"
+@test sendCmd(emptyCmd) == "{\"status\":\"ERROR\",\"error\":\"Command 'ERROR_NOCOMMANDPROVIDED' not a valid command.\"}"
 
-    # Sinmple operational tests
-    @test sendCmd(addVariableCmd) == "{\"status\":\"OK\",\"id\":\"x0\"}"
-    @test sendCmd(lsCmd) == "{\"variables\":[{\"factors\":[],\"id\":\"x0\"}],\"status\":\"OK\"}"
+# Sinmple operational tests
+@test sendCmd(addVariableCmd) == "{\"status\":\"OK\",\"id\":\"x0\"}"
+@test sendCmd(lsCmd) == "{\"variables\":[{\"factors\":[],\"id\":\"x0\"}],\"status\":\"OK\"}"
 
-    # Lastly mock server test
-    @test sendCmd(mockServerCmd) == "{\"status\":\"OK\",\"isMockServer\":\"true\"}"
-    @test sendCmd(addOdo2DCmd) == "{\"status\":\"OK\"}"
-    # Disable it
-    mockServerCmd["isMockServer"]="false"
-    @test sendCmd(mockServerCmd) == "{\"status\":\"OK\",\"isMockServer\":\"false\"}"
+# Lastly mock server test
+@test sendCmd(mockServerCmd) == "{\"status\":\"OK\",\"isMockServer\":\"true\"}"
+@test sendCmd(addOdo2DCmd) == "{\"status\":\"OK\"}"
+# Disable it
+mockServerCmd["isMockServer"]="false"
+@test sendCmd(mockServerCmd) == "{\"status\":\"OK\",\"isMockServer\":\"false\"}"
 
-    # Send the shutdown command - cannot be mocked.
-    @test sendCmd(shutdownCmd) == "{\"status\":\"OK\"}"
+# Send the shutdown command - cannot be mocked.
+@test sendCmd(shutdownCmd) == "{\"status\":\"OK\"}"
 end
