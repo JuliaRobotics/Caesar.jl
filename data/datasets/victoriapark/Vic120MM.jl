@@ -638,8 +638,8 @@ function MMRandErrs(MM::Dict{Int64,Int64};frac=0.1)
   len = length(allkeys)
   @show clen = round(Int, frac*len)
   @show clen2 = round(Int, 0.5*clen)
-  p1 = Dict{Int,Void}()
-  p2 = Dict{Int,Void}()
+  p1 = Dict{Int,Nothing}()
+  p2 = Dict{Int,Nothing}()
 
   for m in MM    MMr[m[1]] = m[2]; end
 

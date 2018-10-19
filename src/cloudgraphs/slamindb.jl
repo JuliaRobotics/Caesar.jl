@@ -1,5 +1,5 @@
 # SLAMinDB service functions
-using Base.Dates
+using Dates
 
 function getcredentials(;nparticles=true, drawdepth=true, multisession=false, drawedges=true)
   cloudGraph, addrdict = standardcloudgraphsetup(nparticles=nparticles, drawdepth=drawdepth, drawedges=drawedges, multisession=multisession)
@@ -28,7 +28,7 @@ function runSlamInDbOnSession(
             iterations::Int64,
             isRecursiveSolver::Bool,
             solverStatus::SolverStatus,
-            iterationCompleteCallback)::Void
+            iterationCompleteCallback)::Nothing
     #
     N = caesarConfig.numParticles
 

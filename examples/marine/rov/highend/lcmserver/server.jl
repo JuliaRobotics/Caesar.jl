@@ -135,11 +135,11 @@ function handle_partials!(slam::SLAMWrapper,
     delta_x = message[:delta_x]
     delta_y = message[:delta_y]
     delta_yaw = message[:delta_yaw]
-    
+
     var_x = message[:var_x]
     var_y = message[:var_y]
     var_yaw = message[:var_yaw]
-    
+
     origin_label, destination_label
     xo = getVert(slam.fg,origin_label)
     xd = getVert(slam.fg,destination_label)
@@ -165,7 +165,7 @@ function handle_loops!(slaml::SLAMWrapper,
     delta_x = message[:delta_x]
     delta_y = message[:delta_y]
     delta_yaw = message[:delta_yaw]
-    
+
     var_x = message[:var_x]
     var_y = message[:var_y]
     var_yaw = message[:var_yaw]
@@ -175,7 +175,7 @@ function handle_loops!(slaml::SLAMWrapper,
     xd = getVert(slaml.fg,destination_label)
 
     # if (destination_id - origin_id == 1)
-    #     warn("Avoiding parallel factor! See: https://github.com/dehann/IncrementalInference.jl/issues/63To ")
+    #     @warn "Avoiding parallel factor! See: https://github.com/dehann/IncrementalInference.jl/issues/63To "
     #     return
     # end
 
@@ -189,7 +189,7 @@ function handle_loops!(slaml::SLAMWrapper,
     # # line below fails!
     # lcf = Pose3Pose3NH( MvNormal(veeEuler(rel_pose), diagm(1.0./covar)), [0.5;0.5]) # define 50/50% hypothesis
     # lcf_label = Symbol[origin_label;destination_label]
-    
+
     # addFactor!(slaml.fg, lcf_label, lcf)
 end
 
@@ -201,7 +201,7 @@ end
 
 # function add_pointcloud!(slaml::SLAMWrapper, nodeID::Symbol, cloud::Cloud )
 #     # fetch from database
-#     vert = getVert(slaml.fg, nodeID, api=IncrementalInference.dlapi) 
+#     vert = getVert(slaml.fg, nodeID, api=IncrementalInference.dlapi)
 
 #     # add points blob
 #     serialized_point_cloud = BSONObject(Dict("pointcloud" => cloud.points))

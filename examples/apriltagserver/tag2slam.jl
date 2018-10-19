@@ -31,7 +31,7 @@ subscribe(lcm, "TEST_CHANNEL", (m,c)->tag_handler(m,c,tagData), apriltag_t)
                 msg.utime = tag[2].utime
                 publish(lcm,"Landmarks",encode(msg))
             elseif 100_000 < abs(tnow - tag[2].utime) < 1000_000
-                warn("AprilTag pipeline is taking more than 100ms: $(round(abs(tnow - tag[2].utime)/1000.0, 2))")
+                @warn "AprilTag pipeline is taking more than 100ms: $(round(abs(tnow - tag[2].utime)/1000.0, 2))"
             end
             delete!(tagData, tag[1])
         end
