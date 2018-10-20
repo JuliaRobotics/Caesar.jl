@@ -38,23 +38,26 @@ function addVariable(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function addFactor(configDict, fg, requestDict)::Dict{String, Any}
-    if !haskey(requestDict, "factor")
+    if !haskey(requestDict, "factorRequest")
         error("A factor body is required in the request.")
     end
-    info("Adding factor of type '$(requestDict["factor"]["factorType"])' to variables '$(requestDict["factor"]["variables"])'...")
+    factorRequest = requestDict["factorRequest"]
+    vars = factorRequest["variables"]
+    packedFactor = factorRequest["factor"]
+    info("Adding factor of type '$(factorRequest["factorType"])' to variables '$(vars)'...")
 
     # Right, carrying on...
-    @show factType = _evalType(requestDict["factor"]["factorType"])
     factor = nothing
     try
-        @show factor = convert(factType, requestDict["factor"])
+        @show factType = _evalType(factorRequest["factorType"])
+        @show factor = convert(factType, packedFactor)
     catch ex
         io = IOBuffer()
         showerror(io, ex, catch_backtrace())
         err = String(take!(io))
         error("addFactor: Unable to convert packed factor data to type '$factType'. Please check that a converter exists to deserialize '$factType'. Stack trace = $err")
     end
-    f = addFactor!(fg, Symbol.(requestDict["factor"]["variables"]), factor)
+    f = addFactor!(fg, Symbol.(vars), factor)
     return Dict{String, Any}("status" => "OK", "id" => f.label)
 end
 
