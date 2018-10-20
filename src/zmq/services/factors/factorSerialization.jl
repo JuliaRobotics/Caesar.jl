@@ -30,15 +30,15 @@ function convert(::Type{Pose2Pose2}, prior::Dict{String, Any})
     # Genericize to any packed type next.
     z = prior["measurement"][1]
     z = convert(_evalType(z["distType"]), z)
-    return Prior(z)
+    return Pose2Pose2(z)
 end
 
-"""
-Converter: Pose2Pose2::Dict{String, Any} -> Pose2Pose2
-"""
-function convert(::Type{Pose2Pose2}, prior::Dict{String, Any})
-    # Genericize to any packed type next.
-    z = prior["measurement"][1]
-    z = convert(_evalType(z["distType"]), z)
-    return Prior(z)
-end
+# """
+# Converter: Pose2Pose2::Dict{String, Any} -> Pose2Pose2
+# """
+# function convert(::Type{Pose2Pose2}, prior::Dict{String, Any})
+#     # Genericize to any packed type next.
+#     z = prior["measurement"][1]
+#     z = convert(_evalType(z["distType"]), z)
+#     return Prior(z)
+# end
