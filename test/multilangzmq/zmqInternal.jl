@@ -6,7 +6,7 @@ using Caesar, Caesar.ZmqCaesar
 using Distributions, RoME, IncrementalInference
 using Unmarshal
 
-# @testset "ZMQ Integration Test (Hexagonal Solver)" begin
+@testset "ZMQ Integration Test (Hexagonal Solver)" begin
 
 addOdo2DJson = "{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addOdometry2D\"\n}";
 addLandmark2DJson = "{\n  \"landmark_id\": \"l1\",\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addLandmark2D\"\n}";
@@ -36,7 +36,6 @@ dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), 
 factor = Dict{String, Any}("measurement" => [dist])
 priorFactCmd = Dict{String, Any}("type" => "addFactor", "factorRequest" => JSON.parse(JSON.json(FactorRequest(["x0"], "Prior", factor))))
 @test sendCmd(config, fg, priorFactCmd) == "{\"status\":\"OK\",\"id\":\"x0f1\"}"
-
 
 @test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\"],\"id\":\"x0\"}]}"
 
@@ -71,6 +70,12 @@ result = sendCmd(config, fg, batchSolveCmd)
 getNodeCmd = Dict{String, Any}("type" => "getNode", "id" => "x0")
 x0Ret = JSON.parse(sendCmd(config, fg, getNodeCmd))
 
+# Test a factor that doesn't exist, should produce legible error
+dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
+factor = Dict{String, Any}("measurement" => [dist])
+priorFactCmd = Dict{String, Any}("type" => "addFactor", "factorRequest" => JSON.parse(JSON.json(FactorRequest(["x0"], "IDontExistAsAFactor", factor))))
+@test_throws ErrorException sendCmd(config, fg, priorFactCmd)
+
 # Get the KDEs
 getMAPCmd = Dict{String, Any}("type" => "getVarMAPKDE", "id" => "x0")
 mapResult = sendCmd(config, fg, getMAPCmd)
@@ -85,4 +90,4 @@ mapResult = sendCmd(config, fg, getMAPMeanCmd)
 # drawPosesCmd = Dict{String, Any}("type" => "drawPoses", "plotParams" => Dict{String, Any}("widthPx" => 1024, "heightPx" => 768, "encoding" => "none"))
 # plotResult = sendCmd(config, fg, drawPosesCmd)
 
-# end
+end

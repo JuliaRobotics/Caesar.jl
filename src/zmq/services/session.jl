@@ -55,7 +55,7 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
         io = IOBuffer()
         showerror(io, ex, catch_backtrace())
         err = String(take!(io))
-        error("addFactor: Unable to convert packed factor data to type '$factType'. Please check that a converter exists to deserialize '$factType'. Stack trace = $err")
+        error("addFactor: Unable to convert packed factor data to type '$(factorRequest["factorType"])'. Please check that a converter exists to deserialize '$(factorRequest["factorType"])'. Stack trace = $err")
     end
     f = addFactor!(fg, Symbol.(vars), factor)
     return Dict{String, Any}("status" => "OK", "id" => f.label)
