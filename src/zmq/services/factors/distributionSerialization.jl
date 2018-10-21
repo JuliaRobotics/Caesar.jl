@@ -18,6 +18,21 @@ function convert(::Type{Dict{String, Any}}, mvNormal::Distributions.MvNormal)
 end
 
 """
+Converter: Packed_Normal -> Normal
+"""
+function convert(::Type{Distributions.Normal}, pv::Dict{String, Any})
+    return Distributions.Normal(Float64(pv["mean"]), Float64(pv["std"]))
+end
+
+"""
+Converter: Normal -> Packed_Normal
+"""
+function convert(::Type{Dict{String, Any}}, normal::Distributions.Normal)
+    return JSON.parse(JSON.json(Packed_Normal(normal.μ, normal.σ, "Normal")))
+end
+
+
+"""
 Converter: Packed_AliasingScalarSampler -> AliasingScalarSampler
 """
 function convert(::Type{IncrementalInference.AliasingScalarSampler}, pv::Dict{String, Any})

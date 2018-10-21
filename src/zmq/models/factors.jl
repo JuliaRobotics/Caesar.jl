@@ -1,7 +1,7 @@
 export
-    PackedPrior
+    Packed_Factor
 
-mutable struct Packed_Prior
+mutable struct Packed_Factor
     measurement::Vector{Dict{String, Any}}
-    distType
+    distType::String
 end
