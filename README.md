@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/julia_caesar 001_eyes_thres_wtitle_smaller_centered_low.png" width="480" border="0" />
+<img src="https://user-images.githubusercontent.com/6412556/47298402-ace95500-d5e5-11e8-8607-593525445d14.png" width="480" border="0" />
 </p>
 
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
