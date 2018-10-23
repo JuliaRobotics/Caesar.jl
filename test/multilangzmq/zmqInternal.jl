@@ -33,7 +33,8 @@ lsCmd = Dict{String, Any}("type" => "ls", "filter" => JSON.parse(JSON.json(lsReq
 
 # Add a prior factor
 dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
-priorFactCmd = Dict{String, Any}("type" => "addFactor", "factor" => JSON.parse(JSON.json(FactorRequest("Prior", ["x0"], [dist]))))
+factor = Dict{String, Any}("measurement" => [dist])
+priorFactCmd = Dict{String, Any}("type" => "addFactor", "factorRequest" => JSON.parse(JSON.json(FactorRequest(["x0"], "Prior", factor))))
 @test sendCmd(config, fg, priorFactCmd) == "{\"status\":\"OK\",\"id\":\"x0f1\"}"
 
 @test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\"],\"id\":\"x0\"}]}"
@@ -49,7 +50,8 @@ for i in 1:6
     @test sendCmd(config, fg, addVariableCmd) == "{\"status\":\"OK\",\"id\":\"x$i\"}"
 
     # Now adding odo factor
-    @show odoFactCmd = Dict{String, Any}("type" => "addFactor", "factor" => JSON.parse(JSON.json(FactorRequest("Pose2Pose2", ["x$(i-1)", "x$i"], [odo]))))
+    factor = Dict{String, Any}("measurement" => [odo])
+    @show odoFactCmd = Dict{String, Any}("type" => "addFactor", "factorRequest" => JSON.parse(JSON.json(FactorRequest(["x$(i-1)", "x$i"], "Pose2Pose2", factor))))
     @test sendCmd(config, fg, odoFactCmd) == "{\"status\":\"OK\",\"id\":\"x$(i-1)x$(i)f1\"}"
 end
 
@@ -67,6 +69,12 @@ result = sendCmd(config, fg, batchSolveCmd)
 # Just for fun
 getNodeCmd = Dict{String, Any}("type" => "getNode", "id" => "x0")
 x0Ret = JSON.parse(sendCmd(config, fg, getNodeCmd))
+
+# Test a factor that doesn't exist, should produce legible error
+dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
+factor = Dict{String, Any}("measurement" => [dist])
+priorFactCmd = Dict{String, Any}("type" => "addFactor", "factorRequest" => JSON.parse(JSON.json(FactorRequest(["x0"], "IDontExistAsAFactor", factor))))
+@test_throws ErrorException sendCmd(config, fg, priorFactCmd)
 
 # Get the KDEs
 getMAPCmd = Dict{String, Any}("type" => "getVarMAPKDE", "id" => "x0")

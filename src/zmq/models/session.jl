@@ -13,9 +13,10 @@ struct VariableRequest
 end
 
 mutable struct FactorRequest
-    factorType::String
+    # factorType::String # This is now in the factor itself.
     variables::Vector{String}
-    measurement::Vector{Dict{String, Any}}
+    factorType::String
+    factor::Dict{String, Any}
 end
 
 struct lsRequest

@@ -1,6 +1,13 @@
 export
+    Packed_Normal,
     Packed_MvNormal,
     Packed_AliasingScalarSampler
+
+mutable struct Packed_Normal
+  mean::Float64
+  std::Float64
+  distType::String
+end
 
 mutable struct Packed_MvNormal
   mean::Vector{Float64}
