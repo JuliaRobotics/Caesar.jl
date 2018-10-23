@@ -5,8 +5,8 @@
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
 [![Build Status][build-img]][build-url]
-<!--
-[![Caesar](http://pkg.julialang.org/badges/Caesar_0.6.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.6)-->
+[![codecov.io][cov-img]][cov-url]
+
 
 # Introduction
 
@@ -28,9 +28,20 @@ Please see the [Arena.jl](http://www.github.com/JuliaRobotics/Arena.jl) package 
 
 # Installation
 
-Caesar can be installed with:
+Caesar can be installed for latest Julia 0.7/1.0 with:
 ```julia
-julia> Pkg.add("Caesar")
+julia> ] # to enable package manager
+pkg> add Caesar
+```
+
+Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
+```julia
+pkg> test IncrementalInference
+...
+pkg> test RoME
+...
+pkg> test Caesar
+...
 ```
 
 # Bleeding-edge Development Status
@@ -59,7 +70,7 @@ Consider citing our work:
 
 ```
 @misc{caesarjl,
-  author = "Dehann Fourie, John Leonard, Micheal Kaess, and contributors",
+  author = "Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors",
   title =  "Caesar.jl",
   year =   2017,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
