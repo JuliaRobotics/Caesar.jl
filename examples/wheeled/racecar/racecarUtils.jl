@@ -52,7 +52,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
     end
     if rand() > DAerrors
       # regular single hypothesis
-      addFactor!(fg, [pssym; lmsym], ppbr, autoinit=false, autoinit=autoinit)
+      addFactor!(fg, [pssym; lmsym], ppbr, autoinit=autoinit)
     else
       # artificial errors to data association occur
       info("Forcing bad data association with $lmsym")
@@ -60,7 +60,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
       @show ll2 = setdiff(ll, [lmsym])
       @show daidx = round(Int, (length(ll2)-1)*rand()+1)
       @show rda = ll2[daidx]
-      addFactor!(fg, [pssym; lmsym; rda], ppbr, autoinit=false, multihypo=[1.0;0.5;0.5], autoinit=autoinit)
+      addFactor!(fg, [pssym; lmsym; rda], ppbr, multihypo=[1.0;0.5;0.5], autoinit=autoinit)
     end
   end
   nothing
