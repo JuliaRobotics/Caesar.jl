@@ -1,4 +1,4 @@
-using RoMEPlotting
+# using RoMEPlotting
 using Caesar, Caesar.ZmqCaesar
 using IncrementalInference, RoME
 using Base.Test

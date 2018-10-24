@@ -6,17 +6,17 @@ export
 
 import Base: start
 
-systemverbs = Symbol[
+global systemverbs = Symbol[
     :shutdown
 ]
-configverbs = Symbol[
+global configverbs = Symbol[
     :initDfg;
     :toggleMockServer;
     :registerRobot;
     :registerSession;
 ]
 
-sessionverbs = [
+global sessionverbs = [
     :addVariable;
     :addFactor;
     :addOdometry2D;
@@ -39,25 +39,28 @@ plottingVerbs = [];
 try
     # Test - if passed, declare verbs
     getfield(Main, :RoMEPlotting)
-    plottingVerbs = [
+    global plottingVerbs = [
         :plotKDE;
         :plotPose;
         :drawPoses;
         :drawPosesLandms
     ];
 catch ex
-    info("[ZMQ Server] Plotting is disabled!")
+    @info "[ZMQ Server] Plotting is disabled!"
 end
 
 function shutdown(zmqServer, request)::Dict{String, Any}
-    info("Shutting down ZMQ server on request...")
+    @info "Shutting down ZMQ server on request..."
     zmqServer.isServerActive  = false
     return Dict{String, Any}("status" => "OK")
 end
 
+function Base.isopen(socket::Socket)
+    return getfield(socket, :data) != C_NULL
+end
+
 function start(zmqServer::ZmqServer)
     # set up a context for zmq
-    Base.isopen(socket::Socket) = getfield(socket, :data) != C_NULL
     ctx=Context()
     s1=Socket(ctx, REP)
     ZMQ.bind(s1, "tcp://*:5555")
@@ -71,7 +74,7 @@ function start(zmqServer::ZmqServer)
             request = JSON.parse(str)
 
             cmdtype = haskey(request, "type") ? Symbol(request["type"]) : :ERROR_NOCOMMANDPROVIDED
-            info("[ZMQ Server] REQUEST: Received command '$cmdtype' in payload '$str'...")
+            @info "[ZMQ Server] REQUEST: Received command '$cmdtype' in payload '$str'..."
             if cmdtype in union(configverbs, sessionverbs)
                 resp = Dict{String, Any}()
                 try
@@ -94,12 +97,12 @@ function start(zmqServer::ZmqServer)
                     resp["status"] = "ERROR"
                     resp["error"] = err
                 end
-                info("[ZMQ Server] RESPONSE: $(JSON.json(resp))")
+                @info "[ZMQ Server] RESPONSE: $(JSON.json(resp))"
                 ZMQ.send(s1, JSON.json(resp))
             elseif cmdtype in systemverbs
                 if cmdtype == :shutdown
                     #TODO: Call shutdown from here.
-                    info("Shutting down ZMQ server on request...")
+                    @info "Shutting down ZMQ server on request..."
                     zmqServer.isServerActive  = false
                     resp = Dict{String, Any}("status" => "OK")
                     # Send response before shutting down.
@@ -118,7 +121,7 @@ function start(zmqServer::ZmqServer)
     finally
         warn("[ZMQ Server] Shutting down server")
         # TODO: Figure out why I can't use Base.isopen here...
-        if getfield(s1, :data) != C_NULL
+        if Base.isopen(s1)
             ZMQ.close(s1)
         end
         ZMQ.close(ctx)

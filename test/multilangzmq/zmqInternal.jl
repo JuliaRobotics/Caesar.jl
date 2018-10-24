@@ -1,7 +1,7 @@
-using Revise
+# using Revise
 using JSON, ZMQ
 using Base.Test
-using RoMEPlotting
+# using RoMEPlotting
 using Caesar, Caesar.ZmqCaesar
 using Distributions, RoME, IncrementalInference
 using Unmarshal

@@ -31,9 +31,9 @@ function addVariable(configDict, fg, requestDict)::Dict{String, Any}
       error("addVariable: Unable to locate variable type '$(varRequest.variableType)'. Please check that it exists in main context. Stack trace = $err")
   end
 
-  info("Adding variable of type '$(varRequest.variableType)' with id '$(varRequest.label)'...")
+  @info "Adding variable of type '$(varRequest.variableType)' with id '$(varRequest.label)'..."
 
-  vnext = addNode!(fg, varLabel, varType, N=(isnull(varRequest.N)?100:get(varRequest.N)), ready=0, labels=[varRequest.labels; "VARIABLE"])
+  vnext = addNode!(fg, varLabel, varType, N=(varRequest.N==nothing?100:varRequest.N), ready=0, labels=[varRequest.labels; "VARIABLE"])
   return Dict{String, Any}("status" => "OK", "id" => vnext.label)
 end
 
@@ -44,7 +44,7 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
     factorRequest = requestDict["factorRequest"]
     vars = factorRequest["variables"]
     packedFactor = factorRequest["factor"]
-    info("Adding factor of type '$(factorRequest["factorType"])' to variables '$(vars)'...")
+    @info "Adding factor of type '$(factorRequest["factorType"])' to variables '$(vars)'..."
 
     # Right, carrying on...
     factor = nothing
@@ -118,7 +118,7 @@ function setReady(configDict, fg, requestDict)::Dict{String, Any}
     # Validation of payload
 
     # Action
-    varLabels = isnull(readyRequest.variables) ? union(Caesar.ls(fg)...) : Symbol.(get(requestDict.variables))
+    varLabels = readyRequest.variables==nothing ? union(Caesar.ls(fg)...) : Symbol.(requestDict.variables)
     # Do specific variables
     for varLabel in varLabels
         v = getVert(fg, varLabel)
