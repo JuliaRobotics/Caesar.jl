@@ -175,11 +175,11 @@ Return new multisession factor, symbol sym, inserted using prp2::PriorPoint2Dens
 after checking existing multisession dict (exims::(exvsym=>neoid)) if any nodes should be removed before inserting new ones
 on that graph node. Assuming just one multisession prior per node.
 """
-function removeReinsertMultisessionPrior!{T <: FunctorSingleton}(fgl::FactorGraph,
+function removeReinsertMultisessionPrior!(fgl::FactorGraph,
         exims::Dict{Symbol, Int},
         prp2::T,
         sym::Symbol,
-        uid::Int  )
+        uid::Int  ) where {T <: FunctorSingleton}
   #
   # remove previous Multi session constraint on this sym vertex
   if haskey(exims, sym)

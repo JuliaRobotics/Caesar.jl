@@ -84,7 +84,7 @@ function (dp2dp2::DynPoint2DynPoint2)(
             userdata,
             idx::Int,
             meas::Tuple,
-            Xs...  )::Void
+            Xs...  )::Nothing
 ```
 where `Xs` can be expanded to the particular number of variable nodes this factor will be associated, and note they are order sensitive at `addFactor!(fg, ...)` time.  The `res` parameter is a vector of the same dimension defined by the largest of the `Xs` terms.  The `userdata` value contains the small metadata / userdata portions of information that was introduced to the factor graph at construction time -- please consult `error(string(fieldnames(userdata)))` for details at this time.  This is a relatively new feature in the code and likely to be improved.  The `idx` parameter represents a legacy index into the measurement `meas[1]` and variables `Xs` to select the desired marginal sample value.  Future versions of the code plan to remove the `idx` parameter entirely.  The `Xs` array of parameter are each of type `::Array{Float64,2}` and contain the estimated samples from each of the current best marginal belief estimates of the factor graph variable node.  
 ```julia
