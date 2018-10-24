@@ -37,6 +37,34 @@ function (czt::CZTFilter{T})(dataIn::Array, dataOut::Array{Complex{T}}) where {T
     nothing
 end
 
+# function (czt::CZTFilter{T})(dataIn::Array, dataOut::Array{Complex{T}}) where {T <: Real}
+#     dataLen = size(dataIn,1)
+#     if dataLen!=czt.dataLen
+#         error("Data Signal length: $dataLen Filter expected: $(czt.dataLen)")
+#     end
+#     if czt.nPhones != size(dataIn,2)
+#         error("Number of phones: $(size(dataIn,2)). Expected: $(czt.nPhones)")
+#     end
+#     for i in 1:czt.dataLen
+#         for j in czt.phonesIter
+#             czt.tempData[i,j] = dataIn[i,j] * czt.Awk2[i]
+#         end
+#     end
+#     fft!(czt.tempData,1)
+#     for i in czt.fftIter
+#         for j in czt.phonesIter
+#           czt.tempData[i,j] = czt.tempData[i,j] * czt.Fwk2[i]
+#         end
+#     end
+#     ifft!(czt.tempData,1)
+#     for i in czt.dataLen:(czt.dataLen+czt.outLen-1)
+#       for j in czt.phonesIter
+#         dataOut[i-czt.dataLen+1,j] = czt.tempData[i,j]*czt.wk2[i-czt.dataLen+1]
+#       end
+#     end
+#     nothing
+# end
+
 
 #orig - starting point in the plane
 #theoretically allocating all memory here

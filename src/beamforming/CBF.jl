@@ -27,25 +27,31 @@ function getCBFFilter2Dsize(thisCfg::CBFFilterConfig)
     return (length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
 end
 
-function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array)
-    if size(filterOut)!=(length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
-        error("Provided Filter has wrong dimensions.")
-    end
+function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array,sourceXY::Array, dataTemp::Array)
+
+    #if size(filterOut)!=(length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
+    #    error("Provided Filter has wrong dimensions.")
+    #end
     #Allocations
-    tDelays = zeros(thisCfg.nPhones)
-    sourceXY = zeros(2)
-    dataTemp = zeros(Complex{Float64}, thisCfg.nPhones,thisCfg.dataLen)
+    #tDelays = zeros(thisCfg.nPhones)
+    #sourceXY = zeros(2)
+    #dataTemp = zeros(Complex{Float64}, thisCfg.nPhones,thisCfg.dataLen)
 
     # combination of fCeil and fSampling limit information content extracted by thirsCfg.azimuths. Sample faster to get higher res BF
     for iter in eachindex(thisCfg.azimuths)
         sourceXY[1] = -cos(thisCfg.azimuths[iter])
         sourceXY[2] = -sin(thisCfg.azimuths[iter])
-
-        tDelays[:] = (arrayPos * sourceXY)/thisCfg.soundSpeed
+        #tDelays[:] = (arrayPos * sourceXY)/thisCfg.soundSpeed
 
         for piter in 1:thisCfg.nPhones
+            dt = (arrayPos[piter,1]*sourceXY[1] + arrayPos[piter,2]*sourceXY[2])/thisCfg.soundSpeed
+
+            #copy!(tDelays,thisCfg.FFTfreqs)
+            #tDelays .*= -2im*pi*dt
+            #dataTemp[piter,:] .= exp.(tDelays)
             for fftiter in 1:thisCfg.dataLen
-                dataTemp[piter,fftiter] = exp(-2im*pi*tDelays[piter]*thisCfg.FFTfreqs[fftiter])
+                 dataTemp[piter,fftiter] = exp(-2im*pi*dt*thisCfg.FFTfreqs[fftiter])
+            #     #dataTemp[piter,fftiter] = exp(-2im*pi*tDelays[piter]*thisCfg.FFTfreqs[fftiter])
             end
         end
 
@@ -55,16 +61,56 @@ function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOu
     nothing
 end
 
-function CBF2D_DelaySum!(thisCfg::CBFFilterConfig,dataIn::Array,dataOut::Array,thisFilter::Array)
-    if size(dataIn,1) !=thisCfg.dataLen || size(dataIn,2)!=thisCfg.nPhones
-        error("Data Array wrong dimensions")
+function CBF2D_DelaySum!(thisCfg::CBFFilterConfig,dataIn::Array,dataOut::Array,temp1::Array,temp2::Array,thisFilter::Array; dochecks::Bool=false)
+    if dochecks
+      if size(dataIn,1) !=thisCfg.dataLen || size(dataIn,2)!=thisCfg.nPhones
+          error("Data Array wrong dimensions")
+      end
+      if size(thisFilter)!=(length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
+          error("Provided Filter does not match provided config.")
+      end
     end
-    if size(thisFilter)!=(length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
-        error("Provided Filter does not match provided config.")
-    end
+    # minimal syntax
+#    for iter in eachindex(thisCfg.azimuths)
+#        dataOut[iter] = sum(norm.(sum(dataIn.*thisFilter[iter,:,:],2),2),1)[1]
+#    end
+
     for iter in eachindex(thisCfg.azimuths)
-        dataOut[iter] = sum(norm.(sum(dataIn.*thisFilter[iter,:,:],2),2),1)[1]
+        # for diter in 1:thisCfg.dataLen
+        #      for phiter in 1:thisCfg.nPhones
+        #          temp2[diter,phiter] = dataIn[diter,phiter]
+        #      end
+        #  end
+        copy!(temp2,dataIn)
+        #temp2 = deepcopy(dataIn) # think somethign not zeroing properly?
+        @fastmath temp2 .*= @view thisFilter[iter,:,:]
+        @fastmath @inbounds sum!(temp1,temp2)
+
+        @fastmath @inbounds @simd for ditr in 1:thisCfg.dataLen
+            temp1[ditr] = norm(temp1[ditr])
+        end
+
+        @inbounds dataOut[iter] = sum(temp1)
+        #dataOut[iter] = sum(norm.(temp1,2))
     end
+
+    # dataOut = deepcopy(dataOut)
+
+    # brute force in-place syntax
+    # fill!(dataOut, 0.0)
+    # phones_combined_ = zeros(thisCfg.dataLen) .+ im*0.0
+    # for iter in eachindex(thisCfg.azimuths)
+    #   fill!(phones_combined_, 0.0)
+    #   for diter in 1:thisCfg.dataLen
+    #     for phiter in 1:thisCfg.nPhones
+    #       phones_combined_[diter] += dataIn[diter,phiter]*thisFilter[iter,diter,phiter]
+    #     end
+    #     dataOut[iter] += norm(phones_combined_[diter],2)
+    #   end
+    # end
+    # @assert norm(dataOut - dataOutTest) < 0.00001
+
+    # TODO - some hybrid clean in-place syntax
     nothing
 end
 
@@ -79,24 +125,49 @@ Phase shifting ztransWave contents of leave one out element of `elemPositions` (
 based on dx,dy position perturbation.  The ztransWave is chirp z-transform of LOO elements's waveform data,
 and only considering subset of frequencies in ztransWave (i.e. smaller than size of raw waveform data)
 """
-function phaseShiftSingle!(thisCfg::CBFFilterConfig,
-                            azi::R,
-                            positions::Array,
-                            ztransWave::Array{Complex{R2}}  ) where {R <: Real, R2 <: Real}
+function phaseShiftSingle!(sourceXY::Vector{Float64},
+                           thisCfg::CBFFilterConfig,
+                           azi::R,
+                           positions::Array,
+                           ztransWave::Array{Complex{R2}}  ) where {R <: Real, R2 <: Real}
   #
-  sourceXY = zeros(2)
-  FFTfreqs = linspace(thisCfg.fFloor,thisCfg.fCeil,thisCfg.dataLen)
+  # sourceXY = zeros(2)
+  # FFTfreqs = linspace(thisCfg.fFloor,thisCfg.fCeil,thisCfg.dataLen)
   sourceXY[1] = -cos(azi) # unit vector in azimuth direction
   sourceXY[2] = -sin(azi)
   dt = (positions' * sourceXY)/thisCfg.soundSpeed
+
   # @assert thisCfg.dataLen == length(ztransWave)
   for j in 1:thisCfg.dataLen
-    ztransWave[j] *= conj(exp(-2im*pi*dt*FFTfreqs[j]))
+    ztransWave[j] *= conj(exp(-2im*pi*dt*thisCfg.FFTfreqs[j]))
   end
   nothing
 end
 
+"""
+    $(SIGNATURES)
 
+Phase shifting ztransWave contents of leave one out element of `elemPositions` (positions of array elements)
+based on dx,dy position perturbation.  The ztransWave is chirp z-transform of LOO elements's waveform data,
+and only considering subset of frequencies in ztransWave (i.e. smaller than size of raw waveform data)
+"""
+function phaseShiftSingle!(thisCfg::CBFFilterConfig,
+                           azi::R,
+                           positions::Array,
+                           ztransWave::Array{Complex{R2}}  ) where {R <: Real, R2 <: Real}
+  #
+  # FFTfreqs = linspace(thisCfg.fFloor,thisCfg.fCeil,thisCfg.dataLen)
+  sourceXY = zeros(2)
+  phaseShiftSingle!(sourceXY, thisCfg, azi, positions, ztransWave)
+  # sourceXY[1] = -cos(azi) # unit vector in azimuth direction
+  # sourceXY[2] = -sin(azi)
+  # dt = (positions' * sourceXY)/thisCfg.soundSpeed
+  # # @assert thisCfg.dataLen == length(ztransWave)
+  # for j in 1:thisCfg.dataLen
+  #   ztransWave[j] *= conj(exp(-2im*pi*dt*FFTfreqs[j]))
+  # end
+  # nothing
+end
 
 
 """
@@ -104,10 +175,14 @@ end
 
 Generate the incoming waveform (into `bfOutLIEl`) at the desired look angle `aziInd`.
 """
-function liebf!(bfOutLIEl, cztWaveLIEl, bfFilterLIEl, aziIndl; normalize::Bool=false)
+function liebf!(bfOutLIEl, cztWaveLIEl, bfFilterLIEl, aziIndl, temp; normalize::Bool=false)
 
   # perform conventional beam forming with single look angle (on leave-ins)
-  bfOutLIEl[:] = sum(cztWaveLIEl.*bfFilterLIEl[aziIndl,:,:],2)
+  #bfOutLIEl[:] = sum(cztWaveLIEl.*bfFilterLIEl[aziIndl,:,:],2)
+
+  copy!(temp,cztWaveLIEl)
+  temp .*= @view bfFilterLIEl[aziIndl,:,:]
+  sum!(bfOutLIEl,temp)
 
   # OPTIONAL normalize according to number of leave in elements
   # REQUIRED when doing residual rather than corr of waveform (measured - predict)

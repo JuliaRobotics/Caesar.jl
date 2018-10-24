@@ -21,7 +21,7 @@ function sanitycheck_nav(navdata)
     check = true
     errorout = 0;
     for i in 1:size(navdata,1)-1
-        dist = abs(navdata[i,:]-navdata[i+1,:]);
+        dist = abs.(navdata[i,:]-navdata[i+1,:]);
         if dist[1] > 3
             println("NAV_X is off by $(dist[1])")
             check = false
@@ -75,7 +75,7 @@ function importdata_waveforms(frames::Array{Int,1},
     dataOut
 end
 
-function cumulativeDrift!(cdata::Array,cstart::Array,σ::Array)
+function cumulativeDrift!(cdata::AbstractArray,cstart::Array,σ::Array)
     cdrift = cstart
     for i in 1:size(cdata,1)
         cdata[i,:] += cdrift
@@ -191,101 +191,45 @@ function addsascluster_only_gps!(fg::FactorGraph,
   nothing
 end
 
-function approxConvFwdBFRaw(fg, poses, beacon, origin; N::Int=100)
+function approxConvFwdBFRaw(fg, poses, beacon, origin, scale, snrfloor; N::Int=100)
   #
   fctsym = Symbol(string(beacon,poses...,:f1))
   sas2d = IncrementalInference.getfnctype(getVert(fg, fctsym, nt=:fnc))
-  reset!(sas2d.dbg)
+  sas2d.debugging = true
+  for ti in 1:Threads.nthreads() reset!(sas2d.threadreuse[ti].dbg) end
   predL1 = IncrementalInference.approxConv(fg, fctsym, beacon, N=N)
 
-  # avg_beam_cut = zeros(length(sas2d.dbg.beams_cut[1]))
-  # for i in 1:N
-  #   avg_beam_cut[:] = avg_beam_cut + sas2d.dbg.beams_cut[i]
-  # end
-  # avg_beam_cut ./= sum(avg_beam_cut)
-
-  avg_beam = zeros(length(sas2d.dbg.beams[1]))
-  for i in 1:N
-    avg_beam[:] = avg_beam + sas2d.dbg.beams[i]
+  allbeams = []
+  for ti in 1:Threads.nthreads()
+      for itr in eachindex(sas2d.threadreuse[ti].dbg.beams)
+          push!(allbeams,sas2d.threadreuse[ti].dbg.beams[itr])
+      end
   end
-  avg_beam ./= sum(avg_beam)
+  @show size(allbeams[1])
+  avg_beam = zeros(length(allbeams[1]))
+  for i in 1:N
+    avg_beam[:] = avg_beam + allbeams[i]
+  end
+
+  #avg_beam ./= sum(avg_beam)
+  #avg_beam .-= quantile(avg_beam, snrfloor)
+  #avg_beam[avg_beam .< 0.0] = 0.0
 
   circ_avg_beam = zeros(2,length(avg_beam))
   count = 0
   for th in linspace(0,2pi,length(avg_beam))
     count += 1
-    circ_avg_beam[:,count] = R(th)*[avg_beam[count];0.0]+origin
+    circ_avg_beam[:,count] = R(th)*scale*[avg_beam[count];0.0]+origin
   end
 
-  circ_avg_beam
+  allbeams
 end
 
-function approxConvFwdBFlayer(fg, poses, beacon, origin, scale; N::Int=100)
+function approxConvFwdBFlayer(fg, poses, beacon, origin, scale, snrfloor; N::Int=100)
   #
-  fctsym = Symbol(string(beacon,poses...,:f1))
-  sas2d = IncrementalInference.getfnctype(getVert(fg, fctsym, nt=:fnc))
-  reset!(sas2d.dbg)
-  predL1 = IncrementalInference.approxConv(fg, fctsym, beacon, N=N)
+  circ_avg_beam = approxConvFwdBFRaw(fg, poses, beacon, origin, scale, snrfloor, N=N)
 
-  avg_beam_cut = zeros(length(sas2d.dbg.beams_cut[1]))
-  for i in 1:N
-    avg_beam_cut[:] = avg_beam_cut + sas2d.dbg.beams_cut[i]
-  end
-  avg_beam_cut ./= sum(avg_beam_cut)
-
-  avg_beam = zeros(length(sas2d.dbg.beams[1]))
-  for i in 1:N
-    avg_beam[:] = avg_beam + sas2d.dbg.beams[i]
-  end
-  avg_beam ./= sum(avg_beam)
-
-  circ_avg_beam = zeros(2,length(avg_beam))
-  count = 0
-  for th in linspace(0,2pi,length(avg_beam))
-    count += 1
-    circ_avg_beam[:,count] = scale*R(th)*[avg_beam[count];0.0]+origin
-  end
-
-  # not the median cut beam
   plPica = Gadfly.layer(x=circ_avg_beam[1,:], y=circ_avg_beam[2,:], Geom.path(),   Theme(default_color=colorant"magenta", line_width=2pt))
 
-  plPica
-end
-
-
-function convForwShowSAS(fg, poses, beacon; pllim::Real=Inf, N::Int=100)
-  #
-  fctsym = Symbol(string(beacon,poses...,:f1))
-  sas2d = getfnctype(getVert(fg, fctsym, nt=:fnc))
-  reset!(sas2d.dbg)
-  predL1 = IncrementalInference.approxConv(fg, fctsym, beacon, N=N)
-
-
-  X1 = getVal(fg, poses[1])
-  pl = Gadfly.plot(Gadfly.layer(x=predL1[1,:][-pllim .< predL1[1,:] .< pllim],y=predL1[2,:][-pllim .< predL1[2,:] .<   pllim], Gadfly.Geom.hexbin(xbincount=100, ybincount=100)), Gadfly.layer(x=X1[1,:],y=X1[2,:], Gadfly.Geom.histogram))
-
-  avg_beam_cut = zeros(length(sas2d.dbg.beams_cut[1]))
-  for i in 1:N
-    avg_beam_cut[:] = avg_beam_cut + sas2d.dbg.beams_cut[i]
-  end
-  avg_beam_cut ./= sum(avg_beam_cut)
-
-  avg_beam = zeros(length(sas2d.dbg.beams[1]))
-  for i in 1:N
-    avg_beam[:] = avg_beam + sas2d.dbg.beams[i]
-  end
-  avg_beam ./= sum(avg_beam)
-
-  circ_avg_beam = zeros(2,length(avg_beam))
-  count = 0
-  for th in linspace(0,2pi,length(avg_beam))
-    count += 1
-    circ_avg_beam[:,count] = 7500*R(th)*[avg_beam[count];0.0]
-  end
-
-  # not the median cut beam
-  plPica = plot(x=circ_avg_beam[1,:], y=circ_avg_beam[2,:], Geom.path(),   Theme(default_color=colorant"magenta", line_width=2pt))
-
-  plPica.layers = union(plPica.layers, pl.layers)
   plPica
 end

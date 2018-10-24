@@ -10,10 +10,27 @@ mutable struct SASREUSE
     CBFLIE::Array{Complex{Float64}}
     BFOutFull::Array{Complex{Float64}}
     BFOutLIE::Array{Complex{Float64}}
+    BFOutLIETemp::Array{Complex{Float64}}
     phaseshiftLOO::Array{Complex{Float64}}
     arrayPos::Array{Float64}
     arrayPosLIE::Array{Float64}
     hackazi::Tuple{Vector{Int}, Vector{Float64}} # [idx], [azi]
+    oncebackidx::Vector{Int} # [idx]
+
+    workvarlist::Vector{Symbol}
+    looelement::Int
+    elementset::Vector{Int}
+    waveformsLIE::Array{Complex{Float64},2}
+    waveformsLOOc::Array{Complex{Float64},1}
+
+    BFtemp::Array{Complex{Float64}}
+
+    LIEtemp::Array{Complex{Float64}}
+    temp1::Array{Complex{Float64},1}
+    temp2::Array{Complex{Float64},2}
+
+    temp::Array{Complex{Float64}}
+    sourceXY::Vector{Float64}
 
     dbg::SASDebug
     SASREUSE() = new()
@@ -39,16 +56,55 @@ mutable struct SASBearing2D <: IncrementalInference.FunctorPairwiseMinimize
 end
 function getSample(sas2d::SASBearing2D, N::Int=1)
   # TODO bring the solvefor index tp getSample function
-  if typeof(sas2d.rangemodel) == Distributions.Rayleigh
+  if isa(sas2d.rangemodel, Distributions.Rayleigh)
     return (reshape(rand(sas2d.rangemodel, N),1,N), )
   else
     # TODO have to use the first waveform, since we do not know who is being solved for
     return (reshape(rand(sas2d.rangemodel[1], N), 1,N), )
   end
-  #   smps = zeros(N)
-  #   StatsBase.alias_sample!(sas2d.ranget, sas2d.rangemodel[1], smps);
-  #   return (smps, )
 end
+
+function forwardsas(sas2d::SASBearing2D,
+                    thread_data::SASREUSE,
+                    res::Vector{Float64},
+                    idx::Int,
+                    meas::Tuple,
+                    L1::Array{Float64,2},
+                    XX...)
+  # dx, dy, azi = 0.0, 0.0, 0.0
+  # thread_data = sas2d.threadreuse[Threads.threadid()]
+
+  if thread_data.hackazi[1][1] != idx
+    for i in 1:length(XX)
+      thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[1][1:2,idx]
+    end
+    constructCBFFilter2D!(sas2d.cfgTotal, thread_data.arrayPos, thread_data.CBFFull,thread_data.sourceXY, thread_data.BFtemp)
+
+    #fill!(thread_data.temp1,0)
+    #fill!(thread_data.temp2,0)
+
+    CBF2D_DelaySum!(sas2d.cfgTotal, sas2d.waveformsIn, thread_data.BFOutFull,thread_data.temp1,thread_data.temp2,thread_data.CBFFull)
+
+    thread_data.hackazi[1][1] = idx
+
+    azi_weights = (repmat(norm.(thread_data.BFOutFull), 1,8)')[:]
+    azi_domain = collect(linspace(0,2pi-1e-10,length(azi_weights)))
+    bss = AliasingScalarSampler(azi_domain, azi_weights, SNRfloor=sas2d.cfg["azi_snr_floor"])
+
+    thread_data.hackazi[2][1] = wrapRad(rand(bss)[1])
+
+    if sas2d.debugging
+        push!(thread_data.dbg.beams, deepcopy(thread_data.BFOutFull))
+        push!(thread_data.dbg.azi_smpls, thread_data.hackazi[2][1])
+    end
+  end
+
+  dx, dy = L1[1,idx]-XX[1][1,idx] ,  L1[2,idx]-XX[1][2,idx]
+  res[1] = (thread_data.hackazi[2][1] - atan2(dy, dx))^2 +
+           (meas[1][idx] - norm([dx; dy]))^2
+  nothing
+end
+
 function (sas2d::SASBearing2D)(
             res::Array{Float64},
             userdata::FactorMetadata,
@@ -63,67 +119,73 @@ function (sas2d::SASBearing2D)(
   if string(userdata.solvefor)[1] == 'l'
     # Solving all poses to Landmark
     # Reference the filter positions locally (first element)
-    for i in 1:length(XX)
-      thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[1][1:2,idx]
-    end
-    if thread_data.hackazi[1][1] != idx
-      constructCBFFilter2D!(sas2d.cfgTotal, thread_data.arrayPos, thread_data.CBFFull)
-      CBF2D_DelaySum!(sas2d.cfgTotal, sas2d.waveformsIn, thread_data.BFOutFull, thread_data.CBFFull)
 
-      # # TODO -- move to specialized getSample
-      thread_data.hackazi[1][1] = idx
-
-      azi_weights = (repmat(norm.(thread_data.BFOutFull), 1,8)')[:]
-      azi_domain = collect(linspace(0,2pi-1e-10,length(azi_weights)))
-      bss = AliasingScalarSampler(azi_domain, azi_weights, SNRfloor=sas2d.cfg["azi_snr_floor"])
-
-      thread_data.hackazi[2][1] = wrapRad(rand(bss)[1])
-
-      if sas2d.debugging
-          push!(sas2d.dbg.beams, deepcopy(sas2d.BFOut))
-          push!(sas2d.dbg.azi_smpls, thread_data.hackazi[2][1])
-      end
-    end
-
-    dx, dy = L1[1,idx]-XX[1][1,idx] ,  L1[2,idx]-XX[1][2,idx]
-    res[1] = (thread_data.hackazi[2][1] - atan2(dy, dx))^2 +
-             (meas[1][idx] - norm([dx; dy]))^2
+    forwardsas(sas2d, thread_data, res, idx,meas,L1,XX...)
 
   else
-      # WORK IN PROGRESS
-    workvarlist = userdata.variablelist[2:end] # skip landmark element
-    looelement = findfirst(workvarlist .== userdata.solvefor)
-    # @assert looelement > 0
-    # looelement = parse(Int, string(userdata.solvefor)[2:end])
-    elementset = setdiff(Int[1:length(workvarlist);], [looelement;])
 
-    # assume you get variable list [:l1,:x8,:x9,:x10]
-    # looelement must be int index [1..numelemnts]
-    # elementset is Vector of int indices for LIE, eg. [1;2;4;5], and LOO is 3
+    if thread_data.oncebackidx[1] != idx
+      # ccall(:jl_, Void, (Any,), "idx=$(idx)\n")
+      thread_data.oncebackidx[1] = idx
+      #run for eacn new idx
+      thread_data.workvarlist = userdata.variablelist[2:end] # skip landmark element
+      thread_data.looelement = findfirst(thread_data.workvarlist .== userdata.solvefor)
+      thread_data.elementset = setdiff(Int[1:length(thread_data.workvarlist);],   [thread_data.looelement;])
 
-
-    # Reference first or second element
-    for i in 1:length(XX)
-        if looelement==1
+      # Reference first or second element
+      for i in 1:length(XX)
+        if thread_data.looelement==1
             thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[2][1:2,idx]
             dx, dy = L1[1,idx]-XX[2][1,idx] ,  L1[2,idx]-XX[2][2,idx]
         else
             thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[1][1:2,idx]
             dx, dy = L1[1,idx]-XX[1][1,idx] ,  L1[2,idx]-XX[1][2,idx]
         end
+      end
+
+      for i in 1:sas2d.cfgLIE.dataLen
+          for j in 1:length(thread_data.elementset)
+            thread_data.waveformsLIE[i,j] = sas2d.waveformsIn[i,thread_data.elementset[j]]
+          end
+          thread_data.waveformsLOOc[i] = sas2d.waveformsIn[i,thread_data.looelement]
+      end
+
+
+
+    end #end of idx
+
+    # Reference first or second element
+    for i in 1:length(XX)
+      if thread_data.looelement==1
+          thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[2][1:2,idx]
+          dx, dy = L1[1,idx]-XX[2][1,idx] ,  L1[2,idx]-XX[2][2,idx]
+      else
+          thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[1][1:2,idx]
+          dx, dy = L1[1,idx]-XX[1][1,idx] ,  L1[2,idx]-XX[1][2,idx]
+      end
     end
-    thread_data.arrayPosLIE[1:end,1:2] = thread_data.arrayPos[elementset,1:2]
+
+    for i in 1:length(thread_data.elementset), j in 1:2
+        elem = thread_data.elementset[i]
+        thread_data.arrayPosLIE[i,j] = thread_data.arrayPos[elem,j]
+    end
     azi = atan2(dy,dx)
     sas2d.cfgLIE.azimuths = [azi;]
-    # @show sas2d.cfgLIE.nPhones, size(sas2d.cfgLIE.arrayPos), size(sas2d.CBFLIE)
-    constructCBFFilter2D!(sas2d.cfgLIE, thread_data.arrayPosLIE, thread_data.CBFLIE)
-    liebf!(thread_data.BFOutLIE, sas2d.waveformsIn[:,elementset], thread_data.CBFLIE, 1, normalize=true)
 
-    thread_data.phaseshiftLOO = deepcopy(sas2d.waveformsIn[:,looelement])
-    phaseShiftSingle!(sas2d.cfgLIE, azi, thread_data.arrayPos[looelement,1:2], thread_data.phaseshiftLOO)
 
-    bfOutLIEcorr = thread_data.BFOutLIE + thread_data.phaseshiftLOO
-    res[1] = -sum(norm.(bfOutLIEcorr))
+    constructCBFFilter2D!(sas2d.cfgLIE, thread_data.arrayPosLIE, thread_data.CBFLIE,thread_data.sourceXY,thread_data.LIEtemp)
+
+    liebf!(thread_data.BFOutLIE, thread_data.waveformsLIE, thread_data.CBFLIE, 1, thread_data.temp, normalize=true)
+
+    copy!(thread_data.phaseshiftLOO,thread_data.waveformsLOOc)
+    phaseShiftSingle!(thread_data.sourceXY, sas2d.cfgLIE, azi, thread_data.arrayPos[thread_data.looelement,1:2], thread_data.phaseshiftLOO)
+
+    res[1] = 0.0
+    copy!(thread_data.BFOutLIETemp,thread_data.BFOutLIE)
+    @fastmath @inbounds @simd for i in 1:length(thread_data.phaseshiftLOO)
+      thread_data.BFOutLIETemp[i] += thread_data.phaseshiftLOO[i]
+      res[1] -= norm(thread_data.BFOutLIETemp[i])
+    end
   end
   res[1]
 end
