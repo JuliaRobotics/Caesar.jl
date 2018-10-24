@@ -1,3 +1,4 @@
+using Caesar, Caesar.ZmqCaesar
 using JSON, ZMQ
 using Unmarshal
 

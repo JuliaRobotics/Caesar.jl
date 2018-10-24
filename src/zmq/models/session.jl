@@ -1,4 +1,6 @@
 
+import Base: convert
+
 export
     VariableRequest,
     FactorRequest,

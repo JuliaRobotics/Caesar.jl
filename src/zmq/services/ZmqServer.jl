@@ -80,7 +80,7 @@ function start(zmqServer::ZmqServer)
                 try
                     # Mocking server
                     if haskey(zmqServer.config, "isMockServer") && zmqServer.config["isMockServer"] == "true" && cmdtype != :toggleMockServer
-                        warn("[ZMQ Server] MOCKING ENABLED - Ignoring request!")
+                        @warn "[ZMQ Server] MOCKING ENABLED - Ignoring request!"
                     else
                         # Otherwise actually perform the command
                         @show cmd = getfield(Caesar.ZmqCaesar, cmdtype)
@@ -93,7 +93,7 @@ function start(zmqServer::ZmqServer)
                     io = IOBuffer()
                     showerror(io, ex, catch_backtrace())
                     err = String(take!(io))
-                    warn("[ZMQ Server] Exception: $err")
+                    @warn "[ZMQ Server] Exception: $err"
                     resp["status"] = "ERROR"
                     resp["error"] = err
                 end
@@ -109,22 +109,22 @@ function start(zmqServer::ZmqServer)
                     ZMQ.send(s1, JSON.json(resp))
                 end
             else
-                warn("[ZMQ Server] Received invalid command $cmdtype")
+                @warn "[ZMQ Server] Received invalid command $cmdtype"
                 d = Dict{String, String}("status" => "ERROR", "error" => "Command '$cmdtype' not a valid command.")
                 oks = json(d)
                 ZMQ.send(s1, oks)
             end
         end
     catch ex
-        warn("[ZMQ Server] Something in the zmq/json/rest pipeline broke")
-        showerror(STDERR, ex, catch_backtrace())
+        @warn "[ZMQ Server] Something in the zmq/json/rest pipeline broke"
+        showerror(stderr, ex, catch_backtrace())
     finally
-        warn("[ZMQ Server] Shutting down server")
+        @warn "[ZMQ Server] Shutting down server"
         # TODO: Figure out why I can't use Base.isopen here...
         if Base.isopen(s1)
             ZMQ.close(s1)
         end
         ZMQ.close(ctx)
-        warn("[ZMQ Server] Shut down!")
+        @warn "[ZMQ Server] Shut down!"
     end
 end

@@ -108,21 +108,24 @@ function getNode(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function setReady(configDict, fg, requestDict)::Dict{String, Any}
-    @show requestDict
-
-    # Unmarshal if necessary
     if !haskey(requestDict, "params")
         error("Request must contain a ReadyRequest in a field called 'param'")
     end
-    readyRequest = Unmarshal.unmarshal(SetReadyRequest, requestDict["params"])
+    readyRequest = requestDict["params"]
     # Validation of payload
+    if !(typeof(readyRequest["isReady"]) <: Int)
+        error("SetReady request must set to ready to either 0 or 1.")
+    end
+    if !(readyRequest["isReady"] in [0, 1])
+        error("SetReady request must set to ready to either 0 or 1.")
+    end
 
     # Action
-    varLabels = readyRequest.variables==nothing ? union(Caesar.ls(fg)...) : Symbol.(requestDict.variables)
+    varLabels = readyRequest["variables"]==nothing ? union(Caesar.ls(fg)...) : Symbol.(requestDict["variables"])
     # Do specific variables
     for varLabel in varLabels
         v = getVert(fg, varLabel)
-        v.attributes["ready"] = readyRequest.isReady
+        v.attributes["ready"] = readyRequest["isReady"]
     end
 
     # Generate return payload
