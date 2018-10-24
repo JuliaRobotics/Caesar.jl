@@ -85,6 +85,7 @@ close(fid)
 camlookup = prepCamLookup(camidxs)
 
 # until AprilTag fix
+println("premature exit")
 exit()
 
 ## TODO: udpate to AprilTags.jl
