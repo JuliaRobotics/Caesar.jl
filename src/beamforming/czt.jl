@@ -85,8 +85,8 @@ function prepCZTFilter(n::Int, nPhones::Int, w::Complex{T}, m::Int=-1, a::Comple
     wk2 = w.^(k.^2/2); #@show size(wk2)
     out.Awk2 = ((a.^-k) .* wk2)[1:n]
     out.Fwk2 = zeros(Complex{T},out.nFFT)
-    out.Fwk2[1:n] = 1./wk2[n:-1:1]
-    out.Fwk2[n:m+n-1] = 1./wk2[1:m]
+    out.Fwk2[1:n] = 1.0 ./wk2[n:-1:1]
+    out.Fwk2[n:m+n-1] = 1.0 ./wk2[1:m]
     #out.Fwk2[1:n+1] = 1./append!(wk2[n:-1:2], wk2[1:m])    #alternative for two lines above
     fft!(out.Fwk2)
     out.wk2 = wk2[1:m]

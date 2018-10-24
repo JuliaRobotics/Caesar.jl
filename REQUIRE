@@ -21,3 +21,5 @@ Reexport 0.2.0
 CloudGraphs 0.1.1
 Neo4j 2.0.0
 Mongoc 0.1.2
+YAML
+FFTW

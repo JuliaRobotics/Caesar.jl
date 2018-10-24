@@ -3,7 +3,7 @@ module Caesar
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 import RoME: getRangeKDEMax2D, getLastPose, initfg
-import IncrementalInference: batchSolve!
+import IncrementalInference: batchSolve!, getSample
 
 using Reexport
 
@@ -12,6 +12,7 @@ using Reexport
 @reexport using Distributions
 
 using
+  DelimitedFiles,
   Distributed,
   Statistics,
   LinearAlgebra,
@@ -29,8 +30,9 @@ using
   DocStringExtensions,
   CloudGraphs, # TODO: will be movedd to DFG
   Neo4j, # TODO: will be movedd to DFG
-  Mongoc # TODO: will be movedd to DFG
-
+  Mongoc, # TODO: will be movedd to DFG
+  YAML,
+  FFTW
 
 export
   GenericInSituSystem,  # insitu components
