@@ -5,11 +5,11 @@ using Unmarshal
 @testset "ZMQ End-To-End Test" begin
 
 emptyCmd = Dict{String, Any}()
-unknownCmd = Dict{String, Any}("type" => "NOPENOPENOPE")
-mockServerCmd = Dict{String, Any}("type" => "toggleMockServer", "isMockServer" => "true")
-addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
-lsCmd = Dict{String, Any}("type" => "ls", "filter" => Dict{String, Any}("variables" => "true", "factors" => "true"))
-shutdownCmd = Dict{String, Any}("type" => "shutdown")
+unknownCmd = Dict{String, Any}("request" => "NOPENOPENOPE")
+mockServerCmd = Dict{String, Any}("request" => "toggleMockServer", "payload" => Dict{String, Any}("isMockServer" => "true"))
+addVariableCmd = Dict{String, Any}("request" => "addVariable", "payload" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
+lsCmd = Dict{String, Any}("request" => "ls", "payload" => Dict{String, Any}("variables" => "true", "factors" => "true"))
+shutdownCmd = Dict{String, Any}("request" => "shutdown")
 addOdo2DJson = "{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addOdometry2D\"\n}";
 addOdo2DCmd = JSON.parse(addOdo2DJson)
 

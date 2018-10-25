@@ -73,8 +73,8 @@ function start(zmqServer::ZmqServer)
             str = String(take!(out))
             request = JSON.parse(str)
 
-            cmdtype = haskey(request, "type") ? Symbol(request["type"]) : :ERROR_NOCOMMANDPROVIDED
-            @info "[ZMQ Server] REQUEST: Received command '$cmdtype' in payload '$str'..."
+            cmdtype = haskey(request, "request") ? Symbol(request["request"]) : :ERROR_NOCOMMANDPROVIDED
+            @info "[ZMQ Server] REQUEST: Received request '$cmdtype' in payload '$str'..."
             if cmdtype in union(configverbs, sessionverbs)
                 resp = Dict{String, Any}()
                 try

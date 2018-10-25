@@ -16,11 +16,15 @@ Configure to just return "{"status": "OK"}" for all requests.
 function toggleMockServer(config, dfg, request)::Dict{String, Any}
     @show request
     @show config
-    if haskey(request, "isMockServer")
-        config["isMockServer"] = request["isMockServer"]
-        return Dict{String, Any}("isMockServer" => config["isMockServer"])
+    if haskey(request, "payload")
+        if haskey(request["payload"], "isMockServer")
+            config["isMockServer"] = request["payload"]["isMockServer"]
+            return Dict{String, Any}("isMockServer" => config["isMockServer"])
+        else
+            error("Please provide a 'payload' body containing a field 'isMockServer': [\"true\"/\"false\"] for this request.")
+        end
     else
-        error("Please provide a body containing a field 'isMockServer': [true/false] for this request.")
+        error("Please provide a 'payload' body containing a field 'isMockServer': [\"true\"/\"false\"] for this request.")
     end
 end
 

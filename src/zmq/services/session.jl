@@ -19,7 +19,7 @@ export
 okResponse = Dict{String, Any}("status" => "OK")
 
 function addVariable(configDict, fg, requestDict)::Dict{String, Any}
-  varRequest = Unmarshal.unmarshal(VariableRequest, requestDict["variable"])
+  varRequest = Unmarshal.unmarshal(VariableRequest, requestDict["payload"])
   varLabel = Symbol(varRequest.label)
   varType = nothing
   try
@@ -38,10 +38,10 @@ function addVariable(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function addFactor(configDict, fg, requestDict)::Dict{String, Any}
-    if !haskey(requestDict, "factorRequest")
-        error("A factor body is required in the request.")
+    if !haskey(requestDict, "payload")
+        error("A factor body is required in the request as 'payload' field.")
     end
-    factorRequest = requestDict["factorRequest"]
+    factorRequest = requestDict["payload"]
     vars = factorRequest["variables"]
     packedFactor = factorRequest["factor"]
     @info "Adding factor of type '$(factorRequest["factorType"])' to variables '$(vars)'..."
@@ -81,10 +81,10 @@ end
 
 function ls(configDict, fg, requestDict)::Dict{String, Any}
     @show requestDict
-    if !haskey(requestDict, "filter")
-        error("The request does not contain a filter parameter and this is required for the command")
+    if !haskey(requestDict, "payload")
+        error("The request does not contain a filter in 'payload' field and this is required for the command")
     end
-    lsr = Unmarshal.unmarshal(lsRequest, requestDict["filter"])
+    lsr = Unmarshal.unmarshal(lsRequest, requestDict["payload"])
 
     resp = Dict{String, Any}()
     if lsr.variables == "true"
@@ -103,15 +103,15 @@ end
 
 function getNode(configDict, fg, requestDict)::Dict{String, Any}
     # TODO: Build a cleaner contract to return this value.
-    vert = RoME.getVert(fg, Symbol(requestDict["id"]))
+    vert = RoME.getVert(fg, Symbol(requestDict["payload"]))
     return JSON.parse(JSON.json(vert))
 end
 
 function setReady(configDict, fg, requestDict)::Dict{String, Any}
-    if !haskey(requestDict, "params")
-        error("Request must contain a ReadyRequest in a field called 'param'")
+    if !haskey(requestDict, "payload")
+        error("Request must contain a ReadyRequest in a field called 'payload'")
     end
-    readyRequest = requestDict["params"]
+    readyRequest = requestDict["payload"]
     # Validation of payload
     if !(typeof(readyRequest["isReady"]) <: Int)
         error("SetReady request must set to ready to either 0 or 1.")
@@ -149,7 +149,7 @@ function setVarKDE(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function getVarMAPKDE(configDict, fg, requestDict)::Dict{String, Any}
-    map = KDE.getKDEMax(getVertKDE(fg, Symbol(Symbol(requestDict["id"]))))
+    map = KDE.getKDEMax(getVertKDE(fg, Symbol(Symbol(requestDict["payload"]))))
     return Dict{String, Any}("MAP" => JSON.parse(JSON.json(map)))
 end
 
@@ -161,7 +161,7 @@ function getVarMAPMax(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function getVarMAPMean(configDict, fg, requestDict)::Dict{String, Any}
-    map = KDE.getKDEMean(getVertKDE(fg, Symbol(Symbol(requestDict["id"]))))
+    map = KDE.getKDEMean(getVertKDE(fg, Symbol(Symbol(requestDict["payload"]))))
     return Dict{String, Any}("MAP" => JSON.parse(JSON.json(map)))
 end
 

@@ -24,17 +24,17 @@ function sendCmd(config, fg, cmd::Dict{String, Any})::String
 end
 
 # Add an initial variable.
-addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
+addVariableCmd = Dict{String, Any}("request" => "addVariable", "payload" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
 @test sendCmd(config, fg, addVariableCmd) == "{\"status\":\"OK\",\"id\":\"x0\"}"
 
 # ls to see that it is added to the graph.
-lsCmd = Dict{String, Any}("type" => "ls", "filter" => JSON.parse(JSON.json(lsRequest("true", "true"))))
+lsCmd = Dict{String, Any}("request" => "ls", "payload" => JSON.parse(JSON.json(lsRequest("true", "true"))))
 @test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[],\"id\":\"x0\"}]}"
 
 # Add a prior factor
 dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
 factor = Dict{String, Any}("measurement" => [dist])
-priorFactCmd = Dict{String, Any}("type" => "addFactor", "factorRequest" => JSON.parse(JSON.json(FactorRequest(["x0"], "Prior", factor))))
+priorFactCmd = Dict{String, Any}("request" => "addFactor", "payload" => JSON.parse(JSON.json(FactorRequest(["x0"], "Prior", factor))))
 @test sendCmd(config, fg, priorFactCmd) == "{\"status\":\"OK\",\"id\":\"x0f1\"}"
 
 @test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\"],\"id\":\"x0\"}]}"
@@ -46,40 +46,40 @@ odo = Dict{String, Any}(
     "cov" => [0.1,0,0,0,0.1,0,0,0,0.1])
 for i in 1:6
     # Add variable
-    addVariableCmd = Dict{String, Any}("type" => "addVariable", "variable" => JSON.parse(JSON.json(VariableRequest("x$i", "Pose2", 100, ["TEST"]))))
+    addVariableCmd = Dict{String, Any}("request" => "addVariable", "payload" => JSON.parse(JSON.json(VariableRequest("x$i", "Pose2", 100, ["TEST"]))))
     @test sendCmd(config, fg, addVariableCmd) == "{\"status\":\"OK\",\"id\":\"x$i\"}"
 
     # Now adding odo factor
     factor = Dict{String, Any}("measurement" => [odo])
-    @show odoFactCmd = Dict{String, Any}("type" => "addFactor", "factorRequest" => JSON.parse(JSON.json(FactorRequest(["x$(i-1)", "x$i"], "Pose2Pose2", factor))))
+    @show odoFactCmd = Dict{String, Any}("request" => "addFactor", "payload" => JSON.parse(JSON.json(FactorRequest(["x$(i-1)", "x$i"], "Pose2Pose2", factor))))
     @test sendCmd(config, fg, odoFactCmd) == "{\"status\":\"OK\",\"id\":\"x$(i-1)x$(i)f1\"}"
 end
 
 @test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\",\"x0x1f1\"],\"id\":\"x0\"},{\"factors\":[\"x0x1f1\",\"x1x2f1\"],\"id\":\"x1\"},{\"factors\":[\"x1x2f1\",\"x2x3f1\"],\"id\":\"x2\"},{\"factors\":[\"x2x3f1\",\"x3x4f1\"],\"id\":\"x3\"},{\"factors\":[\"x3x4f1\",\"x4x5f1\"],\"id\":\"x4\"},{\"factors\":[\"x4x5f1\",\"x5x6f1\"],\"id\":\"x5\"},{\"factors\":[\"x5x6f1\"],\"id\":\"x6\"}]}"
 
 # Set all variables ready
-setReadyCmd = Dict{String, Any}("type" => "setReady", "params" => JSON.parse(JSON.json(SetReadyRequest(nothing, 1))))
+setReadyCmd = Dict{String, Any}("request" => "setReady", "payload" => JSON.parse(JSON.json(SetReadyRequest(nothing, 1))))
 @test sendCmd(config, fg, setReadyCmd) == "{\"status\":\"OK\"}"
 
 # Call batch solve
-batchSolveCmd = Dict{String, Any}("type" => "batchSolve")
+batchSolveCmd = Dict{String, Any}("request" => "payload")
 result = sendCmd(config, fg, batchSolveCmd)
 @test JSON.parse(result)["status"] == "OK"
 
 # Just for fun
-getNodeCmd = Dict{String, Any}("type" => "getNode", "id" => "x0")
+getNodeCmd = Dict{String, Any}("request" => "getNode", "payload" => "x0")
 x0Ret = JSON.parse(sendCmd(config, fg, getNodeCmd))
 
 # Test a factor that doesn't exist, should produce legible error
 dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
 factor = Dict{String, Any}("measurement" => [dist])
-priorFactCmd = Dict{String, Any}("type" => "addFactor", "factorRequest" => JSON.parse(JSON.json(FactorRequest(["x0"], "IDontExistAsAFactor", factor))))
+priorFactCmd = Dict{String, Any}("request" => "addFactor", "payload" => JSON.parse(JSON.json(FactorRequest(["x0"], "IDontExistAsAFactor", factor))))
 @test_throws ErrorException sendCmd(config, fg, priorFactCmd)
 
 # Get the KDEs
-getMAPCmd = Dict{String, Any}("type" => "getVarMAPKDE", "id" => "x0")
+getMAPCmd = Dict{String, Any}("request" => "getVarMAPKDE", "payload" => "x0")
 mapResult = sendCmd(config, fg, getMAPCmd)
-getMAPMeanCmd = Dict{String, Any}("type" => "getVarMAPMean", "id" => "x0")
+getMAPMeanCmd = Dict{String, Any}("request" => "getVarMAPMean", "payload" => "x0")
 mapResult = sendCmd(config, fg, getMAPMeanCmd)
 
 #######

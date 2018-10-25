@@ -19,7 +19,7 @@ if isLoadingPlottingEndpoints
     end
 
     function drawPoses(configDict, fg, requestDict)::Dict{String, Any}
-        plotRequest = Unmarshal.unmarshal(PlotRequest, requestDict["plotParams"])
+        plotRequest = Unmarshal.unmarshal(PlotRequest, requestDict["payload"])
         pl = RoMEPlotting.drawPoses(fg);
         io = IOBuffer();
         Gadfly.draw(PNG(io, (plotRequest.widthPx)px, (plotRequest.heightPx)px), pl);
@@ -27,7 +27,7 @@ if isLoadingPlottingEndpoints
     end
 
     function drawPosesLandms(configDict, fg, requestDict)::Dict{String, Any}
-        plotRequest = Unmarshal.unmarshal(PlotRequest, requestDict)
+        plotRequest = Unmarshal.unmarshal(PlotRequest, requestDict["payload"])
         pl = RoMEPlotting.drawPosesLandms(fg);
         io = IOBuffer();
         Gadfly.draw(PNG(io, (plotRequest.widthPx)px, (plotRequest.heightPx)px), pl);
