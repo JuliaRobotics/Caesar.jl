@@ -5,11 +5,12 @@ using Test
 
 @testset "ZMQ Interface" begin
     # Unit tests
-    #include("multilangzmq/callbackCompatibilityTest.jl")
+    include("multilangzmq/callbackCompatibilityTest.jl")
     # Integration tests
-    # include("multilangzmq/zmqInternal.jl")
+    include("multilangzmq/zmqInternal.jl")
     # End to end tests
-    include("multilangzmq/serverTest.jl")
+    # Do this manually...
+    # include("multilangzmq/serverTest.jl")
 end
 
 # println("[TEST] CloudGraphs API calls...")

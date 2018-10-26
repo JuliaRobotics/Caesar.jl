@@ -1,12 +1,12 @@
 # using Revise
 using JSON, ZMQ
-using Base.Test
+using Test
 # using RoMEPlotting
 using Caesar, Caesar.ZmqCaesar
 using Distributions, RoME, IncrementalInference
 using Unmarshal
 
-@testset "ZMQ Integration Test (Hexagonal Solver)" begin
+# @testset "ZMQ Integration Test (Hexagonal Solver)" begin
 
 addOdo2DJson = "{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addOdometry2D\"\n}";
 addLandmark2DJson = "{\n  \"landmark_id\": \"l1\",\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addLandmark2D\"\n}";
@@ -18,7 +18,7 @@ config = Dict{String, String}()
 
 # Send a command locally.
 function sendCmd(config, fg, cmd::Dict{String, Any})::String
-    callback = getfield(Caesar.ZmqCaesar, Symbol(cmd["type"]))
+    callback = getfield(Caesar.ZmqCaesar, Symbol(cmd["request"]))
     resp = callback(config, fg, cmd)
     return JSON.json(resp)
 end
@@ -62,7 +62,7 @@ setReadyCmd = Dict{String, Any}("request" => "setReady", "payload" => JSON.parse
 @test sendCmd(config, fg, setReadyCmd) == "{\"status\":\"OK\"}"
 
 # Call batch solve
-batchSolveCmd = Dict{String, Any}("request" => "payload")
+batchSolveCmd = Dict{String, Any}("request" => "batchSolve")
 result = sendCmd(config, fg, batchSolveCmd)
 @test JSON.parse(result)["status"] == "OK"
 
@@ -90,4 +90,4 @@ mapResult = sendCmd(config, fg, getMAPMeanCmd)
 # drawPosesCmd = Dict{String, Any}("type" => "drawPoses", "plotParams" => Dict{String, Any}("widthPx" => 1024, "heightPx" => 768, "encoding" => "none"))
 # plotResult = sendCmd(config, fg, drawPosesCmd)
 
-end
+# end

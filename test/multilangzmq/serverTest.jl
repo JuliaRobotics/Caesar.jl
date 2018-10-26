@@ -1,8 +1,9 @@
 using Caesar, Caesar.ZmqCaesar
 using JSON, ZMQ
 using Unmarshal
+using Test
 
-@testset "ZMQ End-To-End Test" begin
+# @testset "ZMQ End-To-End Test" begin
 
 emptyCmd = Dict{String, Any}()
 unknownCmd = Dict{String, Any}("request" => "NOPENOPENOPE")
@@ -10,17 +11,19 @@ mockServerCmd = Dict{String, Any}("request" => "toggleMockServer", "payload" => 
 addVariableCmd = Dict{String, Any}("request" => "addVariable", "payload" => JSON.parse(JSON.json(VariableRequest("x0", "Pose2", 100, ["TEST"]))))
 lsCmd = Dict{String, Any}("request" => "ls", "payload" => Dict{String, Any}("variables" => "true", "factors" => "true"))
 shutdownCmd = Dict{String, Any}("request" => "shutdown")
-addOdo2DJson = "{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addOdometry2D\"\n}";
-addOdo2DCmd = JSON.parse(addOdo2DJson)
+addOdo2DCmd = Dict{String, Any}(
+    "request" => "addOdometry2D",
+    "payload" => JSON.parse("{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\"}"));
 
-info("Starting the ZMQ server in an @async...")
+@info "Starting the ZMQ server in an @async..."
 @async begin
     fg = Caesar.initfg()
     config = Dict{String, String}()
     zmqConfig = ZmqServer(fg, config, true, "tcp://*:5555")
     start(zmqConfig)
 end
-info("Started the ZMQ server!")
+sleep(20)
+@info "Started the ZMQ server!"
 
 
 function sendCmd(cmd::Dict{String, Any})::String
@@ -48,9 +51,9 @@ end
 @test sendCmd(mockServerCmd) == "{\"status\":\"OK\",\"isMockServer\":\"true\"}"
 @test sendCmd(addOdo2DCmd) == "{\"status\":\"OK\"}"
 # Disable it
-mockServerCmd["isMockServer"]="false"
+mockServerCmd["payload"]["isMockServer"]="false"
 @test sendCmd(mockServerCmd) == "{\"status\":\"OK\",\"isMockServer\":\"false\"}"
 
 # Send the shutdown command - cannot be mocked.
 @test sendCmd(shutdownCmd) == "{\"status\":\"OK\"}"
-end
+# end
