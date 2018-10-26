@@ -1,7 +1,7 @@
-using RoMEPlotting
+# using RoMEPlotting
 using Caesar, Caesar.ZmqCaesar
 using IncrementalInference, RoME
-using Base.Test
+using Test
 
 @testset "ZMQ Interface" begin
     # Unit tests
@@ -9,7 +9,8 @@ using Base.Test
     # Integration tests
     include("multilangzmq/zmqInternal.jl")
     # End to end tests
-    include("multilangzmq/serverTest.jl")
+    # Do this manually...
+    # include("multilangzmq/serverTest.jl")
 end
 
 # println("[TEST] CloudGraphs API calls...")
@@ -18,7 +19,7 @@ end
 #   include("fourdoortestcloudgraph.jl")
 #   println("[SUCCESS]")
 # else
-#   warn("[NOT TESTING] CloudGraphs interface, auth required -- you can enable it here at $(@__FILE__).")
+#   @warn "[NOT TESTING] CloudGraphs interface, auth required -- you can enable it here at $(@__FILE__)."
 # end
 
 
@@ -26,5 +27,5 @@ end
 #   # using VictoriaParkTypes
 #
 # else
-#   warn("not running full Victoria park dataset now")
+#   @warn "not running full Victoria park dataset now"
 # end

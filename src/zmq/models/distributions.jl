@@ -18,6 +18,6 @@ end
 mutable struct Packed_AliasingScalarSampler
   samples::Vector{Float64}
   weights::Vector{Float64}
-  quantile::Nullable{Float64}
+  quantile::Union{Float64, Nothing}
   distType::String # AliasingScalarSampler
 end

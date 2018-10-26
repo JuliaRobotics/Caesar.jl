@@ -81,7 +81,7 @@ function parseMergeVertAttr!(v::Graphs.ExVertex, elem)
     elseif k == :ready
       v.attributes[string(k)] = typeof(va["val"]) == Int ? va["val"] : parse(Int,va["val"])
     else
-      warn("setting $(k) to $(typeof(va["val"]))")
+      @warn "setting $(k) to $(typeof(va["val"]))"
       v.attributes[string(k)] = va["val"]  # this is replacing data incorrectly
     end
   end
@@ -93,14 +93,14 @@ end
 
 Hodgepodge function to merge data in CloudVertex
 """
-function mergeCloudVertex!{T <: AbstractString}(cg::CloudGraph,
+function mergeCloudVertex!(cg::CloudGraph,
       v::Graphs.ExVertex,
       neoNodeId::Int,
       alreadyexists::Bool,
       neo4jNode,
       existlbs::Vector{AbstractString},
       mongos;
-      labels::Vector{T}=String[]  )
+      labels::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   cv = CloudVertex()
   if alreadyexists
@@ -135,7 +135,7 @@ function mergeBigDataElements!(bdes::Vector{BigDataElement}, mongos::Dict)
       haskey = false
       for bd in bdes
         if bd.description == k
-          warn("skipping bigDataElement $(bd.description), assumed to be repeat during merge.")
+          @warn "skipping bigDataElement $(bd.description), assumed to be repeat during merge."
           haskey = true
         end
       end
@@ -152,12 +152,12 @@ function mergeBigDataElements!(bdes::Vector{BigDataElement}, mongos::Dict)
   nothing
 end
 
-function mergeValuesIntoCloudVert!{T <: AbstractString}(fgl::FactorGraph,
+function mergeValuesIntoCloudVert!(fgl::FactorGraph,
       neoNodeId::Int,
       elem,
       uidl,
       v::Graphs.ExVertex;
-      labels::Vector{T}=String[]  )
+      labels::Vector{T}=String[]  ) where {T <: AbstractString}
   #
 
   # why am I getting a node again (because we don't have the labels here)?
@@ -250,8 +250,6 @@ function recoverConstraintType(cgl::CloudGraph,
     @show size(rngs), size(bearing)
     prange = resample(kde!(rngs),N)
     pbear = resample(kde!(bearing),N)
-    # warn("temporary return")
-    # return prange, pbear
     return Pose2DPoint2DBearingRangeDensity(pbear, prange)
   elseif lkl[1]=="rangeMEAS"
     @show rangekey = mongokeys["range"]
@@ -259,8 +257,6 @@ function recoverConstraintType(cgl::CloudGraph,
     # rngs = Vector{Float64}(elem["range"] )
     @show size(rngs)
     prange = resample(kde!(rngs),N)
-    # warn("temporary return")
-    # return prange
     return Pose2DPoint2DRangeDensity(prange)
   else
     return error("Don't know how to convert $(lkl[1]) to a factor")
@@ -283,7 +279,7 @@ function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N:
       # v = addNode!(fgl, nlbsym, , 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
       push!(labels,"POSE")
     elseif elem[:frtend]["t"] == "L"
-      warn("using hack counter for LANDMARKS uid +200000")
+      @warn "using hack counter for LANDMARKS uid +200000"
       uidl = elem[:frtend]["tag_id"]+200000 # TODO complete hack
       nlbsym = Symbol(string('l', uidl))
       initvals = 0.1*randn(2,N) # Make sure autoinit still works properly
@@ -304,18 +300,18 @@ end
 function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict, maxfuid::Int)
   foffset = 100000
   fuid = maxfuid >= foffset ? maxfuid : maxfuid+foffset # offset factor values
-  warn("using hack counter for FACTOR uid starting at $(fuid)")
+  @warn "using hack counter for FACTOR uid starting at $(fuid)"
   # neoNodeId = 63363
   # elem = newvertdict[neoNodeId]
   for (neoNodeId,elem) in newvertdict
     if elem[:frtend]["t"] == "F"
       # @show neoNodeId
       if !haskey(elem,:ready)
-        # warn("missing ready field")
+        # missing ready field
         continue
       end
       if Int(elem[:ready]["val"]) != 1
-        warn("ready/val field not equal to 1")
+        @warn "ready/val field not equal to 1"
         continue
       end
       # verts relating to this factor
@@ -330,7 +326,7 @@ function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict, maxf
             elem[:frtend]["lklh"] == "rangeMEAS" ) && i==2 ) ||
             ( elem[:frtend]["lklh"] == "PTPR2 G 2 STDEV" && i==1 )
           # detect bearing range factors being added between pose and landmark
-          warn("using hack counter for LANDMARKS uid +$(2*foffset)")
+          @warn "using hack counter for LANDMARKS uid +$(2*foffset)"
           uid = parse(Int,bf)+ 2*foffset # complete hack
         end
         push!(verts, fgl.g.vertices[uid])

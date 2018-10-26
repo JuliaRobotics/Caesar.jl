@@ -1,4 +1,6 @@
 
+import Base: convert
+
 export
     VariableRequest,
     FactorRequest,
@@ -8,7 +10,7 @@ export
 struct VariableRequest
     label::String
     variableType::String
-    N::Nullable{Int64}
+    N::Union{Int64, Nothing}
     labels::Vector{String}
 end
 
@@ -25,6 +27,6 @@ struct lsRequest
 end
 
 struct SetReadyRequest
-    variables::Nullable{Vector{String}}
+    variables::Union{Vector{String}, Nothing}
     isReady::Int
 end

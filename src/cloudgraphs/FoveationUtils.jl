@@ -82,12 +82,12 @@ export
 """
     $(SIGNATURES)
 """
-function foveateQueryToPoint{T <: AbstractString}(cg::CloudGraph,
+function foveateQueryToPoint(cg::CloudGraph,
         sessions::Vector{T},
         robot::T,
         user::T;
         point::Vector{Float64}=[0.0;0.0],
-        minrange::Number=1.5, maxrange::Number=5, fovrad::Number=0.3  )
+        minrange::Number=1.5, maxrange::Number=5, fovrad::Number=0.3  ) where {T <: AbstractString}
   #
   neoids, syms = Vector{Int}(), Vector{Symbol}()
   loadtx = transaction(cg.neo4j.connection)
