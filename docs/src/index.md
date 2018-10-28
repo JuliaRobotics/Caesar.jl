@@ -1,6 +1,6 @@
 ```@raw html
 <p align="center">
-<img src="assets/logo.png" width="480" border="0" />
+<img src="https://user-images.githubusercontent.com/6412556/47298402-ace95500-d5e5-11e8-8607-593525445d14.png" width="480" border="0" />
 </p>
 ```
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
