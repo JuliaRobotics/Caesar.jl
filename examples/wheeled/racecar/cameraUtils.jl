@@ -86,12 +86,15 @@ function getAprilTagTransform(tag::AprilTag,
   distCoeffs[2] = k2
 
   # Python OpenCV
-  ret, rvec, tvec = cv2.solvePnP(objPts, imgPts, camK, distCoeffs)
+  # ret, rvec, tvec = cv2.solvePnP(objPts, imgPts, camK, distCoeffs)
+  # Rmat = zeros(3,3)
+  # rodrigues!(Rmat,rvec[:])
+  # q = convert(Quat, RotMatrix{3}(Rmat))
 
-  Rmat = zeros(3,3)
-  rodrigues!(Rmat,rvec[:])
-  q = convert(Quat, RotMatrix{3}(Rmat))
-  return q, Translation(SVector(tvec...)), camK
+  cTt = AprilTags.homographytopose(tag.H, camK[1,1], camK[2,2], camK[1,3], camK[2,3], taglength=tagsize)
+
+  q = Quat(cTt[1:3,1:3])
+  return q, Translation(SVector(cTt[1:3,4]...)), camK
 end
 # objPts.push_back(cv::Point3f(-s,-s, 0));
 # objPts.push_back(cv::Point3f( s,-s, 0));
@@ -140,7 +143,7 @@ end
 function getTagPP2(bTt)
   @show bTt
   cVz = LinearMap(Quat(bTt.linear))([1.0;0;0])
-  wYt = atan2(cVz[2],cVz[1])
+  wYt = atan(cVz[2],cVz[1])
   Translation(bTt.translation[1],bTt.translation[2],0) ∘ LinearMap(RotZ(wYt))
 end
 

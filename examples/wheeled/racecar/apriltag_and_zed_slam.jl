@@ -16,19 +16,11 @@ using CoordinateTransformations, Rotations, StaticArrays
 # using MeshCat
 # using GeometryTypes
 
-
 using AprilTags
-
-# temporarily using Python / OpenCV for solvePnP
-# TODO: remove in favor of AprilTags.jl
-# using PyCall
-#
-# @pyimport numpy as np
-# @pyimport cv2
 
 
 include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","racecarUtils.jl"))
-# include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","cameraUtils.jl"))
+include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","cameraUtils.jl"))
 # include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","visualizationUtils.jl"))
 
 
