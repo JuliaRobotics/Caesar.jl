@@ -27,10 +27,10 @@ using
   ImageMagick,
   ImageCore,
   DocStringExtensions,
-  CloudGraphs, # TODO: will be movedd to DFG
-  Neo4j, # TODO: will be movedd to DFG
-  Mongoc # TODO: will be movedd to DFG
-
+  CloudGraphs,
+  Neo4j,
+  Mongoc,
+  Unmarshal
 
 export
   GenericInSituSystem,  # insitu components
@@ -135,4 +135,6 @@ include("cloudgraphs/slamindb.jl")
 include("cloudgraphs/MultisessionUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
 
+# ZMQ server and endpoints
+include("zmq/ZmqCaesar.jl")
 end
