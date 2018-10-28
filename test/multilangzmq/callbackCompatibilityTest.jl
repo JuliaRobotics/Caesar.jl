@@ -1,10 +1,10 @@
 using Caesar, Caesar.ZmqCaesar
-using Base.Test
+using Test
 
 @testset "ZMQ Callback Compatibility Tests" begin
 
     # Bring in the callbacks symbols
-    include(joinpath(Pkg.dir("Caesar"), "src", "zmq", "services", "ZmqServer.jl"))
+    include(joinpath(dirname(@__FILE__), "..", "..", "src", "zmq", "services", "ZmqServer.jl"))
 
     @testset "ZMQ Callback Compatibility Tests: System Callbacks" begin
         for callback in systemverbs

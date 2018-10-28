@@ -2,6 +2,7 @@ module ZmqCaesar
     using ZMQ, JSON
     using Distributions, IncrementalInference, Caesar
     using Unmarshal
+    using Dates
 
     include("models/distributions.jl")
     include("models/factors.jl")

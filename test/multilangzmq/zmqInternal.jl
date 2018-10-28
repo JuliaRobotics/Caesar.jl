@@ -32,7 +32,7 @@ lsCmd = Dict{String, Any}("request" => "ls", "payload" => JSON.parse(JSON.json(l
 @test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[],\"id\":\"x0\"}]}"
 
 # Add a prior factor
-dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
+dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(undef,3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
 factor = Dict{String, Any}("measurement" => [dist])
 priorFactCmd = Dict{String, Any}("request" => "addFactor", "payload" => JSON.parse(JSON.json(FactorRequest(["x0"], "Prior", factor))))
 @test sendCmd(config, fg, priorFactCmd) == "{\"status\":\"OK\",\"id\":\"x0f1\"}"
@@ -71,7 +71,7 @@ getNodeCmd = Dict{String, Any}("request" => "getNode", "payload" => "x0")
 x0Ret = JSON.parse(sendCmd(config, fg, getNodeCmd))
 
 # Test a factor that doesn't exist, should produce legible error
-dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
+dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(undef,3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
 factor = Dict{String, Any}("measurement" => [dist])
 priorFactCmd = Dict{String, Any}("request" => "addFactor", "payload" => JSON.parse(JSON.json(FactorRequest(["x0"], "IDontExistAsAFactor", factor))))
 @test_throws ErrorException sendCmd(config, fg, priorFactCmd)
