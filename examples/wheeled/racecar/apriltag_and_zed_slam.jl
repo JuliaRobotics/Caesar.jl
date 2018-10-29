@@ -1,26 +1,33 @@
-    # Local compute version
+# Local compute version
+
+using Distributed
 
 # add more julia processes
-cores = 1
+cores = 4
 if cores > 1
   nprocs() < cores ? addprocs(cores-nprocs()) : nothing
 end
 
+using Dates, Statistics
 using Caesar
 using YAML
-#, JLD2
+using JLD2
 using CoordinateTransformations, Rotations, StaticArrays
 
-# using RoMEPlotting, Gadfly
-# using Images, ImageView, ImageDraw
-# using MeshCat
-# using GeometryTypes
-
 using AprilTags
+using Images, ImageView, ImageDraw
+
+using Fontconfig
+using Cairo
+using Compose
+using RoMEPlotting, Gadfly
+# using FileIO
+# using GeometryTypes # using MeshCat
 
 
-include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","racecarUtils.jl"))
-include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","cameraUtils.jl"))
+
+include(joinpath(dirname(@__FILE__),"racecarUtils.jl"))
+include(joinpath(dirname(@__FILE__),"cameraUtils.jl"))
 # include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","visualizationUtils.jl"))
 
 
@@ -52,8 +59,7 @@ datafolder = joinpath(datadir,"labrun2/"); camidxs =  0:5:1625
 imgfolder = "images"
 # Figure export folder
 currdirtime = now()
-# currdirtime = "2018-08-14T00:52:01.534"
-# currdirtime = "2018-09-10T09:22:00.922"
+# currdirtime = "2018-10-28T15:50:41.953"
 resultsdir = joinpath(datadir, "results")
 imgdir = joinpath(resultsdir, "$(currdirtime)")
 
@@ -76,9 +82,6 @@ close(fid)
 # camlookup = prepCamLookup(175:5:370)
 camlookup = prepCamLookup(camidxs)
 
-# until AprilTag fix
-println("premature exit")
-exit()
 
 ## TODO: udpate to AprilTags.jl
 IMGS, TAGS = detectTagsViaCamLookup(camlookup, datafolder*imgfolder, imgdir)
@@ -90,8 +93,8 @@ tag_bag = prepTagBag(TAGS)
 
 
 # save the tag bag file for future use
-@save imgdir*"/tag_det_per_pose.jld" tag_bag
-# @load imgdir*"/tag_det_per_pose.jld" tag_bag
+@save imgdir*"/tag_det_per_pose.jld2" tag_bag
+# @load imgdir*"/tag_det_per_pose.jld2" tag_bag
 
 fid=open(imgdir*"/tags/pose_tags.csv","w")
 for pose in sort(collect(keys(tag_bag)))
@@ -109,16 +112,15 @@ pssym = Symbol("x$psid")
 # first pose with zero prior
 addNode!(fg, pssym, DynPose2(ut=0))
 # addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
-addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2)),
-                                              MvNormal(zeros(2),diagm([0.1;0.05].^2))))
+addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
+                                              MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))
 
 addApriltags!(fg, pssym, tag_bag[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 
 # writeGraphPdf(fg)
 
 # quick solve as sanity check
-tree = wipeBuildNewTree!(fg, drawpdf=true)
-inferOverTreeR!(fg,tree, N=N)
+batchSolve!(fg, N=N)
 
 
 # plotKDE(fg, :l1, dims=[3])
@@ -128,29 +130,29 @@ inferOverTreeR!(fg,tree, N=N)
 # @async run(`evince bt.pdf`)
 
 
-prev_psid = 0
 # add other positions
 maxlen = (length(tag_bag)-1)
-# psid = 5
-for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
+prev_psid = 0
+
+
+for psid in 1:1:240 #maxlen
   @show psym = Symbol("x$psid")
   addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
   # writeGraphPdf(fg)
 
 
-  if psid % 50 == 0 || psid == maxlen
-    IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym)_presolve.jld")
-    # tree = wipeBuildNewTree!(fg, drawpdf=true)
-    # inferOverTree!(fg,tree, N=N)
+  if psid % 20 == 0 || psid == maxlen
+    IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym)_presolve.jld2")
+    batchSolve!(fg,N=N)
   end
-  IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym).jld")
+  IIF.savejld(fg, file=imgdir*"/racecar_fg_$(psym).jld2")
 
   ## save factor graph for later testing and evaluation
-  # ensureAllInitialized!(fg)
-  # pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
-  # Gadfly.draw(PNG(joinpath(imgdir,"$(psym).png"),15cm, 10cm),pl)
-  # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
-  # Gadfly.draw(PNG(joinpath(imgdir,"hist_$(psym).png"),15cm, 10cm),pl)
+  ensureAllInitialized!(fg)
+  pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
+  Gadfly.draw(PNG(joinpath(imgdir,"$(psym).png"),15cm, 10cm),pl)
+  pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
+  Gadfly.draw(PNG(joinpath(imgdir,"hist_$(psym).png"),15cm, 10cm),pl)
   # pl = plotPose2Vels(fg, Symbol("$(psym)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
   # Gadfly.draw(PNG(joinpath(imgdir,"vels_$(psym).png"),15cm, 10cm),pl)
 
@@ -159,29 +161,33 @@ for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
 end
 
 
-IIF.savejld(fg, file=imgdir*"/racecar_fg_final.jld")
-# fg, = loadjld(file=imgdir*"/racecar_fg_final.jld")
+IIF.savejld(fg, file=imgdir*"/racecar_fg_final.jld2")
+# fg, = loadjld(file=imgdir*"/racecar_fg_final.jld2")
 results2csv(fg; dir=imgdir, filename="results.csv")
 
 
 # save factor graph for later testing and evaluation
 batchSolve!(fg, drawpdf=true, N=N)
 
-IIF.savejld(fg, file=imgdir*"/racecar_fg_final_resolve.jld")
-# fgr, = loadjld(file=imgdir*"/racecar_fg_final_resolve.jld")
+IIF.savejld(fg, file=imgdir*"/racecar_fg_final_resolve.jld2")
+# fgr, = loadjld(file=imgdir*"/racecar_fg_final_resolve.jld2")
 results2csv(fg; dir=imgdir, filename="results_resolve.csv")
 
+
+# pl = plotKDE(fg, :x1, levels=1, dims=[1;2]);
 
 
 #,xmin=-3,xmax=6,ymin=-5,ymax=2);
 Gadfly.push_theme(:default)
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max)
+pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max);
 # Gadfly.set(:default_theme)
-Gadfly.draw(SVG(joinpath(imgdir,"images","final.svg"),15cm, 10cm),pl)
+Gadfly.draw(PNG(joinpath(imgdir,"images","final.png"),15cm, 10cm),pl);
+Gadfly.draw(SVG(joinpath(imgdir,"images","final.svg"),15cm, 10cm),pl);
+
 # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
 # Gadfly.draw(PNG(joinpath(imgdir,"hist_final.png"),15cm, 10cm),pl)
 
-
+drawPoses(fg)
 
 
 # artificial loops  THIS IS FOR labrun 5
@@ -208,12 +214,12 @@ addFactor!(fg, [:l12; :l19], ppr)
 ensureAllInitialized!(fg)
 
 
-IIF.savejld(fg, file=imgdir*"/racecar_fg_presolve.jld")
+IIF.savejld(fg, file=imgdir*"/racecar_fg_presolve.jld2")
 results2csv(fg; dir=imgdir, filename="results_presolve_nloops.csv")
 
 batchSolve!(fg, drawpdf=true, N=N)
 
-IIF.savejld(fg, file=imgdir*"/racecar_fg_solved1_nloops.jld")
+IIF.savejld(fg, file=imgdir*"/racecar_fg_solved1_nloops.jld2")
 results2csv(fg; dir=imgdir, filename="results_solved_nloops.csv")
 # Gadfly.push_theme(:default)
 pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max)
