@@ -137,7 +137,7 @@ maxlen = (length(tag_bag)-1)
 prev_psid = 0
 
 
-for psid in 1:1:240 #maxlen
+for psid in 1:1:100 #maxlen
   @show psym = Symbol("x$psid")
   addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
   # writeGraphPdf(fg)
