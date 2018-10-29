@@ -112,7 +112,7 @@ function detectTagsViaCamLookup(camlookup, imgfolder, imgsavedir)
     push!(TAGS, deepcopy(tags))
     push!(IMGS, deepcopy(img))
     foreach(tag->drawTagBox!(IMGS[psid+1],tag, width = 5, drawReticle = false), tags)
-    save(imgsavedir*"/tags/img_$(psid).jpg", IMGS[psid+1])
+    Images.save(imgsavedir*"/tags/img_$(psid).jpg", IMGS[psid+1])
   end
   # psid = 1
   # img = load(datafolder*"$(imgfolder)/$(camlookup[psid])")
