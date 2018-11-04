@@ -6,8 +6,11 @@ A couple of important points:
 * You **do not need** to modify/fork/edit internal Caesar/RoME/IncrementalInference source code to introduce new  variable and factor types!
 * As long as the factors exist in the working space when the solver is run, the factors are automatically used -- this is possible due to Julia's [multiple dispatch design](https://docs.julialang.org/en/v1/manual/methods/index.html)
 * Caesar is designed to allow you to add new variables and factors to your own independent repository and incorporate them at will at compile-time or even run-time
-* Residual function definitions for new factors types use a [callable struct (a.k.a functor) architecture](https://discourse.julialang.org/t/documenting-a-functor-callable-struct/8444) to simultaneously allow:  multiple dispatch (i.e. 'polymorphic' bahavior); meta data and in-place memory storage for advanced and performant code; as well as a outside callback implementation style.
-* In most scenarios, there is no need for new variables or factors:
+* Residual function definitions for new factors types use a [callable struct (a.k.a functor) architecture](https://discourse.julialang.org/t/documenting-a-functor-callable-struct/8444) to simultaneously allow:  
+  * Multiple dispatch (i.e. 'polymorphic' behavior)
+  * Meta-data and in-place memory storage for advanced and performant code
+  * An outside callback implementation style
+* In most robotics scenarios, there is no need for new variables or factors:
   * Variables have various mechanisms that allow you to attach data to them, e.g. raw sensory data or identified April tags, so you do not need to create a new variable type just to store data
   * New variables are required only if you are representing a new state - TODO: Example of needed state
   * New factors are needed if:
@@ -32,11 +35,39 @@ The remainder of this section discusses each of these steps.
 ## Creating a Repository
 You can fork the following template repository to construct your own [Caesar Variable and Factor Examples](https://github.com/GearsAD/Caesar_VariableFactorExamples.jl.git).
 
+If this repository is going to be used for development of the new variables/factors as well as for the experiment (i.e. the code that builds the graph and solves it),
+
+```julia
+using Caesar, RoME
+using Caesar_VariableFactorExamples # Your new variable/factor repository
+```
+
 ## Creating New Variables
+
+What you need to build in the variable:
+* ?
 
 ## Creating New Factors
 
+Factor types:
+* FunctorSingleton
+* FunctorPairwise
+* FunctorPairwiseMinimize
+
+What you need to build in the factor:
+* A struct for the factor itself
+* A sampler
+* A residual function
+* Serialization and deserialization methods
+
 ## Unit Tests
+
+What you need to test:
+* Creation of the factor
+* Sampling of the factor
+* Residual testing
+* Solving using the variables and factors
+* Serialization and deserialization
 
 ## Using your Types with the Caesar Solver
 
