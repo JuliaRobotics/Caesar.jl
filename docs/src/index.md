@@ -34,10 +34,12 @@ Caesar is implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http
 [Caesar.jl](http://www.github.com/JuliaRobotics/Caesar.jl) is the umbrella repo that depends on RoME.jl and others to support that 'passes through' the same functionality while introducing more. For example, interaction with database server systems, [LCMCore.jl](http://www.github.com/JuliaRobotics/LCMCore.jl), (future ROS support), and more.
 
 ### Caesar Core Packages
-Critically, this package can operate in the conventional SLAM manner, using local dictionaries, or centralize around the `FactorGraph` through a graph database using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git), as [discussed here](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf)[2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate [RoME.jl][rome-url] and back-end solver [IncrementalInference.jl][iif-url].
+Critically, this package can operate in the conventional SLAM manner, using local dictionaries, or centralize around the `FactorGraph` through a graph database using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git), as [discussed here](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) [2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) and back-end solver [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl).
 
 Details about the accompanying packages:
-* [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl) supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself. * [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) introduces nodes and factors that are useful to robotic navigation. * [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) are a set of scripts that provide MATLAB style plotting of factor graph beliefs, mostly supporting 2D visualization with some support for projections of 3D.
+* [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl) supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself.
+* [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) introduces nodes and factors that are useful to robotic navigation.
+* [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) are a set of scripts that provide MATLAB style plotting of factor graph beliefs, mostly supporting 2D visualization with some support for projections of 3D.
 
 ## Caesar Extensions
 
@@ -55,9 +57,6 @@ The Caesar framework is not limited to direct Julia use. The following Github pr
 
 Contributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below).
 
-## Future
-In the future, Caesar.jl would likely interact more closely with repo's such as [SensorFeatureTracking.jl](http://www.github.com/JuliaRobotics/SensorFeatureTracking.jl), [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl), and [RecursiveFiltering.jl](http://www.github.com/JuliaRobotics/RecursiveFiltering.jl)
-
 # Next Steps
 For installation steps, examples/tutorials, and concepts please refer to the following pages:
 
@@ -72,14 +71,11 @@ Depth = 3
 ```
 
 ## Future targets
----
-
 This is a work in progress package. Please file issues here as needed to help resolve problems for everyone! We are tracking improvements and new endeavors in the Issues section of this repository.
 
+In the future, Caesar.jl would likely interact more closely with repo's such as [SensorFeatureTracking.jl](http://www.github.com/JuliaRobotics/SensorFeatureTracking.jl), [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl), and [RecursiveFiltering.jl](http://www.github.com/JuliaRobotics/RecursiveFiltering.jl)
 
 # Contributors
----
-
 Authors directly involved with this package are:
 
 D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
