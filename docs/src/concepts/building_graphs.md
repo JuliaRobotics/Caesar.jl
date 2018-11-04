@@ -83,9 +83,6 @@ The current factor types that you will find in the examples are (there are many 
 * Pose2Pose2 - A factor between two 2D poses
 * Pose3Pose3 - A factor between two 3D poses
 
-## Quick Discussion on IsReady
-TODO
-
 ## Solving Graphs
 
 ```julia
