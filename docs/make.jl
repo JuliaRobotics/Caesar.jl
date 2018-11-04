@@ -12,7 +12,7 @@ makedocs(
         "Concepts" => [
             "Caesar Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
-            "Adding New Factors" => "concepts/adding_factors.md",
+            "Adding New Variables and Factors" => "concepts/adding_variables_factors.md",
             "Arena Visualization" => "concepts/arena_visualizations.md",
             "Using Caesar's ZMQ" => "concepts/zmq.md",
             "Using Caesar Database Operation" => "concepts/database_interactions.md"
@@ -22,7 +22,7 @@ makedocs(
             "Basics: Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Basics: Singular Ranges-only SLAM" => "examples/basic_slamedonut.md",
             "Basics: ContinuousScalar" => "examples/basic_continuousscalar.md",
-            "Basics: Creating Custom Factors" => "examples/basic_simplenew.md",
+            "Basics: Creating Custom Variables and Factors" => "examples/basic_simplenewvariablesfactors.md",
             "Moderate Tutorial: Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
         "Function Reference" => "func_ref.md"
