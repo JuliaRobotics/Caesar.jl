@@ -7,7 +7,7 @@
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.7.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.7)
 
 # Introduction
-Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar is a product of the thesis "Towards non-parametric / parametric state estimation and navigation solutions" [1].
+Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar started its development as part of the thesis "Towards non-parametric / parametric state estimation and navigation solutions" [1].
 
 # Features
 The Caesar framework has the following features:
@@ -20,6 +20,11 @@ The Caesar framework has the following features:
 * Multi-hypothesis representation in the factor-graph
 * Local in-memory solving on the device as well as database-driven centralized solving
 * Fixed-lag, continuous operation as well as off-line batch solving
+
+# TLDR Installation
+If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package 'Caesar'.
+
+In a Julia 0.7+ REPL, press '?' and type `add Caesar` to pull the latest tagged version.
 
 # Caesar Implementation
 
@@ -53,81 +58,24 @@ Contributions are welcome! If you are developing an extension we would like to h
 ## Future
 In the future, Caesar.jl would likely interact more closely with repo's such as [SensorFeatureTracking.jl](http://www.github.com/JuliaRobotics/SensorFeatureTracking.jl), [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl), and [RecursiveFiltering.jl](http://www.github.com/JuliaRobotics/RecursiveFiltering.jl)
 
-# Major features
----
-
-* Performing multi-core inference with Multi-modal iSAM over factor graphs, supporting `Pose2, Pose3, Point2, Point3, Null hypothesis, Multi-modal, KDE density, partial constraints`, and more.
-```julia
-tree = wipeBuildBayesTree!(fg, drawpdf=true)
-inferOverTree!(fg, tree)
-```
-
-* Or directly on a database, allowing for separation of concerns
-```julia
-slamindb()
-```
-
-* Local copy of database held FactorGraph
-```julia
-fg = Caesar.initfg(cloudGraph, session)
-fullLocalGraphCopy(fg)
-```
-
-* Saving and loading FactorGraph objects to file
-```julia
-savejld(fg, file="test.jld", groundtruth=gt)
-loadjld(file="test.jld")
-```
-
-* Visualization through [Arena.jl](https://github.com/dehann/Arena.jl).
-```julia
-visualizeallposes(fg) # from local dictionary
-drawdbdirector()      # from database held factor graph
-```
-
-* [Foveation queries](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) to quickly organize, extract and work with big data blobs, for example looking at images from multiple sessions predicted to see the same point `[-9.0,9.0]` in the map:
-```julia
-neoids, syms = foveateQueryToPoint(cloudGraph,["SESS21";"SESS38";"SESS45"], "robot", "user" point=[-9.0;9.0], fovrad=0.5 )
-for neoid in neoids
-    cloudimshow(cloudGraph, neoid=neoid)
-end
-```
-
-* Operating on data from a thin client processes, such as a Python front-end
- [examples/database/python/neo_interact_example.jl](https://github.com/dehann/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py)
-
-* A `caesar-lcm` server interface for C++ applications is [available here](http://github.com/pvazteixeira/caesar-lcm).
-
-* A multicore Bayes 2D feature tracking server over tcp
-```
-julia -p10 -e "using Caesar; tcpStringBRTrackingServer()"
-```
-
-And many more, please see the [examples](/examples) folder.
-
 # Next Steps
+For installation steps, examples/tutorials, and concepts please refer to the following pages:
 
-
-## Installation
----
-
-Caesar.jl is registered with the regular Julia METADATA and can be installed as follows:
-```julia
-julia> Pkg.add("Caesar")
+```@contents
+Pages = [
+    "installation_environment.md"
+    "tutorials.md"
+    "examples.md"
+    "func_ref.md"
+]
+Depth = 3
 ```
-
-## Basic usage
----
-
-The basic example has been moved to the visualization page.
-
 
 ## Future targets
 ---
 
-This is a work in progress package. Please file issues here as needed to help resolve problems for everyone!
+This is a work in progress package. Please file issues here as needed to help resolve problems for everyone! We are tracking improvements and new endeavors in the Issues section of this repository.
 
-Hybrid parametric and non-parametric optimization. Incrementalized update rules and properly marginalized 'forgetting' for sliding window type operation. We defined interprocess interface for multi-language front-end development.
 
 # Contributors
 ---
@@ -160,14 +108,3 @@ Consider citing our work:
     [2]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: "SLAMinDB: Centralized graph
          databases for mobile robotics" IEEE International Conference on Robotics and Automation (ICRA),
          Singapore, 2017.
-
-## Manual Outline
-
-```@contents
-Pages = [
-    "index.md"
-    "examples.md"
-    "func_ref.md"
-]
-Depth = 3
-```
