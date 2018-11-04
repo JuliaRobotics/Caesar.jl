@@ -6,7 +6,9 @@ makedocs(
     sitename = "Caesar.jl",
     pages = Any[
         "Home" => "index.md",
-        "Getting Started" => "getting_started.md",
+        "Getting Started" => [
+            "installation_environment.md",
+        ],
         "Examples" => "examples.md",
         "Entry Tutorial: ContinuousScalar" => "tutorialcontinuousscalar.md",
         "Entry Tutorial: Hexagonal 2D SLAM" => "tut_hexagonal2d.md",
