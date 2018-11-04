@@ -63,8 +63,8 @@ For installation steps, examples/tutorials, and concepts please refer to the fol
 ```@contents
 Pages = [
     "installation_environment.md"
-    "tutorials.md"
-    "examples.md"
+    "concepts/concepts.md"
+    "examples/examples.md"
     "func_ref.md"
 ]
 Depth = 3
