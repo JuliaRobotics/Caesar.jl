@@ -1,4 +1,23 @@
-## Examples
+# Examples
+
+## Basics
+
+### Hexagonal 2D
+[Hexagonal 2D Example](basic_hexagonal2d.md)
+
+### Continuous Scalar
+
+This abstract example illustrates how `IncrementalInference` enables algebraic relations between stochastic variables, and how a final posterior belief estimate is calculated from several pieces of information.
+
+### Adding Factors - Simple Factor Design
+
+
+## Intermediate Examples
+
+### Adding Factors - DynPose Factor
+
+
+----- REFACTOR ----
 
 
 #$ Multi-modal range only example:   

@@ -7,7 +7,7 @@
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.7.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.7)
 
 # Introduction
-Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar started its development as part of the thesis "Towards non-parametric / parametric state estimation and navigation solutions" [1].
+Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar started as part of the thesis "Towards non-parametric / parametric state estimation and navigation solutions" [1].
 
 # Features
 The Caesar framework has the following features:
@@ -26,7 +26,7 @@ If you want to skip ahead and add Caesar to your Julia packages, you can install
 
 In a Julia 0.7+ REPL, press '?' and type `add Caesar` to pull the latest tagged version.
 
-# Caesar Implementation
+# Caesar Framework
 
 ## Caesar Core
 Caesar is implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.
@@ -70,10 +70,13 @@ Pages = [
 Depth = 3
 ```
 
-## Future targets
-This is a work in progress package. Please file issues here as needed to help resolve problems for everyone! We are tracking improvements and new endeavors in the Issues section of this repository.
+## Future
+This package is a work in progress. Please file issues here as needed to help resolve problems for everyone! We are tracking improvements and new endeavors in the Issues section of this repository.
 
-In the future, Caesar.jl would likely interact more closely with repo's such as [SensorFeatureTracking.jl](http://www.github.com/JuliaRobotics/SensorFeatureTracking.jl), [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl), and [RecursiveFiltering.jl](http://www.github.com/JuliaRobotics/RecursiveFiltering.jl)
+In the future, Caesar will likely interact more closely with repos such as:
+* [SensorFeatureTracking.jl](http://www.github.com/JuliaRobotics/SensorFeatureTracking.jl)
+* [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl)
+* [RecursiveFiltering.jl](http://www.github.com/JuliaRobotics/RecursiveFiltering.jl)
 
 # Contributors
 Authors directly involved with this package are:
@@ -82,9 +85,10 @@ D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kae
 
 We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
 
-# Cite
----
+# JuliaRobotics Code of Conduct
+The Caesar repository is part of the JuliaRobotics organization and adheres to the JuliaRobotics [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 
+# Cite
 Consider citing our work:
 
 ```
@@ -92,13 +96,11 @@ Consider citing our work:
   author = "Dehann Fourie, John Leonard, Micheal Kaess, and contributors",
   title =  "Caesar.jl",
   year =   2017,
-  url =    "https://github.com/dehann/Caesar.jl"
+  url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
 
 # References
----
-
     [1]  Fourie, D.: "Multi-modal and Inertial Sensor Solutions to Navigation-type Factor Graph",
          Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.
     [2]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: "SLAMinDB: Centralized graph
