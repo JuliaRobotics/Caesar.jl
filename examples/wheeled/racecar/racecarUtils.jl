@@ -48,7 +48,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
                 MvNormal([dx;
                           dy;
                           dth],
-                         diagm([0.05;0.05;0.03].^2)) )
+                         Matrix(Diagonal([0.05;0.05;0.03].^2))) )
     end
     if rand() > DAerrors
       # regular single hypothesis

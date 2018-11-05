@@ -8,7 +8,7 @@ using AprilTags
 
 
 
-include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","racecarUtils.jl"))
+include(joinpath(dirname(@__FILE__),"racecarUtils.jl"))
 
 
 cfg = loadConfig()

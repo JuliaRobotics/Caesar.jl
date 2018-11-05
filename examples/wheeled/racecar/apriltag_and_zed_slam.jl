@@ -2,11 +2,16 @@
 
 using Distributed
 
-# add more julia processes
-cores = 4
-if cores > 1
-  nprocs() < cores ? addprocs(cores-nprocs()) : nothing
+"""
+Ensure the desired number of julia processes are present.
+"""
+function check_procs_IIF(n::Int)
+  if n > 1
+    nprocs() < n ? addprocs(n-nprocs()) : nothing
+  end
+  procs()
 end
+check_procs_IIF(4) # TODO use IIF.check_procs(4) once available
 
 using Dates, Statistics
 using Caesar
@@ -34,7 +39,7 @@ include(joinpath(dirname(@__FILE__),"cameraUtils.jl"))
 cfg = loadConfig()
 
 cw, ch = cfg[:intrinsics][:cx], cfg[:intrinsics][:cy]
-fx = fy = cfg[:intrinsics][:fx]
+fx = fy = 1.0*cfg[:intrinsics][:fx]
 camK = [fx 0 cw; 0 fy ch; 0 0 1]
 tagsize = 0.172
 # k1,k2 = cfg[:intrinsics][:k1], cfg[:intrinsics][:k2] # makes it worse
@@ -61,9 +66,10 @@ imgfolder = "images"
 
 # Figure export folder
 currdirtime = now()
-# currdirtime = "2018-10-28T15:50:41.953"
+# currdirtime = "2018-10-28T23:17:30.067"
 resultsdir = joinpath(datadir, "results")
 resultsdir = joinpath(resultsdir, "$(currdirtime)")
+
 
 mkdir(resultsdir)
 mkdir(resultsdir*"/tags")
@@ -119,10 +125,12 @@ addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal(
 
 addApriltags!(fg, pssym, tag_bag[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 
-# writeGraphPdf(fg)
+writeGraphPdf(fg)
 
 # quick solve as sanity check
-batchSolve!(fg, N=N)
+tree = batchSolve!(fg, N=N, drawpdf=true, show=true)
+
+# @async run(`evince /tmp/bt.pdf`)
 
 
 # plotKDE(fg, :l1, dims=[3])
@@ -136,6 +144,8 @@ batchSolve!(fg, N=N)
 maxlen = (length(tag_bag)-1)
 prev_psid = 0
 
+Gadfly.push_theme(:default)
+
 
 for psid in 1:1:100 #maxlen
   @show psym = Symbol("x$psid")
@@ -143,9 +153,9 @@ for psid in 1:1:100 #maxlen
   # writeGraphPdf(fg)
 
 
-  if psid % 20 == 0 || psid == maxlen
+  if psid % 10 == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
-    batchSolve!(fg,N=N)
+    tree = batchSolve!(fg, drawpdf=true, N=N)
   end
   IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym).jld2")
 
@@ -164,12 +174,13 @@ end
 
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
-# fg, = loadjld(file=resultsdir*"/racecar_fg_final.jld2")
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x220_presolve.jld2")
+
 results2csv(fg; dir=resultsdir, filename="results.csv")
 
 
 # save factor graph for later testing and evaluation
-batchSolve!(fg, drawpdf=true, N=N)
+tree = batchSolve!(fg, N=N, drawpdf=true)
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final_resolve.jld2")
 # fgr, = loadjld(file=resultsdir*"/racecar_fg_final_resolve.jld2")
@@ -177,6 +188,7 @@ results2csv(fg; dir=resultsdir, filename="results_resolve.csv")
 
 
 # pl = plotKDE(fg, :x1, levels=1, dims=[1;2]);
+
 
 
 #,xmin=-3,xmax=6,ymin=-5,ymax=2);
@@ -190,6 +202,24 @@ Gadfly.draw(SVG(joinpath(resultsdir,"images","final.svg"),15cm, 10cm),pl);
 # Gadfly.draw(PNG(joinpath(resultsdir,"hist_final.png"),15cm, 10cm),pl)
 
 
+
+
+
+
+# debugging
+
+
+# vars = lsRear(fg, 5)
+#
+#
+# num_edges(fg.g)
+#
+# subgraphFromVerts(fg, vars)
+#
+# ensureAllInitialized!(fg)
+# isInitialized(fg, :x220)
+#
+# ls(fg, :l14)
 
 
 #
