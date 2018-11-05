@@ -7,7 +7,6 @@ This tutorial is rather abstract and the user is free to imagine any system of r
 The tutorial implicitly shows a multi-modal uncertainty introduced and transmitted.
 The tutorial also illustrates consensus through an additional piece of information, which reduces all stochastic variable marginal beliefs to unimodal only beliefs.
 The example will also illustrate the use of non-Gaussian beliefs and global inference.
-The tutorial also shows how to create user defined functions.
 Lastly, the tutorial demonstrates how automatic initialization of variables works.
 
 This tutorial requires `IncrementalInference v0.3.0+, RoME v0.1.0, RoMEPlotting` packages be installed. In addition, the optional `GraphViz` package will allow easy visualization of the `FactorGraph` object structure.
@@ -17,49 +16,8 @@ To start, the two major mathematical packages are brought into scope.
 using Distributions
 using IncrementalInference
 ```
-This tutorial calls for multiple variable nodes connected through algebraic functions stochastic uncertainty.
-User scope `Prior`, `LinearOffset`, and `MultiModalOffset` with arbitrary distributions are defined as:
-```julia
-import IncrementalInference: getSample
 
-struct Prior{T} <: IncrementalInference.FunctorSingleton where T <: Distribution
-  z::T
-end
-getSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,:), )
-struct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: Distribution
-  z::T
-end
-getSample(s::LinearOffset, N::Int=1) = (reshape(rand(s.z,N),1,:), )
-function (s::LinearOffset)(res::Array{Float64},
-                           userdata::FactorMetadata,
-                           idx::Int,
-                           meas::Tuple{Array{Float64, 2}},
-                           X1::Array{Float64,2},
-                           X2::Array{Float64,2}  )
-  #
-  res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])
-  nothing
-end
-struct MultiModalOffset <: IncrementalInference.FunctorPairwise
-  z::Vector{Distribution}
-  c::Categorical
-end
-getSample(s::MultiModalOffset, N::Int=1) = (reshape.(rand.(s.z, N),1,:)..., rand(s.c, N))
-function (s::MultiModalOffset)(res::Array{Float64},
-                               userdata::FactorMetadata,
-                               idx::Int,
-                               meas::Tuple,
-                               X1::Array{Float64,2},
-                               X2::Array{Float64,2}  )
-  #
-  res[1] = meas[meas[end][idx]][idx] - (X2[1,idx] - X1[1,idx])
-  nothing
-end
-```
-Notice the residual function relating to the two `PairwiseFunctor` derived definitions.
-The one dimensional residual functions, `res[1] = measurement - prediction`, are used during inference to approximate the convolution of conditional beliefs from the sample approximate marginal beliefs of the connected variables.
-
-Guidelines for developing your own functions are discussed here (TBD), and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package [RoME.jl](http://www.github.com/dehann/RoME.jl).
+Guidelines for developing your own functions are discussed here in [Adding Variables and Factors](../concepts/adding_variables_factors.md), and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package [RoME.jl](http://www.github.com/dehann/RoME.jl).
 
 The next step is to describe the inference problem with a graphical model of type `IncrementalInference.FactorGraph`.
 The first step is to create an empty factor graph object and start populating it with variable nodes.
