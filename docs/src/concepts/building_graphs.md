@@ -4,8 +4,8 @@ Irrespective of your application - real-time robotics, batch processing of surve
 The following sections discuss the steps required to construct a graph and solve it:
 * Initialing the Factor Graph
 * Adding Variables and Factors to the Graph
-* Informing the Solver About Ready Data
 * Solving the Graph
+* Informing the Solver About Ready Data
 
 # Initializing a Factor Graph
 
@@ -35,9 +35,11 @@ addNode!(fg, :x1, Pose2)
 You can check for the latest variable types by running the following in your terminal:
 
 ```julia
-using RoME
+using RoME, Caesar
 subtypes(IncrementalInference.InferenceVariable)
 ```
+
+Note: This has been made available as `IncrementalInference.getCurrentWorkspaceVariables()` in IncrementalInference v0.4.4.
 
 The current list of available variable types is:
 * Point2 - A 2D coordinate consisting of [x, y, theta]
@@ -70,12 +72,20 @@ You can check for the latest factor types by running the following in your termi
 
 ```julia
 using RoME, Caesar
-subtypes(IncrementalInference.FunctorPairwise)
+println("- Singletons (priors): ")
+println.(sort(string.(subtypes(IncrementalInference.FunctorSingleton))));
+println("- Pairwise (variable constraints): ")
+println.(sort(string.(subtypes(IncrementalInference.FunctorPairwise))));
+println("- Pairwise (variable minimization constraints): ")
+println.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));
 ```
+
+Note: This has been made available as `IncrementalInference.getCurrentWorkspaceFactors()` in IncrementalInference v0.4.4.
 
 The current factor types that you will find in the examples are (there are many aside from these):
 
-* Point2Point2 -A factor between two 2D points
+* Prior - A singleton indicating a prior on a variable
+* Point2Point2 - A factor between two 2D points
 * Point2Point2WorldBearing - A factor between two 2D points with bearing
 * Pose2Point2Bearing - A factor between two 2D points with bearing
 * Pose2Point2BearingRange - A factor between two 2D points with bearing and range

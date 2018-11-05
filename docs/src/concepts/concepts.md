@@ -2,6 +2,6 @@
 
 Discuss factor graphs, variables, factors, accessing data etc.
 
-Discuss plotting (Arena, RoME plotting).
+Discuss plotting (Arena, RoMEPlotting).
 
 Discuss connectivity (database, ZMQ).

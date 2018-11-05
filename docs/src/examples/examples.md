@@ -31,6 +31,10 @@ This abstract example illustrates how `IncrementalInference` enables algebraic r
 ## Intermediate Examples
 The following are more complex examples that demonstrate real-world applications.
 
+### Fixed-Lag Solving - Hexagonal2D Revisited
+
+[Hexagonal Fixed-Lag](interm_fixedlag_hexagonal.md)
+
 ### Adding Factors - DynPose Factor
 
 
