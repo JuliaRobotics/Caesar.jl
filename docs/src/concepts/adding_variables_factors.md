@@ -192,6 +192,8 @@ What you should test:
 * Solving using the variables and factors
 * Serialization and deserialization
 
+An example of these tests can be seen for the trivial case shown in the example repo [ExamplePrior Unit Tests](https://github.com/GearsAD/Caesar_VariableFactorExamples.jl/blob/master/test/ExamplePrior.jl).
+
 ## Using your Types with the Caesar Solver
 
 As above, as long as you bring your factors into the workspace, you should be able to use them in your experimental setup.
