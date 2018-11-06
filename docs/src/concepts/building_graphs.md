@@ -136,6 +136,8 @@ verts = ls(fg)
 map(v -> println("$v : $(getKDEMax(getVertKDE(fg, v)))"), verts[1]);
 ```
 
+> Also see built-in function `printgraphmax(fg)` which performs a similar function.
+
 ## Plotting
 Once the graph has been built, a simple plot of the values can be produced with RoMEPlotting.jl. For example:
 
