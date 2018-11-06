@@ -27,6 +27,9 @@ This abstract example illustrates how `IncrementalInference` enables algebraic r
 
 ### Adding Factors - Simple Factor Design
 
+Caesar can be extended with new variables and factors without changing the core code. An example of this design pattern is provided in this example.
+
+[Defining New Variables and Factor](basic_definingfactors.md)
 
 ## Intermediate Examples
 The following are more complex examples that demonstrate real-world applications.
@@ -37,17 +40,16 @@ The following are more complex examples that demonstrate real-world applications
 
 ### Adding Factors - DynPose Factor
 
+## Application Examples and Demos
 
------ TODO REFACTOR ----
-
-## Multi-session Use-case
+### Multi-session Use-case
 
 Multi-session [Turtlebot](http://www.turtlebot.com/) example of the second floor in the [Stata Center](https://en.wikipedia.org/wiki/Ray_and_Maria_Stata_Center):   
 ```@raw html
 <img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/turtlemultisession.gif" alt="Turtlebot Multi-session animation" width="480" border="0" /></a>
 ```
 
-## Simulated Ambiguous SONAR in 3D
+### Simulated Ambiguous SONAR in 3D
 
 Intersection of ambiguous elevation angle from planar SONAR sensor:   
 
