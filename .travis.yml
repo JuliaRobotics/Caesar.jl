@@ -19,7 +19,13 @@ script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia --check-bounds=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.develop("Mongoc"); Pkg.develop("CloudGraphs"); Pkg.test("Caesar"; coverage=true)'
 
-after_success:
-  - julia -e 'using Pkg; cd(Pkg.dir("Caesar")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
-  - julia -e 'using Pkg; Pkg.add("Documenter")'
-  - julia -e 'using Pkg; cd(Pkg.dir("Caesar")); include(joinpath("docs", "make.jl"))'
+jobs:
+  include:
+    - stage: "Documentation"
+      julia: 1.0
+      os: linux
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate();
+                                    Pkg.develop(PackageSpec(path=pwd()))'
+        - julia --project=docs/ docs/make.jl
+      after_success: skip
