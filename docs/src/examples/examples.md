@@ -40,6 +40,8 @@ The following are more complex examples that demonstrate real-world applications
 
 ### Adding Factors - DynPose Factor
 
+[Intermediate Example: Adding Dynamic Factors and Variables](interm_dynpose.md)
+
 ## Application Examples and Demos
 
 ### Multi-session Use-case
