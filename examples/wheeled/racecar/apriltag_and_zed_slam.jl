@@ -67,8 +67,9 @@ imgfolder = "images"
 # Figure export folder
 currdirtime = now()
 # currdirtime = "2018-10-28T23:17:30.067"
-resultsdir = joinpath(datadir, "results")
-resultsdir = joinpath(resultsdir, "$(currdirtime)")
+currdirtime = "2018-11-03T22:48:51.924"
+resultsparentdir = joinpath(datadir, "results")
+resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
 
 
 mkdir(resultsdir)
@@ -81,7 +82,7 @@ println(fid, datafolder)
 println(fid, camidxs)
 close(fid)
 
-fid = open(resultsdir*"/racecar.log", "a")
+fid = open(resultsparentdir*"/racecar.log", "a")
 println(fid, "$(currdirtime), $datafolder")
 close(fid)
 
@@ -141,19 +142,21 @@ tree = batchSolve!(fg, N=N, drawpdf=true, show=true)
 
 
 # add other positions
-maxlen = (length(tag_bag)-1)
-prev_psid = 0
+global maxlen = (length(tag_bag)-1)
+global prev_psid = 0
 
 Gadfly.push_theme(:default)
 
 
-for psid in 1:1:100 #maxlen
+for psid in 280:1:maxlen
+  global prev_psid
+  global maxlen
   @show psym = Symbol("x$psid")
   addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
   # writeGraphPdf(fg)
 
 
-  if psid % 10 == 0 || psid == maxlen
+  if psid % 20 == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
     tree = batchSolve!(fg, drawpdf=true, N=N)
   end
@@ -174,7 +177,10 @@ end
 
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
-# fg, = loadjld(file=resultsdir*"/racecar_fg_x220_presolve.jld2")
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x280_presolve.jld2")
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x279.jld2")
+
+
 
 results2csv(fg; dir=resultsdir, filename="results.csv")
 
@@ -207,6 +213,16 @@ Gadfly.draw(SVG(joinpath(resultsdir,"images","final.svg"),15cm, 10cm),pl);
 
 
 # debugging
+
+# using Profile
+#
+# using Logging
+# global_logger(NullLogger())
+# @profile println("test")
+# Profile.clear()
+# @profile tree1 = IIF.wipeBuildNewTree!(fg)
+#
+# Juno.profiler()
 
 
 # vars = lsRear(fg, 5)

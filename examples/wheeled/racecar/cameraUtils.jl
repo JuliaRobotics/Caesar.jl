@@ -49,7 +49,7 @@ function buildtagdict(cTt,
   onetag[:pos] = tvec.translation[:]
   onetag[:quat] = Float64[Ql.w; Ql.x; Ql.y; Ql.z]
   onetag[:tagxy] = Float64[tagsize; tagsize]
-  onetag[:bearing] = [atan2(-tvec.translation[1], tvec.translation[3]);]
+  onetag[:bearing] = [atan(-tvec.translation[1], tvec.translation[3]);]
   onetag[:range] = [norm(tvec.translation[[1;3]]);]
   # onetag[:tRYc] = convert(RotXYZ, q).theta2
   onetag[:bP2t] = bP2t

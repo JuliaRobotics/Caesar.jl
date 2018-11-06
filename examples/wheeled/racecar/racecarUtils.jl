@@ -29,7 +29,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
   for lmid in keys(posetags)
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
-      info("adding node $lmsym")
+      @info "adding node $lmsym"
       addNode!(fg, lmsym, lmtype)
     end
     ppbr = nothing
@@ -75,8 +75,8 @@ function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odot
     addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))), autoinit=autoinit)
   elseif odotype == VelPose2VelPose2
     addNode!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
-    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),diagm([0.4;0.4;0.3].^2)),
-                                                             MvNormal(zeros(2),diagm([0.2;0.1].^2))), autoinit=autoinit)
+    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([0.4;0.4;0.3].^2))),
+                                                             MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2)))), autoinit=autoinit)
   end
 
   addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors)
