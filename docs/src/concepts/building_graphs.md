@@ -50,8 +50,7 @@ The current list of available variable types is:
 * DynPose2 - A 2D coordinate, linear velocities, and a rotation
 
 ## Factors
-TODO - define.
-Factors provide constraints between variables.
+Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a prior is defined against x0 with a normal distribution centered around [0,0,0]. 
 
 ### Priors
 ```julia
