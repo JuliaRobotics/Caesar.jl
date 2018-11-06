@@ -2,7 +2,7 @@
 
 Caesar.jl is one of the packages within the [JuliaRobotics](http://www.juliarobotics.org) community, and adheres to the [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 
-## Local copy of Julia
+## Local Installation of Julia
 
 Although [Julia](https://julialang.org/) (or [JuliaPro](https://juliacomputing.com/)) can be installed on a Linux computer using the `apt` package manager, we are striving for a fully local installation environment which is highly reproducible on a variety of platforms.
 
@@ -112,7 +112,7 @@ You can work with the packages as regular git repositories there.
 
 ## Install Visualization Utils (e.g. Arena.jl)
 
-Visualizations were removed from Caesar by popular demand and moved to a new package [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) instead.
+Visualizations were removed from Caesar and moved to a new package [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) instead.
 Please follow instructions on the [Visualizations page](http://www.juliarobotics.org/Caesar.jl/latest/arena_visualizations.html) for a variety of 2D / 3D utilities.
 
 ## Contributing, Issues, or Comments

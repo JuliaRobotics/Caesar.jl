@@ -1,4 +1,4 @@
-# Tutorial: Singular Ranges-only SLAM Solution (i.e. "Under-Constrained")
+# Example: Singular Ranges-only SLAM Solution (i.e. "Under-Constrained")
 
 
 This tutorial describes a range-only system where there are always more variable dimensions than range measurements made.
@@ -14,7 +14,7 @@ This example is also available as a script [here in RoME.jl](https://github.com/
 
 ## REQUIRES
 
-- `RoME v0.1.5`
+- `RoME v0.2.5`
 - `RoMEPlotting v0.0.2`
 
 ## Loading The Data
