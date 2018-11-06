@@ -10,11 +10,11 @@ The initial steps in constructing and solving graphs can be found in [Building a
 
 We also recommend reviewing the various examples available in the [Examples section](../examples/examples.md).
 
-## Extending Caesar
-The variables and factors in Caesar should be sufficient for the majority of robotic applications, however Caesar allows users to extend the framework without changing the core code. This is discussed in [Creating New Variables and Factors](adding_variables_factors.md).
-
 ## Visualization
 Caesar supports various visualizations and plots by using Arena, RoMEPlotting, and Director. This is discussed in [Visualization with Arena.jl and RoMEPlotting.jl](arena_visualization.md)
+
+## Extending Caesar
+The variables and factors in Caesar should be sufficient for the majority of robotic applications, however Caesar allows users to extend the framework without changing the core code. This is discussed in [Creating New Variables and Factors](adding_variables_factors.md).
 
 ## Connectivity and Extensibility
 Caesar supports both in-memory solving (really fast, but for moderately-sized graphs) as well as database-driven solving (think massive graphs and multiple sessions). This is still under development/being refactored, and is discussed in [Common Data Persistence and Inference](database_interactions.md).
