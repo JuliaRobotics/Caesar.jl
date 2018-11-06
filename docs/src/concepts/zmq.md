@@ -1,4 +1,4 @@
-# Extending Caesar via its ZMQ Interface
+# Caesar Multi-Language Support
 Caesar allows other languages to construct and solve graphs via it's ZMQ interface.
 
 # Concepts
