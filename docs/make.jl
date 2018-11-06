@@ -22,8 +22,9 @@ makedocs(
             "Basics: Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Basics: Singular Ranges-only SLAM" => "examples/basic_slamedonut.md",
             "Basics: ContinuousScalar" => "examples/basic_continuousscalar.md",
-            "Basics: Creating Custom Variables and Factors" => "examples/basic_simplenewvariablesfactors.md",
-            "Moderate Tutorial: Creating DynPose Factor" => "examples/interm_dynpose.md"
+            "Basics: Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
+            "Intermediate Tutorial: Creating DynPose Factor" => "examples/interm_dynpose.md",
+            "Intermediate Tutorial: Fixed-Lag Solving" => "examples/interm_fixedlag_hexagonal.md"
         ],
         "Function Reference" => "func_ref.md"
     ]

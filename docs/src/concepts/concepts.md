@@ -19,4 +19,4 @@ Caesar supports various visualizations and plots by using Arena, RoMEPlotting, a
 ## Connectivity and Extensibility
 Caesar supports both in-memory solving (really fast, but for moderately-sized graphs) as well as database-driven solving (think massive graphs and multiple sessions). This is still under development/being refactored, and is discussed in [Common Data Persistence and Inference](database_interactions.md).
 
-Although Caesar is Julia-based, it is easily extensible via its ZMQ interface, which is discussed in [Extending Caesar via its ZMQ Interface](zmq.md).
+Although Caesar is Julia-based, it provides a ZMQ interface for extending it to other languages. This is discussed in [Extending Caesar via its ZMQ Interface](zmq.md).
