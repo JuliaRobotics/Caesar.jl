@@ -148,7 +148,7 @@ global prev_psid = 0
 Gadfly.push_theme(:default)
 
 
-for psid in 280:1:maxlen
+for psid in 1:1:maxlen
   global prev_psid
   global maxlen
   @show psym = Symbol("x$psid")
@@ -158,7 +158,9 @@ for psid in 280:1:maxlen
 
   if psid % 20 == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
-    tree = batchSolve!(fg, drawpdf=true, N=N)
+    # tree = batchSolve!(fg, drawpdf=true, N=N)
+    tree = wipeBuildNewTree!(fg, drawpdf=true)
+    inferOverTreeR!(fg, tree, N=N)
   end
   IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym).jld2")
 
@@ -178,7 +180,7 @@ end
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
 # fg, = loadjld(file=resultsdir*"/racecar_fg_x280_presolve.jld2")
-# fg, = loadjld(file=resultsdir*"/racecar_fg_x279.jld2")
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x299.jld2")
 
 
 
@@ -186,7 +188,8 @@ results2csv(fg; dir=resultsdir, filename="results.csv")
 
 
 # save factor graph for later testing and evaluation
-tree = batchSolve!(fg, N=N, drawpdf=true)
+# fg, = loadjld(file=resultsdir*"/racecar_fg_final.jld2")
+@time tree = batchSolve!(fg, N=N, drawpdf=true)
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final_resolve.jld2")
 # fgr, = loadjld(file=resultsdir*"/racecar_fg_final_resolve.jld2")
@@ -207,7 +210,7 @@ Gadfly.draw(SVG(joinpath(resultsdir,"images","final.svg"),15cm, 10cm),pl);
 # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
 # Gadfly.draw(PNG(joinpath(resultsdir,"hist_final.png"),15cm, 10cm),pl)
 
-
+0
 
 
 
