@@ -70,17 +70,18 @@ IMGS, TAGS = detectTagsViaCamLookup(camlookup, joinpath(datafolder,imgfolder), r
 # prep dictionary with all tag detections and poses
 tag_bag = prepTagBag(TAGS)
 
-
-# save the tag bag file for future use
-@save resultsdir*"/tag_det_per_pose.jld2" tag_bag
-# @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
-
 # save the tag detections for later comparison
 fid=open(resultsdir*"/tags/pose_tags.csv","w")
 for pose in sort(collect(keys(tag_bag)))
   println(fid, "$pose, $(collect(keys(tag_bag[pose])))")
 end
 close(fid)
+
+
+# save the tag bag file for future use
+@save resultsdir*"/tag_det_per_pose.jld2" tag_bag
+# @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
+
 
 
 ## BUILD FACTOR GRAPH FOR SLAM SOLUTION,
@@ -107,15 +108,15 @@ writeGraphPdf(fg)
 # quick solve as sanity check
 tree = batchSolve!(fg, N=N, drawpdf=true, show=true)
 
-# @async run(`evince /tmp/bt.pdf`)
 
-
+## sneak peak
 # plotKDE(fg, :l1, dims=[3])
 # ls(fg)
-# val = getVal(fg, :l11)
 # drawPosesLandms(fg, spscale=0.25)
-# @async run(`evince bt.pdf`)
 
+
+# load from previous file
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x160.jld2")
 
 # add other positions
 global maxlen = (length(tag_bag)-1)
@@ -124,7 +125,7 @@ global prev_psid = 0
 Gadfly.push_theme(:default)
 
 
-for psid in 161:1:maxlen
+for psid in 1:1:maxlen
   global prev_psid
   global maxlen
   @show psym = Symbol("x$psid")
@@ -154,7 +155,6 @@ end
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
 # fg, = loadjld(file=resultsdir*"/racecar_fg_x280_presolve.jld2")
-# fg, = loadjld(file=resultsdir*"/racecar_fg_x159.jld2")
 
 
 
