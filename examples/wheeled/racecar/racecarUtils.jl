@@ -1,35 +1,13 @@
 
 
 
-
-function loadConfig()
-  cfg = Dict{Symbol,Any}()
-  data =   YAML.load(open(joinpath(dirname(@__FILE__),"cam_cal.yml")))
-  bRc = eval(Meta.parse("["*data["extrinsics"]["bRc"][1]*"]"))
-  # convert to faster symbol lookup
-  cfg[:extrinsics] = Dict{Symbol,Any}()
-  cfg[:extrinsics][:bRc] = bRc
-  cfg[:intrinsics] = Dict{Symbol,Any}()
-  cfg[:intrinsics][:height] = data["left"]["intrinsics"]["height"]
-  cfg[:intrinsics][:width] = data["left"]["intrinsics"]["width"]
-  haskey(data["left"]["intrinsics"], "camera_matrix") ? (cfg[:intrinsics][:cam_matrix] = data["left"]["intrinsics"]["camera_matrix"]) : nothing
-  cfg[:intrinsics][:cx] = data["left"]["intrinsics"]["cx"]
-  cfg[:intrinsics][:cy] = data["left"]["intrinsics"]["cy"]
-  cfg[:intrinsics][:fx] = data["left"]["intrinsics"]["fx"]
-  cfg[:intrinsics][:fy] = data["left"]["intrinsics"]["fy"]
-  cfg[:intrinsics][:k1] = data["left"]["intrinsics"]["k1"]
-  cfg[:intrinsics][:k2] = data["left"]["intrinsics"]["k2"]
-  cfg
-end
-
-
 # add AprilTag sightings from this pose
 function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true )
   @show currtags = ls(fg)[2]
   for lmid in keys(posetags)
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
-      info("adding node $lmsym")
+      @info "adding node $lmsym"
       addNode!(fg, lmsym, lmtype)
     end
     ppbr = nothing
@@ -75,8 +53,8 @@ function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odot
     addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))), autoinit=autoinit)
   elseif odotype == VelPose2VelPose2
     addNode!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
-    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),diagm([0.4;0.4;0.3].^2)),
-                                                             MvNormal(zeros(2),diagm([0.2;0.1].^2))), autoinit=autoinit)
+    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([0.4;0.4;0.3].^2))),
+                                                             MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2)))), autoinit=autoinit)
   end
 
   addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors)

@@ -1,25 +1,21 @@
 # Local compute version
 
-@show ARGS
-
-#include("parsecommands.jl")  # Hi Kurran, see here
-
-
-## Load all required packages
 using Distributed
 
 """
 Ensure the desired number of julia processes are present.
 """
-function check_procs_IIF(cores::Int)
-  if cores > 1
-    nprocs() < cores ? addprocs(cores-nprocs()) : nothing
+function check_procs_IIF(n::Int)
+  if n > 1
+    nprocs() < n ? addprocs(n-nprocs()) : nothing
   end
+  procs()
 end
-check_procs_IIF(4) # make sure there are 4 processes waiting before loading packages
+check_procs_IIF(4) # TODO use IIF.check_procs(4) once available
 
 using Dates, Statistics
 using Caesar
+using YAML
 using JLD2
 using CoordinateTransformations, Rotations, StaticArrays
 
@@ -30,30 +26,10 @@ using Fontconfig
 using Cairo
 using Compose
 using RoMEPlotting, Gadfly
-using ArgParse
 # using FileIO
 # using GeometryTypes # using MeshCat
 
-function parse_commandline()
-    s = ArgParseSettings()
 
-<<<<<<< HEAD
-    @add_arg_table s begin
-        "--folder_name"
-            help = "The name of the folder containing the images and other data"
-            arg_type = String
-            default = "labrun1"
-    end
-
-    return parse_args(s)
-end
-
-parsed_args = parse_commandline()
-for (arg, val) in parsed_args:
-    if arg == "folder_name"
-        folderName = val
-    end
-end
 
 include(joinpath(dirname(@__FILE__),"racecarUtils.jl"))
 include(joinpath(dirname(@__FILE__),"cameraUtils.jl"))
@@ -79,7 +55,7 @@ datadir = joinpath(ENV["HOME"],"data","racecar")
 
 
 # datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"  # 175:5:370
-datafolder = joinpath(datadir, folderName); camidxs =  0:5:1625
+datafolder = joinpath(datadir,"labrun2"); camidxs =  0:5:1625
 # datafolder = ENV["HOME"]*"/data/racecar/labrun3/"; # camidxs =
 # datafolder = ENV["HOME"]*"/data/racecar/labrun5/"; camidxs =  0:5:1020
 # datafolder = ENV["HOME"]*"/data/racecar/labrun6/"; camidxs =  0:5:1795
@@ -87,45 +63,47 @@ datafolder = joinpath(datadir, folderName); camidxs =  0:5:1625
 imgfolder = "images"
 
 
-=======
-# setup configuration
-using YAML
-
-include("configParameters.jl")
->>>>>>> 3e705a2b45469bb6ec93da03c15b55ff9176ea6f
 
 # Figure export folder
 currdirtime = now()
 # currdirtime = "2018-10-28T23:17:30.067"
-# currdirtime = "2018-11-03T22:48:51.924"
-# currdirtime = "2018-11-07T01:36:52.274"
-resultsparentdir = joinpath(datadir, "results")
-resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
+resultsdir = joinpath(datadir, "results")
+resultsdir = joinpath(resultsdir, "$(currdirtime)")
 
 
-# When running fresh from new data
-include("createResultsDir.jl")
+mkdir(resultsdir)
+mkdir(resultsdir*"/tags")
+mkdir(resultsdir*"/images")
 
 
+fid = open(resultsdir*"/readme.txt", "w")
+println(fid, datafolder)
+println(fid, camidxs)
+close(fid)
 
-# Utils required for this processing script
-include(joinpath(dirname(@__FILE__),"racecarUtils.jl"))
-include(joinpath(dirname(@__FILE__),"cameraUtils.jl"))
-# include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","visualizationUtils.jl"))
+fid = open(resultsdir*"/racecar.log", "a")
+println(fid, "$(currdirtime), $datafolder")
+close(fid)
 
 
-
-## DETECT APRILTAGS FROM IMAGE DATA
-# prep keyframe image data
+# process images
+# camlookup = prepCamLookup(175:5:370)
 camlookup = prepCamLookup(camidxs)
 
-# detect tags and extract pose transform
+
+## TODO: udpate to AprilTags.jl
 IMGS, TAGS = detectTagsViaCamLookup(camlookup, joinpath(datafolder,imgfolder), resultsdir)
+# IMGS[1]
+# TAGS[1]
 
-# prep dictionary with all tag detections and poses
 tag_bag = prepTagBag(TAGS)
+# tag_bag[0]
 
-# save the tag detections for later comparison
+
+# save the tag bag file for future use
+@save resultsdir*"/tag_det_per_pose.jld2" tag_bag
+# @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
+
 fid=open(resultsdir*"/tags/pose_tags.csv","w")
 for pose in sort(collect(keys(tag_bag)))
   println(fid, "$pose, $(collect(keys(tag_bag[pose])))")
@@ -133,19 +111,8 @@ end
 close(fid)
 
 
-# save the tag bag file for future use
-@save resultsdir*"/tag_det_per_pose.jld2" tag_bag
-# @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
-
-
-
-## BUILD FACTOR GRAPH FOR SLAM SOLUTION,
-
-# batch solve after every bb=* poses, use 100 points per marginal
-BB = 20
-N = 100
-
 # Factor graph construction
+N = 100
 fg = initfg()
 
 psid = 0
@@ -163,34 +130,32 @@ writeGraphPdf(fg)
 # quick solve as sanity check
 tree = batchSolve!(fg, N=N, drawpdf=true, show=true)
 
+# @async run(`evince /tmp/bt.pdf`)
 
-## sneak peak
+
 # plotKDE(fg, :l1, dims=[3])
 # ls(fg)
+# val = getVal(fg, :l11)
 # drawPosesLandms(fg, spscale=0.25)
+# @async run(`evince bt.pdf`)
 
-
-# load from previous file
-# fg, = loadjld(file=resultsdir*"/racecar_fg_x160.jld2")
 
 # add other positions
-global maxlen = (length(tag_bag)-1)
-global prev_psid = 0
+maxlen = (length(tag_bag)-1)
+prev_psid = 0
 
 Gadfly.push_theme(:default)
 
 
-for psid in 1:1:maxlen
-  global prev_psid
-  global maxlen
+for psid in 1:1:100 #maxlen
   @show psym = Symbol("x$psid")
   addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
   # writeGraphPdf(fg)
 
 
-  if psid % BB == 0 || psid == maxlen
+  if psid % 10 == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
-    tree = batchSolve!(fg, drawpdf=true, show=true, N=N)
+    tree = batchSolve!(fg, drawpdf=true, N=N)
   end
   IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym).jld2")
 
@@ -209,52 +174,39 @@ end
 
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
-# fg, = loadjld(file=resultsdir*"/racecar_fg_x280_presolve.jld2")
-
-
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x220_presolve.jld2")
 
 results2csv(fg; dir=resultsdir, filename="results.csv")
 
 
-# # save factor graph for later testing and evaluation
-# # fg, = loadjld(file=resultsdir*"/racecar_fg_final.jld2")
-# @time tree = batchSolve!(fg, N=N, drawpdf=true, show=true, recursive=true)
-#
-# IIF.savejld(fg, file=resultsdir*"/racecar_fg_final_resolve.jld2")
-# # fgr, = loadjld(file=resultsdir*"/racecar_fg_final_resolve.jld2")
-# results2csv(fg; dir=resultsdir, filename="results_resolve.csv")
-#
-#
-# # pl = plotKDE(fg, :x1, levels=1, dims=[1;2]);
-#
-#
-#
-# #,xmin=-3,xmax=6,ymin=-5,ymax=2);
-# Gadfly.push_theme(:default)
-# pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max);
-# # Gadfly.set(:default_theme)
-# Gadfly.draw(PNG(joinpath(resultsdir,"images","final.png"),15cm, 10cm),pl);
-# Gadfly.draw(SVG(joinpath(resultsdir,"images","final.svg"),15cm, 10cm),pl);
-#
-# # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
-# # Gadfly.draw(PNG(joinpath(resultsdir,"hist_final.png"),15cm, 10cm),pl)
-#
-# 0
+# save factor graph for later testing and evaluation
+tree = batchSolve!(fg, N=N, drawpdf=true)
+
+IIF.savejld(fg, file=resultsdir*"/racecar_fg_final_resolve.jld2")
+# fgr, = loadjld(file=resultsdir*"/racecar_fg_final_resolve.jld2")
+results2csv(fg; dir=resultsdir, filename="results_resolve.csv")
+
+
+# pl = plotKDE(fg, :x1, levels=1, dims=[1;2]);
+
+
+
+#,xmin=-3,xmax=6,ymin=-5,ymax=2);
+Gadfly.push_theme(:default)
+pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max);
+# Gadfly.set(:default_theme)
+Gadfly.draw(PNG(joinpath(resultsdir,"images","final.png"),15cm, 10cm),pl);
+Gadfly.draw(SVG(joinpath(resultsdir,"images","final.svg"),15cm, 10cm),pl);
+
+# pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
+# Gadfly.draw(PNG(joinpath(resultsdir,"hist_final.png"),15cm, 10cm),pl)
+
+
 
 
 
 
 # debugging
-
-# using Profile
-#
-# using Logging
-# global_logger(NullLogger())
-# @profile println("test")
-# Profile.clear()
-# @profile tree1 = IIF.wipeBuildNewTree!(fg)
-#
-# Juno.profiler()
 
 
 # vars = lsRear(fg, 5)
