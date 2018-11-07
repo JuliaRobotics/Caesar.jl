@@ -10,23 +10,23 @@ function parse_commandline()
             default = "labrun1"
         "--cx"
             help = "Center x offset"
-            arg_type = Float32
+            arg_type = Float64
             default = 327.986
         "--cy"
             help = "Center y offset"
-            arg_type = Float32
+            arg_type = Float64
             default = 198.066
         "--fx"
             help = "Focal x"
-            arg_type = Float32
+            arg_type = Float64
             default = 349.982
         "--fy"
             help = "Focal y"
-            arg_type = Float32
+            arg_type = Float64
             default = 349.982
         "--batch_size"
             help = "Batch solve every n poses"
-            arg_type = Int32
+            arg_type = Int64
             default = 20
 
     end
@@ -35,19 +35,27 @@ function parse_commandline()
 end
 
 parsed_args = parse_commandline()
-for (arg, val) in parsed_args:
+
+global folderName, cx, cy, fx, fy, batchSize
+
+for (arg, val) in parsed_args
     if arg == "folder_name"
         folderName = val
+    end
     if arg == "cx"
         cx = val
+    end
     if arg == "cy"
         cy = val
+    end
     if arg == "fx"
         fx = val
+    end
     if arg == "fy"
         fy = val
+    end
     if arg == "batch_size"
-        BB = val
+        batchSize = val
 
     end
 end

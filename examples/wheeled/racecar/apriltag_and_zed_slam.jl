@@ -2,12 +2,9 @@
 
 @show ARGS
 
-include("parsecommands.jl")  # Hi Kurran, see here
-
 # setup configuration
 using YAML
 
-include("configParameters.jl")
 
 # Figure export folder
 currdirtime = now()
@@ -42,6 +39,7 @@ using RoMEPlotting, Gadfly
 # using FileIO
 # using GeometryTypes # using MeshCat
 
+include("configParameters.jl")
 
 
 include(joinpath(dirname(@__FILE__),"racecarUtils.jl"))
