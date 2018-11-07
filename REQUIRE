@@ -1,6 +1,6 @@
 julia 0.7 1.1
 RoME 0.2.0
-IncrementalInference 0.4.3
+IncrementalInference 0.4.4
 Graphs 0.10.1
 KernelDensityEstimate 0.4.1
 Distributions 0.16.0

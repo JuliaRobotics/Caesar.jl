@@ -12,29 +12,18 @@ The easiest method is---via the terminal---to [download the desired](https://jul
 cd ~
 mkdir -p julia-software
 cd julia-software
-wget https://julialang-s3.julialang.org/bin/linux/x64/0.6/julia-0.6.4-linux-x86_64.tar.gz
-tar -xvf julia-0.6.4-linux-x86_64
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.1-linux-x86_64.tar.gz
+tar -xvf julia-1.0.1-linux-x86_64.tar.gz
 cd /usr/bin
-sudo ln -s ~/julia-software/julia-9d11f62bcb/bin/julia julia064
-sudo ln -s julia064 julia
+sudo ln -s ~/julia-software/julia-1.0.1/bin/julia julia
 ```
-**NOTE** Feel free to modify this setup as you see fit.
+>**Note** Feel free to modify this setup as you see fit.
 
-This should allow any terminal or process on the computer to run the Julia REPL:
+This should allow any terminal or process on the computer to run the Julia REPL by type `julia` and testing with:
 
-```
-user@...$ julia
-
-   _       _ _(_)_     |  A fresh approach to technical computing
-  (_)     | (_) (_)    |  Documentation: https://docs.julialang.org
-   _ _   _| |_  __ _   |  Type "?help" for help.
-  | | | | | | |/ _` |  |
-  | | |_| | | | (_| |  |  Version 0.6.3 (2018-05-28 20:20 UTC)
- _/ |\__'_|_|_|\__'_|  |  Official http://julialang.org/ release
-|__/                   |  x86_64-pc-linux-gnu
-
-julia> println("hello world")
-hello world
+```julia
+println("hello world")
+# Should print "hello world"
 ```
 
 Maybe a script, or command:
@@ -47,9 +36,12 @@ user@...$ rm myscript.jl
 
 user@...$ julia -e "println(\"one more time.\")"
 one more time.
+user@...$ julia -e "println(\"...just want to celebrate...\")"
+...just want to celebrate...
+
 ```
 
-**NOTE** When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.
+>**Note**: When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.
 For example, search for 'julialang workflow tips' or 'julialang performance tips'.
 
 ## Just-In-Time Compiling (i.e. why are first runs slow?)
@@ -78,17 +70,16 @@ julia-language
 latex-completions
 ```
 
-**NOTE** Some situations have required separately installing the `Atom.jl` Julia package via command line and Julia REPL; this is done with Julia's package manager and `Pkg.add("Atom")`:
+>**Note** Some situations have required separately installing the `Atom.jl` Julia package via command line and Julia REPL; this is done with Julia's package manager and `Pkg.add("Atom")`:
 
-```
-$ julia
-...
-julia> Pkg.add("Atom")
+```julia
+using Pkg
+Pkg.add("Atom")
 ```
 
 There are a variety of useful packages in Atom, such as `minimap` and `minimap-git`.
 
-To install the Julia packages related to [Caesar.jl]()---which are independent of the Atom packages installed above---please follow instructions below.
+To install the Julia packages related to [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl)---which are independent of the Atom packages installed above---please follow instructions below.
 
 ## Julia Packages
 
@@ -100,11 +91,11 @@ Pkg.add("Caesar")
 ```
 
 These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaLang/METADATA.jl](http://www.github.com/JuliaLang/METADATA.jl).
-Unregistered packages can also be installed with using only the `Pkg.clone` function:
+Unregistered latest packages can also be installed with using only the `Pkg.develop` function:
 
 ```julia
 # Just using Caesar URL as an example --  Caesar is already registered with METADATA
-Pkg.clone("https://github.com/JuliaRobotics/Caesar.jl.git")
+Pkg.develop(PackageSpec(url="https://github.com/JuliaRobotics/Caesar.jl.git"))
 ```
 
 Unless you change the default environment variable `JULIA_PKG_DIR`, all packages (git repos) are cloned/installed to `~/.julia`.
