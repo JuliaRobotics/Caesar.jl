@@ -8,7 +8,15 @@
 ## Load all required packages
 using Distributed
 
-check_procs(4) # make sure there are 4 processes waiting before loading packages
+"""
+Ensure the desired number of julia processes are present.
+"""
+function check_procs__(nprocs::Int)
+  if nprocs > 1
+    nprocs() < nprocs ? addprocs(nprocs-nprocs()) : nothing
+  end
+end
+check_procs__(4) # make sure there are 4 processes waiting before loading packages
 
 using Dates, Statistics
 using Caesar
