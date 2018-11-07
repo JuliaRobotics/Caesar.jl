@@ -35,4 +35,5 @@ makedocs(
 deploydocs(
     repo   = "github.com/JuliaRobotics/Caesar.jl.git",
     target = "build",
+    julia = "1.0"
 )
