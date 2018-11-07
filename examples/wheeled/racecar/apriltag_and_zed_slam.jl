@@ -13,7 +13,7 @@ include("configParameters.jl")
 currdirtime = now()
 # currdirtime = "2018-10-28T23:17:30.067"
 # currdirtime = "2018-11-03T22:48:51.924"
-currdirtime = "2018-11-07T01:36:52.274"
+# currdirtime = "2018-11-07T01:36:52.274"
 resultsparentdir = joinpath(datadir, "results")
 resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
 
