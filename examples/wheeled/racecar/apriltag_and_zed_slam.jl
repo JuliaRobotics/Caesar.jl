@@ -4,23 +4,6 @@
 
 #include("parsecommands.jl")  # Hi Kurran, see here
 
-# setup configuration
-using YAML
-
-include("configParameters.jl")
-
-# Figure export folder
-currdirtime = now()
-# currdirtime = "2018-10-28T23:17:30.067"
-# currdirtime = "2018-11-03T22:48:51.924"
-# currdirtime = "2018-11-07T01:36:52.274"
-resultsparentdir = joinpath(datadir, "results")
-resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
-
-
-# When running fresh from new data
-include("createResultsDir.jl")
-
 
 ## Load all required packages
 using Distributed
@@ -43,7 +26,26 @@ using RoMEPlotting, Gadfly
 # using GeometryTypes # using MeshCat
 
 
+# setup configuration
+using YAML
 
+include("configParameters.jl")
+
+# Figure export folder
+currdirtime = now()
+# currdirtime = "2018-10-28T23:17:30.067"
+# currdirtime = "2018-11-03T22:48:51.924"
+# currdirtime = "2018-11-07T01:36:52.274"
+resultsparentdir = joinpath(datadir, "results")
+resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
+
+
+# When running fresh from new data
+include("createResultsDir.jl")
+
+
+
+# Utils required for this processing script
 include(joinpath(dirname(@__FILE__),"racecarUtils.jl"))
 include(joinpath(dirname(@__FILE__),"cameraUtils.jl"))
 # include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","visualizationUtils.jl"))
@@ -114,7 +116,7 @@ global prev_psid = 0
 Gadfly.push_theme(:default)
 
 
-for psid in 1:1:maxlen
+for psid in 161:1:maxlen
   global prev_psid
   global maxlen
   @show psym = Symbol("x$psid")

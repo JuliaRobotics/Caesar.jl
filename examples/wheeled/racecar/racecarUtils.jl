@@ -1,28 +1,6 @@
 
 
 
-
-function loadConfig()
-  cfg = Dict{Symbol,Any}()
-  data =   YAML.load(open(joinpath(dirname(@__FILE__),"cam_cal.yml")))
-  bRc = eval(Meta.parse("["*data["extrinsics"]["bRc"][1]*"]"))
-  # convert to faster symbol lookup
-  cfg[:extrinsics] = Dict{Symbol,Any}()
-  cfg[:extrinsics][:bRc] = bRc
-  cfg[:intrinsics] = Dict{Symbol,Any}()
-  cfg[:intrinsics][:height] = data["left"]["intrinsics"]["height"]
-  cfg[:intrinsics][:width] = data["left"]["intrinsics"]["width"]
-  haskey(data["left"]["intrinsics"], "camera_matrix") ? (cfg[:intrinsics][:cam_matrix] = data["left"]["intrinsics"]["camera_matrix"]) : nothing
-  cfg[:intrinsics][:cx] = data["left"]["intrinsics"]["cx"]
-  cfg[:intrinsics][:cy] = data["left"]["intrinsics"]["cy"]
-  cfg[:intrinsics][:fx] = data["left"]["intrinsics"]["fx"]
-  cfg[:intrinsics][:fy] = data["left"]["intrinsics"]["fy"]
-  cfg[:intrinsics][:k1] = data["left"]["intrinsics"]["k1"]
-  cfg[:intrinsics][:k2] = data["left"]["intrinsics"]["k2"]
-  cfg
-end
-
-
 # add AprilTag sightings from this pose
 function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true )
   @show currtags = ls(fg)[2]
