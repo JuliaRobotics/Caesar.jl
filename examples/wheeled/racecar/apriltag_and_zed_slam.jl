@@ -1,21 +1,34 @@
 # Local compute version
 
+@show ARGS
+
+#include("parsecommands.jl")  # Hi Kurran, see here
+
+# setup configuration
+using YAML
+
+include("configParameters.jl")
+
+# Figure export folder
+currdirtime = now()
+# currdirtime = "2018-10-28T23:17:30.067"
+# currdirtime = "2018-11-03T22:48:51.924"
+currdirtime = "2018-11-07T01:36:52.274"
+resultsparentdir = joinpath(datadir, "results")
+resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
+
+
+# When running fresh from new data
+include("createResultsDir.jl")
+
+
+## Load all required packages
 using Distributed
 
-"""
-Ensure the desired number of julia processes are present.
-"""
-function check_procs_IIF(n::Int)
-  if n > 1
-    nprocs() < n ? addprocs(n-nprocs()) : nothing
-  end
-  procs()
-end
-check_procs_IIF(4) # TODO use IIF.check_procs(4) once available
+check_procs(4) # make sure there are 4 processes waiting before loading packages
 
 using Dates, Statistics
 using Caesar
-using YAML
 using JLD2
 using CoordinateTransformations, Rotations, StaticArrays
 
@@ -36,76 +49,23 @@ include(joinpath(dirname(@__FILE__),"cameraUtils.jl"))
 # include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","visualizationUtils.jl"))
 
 
-cfg = loadConfig()
 
-cw, ch = cfg[:intrinsics][:cx], cfg[:intrinsics][:cy]
-fx = fy = 1.0*cfg[:intrinsics][:fx]
-camK = [fx 0 cw; 0 fy ch; 0 0 1]
-tagsize = 0.172
-# k1,k2 = cfg[:intrinsics][:k1], cfg[:intrinsics][:k2] # makes it worse
-k1, k2 = 0.0, 0.0
-
-# tag extrinsic rotation
-Rx = RotX(-pi/2)
-Rz = RotZ(-pi/2)
-bTc= LinearMap(Rz) ∘ LinearMap(Rx)
-
-
-datadir = joinpath(ENV["HOME"],"data","racecar")
-
-
-# datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"  # 175:5:370
-# datafolder = joinpath(datadir,"labrun2"); camidxs =  0:5:1625
-# datafolder = ENV["HOME"]*"/data/racecar/labrun3/"; # camidxs =
-datafolder = ENV["HOME"]*"/data/racecar/labrun5/"; camidxs =  0:5:1020
-# datafolder = ENV["HOME"]*"/data/racecar/labrun6/"; camidxs =  0:5:1795
-# datafolder = ENV["HOME"]*"/data/racecar/labfull/"; camidxs =  0:5:1765
-imgfolder = "images"
-
-
-
-# Figure export folder
-currdirtime = now()
-# currdirtime = "2018-10-28T23:17:30.067"
-# currdirtime = "2018-11-03T22:48:51.924"
-currdirtime = "2018-11-07T01:36:52.274"
-resultsparentdir = joinpath(datadir, "results")
-resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
-
-
-mkdir(resultsdir)
-mkdir(resultsdir*"/tags")
-mkdir(resultsdir*"/images")
-
-
-fid = open(resultsdir*"/readme.txt", "w")
-println(fid, datafolder)
-println(fid, camidxs)
-close(fid)
-
-fid = open(resultsparentdir*"/racecar.log", "a")
-println(fid, "$(currdirtime), $datafolder, $(camidxs)")
-close(fid)
-
-
-# process images
-# camlookup = prepCamLookup(175:5:370)
+## DETECT APRILTAGS FROM IMAGE DATA
+# prep keyframe image data
 camlookup = prepCamLookup(camidxs)
 
-
-## TODO: udpate to AprilTags.jl
+# detect tags and extract pose transform
 IMGS, TAGS = detectTagsViaCamLookup(camlookup, joinpath(datafolder,imgfolder), resultsdir)
-# IMGS[1]
-# TAGS[1]
 
+# prep dictionary with all tag detections and poses
 tag_bag = prepTagBag(TAGS)
-# tag_bag[0]
 
 
 # save the tag bag file for future use
 @save resultsdir*"/tag_det_per_pose.jld2" tag_bag
 # @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
 
+# save the tag detections for later comparison
 fid=open(resultsdir*"/tags/pose_tags.csv","w")
 for pose in sort(collect(keys(tag_bag)))
   println(fid, "$pose, $(collect(keys(tag_bag[pose])))")
@@ -113,8 +73,13 @@ end
 close(fid)
 
 
-# Factor graph construction
+## BUILD FACTOR GRAPH FOR SLAM SOLUTION,
+
+# batch solve after every bb=* poses, use 100 points per marginal
+BB = 20
 N = 100
+
+# Factor graph construction
 fg = initfg()
 
 psid = 0
@@ -157,7 +122,7 @@ for psid in 1:1:maxlen
   # writeGraphPdf(fg)
 
 
-  if psid % 20 == 0 || psid == maxlen
+  if psid % BB == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
     tree = batchSolve!(fg, drawpdf=true, show=true, N=N)
   end
@@ -183,33 +148,33 @@ IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
 
 
 
-results2csv(fg; dir=resultsdir, filename="results_x159.csv")
+results2csv(fg; dir=resultsdir, filename="results.csv")
 
 
-# save factor graph for later testing and evaluation
-# fg, = loadjld(file=resultsdir*"/racecar_fg_final.jld2")
-@time tree = batchSolve!(fg, N=N, drawpdf=true, show=true, recursive=true)
-
-IIF.savejld(fg, file=resultsdir*"/racecar_fg_final_resolve.jld2")
-# fgr, = loadjld(file=resultsdir*"/racecar_fg_final_resolve.jld2")
-results2csv(fg; dir=resultsdir, filename="results_resolve.csv")
-
-
-# pl = plotKDE(fg, :x1, levels=1, dims=[1;2]);
-
-
-
-#,xmin=-3,xmax=6,ymin=-5,ymax=2);
-Gadfly.push_theme(:default)
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max);
-# Gadfly.set(:default_theme)
-Gadfly.draw(PNG(joinpath(resultsdir,"images","final.png"),15cm, 10cm),pl);
-Gadfly.draw(SVG(joinpath(resultsdir,"images","final.svg"),15cm, 10cm),pl);
-
-# pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
-# Gadfly.draw(PNG(joinpath(resultsdir,"hist_final.png"),15cm, 10cm),pl)
-
-0
+# # save factor graph for later testing and evaluation
+# # fg, = loadjld(file=resultsdir*"/racecar_fg_final.jld2")
+# @time tree = batchSolve!(fg, N=N, drawpdf=true, show=true, recursive=true)
+#
+# IIF.savejld(fg, file=resultsdir*"/racecar_fg_final_resolve.jld2")
+# # fgr, = loadjld(file=resultsdir*"/racecar_fg_final_resolve.jld2")
+# results2csv(fg; dir=resultsdir, filename="results_resolve.csv")
+#
+#
+# # pl = plotKDE(fg, :x1, levels=1, dims=[1;2]);
+#
+#
+#
+# #,xmin=-3,xmax=6,ymin=-5,ymax=2);
+# Gadfly.push_theme(:default)
+# pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max);
+# # Gadfly.set(:default_theme)
+# Gadfly.draw(PNG(joinpath(resultsdir,"images","final.png"),15cm, 10cm),pl);
+# Gadfly.draw(SVG(joinpath(resultsdir,"images","final.svg"),15cm, 10cm),pl);
+#
+# # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
+# # Gadfly.draw(PNG(joinpath(resultsdir,"hist_final.png"),15cm, 10cm),pl)
+#
+# 0
 
 
 
