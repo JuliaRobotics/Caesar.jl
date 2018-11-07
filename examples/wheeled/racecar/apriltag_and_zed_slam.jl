@@ -26,10 +26,29 @@ using Fontconfig
 using Cairo
 using Compose
 using RoMEPlotting, Gadfly
+using ArgParse
 # using FileIO
 # using GeometryTypes # using MeshCat
 
+function parse_commandline()
+    s = ArgParseSettings()
 
+    @add_arg_table s begin
+        "--folder_name"
+            help = "The name of the folder containing the images and other data"
+            arg_type = String
+            default = "labrun1"
+    end
+
+    return parse_args(s)
+end
+
+parsed_args = parse_commandline()
+for (arg, val) in parsed_args:
+    if arg == "folder_name"
+        folderName = val
+    end
+end
 
 include(joinpath(dirname(@__FILE__),"racecarUtils.jl"))
 include(joinpath(dirname(@__FILE__),"cameraUtils.jl"))
@@ -55,7 +74,7 @@ datadir = joinpath(ENV["HOME"],"data","racecar")
 
 
 # datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"  # 175:5:370
-datafolder = joinpath(datadir,"labrun2"); camidxs =  0:5:1625
+datafolder = joinpath(datadir, folderName); camidxs =  0:5:1625
 # datafolder = ENV["HOME"]*"/data/racecar/labrun3/"; # camidxs =
 # datafolder = ENV["HOME"]*"/data/racecar/labrun5/"; camidxs =  0:5:1020
 # datafolder = ENV["HOME"]*"/data/racecar/labrun6/"; camidxs =  0:5:1795
