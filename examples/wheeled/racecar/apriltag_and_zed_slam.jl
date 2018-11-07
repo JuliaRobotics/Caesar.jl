@@ -55,9 +55,9 @@ datadir = joinpath(ENV["HOME"],"data","racecar")
 
 
 # datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"  # 175:5:370
-datafolder = joinpath(datadir,"labrun2"); camidxs =  0:5:1625
+# datafolder = joinpath(datadir,"labrun2"); camidxs =  0:5:1625
 # datafolder = ENV["HOME"]*"/data/racecar/labrun3/"; # camidxs =
-# datafolder = ENV["HOME"]*"/data/racecar/labrun5/"; camidxs =  0:5:1020
+datafolder = ENV["HOME"]*"/data/racecar/labrun5/"; camidxs =  0:5:1020
 # datafolder = ENV["HOME"]*"/data/racecar/labrun6/"; camidxs =  0:5:1795
 # datafolder = ENV["HOME"]*"/data/racecar/labfull/"; camidxs =  0:5:1765
 imgfolder = "images"
@@ -67,7 +67,8 @@ imgfolder = "images"
 # Figure export folder
 currdirtime = now()
 # currdirtime = "2018-10-28T23:17:30.067"
-currdirtime = "2018-11-03T22:48:51.924"
+# currdirtime = "2018-11-03T22:48:51.924"
+currdirtime = "2018-11-07T01:36:52.274"
 resultsparentdir = joinpath(datadir, "results")
 resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
 
@@ -83,7 +84,7 @@ println(fid, camidxs)
 close(fid)
 
 fid = open(resultsparentdir*"/racecar.log", "a")
-println(fid, "$(currdirtime), $datafolder")
+println(fid, "$(currdirtime), $datafolder, $(camidxs)")
 close(fid)
 
 
@@ -158,9 +159,7 @@ for psid in 1:1:maxlen
 
   if psid % 20 == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
-    # tree = batchSolve!(fg, drawpdf=true, N=N)
-    tree = wipeBuildNewTree!(fg, drawpdf=true)
-    inferOverTreeR!(fg, tree, N=N)
+    tree = batchSolve!(fg, drawpdf=true, show=true, N=N)
   end
   IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym).jld2")
 
@@ -180,16 +179,16 @@ end
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
 # fg, = loadjld(file=resultsdir*"/racecar_fg_x280_presolve.jld2")
-# fg, = loadjld(file=resultsdir*"/racecar_fg_x299.jld2")
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x159.jld2")
 
 
 
-results2csv(fg; dir=resultsdir, filename="results.csv")
+results2csv(fg; dir=resultsdir, filename="results_x159.csv")
 
 
 # save factor graph for later testing and evaluation
 # fg, = loadjld(file=resultsdir*"/racecar_fg_final.jld2")
-@time tree = batchSolve!(fg, N=N, drawpdf=true)
+@time tree = batchSolve!(fg, N=N, drawpdf=true, show=true, recursive=true)
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final_resolve.jld2")
 # fgr, = loadjld(file=resultsdir*"/racecar_fg_final_resolve.jld2")
