@@ -2,7 +2,7 @@
 
 @show ARGS
 
-#include("parsecommands.jl")  # Hi Kurran, see here
+include("parsecommands.jl")  # Hi Kurran, see here
 
 # setup configuration
 using YAML
