@@ -11,7 +11,7 @@ using Distributed
 """
 Ensure the desired number of julia processes are present.
 """
-function check_procs__(nprocs::Int)
+function check_procs_IIF(nprocs::Int)
   if nprocs > 1
     nprocs() < nprocs ? addprocs(nprocs-nprocs()) : nothing
   end
