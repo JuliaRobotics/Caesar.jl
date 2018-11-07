@@ -34,5 +34,5 @@ makedocs(
 
 deploydocs(
     repo   = "github.com/JuliaRobotics/Caesar.jl.git",
-    target = "build",
+    target = "build"
 )
