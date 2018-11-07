@@ -46,6 +46,8 @@ for (arg, val) in parsed_args:
         fx = val
     if arg == "fy"
         fy = val
+    if arg == "batch_size"
+        BB = val
 
     end
 end
