@@ -11,12 +11,12 @@ using Distributed
 """
 Ensure the desired number of julia processes are present.
 """
-function check_procs_IIF(nprocs::Int)
-  if nprocs > 1
-    nprocs() < nprocs ? addprocs(nprocs-nprocs()) : nothing
+function check_procs_IIF(cores::Int)
+  if cores > 1
+    nprocs() < cores ? addprocs(cores-nprocs()) : nothing
   end
 end
-check_procs__(4) # make sure there are 4 processes waiting before loading packages
+check_procs_IIF(4) # make sure there are 4 processes waiting before loading packages
 
 using Dates, Statistics
 using Caesar
