@@ -49,7 +49,7 @@ resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
 
 
 # When running fresh from new data
-include("createResultsDir.jl")
+include("createResultsDirs.jl")
 
 
 
@@ -69,6 +69,9 @@ IMGS, TAGS = detectTagsViaCamLookup(camlookup, joinpath(datafolder,imgfolder), r
 
 # prep dictionary with all tag detections and poses
 tag_bag = prepTagBag(TAGS)
+# @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
+
+
 
 # save the tag detections for later comparison
 fid=open(resultsdir*"/tags/pose_tags.csv","w")
@@ -77,10 +80,8 @@ for pose in sort(collect(keys(tag_bag)))
 end
 close(fid)
 
-
 # save the tag bag file for future use
 @save resultsdir*"/tag_det_per_pose.jld2" tag_bag
-# @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
 
 
 
@@ -124,7 +125,6 @@ global prev_psid = 0
 
 Gadfly.push_theme(:default)
 
-
 for psid in 1:1:maxlen
   global prev_psid
   global maxlen
@@ -135,7 +135,7 @@ for psid in 1:1:maxlen
 
   if psid % BB == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
-    tree = batchSolve!(fg, drawpdf=true, show=true, N=N)
+    tree = batchSolve!(fg, drawpdf=true, show=true, N=N, recursive=true)
   end
   IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym).jld2")
 
@@ -154,16 +154,16 @@ end
 
 
 IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
-# fg, = loadjld(file=resultsdir*"/racecar_fg_x280_presolve.jld2")
-
 
 
 results2csv(fg; dir=resultsdir, filename="results.csv")
 
 
 # # save factor graph for later testing and evaluation
-# # fg, = loadjld(file=resultsdir*"/racecar_fg_final.jld2")
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x200_presolve.jld2")
+# fg, = loadjld(file=resultsdir*"/racecar_fg_final.jld2")
 # @time tree = batchSolve!(fg, N=N, drawpdf=true, show=true, recursive=true)
+# 0
 #
 # IIF.savejld(fg, file=resultsdir*"/racecar_fg_final_resolve.jld2")
 # # fgr, = loadjld(file=resultsdir*"/racecar_fg_final_resolve.jld2")

@@ -41,9 +41,11 @@ bTc= LinearMap(Rz) ∘ LinearMap(Rx)
 datadir = joinpath(ENV["HOME"],"data","racecar")
 
 # datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"  # 175:5:370
-# datafolder = joinpath(datadir,"labrun2"); camidxs =  0:5:1625
+# datafolder = ENV["HOME"]*"/data/racecar/labrun2/; camidxs =  0:5:1625
 # datafolder = ENV["HOME"]*"/data/racecar/labrun3/"; # camidxs =
-datafolder = ENV["HOME"]*"/data/racecar/labrun5/"; camidxs =  0:5:1020
+# datafolder = ENV["HOME"]*"/data/racecar/labrun5/"; camidxs =  0:5:1020
 # datafolder = ENV["HOME"]*"/data/racecar/labrun6/"; camidxs =  0:5:1795
-# datafolder = ENV["HOME"]*"/data/racecar/labfull/"; camidxs =  0:5:1765
+datafolder = ENV["HOME"]*"/data/racecar/labrun7/"; camidxs =  0:5:2135
+# datafolder = ENV["HOME"]*"/data/racecar/labrun8/"; camidxs =  0:5:
+
 imgfolder = "images"
