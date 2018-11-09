@@ -19,20 +19,22 @@ end
 check_procs_IIF(4) # make sure there are 4 processes waiting before loading packages
 
 using Dates, Statistics
-using Caesar
-using JLD2
+@everywhere using Caesar
+@everywhere using JLD2
 using CoordinateTransformations, Rotations, StaticArrays
 
 using AprilTags
 using Images, ImageView, ImageDraw
 
+@everywhere begin
 using Fontconfig
 using Cairo
 using Compose
-using RoMEPlotting, Gadfly
+using Gadfly
+using RoMEPlotting
 # using FileIO
 # using GeometryTypes # using MeshCat
-
+end
 
 # setup configuration
 using YAML
@@ -44,7 +46,7 @@ currdirtime = now()
 # currdirtime = "2018-10-28T23:17:30.067"
 # currdirtime = "2018-11-03T22:48:51.924"
 # currdirtime = "2018-11-07T01:36:52.274"
-# currdirtime = "2018-11-08T01:23:46.363"
+# currdirtime = "2018-11-08T21:56:16.991"
 resultsparentdir = joinpath(datadir, "results")
 resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
 
@@ -89,7 +91,12 @@ close(fid)
 # batch solve after every bb=* poses, use 100 points per marginal
 BB = 20
 N = 100
-lagLength = 50
+lagLength = 75
+
+
+# load from previous file
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x260.jld2")
+
 
 # Factor graph construction
 fg = initfg()
@@ -118,7 +125,7 @@ tree = batchSolve!(fg, N=N, drawpdf=true, show=true)
 # drawPosesLandms(fg, spscale=0.25)
 
 
-function plotRacecarInterm(fgl, resultsdirl, psyml)::Nothing
+@everywhere function plotRacecarInterm(fgl, resultsdirl, psyml)::Nothing
   pl = drawPosesLandms(fgl, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
   Gadfly.draw(PNG(joinpath(resultsdirl, "images", "$(psyml).png"),15cm, 10cm),pl)
   pl = drawPosesLandms(fgl, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
@@ -132,16 +139,12 @@ function plotRacecarInterm(fgl, resultsdirl, psyml)::Nothing
 end
 
 
-# load from previous file
-# fg, = loadjld(file=resultsdir*"/racecar_fg_x269.jld2")
-
 # add other positions
 global maxlen = (length(tag_bag)-1)
 global prev_psid = 0
 
 Gadfly.push_theme(:default)
 
-# prev_psid=0
 for psid in 1:1:maxlen
   global prev_psid
   global maxlen
@@ -151,13 +154,13 @@ for psid in 1:1:maxlen
 
   if psid % BB == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
-    tree = batchSolve!(fg, drawpdf=true, show=true, N=N, recursive=false)
+    tree = batchSolve!(fg, drawpdf=true, show=true, N=N, recursive=true)
   end
-  IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym).jld2")
+  @spawn IIF.savejld(deepcopy(fg), file=resultsdir*"/racecar_fg_$(psym).jld2")
 
   ## save factor graph for later testing and evaluation
   # ensureAllInitialized!(fg)
-  @spawn plotRacecarInterm(fg, resultsdir, psym)
+  @spawn plotRacecarInterm(deepcopy(fg), resultsdir, psym)
 
   # prepare for next iteration
   prev_psid = psid
@@ -165,6 +168,7 @@ end
 
 # extract results for later use as training data
 results2csv(fg; dir=resultsdir, filename="results.csv")
+0
 
 # IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
 
