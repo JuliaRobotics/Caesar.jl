@@ -86,17 +86,32 @@ close(fid)
 
 
 
+@everywhere function plotRacecarInterm(fgl::FactorGraph, resultsdirl, psyml::Symbol)::Nothing
+  @show ls(fgl)
+  pl = drawPosesLandms(fgl, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
+  Gadfly.draw(PNG(joinpath(resultsdirl, "images", "$(psyml).png"),15cm, 10cm),pl)
+  pl = drawPosesLandms(fgl, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
+  Gadfly.draw(PNG(joinpath(resultsdirl, "images", "hist_$(psyml).png"),15cm, 10cm),pl)
+  pl = plotPose2Vels(fgl, Symbol("$(psyml)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
+  Gadfly.draw(PNG(joinpath(resultsdirl, "images", "vels_$(psyml).png"),15cm, 10cm),pl)
+  # save combined image with tags
+  nothing
+end
+
+
+
 ## BUILD FACTOR GRAPH FOR SLAM SOLUTION,
+
+
+function main(resultsdir, camidxs, tag_bagl)
 
 # batch solve after every bb=* poses, use 100 points per marginal
 BB = 20
 N = 100
 lagLength = 75
 
-
 # load from previous file
 # fg, = loadjld(file=resultsdir*"/racecar_fg_x260.jld2")
-
 
 # Factor graph construction
 fg = initfg()
@@ -111,67 +126,53 @@ addNode!(fg, pssym, DynPose2(ut=0))
 addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
                                               MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))
 
-addApriltags!(fg, pssym, tag_bag[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
+addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 
 writeGraphPdf(fg)
 
 # quick solve as sanity check
 tree = batchSolve!(fg, N=N, drawpdf=true, show=true)
 
-
-## sneak peak
-# plotKDE(fg, :l1, dims=[3])
-# ls(fg)
-# drawPosesLandms(fg, spscale=0.25)
-
-
-@everywhere function plotRacecarInterm(fgl, resultsdirl, psyml)::Nothing
-  pl = drawPosesLandms(fgl, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
-  Gadfly.draw(PNG(joinpath(resultsdirl, "images", "$(psyml).png"),15cm, 10cm),pl)
-  pl = drawPosesLandms(fgl, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
-  Gadfly.draw(PNG(joinpath(resultsdirl, "images", "hist_$(psyml).png"),15cm, 10cm),pl)
-  pl = plotPose2Vels(fgl, Symbol("$(psyml)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
-  Gadfly.draw(PNG(joinpath(resultsdirl, "images", "vels_$(psyml).png"),15cm, 10cm),pl)
-
-  # save combined image with tags
-
-  nothing
-end
-
-
 # add other positions
-global maxlen = (length(tag_bag)-1)
-global prev_psid = 0
+maxlen = (length(tag_bagl)-1)
+prev_psid = 0
 
 Gadfly.push_theme(:default)
 
 for psid in 1:1:maxlen
-  global prev_psid
-  global maxlen
+  prev_psid
+  maxlen
   @show psym = Symbol("x$psid")
-  addnextpose!(fg, prev_psid, psid, tag_bag[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
+  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
   # writeGraphPdf(fg)
 
   if psid % BB == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
     tree = batchSolve!(fg, drawpdf=true, show=true, N=N, recursive=true)
   end
-  @spawn IIF.savejld(deepcopy(fg), file=resultsdir*"/racecar_fg_$(psym).jld2")
+  jldfile = resultsdir*"/racecar_fg_$(psym).jld2"
+  @spawn IIF.savejld(fg, file=jldfile)
 
   ## save factor graph for later testing and evaluation
   # ensureAllInitialized!(fg)
-  @spawn plotRacecarInterm(deepcopy(fg), resultsdir, psym)
+  @spawn plotRacecarInterm(fg, resultsdir, psym)
 
   # prepare for next iteration
   prev_psid = psid
 end
 
 # extract results for later use as training data
-results2csv(fg; dir=resultsdir, filename="results.csv")
+results2csv(fg, dir=resultsdir, filename="results.csv")
+
+end # main
+
+
+main(resultsdir, camidxs, tag_bag)
+
 0
 
-# IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
 
+# IIF.savejld(fg, file=resultsdir*"/racecar_fg_final.jld2")
 
 
 # # save factor graph for later testing and evaluation
