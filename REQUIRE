@@ -4,7 +4,7 @@ IncrementalInference 0.4.4
 Graphs 0.10.1
 KernelDensityEstimate 0.4.1
 Distributions 0.16.0
-TransformUtils 0.2.1
+TransformUtils 0.2.2
 Rotations 0.8.0
 CoordinateTransformations 0.5.0
 JLD2
