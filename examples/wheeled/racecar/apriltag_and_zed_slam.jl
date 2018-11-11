@@ -15,7 +15,8 @@ using Dates, Statistics
 using CoordinateTransformations, Rotations, StaticArrays
 
 using AprilTags
-using Images, ImageView, ImageDraw
+using Images, ImageDraw
+# using ImageView
 
 @everywhere begin
 using Fontconfig

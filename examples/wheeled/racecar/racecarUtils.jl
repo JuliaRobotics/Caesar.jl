@@ -160,7 +160,7 @@ addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal(
 
 addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 
-writeGraphPdf(fg)
+show ? writeGraphPdf(fg) : nothing
 
 # quick solve as sanity check
 tree = batchSolve!(fg, N=N, drawpdf=true, show=show, recursive=failsafe)
