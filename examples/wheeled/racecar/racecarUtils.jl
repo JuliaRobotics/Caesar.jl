@@ -133,7 +133,8 @@ function main(resultsdir::String,
               lagLength=75,
               dofixedlag=true,
               jldfile::String="",
-              failsafe::Bool=false  )
+              failsafe::Bool=false,
+              show::Bool=false  )
 
 # Factor graph construction
 fg = initfg()
@@ -162,7 +163,7 @@ addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 writeGraphPdf(fg)
 
 # quick solve as sanity check
-tree = batchSolve!(fg, N=N, drawpdf=true, show=true, recursive=failsafe)
+tree = batchSolve!(fg, N=N, drawpdf=true, show=show, recursive=failsafe)
 
 # add other positions
 maxlen = (length(tag_bagl)-1)
@@ -178,7 +179,7 @@ for psid in (prev_psid+1):1:maxlen
 
   if psid % BB == 0 || psid == maxlen
     IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
-    tree = batchSolve!(fg, drawpdf=true, show=true, N=N, recursive=true)
+    tree = batchSolve!(fg, drawpdf=true, show=show, N=N, recursive=true)
   end
   jldfile = resultsdir*"/racecar_fg_$(psym).jld2"
   @spawn IIF.savejld(fg, file=jldfile)

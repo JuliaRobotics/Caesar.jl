@@ -88,7 +88,7 @@ end
 
 
 
-fg = main(resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"]  )
+fg = main(resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"]  )
 
 
 
@@ -98,7 +98,7 @@ fg = main(resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe
 # fails
 # key 1 not found
 # julia101 -p 4 apriltag_and_zed_slam.jl --previous "2018-11-09T01:42:33.279" --jldfile "racecar_fg_x299.jld2" --folder_name "labrun7" --failsafe
- 
+
 
 
 
