@@ -39,6 +39,9 @@ function parse_commandline()
             help = "Batch solve every n poses"
             arg_type = Int64
             default = 20
+        "--show"
+            help = "Show pdfs during computation using `evince`"
+            action = :store_true
     end
 
     return parse_args(s)
