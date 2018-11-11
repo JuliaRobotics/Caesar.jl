@@ -125,7 +125,14 @@ end
 ## BUILD FACTOR GRAPH FOR SLAM SOLUTION,
 
 
-function main( resultsdir::String, camidxs, tag_bagl; BB=20, N=100, lagLength=75, dofixedlag=true, jldfile::String=""  )
+function main(resultsdir::String,
+              camidxs,
+              tag_bagl;
+              BB=20,
+              N=100,
+              lagLength=75,
+              dofixedlag=true,
+              jldfile::String=""  )
 
 # Factor graph construction
 fg = initfg()

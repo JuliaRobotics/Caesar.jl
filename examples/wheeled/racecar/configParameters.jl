@@ -1,5 +1,4 @@
-include("parsecommands.jl")
-using YAML
+
 
 function loadConfig()
   cfg = Dict{Symbol,Any}()
@@ -24,10 +23,11 @@ end
 
 cfg = loadConfig()
 
-cw, ch = cfg[:intrinsics][:cx], cfg[:intrinsics][:cy]
-fx = fy = 1.0*cfg[:intrinsics][:fx]
+cw = cfg[:intrinsics][:cx] + parsed_args["cxoffset"]
+ch = cfg[:intrinsics][:cy] + parsed_args["cyoffset"]
+fx = fy = parsed_args["focalscale"]*cfg[:intrinsics][:fx]
 camK = [fx 0 cw; 0 fy ch; 0 0 1]
-tagsize = 0.172
+tagsize = parsed_args["tagscale"]*0.172
 # k1,k2 = cfg[:intrinsics][:k1], cfg[:intrinsics][:k2] # makes it worse
 k1, k2 = 0.0, 0.0
 
@@ -42,7 +42,7 @@ datadir = joinpath(ENV["HOME"],"data","racecar")
 imgfolder = "images"
 datafolder = ENV["HOME"]*"/data/racecar/$(folderName)/";
 
-camidxs = 0:5:5
+global camidxs = 0:5:5
 if folderName == "labrun2"
   camidxs =  0:5:1625
 elseif folderName == "labrun3"

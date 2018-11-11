@@ -1,23 +1,29 @@
 # Local compute version
 
-@show ARGS
+# @show ARGS
+include("parsecommands.jl")
+
 
 # setup configuration
 using YAML
 
 
 # Figure export folder
-currdirtime = now()
-# currdirtime = "2018-10-28T23:17:30.067"
-# currdirtime = "2018-11-03T22:48:51.924"
-currdirtime = "2018-11-07T01:36:52.274"
+global currdirtime = now()
+if parsed_args["previous"] != ""
+  # currdirtime = "2018-10-28T23:17:30.067"
+  # currdirtime = "2018-11-03T22:48:51.924"
+  # currdirtime = "2018-11-07T01:36:52.274"
+  currdirtime = parsed_args["previous"]
+end
+
 resultsparentdir = joinpath(datadir, "results")
 resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
 
-
-# When running fresh from new data
-include("createResultsDir.jl")
-
+if parsed_args["previous"] == ""
+  # When running fresh from new data
+  include("createResultsDir.jl")
+end
 
 ## Load all required packages
 using Distributed
@@ -69,17 +75,19 @@ include(joinpath(dirname(@__FILE__),"visualizationUtils.jl") )
 
 
 
-# @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
+global tag_bag = Dict()
+if parsed_args["previous"] != ""
+  tag_bag = detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs)
+  # save the tag bag file for future use
+  @save resultsdir*"/tag_det_per_pose.jld2" tag_bag
+else
+  @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
+end
 
-tag_bag = detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs)
-# save the tag bag file for future use
-@save resultsdir*"/tag_det_per_pose.jld2" tag_bag
 
 
 
-
-
-fg = main(resultsdir, camidxs, tag_bag)
+fg = main(resultsdir, camidxs, tag_bag, )
 
 0
 
