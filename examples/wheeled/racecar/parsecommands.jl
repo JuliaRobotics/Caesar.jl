@@ -16,6 +16,9 @@ function parse_commandline()
             help = "Which JLD file to load from the previous results folder"
             arg_type = String
             default = ""
+        "--failsafe"
+            help = "Single process and recursive Bayes tree solving, slower by but more robust with better error stack traces."
+            action = :store_true
         "--cxoffset"
             help = "Center x offset"
             arg_type = Float64

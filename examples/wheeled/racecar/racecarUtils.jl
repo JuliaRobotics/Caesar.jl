@@ -132,7 +132,8 @@ function main(resultsdir::String,
               N=100,
               lagLength=75,
               dofixedlag=true,
-              jldfile::String=""  )
+              jldfile::String="",
+              failsafe::Bool=false  )
 
 # Factor graph construction
 fg = initfg()
@@ -161,7 +162,7 @@ addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 writeGraphPdf(fg)
 
 # quick solve as sanity check
-tree = batchSolve!(fg, N=N, drawpdf=true, show=true)
+tree = batchSolve!(fg, N=N, drawpdf=true, show=true, recursive=failsafe)
 
 # add other positions
 maxlen = (length(tag_bagl)-1)

@@ -11,10 +11,10 @@ function loadConfig()
   cfg[:intrinsics][:height] = data["left"]["intrinsics"]["height"]
   cfg[:intrinsics][:width] = data["left"]["intrinsics"]["width"]
   haskey(data["left"]["intrinsics"], "camera_matrix") ? (cfg[:intrinsics][:cam_matrix] = data["left"]["intrinsics"]["camera_matrix"]) : nothing
-  cfg[:intrinsics][:cx] = cx#data["left"]["intrinsics"]["cx"]
-  cfg[:intrinsics][:cy] = cy#data["left"]["intrinsics"]["cy"]
-  cfg[:intrinsics][:fx] = fx#data["left"]["intrinsics"]["fx"]
-  cfg[:intrinsics][:fy] = fy#data["left"]["intrinsics"]["fy"]
+  cfg[:intrinsics][:cx] = data["left"]["intrinsics"]["cx"]
+  cfg[:intrinsics][:cy] = data["left"]["intrinsics"]["cy"]
+  cfg[:intrinsics][:fx] = data["left"]["intrinsics"]["fx"]
+  cfg[:intrinsics][:fy] = data["left"]["intrinsics"]["fy"]
   cfg[:intrinsics][:k1] = data["left"]["intrinsics"]["k1"]
   cfg[:intrinsics][:k2] = data["left"]["intrinsics"]["k2"]
   cfg
@@ -40,33 +40,33 @@ bTc= LinearMap(Rz) ∘ LinearMap(Rx)
 datadir = joinpath(ENV["HOME"],"data","racecar")
 
 imgfolder = "images"
-datafolder = ENV["HOME"]*"/data/racecar/$(folderName)/";
+datafolder = ENV["HOME"]*"/data/racecar/$(parsed_args["folder_name"])/";
 
 global camidxs = 0:5:5
-if folderName == "labrun2"
+if parsed_args["folder_name"] == "labrun2"
   camidxs =  0:5:1625
-elseif folderName == "labrun3"
+elseif parsed_args["folder_name"] == "labrun3"
   @error "unknown image camidxs"
-elseif folderName == "labrun4"
+elseif parsed_args["folder_name"] == "labrun4"
   @error "unknown image camidxs"
-elseif folderName == "labrun5"
+elseif parsed_args["folder_name"] == "labrun5"
   camidxs =  0:5:1020
-elseif folderName == "labrun6"
+elseif parsed_args["folder_name"] == "labrun6"
   camidxs =  0:5:1795
-elseif folderName == "labrun7"
+elseif parsed_args["folder_name"] == "labrun7"
   camidxs =  0:5:2135
-elseif folderName == "labrun8"
+elseif parsed_args["folder_name"] == "labrun8"
   @error "unknown image camidxs"
-elseif folderName == "straightrun3"
+elseif parsed_args["folder_name"] == "straightrun3"
   camidxs =  175:5:370
 else
-  @error "unknown Racecar data folder, $folderName"
+  @error "unknown Racecar data folder, $(parsed_args["folder_name"])"
 end
 
 # datafolder = ENV["HOME"]*"/data/racecar/straightrun3/"  # 175:5:370
 # datafolder = ENV["HOME"]*"/data/racecar/labrun2/; camidxs =  0:5:1625
 # datafolder = ENV["HOME"]*"/data/racecar/labrun3/"; # camidxs =
-# datafolder = ENV["HOME"]*"/data/racecar/$(folderName)/"; camidxs =  0:5:1020
+# datafolder = ENV["HOME"]*"/data/racecar/$(parsed_args["folder_name"])/"; camidxs =  0:5:1020
 # datafolder = ENV["HOME"]*"/data/racecar/labrun6/"; camidxs =  0:5:1795
 # datafolder = ENV["HOME"]*"/data/racecar/labrun7/"; camidxs =  0:5:2135
 # datafolder = ENV["HOME"]*"/data/racecar/labrun8/"; camidxs =  0:5:
