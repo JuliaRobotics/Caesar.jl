@@ -51,7 +51,7 @@ resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
 
 if parsed_args["previous"] == ""
   # When running fresh from new data
-  include("createResultsDir.jl")
+  include(joinpath(dirname(@__FILE__),"createResultsDirs.jl"))
 end
 
 
@@ -77,7 +77,7 @@ end
 
 
 global tag_bag = Dict()
-if parsed_args["previous"] != ""
+if parsed_args["previous"] == ""
   tag_bag = detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs)
   # save the tag bag file for future use
   @save resultsdir*"/tag_det_per_pose.jld2" tag_bag
@@ -90,10 +90,15 @@ end
 
 fg = main(resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"]  )
 
+
+
 0
 
 
-
+# fails
+# key 1 not found
+# julia101 -p 4 apriltag_and_zed_slam.jl --previous "2018-11-09T01:42:33.279" --jldfile "racecar_fg_x299.jld2" --folder_name "labrun7" --failsafe
+ 
 
 
 

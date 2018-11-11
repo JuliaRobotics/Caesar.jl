@@ -39,7 +39,6 @@ function parse_commandline()
             help = "Batch solve every n poses"
             arg_type = Int64
             default = 20
-
     end
 
     return parse_args(s)

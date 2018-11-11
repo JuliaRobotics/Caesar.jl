@@ -42,13 +42,14 @@ datadir = joinpath(ENV["HOME"],"data","racecar")
 imgfolder = "images"
 datafolder = ENV["HOME"]*"/data/racecar/$(parsed_args["folder_name"])/";
 
+# TODO: automate construction of camidxs from data folder itself
 global camidxs = 0:5:5
 if parsed_args["folder_name"] == "labrun2"
   camidxs =  0:5:1625
 elseif parsed_args["folder_name"] == "labrun3"
-  @error "unknown image camidxs"
+  camidxs =  205:5:1165
 elseif parsed_args["folder_name"] == "labrun4"
-  @error "unknown image camidxs"
+  camidxs =  0:5:1715
 elseif parsed_args["folder_name"] == "labrun5"
   camidxs =  0:5:1020
 elseif parsed_args["folder_name"] == "labrun6"
@@ -56,7 +57,7 @@ elseif parsed_args["folder_name"] == "labrun6"
 elseif parsed_args["folder_name"] == "labrun7"
   camidxs =  0:5:2135
 elseif parsed_args["folder_name"] == "labrun8"
-  @error "unknown image camidxs"
+    camidxs =  0:5:1765
 elseif parsed_args["folder_name"] == "straightrun3"
   camidxs =  175:5:370
 else
