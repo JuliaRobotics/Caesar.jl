@@ -36,8 +36,8 @@ user@...$ rm myscript.jl
 
 user@...$ julia -e "println(\"one more time.\")"
 one more time.
-user@...$ julia -e "println(\"...just want to celebrate...\")"
-...just want to celebrate...
+user@...$ julia -e "println(\"...testing...\")"
+...testing...
 
 ```
 
@@ -62,7 +62,11 @@ dpkg -i atom-amd64.deb
 
 After installing and running Atom, you can choose to either install `uber-juno` package [in one go](https://github.com/JunoLab/uber-juno/blob/master/setup.md) or install the three associated packages individually.
 In Atom, open the command pallette by pressing `Ctrl + Shft + p` and typing `settings`.
-Go to the `install` tab, search for and install these packages:
+Go to the `install` tab, search for and install either
+```
+uber-juno
+```
+or the individual packages directly:
 ```
 ink
 julia-client
@@ -70,11 +74,10 @@ julia-language
 latex-completions
 ```
 
->**Note** Some situations have required separately installing the `Atom.jl` Julia package via command line and Julia REPL; this is done with Julia's package manager and `Pkg.add("Atom")`:
-
+>**Note** Some situations have required the user separately installing the `Atom.jl` Julia package via command line (if Juno does not automatically install Atom.jl for you).  Atom.jl can then be installed with Julia's package manager and `add Atom`:
 ```julia
-using Pkg
-Pkg.add("Atom")
+] # activate Pkg manager
+(v1.0) pkg> add Atom
 ```
 
 There are a variety of useful packages in Atom, such as `minimap` and `minimap-git`.
@@ -87,7 +90,8 @@ The philosophy around Julia packages are discussed at length in the [Julia core 
 To install a Julia package, simply open a `julia` REPL (equally the julia REPL in Atom/Juno) and type:
 
 ```julia
-Pkg.add("Caesar")
+] # activate Pkg manager
+(v1.0) pkg> add Caesar
 ```
 
 These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaLang/METADATA.jl](http://www.github.com/JuliaLang/METADATA.jl).
@@ -95,6 +99,7 @@ Unregistered latest packages can also be installed with using only the `Pkg.deve
 
 ```julia
 # Just using Caesar URL as an example --  Caesar is already registered with METADATA
+using Pkg
 Pkg.develop(PackageSpec(url="https://github.com/JuliaRobotics/Caesar.jl.git"))
 ```
 
