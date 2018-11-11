@@ -148,4 +148,26 @@ function getTagPP2(bTt)
 end
 
 
+## DETECT APRILTAGS FROM IMAGE DATA
+function detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs)
+
+    # prep keyframe image data
+    camlookup = prepCamLookup(camidxs)
+
+    # detect tags and extract pose transform
+    IMGS, TAGS = detectTagsViaCamLookup(camlookup, joinpath(datafolder,imgfolder), resultsdir)
+
+    # prep dictionary with all tag detections and poses
+    tag_bag = prepTagBag(TAGS)
+
+    # save the tag detections for later comparison
+    fid=open(resultsdir*"/tags/pose_tags.csv","w")
+    for pose in sort(collect(keys(tag_bag)))
+      println(fid, "$pose, $(collect(keys(tag_bag[pose])))")
+    end
+    close(fid)
+    return tag_bag
+end
+
+
 #

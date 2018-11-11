@@ -121,4 +121,73 @@ end
 
 
 
+
+## BUILD FACTOR GRAPH FOR SLAM SOLUTION,
+
+
+function main( resultsdir::String, camidxs, tag_bagl; BB=20, N=100, lagLength=75, dofixedlag=true, jldfile::String=""  )
+
+# Factor graph construction
+fg = initfg()
+prev_psid = 0
+
+# load from previous file
+if jldfile != ""
+  fg, = loadjld( file=joinpath(resultsdir,jldfile) )
+  xx, = ls(fg)
+  prev_psid = parse(Int, string(xx[end])[2:end])
+end
+
+fg.isfixedlag = dofixedlag
+fg.qfl = lagLength
+
+psid = 0
+pssym = Symbol("x$psid")
+# first pose with zero prior
+addNode!(fg, pssym, DynPose2(ut=0))
+# addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
+addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
+                                              MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))
+
+addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
+
+writeGraphPdf(fg)
+
+# quick solve as sanity check
+tree = batchSolve!(fg, N=N, drawpdf=true, show=true)
+
+# add other positions
+maxlen = (length(tag_bagl)-1)
+
+Gadfly.push_theme(:default)
+
+for psid in (prev_psid+1):1:maxlen
+  prev_psid
+  maxlen
+  @show psym = Symbol("x$psid")
+  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
+  # writeGraphPdf(fg)
+
+  if psid % BB == 0 || psid == maxlen
+    IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
+    tree = batchSolve!(fg, drawpdf=true, show=true, N=N, recursive=true)
+  end
+  jldfile = resultsdir*"/racecar_fg_$(psym).jld2"
+  @spawn IIF.savejld(fg, file=jldfile)
+
+  ## save factor graph for later testing and evaluation
+  # ensureAllInitialized!(fg)
+  @spawn plotRacecarInterm(fg, resultsdir, psym)
+
+  # prepare for next iteration
+  prev_psid = psid
+end
+
+# extract results for later use as training data
+results2csv(fg, dir=resultsdir, filename="results.csv")
+
+return fg
+end # main
+
+
 #
