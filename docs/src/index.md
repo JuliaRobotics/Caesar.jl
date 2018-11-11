@@ -6,10 +6,10 @@
 
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.7.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.7)
 
-# Introduction
+## Introduction
 Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar started as part of the thesis "Towards non-parametric / parametric state estimation and navigation solutions" [1].
 
-# Features
+## Features
 The Caesar framework has the following features:
 * Factor-graph representation of pose and sensor data
 * Localization using [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf)
@@ -21,12 +21,12 @@ The Caesar framework has the following features:
 * Local in-memory solving on the device as well as database-driven centralized solving
 * Fixed-lag, continuous operation as well as off-line batch solving
 
-# TLDR Installation
+## TLDR Installation
 If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package 'Caesar'.
 
 In a Julia 0.7+ REPL, press '?' and type `add Caesar` to pull the latest tagged version.
 
-# Caesar Framework
+## Caesar Framework
 
 ## Caesar Core
 Caesar is implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.
@@ -57,7 +57,7 @@ The Caesar framework is not limited to direct Julia use. The following Github pr
 
 Contributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below).
 
-# Next Steps
+## Next Steps
 For installation steps, examples/tutorials, and concepts please refer to the following pages:
 
 ```@contents
@@ -78,24 +78,26 @@ In the future, Caesar will likely interact more closely with repos such as:
 * [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl)
 * [RecursiveFiltering.jl](http://www.github.com/JuliaRobotics/RecursiveFiltering.jl)
 
-# Contributors
+## JuliaRobotics Code of Conduct
+The Caesar repository is part of the JuliaRobotics organization and adheres to the JuliaRobotics [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
+
+
+## Contributors
 Authors directly involved with this package are:
 
 D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
 
 We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
 
-# JuliaRobotics Code of Conduct
-The Caesar repository is part of the JuliaRobotics organization and adheres to the JuliaRobotics [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 
-# Cite
+## Cite
 Consider citing our work:
 
 ```
 @misc{caesarjl,
   author = "Dehann Fourie, John Leonard, Micheal Kaess, and contributors",
   title =  "Caesar.jl",
-  year =   2017,
+  year =   2018,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
