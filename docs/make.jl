@@ -22,9 +22,9 @@ makedocs(
             "Basics: ContinuousScalar" => "examples/basic_continuousscalar.md",
             "Basics: Singular Ranges-only SLAM (Underdetermined System)" => "examples/basic_slamedonut.md",
             "Basics: Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
-            "Basics: Fixed-Lag Solving" => "examples/interm_fixedlag_hexagonal.md"
+            "Basics: Fixed-Lag Solving" => "examples/interm_fixedlag_hexagonal.md",
             "Intermediate: Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
-            "Intermediate: Creating DynPose Factor" => "examples/interm_dynpose.md",
+            "Intermediate: Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
         "Function Reference" => "func_ref.md"
     ]
