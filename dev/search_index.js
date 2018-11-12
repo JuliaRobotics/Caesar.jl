@@ -13,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Introduction",
     "category": "section",
-    "text": "Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar started as part of the thesis \"Towards non-parametric / parametric state estimation and navigation solutions\" [1]."
+    "text": "Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar attempts to address a number of issues that arise in normal SLAM solutions - solving under-defined systems, inference with non-gaussian measurement distributions, simplifying factor creation, and centralizing factor-graph persistence with databases. Caesar started as part of the thesis \"Towards non-parametric / parametric state estimation and navigation solutions\" [1]."
 },
 
 {
@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Cite",
     "category": "section",
-    "text": "Consider citing our work:@misc{caesarjl,\n  author = \"Dehann Fourie, John Leonard, Micheal Kaess, and contributors\",\n  title =  \"Caesar.jl\",\n  year =   2018,\n  url =    \"https://github.com/JuliaRobotics/Caesar.jl\"\n}"
+    "text": "Consider citing our work:@misc{caesarjl,\n  author = \"Dehann Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, John Leonard, Micheal Kaess, and other contributors\",\n  title =  \"Caesar.jl\",\n  year =   2018,\n  url =    \"https://github.com/JuliaRobotics/Caesar.jl\"\n}"
 },
 
 {
@@ -877,7 +877,47 @@ var documenterSearchIndex = {"docs": [
     "page": "Basics: Fixed-Lag Solving",
     "title": "Basic Example: Hexagonal 2D with Fixed-Lag Solving",
     "category": "section",
-    "text": "Work In Progress, but In the mean time see the following examples:https://github.com/JuliaRobotics/RoME.jl/blob/feature/fixedlagexample/examples/Hexagonal2DSLAM_FixedLag.jl\nhttps://github.com/JuliaRobotics/Caesar.jl/blob/master/examples/wheeled/racecar/apriltagandzed_slam.jl"
+    "text": "NOTE: This is an experimental feature that is currently being developed. This example provides an overview of how to enable it and the benefits of using fixed-lag solving. The objective is to provide a near-constant solve time for ever-growing graphs by only recalculating the most recent portion. Think of this as a placeholder, as we develop the solution this tutorial will be updated to demonstrate how that is achieved."
+},
+
+{
+    "location": "examples/interm_fixedlag_hexagonal/#Example-Code-1",
+    "page": "Basics: Fixed-Lag Solving",
+    "title": "Example Code",
+    "category": "section",
+    "text": "The complete code for this example can be found in the fixed-lag branch of RoME: Hexagonal Fixed-Lag Example."
+},
+
+{
+    "location": "examples/interm_fixedlag_hexagonal/#Introduction-1",
+    "page": "Basics: Fixed-Lag Solving",
+    "title": "Introduction",
+    "category": "section",
+    "text": "Fixed-lag solving is enabled when creating the factor-graph. Users provide a window - the quasi fixed-lag constant (QFL) - which defines how many of the most-recent variables should be calculated. Any other variables are \'frozen\'. The objective of this example is to explore providing a near-constant solve time for ever-growing graphs by only recalculating the most recent portion."
+},
+
+{
+    "location": "examples/interm_fixedlag_hexagonal/#Example-Overview-1",
+    "page": "Basics: Fixed-Lag Solving",
+    "title": "Example Overview",
+    "category": "section",
+    "text": "In the example, the basic Hexagonal 2D is grown to solve 200 variables. The original example is remains the same, i.e. a vehicle is driving around in a hexagon and seeing the same bearing+range landmark as it crosses the starting point. At every 20th variable, a solve is invoked. Rather than use batchSolve(), the solve is performed in parts (construction of Bayes tree, solving the graph) to get performance statistics as the graph grows.numVariables = 200\nsolveEveryNVariables = 20\nlagLength = 30\n\n# Standard Hexagonal example for totalIterations - solve every iterationsPerSolve iterations.\nfunction runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPerSolve::Int)::DataFrame\n    # Add the first pose :x0\n    addNode!(fg, :x0, Pose2)\n\n    # Add at a fixed location PriorPose2 to pin :x0 to a starting location\n    addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))\n\n    # Add a landmark l1\n    addNode!(fg, :l1, Point2, labels=[\"LANDMARK\"])\n\n    # Drive around in a hexagon a number of times\n    solveTimes = DataFrame(GraphSize = [], TimeBuildBayesTree = [], TimeSolveGraph = [])\n    for i in 0:totalIterations\n        psym = Symbol(\"x$i\")\n        nsym = Symbol(\"x$(i+1)\")\n        @info \"Adding pose $nsym...\"\n        addNode!(fg, nsym, Pose2)\n        pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal( [0.1;0.1;0.1].^2 ) )))\n        @info \"Adding odometry factor between $psym -> $nsym...\"\n        addFactor!(fg, [psym;nsym], pp )\n\n        if i % 6 == 0\n            @info \"Creating factor between $psym and l1...\"\n            p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))\n            addFactor!(fg, [psym; :l1], p2br)\n        end\n        if i % iterationsPerSolve == 0 && i != 0\n            @info \"Performing inference!\"\n            if fg.isfixedlag\n                @info \"Quasi fixed-lag is enabled (a feature currently in testing)!\"\n                fifoFreeze!(fg)\n            end\n            tBuild = @timed tree = wipeBuildNewTree!(fg)\n            tInfer = @timed inferOverTree!(fg, tree, N=100)\n            graphSize = length([ls(fg)[1]..., ls(fg)[2]...])\n            push!(solveTimes, (graphSize, tBuild[2], tInfer[2]))\n        end\n    end\n    return solveTimes\nendTwo cases are set up:One solving the full graph every time a solve is performed:# start with an empty factor graph object\nfg = initfg()\n# DO NOT enable fixed-lag operation\nsolverTimesForBatch = runHexagonalExample(fg, numVariables, solveEveryNVariables)The other enabling fixed-lag with a window of 20 variables:fgFixedLag = initfg()\nfgFixedLag.isfixedlag = true\nfgFixedLag.qfl = lagLength\n\nsolverTimesFixedLag = runHexagonalExample(fgFixedLag, numVariables, solveEveryNVariables)The resultant path of the robot can be seen by using RoMEPlotting and is drawn if the visualization lines are uncommented:#### Visualization\n\n# Plot the many iterations to see that it succeeded.\n# Batch\n# drawPosesLandms(fg)\n\n# Fixed lag\n# drawPosesLandms(fgFixedLag)Lastly, the timing results of both scenarios are merged into a single DataFrame table, exported to CSV, and a summary graph is shown using GadFly.using Gadfly\nusing Colors\nusing CSV\n\n# Make a clean dataset\nrename!(solverTimesForBatch, :TimeBuildBayesTree => :Batch_BayedBuild, :TimeSolveGraph => :Batch_SolveGraph);\nrename!(solverTimesFixedLag, :TimeBuildBayesTree => :FixedLag_BayedBuild, :TimeSolveGraph => :FixedLag_SolveGraph);\ntimingMerged = DataFrames.join(solverTimesForBatch, solverTimesFixedLag, on=:GraphSize)\nCSV.write(\"timing_comparison.csv\", timingMerged)\n\nPP = []\npush!(PP, Gadfly.layer(x=timingMerged[:GraphSize], y=timingMerged[:FixedLag_SolveGraph], Geom.path, Theme(default_color=colorant\"green\"))[1]);\npush!(PP, Gadfly.layer(x=timingMerged[:GraphSize], y=timingMerged[:Batch_SolveGraph], Geom.path, Theme(default_color=colorant\"magenta\"))[1]);\n\nplt = Gadfly.plot(PP...,\n    Guide.title(\"Solving Time vs. Iteration for Fixed-Lag Operation\"),\n    Guide.xlabel(\"Solving Iteration\"),\n    Guide.ylabel(\"Solving Time (seconds)\"),\n    Guide.manual_color_key(\"Legend\", [\"fixed\", \"batch\"], [\"green\", \"magenta\"]))\nGadfly.draw(PNG(\"results_comparison.png\", 12cm, 15cm), plt)"
+},
+
+{
+    "location": "examples/interm_fixedlag_hexagonal/#Results-1",
+    "page": "Basics: Fixed-Lag Solving",
+    "title": "Results",
+    "category": "section",
+    "text": "Preliminary results for the comparison can be seen below. However, this is just a start and we need to perform more testing. At the moment we are working on providing consistent results and further improving performance/flattening the fixed-lag time. It should be noted that the below graph is not to demonstrate the absolute solve time, but rather the relative behavior of full-graph solve vs. fixed-lag.(Image: Timing comparison of full solve vs. fixed-lag)"
+},
+
+{
+    "location": "examples/interm_fixedlag_hexagonal/#Additional-Example-1",
+    "page": "Basics: Fixed-Lag Solving",
+    "title": "Additional Example",
+    "category": "section",
+    "text": "Work In Progress, but In the mean time see the following examples:https://github.com/JuliaRobotics/Caesar.jl/blob/master/examples/wheeled/racecar/apriltagandzed_slam.jl"
 },
 
 {
