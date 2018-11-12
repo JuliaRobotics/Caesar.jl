@@ -1,3 +1,5 @@
+using HDF5, JLD
+
 
 examplefolder = dirname(@__FILE__)
 datafolder = joinpath(examplefolder,"..","..","data","datasets","victoriapark")
