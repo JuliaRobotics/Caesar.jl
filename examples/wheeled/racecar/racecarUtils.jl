@@ -1,35 +1,13 @@
 
 
 
-
-function loadConfig()
-  cfg = Dict{Symbol,Any}()
-  data =   YAML.load(open(joinpath(Pkg.dir("Caesar"),"examples","wheeled","racecar","cam_cal.yml")))
-  bRc = eval(parse("["*data["extrinsics"]["bRc"][1]*"]"))
-  # convert to faster symbol lookup
-  cfg[:extrinsics] = Dict{Symbol,Any}()
-  cfg[:extrinsics][:bRc] = bRc
-  cfg[:intrinsics] = Dict{Symbol,Any}()
-  cfg[:intrinsics][:height] = data["left"]["intrinsics"]["height"]
-  cfg[:intrinsics][:width] = data["left"]["intrinsics"]["width"]
-  haskey(data["left"]["intrinsics"], "camera_matrix") ? (cfg[:intrinsics][:cam_matrix] = data["left"]["intrinsics"]["camera_matrix"]) : nothing
-  cfg[:intrinsics][:cx] = data["left"]["intrinsics"]["cx"]
-  cfg[:intrinsics][:cy] = data["left"]["intrinsics"]["cy"]
-  cfg[:intrinsics][:fx] = data["left"]["intrinsics"]["fx"]
-  cfg[:intrinsics][:fy] = data["left"]["intrinsics"]["fy"]
-  cfg[:intrinsics][:k1] = data["left"]["intrinsics"]["k1"]
-  cfg[:intrinsics][:k2] = data["left"]["intrinsics"]["k2"]
-  cfg
-end
-
-
 # add AprilTag sightings from this pose
 function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true )
   @show currtags = ls(fg)[2]
   for lmid in keys(posetags)
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
-      info("adding node $lmsym")
+      @info "adding node $lmsym"
       addNode!(fg, lmsym, lmtype)
     end
     ppbr = nothing
@@ -48,11 +26,11 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
                 MvNormal([dx;
                           dy;
                           dth],
-                         diagm([0.05;0.05;0.03].^2)) )
+                         Matrix(Diagonal([0.05;0.05;0.03].^2))) )
     end
     if rand() > DAerrors
       # regular single hypothesis
-      addFactor!(fg, [pssym; lmsym], ppbr, autoinit=false, autoinit=autoinit)
+      addFactor!(fg, [pssym; lmsym], ppbr, autoinit=autoinit)
     else
       # artificial errors to data association occur
       info("Forcing bad data association with $lmsym")
@@ -60,7 +38,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
       @show ll2 = setdiff(ll, [lmsym])
       @show daidx = round(Int, (length(ll2)-1)*rand()+1)
       @show rda = ll2[daidx]
-      addFactor!(fg, [pssym; lmsym; rda], ppbr, autoinit=false, multihypo=[1.0;0.5;0.5], autoinit=autoinit)
+      addFactor!(fg, [pssym; lmsym; rda], ppbr, multihypo=[1.0;0.5;0.5], autoinit=autoinit)
     end
   end
   nothing
@@ -75,8 +53,8 @@ function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odot
     addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))), autoinit=autoinit)
   elseif odotype == VelPose2VelPose2
     addNode!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
-    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),diagm([0.3;0.1;0.25].^2)),
-                                                             MvNormal(zeros(2),diagm([0.2;0.1].^2))), autoinit=autoinit)
+    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([0.4;0.4;0.3].^2))),
+                                                             MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2)))), autoinit=autoinit)
   end
 
   addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors)
@@ -112,7 +90,7 @@ function detectTagsViaCamLookup(camlookup, imgfolder, imgsavedir)
     push!(TAGS, deepcopy(tags))
     push!(IMGS, deepcopy(img))
     foreach(tag->drawTagBox!(IMGS[psid+1],tag, width = 5, drawReticle = false), tags)
-    save(imgsavedir*"/tags/img_$(psid).jpg", IMGS[psid+1])
+    Images.save(imgsavedir*"/tags/img_$(psid).jpg", IMGS[psid+1])
   end
   # psid = 1
   # img = load(datafolder*"$(imgfolder)/$(camlookup[psid])")
@@ -141,6 +119,84 @@ close(fid)
 
 end
 
+
+
+
+## BUILD FACTOR GRAPH FOR SLAM SOLUTION,
+
+
+function main(resultsdir::String,
+              camidxs,
+              tag_bagl;
+              BB=20,
+              N=100,
+              lagLength=75,
+              dofixedlag=true,
+              jldfile::String="",
+              failsafe::Bool=false,
+              show::Bool=false  )
+
+# Factor graph construction
+fg = initfg()
+prev_psid = 0
+
+# load from previous file
+if jldfile != ""
+  fg, = loadjld( file=joinpath(resultsdir,jldfile) )
+  xx, = ls(fg)
+  prev_psid = parse(Int, string(xx[end])[2:end])
+end
+
+fg.isfixedlag = dofixedlag
+fg.qfl = lagLength
+
+psid = 0
+pssym = Symbol("x$psid")
+# first pose with zero prior
+addNode!(fg, pssym, DynPose2(ut=0))
+# addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
+addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
+                                              MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))
+
+addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
+
+writeGraphPdf(fg)
+
+# quick solve as sanity check
+tree = batchSolve!(fg, N=N, drawpdf=true, show=show, recursive=failsafe)
+
+# add other positions
+maxlen = (length(tag_bagl)-1)
+
+Gadfly.push_theme(:default)
+
+for psid in (prev_psid+1):1:maxlen
+  prev_psid
+  maxlen
+  @show psym = Symbol("x$psid")
+  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
+  # writeGraphPdf(fg)
+
+  if psid % BB == 0 || psid == maxlen
+    IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
+    tree = batchSolve!(fg, drawpdf=true, show=show, N=N, recursive=true)
+  end
+  jldfile = resultsdir*"/racecar_fg_$(psym).jld2"
+  @spawn IIF.savejld(fg, file=jldfile)
+
+  ## save factor graph for later testing and evaluation
+  # ensureAllInitialized!(fg)
+  @spawn plotRacecarInterm(fg, resultsdir, psym)
+
+  # prepare for next iteration
+  prev_psid = psid
+end
+
+# extract results for later use as training data
+results2csv(fg, dir=resultsdir, filename="results.csv")
+
+return fg
+end # main
 
 
 #

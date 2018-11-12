@@ -1,4 +1,4 @@
-# Intermediate Example: Hexagonal 2D with Fixed-Lag Solving
+# Basic Example: Hexagonal 2D with Fixed-Lag Solving
 
 > **NOTE:** This is an experimental feature that is currently being developed. This example provides an overview of how to enable it and the benefits of using fixed-lag solving. The objective is to provide a near-constant solve time for ever-growing graphs by only recalculating the most recent portion. Think of this as a placeholder, as we develop the solution this tutorial will be updated to demonstrate how that is achieved.
 
@@ -125,3 +125,9 @@ Gadfly.draw(PNG("results_comparison.png", 12cm, 15cm), plt)
 Preliminary results for the comparison can be seen below. However, this is just a start and we need to perform more testing. At the moment we are working on providing consistent results and further improving performance/flattening the fixed-lag time. It should be noted that the below graph is not to demonstrate the absolute solve time, but rather the relative behavior of full-graph solve vs. fixed-lag.
 
 ![Timing comparison of full solve vs. fixed-lag](images/fixed_lag_timing.png)
+
+## Additional Example
+
+> Work In Progress, but In the mean time see the following examples:
+https://github.com/JuliaRobotics/Caesar.jl/blob/master/examples/wheeled/racecar/apriltag_and_zed_slam.jl
+

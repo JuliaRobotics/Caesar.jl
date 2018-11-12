@@ -19,12 +19,12 @@ makedocs(
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
-            "Basics: Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
-            "Basics: Singular Ranges-only SLAM" => "examples/basic_slamedonut.md",
             "Basics: ContinuousScalar" => "examples/basic_continuousscalar.md",
-            "Basics: Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
-            "Intermediate Tutorial: Creating DynPose Factor" => "examples/interm_dynpose.md",
-            "Intermediate Tutorial: Fixed-Lag Solving" => "examples/interm_fixedlag_hexagonal.md"
+            "Basics: Singular Ranges-only SLAM (Underdetermined System)" => "examples/basic_slamedonut.md",
+            "Basics: Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
+            "Basics: Fixed-Lag Solving" => "examples/interm_fixedlag_hexagonal.md",
+            "Intermediate: Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
+            "Intermediate: Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
         "Function Reference" => "func_ref.md"
     ]
@@ -34,9 +34,5 @@ makedocs(
 
 deploydocs(
     repo   = "github.com/JuliaRobotics/Caesar.jl.git",
-    target = "build",
-    deps   = nothing,
-    make   = nothing,
-    julia  = "0.7",
-    osname = "linux"
+    target = "build"
 )

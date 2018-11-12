@@ -128,7 +128,6 @@ end
 
 
 
-
 # L = X + DX  =>  X\L = DX
 
 function imageFactor(fg, fsym, im, cfg)
@@ -240,5 +239,69 @@ function plotPoseVelAsMax(fg, poserange)
     Gadfly.layer(x=poserange, y=VV[:,2], Geom.line, Theme(default_color=colorant"green"))
   )
 end
+
+
+
+
+
+
+
+# # save factor graph for later testing and evaluation
+# fg, = loadjld(file=resultsdir*"/racecar_fg_x200_presolve.jld2")
+# fg, = loadjld(file=resultsdir*"/racecar_fg_??.jld2")
+# @time tree = batchSolve!(fg, N=N, drawpdf=true, show=true, recursive=true)
+# 0
+#
+# IIF.savejld(fg, file=resultsdir*"/racecar_fg_final_resolve.jld2")
+# # fgr, = loadjld(file=resultsdir*"/racecar_fg_final_resolve.jld2")
+# results2csv(fg; dir=resultsdir, filename="results_resolve.csv")
+#
+#
+# # pl = plotKDE(fg, :x1, levels=1, dims=[1;2]);
+#
+#
+#
+# #,xmin=-3,xmax=6,ymin=-5,ymax=2);
+# Gadfly.push_theme(:default)
+# pl = drawPosesLandms(fg, spscale=0.1, drawhist=false, meanmax=:max);
+# # Gadfly.set(:default_theme)
+# Gadfly.draw(PNG(joinpath(resultsdir,"images","final.png"),15cm, 10cm),pl);
+# Gadfly.draw(SVG(joinpath(resultsdir,"images","final.svg"),15cm, 10cm),pl);
+#
+# # pl = drawPosesLandms(fg, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
+# # Gadfly.draw(PNG(joinpath(resultsdir,"hist_final.png"),15cm, 10cm),pl)
+#
+# 0
+
+
+
+
+# debugging
+
+# using Profile
+#
+# using Logging
+# global_logger(NullLogger())
+# @profile println("test")
+# Profile.clear()
+# @profile tree1 = IIF.wipeBuildNewTree!(fg)
+#
+# Juno.profiler()
+
+
+# vars = lsRear(fg, 5)
+#
+#
+# num_edges(fg.g)
+#
+# subgraphFromVerts(fg, vars)
+#
+# ensureAllInitialized!(fg)
+# isInitialized(fg, :x220)
+#
+# ls(fg, :l14)
+
+
+
 
 #
