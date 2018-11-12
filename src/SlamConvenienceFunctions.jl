@@ -118,7 +118,6 @@ function parseLandmarkXY!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString
   nothing
 end
 
-
 function batchSolve!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   println("batchSolve -- wiping tree and solving")
   slam.tree = wipeBuildNewTree!(slam.fg)
@@ -155,7 +154,7 @@ function parseGetNextID(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},
 end
 
 function parseReset(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
-  warn("parseReset -- resetting factor graph")
+  @warn "parseReset -- resetting factor graph"
   slam = SLAMWrapper(emptyFactorGraph(), Union{}, 0)
   nothing
 end
@@ -233,7 +232,7 @@ function parseTCP!(slam::SLAMWrapper, line::AbstractString)
       println("parseTCP -- should quit now")
       return false, string("")
     else
-      warn("parseTCP -- I don't know what $(cmd) means")
+      @warn "parseTCP -- I don't know what $(cmd) means"
       goahead = false
     end
     retstr = nothing

@@ -51,7 +51,7 @@ inferOverTreeR!(fg, tree)
 
 
 # newLandmark = VariableRequest("l1", "Point2", nothing, ["LANDMARK"])
-# response = addVariable(synchronyConfig, robotId, sessionId, newLandmark)
+# response = addVariable(graffConfig, robotId, sessionId, newLandmark)
 # newBearingRangeFactor = BearingRangeRequest("x1", "l1",
 #                           DistributionRequest("Normal", Float64[0; 0.1]),
 #                           DistributionRequest("Normal", Float64[20; 1.0]))

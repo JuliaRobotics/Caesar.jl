@@ -3,18 +3,23 @@ module Caesar
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 import RoME: getRangeKDEMax2D, getLastPose, initfg
+import IncrementalInference: batchSolve!
+
+using Reexport
+
+@reexport using RoME
+@reexport using KernelDensityEstimate
+@reexport using Distributions
 
 using
-  RoME,
+  Distributed,
+  Statistics,
+  LinearAlgebra,
   IncrementalInference,
   Graphs,
-  KernelDensityEstimate,
-  Distributions,
   TransformUtils,
   CoordinateTransformations,
   Rotations,
-  JLD,
-  HDF5,
   JSON,
   FileIO,
   DataStructures,
@@ -24,45 +29,11 @@ using
   DocStringExtensions,
   CloudGraphs,
   Neo4j,
-  Mongo,
-  LibBSON
-
+  Mongoc,
+  Unmarshal
 
 export
-  # pass through from KDE
-  kde!,
-  getPoints,
-  getBW,
-  Ndim,
-  Npts,
-
-  # pass through from IIF and RoME
-  ls,
-  FactorGraph,
-  writeGraphPdf,
-  getVert,
-  getVal,
-  saveplot,
-  wipeBuildNewTree!,
-  inferOverTree!,
-  inferOverTreeR!,
-  # callbacks for datalayer changes
-  localapi,
-  dlapi,
-  # Victoria Park example -- batch
-  loadVicPrkDataset,
-
-  # passthrough variable and factor types
-  Pose2,
-  Point2,
-
-  # passthrough RoME factor types
-  PriorPose2,
-  Pose2Pose2,
-  Pose2Point2BearingRange,
-
-  # insitu component
-  GenericInSituSystem,
+  GenericInSituSystem,  # insitu components
   makeGenericInSituSys,
   InSituSystem,
   makeInSituSys,
@@ -80,8 +51,8 @@ export
   tcpStringBRTrackingServer,
 
   # save and load data
-  saveSlam,
-  loadSlam,
+  saveSlam, # TODO deprecate
+  loadSlam, # TODO deprecate
   haselement,
 
   # user functions
@@ -129,6 +100,7 @@ export
   # webserver
   SolverStatus,
   CaesarConfig,
+  IterationStatistics,
   VisualizationConfig,
 
   # multisession utils
@@ -142,7 +114,7 @@ export
   rmInstMultisessionPriors!,
   removeMultisessions!
 
-VoidUnion{T} = Union{Void, T}
+NothingUnion{T} = Union{Nothing, T}
 
 include("BearingRangeTrackingServer.jl")
 
@@ -156,10 +128,13 @@ include("config/CaesarConfig.jl")
 
 # using CloudGraphs
 include("cloudgraphs/SolverStatus.jl")
+include("cloudgraphs/IterationStatistics.jl")
 include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
 include("cloudgraphs/ConvertGeneralSlaminDB.jl")
 include("cloudgraphs/slamindb.jl")
 include("cloudgraphs/MultisessionUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
 
+# ZMQ server and endpoints
+include("zmq/ZmqCaesar.jl")
 end

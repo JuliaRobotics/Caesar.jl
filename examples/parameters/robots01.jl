@@ -1,6 +1,6 @@
 # example for loading robot description to database
 
-using Caesar, SynchronySDK
+using Caesar, GraffSDK
 
 
 
@@ -12,7 +12,7 @@ rovconf["pointcloud_description_name"] = "BSONpointcloud"
 rovconf["pointcloud_color_description_name"] = "BSONcolors"
 
 # Actually modify the databases
-updateRobotConfig(synchronyConfig, robotId, rovconf)
+updateRobotConfig(graffConfig, robotId, rovconf)
 
 
 

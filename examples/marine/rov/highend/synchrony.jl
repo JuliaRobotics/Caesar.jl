@@ -11,7 +11,7 @@ using Distributions
 using LCMCore
 using LibBSON
 
-include(joinpath(dirname(@__FILE__), "synchronySDKIntegration.jl"))
+include(joinpath(dirname(@__FILE__), "graffSDKIntegration.jl"))
 
 # 0. Constants
 println("[Caesar.jl] defining constants.")
@@ -53,7 +53,7 @@ end
 # create a SLAM container object
 slam_client = SyncrSLAM(robotId, sessionId, nothing)
 
-# initialize a new session ready for SLAM using the built in SynchronySDK
+# initialize a new session ready for SLAM using the built in GraffSDK
 println("[Caesar.jl] Setting up remote solver")
 initialize!(slam_client)
 
