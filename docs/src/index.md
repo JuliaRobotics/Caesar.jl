@@ -7,7 +7,7 @@
 [![Caesar](http://pkg.julialang.org/badges/Caesar_0.7.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.7)
 
 # Introduction
-Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar attempts to address a number of issues that arise in normal SLAM solutions - solving under-defined systems, inference with non-gaussian measurement distributions, simplifying factor creation, and centralizing factor-graph persistence with databases. Caesar started as part of the thesis "Towards non-parametric / parametric state estimation and navigation solutions" [1](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1).
+Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar attempts to address a number of issues that arise in normal SLAM solutions - solving under-defined systems, inference with non-gaussian measurement distributions, simplifying factor creation, and centralizing factor-graph persistence with databases. Caesar started as part of the thesis "Towards non-parametric / parametric state estimation and navigation solutions" [[1]](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1).
 
 ## Features
 The Caesar framework has the following features:
@@ -103,7 +103,7 @@ Consider citing our work:
 ```
 
 # References
-    [1]  [Fourie, D.: "Multi-modal and Inertial Sensor Solutions to Navigation-type Factor Graph"](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1),
+    [1]  Fourie, D.: "Multi-modal and Inertial Sensor Solutions to Navigation-type Factor Graph",
          Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.
     [2]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: "SLAMinDB: Centralized graph
          databases for mobile robotics" IEEE International Conference on Robotics and Automation (ICRA),
