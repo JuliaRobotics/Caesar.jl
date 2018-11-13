@@ -4,8 +4,6 @@
 </p>
 ```
 
-[![Caesar](http://pkg.julialang.org/badges/Caesar_0.7.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.7)
-
 ## Introduction
 Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar attempts to address a number of issues that arise in normal SLAM solutions - solving under-defined systems, inference with non-Gaussian measurement distributions, simplifying factor creation, and centralizing factor-graph persistence with databases. Caesar started as part of the thesis "Multi-modal and Inertial Sensor Solutions for Navigation-type Factor Graphs" [[1]](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1).
 
