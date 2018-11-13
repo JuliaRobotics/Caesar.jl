@@ -1,4 +1,4 @@
-# Example: Singular Ranges-only SLAM Solution (i.e. "Under-Constrained")
+# Singular Ranges-only SLAM Solution (i.e. "Under-Constrained")
 
 
 This tutorial describes a range-only system where there are always more variable dimensions than range measurements made.
