@@ -1,5 +1,7 @@
 using Caesar, RoME, IncrementalInference
 
+using DelimitedFiles
+
 # visualization scripts
 
 using Colors
