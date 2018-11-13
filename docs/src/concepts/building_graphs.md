@@ -100,7 +100,7 @@ The current factor types that you will find in the examples are (there are many 
 
 # Querying the FactorGraph
 
-There are a variety of functions to query the factor graph, please refer to [Function Reference](../func_ref.md) for details.
+There are a variety of functions to query the factor graph, please refer to [Function Reference](../reference.md) for details.
 
 A quick summary of the variables in the factor graph can be retrieved with:
 
