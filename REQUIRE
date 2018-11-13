@@ -23,3 +23,5 @@ Neo4j 2.0.0
 Mongoc 0.1.2
 Unmarshal 0.2.1
 ZMQ 1.0.0
+YAML
+FFTW
