@@ -5,16 +5,6 @@
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
 [![Build Status][build-img]][build-url]
-[![codecov.io][cov-img]][cov-url]
-
-
-# Introduction
-
-Towards non-parametric / parametric state estimation and navigation solutions [1]. Implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages like C/[C++](http://github.com/pvazteixeira/caesar-lcm) or [Python](http://github.com/JuliaRobotics/Caesar.jl/blob/master/examples/database/python/neo4j_interact_example.py), as listed in features below. Multi-modal (quasi-multi-hypothesis) navigation and mapping solutions, using various sensor data, is a corner stone of this package. Multi-sensor fusion is made possible via vertically integrated [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf).
-
-Critically, this package can operate in the conventional SLAM manner, using local dictionaries, or centralize around the `FactorGraph` through a graph database using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git), as [discussed here](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf)[2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate [RoME.jl][rome-url] and back-end solver [IncrementalInference.jl][iif-url].
-
-Comments, questions and issues welcome.
 
 # Documentation
 
@@ -22,27 +12,6 @@ Please see the [documentation](http://juliarobotics.github.io/Caesar.jl/latest/)
 
 [![docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://juliarobotics.github.io/Caesar.jl/latest/)
 
-# Visualization
-
-Please see the [Arena.jl](http://www.github.com/JuliaRobotics/Arena.jl) package for the concentration of all 2D and 3D visualization utilities of the Caesar.jl robot navigation packages.
-
-# Installation
-
-Caesar can be installed for latest Julia 0.7/1.0 with:
-```julia
-julia> ] # to enable package manager
-pkg> add Caesar
-```
-
-Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
-```julia
-pkg> test IncrementalInference
-...
-pkg> test RoME
-...
-pkg> test Caesar
-...
-```
 
 # Bleeding-edge Development Status
 
@@ -63,8 +32,6 @@ Authors directly involved with this package are:
 D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
 
 We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
-
-# Cite
 
 Consider citing our work:
 
