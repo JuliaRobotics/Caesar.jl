@@ -183,7 +183,7 @@ plotKDE(fg, [:x0, :x1, :x2, :x3])
 The resulting posterior marginal beliefs over all the system variables are:
 ```@raw html
 <p align="center">
-<img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/src/assets/tutorials/ContinuousScalar/fgx0.png" width="480" border="0" />
+<img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/src/assets/tutorials/ContinuousScalar/plx0123infr.png" width="480" border="0" />
 </p>
 ```
 
