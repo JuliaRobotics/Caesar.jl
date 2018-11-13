@@ -7,7 +7,6 @@
 
 
 
-
 racecarslamdefault_1() {
     julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun1" --failsafe $*
 }
@@ -51,6 +50,8 @@ racecarall() {
 # racecarall --focalscale 1.01
 # racecarall --focalscale 0.99
 #
+# racecarall --cxoffset -0.25
+# racecarall --cxoffset 0.25
 # racecarall --cxoffset -0.5
 # racecarall --cxoffset 0.5
 # racecarall --cyoffset -0.5
