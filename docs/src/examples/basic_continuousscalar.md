@@ -2,8 +2,8 @@
 
 ## IncrementalInference.jl ContinuousScalar
 
-This tutorial illustrates how `IncrementalInference` enables algebraic relations between stochastic variables, and how a final posterior belief estimate is calculated from several pieces of information.
-This tutorial is rather abstract and the user is free to imagine any system of relationships, for example a robot driving in a one dimensional world, or a time traveler making uncertain jumps forwards and backwards in time.
+This tutorial illustrates how `IncrementalInference` enables algebraic relations (residual functions) between multiple stochastic variables, and how a final posterior belief estimate is calculated from several pieces of information.
+The application of this tutorial is presented in abstract from which the user is free to imagine any system of relationships:  For example, a robot driving in a one dimensional world; or a time traveler making uncertain jumps forwards and backwards in time.
 The tutorial implicitly shows a multi-modal uncertainty introduced and transmitted.
 The tutorial also illustrates consensus through an additional piece of information, which reduces all stochastic variable marginal beliefs to unimodal only beliefs.
 The example will also illustrate the use of non-Gaussian beliefs and global inference.

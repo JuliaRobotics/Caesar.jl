@@ -1,55 +1,6 @@
-# Intermediate Example: Adding Dynamic Factors and Variables
+# Adding Dynamic Factors and Variables
 
 This tutorial describes how a new factor can be developed, beyond the pre-existing implementation in [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl).  Factors can accept any number of variable dependencies and allow for a wide class of allowable function calls can be used.  Our intention is to make it as easy as possible for users to create their own factor types.
-
-## Quick Example in One Dimension
-
-Already exists in IncrementalInference
-
-TODO: Smooth this over.
-
-This tutorial calls for multiple variable nodes connected through algebraic functions stochastic uncertainty.
-User scope `Prior`, `LinearOffset`, and `MultiModalOffset` with arbitrary distributions are defined as:
-```julia
-import IncrementalInference: getSample
-
-struct Prior{T} <: IncrementalInference.FunctorSingleton where T <: Distribution
-  z::T
-end
-getSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,:), )
-struct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: Distribution
-  z::T
-end
-getSample(s::LinearOffset, N::Int=1) = (reshape(rand(s.z,N),1,:), )
-function (s::LinearOffset)(res::Array{Float64},
-                           userdata::FactorMetadata,
-                           idx::Int,
-                           meas::Tuple{Array{Float64, 2}},
-                           X1::Array{Float64,2},
-                           X2::Array{Float64,2}  )
-  #
-  res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])
-  nothing
-end
-struct MultiModalOffset <: IncrementalInference.FunctorPairwise
-  z::Vector{Distribution}
-  c::Categorical
-end
-getSample(s::MultiModalOffset, N::Int=1) = (reshape.(rand.(s.z, N),1,:)..., rand(s.c, N))
-function (s::MultiModalOffset)(res::Array{Float64},
-                               userdata::FactorMetadata,
-                               idx::Int,
-                               meas::Tuple,
-                               X1::Array{Float64,2},
-                               X2::Array{Float64,2}  )
-  #
-  res[1] = meas[meas[end][idx]][idx] - (X2[1,idx] - X1[1,idx])
-  nothing
-end
-```
-Notice the residual function relating to the two `PairwiseFunctor` derived definitions.
-The one dimensional residual functions, `res[1] = measurement - prediction`, are used during inference to approximate the convolution of conditional beliefs from the sample approximate marginal beliefs of the connected variables.
-
 
 ## Example: Adding Velocity to Point2D
 
