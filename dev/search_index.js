@@ -625,22 +625,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "examples/examples/#Hexagonal-2D-1",
-    "page": "Caesar Examples",
-    "title": "Hexagonal 2D",
-    "category": "section",
-    "text": "A simple 2D robot trajectory example is expanded below using techniques developed in simultaneous localization and mapping (SLAM).Hexagonal 2D Example"
-},
-
-{
-    "location": "examples/examples/#A-Multi-Modal-Under-Constrained-Solution-1",
-    "page": "Caesar Examples",
-    "title": "A Multi-Modal Under-Constrained Solution",
-    "category": "section",
-    "text": "This tutorial describes a range-only system where there are always more variable dimensions than range measurements made. The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point – other examples show inference results where highly non-Gaussian error distributions are used.Multi-modal range only example (click here or image for full Vimeo):   <a href=\"http://vimeo.com/190052649\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"640\" border=\"0\" /></a>Multi-Modal Under-Constrained Example"
-},
-
-{
     "location": "examples/examples/#Continuous-Scalar-1",
     "page": "Caesar Examples",
     "title": "Continuous Scalar",
@@ -649,19 +633,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "examples/examples/#Adding-Factors-Simple-Factor-Design-1",
+    "location": "examples/examples/#Hexagonal-2D-1",
     "page": "Caesar Examples",
-    "title": "Adding Factors - Simple Factor Design",
+    "title": "Hexagonal 2D",
     "category": "section",
-    "text": "Caesar can be extended with new variables and factors without changing the core code. An example of this design pattern is provided in this example.Defining New Variables and Factor"
-},
-
-{
-    "location": "examples/examples/#Intermediate-Examples-1",
-    "page": "Caesar Examples",
-    "title": "Intermediate Examples",
-    "category": "section",
-    "text": "The following are more complex examples that demonstrate real-world applications."
+    "text": "A simple 2D robot trajectory example is expanded below using techniques developed in simultaneous localization and mapping (SLAM).Hexagonal 2D Example"
 },
 
 {
@@ -670,6 +646,30 @@ var documenterSearchIndex = {"docs": [
     "title": "Fixed-Lag Solving - Hexagonal2D Revisited",
     "category": "section",
     "text": "Hexagonal Fixed-Lag"
+},
+
+{
+    "location": "examples/examples/#A-Under-Constrained-Solution-(unforced-multimodality)-1",
+    "page": "Caesar Examples",
+    "title": "A Under-Constrained Solution (unforced multimodality)",
+    "category": "section",
+    "text": "This tutorial describes a range-only system where there are always more variable dimensions than range measurements made. The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point – other examples show inference results where highly non-Gaussian error distributions are used.Multi-modal range only example (click here or image for full Vimeo):   <a href=\"http://vimeo.com/190052649\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"640\" border=\"0\" /></a>Multi-Modal Under-Constrained Example"
+},
+
+{
+    "location": "examples/examples/#Uncertain-Data-Associations,-a-Multi-Modal-Solution-(forced-multi-hypothesis)-1",
+    "page": "Caesar Examples",
+    "title": "Uncertain Data Associations, a Multi-Modal Solution (forced multi-hypothesis)",
+    "category": "section",
+    "text": "Documentation in progress, in the mean time please see the addFactor!(..., multihypo=[1.0; 0.5;0.5]) feature for 50/50 uncertainty. Similarly for trinary or higher multi-hypotheses per factor.TODO: add example."
+},
+
+{
+    "location": "examples/examples/#Adding-Factors-Simple-Factor-Design-1",
+    "page": "Caesar Examples",
+    "title": "Adding Factors - Simple Factor Design",
+    "category": "section",
+    "text": "Caesar can be extended with new variables and factors without changing the core code. An example of this design pattern is provided in this example.Defining New Variables and Factor"
 },
 
 {
@@ -714,15 +714,15 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_continuousscalar/#",
-    "page": "Basics: ContinuousScalar",
-    "title": "Basics: ContinuousScalar",
+    "page": "ContinuousScalar",
+    "title": "ContinuousScalar",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "examples/basic_continuousscalar/#Tutorials-1",
-    "page": "Basics: ContinuousScalar",
+    "page": "ContinuousScalar",
     "title": "Tutorials",
     "category": "section",
     "text": ""
@@ -730,31 +730,31 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_continuousscalar/#IncrementalInference.jl-ContinuousScalar-1",
-    "page": "Basics: ContinuousScalar",
+    "page": "ContinuousScalar",
     "title": "IncrementalInference.jl ContinuousScalar",
     "category": "section",
-    "text": "This tutorial illustrates how IncrementalInference enables algebraic relations between stochastic variables, and how a final posterior belief estimate is calculated from several pieces of information. This tutorial is rather abstract and the user is free to imagine any system of relationships, for example a robot driving in a one dimensional world, or a time traveler making uncertain jumps forwards and backwards in time. The tutorial implicitly shows a multi-modal uncertainty introduced and transmitted. The tutorial also illustrates consensus through an additional piece of information, which reduces all stochastic variable marginal beliefs to unimodal only beliefs. The example will also illustrate the use of non-Gaussian beliefs and global inference. Lastly, the tutorial demonstrates how automatic initialization of variables works.This tutorial requires IncrementalInference v0.3.0+, RoME v0.1.0, RoMEPlotting packages be installed. In addition, the optional GraphViz package will allow easy visualization of the FactorGraph object structure.To start, the two major mathematical packages are brought into scope.using Distributions\nusing IncrementalInferenceGuidelines for developing your own functions are discussed here in Adding Variables and Factors, and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package RoME.jl.The next step is to describe the inference problem with a graphical model of type IncrementalInference.FactorGraph. The first step is to create an empty factor graph object and start populating it with variable nodes. The variable nodes are identified by Symbols, namely :x0, :x1, :x2, :x3.# Start with an empty factor graph\nfg = emptyFactorGraph()\n\n# add the first node\naddNode!(fg, :x0, ContinuousScalar)\n\n# this is unary (prior) factor and does not immediately trigger autoinit of :x0.\naddFactor!(fg, [:x0], Prior(Normal(0,1)))Factor graphs are bipartite graphs with factors that act as mathematical structure between interacting variables. After adding node :x0, a singleton factor of type Prior (which was defined by the user earlier) is \'connected to\' variable node :x0. This unary factor is taken as a Distributions.Normal distribution with zero mean and a standard devitation of 1. GraphViz.jl can be used to visualize the factor graph structure, although the package is not installed by default. Furthermore, the writeGraphPdf member definition is given at the end of this tutorial, which allows the user to store the graph image in graphviz supported image types.Graphs.plot(fg.g)\n# writeGraphPdf(fg, file=\"fgx01.pdf\") # file=\"fgx01.png\"The two node factor graph is shown in the image below.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx0.png\" width=\"120\" border=\"0\" />\n</p>Automatic initialization of variables depend on how the factor graph model is constructed. This tutorial demonstrates this behavior by first showing that :x0 is not initialized:@show isInitialized(fg, :x0) # falseWhy is :x0 not initialized? Since no other variable nodes have been \'connected to\' (or depend) on :x0 and future intentions of the user are unknown, the initialization of :x0 is deferred until the latest possible moment. IncrementalInference.jl assumes that the user will generally populate new variable nodes with most of the associated factors before moving to the next variable. By delaying initialization of a new variable (say :x0) until a second newer uninitialized variable (say :x1) depends on :x0, the IncrementalInference algorithms hope to then initialize :x0 with the more information from previous and surrounding variables and factors. Also note that initialization of variables is a local operation based only on the neighboring nodes – global inference will over the entire graph is shows later in this tutorial.By adding :x1 and connecting it through the LinearOffset and Normal distributed factor, the automatic initialization of :x0 is triggered.addNode!(fg, :x1, ContinuousScalar)\n# P(Z | :x1 - :x0 ) where Z ~ Normal(10,1)\naddFactor!(fg, [:x0, :x1], LinearOffset(Normal(10.0,1)))\n@show isInitialized(fg, :x0) # trueNote that the automatic initialization of :x0 is aware that :x1 is not initialized and therefore only used the Prior(Normal(0,1)) unary factor to initialize the marginal belief estimate for :x0. The structure of the graph has now been updated to two variable nodes and two factors.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx01.png\" width=\"240\" border=\"0\" />\n</p>Global inference requires that the entire factor graph be initialized before the numerical belief computation algorithms can be performed. Notice how the new :x1 variable is not yet initialized:@show isInitialized(fg, :x1) # falseThe RoMEPlotting.jl package allows visualization (plotting) of the belief state over any of the variable nodes. Remember the first time executions are slow given required code compilation, and that future versions of these package will use more precompilation to reduce first execution running cost.using RoMEPlotting\n\nplotKDE(fg, :x0)<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx0.png\" width=\"360\" border=\"0\" />\n</p>By forcing the initialization of :x1 and plotting its belief estimate,ensureAllInitialized!(fg)\nplotKDE(fg, [:x0, :x1])the predicted influence of the P(Z| X1 - X0) = LinearOffset(Normal(10, 1)) is shown by the red trace.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx01.png\" width=\"360\" border=\"0\" />\n</p>The red trace (predicted belief of :x1) is noting more than the approximated convolution of the current marginal belief of :x0 with the conditional belief described by P(Z | X1 - X0).Another ContinuousScalar variable :x2 is \'connected\' to :x1 through a more complicated MultiModalOffset likelihood function.addNode!(fg, :x2, ContinuousScalar)\nmmo = MultiModalOffset([Rayleigh(3); Uniform(30,55)], Categorical([0.4; 0.6]))\naddFactor!(fg, [:x1, :x2], mmo)<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx012.png\" width=\"360\" border=\"0\" />\n</p>The mmo variable illustrates how a near arbitrary mixture probability distribution can be used as a conditional relationship between variable nodes in the factor graph. In this case, a 40%/60% balance of a Rayleigh and truncated Uniform distribution which acts as a multi-modal conditional belief. Interpret carefully what a conditional belief of this nature actually means.Following the tutorial\'s practical example frameworks (robot navigation or time travel), this multi-modal belief implies that moving from one of the probable locations in :x1 to a location in :x2 by some processes defined by mmo=P(Z | X2, X1) is uncertain to the same 40%/60% ratio. In practical terms, collapsing (through observation of an event) the probabilistic likelihoods of the transition from :x1 to :x2 may result in the :x2 location being at either 15-20, or 40-65-ish units. The predicted belief over :x2 is illustrated by plotting the predicted belief (green trace), after forcing initialization.ensureAllInitialized!(fg)\nplotKDE(fg, [:x0, :x1, :x2])<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx012.png\" width=\"360\" border=\"0\" />\n</p>Adding one more variable :x3 through another LinearOffset(Normal(-50,1))addNode!(fg, :x3, ContinuousScalar)\naddFactor!(fg, [:x2, :x3], LinearOffset(Normal(-50, 1)))expands the factor graph to to four variables and four factors.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx0123.png\" width=\"480\" border=\"0\" />\n</p>This part of the tutorial shows how a unimodal likelihood (conditional belief) can transmit the bimodal belief currently contained in :x2.ensureAllInitialized!(fg)\nplotKDE(fg, [:x0, :x1, :x2, :x3])Notice the blue trace (:x3) is a shifted and slightly spread out version of the initialized belief on :x2, through the convolution with the conditional belief P(Z | X2, X3).<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx0123.png\" width=\"480\" border=\"0\" />\n</p>Global inference over the entire factor graph has still not occurred, and will at this stage produce roughly similar results to the predicted beliefs shown above. Only by introducing more information into the factor graph can inference extract more precise marginal belief estimates for each of the variables. A final piece of information added to this graph is a factor directly relating :x3 with :x0.addFactor!(fg, [:x3, :x0], LinearOffset(Normal(40, 1)))Pay close attention to what this last factor means in terms of the probability density traces shown in the previous figure. The blue trace for :x3 has two major modes, one that overlaps with :x0, :x1 near 0 and a second mode further to the left at -40. The last factor introduces a shift LinearOffset(Normal(40,1)) which essentially aligns the left most mode of :x3 back onto :x0.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx0123c.png\" width=\"480\" border=\"0\" />\n</p>This last factor forces a mode selection through consensus. By doing global inference, the new information obtained in :x3 will be equally propagated to :x2 where only one of the two modes will remain.Global inference is achieved with local computation using two function calls, as follows.tree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n# and visualization\nplotKDE(fg, [:x0, :x1, :x2, :x3])The resulting posterior marginal beliefs over all the system variables are:<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx0123infr.png\" width=\"480\" border=\"0\" />\n</p>It is import to note that although this tutorial ends with all marginal beliefs having near Gaussian shape and are unimodal, that the package supports multi-modal belief estimates during both the prediction and global inference processes. In fact, many of the same underlying inference functions are involved with the automatic initialization process and the global multi-modal iSAM inference procedure. This concludes the ContinuousScalar tutorial particular to the IncrementalInference package."
+    "text": "This tutorial illustrates how IncrementalInference enables algebraic relations (residual functions) between multiple stochastic variables, and how a final posterior belief estimate is calculated from several pieces of information. The application of this tutorial is presented in abstract from which the user is free to imagine any system of relationships:  For example, a robot driving in a one dimensional world; or a time traveler making uncertain jumps forwards and backwards in time. The tutorial implicitly shows a multi-modal uncertainty introduced and transmitted. The tutorial also illustrates consensus through an additional piece of information, which reduces all stochastic variable marginal beliefs to unimodal only beliefs. The example will also illustrate the use of non-Gaussian beliefs and global inference. Lastly, the tutorial demonstrates how automatic initialization of variables works.This tutorial requires IncrementalInference v0.3.0+, RoME v0.1.0, RoMEPlotting packages be installed. In addition, the optional GraphViz package will allow easy visualization of the FactorGraph object structure.To start, the two major mathematical packages are brought into scope.using Distributions\nusing IncrementalInferenceGuidelines for developing your own functions are discussed here in Adding Variables and Factors, and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package RoME.jl.The next step is to describe the inference problem with a graphical model of type IncrementalInference.FactorGraph. The first step is to create an empty factor graph object and start populating it with variable nodes. The variable nodes are identified by Symbols, namely :x0, :x1, :x2, :x3.# Start with an empty factor graph\nfg = emptyFactorGraph()\n\n# add the first node\naddNode!(fg, :x0, ContinuousScalar)\n\n# this is unary (prior) factor and does not immediately trigger autoinit of :x0.\naddFactor!(fg, [:x0], Prior(Normal(0,1)))Factor graphs are bipartite graphs with factors that act as mathematical structure between interacting variables. After adding node :x0, a singleton factor of type Prior (which was defined by the user earlier) is \'connected to\' variable node :x0. This unary factor is taken as a Distributions.Normal distribution with zero mean and a standard devitation of 1. GraphViz.jl can be used to visualize the factor graph structure, although the package is not installed by default. Furthermore, the writeGraphPdf member definition is given at the end of this tutorial, which allows the user to store the graph image in graphviz supported image types.Graphs.plot(fg.g)\n# writeGraphPdf(fg, file=\"fgx01.pdf\") # file=\"fgx01.png\"The two node factor graph is shown in the image below.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx0.png\" width=\"120\" border=\"0\" />\n</p>Automatic initialization of variables depend on how the factor graph model is constructed. This tutorial demonstrates this behavior by first showing that :x0 is not initialized:@show isInitialized(fg, :x0) # falseWhy is :x0 not initialized? Since no other variable nodes have been \'connected to\' (or depend) on :x0 and future intentions of the user are unknown, the initialization of :x0 is deferred until the latest possible moment. IncrementalInference.jl assumes that the user will generally populate new variable nodes with most of the associated factors before moving to the next variable. By delaying initialization of a new variable (say :x0) until a second newer uninitialized variable (say :x1) depends on :x0, the IncrementalInference algorithms hope to then initialize :x0 with the more information from previous and surrounding variables and factors. Also note that initialization of variables is a local operation based only on the neighboring nodes – global inference will over the entire graph is shows later in this tutorial.By adding :x1 and connecting it through the LinearOffset and Normal distributed factor, the automatic initialization of :x0 is triggered.addNode!(fg, :x1, ContinuousScalar)\n# P(Z | :x1 - :x0 ) where Z ~ Normal(10,1)\naddFactor!(fg, [:x0, :x1], LinearOffset(Normal(10.0,1)))\n@show isInitialized(fg, :x0) # trueNote that the automatic initialization of :x0 is aware that :x1 is not initialized and therefore only used the Prior(Normal(0,1)) unary factor to initialize the marginal belief estimate for :x0. The structure of the graph has now been updated to two variable nodes and two factors.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx01.png\" width=\"240\" border=\"0\" />\n</p>Global inference requires that the entire factor graph be initialized before the numerical belief computation algorithms can be performed. Notice how the new :x1 variable is not yet initialized:@show isInitialized(fg, :x1) # falseThe RoMEPlotting.jl package allows visualization (plotting) of the belief state over any of the variable nodes. Remember the first time executions are slow given required code compilation, and that future versions of these package will use more precompilation to reduce first execution running cost.using RoMEPlotting\n\nplotKDE(fg, :x0)<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx0.png\" width=\"360\" border=\"0\" />\n</p>By forcing the initialization of :x1 and plotting its belief estimate,ensureAllInitialized!(fg)\nplotKDE(fg, [:x0, :x1])the predicted influence of the P(Z| X1 - X0) = LinearOffset(Normal(10, 1)) is shown by the red trace.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx01.png\" width=\"360\" border=\"0\" />\n</p>The red trace (predicted belief of :x1) is noting more than the approximated convolution of the current marginal belief of :x0 with the conditional belief described by P(Z | X1 - X0).Another ContinuousScalar variable :x2 is \'connected\' to :x1 through a more complicated MultiModalOffset likelihood function.addNode!(fg, :x2, ContinuousScalar)\nmmo = MultiModalOffset([Rayleigh(3); Uniform(30,55)], Categorical([0.4; 0.6]))\naddFactor!(fg, [:x1, :x2], mmo)<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx012.png\" width=\"360\" border=\"0\" />\n</p>The mmo variable illustrates how a near arbitrary mixture probability distribution can be used as a conditional relationship between variable nodes in the factor graph. In this case, a 40%/60% balance of a Rayleigh and truncated Uniform distribution which acts as a multi-modal conditional belief. Interpret carefully what a conditional belief of this nature actually means.Following the tutorial\'s practical example frameworks (robot navigation or time travel), this multi-modal belief implies that moving from one of the probable locations in :x1 to a location in :x2 by some processes defined by mmo=P(Z | X2, X1) is uncertain to the same 40%/60% ratio. In practical terms, collapsing (through observation of an event) the probabilistic likelihoods of the transition from :x1 to :x2 may result in the :x2 location being at either 15-20, or 40-65-ish units. The predicted belief over :x2 is illustrated by plotting the predicted belief (green trace), after forcing initialization.ensureAllInitialized!(fg)\nplotKDE(fg, [:x0, :x1, :x2])<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx012.png\" width=\"360\" border=\"0\" />\n</p>Adding one more variable :x3 through another LinearOffset(Normal(-50,1))addNode!(fg, :x3, ContinuousScalar)\naddFactor!(fg, [:x2, :x3], LinearOffset(Normal(-50, 1)))expands the factor graph to to four variables and four factors.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx0123.png\" width=\"480\" border=\"0\" />\n</p>This part of the tutorial shows how a unimodal likelihood (conditional belief) can transmit the bimodal belief currently contained in :x2.ensureAllInitialized!(fg)\nplotKDE(fg, [:x0, :x1, :x2, :x3])Notice the blue trace (:x3) is a shifted and slightly spread out version of the initialized belief on :x2, through the convolution with the conditional belief P(Z | X2, X3).<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx0123.png\" width=\"480\" border=\"0\" />\n</p>Global inference over the entire factor graph has still not occurred, and will at this stage produce roughly similar results to the predicted beliefs shown above. Only by introducing more information into the factor graph can inference extract more precise marginal belief estimates for each of the variables. A final piece of information added to this graph is a factor directly relating :x3 with :x0.addFactor!(fg, [:x3, :x0], LinearOffset(Normal(40, 1)))Pay close attention to what this last factor means in terms of the probability density traces shown in the previous figure. The blue trace for :x3 has two major modes, one that overlaps with :x0, :x1 near 0 and a second mode further to the left at -40. The last factor introduces a shift LinearOffset(Normal(40,1)) which essentially aligns the left most mode of :x3 back onto :x0.<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/fgx0123c.png\" width=\"480\" border=\"0\" />\n</p>This last factor forces a mode selection through consensus. By doing global inference, the new information obtained in :x3 will be equally propagated to :x2 where only one of the two modes will remain.Global inference is achieved with local computation using two function calls, as follows.tree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n# and visualization\nplotKDE(fg, [:x0, :x1, :x2, :x3])The resulting posterior marginal beliefs over all the system variables are:<p align=\"center\">\n<img src=\"assets/tutorials/ContinuousScalar/plx0123infr.png\" width=\"480\" border=\"0\" />\n</p>It is import to note that although this tutorial ends with all marginal beliefs having near Gaussian shape and are unimodal, that the package supports multi-modal belief estimates during both the prediction and global inference processes. In fact, many of the same underlying inference functions are involved with the automatic initialization process and the global multi-modal iSAM inference procedure. This concludes the ContinuousScalar tutorial particular to the IncrementalInference package."
 },
 
 {
     "location": "examples/basic_slamedonut/#",
-    "page": "Basics: Singular Ranges-only SLAM (Underdetermined System)",
-    "title": "Basics: Singular Ranges-only SLAM (Underdetermined System)",
+    "page": "Singular Ranges-only SLAM (Underdetermined System)",
+    "title": "Singular Ranges-only SLAM (Underdetermined System)",
     "category": "page",
     "text": ""
 },
 
 {
-    "location": "examples/basic_slamedonut/#Example:-Singular-Ranges-only-SLAM-Solution-(i.e.-\"Under-Constrained\")-1",
-    "page": "Basics: Singular Ranges-only SLAM (Underdetermined System)",
-    "title": "Example: Singular Ranges-only SLAM Solution (i.e. \"Under-Constrained\")",
+    "location": "examples/basic_slamedonut/#Singular-Ranges-only-SLAM-Solution-(i.e.-\"Under-Constrained\")-1",
+    "page": "Singular Ranges-only SLAM (Underdetermined System)",
+    "title": "Singular Ranges-only SLAM Solution (i.e. \"Under-Constrained\")",
     "category": "section",
     "text": "This tutorial describes a range-only system where there are always more variable dimensions than range measurements made. The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point – other examples show inference results where highly non-Gaussian error distributions are used. The one pre-baked result of this of this singular range-only illustration can be seen in this video:Multi-modal range only example (click here or image for full Vimeo):   <a href=\"http://vimeo.com/190052649\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"640\" border=\"0\" /></a>This example is also available as a script here in RoME.jl."
 },
 
 {
     "location": "examples/basic_slamedonut/#REQUIRES-1",
-    "page": "Basics: Singular Ranges-only SLAM (Underdetermined System)",
+    "page": "Singular Ranges-only SLAM (Underdetermined System)",
     "title": "REQUIRES",
     "category": "section",
     "text": "RoME v0.2.5\nRoMEPlotting v0.0.2"
@@ -762,7 +762,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_slamedonut/#Loading-The-Data-1",
-    "page": "Basics: Singular Ranges-only SLAM (Underdetermined System)",
+    "page": "Singular Ranges-only SLAM (Underdetermined System)",
     "title": "Loading The Data",
     "category": "section",
     "text": "Starting a Juno IDE or Julia REPL session, the ground truth positions for vehicle positions GTp and landmark positions GTl can be loaded into memory directly with these values:GTp = Dict{Symbol, Vector{Float64}}()\nGTp[:l100] = [0.0;0]\nGTp[:l101] = [50.0;0]\nGTp[:l102] = [100.0;0]\nGTp[:l103] = [100.0;50.0]\nGTp[:l104] = [100.0;100.0]\nGTp[:l105] = [50.0;100.0]\nGTp[:l106] = [0.0;100.0]\nGTp[:l107] = [0.0;50.0]\nGTp[:l108] = [0.0;-50.0]\nGTp[:l109] = [0.0;-100.0]\nGTp[:l110] = [50.0;-100.0]\nGTp[:l111] = [100.0;-100.0]\nGTp[:l112] = [100.0;-50.0]\n\nGTl = Dict{Symbol, Vector{Float64}}()\nGTl[:l1] = [10.0;30]\nGTl[:l2] = [30.0;-30]\nGTl[:l3] = [80.0;40]\nGTl[:l4] = [120.0;-50]NOTE 1. that by using location indicators :l1, :l2, ... or :l100, :l101, ... is of practical benefit when visualizing with existing RoMEPlotting functions.NOTE 2. Landmarks must be in range before range measurements can be made to them."
@@ -770,7 +770,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_slamedonut/#Creating-the-Factor-Graph-with-Point2-1",
-    "page": "Basics: Singular Ranges-only SLAM (Underdetermined System)",
+    "page": "Singular Ranges-only SLAM (Underdetermined System)",
     "title": "Creating the Factor Graph with Point2",
     "category": "section",
     "text": "The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  # add more julia processes\nnprocs() < 7 ? addprocs(7-nprocs()) : nothing\n\n# tell Julia that you want to use these modules/namespaces\nusing RoME, DistributionsNOTE Julia uses just-in-time compiling (unless pre-compiled), therefore each time a new function call on a Julia process will be slow, but all following calls to the same functions will be as fast as the statically compiled code.This example exclusively uses Point2 variable node types, which have dimension 2 and represent [x, y] position estimates in the world frame.Next construct the factor graph containing the first pose :l100 (without any knowledge of where it is) and three measured beacons/landmarks :l1,:l2,:l3 – with prior location knowledge for :l1 and :l2:# create the factor graph object\nfg = initfg()\n\n# first pose with no initial estimate\naddNode!(fg, :l100, Point2)\n\n# add three landmarks\naddNode!(fg, :l1, Point2)\naddNode!(fg, :l2, Point2)\naddNode!(fg, :l3, Point2)\n\n# and put priors on :l101 and :l102\naddFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], eye(2))) )\naddFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], eye(2))) )The PriorPoint2 is assumed to be a multivariate normal distribution of covariance eye(2), as well as a weighting factor of [1.0].NOTE API change: PriorPoint2D changed to PriorPoint2{T} to accept distribution objects and discard (standard in RoME v0.1.5 – see issue 72 here)."
@@ -778,7 +778,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_slamedonut/#Adding-Range-Measurements-Between-Variables-1",
-    "page": "Basics: Singular Ranges-only SLAM (Underdetermined System)",
+    "page": "Singular Ranges-only SLAM (Underdetermined System)",
     "title": "Adding Range Measurements Between Variables",
     "category": "section",
     "text": "Next we connect the three range measurements from the vehicle location :l0 to the three beacons, respectively – and consider that the range measurements are completely relative between the vehicle and beacon position estimates:# first range measurement\nrhoZ1 = norm(GTl[:l1]-GTp[:l100])\nppr = Point2DPoint2DRange([rhoZ1], 2.0, [1.0])\naddFactor!(fg, [:l100;:l101], ppr)\n\n# second range measurement\nrhoZ2 = norm(GTl[:l2]-GTp[:l100])\nppr = Point2DPoint2DRange([rhoZ2], 3.0, [1.0])\naddFactor!(fg, [:l100; :l2], ppr)\n\n# second range measurement\nrhoZ3 = norm(GTl[:l3]-GTp[:l100])\nppr = Point2DPoint2DRange([rhoZ3], 3.0, [1.0])\naddFactor!(fg, [:l100; :l3], ppr)The ranging measurement standard deviation of 2.0 or 3.0 is taken, assuming a Gaussian measurement assumption.   Again, any distribution could have been used. The factor graph should look as follows:writeGraphPdf(fg) # show the factor graph(Image: exranges01)"
@@ -786,7 +786,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_slamedonut/#Inference-and-Visualizations-1",
-    "page": "Basics: Singular Ranges-only SLAM (Underdetermined System)",
+    "page": "Singular Ranges-only SLAM (Underdetermined System)",
     "title": "Inference and Visualizations",
     "category": "section",
     "text": "At this point we can call the solver start interpreting the first results:tree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)The factor graph figure above showed the structure between variables and factors. In order to see the numerical values contained in the factor graph, a set of tools are provided by the RoMEPlotting and KernelDensityEstimatePlotting packages. For more details, please see the dedicated visualization discussion here.First look at the two landmark positions :l1, :l2 at (10.0,30),(30.0,-30) respectively.using RoMEPlotting\n\nplotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)(Image: testl1_2)Similarly, the belief estimate for the first vehicle position :l100 is bi-modal, due to the intersection of two range measurements:plotKDE(fg, :l100, dims=[1;2])(Image: testl100)An alternative plotting interface can also be used, that shows a histogram of desired elements instead:drawLandms(fg, from=1, to=101)(Image: testlall)Notice the ring of particles which represents the belief on the third beacon/landmark :l3, which was not constrained by a prior factor. Instead, the belief over the position of :l3 is being estimated simultaneous to estimating the vehicle position :l100."
@@ -794,7 +794,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_slamedonut/#Stochastic-Growth-and-Decay-of-Modes-(i.e.-Hypotheses)-1",
-    "page": "Basics: Singular Ranges-only SLAM (Underdetermined System)",
+    "page": "Singular Ranges-only SLAM (Underdetermined System)",
     "title": "Stochastic Growth and Decay of Modes (i.e. Hypotheses)",
     "category": "section",
     "text": "Next consider the vehicle moving a distance of 50 units–-and by design the direction of travel is not known–-to the next true position. The video above gives away the vehicle position with the cyan line, showing travel in the shape of a lower case \'e\'. Finally, to speed things up, lets write a function that handles the travel (pseudo odometry factors between positions) and ranging measurement factors to beacons.function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R <: Real}\n  currvar = union(ls(fgl)...)\n  prev_sym = Symbol(\"l$(maximum(Int[parse(Int,string(currvar[i])[2:end]) for i in 2:length(currvar)]))\")\n  if !(pos_sym in currvar)\n    println(\"Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.\")\n    addNode!(fgl, pos_sym, Point2)\n    @show rho = norm(GTp[prev_sym] - GTp[pos_sym])\n    ppr = Point2DPoint2DRange([rho], 3.0, [1.0])\n    addFactor!(fgl, [prev_sym;pos_sym], ppr)\n  else\n    @warn \"Variable node $pos_sym already in the factor graph.\"\n  end\n  beacons = keys(GTl)\n  for ll in beacons\n    rho = norm(GTl[ll] - GTp[pos_sym])\n    # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks\n    if rho < measurelimit\n      ppr = Point2DPoint2DRange([rho], 3.0, [1.0])\n      if !(ll in currvar)\n        println(\"Adding variable vertex $ll, not yet in fgl::FactorGraph.\")\n        addNode!(fgl, ll, Point2)\n      end\n      addFactor!(fgl, [pos_sym;ll], ppr)\n    end\n  end\n  nothing\nendAfter pasting (or running) this function in the Julia, a new member definition exists for vehicle_drives_to!.NOTE The exclamation mark at the end of the function name has no syntactic significance in Julia, since the full UTF8 character set is available for functions or variables. Instead, the exclamation serves as a Julia community convention to tell the caller that this function will modify the contents of at least some of the variables being passed into it – in this case the factor graph fg will be modified.Now the actual driving event can be added to the factor graph:#drive to location :l101, then :l102\nvehicle_drives_to!(fg, :l101, GTp, GTl)\nvehicle_drives_to!(fg, :l102, GTp, GTl)\n\n# see the graph\nwriteGraphPdf(fg)NOTE The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.The marginal posterior estimates are found by repeating inference over the factor graph, followed drawing all vehicle locations as a contour map:tree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n# draw all vehicle locations\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 0:2], dims=[1;2])\n# Gadfly.draw(PDF(\"/tmp/testL100_102.pdf\", 20cm, 10cm),pl) # for storing image to disk\n\npl = plotKDE(fg, [:l3;:l4], dims=[1;2], levels=4)\n# Gadfly.draw(PNG(\"/tmp/testL3_4.png\", 20cm, 10cm),pl)Notice how the vehicle positions have two hypotheses, one left to right and one diagonal right to bottom left – both are valid solutions!(Image: testl100_102)The two \"free\" beacons/landmarks :l3,:l4 still have several modes each, implying insufficient data to constrain either to a strong unimodal belief.(Image: testl3_4)\nvehicle_drives_to!(fg, :l103, GTp, GTl)\nvehicle_drives_to!(fg, :l104, GTp, GTl)\n\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 0:4], dims=[1;2])\n# Gadfly.draw(PDF(\"/tmp/testL100_104.pdf\", 20cm, 10cm),pl)Moving up to position :l104 still shows strong multiodality in the vehicle position estimates:(Image: testl100_105)vehicle_drives_to!(fg, :l105, GTp, GTl)\nvehicle_drives_to!(fg, :l106, GTp, GTl)\n\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n\nvehicle_drives_to!(fg, :l107, GTp, GTl)\n\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n\nvehicle_drives_to!(fg, :l108, GTp, GTl)\n\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 2:8], dims=[1;2], levels=6)\n# Gadfly.draw(PDF(\"/tmp/testL103_108.pdf\", 20cm, 10cm),pl)Next we see a strong return to a single dominant mode in all vehicle position estimates, owing to the increased measurements to beacons/landmarks as well as more unimodal estimates in :l3, :l4 beacon/landmark positions.vehicle_drives_to!(fg, :l109, GTp, GTl)\nvehicle_drives_to!(fg, :l110, GTp, GTl)\n\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n\nvehicle_drives_to!(fg, :l111, GTp, GTl)\nvehicle_drives_to!(fg, :l112, GTp, GTl)\n\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree, N=200)\n\n\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 7:12], dims=[1;2])\n# Gadfly.draw(PDF(\"/tmp/testL106_112.pdf\", 20cm, 10cm),pl)\n\npl = plotKDE(fg, [:l1;:l2;:l3;:l4], dims=[1;2], levels=4)\n# Gadfly.draw(PDF(\"/tmp/testL1234.pdf\", 20cm, 10cm),pl)\n\npl = drawLandms(fg, from=100)\n# Gadfly.draw(PDF(\"/tmp/testLocsAll.pdf\", 20cm, 10cm),pl)Several location belief estimates exhibit multimodality as the trajectory progresses (not shown), but collapses and finally collapses to a stable set of dominant position estimates.(Image: testl106_112)Landmark estimates are also stable at one estimate:(Image: testl1234)In addition, the SLAM 2D landmark visualization can be re-used to plot more information at once:# pl = drawLandms(fg, from=100, to=200)\n# Gadfly.draw(PDF(\"/tmp/testLocsAll.pdf\", 20cm, 10cm),pl)\n\npl = drawLandms(fg)\n# Gadfly.draw(PDF(\"/tmp/testAll.pdf\", 20cm, 10cm),pl)(Image: testall)This example used the default of N=200 particles per marginal belief. By increasing the number to N=300 throughout the test many more modes and interesting features can be explored, and we refer the reader to an alternative and longer discussion on the same example, in Chapter 6 here."
@@ -802,23 +802,23 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_hexagonal2d/#",
-    "page": "Basics: Hexagonal 2D SLAM",
-    "title": "Basics: Hexagonal 2D SLAM",
+    "page": "Hexagonal 2D SLAM",
+    "title": "Hexagonal 2D SLAM",
     "category": "page",
     "text": ""
 },
 
 {
-    "location": "examples/basic_hexagonal2d/#Tutorial:-Hexagonal-2D-SLAM-Example-(Local-Compute)-1",
-    "page": "Basics: Hexagonal 2D SLAM",
-    "title": "Tutorial: Hexagonal 2D SLAM Example (Local Compute)",
+    "location": "examples/basic_hexagonal2d/#Hexagonal-2D-SLAM-Example-(Local-Compute)-1",
+    "page": "Hexagonal 2D SLAM",
+    "title": "Hexagonal 2D SLAM Example (Local Compute)",
     "category": "section",
     "text": "A simple 2D robot trajectory example is expanded below using techniques developed in simultaneous localization and mapping (SLAM). This example is available as a single script here."
 },
 
 {
     "location": "examples/basic_hexagonal2d/#Creating-the-Factor-Graph-with-Pose2-1",
-    "page": "Basics: Hexagonal 2D SLAM",
+    "page": "Hexagonal 2D SLAM",
     "title": "Creating the Factor Graph with Pose2",
     "category": "section",
     "text": "The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  # add more julia processes\nnprocs() < 4 ? addprocs(4-nprocs()) : nothing\n\n# tell Julia that you want to use these modules/namespaces\nusing RoME, DistributionsAfter loading the RoME and Distributions modules, we construct a local factor graph object in memory:# start with an empty factor graph object\nfg = initfg()\n\n# Add the first pose :x0\naddNode!(fg, :x0, Pose2)\n\n# Add at a fixed location PriorPose2 to pin :x0 to a starting location\naddFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )A factor graph object fg (of type ::FactorGraph) has been constructed; the first pose :x0 has been added; and a prior factor setting the origin at [0,0,0] over variable node dimensions [x,y,θ] in the world frame. The type Pose2 is used to indicate what variable is stored in the node. Caesar.jl allows a little more freedom in how factor and variable nodes can be connected, while still allowing for type-assertion to occur.NOTE Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use.The next 6 nodes are added with odometry in an counter-clockwise hexagonal manner. Note how variables are denoted with symbols, :x2 == Symbol(\"x2\"):# Drive around in a hexagon\nfor i in 0:5\n  psym = Symbol(\"x$i\")\n  nsym = Symbol(\"x$(i+1)\")\n  addNode!(fg, nsym, Pose2)\n  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))\n  addFactor!(fg, [psym;nsym], pp )\nendAt this point it would be good to see what the factor graph actually looks like:writeGraphPdf(fg)You should see the program evince open with this visual:(Image: exfg2d)"
@@ -826,7 +826,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_hexagonal2d/#Performing-Inference-1",
-    "page": "Basics: Hexagonal 2D SLAM",
+    "page": "Hexagonal 2D SLAM",
     "title": "Performing Inference",
     "category": "section",
     "text": "Let\'s run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this fg object:# perform inference, and remember first runs are slower owing to Julia\'s just-in-time compiling\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n# batchSolve!(fg) # coming soonThis will take a couple of seconds (including first time compiling for all Julia processes)."
@@ -834,7 +834,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_hexagonal2d/#Some-Visualization-Plot-1",
-    "page": "Basics: Hexagonal 2D SLAM",
+    "page": "Hexagonal 2D SLAM",
     "title": "Some Visualization Plot",
     "category": "section",
     "text": "2D plots of the factor graph contents is provided by the RoMEPlotting package. See further discussion on visualizations and packages here.## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist\nusing RoMEPlotting\n\n# For Juno/Jupyter style use\npl = drawPoses(fg)\n\n# For scripting use-cases you can export the image\nGadfly.draw(Gadfly.PDF(\"/tmp/test.pdf\", 20cm, 10cm),pl)  # or PNG(...)(Image: test)"
@@ -842,7 +842,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_hexagonal2d/#Adding-Landmarks-as-Point2-1",
-    "page": "Basics: Hexagonal 2D SLAM",
+    "page": "Hexagonal 2D SLAM",
     "title": "Adding Landmarks as Point2",
     "category": "section",
     "text": "Suppose some sensor detected a feature of interest with an associated range and bearing measurement The new variable and measurement can be included into the factor graph as follows:# Add landmarks with Bearing range measurements\naddNode!(fg, :l1, Point2, labels=[\"LANDMARK\"])\np2br = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))\naddFactor!(fg, [:x0; :l1], p2br)\n\n# Initialize :l1 numerical values but do not rerun solver\nensureAllInitialized!(fg)NOTE The default behavior for initialization of variable nodes implies the last variable noded added will not have any numerical values yet, please see ContinuousScalar Tutorial for deeper discussion on automatic initialization (autoinit). A slightly expanded plotting function will draw both poses and landmarks (and currently assumes labels starting with :x and :l respectively) – notice the new landmark bottom right:drawPosesLandms(fg)(Image: test)"
@@ -850,7 +850,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_hexagonal2d/#One-type-of-Loop-Closure-1",
-    "page": "Basics: Hexagonal 2D SLAM",
+    "page": "Hexagonal 2D SLAM",
     "title": "One type of Loop-Closure",
     "category": "section",
     "text": "Loop-closures are a major part of SLAM based state estimation. One illustration is to take a second sighting of the same :l1 landmark from the last pose :x6; followed by repeating the inference and re-plotting the result – notice the tighter confidences over all variables:# Add landmarks with Bearing range measurements\np2br2 = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))\naddFactor!(fg, [:x6; :l1], p2br2)\n\n# solve\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n# redraw\npl = drawPosesLandms(fg)(Image: test)This concludes the Hexagonal 2D SLAM example."
@@ -858,7 +858,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_hexagonal2d/#Interest:-The-Bayes-(Junction)-tree-1",
-    "page": "Basics: Hexagonal 2D SLAM",
+    "page": "Hexagonal 2D SLAM",
     "title": "Interest: The Bayes (Junction) tree",
     "category": "section",
     "text": "The Bayes (Junction) tree is used as an acyclic (has no loops) computational object, an exact algebraic refactorizating of factor graph, to perform the associated sum-product inference. The visual structure of the tree can extracted by modifying the command tree = wipeBuildNewTree!(fg, drawpdf=true) to produce representations such as this in bt.pdf.(Image: exbt2d)"
@@ -866,23 +866,23 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_fixedlag_hexagonal/#",
-    "page": "Basics: Fixed-Lag Solving",
-    "title": "Basics: Fixed-Lag Solving",
+    "page": "Fixed-Lag Solving",
+    "title": "Fixed-Lag Solving",
     "category": "page",
     "text": ""
 },
 
 {
-    "location": "examples/interm_fixedlag_hexagonal/#Basic-Example:-Hexagonal-2D-with-Fixed-Lag-Solving-1",
-    "page": "Basics: Fixed-Lag Solving",
-    "title": "Basic Example: Hexagonal 2D with Fixed-Lag Solving",
+    "location": "examples/interm_fixedlag_hexagonal/#Hexagonal-2D-with-Fixed-Lag-Solving-1",
+    "page": "Fixed-Lag Solving",
+    "title": "Hexagonal 2D with Fixed-Lag Solving",
     "category": "section",
     "text": "NOTE: This is an experimental feature that is currently being developed. This example provides an overview of how to enable it and the benefits of using fixed-lag solving. The objective is to provide a near-constant solve time for ever-growing graphs by only recalculating the most recent portion. Think of this as a placeholder, as we develop the solution this tutorial will be updated to demonstrate how that is achieved."
 },
 
 {
     "location": "examples/interm_fixedlag_hexagonal/#Example-Code-1",
-    "page": "Basics: Fixed-Lag Solving",
+    "page": "Fixed-Lag Solving",
     "title": "Example Code",
     "category": "section",
     "text": "The complete code for this example can be found in the fixed-lag branch of RoME: Hexagonal Fixed-Lag Example."
@@ -890,7 +890,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_fixedlag_hexagonal/#Introduction-1",
-    "page": "Basics: Fixed-Lag Solving",
+    "page": "Fixed-Lag Solving",
     "title": "Introduction",
     "category": "section",
     "text": "Fixed-lag solving is enabled when creating the factor-graph. Users provide a window - the quasi fixed-lag constant (QFL) - which defines how many of the most-recent variables should be calculated. Any other variables are \'frozen\'. The objective of this example is to explore providing a near-constant solve time for ever-growing graphs by only recalculating the most recent portion."
@@ -898,7 +898,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_fixedlag_hexagonal/#Example-Overview-1",
-    "page": "Basics: Fixed-Lag Solving",
+    "page": "Fixed-Lag Solving",
     "title": "Example Overview",
     "category": "section",
     "text": "In the example, the basic Hexagonal 2D is grown to solve 200 variables. The original example is remains the same, i.e. a vehicle is driving around in a hexagon and seeing the same bearing+range landmark as it crosses the starting point. At every 20th variable, a solve is invoked. Rather than use batchSolve(), the solve is performed in parts (construction of Bayes tree, solving the graph) to get performance statistics as the graph grows.numVariables = 200\nsolveEveryNVariables = 20\nlagLength = 30\n\n# Standard Hexagonal example for totalIterations - solve every iterationsPerSolve iterations.\nfunction runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPerSolve::Int)::DataFrame\n    # Add the first pose :x0\n    addNode!(fg, :x0, Pose2)\n\n    # Add at a fixed location PriorPose2 to pin :x0 to a starting location\n    addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))\n\n    # Add a landmark l1\n    addNode!(fg, :l1, Point2, labels=[\"LANDMARK\"])\n\n    # Drive around in a hexagon a number of times\n    solveTimes = DataFrame(GraphSize = [], TimeBuildBayesTree = [], TimeSolveGraph = [])\n    for i in 0:totalIterations\n        psym = Symbol(\"x$i\")\n        nsym = Symbol(\"x$(i+1)\")\n        @info \"Adding pose $nsym...\"\n        addNode!(fg, nsym, Pose2)\n        pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal( [0.1;0.1;0.1].^2 ) )))\n        @info \"Adding odometry factor between $psym -> $nsym...\"\n        addFactor!(fg, [psym;nsym], pp )\n\n        if i % 6 == 0\n            @info \"Creating factor between $psym and l1...\"\n            p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))\n            addFactor!(fg, [psym; :l1], p2br)\n        end\n        if i % iterationsPerSolve == 0 && i != 0\n            @info \"Performing inference!\"\n            if fg.isfixedlag\n                @info \"Quasi fixed-lag is enabled (a feature currently in testing)!\"\n                fifoFreeze!(fg)\n            end\n            tBuild = @timed tree = wipeBuildNewTree!(fg)\n            tInfer = @timed inferOverTree!(fg, tree, N=100)\n            graphSize = length([ls(fg)[1]..., ls(fg)[2]...])\n            push!(solveTimes, (graphSize, tBuild[2], tInfer[2]))\n        end\n    end\n    return solveTimes\nendTwo cases are set up:One solving the full graph every time a solve is performed:# start with an empty factor graph object\nfg = initfg()\n# DO NOT enable fixed-lag operation\nsolverTimesForBatch = runHexagonalExample(fg, numVariables, solveEveryNVariables)The other enabling fixed-lag with a window of 20 variables:fgFixedLag = initfg()\nfgFixedLag.isfixedlag = true\nfgFixedLag.qfl = lagLength\n\nsolverTimesFixedLag = runHexagonalExample(fgFixedLag, numVariables, solveEveryNVariables)The resultant path of the robot can be seen by using RoMEPlotting and is drawn if the visualization lines are uncommented:#### Visualization\n\n# Plot the many iterations to see that it succeeded.\n# Batch\n# drawPosesLandms(fg)\n\n# Fixed lag\n# drawPosesLandms(fgFixedLag)Lastly, the timing results of both scenarios are merged into a single DataFrame table, exported to CSV, and a summary graph is shown using GadFly.using Gadfly\nusing Colors\nusing CSV\n\n# Make a clean dataset\nrename!(solverTimesForBatch, :TimeBuildBayesTree => :Batch_BayedBuild, :TimeSolveGraph => :Batch_SolveGraph);\nrename!(solverTimesFixedLag, :TimeBuildBayesTree => :FixedLag_BayedBuild, :TimeSolveGraph => :FixedLag_SolveGraph);\ntimingMerged = DataFrames.join(solverTimesForBatch, solverTimesFixedLag, on=:GraphSize)\nCSV.write(\"timing_comparison.csv\", timingMerged)\n\nPP = []\npush!(PP, Gadfly.layer(x=timingMerged[:GraphSize], y=timingMerged[:FixedLag_SolveGraph], Geom.path, Theme(default_color=colorant\"green\"))[1]);\npush!(PP, Gadfly.layer(x=timingMerged[:GraphSize], y=timingMerged[:Batch_SolveGraph], Geom.path, Theme(default_color=colorant\"magenta\"))[1]);\n\nplt = Gadfly.plot(PP...,\n    Guide.title(\"Solving Time vs. Iteration for Fixed-Lag Operation\"),\n    Guide.xlabel(\"Solving Iteration\"),\n    Guide.ylabel(\"Solving Time (seconds)\"),\n    Guide.manual_color_key(\"Legend\", [\"fixed\", \"batch\"], [\"green\", \"magenta\"]))\nGadfly.draw(PNG(\"results_comparison.png\", 12cm, 15cm), plt)"
@@ -906,7 +906,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_fixedlag_hexagonal/#Results-1",
-    "page": "Basics: Fixed-Lag Solving",
+    "page": "Fixed-Lag Solving",
     "title": "Results",
     "category": "section",
     "text": "Preliminary results for the comparison can be seen below. However, this is just a start and we need to perform more testing. At the moment we are working on providing consistent results and further improving performance/flattening the fixed-lag time. It should be noted that the below graph is not to demonstrate the absolute solve time, but rather the relative behavior of full-graph solve vs. fixed-lag.(Image: Timing comparison of full solve vs. fixed-lag)"
@@ -914,7 +914,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_fixedlag_hexagonal/#Additional-Example-1",
-    "page": "Basics: Fixed-Lag Solving",
+    "page": "Fixed-Lag Solving",
     "title": "Additional Example",
     "category": "section",
     "text": "Work In Progress, but In the mean time see the following examples:https://github.com/JuliaRobotics/Caesar.jl/blob/master/examples/wheeled/racecar/apriltagandzed_slam.jl"
@@ -922,47 +922,47 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_definingfactors/#",
-    "page": "Intermediate: Creating Custom Variables and Factors",
-    "title": "Intermediate: Creating Custom Variables and Factors",
+    "page": "Creating Custom Variables and Factors",
+    "title": "Creating Custom Variables and Factors",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "examples/basic_definingfactors/#Defining-New-Variables-and-Factors-1",
-    "page": "Intermediate: Creating Custom Variables and Factors",
+    "page": "Creating Custom Variables and Factors",
     "title": "Defining New Variables and Factors",
     "category": "section",
-    "text": "Coming soon!"
+    "text": "TODO: Smooth text and flow."
+},
+
+{
+    "location": "examples/basic_definingfactors/#Quick-Example-in-One-Dimension-1",
+    "page": "Creating Custom Variables and Factors",
+    "title": "Quick Example in One Dimension",
+    "category": "section",
+    "text": "Note these factors already exists in IncrementalInference (and many more in RoME) and are presented here as a first introduction into the process of defining your own factors.User scope Prior, LinearOffset, and MultiModalOffset with arbitrary distributions are defined as:import IncrementalInference: getSample\n\nstruct Prior{T} <: IncrementalInference.FunctorSingleton where T <: Distribution\n  z::T\nend\ngetSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,:), )\nstruct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: Distribution\n  z::T\nend\ngetSample(s::LinearOffset, N::Int=1) = (reshape(rand(s.z,N),1,:), )\nfunction (s::LinearOffset)(res::Array{Float64},\n                           userdata::FactorMetadata,\n                           idx::Int,\n                           meas::Tuple{Array{Float64, 2}},\n                           X1::Array{Float64,2},\n                           X2::Array{Float64,2}  )\n  #\n  res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])\n  nothing\nend\nstruct MultiModalOffset <: IncrementalInference.FunctorPairwise\n  z::Vector{Distribution}\n  c::Categorical\nend\ngetSample(s::MultiModalOffset, N::Int=1) = (reshape.(rand.(s.z, N),1,:)..., rand(s.c, N))\nfunction (s::MultiModalOffset)(res::Array{Float64},\n                               userdata::FactorMetadata,\n                               idx::Int,\n                               meas::Tuple,\n                               X1::Array{Float64,2},\n                               X2::Array{Float64,2}  )\n  #\n  res[1] = meas[meas[end][idx]][idx] - (X2[1,idx] - X1[1,idx])\n  nothing\nendNotice the residual function relating to the two PairwiseFunctor derived definitions. The one dimensional residual functions, res[1] = measurement - prediction, are used during inference to approximate the convolution of conditional beliefs from the sample approximate marginal beliefs of the connected variables."
 },
 
 {
     "location": "examples/interm_dynpose/#",
-    "page": "Intermediate: Creating DynPose Factor",
-    "title": "Intermediate: Creating DynPose Factor",
+    "page": "Creating DynPose Factor",
+    "title": "Creating DynPose Factor",
     "category": "page",
     "text": ""
 },
 
 {
-    "location": "examples/interm_dynpose/#Intermediate-Example:-Adding-Dynamic-Factors-and-Variables-1",
-    "page": "Intermediate: Creating DynPose Factor",
-    "title": "Intermediate Example: Adding Dynamic Factors and Variables",
+    "location": "examples/interm_dynpose/#Adding-Dynamic-Factors-and-Variables-1",
+    "page": "Creating DynPose Factor",
+    "title": "Adding Dynamic Factors and Variables",
     "category": "section",
     "text": "This tutorial describes how a new factor can be developed, beyond the pre-existing implementation in RoME.jl.  Factors can accept any number of variable dependencies and allow for a wide class of allowable function calls can be used.  Our intention is to make it as easy as possible for users to create their own factor types."
 },
 
 {
-    "location": "examples/interm_dynpose/#Quick-Example-in-One-Dimension-1",
-    "page": "Intermediate: Creating DynPose Factor",
-    "title": "Quick Example in One Dimension",
-    "category": "section",
-    "text": "Already exists in IncrementalInferenceTODO: Smooth this over.This tutorial calls for multiple variable nodes connected through algebraic functions stochastic uncertainty. User scope Prior, LinearOffset, and MultiModalOffset with arbitrary distributions are defined as:import IncrementalInference: getSample\n\nstruct Prior{T} <: IncrementalInference.FunctorSingleton where T <: Distribution\n  z::T\nend\ngetSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,:), )\nstruct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: Distribution\n  z::T\nend\ngetSample(s::LinearOffset, N::Int=1) = (reshape(rand(s.z,N),1,:), )\nfunction (s::LinearOffset)(res::Array{Float64},\n                           userdata::FactorMetadata,\n                           idx::Int,\n                           meas::Tuple{Array{Float64, 2}},\n                           X1::Array{Float64,2},\n                           X2::Array{Float64,2}  )\n  #\n  res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])\n  nothing\nend\nstruct MultiModalOffset <: IncrementalInference.FunctorPairwise\n  z::Vector{Distribution}\n  c::Categorical\nend\ngetSample(s::MultiModalOffset, N::Int=1) = (reshape.(rand.(s.z, N),1,:)..., rand(s.c, N))\nfunction (s::MultiModalOffset)(res::Array{Float64},\n                               userdata::FactorMetadata,\n                               idx::Int,\n                               meas::Tuple,\n                               X1::Array{Float64,2},\n                               X2::Array{Float64,2}  )\n  #\n  res[1] = meas[meas[end][idx]][idx] - (X2[1,idx] - X1[1,idx])\n  nothing\nendNotice the residual function relating to the two PairwiseFunctor derived definitions. The one dimensional residual functions, res[1] = measurement - prediction, are used during inference to approximate the convolution of conditional beliefs from the sample approximate marginal beliefs of the connected variables."
-},
-
-{
     "location": "examples/interm_dynpose/#Example:-Adding-Velocity-to-Point2D-1",
-    "page": "Intermediate: Creating DynPose Factor",
+    "page": "Creating DynPose Factor",
     "title": "Example: Adding Velocity to Point2D",
     "category": "section",
     "text": "A smaller example in two dimensions where we wish to estimate the velocity of some target:  Consider two variables :x0 with a prior as well as a conditional–-likelihood for short–-to variable :x1.  Priors are in the \"global\" reference frame (how ever you choose to define it), while likelihoods are in the \"local\" / \"relative\" frame that only exist between variables.(Image: dynpoint2fg)"
@@ -970,7 +970,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_dynpose/#Brief-on-Variable-Node-softtypes-1",
-    "page": "Intermediate: Creating DynPose Factor",
+    "page": "Creating DynPose Factor",
     "title": "Brief on Variable Node softtypes",
     "category": "section",
     "text": "Variable nodes retain meta data (so called \"soft types\") describing the type of variable.  Common VariableNode types are RoME.Point2D, RoME.Pose3D.  VariableNode soft types are passed during construction of the factor graph, for example:v1 = addNode!(fg, :x1, Pose2)Certain cases require that more information be retained for each VariableNode, and velocity calculations are a clear example where time stamp data across positions is required.  Note Larger data can also be stored under the bigdata framework which is discussed here (TBD).If the required VariableNode does not exist, then one can be created, such as adding velocity states with DynPoint2:mutable struct DynPoint2 <: IncrementalInference.InferenceVariable\n  ut::Int64 # microsecond time\n  dims::Int\n  labels::Vector{String}\n  DynPoint2(;ut::Int64=0, labels::Vector{<:AbstractString}=String[]) = new(ut, 4, labels)\nendThe dims field is permanently set to 4, i.e. [x, y, dx/dt, dy/dt].  Labels represent special labels that can be used for more efficient indexing in database systems.  The utparameter is for storing the microsecond time stamp for that variable node.In order to implement your own factor type outside IncrementalInference you should import the required identifiers, as follows:using IncrementalInference\nimport IncrementalInference: getSampleNote that new factor types can be defined at any time, even after you have started to construct the FactorGraph object."
@@ -978,7 +978,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_dynpose/#DynPoint2VelocityPrior-1",
-    "page": "Intermediate: Creating DynPose Factor",
+    "page": "Creating DynPose Factor",
     "title": "DynPoint2VelocityPrior",
     "category": "section",
     "text": "Work in progress.mutable struct DynPoint2VelocityPrior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}\n  z::T\n  DynPoint2VelocityPrior{T}() where {T <: Distribution} = new{T}()\n  DynPoint2VelocityPrior(z1::T) where {T <: Distribution} = new{T}(z1)\nend\ngetSample(dp2v::DynPoint2VelocityPrior, N::Int=1) = (rand(dp2v.z,N), )"
@@ -986,7 +986,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_dynpose/#DynPoint2DynPoint2-(preintegration)-1",
-    "page": "Intermediate: Creating DynPose Factor",
+    "page": "Creating DynPose Factor",
     "title": "DynPoint2DynPoint2 (preintegration)",
     "category": "section",
     "text": "The basic idea is that change in position is composed of three components (originating from double integration of Newton\'s second law):(Image: deltapositionplus) ( eq. 1)DynPoint2DynPoint2 factor is using the above equation to define the difference in position between the two DynPoint2s.  The position part stored in DynPoint2DynPoint2 factor corresponds to (Image: deltaposplusonly).  A new multi-variable (so called \"pairwise\") factor between any number of variables is defined with three elements:Factor type definition that inherits either IncrementalInference.FunctorPairwise or IncrementalInference.FunctorPairwiseMinimize;mutable struct DynPoint2DynPoint2{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}\n  z::T\n  DynPoint2DynPoint2{T}() where {T <: Distribution} = new{T}()\n  DynPoint2DynPoint2(z1::T) where {T <: Distribution} = new{T}(z1)\nendA sampling function with exactly the signature: getSample(dp2dp2::DynPoint2DynPoint2, N::Int=1) and returning a Tuple (legacy reasons);getSample(dp2dp2::DynPoint2DynPoint2, N::Int=1) = (rand(dp2dp2.z,N), )A residual or minimization function with exactly the signature described below.Residual (related to FunctorPairwise) or factor minimization function (related to FunctorPairwiseMinimize) signatures should match this dp2dp2::DynPoint2DynPoint2 example:function (dp2dp2::DynPoint2DynPoint2)(\n            res::Array{Float64},\n            userdata,\n            idx::Int,\n            meas::Tuple,\n            Xs...  )::Nothingwhere Xs can be expanded to the particular number of variable nodes this factor will be associated, and note they are order sensitive at addFactor!(fg, ...) time.  The res parameter is a vector of the same dimension defined by the largest of the Xs terms.  The userdata value contains the small metadata / userdata portions of information that was introduced to the factor graph at construction time – please consult error(string(fieldnames(userdata))) for details at this time.  This is a relatively new feature in the code and likely to be improved.  The idx parameter represents a legacy index into the measurement meas[1] and variables Xs to select the desired marginal sample value.  Future versions of the code plan to remove the idx parameter entirely.  The Xs array of parameter are each of type ::Array{Float64,2} and contain the estimated samples from each of the current best marginal belief estimates of the factor graph variable node.  function (dp2dp2::DynPoint2DynPoint2)(\n            res::Array{Float64},\n            userdata,\n            idx::Int,\n            meas::Tuple,\n            Xi::Array{Float64,2},\n            Xj::Array{Float64,2}  )\n  #\n  z = meas[1][:,idx]\n  xi, xj = Xi[:,idx], Xj[:,idx]\n  dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata\n  res[1:2] = z[1:2] - (xj[1:2] - (xi[1:2]+dt*xi[3:4]))\n  res[3:4] = z[3:4] - (xj[3:4] - xi[3:4])\n  nothing\nendA brief usage example looks as follows, and further questions about how the preintegration strategy was implemented can be traced through the original issue JuliaRobotics/RoME.jl#60 or the literature associated with this project, or contact for more information.using RoME, Distributions\nfg = initfg()\nv0 = addNode!(fg, :x0, DynPoint2(ut=0))\n\n# Prior factor as boundary condition\npp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*eye(4)))\nf0 = addFactor!(fg, [:x0;], pp0)\n\n# conditional likelihood between Dynamic Point2\nv1 = addNode!(fg, :x1, DynPoint2(ut=1000_000)) # time in microseconds\ndp2dp2 = DynPoint2DynPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))\nf1 = addFactor!(fg, [:x0;:x1], dp2dp2)\n\nensureAllInitialized!(fg)\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\nusing KernelDensityEstimate\n@show x0 = getKDEMax(getVertKDE(fg, :x0))\n# julia> ... = [-0.19441, 0.0187019, 10.0082, 10.0901]\n@show x1 = getKDEMax(getVertKDE(fg, :x1))\n # julia> ... = [19.9072, 19.9765, 10.0418, 10.0797]"
@@ -994,7 +994,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_dynpose/#VelPoint2VelPoint2-(back-differentiation)-1",
-    "page": "Intermediate: Creating DynPose Factor",
+    "page": "Creating DynPose Factor",
     "title": "VelPoint2VelPoint2 (back-differentiation)",
     "category": "section",
     "text": "In case the preintegrated approach is not the first choice, we include VelPoint2VelPoint2 <: IncrementalInference.FunctorPairwiseMinimize as a second likelihood factor example which may seem more intuitive:mutable struct VelPoint2VelPoint2{T} <: IncrementalInference.FunctorPairwiseMinimize where {T <: Distribution}\n  z::T\n  VelPoint2VelPoint2{T}() where {T <: Distribution} = new{T}()\n  VelPoint2VelPoint2(z1::T) where {T <: Distribution} = new{T}(z1)\nend\ngetSample(vp2vp2::VelPoint2VelPoint2, N::Int=1) = (rand(vp2vp2.z,N), )\nfunction (vp2vp2::VelPoint2VelPoint2)(\n                res::Array{Float64},\n                userdata,\n                idx::Int,\n                meas::Tuple,\n                Xi::Array{Float64,2},\n                Xj::Array{Float64,2}  )\n  #\n  z = meas[1][:,idx]\n  xi, xj = Xi[:,idx], Xj[:,idx]\n  dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata\n  dp = (xj[1:2]-xi[1:2])\n  dv = (xj[3:4]-xi[3:4])\n  res[1] = 0.0\n  res[1] += sum((z[1:2] - dp).^2)\n  res[1] += sum((z[3:4] - dv).^2)\n  res[1] += sum((dp/dt - xi[3:4]).^2)  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration\n  res[1]\nendA similar usage example here shows:fg = initfg()\n\n# add three point locations\nv0 = addNode!(fg, :x0, DynPoint2(ut=0))\nv1 = addNode!(fg, :x1, DynPoint2(ut=1000_000))\nv2 = addNode!(fg, :x2, DynPoint2(ut=2000_000))\n\n# Prior factor as boundary condition\npp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*eye(4)))\nf0 = addFactor!(fg, [:x0;], pp0)\n\n# conditional likelihood between Dynamic Point2\ndp2dp2 = VelPoint2VelPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))\nf1 = addFactor!(fg, [:x0;:x1], dp2dp2)\n\n# conditional likelihood between Dynamic Point2\ndp2dp2 = VelPoint2VelPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))\nf2 = addFactor!(fg, [:x1;:x2], dp2dp2)\n\n# Graphs.plot(fg.g)\nensureAllInitialized!(fg)\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n# see the output\n@show x0 = getKDEMax(getVertKDE(fg, :x0))\n@show x1 = getKDEMax(getVertKDE(fg, :x1))\n@show x2 = getKDEMax(getVertKDE(fg, :x2))Producing output:x0 = getKDEMax(getVertKDE(fg, :x0)) = [0.101503, -0.0273216, 9.86718, 9.91146]\nx1 = getKDEMax(getVertKDE(fg, :x1)) = [10.0087, 9.95139, 10.0622, 10.0195]\nx2 = getKDEMax(getVertKDE(fg, :x2)) = [19.9381, 19.9791, 10.0056, 9.92442]"
@@ -1002,7 +1002,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_dynpose/#IncrementalInference.jl-Defining-Factors-(Future-API)-1",
-    "page": "Intermediate: Creating DynPose Factor",
+    "page": "Creating DynPose Factor",
     "title": "IncrementalInference.jl Defining Factors (Future API)",
     "category": "section",
     "text": "We would like to remove the idx indexing from the residual function calls, since that is an unnecessary burden on the user.  Instead, the package will use views and SubArray types to simplify the interface.  Please contact author for more details (8 June 2018)."
@@ -1010,7 +1010,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/interm_dynpose/#Contributions-1",
-    "page": "Intermediate: Creating DynPose Factor",
+    "page": "Creating DynPose Factor",
     "title": "Contributions",
     "category": "section",
     "text": "Thanks to mc2922 for raising the catalyst issue and conversations that followed from JuliaRobotics/RoME.jl#60."
@@ -1029,7 +1029,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Function Reference",
     "title": "Function Reference",
     "category": "section",
-    "text": "NOTE WORK IN PROGRESSPages = [\n    \"func_ref.md\"\n]\nDepth = 3"
+    "text": "Pages = [\n    \"func_ref.md\"\n]\nDepth = 3"
 },
 
 {
@@ -1037,7 +1037,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Function Reference",
     "title": "Caesar",
     "category": "section",
-    "text": "    Caesar.loadmodel\n    Caesar.getPoseExVertexNeoIDs\n    Caesar.askneo4jcredentials!\n    RoME.getRangeKDEMax2D\n    Caesar.getLandmOtherSessNeoIDs\n    Caesar.db2jld\n    Caesar.identitypose6fg\n    Caesar.fetchrobotdatafirstpose\n    Caesar.executeQuery\n    IncrementalInference.ls\n    Caesar.updateparallelposes!\n    Caesar.removeReinsertMultisessionPrior!\n    Caesar.appendvertbigdata!\n    Caesar.parseMergeVertAttr!\n    Caesar.updatenewverts!\n    Caesar.mergeCloudVertex!\n    Caesar.getVertNeoIDs!\n    Caesar.whosNear3D\n    Caesar.getprpt2kde\n    Caesar.whosNear2D\n    Caesar.hasBigDataElement\n    Caesar.getAllLandmarkNeoIDs\n    Caesar.consoleaskuserfordb\n    Caesar.drawAllOdometryEdges!\n    Caesar.standardcloudgraphsetup\n    Caesar.resetentireremotesession\n    Caesar.getfirstpose\n    Caesar.getExVertexNeoIDs\n    Caesar.findExistingMSConstraints\n    Caesar.removeNeo4jID\n    Caesar.drawLineBetween!\n    Caesar.getBigDataElement\n    Caesar.askmongocredentials!\n    Caesar.rmInstMultisessionPriors!\n    RoME.getLastPose\n    Caesar.insertrobotdatafirstpose!\n    Caesar.fetchsubgraph!\n    Caesar.getLocalSubGraphMultisession\n    Caesar.getnewvertdict"
+    "text": "loadmodel\ngetPoseExVertexNeoIDs\naskneo4jcredentials!\ngetLandmOtherSessNeoIDs\ndb2jld\nidentitypose6fg\nfetchrobotdatafirstpose\nexecuteQuery\nupdateparallelposes!\nremoveReinsertMultisessionPrior!\nappendvertbigdata!\nparseMergeVertAttr!\nupdatenewverts!\nmergeCloudVertex!\ngetVertNeoIDs!\nwhosNear3D\ngetprpt2kde\nwhosNear2D\nhasBigDataElement\ngetAllLandmarkNeoIDs\nconsoleaskuserfordb\ndrawAllOdometryEdges!\nstandardcloudgraphsetup\nresetentireremotesession\ngetfirstpose\ngetExVertexNeoIDs\nfindExistingMSConstraints\nremoveNeo4jID\ndrawLineBetween!\ngetBigDataElement\naskmongocredentials!\nrmInstMultisessionPriors!\ninsertrobotdatafirstpose!\nfetchsubgraph!\ngetLocalSubGraphMultisession\ngetnewvertdict"
 },
 
 {
@@ -1045,7 +1045,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Function Reference",
     "title": "Index",
     "category": "section",
-    "text": ""
+    "text": "loadmodel\ngetPoseExVertexNeoIDs\naskneo4jcredentials!\ngetLandmOtherSessNeoIDs\ndb2jld\nidentitypose6fg\nfetchrobotdatafirstpose\nexecuteQuery\nupdateparallelposes!\nremoveReinsertMultisessionPrior!\nappendvertbigdata!\nparseMergeVertAttr!\nupdatenewverts!\nmergeCloudVertex!\ngetVertNeoIDs!\nwhosNear3D\ngetprpt2kde\nwhosNear2D\nhasBigDataElement\ngetAllLandmarkNeoIDs\nconsoleaskuserfordb\ndrawAllOdometryEdges!\nstandardcloudgraphsetup\nresetentireremotesession\ngetfirstpose\ngetExVertexNeoIDs\nfindExistingMSConstraints\nremoveNeo4jID\ndrawLineBetween!\ngetBigDataElement\naskmongocredentials!\nrmInstMultisessionPriors!\ninsertrobotdatafirstpose!\nfetchsubgraph!\ngetLocalSubGraphMultisession\ngetnewvertdict"
 },
 
 ]}
