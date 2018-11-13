@@ -29,12 +29,12 @@ pl = drawPoses(fg)
 # For scripting use-cases you can export the image
 Gadfly.draw(Gadfly.PDF(&quot;/tmp/test.pdf&quot;, 20cm, 10cm),pl)  # or PNG(...)</code></pre><p><img src="https://user-images.githubusercontent.com/6412556/42294545-c6c80f70-7faf-11e8-8167-017889cee932.png" alt="test"/></p><h2><a class="nav-anchor" id="Adding-Landmarks-as-Point2-1" href="#Adding-Landmarks-as-Point2-1">Adding Landmarks as Point2</a></h2><p>Suppose some sensor detected a feature of interest with an associated range and bearing measurement The new variable and measurement can be included into the factor graph as follows:</p><pre><code class="language-julia"># Add landmarks with Bearing range measurements
 addNode!(fg, :l1, Point2, labels=[&quot;LANDMARK&quot;])
-p2br = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 
 # Initialize :l1 numerical values but do not rerun solver
 ensureAllInitialized!(fg)</code></pre><p><strong>NOTE</strong> The default behavior for initialization of variable nodes implies the last variable noded added will not have any numerical values yet, please see <a href="http://www.juliarobotics.org/Caesar.jl/latest/tutorialcontinuousscalar.html">ContinuousScalar Tutorial</a> for deeper discussion on automatic initialization (<code>autoinit</code>). A slightly expanded plotting function will draw both poses and landmarks (and currently assumes labels starting with <code>:x</code> and <code>:l</code> respectively) – notice the new landmark bottom right:</p><pre><code class="language-julia">drawPosesLandms(fg)</code></pre><p><img src="https://user-images.githubusercontent.com/6412556/42296689-c39e6f1c-7fc6-11e8-9a3a-6d5d2f1b5a49.png" alt="test"/></p><h2><a class="nav-anchor" id="One-type-of-Loop-Closure-1" href="#One-type-of-Loop-Closure-1">One type of Loop-Closure</a></h2><p>Loop-closures are a major part of SLAM based state estimation. One illustration is to take a second sighting of the same <code>:l1</code> landmark from the last pose <code>:x6</code>; followed by repeating the inference and re-plotting the result – notice the tighter confidences over all variables:</p><pre><code class="language-julia"># Add landmarks with Bearing range measurements
-p2br2 = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))
+p2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x6; :l1], p2br2)
 
 # solve

@@ -35,19 +35,19 @@ addNode!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
 addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], eye(2))) )
-addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], eye(2))) )</code></pre><p>The <code>PriorPoint2</code> is assumed to be a multivariate normal distribution of covariance <code>eye(2)</code>, as well as a weighting factor of <code>[1.0]</code>.</p><p><strong>NOTE</strong> API change: <code>PriorPoint2D</code> changed to <code>PriorPoint2{T}</code> to accept distribution objects and discard (standard in <code>RoME v0.1.5</code> – see <a href="https://github.com/JuliaRobotics/RoME.jl/issues/72">issue 72 here</a>).</p><h2><a class="nav-anchor" id="Adding-Range-Measurements-Between-Variables-1" href="#Adding-Range-Measurements-Between-Variables-1">Adding Range Measurements Between Variables</a></h2><p>Next we connect the three range measurements from the vehicle location <code>:l0</code> to the three beacons, respectively – and consider that the range measurements are completely relative between the vehicle and beacon position estimates:</p><pre><code class="language-julia"># first range measurement
+addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], eye(2))) )</code></pre><p>The <code>PriorPoint2</code> is assumed to be a multivariate normal distribution of covariance <code>eye(2)</code>, as well as a weighting factor of <code>[1.0]</code>.</p><p><strong>NOTE</strong> API changed to <code>PriorPoint2(::T) where T &lt;: SamplableBelief = PriorPoint2{T}</code> to accept distribution objects and discard (standard in <code>RoME v0.1.5</code> – see <a href="https://github.com/JuliaRobotics/RoME.jl/issues/72">issue 72 here</a>).</p><h2><a class="nav-anchor" id="Adding-Range-Measurements-Between-Variables-1" href="#Adding-Range-Measurements-Between-Variables-1">Adding Range Measurements Between Variables</a></h2><p>Next we connect the three range measurements from the vehicle location <code>:l0</code> to the three beacons, respectively – and consider that the range measurements are completely relative between the vehicle and beacon position estimates:</p><pre><code class="language-julia"># first range measurement
 rhoZ1 = norm(GTl[:l1]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ1], 2.0, [1.0])
+ppr = Point2Point2Range( Normal(rhoZ1, 2.0) )
 addFactor!(fg, [:l100;:l101], ppr)
 
 # second range measurement
 rhoZ2 = norm(GTl[:l2]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ2], 3.0, [1.0])
+ppr = Point2Point2Range( Normal(rhoZ2, 3.0) )
 addFactor!(fg, [:l100; :l2], ppr)
 
 # second range measurement
 rhoZ3 = norm(GTl[:l3]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ3], 3.0, [1.0])
+ppr = Point2Point2Range( Normal(rhoZ3, 3.0) )
 addFactor!(fg, [:l100; :l3], ppr)</code></pre><p>The ranging measurement standard deviation of <code>2.0</code> or <code>3.0</code> is taken, assuming a Gaussian measurement assumption.   Again, any distribution could have been used. The factor graph should look as follows:</p><pre><code class="language-julia">writeGraphPdf(fg) # show the factor graph</code></pre><p><img src="https://user-images.githubusercontent.com/6412556/42350352-1f36072e-807e-11e8-997b-846223cc5262.png" alt="exranges01"/></p><h2><a class="nav-anchor" id="Inference-and-Visualizations-1" href="#Inference-and-Visualizations-1">Inference and Visualizations</a></h2><p>At this point we can call the solver start interpreting the first results:</p><pre><code class="language-julia">tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree)</code></pre><p>The factor graph figure above showed the structure between variables and factors. In order to see the numerical values contained in the factor graph, a set of tools are provided by the <code>RoMEPlotting</code> and <code>KernelDensityEstimatePlotting</code> packages. For more details, please see the <a href="http://www.juliarobotics.org/Caesar.jl/latest/arena_visualizations.html">dedicated visualization discussion here</a>.</p><p>First look at the two landmark positions <code>:l1, :l2</code> at <code>(10.0,30)</code>,<code>(30.0,-30)</code> respectively.</p><pre><code class="language-julia">using RoMEPlotting
 
@@ -58,7 +58,7 @@ plotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)</code></pre><p><img src="https://us
     println(&quot;Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.&quot;)
     addNode!(fgl, pos_sym, Point2)
     @show rho = norm(GTp[prev_sym] - GTp[pos_sym])
-    ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+    ppr = Point2Point2Range( Normal(rho, 3.0) )
     addFactor!(fgl, [prev_sym;pos_sym], ppr)
   else
     @warn &quot;Variable node $pos_sym already in the factor graph.&quot;
@@ -68,7 +68,7 @@ plotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)</code></pre><p><img src="https://us
     rho = norm(GTl[ll] - GTp[pos_sym])
     # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks
     if rho &lt; measurelimit
-      ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+      ppr = Point2Point2Range( Normal(rho, 3.0) )
       if !(ll in currvar)
         println(&quot;Adding variable vertex $ll, not yet in fgl::FactorGraph.&quot;)
         addNode!(fgl, ll, Point2)
