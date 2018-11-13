@@ -22,7 +22,7 @@ Factor graphs are made of two constituent parts:
 * Factors
 
 ## Variables
-Variables (a.k.a. poses in localization terminology) are created in the same way  shown above for the landmark. Variables contain a label, a data type (e.g. a 2D Point or Pose). Note that variables are solved - i.e. they are the product, what you wish to calculate when the solver runs - so you don't provide any measurements when creating them.
+Variables (a.k.a. poses in localization terminology) are created in the same way  shown above for the landmark. Variables contain a label, a data type (e.g. in 2D `RoME.Point2` or `RoME.Pose2`). Note that variables are solved - i.e. they are the product, what you wish to calculate when the solver runs - so you don't provide any measurements when creating them.
 
 ```julia
 # Add the first pose :x0
@@ -52,6 +52,19 @@ for i in 1:10
 end
 ```
 
+### When to Create New Pose Variables
+
+Consider a robot traversing some area while exploring, localizing, and wanting to find strong loop-closure features for consistent mapping.  The creation of new poses and landmark variables is a trade-off in computational complexity and marginalization errors made during factor graph construction.  Common triggers for new poses are:
+- Time-based trigger (eg. new pose a second or 5 minutes if stationary)
+- Distance traveled (eg. new pose every 0.5 meters)
+- Rotation angle (eg. new pose every 15 degrees)
+
+Computation will progress faster if poses and landmarks are very sparse.  To extract the benefit of dense reconstructions, one approach is to use the factor graph as sparse index in history about the general progression of the trajectory and use additional processing from dense sensor data for high-fidelity map reconstructions.  Either interpolations, or better direct reconstructions from inertial data can be used for dense reconstruction.
+
+For completeness, one could also re-project the most meaningful measurements from sensor measurements between pose epochs as though measured from the pose epoch.  This approach essentially marginalizes the local dead reckoning drift errors into the local interpose re-projections, but helps keep the pose count low.
+
+In addition, see [fixed-lag discussion](../examples/interm_fixedlag_hexagonal.md) for limiting during inference the number of fluid variables manually to a user desired count.
+
 # Variables and Factors Available in Caesar
 
 ### Variables Available in Caesar
@@ -65,12 +78,15 @@ subtypes(IncrementalInference.InferenceVariable)
 Note: This has been made available as `IncrementalInference.getCurrentWorkspaceVariables()` in IncrementalInference v0.4.4.
 
 The current list of available variable types is:
-* Point2 - A 2D coordinate consisting of [x, y, theta]
-* Point3 - A 3D coordinate consisting of [x, y, z]
-* Pose2 - A 2D coordinate and a rotation (i.e. bearing) consisting of [x, y, z, and theta]
-* Pose3 - A 3D coordinate and 3 associated rotations consisting of [x, y, z, theta, phi, psi]
-* DynPoint2 - A 2D coordinate and linear velocities
-* DynPose2 - A 2D coordinate, linear velocities, and a rotation
+* `RoME.Point2` - A 2D coordinate consisting of [x, y, theta]
+* `RoME.Pose2` - A 2D coordinate and a rotation (i.e. bearing) consisting of [x, y, z, and theta]
+* `RoME.DynPoint2` - A 2D coordinate and linear velocities
+* `RoME.DynPose2` - A 2D coordinate, linear velocities, and a rotation
+* `RoME.Point3` - A 3D coordinate consisting of [x, y, z]
+* `RoME.Pose3` - A 3D coordinate and 3 associated rotations consisting of [x, y, z, theta, phi, psi]
+* `RoME.InertialPose3` - A 3D coordinate and rotation pose along with velocity and IMU bias calibration terms
+
+> **Note** several more variable and factors types have been implemented which will over time be incorporated into standard `RoME` release.  Please open an issue with [JuliaRobotics/RoME.jl](JuliaRobotics/RoME.jl) for specific requests, problems, or suggestions.  Contributions are also welcome.
 
 ### Factors Available in Caesar
 You can check for the latest factor types by running the following in your terminal:
@@ -89,18 +105,19 @@ Note: This has been made available as `IncrementalInference.getCurrentWorkspaceF
 
 The current factor types that you will find in the examples are (there are many aside from these):
 
-* Prior - A singleton indicating a prior on a variable
-* Point2Point2 - A factor between two 2D points
-* Point2Point2WorldBearing - A factor between two 2D points with bearing
-* Pose2Point2Bearing - A factor between two 2D points with bearing
-* Pose2Point2BearingRange - A factor between two 2D points with bearing and range
-* Pose2Point2Range - A factor between a 2D pose and a 2D point, with range
-* Pose2Pose2 - A factor between two 2D poses
-* Pose3Pose3 - A factor between two 3D poses
+* `RoME.Prior` - A singleton indicating a prior on a variable
+* `RoME.Point2Point2` - A factor between two 2D points
+* `RoME.Point2Point2WorldBearing` - A factor between two 2D points with bearing
+* `RoME.Pose2Point2Bearing` - A factor between two 2D points with bearing
+* `RoME.Pose2Point2BearingRange` - A factor between two 2D points with bearing and range
+* `RoME.Pose2Point2Range` - A factor between a 2D pose and a 2D point, with range
+* `RoME.Pose2Pose2` - A factor between two 2D poses
+* `RoME.Pose3Pose3` - A factor between two 3D poses
+* `RoME.IntertialPose3` - A factor between two 3D IMU sensor poses
 
 # Querying the FactorGraph
 
-There are a variety of functions to query the factor graph, please refer to [Function Reference](../reference.md) for details.
+There are a variety of functions to query the factor graph, please refer to [Function Reference](../func_ref.md) for details.
 
 A quick summary of the variables in the factor graph can be retrieved with:
 
