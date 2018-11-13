@@ -84,7 +84,7 @@ In a trivial example of Pose2:
 ## Creating New Factors
 
 All factors inherit from one of the following types, depending on their function:
-* FunctorSingleton: FunctorSingletons are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a Pose2D scenario.
+* FunctorSingleton: FunctorSingletons are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a `RoME.Pose2` scenario.
   * Requires: A getSample function
 * FunctorPairwiseMinimize: FunctorPairwiseMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.
   * Requires: A getSample function and a residual function definition

@@ -81,7 +81,7 @@ addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], eye(2))) )
 The `PriorPoint2` is assumed to be a multivariate normal distribution of covariance `eye(2)`, as well as a weighting factor of `[1.0]`.
 
 
-**NOTE** API change: `PriorPoint2D` changed to `PriorPoint2{T}` to accept distribution objects and discard (standard in `RoME v0.1.5` -- see [issue 72 here](https://github.com/JuliaRobotics/RoME.jl/issues/72)).
+**NOTE** API changed to `PriorPoint2(::T) where T <: SamplableBelief = PriorPoint2{T}` to accept distribution objects and discard (standard in `RoME v0.1.5` -- see [issue 72 here](https://github.com/JuliaRobotics/RoME.jl/issues/72)).
 
 ## Adding Range Measurements Between Variables
 
@@ -89,17 +89,17 @@ Next we connect the three range measurements from the vehicle location `:l0` to 
 ```julia
 # first range measurement
 rhoZ1 = norm(GTl[:l1]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ1], 2.0, [1.0])
+ppr = Point2Point2Range( Normal(rhoZ1, 2.0) )
 addFactor!(fg, [:l100;:l101], ppr)
 
 # second range measurement
 rhoZ2 = norm(GTl[:l2]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ2], 3.0, [1.0])
+ppr = Point2Point2Range( Normal(rhoZ2, 3.0) )
 addFactor!(fg, [:l100; :l2], ppr)
 
 # second range measurement
 rhoZ3 = norm(GTl[:l3]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ3], 3.0, [1.0])
+ppr = Point2Point2Range( Normal(rhoZ3, 3.0) )
 addFactor!(fg, [:l100; :l3], ppr)
 ```
 
@@ -165,7 +165,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
     println("Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.")
     addNode!(fgl, pos_sym, Point2)
     @show rho = norm(GTp[prev_sym] - GTp[pos_sym])
-    ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+    ppr = Point2Point2Range( Normal(rho, 3.0) )
     addFactor!(fgl, [prev_sym;pos_sym], ppr)
   else
     @warn "Variable node $pos_sym already in the factor graph."
@@ -175,7 +175,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
     rho = norm(GTl[ll] - GTp[pos_sym])
     # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks
     if rho < measurelimit
-      ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+      ppr = Point2Point2Range( Normal(rho, 3.0) )
       if !(ll in currvar)
         println("Adding variable vertex $ll, not yet in fgl::FactorGraph.")
         addNode!(fgl, ll, Point2)
