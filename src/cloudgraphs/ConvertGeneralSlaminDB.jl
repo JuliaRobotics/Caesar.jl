@@ -237,7 +237,7 @@ function recoverConstraintType(cgl::CloudGraph,
     # return Pose2Pose2(zij, cov^2, [1.0])
   elseif lkl[1]=="BR"
     msm = split(elem["meas"], ' ')
-    return Pose2DPoint2DBearingRange{Normal, Normal}(
+    return Pose2Point2BearingRange{Normal, Normal}(
                   Normal(parse(msm[1]), parse(Float64, msm[3]) ),
                   Normal(parse(msm[2]),parse(Float64, msm[5]) )  )
   elseif lkl[1]=="rangeBearingMEAS"
@@ -250,14 +250,18 @@ function recoverConstraintType(cgl::CloudGraph,
     @show size(rngs), size(bearing)
     prange = resample(kde!(rngs),N)
     pbear = resample(kde!(bearing),N)
-    return Pose2DPoint2DBearingRangeDensity(pbear, prange)
+    # warn("temporary return")
+    # return prange, pbear
+    return Pose2Point2BearingRangeDensity(pbear, prange)
   elseif lkl[1]=="rangeMEAS"
     @show rangekey = mongokeys["range"]
     rngs = bin2arr(CloudGraphs.read_MongoData(cgl, rangekey))
     # rngs = Vector{Float64}(elem["range"] )
     @show size(rngs)
     prange = resample(kde!(rngs),N)
-    return Pose2DPoint2DRangeDensity(prange)
+    # warn("temporary return")
+    # return prange
+    return Pose2Point2RangeDensity(prange)
   else
     return error("Don't know how to convert $(lkl[1]) to a factor")
   end

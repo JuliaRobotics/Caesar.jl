@@ -31,6 +31,7 @@ using
   CloudGraphs, # TODO: will be movedd to DFG
   Neo4j, # TODO: will be movedd to DFG
   Mongoc, # TODO: will be movedd to DFG
+  Unmarshal,
   YAML,
   FFTW
 
@@ -159,6 +160,10 @@ include("cloudgraphs/ConvertGeneralSlaminDB.jl")
 include("cloudgraphs/slamindb.jl")
 include("cloudgraphs/MultisessionUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
+
+
+# ZMQ server and endpoints
+include("zmq/ZmqCaesar.jl")
 
 # SAS-SLAM
 include("beamforming/czt.jl")
