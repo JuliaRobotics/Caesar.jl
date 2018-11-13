@@ -26,7 +26,7 @@ makedocs(
             "Intermediate: Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
             "Intermediate: Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
-        "Function Reference" => "func_ref.md"
+        "Function Reference" => "reference.md"
     ]
     # html_prettyurls = !("local" in ARGS),
     )
