@@ -58,7 +58,7 @@ inferOverTreeR!(fg, tree)
 
 addNode!(fg, :l1, Point2, labels=["LANDMARK";])
 
-br = Pose2DPoint2DBearingRange(Normal(0, 0.1), Normal(20, 1.0))
+br = Pose2Point2BearingRange(Normal(0, 0.1), Normal(20, 1.0))
 
 addFactor!(fg, [:x1;:l1], br, autoinit=true )
 

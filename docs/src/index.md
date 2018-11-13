@@ -4,16 +4,14 @@
 </p>
 ```
 
-[![Caesar](http://pkg.julialang.org/badges/Caesar_0.7.svg)](http://pkg.julialang.org/?pkg=Caesar&ver=0.7)
-
-# Introduction
-Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar attempts to address a number of issues that arise in normal SLAM solutions - solving under-defined systems, inference with non-gaussian measurement distributions, simplifying factor creation, and centralizing factor-graph persistence with databases. Caesar started as part of the thesis "Towards non-parametric / parametric state estimation and navigation solutions" [[1]](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1).
+## Introduction
+Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar attempts to address a number of issues that arise in normal SLAM solutions - solving under-defined systems, inference with non-Gaussian measurement distributions, simplifying factor creation, and centralizing factor-graph persistence with databases. Caesar started as part of the thesis "Multi-modal and Inertial Sensor Solutions for Navigation-type Factor Graphs" [[1]](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1).
 
 ## Features
 The Caesar framework has the following features:
 * Factor-graph representation of pose and sensor data
 * Localization using [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf)
-  * Multi-core inference supporting `Pose2, Pose3, Point2, Point3, Null hypothesis, Multi-modal, KDE density, partial constraints`
+  * Multi-core inference supporting `Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc`
 * Multi-modal and non-parametric representation of constraints
   * Gaussian distributions are but one of the many representations of measurement error
   * Simple, extensible framework for creation of new factor types
@@ -24,7 +22,21 @@ The Caesar framework has the following features:
 ## TLDR Installation
 If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package 'Caesar'.
 
-In a Julia 0.7+ REPL, press '?' and type `add Caesar` to pull the latest tagged version.
+Caesar can be installed for latest Julia 0.7/1.0 with:
+```julia
+julia> ] # to enable package manager
+(v1.0) pkg> add Caesar
+```
+
+Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
+```julia
+(v1.0) pkg> test IncrementalInference
+...
+(v1.0) pkg> test RoME
+...
+(v1.0) pkg> test Caesar
+...
+```
 
 ## Caesar Framework
 
@@ -89,15 +101,13 @@ D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kae
 
 We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
 
-
-## Cite
 Consider citing our work:
 
 ```
 @misc{caesarjl,
-  author = "Dehann Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, John Leonard, Micheal Kaess, and other contributors",
+  author = "Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors",
   title =  "Caesar.jl",
-  year =   2018,
+  year =   2017,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```

@@ -6,7 +6,7 @@
 Initialize a and exiting or new factor graph with a first pose and prior as specified by default
 keywords or user.
 """
-function identitypose6fg(;fg=nothing,
+function identitypose6fg!(;fg=nothing,
       N::Int=100,
       initCov::Array{Float64,2}=0.001*eye(6),
       initpose::SE3=SE3(0) )
@@ -23,6 +23,13 @@ function identitypose6fg(;fg=nothing,
   return fg
 end
 
+function identitypose6fg(;fg=nothing,
+      N::Int=100,
+      initCov::Array{Float64,2}=0.001*eye(6),
+      initpose::SE3=SE3(0) )
+   @warn "Caesar.identitypose6fg deprecated, use identitypose6fg! instead"
+   identitypose6fg!(fg=fg, N=N, initCov=initCov, initpose=initpose)
+end
 
 # function solveandvisualize(fg::FactorGraph,
 #       vc::DrakeVisualizer.Visualizer;

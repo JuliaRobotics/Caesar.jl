@@ -160,7 +160,7 @@ addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal(
 
 addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 
-writeGraphPdf(fg)
+show ? writeGraphPdf(fg) : nothing
 
 # quick solve as sanity check
 tree = batchSolve!(fg, N=N, drawpdf=true, show=show, recursive=failsafe)
@@ -169,6 +169,8 @@ tree = batchSolve!(fg, N=N, drawpdf=true, show=show, recursive=failsafe)
 maxlen = (length(tag_bagl)-1)
 
 Gadfly.push_theme(:default)
+
+@sync begin
 
 for psid in (prev_psid+1):1:maxlen
   prev_psid
@@ -182,18 +184,22 @@ for psid in (prev_psid+1):1:maxlen
     tree = batchSolve!(fg, drawpdf=true, show=show, N=N, recursive=true)
   end
   jldfile = resultsdir*"/racecar_fg_$(psym).jld2"
-  @spawn IIF.savejld(fg, file=jldfile)
+  T1 = @spawn IIF.savejld(fg, file=jldfile)
+  @async fetch(T1)
 
   ## save factor graph for later testing and evaluation
   # ensureAllInitialized!(fg)
-  @spawn plotRacecarInterm(fg, resultsdir, psym)
+  T2 = @spawn plotRacecarInterm(fg, resultsdir, psym)
+  @async fetch(T2)
 
   # prepare for next iteration
   prev_psid = psid
-end
+end # for
 
 # extract results for later use as training data
 results2csv(fg, dir=resultsdir, filename="results.csv")
+
+end #sync
 
 return fg
 end # main

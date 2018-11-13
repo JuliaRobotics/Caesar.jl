@@ -1,7 +1,7 @@
 using Documenter, Caesar
 
 makedocs(
-    modules = [Caesar],
+    modules = [Caesar, RoME, IncrementalInference],
     format = :html,
     sitename = "Caesar.jl",
     pages = Any[
@@ -19,14 +19,16 @@ makedocs(
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
-            "Basics: ContinuousScalar" => "examples/basic_continuousscalar.md",
-            "Basics: Singular Ranges-only SLAM (Underdetermined System)" => "examples/basic_slamedonut.md",
-            "Basics: Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
-            "Basics: Fixed-Lag Solving" => "examples/interm_fixedlag_hexagonal.md",
-            "Intermediate: Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
-            "Intermediate: Creating DynPose Factor" => "examples/interm_dynpose.md"
+            "ContinuousScalar" => "examples/basic_continuousscalar.md",
+            "Singular Ranges-only SLAM (Underdetermined System)" => "examples/basic_slamedonut.md",
+            "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
+            "Fixed-Lag Solving" => "examples/interm_fixedlag_hexagonal.md",
+            "Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
+            "Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
-        "Function Reference" => "func_ref.md"
+        "Function Reference" => [
+            "Function Reference" => "func_ref.md",
+        ]
     ]
     # html_prettyurls = !("local" in ARGS),
     )
