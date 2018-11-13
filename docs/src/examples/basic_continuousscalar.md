@@ -13,8 +13,8 @@ This tutorial requires `IncrementalInference v0.3.0+, RoME v0.1.0, RoMEPlotting`
 
 To start, the two major mathematical packages are brought into scope.
 ```julia
-using Distributions
 using IncrementalInference
+# using Distributions # automatically reexported by IncrementalInference
 ```
 
 Guidelines for developing your own functions are discussed here in [Adding Variables and Factors](../concepts/adding_variables_factors.md), and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package [RoME.jl](http://www.github.com/dehann/RoME.jl).
@@ -44,7 +44,7 @@ Graphs.plot(fg.g)
 The two node factor graph is shown in the image below.
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/fgx0.png" width="120" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/fgx0.png" width="120" border="0" />
 </p>
 ```
 Automatic initialization of variables depend on how the factor graph model is constructed.
@@ -69,7 +69,7 @@ Note that the automatic initialization of `:x0` is aware that `:x1` is not initi
 The structure of the graph has now been updated to two variable nodes and two factors.
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/fgx01.png" width="240" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/fgx01.png" width="240" border="0" />
 </p>
 ```
 Global inference requires that the entire factor graph be initialized before the numerical belief computation algorithms can be performed.
@@ -87,7 +87,7 @@ plotKDE(fg, :x0)
 ```
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/plx0.png" width="360" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/plx0.png" width="360" border="0" />
 </p>
 ```
 By forcing the initialization of `:x1` and plotting its belief estimate,
@@ -98,7 +98,7 @@ plotKDE(fg, [:x0, :x1])
 the predicted influence of the `P(Z| X1 - X0) = LinearOffset(Normal(10, 1))` is shown by the red trace.
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/plx01.png" width="360" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/plx01.png" width="360" border="0" />
 </p>
 ```
 The red trace (predicted belief of `:x1`) is noting more than the approximated convolution of the current marginal belief of `:x0` with the conditional belief described by `P(Z | X1 - X0)`.
@@ -111,7 +111,7 @@ addFactor!(fg, [:x1, :x2], mmo)
 ```
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/fgx012.png" width="360" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/fgx012.png" width="360" border="0" />
 </p>
 ```
 The `mmo` variable illustrates how a near arbitrary mixture probability distribution can be used as a conditional relationship between variable nodes in the factor graph.
@@ -127,7 +127,7 @@ plotKDE(fg, [:x0, :x1, :x2])
 ```
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/plx012.png" width="360" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/plx012.png" width="360" border="0" />
 </p>
 ```
 
@@ -139,7 +139,7 @@ addFactor!(fg, [:x2, :x3], LinearOffset(Normal(-50, 1)))
 expands the factor graph to to four variables and four factors.
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/fgx0123.png" width="480" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/fgx0123.png" width="480" border="0" />
 </p>
 ```
 This part of the tutorial shows how a unimodal likelihood (conditional belief) can transmit the bimodal belief currently contained in `:x2`.
@@ -150,7 +150,7 @@ plotKDE(fg, [:x0, :x1, :x2, :x3])
 Notice the blue trace (`:x3`) is a shifted and slightly spread out version of the initialized belief on `:x2`, through the convolution with the conditional belief `P(Z | X2, X3)`.
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/plx0123.png" width="480" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/plx0123.png" width="480" border="0" />
 </p>
 ```
 
@@ -165,7 +165,7 @@ The blue trace for `:x3` has two major modes, one that overlaps with `:x0, :x1` 
 The last factor introduces a shift `LinearOffset(Normal(40,1))` which essentially aligns the left most mode of `:x3` back onto `:x0`.
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/fgx0123c.png" width="480" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/fgx0123c.png" width="480" border="0" />
 </p>
 ```
 
@@ -183,7 +183,7 @@ plotKDE(fg, [:x0, :x1, :x2, :x3])
 The resulting posterior marginal beliefs over all the system variables are:
 ```@raw html
 <p align="center">
-<img src="assets/tutorials/ContinuousScalar/plx0123infr.png" width="480" border="0" />
+<img src="../assets/tutorials/ContinuousScalar/plx0123infr.png" width="480" border="0" />
 </p>
 ```
 
