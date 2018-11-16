@@ -112,7 +112,8 @@ Consider citing our work:
 }
 ```
 
-# References
+## References
+
     [1]  Fourie, D.: "Multi-modal and Inertial Sensor Solutions to Navigation-type Factor Graph",
          Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.
     [2]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: "SLAMinDB: Centralized graph

@@ -7,7 +7,7 @@ The following sections discuss the steps required to construct a graph and solve
 * Solving the Graph
 * Informing the Solver About Ready Data
 
-# Initializing a Factor Graph
+## Initializing a Factor Graph
 
 ```julia
 using Caesar, RoME, Distributions
@@ -65,7 +65,7 @@ For completeness, one could also re-project the most meaningful measurements fro
 
 In addition, see [fixed-lag discussion](../examples/interm_fixedlag_hexagonal.md) for limiting during inference the number of fluid variables manually to a user desired count.
 
-# Variables and Factors Available in Caesar
+## Variables and Factors Available in Caesar
 
 ### Variables Available in Caesar
 You can check for the latest variable types by running the following in your terminal:
@@ -86,7 +86,7 @@ The current list of available variable types is:
 * `RoME.Pose3` - A 3D coordinate and 3 associated rotations consisting of [x, y, z, theta, phi, psi]
 * `RoME.InertialPose3` - A 3D coordinate and rotation pose along with velocity and IMU bias calibration terms
 
-> **Note** several more variable and factors types have been implemented which will over time be incorporated into standard `RoME` release.  Please open an issue with [JuliaRobotics/RoME.jl](JuliaRobotics/RoME.jl) for specific requests, problems, or suggestions.  Contributions are also welcome.
+> **Note** several more variable and factors types have been implemented which will over time be incorporated into standard `RoME` release.  Please open an issue with [JuliaRobotics/RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) for specific requests, problems, or suggestions.  Contributions are also welcome.
 
 ### Factors Available in Caesar
 You can check for the latest factor types by running the following in your terminal:
@@ -115,7 +115,7 @@ The current factor types that you will find in the examples are (there are many 
 * `RoME.Pose3Pose3` - A factor between two 3D poses
 * `RoME.IntertialPose3` - A factor between two 3D IMU sensor poses
 
-# Querying the FactorGraph
+## Querying the FactorGraph
 
 There are a variety of functions to query the factor graph, please refer to [Function Reference](../func_ref.md) for details.
 
