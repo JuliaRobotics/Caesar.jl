@@ -1033,19 +1033,219 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "func_ref/#Caesar.getPoseExVertexNeoIDs",
+    "page": "Function Reference",
+    "title": "Caesar.getPoseExVertexNeoIDs",
+    "category": "function",
+    "text": "getPoseExVertexNeoIDs(conn; ready, backendset, session, reqbackendset)\n\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for all poses.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.getLandmOtherSessNeoIDs",
+    "page": "Function Reference",
+    "title": "Caesar.getLandmOtherSessNeoIDs",
+    "category": "function",
+    "text": "getLandmOtherSessNeoIDs{T <: AbstractString}(::CloudGraph, session::T=\"\", robot::T=\"\", user::T=\"\", multisessions=Vector{T}())\n\nReturn dict of dict of Neo4j vertex IDs by session and landmark symbols.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.db2jld",
+    "page": "Function Reference",
+    "title": "Caesar.db2jld",
+    "category": "function",
+    "text": "db2jld(cgl::CloudGraph, session::AbstractString, filename::AbstractString)\n\nFetch and save a FactorGraph session to a jld, using CloudGraph object and session definition.\n\n\n\n\n\ndb2jld(filename::AbstractString; addrdict::NothingUnion{Dict{AbstractString, AbstractString}}=nothing )\n\nFetch and save a FactorGraph session to a jld, using or asking STDIN for credentials in the addrdict field.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.fetchrobotdatafirstpose",
+    "page": "Function Reference",
+    "title": "Caesar.fetchrobotdatafirstpose",
+    "category": "function",
+    "text": "fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)\n\nReturn dict of JSON parsed \"robot_description\" field as was inserted by counterpart insertrobotdatafirstpose! function. Used for storing general robot specific data in easily accessible manner.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.executeQuery",
+    "page": "Function Reference",
+    "title": "Caesar.executeQuery",
+    "category": "function",
+    "text": "executeQuery(connection, query)\n\n\nRun Neo4j Cypher queries on the cloudGraph database, and return Tuple with the unparsed (results, loadresponse).\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.appendvertbigdata!",
+    "page": "Function Reference",
+    "title": "Caesar.appendvertbigdata!",
+    "category": "function",
+    "text": "appendvertbigdata!(cloudGraph, cv, description, data)\n\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fgl, vert, description, data)\n\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fg, sym, descr, data)\n\nAppend big data element into current blob store using parent appendvertbigdata!, but here specified by symbol of variable node in the FactorGraph. Note the default data layer api definition. User must define dlapi to refetching the  vertex from the data layer. localapi avoids repeated network database fetches.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.updatenewverts!",
+    "page": "Function Reference",
+    "title": "Caesar.updatenewverts!",
+    "category": "function",
+    "text": "updatenewverts!(fgl::FactorGraph; N::Int)\n\nConvert vertices of session in Neo4j DB with Caesar.jl\'s required data elements in preparation for MM-iSAMCloudSolve process.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.getVertNeoIDs!",
+    "page": "Function Reference",
+    "title": "Caesar.getVertNeoIDs!",
+    "category": "function",
+    "text": "getVertNeoIDs!(::CloudGraph, res::Dict{Symbol, Int}; session::AbstractString=\"NA\", robot::AbstractString=\"NA\", user::AbstractString=\"NA\")\n\nInsert into and return dict res with Neo4j IDs of ExVertex labels as stored per session in Neo4j database.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.whosNear3D",
+    "page": "Function Reference",
+    "title": "Caesar.whosNear3D",
+    "category": "function",
+    "text": "whosNear3D(cg, session, robot, user; x, y, z, roll, pitch, yaw, dist, angle)\n\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.getprpt2kde",
+    "page": "Function Reference",
+    "title": "Caesar.getprpt2kde",
+    "category": "function",
+    "text": "getprp2kde(::CloudGraph, neoids::Vector{Int}; N::Int=100)\n\nReturn PriorPoint2DensityNH with N points based on beliefs of neoids, and equal share null hypothesis between length(neoids)+1 beliefs.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.whosNear2D",
+    "page": "Function Reference",
+    "title": "Caesar.whosNear2D",
+    "category": "function",
+    "text": "whosNear2D(cg, session, robot, user; x, y, yaw, dist, angle)\n\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.hasBigDataElement",
+    "page": "Function Reference",
+    "title": "Caesar.hasBigDataElement",
+    "category": "function",
+    "text": "hasBigDataElement(vertex, description)\n\n\nReturn true if vertex has bigDataElements with matching description.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.getAllLandmarkNeoIDs",
+    "page": "Function Reference",
+    "title": "Caesar.getAllLandmarkNeoIDs",
+    "category": "function",
+    "text": "getAllLandmarkNeoIDs(::Dict{Symbol, Dict{Symbol, Int}}, ::Symbol)\n\nReturn Vector{Int} of Neo4j vertex IDs relating to symbol, as listed in lm2others.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.consoleaskuserfordb",
+    "page": "Function Reference",
+    "title": "Caesar.consoleaskuserfordb",
+    "category": "function",
+    "text": "consoleaskuserfordb(; nparticles, drawdepth, clearslamindb, multisession, drawedges)\n\n\nObtain database addresses and login credientials from STDIN, as well as a few case dependent options.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.standardcloudgraphsetup",
+    "page": "Function Reference",
+    "title": "Caesar.standardcloudgraphsetup",
+    "category": "function",
+    "text": "standardcloudgraphsetup(; addrdict, nparticles, drawdepth, drawedges, clearslamindb, multisession)\n\n\nConnect to databases via network according to addrdict, or ask user for credentials and return active cloudGraph object, as well as addrdict.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.resetentireremotesession",
+    "page": "Function Reference",
+    "title": "Caesar.resetentireremotesession",
+    "category": "function",
+    "text": "resetentireremotesession(conn, session, robot, user)\n\nmatch (n:session) remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width set n :NEWDATA return n\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.getfirstpose",
+    "page": "Function Reference",
+    "title": "Caesar.getfirstpose",
+    "category": "function",
+    "text": "getfirstpose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)\n\nReturn Tuple{Symbol, Int} of first pose symbol and Neo4j node ID.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.getExVertexNeoIDs",
+    "page": "Function Reference",
+    "title": "Caesar.getExVertexNeoIDs",
+    "category": "function",
+    "text": "getExVertexNeoIDs(conn; label, ready, backendset, session, robot, user, reqbackendset)\n\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.findExistingMSConstraints",
+    "page": "Function Reference",
+    "title": "Caesar.findExistingMSConstraints",
+    "category": "function",
+    "text": "findExistingMSConstraints(fgl::FactorGraph)\n\nReturn Dict{Symbol, Int} of vertex symbol to Neo4j node ID of MULTISESSION constraints in this fgl.sessionname.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.removeNeo4jID",
+    "page": "Function Reference",
+    "title": "Caesar.removeNeo4jID",
+    "category": "function",
+    "text": "removeNeo4jID(cg::CloudGraph, neoid=-1)\n\nRemove node from Neo4j according to Neo4j Node ID. Big data elements that may be associated with this node are not removed.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.getBigDataElement",
+    "page": "Function Reference",
+    "title": "Caesar.getBigDataElement",
+    "category": "function",
+    "text": "getBigDataElement(vertex, description)\n\n\nWalk through vertex bigDataElements and return the last matching description.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.rmInstMultisessionPriors!",
+    "page": "Function Reference",
+    "title": "Caesar.rmInstMultisessionPriors!",
+    "category": "function",
+    "text": "rmInstMultisessionPriors!(::CloudGraph; session<:AbstractString=, multisessions::Vector{<:AbstractString}= )\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.insertrobotdatafirstpose!",
+    "page": "Function Reference",
+    "title": "Caesar.insertrobotdatafirstpose!",
+    "category": "function",
+    "text": "insertrobotdatafirstpose!(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString, robotdict::Dict)\n\nSaves robotdict via JSON to first pose in a SESSION in the database. Used for storing general robot specific data in easily accessible manner. Can fetch later retrieve same dict with counterpart fetchrobotdatafirstpose function.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.fetchsubgraph!",
+    "page": "Function Reference",
+    "title": "Caesar.fetchsubgraph!",
+    "category": "function",
+    "text": "fetchsubgraph!(::FactorGraph, ::Vector{CloudVertex}, numneighbors::Int=0)\n\nFetch and insert list of CloudVertices into FactorGraph object, up to neighbor depth.\n\n\n\n\n\nfetchsubgraph!(::FactorGraph, ::Vector{Int}, numneighbors::Int=0)\n\nFetch and insert list of Neo4j IDs into FactorGraph object, up to neighbor depth.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.getLocalSubGraphMultisession",
+    "page": "Function Reference",
+    "title": "Caesar.getLocalSubGraphMultisession",
+    "category": "function",
+    "text": "getLocalSubGraphMultisession{T <: AbstractString}(cg::CloudGraph, lm2others; session::T=\"\", numneighbors::Int=0)\n\nReturn subgraph copy of type FactorGraph contaning values from session in lm2others, and Vector{Symbol} of primary key symbols used for graph exstraction.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#Caesar.getnewvertdict",
+    "page": "Function Reference",
+    "title": "Caesar.getnewvertdict",
+    "category": "function",
+    "text": "getnewvertdict(conn, session::AbstractString, robot::AbstractString, user::AbstractString)\n\nReturn a dictionary with frtend and mongo_keys json string information for :NEWDATA elements in Neo4j database.\n\n\n\n\n\n"
+},
+
+{
     "location": "func_ref/#Caesar-1",
     "page": "Function Reference",
     "title": "Caesar",
     "category": "section",
-    "text": "loadmodel\ngetPoseExVertexNeoIDs\naskneo4jcredentials!\ngetLandmOtherSessNeoIDs\ndb2jld\nidentitypose6fg\nfetchrobotdatafirstpose\nexecuteQuery\nupdateparallelposes!\nremoveReinsertMultisessionPrior!\nappendvertbigdata!\nparseMergeVertAttr!\nupdatenewverts!\nmergeCloudVertex!\ngetVertNeoIDs!\nwhosNear3D\ngetprpt2kde\nwhosNear2D\nhasBigDataElement\ngetAllLandmarkNeoIDs\nconsoleaskuserfordb\ndrawAllOdometryEdges!\nstandardcloudgraphsetup\nresetentireremotesession\ngetfirstpose\ngetExVertexNeoIDs\nfindExistingMSConstraints\nremoveNeo4jID\ndrawLineBetween!\ngetBigDataElement\naskmongocredentials!\nrmInstMultisessionPriors!\ninsertrobotdatafirstpose!\nfetchsubgraph!\ngetLocalSubGraphMultisession\ngetnewvertdict"
-},
-
-{
-    "location": "func_ref/#Index-1",
-    "page": "Function Reference",
-    "title": "Index",
-    "category": "section",
-    "text": "loadmodel\ngetPoseExVertexNeoIDs\naskneo4jcredentials!\ngetLandmOtherSessNeoIDs\ndb2jld\nidentitypose6fg\nfetchrobotdatafirstpose\nexecuteQuery\nupdateparallelposes!\nremoveReinsertMultisessionPrior!\nappendvertbigdata!\nparseMergeVertAttr!\nupdatenewverts!\nmergeCloudVertex!\ngetVertNeoIDs!\nwhosNear3D\ngetprpt2kde\nwhosNear2D\nhasBigDataElement\ngetAllLandmarkNeoIDs\nconsoleaskuserfordb\ndrawAllOdometryEdges!\nstandardcloudgraphsetup\nresetentireremotesession\ngetfirstpose\ngetExVertexNeoIDs\nfindExistingMSConstraints\nremoveNeo4jID\ndrawLineBetween!\ngetBigDataElement\naskmongocredentials!\nrmInstMultisessionPriors!\ninsertrobotdatafirstpose!\nfetchsubgraph!\ngetLocalSubGraphMultisession\ngetnewvertdict"
+    "text": "getPoseExVertexNeoIDs\ngetLandmOtherSessNeoIDs\ndb2jld\nfetchrobotdatafirstpose\nexecuteQuery\nappendvertbigdata!\nupdatenewverts!\ngetVertNeoIDs!\nwhosNear3D\ngetprpt2kde\nwhosNear2D\nhasBigDataElement\ngetAllLandmarkNeoIDs\nconsoleaskuserfordb\nstandardcloudgraphsetup\nresetentireremotesession\ngetfirstpose\ngetExVertexNeoIDs\nfindExistingMSConstraints\nremoveNeo4jID\ngetBigDataElement\nrmInstMultisessionPriors!\ninsertrobotdatafirstpose!\nfetchsubgraph!\ngetLocalSubGraphMultisession\ngetnewvertdict"
 },
 
 ]}
