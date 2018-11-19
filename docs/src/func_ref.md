@@ -68,7 +68,6 @@ landmarks
 loadjld
 ls
 lsf
-localProduct
 lsRear
 printgraphmax
 savejld
