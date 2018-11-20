@@ -1,4 +1,4 @@
-using Documenter, Caesar
+using Documenter, DocumenterTools, Caesar
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference],
