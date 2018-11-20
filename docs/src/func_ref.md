@@ -6,6 +6,9 @@ Pages = [
 ]
 Depth = 3
 ```
+
+**WORK IN PROGRESS**  Not all functions have been added to this directory yet.
+
 ### Caesar
 ```@docs
 getPoseExVertexNeoIDs
@@ -34,4 +37,39 @@ insertrobotdatafirstpose!
 fetchsubgraph!
 getLocalSubGraphMultisession
 getnewvertdict
+```
+
+### RoME
+
+```@docs
+getRangeKDEMax2D
+initFactorGraph!
+addOdoFG!
+```
+
+### IncrementalInference
+```@docs
+addNode!
+addFactor!
+allnums
+approxConv
+batchSolve!
+convert2packedfunctionnode
+decodefg
+doautoinit!
+emptyFactorGraph
+encodefg
+fifoFreeze!
+findRelatedFromPotential
+getCurrentWorkspaceFactors
+getCurrentWorkspaceVariables
+initializeNode!
+landmarks
+loadjld
+ls
+lsf
+lsRear
+printgraphmax
+savejld
+subgraphFromVerts
 ```
