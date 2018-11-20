@@ -1029,7 +1029,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Function Reference",
     "title": "Function Reference",
     "category": "section",
-    "text": "Pages = [\n    \"func_ref.md\"\n]\nDepth = 3"
+    "text": "Pages = [\n    \"func_ref.md\"\n]\nDepth = 3WORK IN PROGRESS  Not all functions have been added to this directory yet."
 },
 
 {
@@ -1246,6 +1246,230 @@ var documenterSearchIndex = {"docs": [
     "title": "Caesar",
     "category": "section",
     "text": "getPoseExVertexNeoIDs\ngetLandmOtherSessNeoIDs\ndb2jld\nfetchrobotdatafirstpose\nexecuteQuery\nappendvertbigdata!\nupdatenewverts!\ngetVertNeoIDs!\nwhosNear3D\ngetprpt2kde\nwhosNear2D\nhasBigDataElement\ngetAllLandmarkNeoIDs\nconsoleaskuserfordb\nstandardcloudgraphsetup\nresetentireremotesession\ngetfirstpose\ngetExVertexNeoIDs\nfindExistingMSConstraints\nremoveNeo4jID\ngetBigDataElement\nrmInstMultisessionPriors!\ninsertrobotdatafirstpose!\nfetchsubgraph!\ngetLocalSubGraphMultisession\ngetnewvertdict"
+},
+
+{
+    "location": "func_ref/#RoME.getRangeKDEMax2D",
+    "page": "Function Reference",
+    "title": "RoME.getRangeKDEMax2D",
+    "category": "function",
+    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#RoME.initFactorGraph!",
+    "page": "Function Reference",
+    "title": "RoME.initFactorGraph!",
+    "category": "function",
+    "text": "initFactorGraph!(fg; P0, init, N, lbl, ready, firstPoseType, labels)\n\n\nInitialize a factor graph object as Pose2, Pose3, or neither and returns variable and factor symbols as array.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#RoME.addOdoFG!",
+    "page": "Function Reference",
+    "title": "RoME.addOdoFG!",
+    "category": "function",
+    "text": "addOdoFG!(fg, n, DX, cov; N, ready, labels)\n\n\nCreate a new variable node and insert odometry constraint factor between which will automatically increment latest pose symbol x<k+1> for new node new node and constraint factor are returned as a tuple.\n\n\n\n\n\naddOdoFG!(fgl, odo; N, ready, labels)\n\n\nCreate a new variable node and insert odometry constraint factor between which will automatically increment latest pose symbol x<k+1> for new node new node and constraint factor are returned as a tuple.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#RoME-1",
+    "page": "Function Reference",
+    "title": "RoME",
+    "category": "section",
+    "text": "getRangeKDEMax2D\ninitFactorGraph!\naddOdoFG!"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.addNode!",
+    "page": "Function Reference",
+    "title": "IncrementalInference.addNode!",
+    "category": "function",
+    "text": "addNode!(fg, lbl, softtype; N, autoinit, ready, dontmargin, labels, api, uid, smalldata)\n\n\nAdd a node (variable) to a graph. Use this over the other dispatches.\n\n\n\n\n\naddNode!(fg, lbl, softtype; N, autoinit, ready, dontmargin, labels, api, uid, smalldata)\n\n\nAdd a node (variable) to a graph. Use this over the other dispatches.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.addFactor!",
+    "page": "Function Reference",
+    "title": "IncrementalInference.addFactor!",
+    "category": "function",
+    "text": "addFactor!(fgl, Xi, usrfnc; multihypo, ready, api, labels, uid, autoinit, threadmodel)\n\n\nAdd factor with user defined type <: FunctorInferenceType to the factor graph object.  Define whether the automatic initialization of variables should be performed.  Use order sensitive multihypo keyword argument to define if any variables are related to data association uncertainty.\n\n\n\n\n\naddFactor!(fgl, xisyms, usrfnc; multihypo, ready, api, labels, uid, autoinit, threadmodel)\n\n\nAdd factor with user defined type <: FunctorInferenceType to the factor graph object.  Define whether the automatic initialization of variables should be performed.  Use order sensitive multihypo keyword argument to define if any variables are related to data association uncertainty.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.allnums",
+    "page": "Function Reference",
+    "title": "IncrementalInference.allnums",
+    "category": "function",
+    "text": "Test if all elements of the string is a number:  Ex, \"123\" is true, \"1_2\" is false.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.approxConv",
+    "page": "Function Reference",
+    "title": "IncrementalInference.approxConv",
+    "category": "function",
+    "text": "approxConv(fgl, fct, towards; api, N)\n\n\nDraw samples from the approximate convolution of towards symbol using factor fct relative to the other variables.  In addition the api can be adjusted to recover the data from elsewhere (likely to be replaced/removed in the future).\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.batchSolve!",
+    "page": "Function Reference",
+    "title": "IncrementalInference.batchSolve!",
+    "category": "function",
+    "text": "batchSolve!(fgl; drawpdf, show, N, recursive)\n\n\nPerform multimodal incremental smoothing and mapping (mm-iSAM) computations over given factor graph fgl::FactorGraph on the local computer.  A pdf of the Bayes (Junction) tree will be generated in the working folder with drawpdf=true\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.convert2packedfunctionnode",
+    "page": "Function Reference",
+    "title": "IncrementalInference.convert2packedfunctionnode",
+    "category": "function",
+    "text": "convert2packedfunctionnode(fgl, fsym)\nconvert2packedfunctionnode(fgl, fsym, api)\n\n\nEncode complicated function node type to related \'Packed<type>\' format assuming a user supplied convert function .\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.decodefg",
+    "page": "Function Reference",
+    "title": "IncrementalInference.decodefg",
+    "category": "function",
+    "text": "decodefg(fgs; api)\n\n\nUnpack PackedFunctionNodeData formats back to regular FunctonNodeData.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.doautoinit!",
+    "page": "Function Reference",
+    "title": "IncrementalInference.doautoinit!",
+    "category": "function",
+    "text": "doautoinit!(fgl, Xi; api, singles, N)\n\n\ninitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!. Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\ndoautoinit!(fgl, xsyms; api, singles, N)\n\n\ninitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!.  Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.emptyFactorGraph",
+    "page": "Function Reference",
+    "title": "IncrementalInference.emptyFactorGraph",
+    "category": "function",
+    "text": "emptyFactorGraph(; reference)\n\n\nConstruct an empty FactorGraph object with the minimum amount of information / memory populated.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.encodefg",
+    "page": "Function Reference",
+    "title": "IncrementalInference.encodefg",
+    "category": "function",
+    "text": "encodefg(fgl; api)\n\n\nMake a full memory copy of the graph and encode all composite function node types – assuming that convert methods for \'Packed<type>\' formats exist.  The same converters are used for database persistence with CloudGraphs.jl.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.fifoFreeze!",
+    "page": "Function Reference",
+    "title": "IncrementalInference.fifoFreeze!",
+    "category": "function",
+    "text": "fifoFreeze!(fgl)\n\n\nFreeze nodes that are older than the quasi fixed-lag length defined by fg.qfl, according to fg.fifo ordering.\n\nFuture:\n\nAllow different freezing strategies beyond fifo.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.findRelatedFromPotential",
+    "page": "Function Reference",
+    "title": "IncrementalInference.findRelatedFromPotential",
+    "category": "function",
+    "text": "findRelatedFromPotential(fg, idfct, vertid, N)\nfindRelatedFromPotential(fg, idfct, vertid, N, dbg)\n\n\nCompute proposal belief on varnodeid through fctvert representing some constraint in factor graph. Always full dimension of variable node, where partial constraints will only influence directed subset of variable dimensions. Remaining dimensions will keep existing variable values.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getCurrentWorkspaceFactors",
+    "page": "Function Reference",
+    "title": "IncrementalInference.getCurrentWorkspaceFactors",
+    "category": "function",
+    "text": "getCurrentWorkspaceFactors()\n\n\nReturn all factors currently registered in the workspace.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getCurrentWorkspaceVariables",
+    "page": "Function Reference",
+    "title": "IncrementalInference.getCurrentWorkspaceVariables",
+    "category": "function",
+    "text": "getCurrentWorkspaceVariables()\n\n\nReturn all variables currently registered in the workspace.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.initializeNode!",
+    "page": "Function Reference",
+    "title": "IncrementalInference.initializeNode!",
+    "category": "function",
+    "text": "initializeNode!(fgl, sym; N, api)\n\n\nInitialize the belief of a variable node in the factor graph struct.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.landmarks",
+    "page": "Function Reference",
+    "title": "IncrementalInference.landmarks",
+    "category": "function",
+    "text": "landmarks(fgl::FactorGraph, vsym::Symbol)\n\nReturn Vector{Symbol} of landmarks attached to vertex vsym in fgl.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.loadjld",
+    "page": "Function Reference",
+    "title": "IncrementalInference.loadjld",
+    "category": "function",
+    "text": "loadjld(; file)\n\n\nOpposite of savejld(fg, gt=gt, file=\"tempfg.jl\") to load data from file. This function uses the unpacking converters for converting all PackedInferenceType to FunctorInferenceType.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.ls",
+    "page": "Function Reference",
+    "title": "IncrementalInference.ls",
+    "category": "function",
+    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.lsf",
+    "page": "Function Reference",
+    "title": "IncrementalInference.lsf",
+    "category": "function",
+    "text": "lsf(fgl, lbl; api)\n\n\nList factors in a factor graph.\n\nExamples\n\nlsf(fg)\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.lsRear",
+    "page": "Function Reference",
+    "title": "IncrementalInference.lsRear",
+    "category": "function",
+    "text": "lsRear(fgl)\nlsRear(fgl, n)\n\n\nReturn array of all variable nodes connected to the last n many poses (:x*).\n\nExample:\n\n# Shallow copy the tail end of poses from a factor graph `fg1`\nvars = lsRear(fg1, 5)\nfg1_r5 = subgraphFromVerts(fg1, vars)\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.printgraphmax",
+    "page": "Function Reference",
+    "title": "IncrementalInference.printgraphmax",
+    "category": "function",
+    "text": "printgraphmax(fgl)\n\n\nPrint the maximum point values form all variables approximate marginals in the factor graph. The full marginal can be recovered for example X0 = getVertKDE(fg, :x0).\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.savejld",
+    "page": "Function Reference",
+    "title": "IncrementalInference.savejld",
+    "category": "function",
+    "text": "savejld(fgl; file, groundtruth)\n\n\nSave mostly complete Factor Graph type by converting complicated FunctionNodeData types to \'Packed\' types using user supplied converters. Ground truth can also be saved and recovered by the associated loadjld(file=\"tempfg.jld2\") method.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.subgraphFromVerts",
+    "page": "Function Reference",
+    "title": "IncrementalInference.subgraphFromVerts",
+    "category": "function",
+    "text": "subgraphFromVerts(fgl, verts; neighbors)\n\n\nExplore all shortest paths combinations in verts, add neighbors and reference subgraph using unique index into graph data structure.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference-1",
+    "page": "Function Reference",
+    "title": "IncrementalInference",
+    "category": "section",
+    "text": "addNode!\naddFactor!\nallnums\napproxConv\nbatchSolve!\nconvert2packedfunctionnode\ndecodefg\ndoautoinit!\nemptyFactorGraph\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ninitializeNode!\nlandmarks\nloadjld\nls\nlsf\nlsRear\nprintgraphmax\nsavejld\nsubgraphFromVerts"
 },
 
 ]}
