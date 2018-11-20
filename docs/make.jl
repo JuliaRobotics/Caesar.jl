@@ -29,9 +29,13 @@ makedocs(
         "Function Reference" => [
             "Function Reference" => "func_ref.md",
         ]
-    ]
-    # html_prettyurls = !("local" in ARGS),
+    ],
+    Documenter.HTML(
+        # Use clean URLs, unless built as a "local" build
+        prettyurls = !("local" in ARGS),
+        canonical = "http://www.juliarobotics.org/Caesar.jl/stable/",
     )
+)
 
 
 deploydocs(
