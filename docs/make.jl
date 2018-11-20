@@ -1,4 +1,4 @@
-using Documenter, DocumenterTools, Caesar
+using Documenter, Caesar
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference],
@@ -30,15 +30,14 @@ makedocs(
             "Function Reference" => "func_ref.md",
         ]
     ],
-    Documenter.HTML(
-        # Use clean URLs, unless built as a "local" build
-        prettyurls = !("local" in ARGS),
-        canonical = "http://www.juliarobotics.org/Caesar.jl/stable/",
-    )
+    html_prettyurls = !("local" in ARGS),
 )
 
 
 deploydocs(
     repo   = "github.com/JuliaRobotics/Caesar.jl.git",
-    target = "build"
+    target = "build",
+    devbranch = "master",
+    devurl = "dev",
+    versions = ["stable" => "v^", "v#.#", devurl => devurl]
 )
