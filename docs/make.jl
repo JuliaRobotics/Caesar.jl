@@ -38,6 +38,5 @@ deploydocs(
     repo   = "github.com/JuliaRobotics/Caesar.jl.git",
     target = "build",
     devbranch = "master",
-    devurl = "dev",
-    versions = ["stable" => "v^", "v#.#", devurl => devurl]
+    versions = ["stable" => "v^", "v#.#", "dev" => "dev"]
 )
