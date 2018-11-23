@@ -94,6 +94,8 @@ batchSolve!(fg)
 #   sleep(2)
 #   sessionLatest = getSession()
 # end
+# get cloud nodes
+getNodes()
 
 # For Juno/Jupyter style use
 pl = drawPoses(fg)
