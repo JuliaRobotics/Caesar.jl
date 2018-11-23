@@ -318,7 +318,7 @@ end
 
 function getpackedtype(typestring::AS) where {AS <: AbstractString}
   # println("Caesar.getpackedtype($(typestring))")
-  eval(parse(typestring))() # TODO consider caching or better
+  eval(Meta.parse(typestring))() # TODO consider caching or better
 end
 
 

@@ -46,7 +46,7 @@ try
         :drawPosesLandms
     ];
 catch ex
-    @info "[ZMQ Server] Plotting is disabled!"
+    @debug "[ZMQ Server] Plotting is disabled!"
 end
 
 function shutdown(zmqServer, request)::Dict{String, Any}

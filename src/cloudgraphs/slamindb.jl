@@ -41,6 +41,7 @@ function runSlamInDbOnSession(
     solverStatus.userId = userId
     solverStatus.robotId = robotId
     solverStatus.sessionId = sessionId
+    solverStatus.result = "IN PROGRESS"
 
     itercount = 0
     while ((iterations > 0 || iterations == -1) && solverStatus.isAttached)
@@ -48,7 +49,7 @@ function runSlamInDbOnSession(
         try
           iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
 
-          tic()
+          startns = time_ns()
           solverStatus.iteration = itercount
 
           println("===================CONVERT===================")
@@ -101,13 +102,17 @@ function runSlamInDbOnSession(
           end
 
           # Notify iteration update.
-          solverStatus.lastIterationDurationSeconds = toc()
+          solverStatus.lastIterationDurationSeconds = (time_ns() - startns) / 1e9
           solverStatus.currentStep = "Idle"
           iterationStats.result = "GOOD"
+          solverStatus.result = "GOOD"
       catch ex
-          stack = catch_stacktrace()
-          msg = "ERROR\r\nMessage: $(ex.msg)\r\nStacktrace:\r\n$(stack)"
+          io = IOBuffer()
+          showerror(io, ex, catch_backtrace())
+          err = String(take!(io))
+          msg = "ERROR\r\n$err"
           iterationStats.result = msg
+          solverStatus.result = msg
       finally
           iterationStats.endTimestamp = Dates.now()
           iterationCompleteCallback(iterationStats)
