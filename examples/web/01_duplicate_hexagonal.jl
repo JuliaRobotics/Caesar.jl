@@ -8,6 +8,7 @@ using GraffSDK
 ## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist
 using RoMEPlotting
 
+
 # Graff.....
 # 1. Import the initialization code.
 cd(joinpath(dirname(pathof(GraffSDK)), "..", "examples"))
@@ -18,17 +19,13 @@ config.sessionId = "HexDemo01"
 println(getGraffConfig())
 # Make sure that the session and robot exist.
 if !isRobotExisting()
+    @info "Robot $(config.robotId) doesn't exist, creating.."
     newRobot = RobotRequest(config.robotId, "My New Bot", "Description of my neat robot", "Active");
     robot = addRobot(newRobot);
-end
-if !isSessionExisting()
-    newSessionRequest = SessionDetailsRequest(config.sessionId, "A test dataset demonstrating data ingestion for a wheeled vehicle driving in a hexagon.", "Pose2")
-    session = addSession(newSessionRequest)
 end
 # ----- Done!
 # 1b. Check the credentials and the service status
 printStatus()
-
 
 ## Fetch existing marginals from previous sessions
 # TODO: new GraffSDK call to fetch desired landmark marginals
@@ -38,17 +35,28 @@ existingSessions = getSessions()
 # getNodes()
 # Decide which ones we want...
 
+## LOCAL MEMORY
 # start with an empty factor graph object
 fg = initfg()
-fgFixedLag.isfixedlag = true
-fgFixedLag.qfl = 10
+fg.isfixedlag = true
+fg.qfl = 10
 
 # Add the first pose :x0
 addNode!(fg, :x0, Pose2)
 
-# Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
-addFactor!(fg, [:x0], IIF.Prior( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))
-# TODO: Add prior in cloud graph.
+# Add at a fixed location PriorPose2 to pin :x0 to a starting location (0, 0, 0)
+addFactor!(fg, [:x0], IIF.Prior( MvNormal([0; 0; 0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))
+
+## CLOUD VERSION
+# This code should work for the first session created, but we need to do a little work so the code is good for infinitely many new sessions
+# TODO: manange non-(0,0,0) initialization of new sessions -- i.e. using landmark initialization.
+if !isSessionExisting()
+    # this call in current API will also create the initial x0 pose with a prior (0,0,0)
+    @info "Session $(config.sessionId) doesn't exist, creating.."
+    newSessionRequest = SessionDetailsRequest(config.sessionId, "A test dataset demonstrating data ingestion for a wheeled vehicle driving in a hexagon.", "Pose2")
+    session = addSession(newSessionRequest)
+end
+
 
 # Drive around in a hexagon
 for i in 0:5
@@ -57,7 +65,7 @@ for i in 0:5
   nsym = Symbol("x$(i+1)")
   deltaMeasurement = [10.0;0;pi/3]
   pOdo = Float64[0.1 0 0; 0 0.1 0; 0 0 0.1]
-  pp = Pose2Pose2(MvNormal(deltaMeasurement, pOdo.^2))))
+  pp = Pose2Pose2(MvNormal(deltaMeasurement, pOdo.^2))
 
   ## LOCAL MEMORY
   # add next pose variable to local memory version
