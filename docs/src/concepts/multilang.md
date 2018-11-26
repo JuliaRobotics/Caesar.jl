@@ -16,8 +16,7 @@ Start the `Caesar.ZmqCaesar` server in a Julia session with a few process cores:
 julia -p 4
 ```
 
-Then run the following commands, and note these steps have also been [scripted here]():
-
+Then run the following commands, and note these steps have also been [scripted here](https://github.com/JuliaRobotics/Caesar.jl/blob/master/scripts/zmqServer.jl):
 ```julia
 #import the required modules
 using Caesar, Caesar.ZmqCaesar
