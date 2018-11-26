@@ -433,7 +433,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "concepts/zmq/#",
+    "location": "concepts/multilang/#",
     "page": "Using Caesar\'s Multi-Language Support",
     "title": "Using Caesar\'s Multi-Language Support",
     "category": "page",
@@ -441,27 +441,43 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "concepts/zmq/#Caesar-Multi-Language-Support-1",
+    "location": "concepts/multilang/#Multi-Language-and-Shared-Objects-1",
     "page": "Using Caesar\'s Multi-Language Support",
-    "title": "Caesar Multi-Language Support",
+    "title": "Multi-Language and Shared Objects",
     "category": "section",
-    "text": "Caesar allows other languages to construct and solve graphs via it\'s ZMQ interface."
+    "text": ""
 },
 
 {
-    "location": "concepts/zmq/#Concepts-1",
+    "location": "concepts/multilang/#ZMQ-Messaging-Interface-1",
     "page": "Using Caesar\'s Multi-Language Support",
-    "title": "Concepts",
+    "title": "ZMQ Messaging Interface",
     "category": "section",
-    "text": "TODO: ZMQ discussion."
+    "text": "Caesar.jl has a ZMQ messaging interface (interested can see code here  here) that allows users to interact with the solver code base in a variety of ways.  The messaging interface is not meant to replace static .so library file compilation–see below–-but rather a more versatile and flexible development strategy.The current known interface implementations to Caesar.jl are:C/C++ GraffCPP,\nPython SychronySDK (needs to be updated),"
 },
 
 {
-    "location": "concepts/zmq/#Applications-1",
+    "location": "concepts/multilang/#Starting-the-Caesar-ZMQ-server-1",
     "page": "Using Caesar\'s Multi-Language Support",
-    "title": "Applications",
+    "title": "Starting the Caesar ZMQ server",
     "category": "section",
-    "text": "The flagship example of an implementation of this is the Caear C/C++ interface that can be found here GraffCPP."
+    "text": "Start the Caesar.ZmqCaesar server in a Julia session with a few process cores:julia -p 4Then run the following commands, and note these steps have also been scripted here:#import the required modules\nusing Caesar, Caesar.ZmqCaesar\n\n# create empty factor graph and config objects\nfg = Caesar.initfg()\nconfig = Dict{String, String}()\nzmqConfig = ZmqServer(fg, config, true, \"tcp://*:5555\");\n\n# Start the server over ZMQ\nstart(zmqConfig)\n\n# give the server a minute to start up ...The current tests are a good place to see some examples of the current interfacing functions.TODO: expand the ZMQ documentation"
+},
+
+{
+    "location": "concepts/multilang/#Static,-Shared-Object-.so-Compilation-1",
+    "page": "Using Caesar\'s Multi-Language Support",
+    "title": "Static, Shared Object .so Compilation",
+    "category": "section",
+    "text": "The Julia language is a (Just-In-Time / Precompiled) static and strongly typed language.  Modules are already naturally compiled to static objects and can also be compiled to more common .so files.  See this AOT vs JIT compiling blog post for a deeper discussion.  The future planning for the Caesar.jl framework and the mm-iSAM inference algorithm plans to use the package: https://github.com/JuliaLang/PackageCompiler.jl so that linkable .so files or even full executables can be compiled.  Please add your comments to this issue discussion."
+},
+
+{
+    "location": "concepts/multilang/#Alternative-Methods-1",
+    "page": "Using Caesar\'s Multi-Language Support",
+    "title": "Alternative Methods",
+    "category": "section",
+    "text": "Interfacing from languages like Python may also be achieved using PyCall.jl although little work has been done in the Caesar.jl framework to explore this path.  Julia is itself interactive/dynamic and has plenty of line-by-line and Integrated Development Environment support – consider trying Julia for your application."
 },
 
 {
@@ -1421,7 +1437,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Function Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
+    "text": "ls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
 },
 
 {
