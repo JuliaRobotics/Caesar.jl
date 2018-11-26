@@ -8,6 +8,34 @@ The current known interface implementations to Caesar.jl are:
 - C/C++ [GraffCPP](https://github.com/MarineRoboticsGroup/graff_cpp),
 - Python [SychronySDK](https://github.com/nicrip/SynchronySDK_py) (needs to be updated),
 
+## Starting the Caesar ZMQ server
+
+Start the `Caesar.ZmqCaesar` server in a Julia session with a few process cores:
+
+```bash
+julia -p 4
+```
+
+Then run the following commands, and note these steps have also been [scripted here]():
+
+```julia
+#import the required modules
+using Caesar, Caesar.ZmqCaesar
+
+# create empty factor graph and config objects
+fg = Caesar.initfg()
+config = Dict{String, String}()
+zmqConfig = ZmqServer(fg, config, true, "tcp://*:5555");
+
+# Start the server over ZMQ
+start(zmqConfig)
+
+# give the server a minute to start up ...
+```
+
+The [current tests are a good place to see some examples](http://github.com/JuliaRobotics/Caesar.jl/tree/master/test/multilangzmq) of the current interfacing functions.
+
+> TODO: expand the ZMQ documentation
 
 ## Static, Shared Object `.so` Compilation
 
