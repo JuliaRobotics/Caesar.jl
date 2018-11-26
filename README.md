@@ -8,8 +8,7 @@ A modern robotic toolkit for localization and mapping -- reducing the barrier of
 
 # Documentation
 
-Please see the [documentation](http://juliarobotics.github.io/Caesar.jl/latest/):
-
+Please see the [documentation](http://juliarobotics.github.io/Caesar.jl/latest/): 
 [![docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://juliarobotics.github.io/Caesar.jl/latest/)
 
 
