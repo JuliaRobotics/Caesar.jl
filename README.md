@@ -38,7 +38,7 @@ Consider citing our work:
 @misc{caesarjl,
   author = "Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors",
   title =  "Caesar.jl",
-  year =   2017,
+  year =   2018,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```

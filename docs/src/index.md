@@ -19,7 +19,7 @@ The Caesar framework has the following features:
 * Local in-memory solving on the device as well as database-driven centralized solving
 * Fixed-lag, continuous operation as well as off-line batch solving
 
-## TLDR Installation
+## TL;DR Installation
 If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package 'Caesar'.
 
 Caesar can be installed for latest Julia 0.7/1.0 with:
@@ -107,7 +107,7 @@ Consider citing our work:
 @misc{caesarjl,
   author = "Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors",
   title =  "Caesar.jl",
-  year =   2017,
+  year =   2018,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
