@@ -13,7 +13,7 @@ makedocs(
             "Caesar Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
             "Arena Visualization" => "concepts/arena_visualizations.md",
-            "Using Caesar's Multi-Language Support" => "concepts/zmq.md",
+            "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
             "Adding New Variables and Factors" => "concepts/adding_variables_factors.md",
             "Using Caesar Database Operation" => "concepts/database_interactions.md"
         ],
