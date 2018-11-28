@@ -13,19 +13,22 @@ using RoMEPlotting
 # 1. Import the initialization code.
 cd(joinpath(dirname(pathof(GraffSDK)), "..", "examples"))
 # 1a. Create a Configuration
-config = loadGraffConfig("synchronyConfig.json")
+config = loadGraffConfig("synchronyConfig1.json")
 #Create a hexagonal sessions
 config.sessionId = "HexDemo01"
 println(getGraffConfig())
+# 1b. Check the credentials and the service status
+printStatus()
+
 # Make sure that the session and robot exist.
 if !isRobotExisting()
     @info "Robot $(config.robotId) doesn't exist, creating.."
     newRobot = RobotRequest(config.robotId, "My New Bot", "Description of my neat robot", "Active");
     robot = addRobot(newRobot);
+else
+    @info "Robot $(config.robotId) already exists, carry on!"
 end
 # ----- Done!
-# 1b. Check the credentials and the service status
-printStatus()
 
 ## Fetch existing marginals from previous sessions
 # TODO: new GraffSDK call to fetch desired landmark marginals
@@ -55,6 +58,8 @@ if !isSessionExisting()
     @info "Session $(config.sessionId) doesn't exist, creating.."
     newSessionRequest = SessionDetailsRequest(config.sessionId, "A test dataset demonstrating data ingestion for a wheeled vehicle driving in a hexagon.", "Pose2")
     session = addSession(newSessionRequest)
+else
+    @info "Session $(config.sessionId) already exists, carry on!"
 end
 
 
