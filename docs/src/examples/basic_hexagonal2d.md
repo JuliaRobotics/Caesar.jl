@@ -11,7 +11,7 @@ The first step is to load the required modules, and in our case we will add a fe
 nprocs() < 4 ? addprocs(4-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
-using RoME, Distributions
+using RoME, Distributions, LinearAlgebra
 ```
 After loading the RoME and Distributions modules, we construct a local factor graph object in memory:
 ```julia
@@ -22,7 +22,7 @@ fg = initfg()
 addNode!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix(LinearAlgebra.I,3,3))) )
 ```
 A factor graph object `fg` (of type `::FactorGraph`) has been constructed; the first pose `:x0` has been added; and a prior factor setting the origin at `[0,0,0]` over variable node dimensions `[x,y,θ]` in the world frame.
 The type `Pose2` is used to indicate what variable is stored in the node.
@@ -38,7 +38,7 @@ for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
   addNode!(fg, nsym, Pose2)
-  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
+  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
   addFactor!(fg, [psym;nsym], pp )
 end
 ```
@@ -56,9 +56,11 @@ You should see the program `evince` open with this visual:
 Let's run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this `fg` object:
 ```julia
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
-# batchSolve!(fg) # coming soon
+batchSolve!(fg) # coming soon
+
+# For those interested, the internal batch solve steps currently involve:
+# tree = wipeBuildNewTree!(fg)
+# inferOverTree!(fg, tree)
 ```
 This will take a couple of seconds (including first time compiling for all Julia processes).
 
