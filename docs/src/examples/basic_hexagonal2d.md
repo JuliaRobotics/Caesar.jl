@@ -56,7 +56,7 @@ You should see the program `evince` open with this visual:
 Let's run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this `fg` object:
 ```julia
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
-batchSolve!(fg) # coming soon
+batchSolve!(fg)
 
 # For those interested, the internal batch solve steps currently involve:
 # tree = wipeBuildNewTree!(fg)
@@ -110,8 +110,7 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x6; :l1], p2br2)
 
 # solve
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+batchSolve!(fg)
 
 # redraw
 pl = drawPosesLandms(fg)
