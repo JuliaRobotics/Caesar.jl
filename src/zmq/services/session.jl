@@ -21,7 +21,7 @@ okResponse = Dict{String, Any}("status" => "OK")
 function addVariable(configDict, fg, requestDict)::Dict{String, Any}
   varRequest = Unmarshal.unmarshal(VariableRequest, requestDict["payload"])
   varLabel = Symbol(varRequest.label)
-  varType = nothing
+  varType = nothing # TODO type instability here is slow
   try
       varType = getfield(RoME, Symbol(varRequest.variableType))
   catch ex

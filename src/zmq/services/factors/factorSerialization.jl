@@ -71,9 +71,43 @@ function convert(::Type{Pose2Point2BearingRange}, fact::Dict{String, Any})
     # Genericize to any packed type next.
     b = fact["measurement"][1]
     r = fact["measurement"][2]
-    b = convert(_evalType(b["distType"]), b)
-    r = convert(_evalType(r["distType"]), r)
-    return Pose2Point2BearingRange(b, r)
+    bdistr = convert(_evalType(b["distType"]), b)
+    rdistr = convert(_evalType(r["distType"]), r)
+    return Pose2Point2BearingRange(bdistr, rdistr)
+end
+
+"""
+Converter: Pose3Pose3::Dict{String, Any} -> Pose3Pose3
+"""
+function convert(::Type{Pose3Pose3}, fact::Dict{String, Any})
+    # Genericize to any packed type next.
+    z = fact["measurement"][1]
+    zdist = convert(_evalType(z["distType"]), z)
+    return Pose3Pose3(zdist)
+end
+
+"""
+Converter: PartialPose3XYYaw::Dict{String, Any} -> PartialPose3XYYaw
+"""
+function convert(::Type{PartialPose3XYYaw}, fact::Dict{String, Any})
+    # Genericize to any packed type next.
+    xy = fact["measurement"][1]
+    yaw = fact["measurement"][2]
+    xydistr = convert(_evalType(xy["distType"]), xy)
+    yawdistr = convert(_evalType(yaw["distType"]), yaw)
+    return PartialPose3XYYaw(xydistr, yawdistr)
+end
+
+"""
+Converter: PartialPriorRollPitchZ::Dict{String, Any} -> PartialPriorRollPitchZ
+"""
+function convert(::Type{PartialPriorRollPitchZ}, fact::Dict{String, Any})
+    # Genericize to any packed type next.
+    rp = fact["measurement"][1]
+    z = fact["measurement"][2]
+    rpdistr = convert(_evalType(rp["distType"]), rp)
+    zdistr = convert(_evalType(z["distType"]), z)
+    return PartialPriorRollPitchZ(rpdistr, zdistr)
 end
 
 
