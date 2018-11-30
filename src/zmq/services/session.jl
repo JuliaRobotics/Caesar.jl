@@ -49,8 +49,8 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
     # Right, carrying on...
     factor = nothing
     try
-        @show factType = _evalType(factorRequest["factorType"])
-        @show factor = convert(factType, packedFactor)
+        factType = _evalType(factorRequest["factorType"])
+        factor = convert(factType, packedFactor)
     catch ex
         io = IOBuffer()
         showerror(io, ex, catch_backtrace())

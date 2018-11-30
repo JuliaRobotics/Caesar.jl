@@ -92,8 +92,11 @@ function start(zmqServer::ZmqServer)
                         resp["status"] = "OK"
                         drawcounter += 1
                     end
-                    if drawcounter % 100 == 0
+                    # TODO: make this an ArgParse.jl enableable feature
+                    if drawcounter % 20 == 0
                         IIF.writeGraphPdf(zmqServer.fg, show=true)
+                    else
+                        drawcounter = 0
                     end
                 catch ex
                     io = IOBuffer()

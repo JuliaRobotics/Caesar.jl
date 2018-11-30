@@ -103,8 +103,8 @@ Converter: PartialPriorRollPitchZ::Dict{String, Any} -> PartialPriorRollPitchZ
 """
 function convert(::Type{PartialPriorRollPitchZ}, fact::Dict{String, Any})
     # Genericize to any packed type next.
-    rp = fact["measurement"][1]
-    z = fact["measurement"][2]
+    z = fact["measurement"][1]
+    rp = fact["measurement"][2]
     rpdistr = convert(_evalType(rp["distType"]), rp)
     zdistr = convert(_evalType(z["distType"]), z)
     return PartialPriorRollPitchZ(rpdistr, zdistr)
