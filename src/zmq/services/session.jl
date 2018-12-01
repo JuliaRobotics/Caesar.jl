@@ -21,7 +21,7 @@ okResponse = Dict{String, Any}("status" => "OK")
 function addVariable(configDict, fg, requestDict)::Dict{String, Any}
   varRequest = Unmarshal.unmarshal(VariableRequest, requestDict["payload"])
   varLabel = Symbol(varRequest.label)
-  varType = nothing
+  varType = nothing # TODO type instability here is slow
   try
       varType = getfield(RoME, Symbol(varRequest.variableType))
   catch ex
@@ -49,8 +49,8 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
     # Right, carrying on...
     factor = nothing
     try
-        @show factType = _evalType(factorRequest["factorType"])
-        @show factor = convert(factType, packedFactor)
+        factType = _evalType(factorRequest["factorType"])
+        factor = convert(factType, packedFactor)
     catch ex
         io = IOBuffer()
         showerror(io, ex, catch_backtrace())

@@ -65,6 +65,8 @@ function start(zmqServer::ZmqServer)
     s1=Socket(ctx, REP)
     ZMQ.bind(s1, "tcp://*:5555")
 
+    drawcounter = 0
+
     try
         while zmqServer.isServerActive
             println("waiting to receive...")
@@ -88,6 +90,13 @@ function start(zmqServer::ZmqServer)
                     end
                     if !haskey(resp, "status")
                         resp["status"] = "OK"
+                        drawcounter += 1
+                    end
+                    # TODO: make this an ArgParse.jl enableable feature
+                    if drawcounter % 20 == 0
+                        IIF.writeGraphPdf(zmqServer.fg, show=true)
+                    else
+                        drawcounter = 0
                     end
                 catch ex
                     io = IOBuffer()
