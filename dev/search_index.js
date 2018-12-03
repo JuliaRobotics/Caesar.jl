@@ -25,9 +25,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "#TLDR-Installation-1",
+    "location": "#TL;DR-Installation-1",
     "page": "Home",
-    "title": "TLDR Installation",
+    "title": "TL;DR Installation",
     "category": "section",
     "text": "If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package \'Caesar\'.Caesar can be installed for latest Julia 0.7/1.0 with:julia> ] # to enable package manager\n(v1.0) pkg> add CaesarUnit tests can further be performed for the upstream packages as follows – NOTE first time runs are slow since each new function call or package must first be precompiled.(v1.0) pkg> test IncrementalInference\n...\n(v1.0) pkg> test RoME\n...\n(v1.0) pkg> test Caesar\n..."
 },
@@ -109,7 +109,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Contributors",
     "category": "section",
-    "text": "Authors directly involved with this package are:D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. LeonardWe are grateful for many, many contributions within the Julia package ecosystem – see the REQUIRE files of Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs and others for a far reaching list of contributions.Consider citing our work:@misc{caesarjl,\n  author = \"Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors\",\n  title =  \"Caesar.jl\",\n  year =   2017,\n  url =    \"https://github.com/JuliaRobotics/Caesar.jl\"\n}"
+    "text": "Authors directly involved with this package are:D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. LeonardWe are grateful for many, many contributions within the Julia package ecosystem – see the REQUIRE files of Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs and others for a far reaching list of contributions.Consider citing our work:@misc{caesarjl,\n  author = \"Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors\",\n  title =  \"Caesar.jl\",\n  year =   2018,\n  url =    \"https://github.com/JuliaRobotics/Caesar.jl\"\n}"
 },
 
 {
@@ -837,7 +837,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Hexagonal 2D SLAM",
     "title": "Creating the Factor Graph with Pose2",
     "category": "section",
-    "text": "The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  # add more julia processes\nnprocs() < 4 ? addprocs(4-nprocs()) : nothing\n\n# tell Julia that you want to use these modules/namespaces\nusing RoME, DistributionsAfter loading the RoME and Distributions modules, we construct a local factor graph object in memory:# start with an empty factor graph object\nfg = initfg()\n\n# Add the first pose :x0\naddNode!(fg, :x0, Pose2)\n\n# Add at a fixed location PriorPose2 to pin :x0 to a starting location\naddFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )A factor graph object fg (of type ::FactorGraph) has been constructed; the first pose :x0 has been added; and a prior factor setting the origin at [0,0,0] over variable node dimensions [x,y,θ] in the world frame. The type Pose2 is used to indicate what variable is stored in the node. Caesar.jl allows a little more freedom in how factor and variable nodes can be connected, while still allowing for type-assertion to occur.NOTE Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use.The next 6 nodes are added with odometry in an counter-clockwise hexagonal manner. Note how variables are denoted with symbols, :x2 == Symbol(\"x2\"):# Drive around in a hexagon\nfor i in 0:5\n  psym = Symbol(\"x$i\")\n  nsym = Symbol(\"x$(i+1)\")\n  addNode!(fg, nsym, Pose2)\n  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))\n  addFactor!(fg, [psym;nsym], pp )\nendAt this point it would be good to see what the factor graph actually looks like:writeGraphPdf(fg)You should see the program evince open with this visual:(Image: exfg2d)"
+    "text": "The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  # add more julia processes\nnprocs() < 4 ? addprocs(4-nprocs()) : nothing\n\n# tell Julia that you want to use these modules/namespaces\nusing RoME, Distributions, LinearAlgebraAfter loading the RoME and Distributions modules, we construct a local factor graph object in memory:# start with an empty factor graph object\nfg = initfg()\n\n# Add the first pose :x0\naddNode!(fg, :x0, Pose2)\n\n# Add at a fixed location PriorPose2 to pin :x0 to a starting location\naddFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix(LinearAlgebra.I,3,3))) )A factor graph object fg (of type ::FactorGraph) has been constructed; the first pose :x0 has been added; and a prior factor setting the origin at [0,0,0] over variable node dimensions [x,y,θ] in the world frame. The type Pose2 is used to indicate what variable is stored in the node. Caesar.jl allows a little more freedom in how factor and variable nodes can be connected, while still allowing for type-assertion to occur.NOTE Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use.The next 6 nodes are added with odometry in an counter-clockwise hexagonal manner. Note how variables are denoted with symbols, :x2 == Symbol(\"x2\"):# Drive around in a hexagon\nfor i in 0:5\n  psym = Symbol(\"x$i\")\n  nsym = Symbol(\"x$(i+1)\")\n  addNode!(fg, nsym, Pose2)\n  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))\n  addFactor!(fg, [psym;nsym], pp )\nendAt this point it would be good to see what the factor graph actually looks like:writeGraphPdf(fg)You should see the program evince open with this visual:(Image: exfg2d)"
 },
 
 {
@@ -845,7 +845,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Hexagonal 2D SLAM",
     "title": "Performing Inference",
     "category": "section",
-    "text": "Let\'s run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this fg object:# perform inference, and remember first runs are slower owing to Julia\'s just-in-time compiling\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n# batchSolve!(fg) # coming soonThis will take a couple of seconds (including first time compiling for all Julia processes)."
+    "text": "Let\'s run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this fg object:# perform inference, and remember first runs are slower owing to Julia\'s just-in-time compiling\nbatchSolve!(fg)\n\n# For those interested, the internal batch solve steps currently involve:\n# tree = wipeBuildNewTree!(fg)\n# inferOverTree!(fg, tree)This will take a couple of seconds (including first time compiling for all Julia processes)."
 },
 
 {
@@ -869,7 +869,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Hexagonal 2D SLAM",
     "title": "One type of Loop-Closure",
     "category": "section",
-    "text": "Loop-closures are a major part of SLAM based state estimation. One illustration is to take a second sighting of the same :l1 landmark from the last pose :x6; followed by repeating the inference and re-plotting the result – notice the tighter confidences over all variables:# Add landmarks with Bearing range measurements\np2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))\naddFactor!(fg, [:x6; :l1], p2br2)\n\n# solve\ntree = wipeBuildNewTree!(fg)\ninferOverTree!(fg, tree)\n\n# redraw\npl = drawPosesLandms(fg)(Image: test)This concludes the Hexagonal 2D SLAM example."
+    "text": "Loop-closures are a major part of SLAM based state estimation. One illustration is to take a second sighting of the same :l1 landmark from the last pose :x6; followed by repeating the inference and re-plotting the result – notice the tighter confidences over all variables:# Add landmarks with Bearing range measurements\np2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))\naddFactor!(fg, [:x6; :l1], p2br2)\n\n# solve\nbatchSolve!(fg)\n\n# redraw\npl = drawPosesLandms(fg)(Image: test)This concludes the Hexagonal 2D SLAM example."
 },
 
 {
