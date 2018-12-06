@@ -76,5 +76,6 @@ productpartials!
 prodmultiplefullpartials
 prodmultipleonefullpartials
 savejld
+setfreeze!
 subgraphFromVerts
 ```
