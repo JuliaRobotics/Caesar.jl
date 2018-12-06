@@ -155,7 +155,7 @@ Instead, the belief over the position of `:l3` is being estimated simultaneous t
 
 Next consider the vehicle moving a distance of `50` units---and by design the direction of travel is not known---to the next true position.
 The video above gives away the vehicle position with the cyan line, showing travel in the shape of a lower case 'e'.
-Finally, to speed things up, lets write a function that handles the travel (pseudo odometry factors between positions) and ranging measurement factors to beacons.
+The following function handles (pseudo odometry) factors as range-only between positions and range-only measurement factors to beacons as the vehice travels.
 
 ```julia
 function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R <: Real}
@@ -187,10 +187,9 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
 end
 ```
 
-After pasting (or running) this function in the Julia, a new member definition exists for `vehicle_drives_to!`.
+After pasting (or running) this function in Julia, a new member definition `vehicle_drives_to!` can be used line any other function.  Julia will handle the just-in-time compiling for the type specific function required and cach the static code for repeat executions.
 
-**NOTE** The exclamation mark at the end of the function name has no syntactic significance in Julia, since the full UTF8 character set is available for functions or variables.
-Instead, the exclamation serves as a Julia community convention to tell the caller that this function will modify the contents of at least some of the variables being passed into it -- in this case the factor graph `fg` will be modified.
+> **NOTE** The exclamation mark at the end of the function name has no syntactic significance in Julia, since the full UTF8 character set is available for functions or variables.  Instead, the exclamation serves as a Julia community convention to tell the caller that this function will modify the contents of at least some of the variables being passed into it -- in this case the factor graph `fg` will be modified.
 
 Now the actual driving event can be added to the factor graph:
 
