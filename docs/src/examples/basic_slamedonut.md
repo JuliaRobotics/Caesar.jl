@@ -202,12 +202,13 @@ vehicle_drives_to!(fg, :l102, GTp, GTl)
 writeGraphPdf(fg)
 ```
 
-**NOTE** The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.
+> **NOTE** The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.
 
 The marginal posterior estimates are found by repeating inference over the factor graph, followed drawing all vehicle locations as a contour map:
 
 ```julia
-tree = batchSolve!(fg)
+# solve and show message passing on Bayes (Juntion) tree
+tree = batchSolve!(fg, drawpdf=true, show=true)
 
 # draw all vehicle locations
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:2], dims=[1;2])
