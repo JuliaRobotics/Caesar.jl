@@ -813,7 +813,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Singular Ranges-only SLAM (Underdetermined System)",
     "title": "Implicit Growth and Decay of Modes (i.e. Hypotheses)",
     "category": "section",
-    "text": "Next consider the vehicle moving a distance of 50 units–-and by design the direction of travel is not known–-to the next true position. The video above gives away the vehicle position with the cyan line, showing travel in the shape of a lower case \'e\'. Finally, to speed things up, lets write a function that handles the travel (pseudo odometry factors between positions) and ranging measurement factors to beacons.function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R <: Real}\n  currvar = union(ls(fgl)...)\n  prev_sym = Symbol(\"l$(maximum(Int[parse(Int,string(currvar[i])[2:end]) for i in 2:length(currvar)]))\")\n  if !(pos_sym in currvar)\n    println(\"Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.\")\n    addNode!(fgl, pos_sym, Point2)\n    @show rho = norm(GTp[prev_sym] - GTp[pos_sym])\n    ppr = Point2Point2Range( Normal(rho, 3.0) )\n    addFactor!(fgl, [prev_sym;pos_sym], ppr)\n  else\n    @warn \"Variable node $pos_sym already in the factor graph.\"\n  end\n  beacons = keys(GTl)\n  for ll in beacons\n    rho = norm(GTl[ll] - GTp[pos_sym])\n    # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks\n    if rho < measurelimit\n      ppr = Point2Point2Range( Normal(rho, 3.0) )\n      if !(ll in currvar)\n        println(\"Adding variable vertex $ll, not yet in fgl::FactorGraph.\")\n        addNode!(fgl, ll, Point2)\n      end\n      addFactor!(fgl, [pos_sym;ll], ppr)\n    end\n  end\n  nothing\nendAfter pasting (or running) this function in the Julia, a new member definition exists for vehicle_drives_to!.NOTE The exclamation mark at the end of the function name has no syntactic significance in Julia, since the full UTF8 character set is available for functions or variables. Instead, the exclamation serves as a Julia community convention to tell the caller that this function will modify the contents of at least some of the variables being passed into it – in this case the factor graph fg will be modified.Now the actual driving event can be added to the factor graph:#drive to location :l101, then :l102\nvehicle_drives_to!(fg, :l101, GTp, GTl)\nvehicle_drives_to!(fg, :l102, GTp, GTl)\n\n# see the graph\nwriteGraphPdf(fg)NOTE The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.The marginal posterior estimates are found by repeating inference over the factor graph, followed drawing all vehicle locations as a contour map:tree = batchSolve!(fg)\n\n# draw all vehicle locations\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 0:2], dims=[1;2])\n# Gadfly.draw(PDF(\"/tmp/testL100_102.pdf\", 20cm, 10cm),pl) # for storing image to disk\n\npl = plotKDE(fg, [:l3;:l4], dims=[1;2], levels=4)\n# Gadfly.draw(PNG(\"/tmp/testL3_4.png\", 20cm, 10cm),pl)Notice how the vehicle positions have two hypotheses, one left to right and one diagonal right to bottom left – both are valid solutions!(Image: testl100_102)The two \"free\" beacons/landmarks :l3,:l4 still have several modes each, implying insufficient data to constrain either to a strong unimodal belief.(Image: testl3_4)\nvehicle_drives_to!(fg, :l103, GTp, GTl)\nvehicle_drives_to!(fg, :l104, GTp, GTl)\n\ntree = batchSolve!(fg)\n\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 0:4], dims=[1;2])\n# Gadfly.draw(PDF(\"/tmp/testL100_104.pdf\", 20cm, 10cm),pl)Moving up to position :l104 still shows strong multiodality in the vehicle position estimates:(Image: testl100_105)vehicle_drives_to!(fg, :l105, GTp, GTl)\nvehicle_drives_to!(fg, :l106, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\nvehicle_drives_to!(fg, :l107, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\nvehicle_drives_to!(fg, :l108, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 2:8], dims=[1;2], levels=6)\n# Gadfly.draw(PDF(\"/tmp/testL103_108.pdf\", 20cm, 10cm),pl)Next we see a strong return to a single dominant mode in all vehicle position estimates, owing to the increased measurements to beacons/landmarks as well as more unimodal estimates in :l3, :l4 beacon/landmark positions.vehicle_drives_to!(fg, :l109, GTp, GTl)\nvehicle_drives_to!(fg, :l110, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\nvehicle_drives_to!(fg, :l111, GTp, GTl)\nvehicle_drives_to!(fg, :l112, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 7:12], dims=[1;2])\n# Gadfly.draw(PDF(\"/tmp/testL106_112.pdf\", 20cm, 10cm),pl)\n\npl = plotKDE(fg, [:l1;:l2;:l3;:l4], dims=[1;2], levels=4)\n# Gadfly.draw(PDF(\"/tmp/testL1234.pdf\", 20cm, 10cm),pl)\n\npl = drawLandms(fg, from=100)\n# Gadfly.draw(PDF(\"/tmp/testLocsAll.pdf\", 20cm, 10cm),pl)Several location belief estimates exhibit multimodality as the trajectory progresses (not shown), but collapses and finally collapses to a stable set of dominant position estimates.(Image: testl106_112)Landmark estimates are also stable at one estimate:(Image: testl1234)In addition, the SLAM 2D landmark visualization can be re-used to plot more information at once:# pl = drawLandms(fg, from=100, to=200)\n# Gadfly.draw(PDF(\"/tmp/testLocsAll.pdf\", 20cm, 10cm),pl)\n\npl = drawLandms(fg)\n# Gadfly.draw(PDF(\"/tmp/testAll.pdf\", 20cm, 10cm),pl)(Image: testall)This example used the default of N=200 particles per marginal belief. By increasing the number to N=300 throughout the test many more modes and interesting features can be explored, and we refer the reader to an alternative and longer discussion on the same example, in Chapter 6 here."
+    "text": "Next consider the vehicle moving a distance of 50 units–-and by design the direction of travel is not known–-to the next true position. The video above gives away the vehicle position with the cyan line, showing travel in the shape of a lower case \'e\'. The following function handles (pseudo odometry) factors as range-only between positions and range-only measurement factors to beacons as the vehice travels.function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R <: Real}\n  currvar = union(ls(fgl)...)\n  prev_sym = Symbol(\"l$(maximum(Int[parse(Int,string(currvar[i])[2:end]) for i in 2:length(currvar)]))\")\n  if !(pos_sym in currvar)\n    println(\"Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.\")\n    addNode!(fgl, pos_sym, Point2)\n    @show rho = norm(GTp[prev_sym] - GTp[pos_sym])\n    ppr = Point2Point2Range( Normal(rho, 3.0) )\n    addFactor!(fgl, [prev_sym;pos_sym], ppr)\n  else\n    @warn \"Variable node $pos_sym already in the factor graph.\"\n  end\n  beacons = keys(GTl)\n  for ll in beacons\n    rho = norm(GTl[ll] - GTp[pos_sym])\n    # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks\n    if rho < measurelimit\n      ppr = Point2Point2Range( Normal(rho, 3.0) )\n      if !(ll in currvar)\n        println(\"Adding variable vertex $ll, not yet in fgl::FactorGraph.\")\n        addNode!(fgl, ll, Point2)\n      end\n      addFactor!(fgl, [pos_sym;ll], ppr)\n    end\n  end\n  nothing\nendAfter pasting (or running) this function in Julia, a new member definition vehicle_drives_to! can be used line any other function.  Julia will handle the just-in-time compiling for the type specific function required and cach the static code for repeat executions.NOTE The exclamation mark at the end of the function name has no syntactic significance in Julia, since the full UTF8 character set is available for functions or variables.  Instead, the exclamation serves as a Julia community convention to tell the caller that this function will modify the contents of at least some of the variables being passed into it – in this case the factor graph fg will be modified.Now the actual driving event can be added to the factor graph:#drive to location :l101, then :l102\nvehicle_drives_to!(fg, :l101, GTp, GTl)\nvehicle_drives_to!(fg, :l102, GTp, GTl)\n\n# see the graph\nwriteGraphPdf(fg)NOTE The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.The marginal posterior estimates are found by repeating inference over the factor graph, followed drawing all vehicle locations as a contour map:# solve and show message passing on Bayes (Juntion) tree\ntree = batchSolve!(fg, drawpdf=true, show=true)\n\n# draw all vehicle locations\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 0:2], dims=[1;2])\n# Gadfly.draw(PDF(\"/tmp/testL100_102.pdf\", 20cm, 10cm),pl) # for storing image to disk\n\npl = plotKDE(fg, [:l3;:l4], dims=[1;2], levels=4)\n# Gadfly.draw(PNG(\"/tmp/testL3_4.png\", 20cm, 10cm),pl)Notice how the vehicle positions have two hypotheses, one left to right and one diagonal right to bottom left – both are valid solutions!(Image: testl100_102)The two \"free\" beacons/landmarks :l3,:l4 still have several modes each, implying insufficient data to constrain either to a strong unimodal belief.(Image: testl3_4)\nvehicle_drives_to!(fg, :l103, GTp, GTl)\nvehicle_drives_to!(fg, :l104, GTp, GTl)\n\ntree = batchSolve!(fg)\n\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 0:4], dims=[1;2])\n# Gadfly.draw(PDF(\"/tmp/testL100_104.pdf\", 20cm, 10cm),pl)Moving up to position :l104 still shows strong multiodality in the vehicle position estimates:(Image: testl100_105)vehicle_drives_to!(fg, :l105, GTp, GTl)\nvehicle_drives_to!(fg, :l106, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\nvehicle_drives_to!(fg, :l107, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\nvehicle_drives_to!(fg, :l108, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 2:8], dims=[1;2], levels=6)\n# Gadfly.draw(PDF(\"/tmp/testL103_108.pdf\", 20cm, 10cm),pl)Next we see a strong return to a single dominant mode in all vehicle position estimates, owing to the increased measurements to beacons/landmarks as well as more unimodal estimates in :l3, :l4 beacon/landmark positions.vehicle_drives_to!(fg, :l109, GTp, GTl)\nvehicle_drives_to!(fg, :l110, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\nvehicle_drives_to!(fg, :l111, GTp, GTl)\nvehicle_drives_to!(fg, :l112, GTp, GTl)\n\ntree = batchSolve!(fg)\n\n\npl = plotKDE(fg, [Symbol(\"l$(100+i)\") for i in 7:12], dims=[1;2])\n# Gadfly.draw(PDF(\"/tmp/testL106_112.pdf\", 20cm, 10cm),pl)\n\npl = plotKDE(fg, [:l1;:l2;:l3;:l4], dims=[1;2], levels=4)\n# Gadfly.draw(PDF(\"/tmp/testL1234.pdf\", 20cm, 10cm),pl)\n\npl = drawLandms(fg, from=100)\n# Gadfly.draw(PDF(\"/tmp/testLocsAll.pdf\", 20cm, 10cm),pl)Several location belief estimates exhibit multimodality as the trajectory progresses (not shown), but collapses and finally collapses to a stable set of dominant position estimates.(Image: testl106_112)Landmark estimates are also stable at one estimate:(Image: testl1234)In addition, the SLAM 2D landmark visualization can be re-used to plot more information at once:# pl = drawLandms(fg, from=100, to=200)\n# Gadfly.draw(PDF(\"/tmp/testLocsAll.pdf\", 20cm, 10cm),pl)\n\npl = drawLandms(fg)\n# Gadfly.draw(PDF(\"/tmp/testAll.pdf\", 20cm, 10cm),pl)(Image: testall)This example used the default of N=200 particles per marginal belief. By increasing the number to N=300 throughout the test many more modes and interesting features can be explored, and we refer the reader to an alternative and longer discussion on the same example, in Chapter 6 here."
 },
 
 {
@@ -1269,7 +1269,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Function Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
@@ -1297,195 +1297,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "func_ref/#IncrementalInference.addNode!",
-    "page": "Function Reference",
-    "title": "IncrementalInference.addNode!",
-    "category": "function",
-    "text": "addNode!(fg, lbl, softtype; N, autoinit, ready, dontmargin, labels, api, uid, smalldata)\n\n\nAdd a node (variable) to a graph. Use this over the other dispatches.\n\n\n\n\n\naddNode!(fg, lbl, softtype; N, autoinit, ready, dontmargin, labels, api, uid, smalldata)\n\n\nAdd a node (variable) to a graph. Use this over the other dispatches.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.addFactor!",
-    "page": "Function Reference",
-    "title": "IncrementalInference.addFactor!",
-    "category": "function",
-    "text": "addFactor!(fgl, Xi, usrfnc; multihypo, ready, api, labels, uid, autoinit, threadmodel)\n\n\nAdd factor with user defined type <: FunctorInferenceType to the factor graph object.  Define whether the automatic initialization of variables should be performed.  Use order sensitive multihypo keyword argument to define if any variables are related to data association uncertainty.\n\n\n\n\n\naddFactor!(fgl, xisyms, usrfnc; multihypo, ready, api, labels, uid, autoinit, threadmodel)\n\n\nAdd factor with user defined type <: FunctorInferenceType to the factor graph object.  Define whether the automatic initialization of variables should be performed.  Use order sensitive multihypo keyword argument to define if any variables are related to data association uncertainty.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.allnums",
-    "page": "Function Reference",
-    "title": "IncrementalInference.allnums",
-    "category": "function",
-    "text": "Test if all elements of the string is a number:  Ex, \"123\" is true, \"1_2\" is false.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.approxConv",
-    "page": "Function Reference",
-    "title": "IncrementalInference.approxConv",
-    "category": "function",
-    "text": "approxConv(fgl, fct, towards; api, N)\n\n\nDraw samples from the approximate convolution of towards symbol using factor fct relative to the other variables.  In addition the api can be adjusted to recover the data from elsewhere (likely to be replaced/removed in the future).\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.batchSolve!",
-    "page": "Function Reference",
-    "title": "IncrementalInference.batchSolve!",
-    "category": "function",
-    "text": "batchSolve!(fgl; drawpdf, show, N, recursive)\n\n\nPerform multimodal incremental smoothing and mapping (mm-iSAM) computations over given factor graph fgl::FactorGraph on the local computer.  A pdf of the Bayes (Junction) tree will be generated in the working folder with drawpdf=true\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.convert2packedfunctionnode",
-    "page": "Function Reference",
-    "title": "IncrementalInference.convert2packedfunctionnode",
-    "category": "function",
-    "text": "convert2packedfunctionnode(fgl, fsym)\nconvert2packedfunctionnode(fgl, fsym, api)\n\n\nEncode complicated function node type to related \'Packed<type>\' format assuming a user supplied convert function .\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.decodefg",
-    "page": "Function Reference",
-    "title": "IncrementalInference.decodefg",
-    "category": "function",
-    "text": "decodefg(fgs; api)\n\n\nUnpack PackedFunctionNodeData formats back to regular FunctonNodeData.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.doautoinit!",
-    "page": "Function Reference",
-    "title": "IncrementalInference.doautoinit!",
-    "category": "function",
-    "text": "doautoinit!(fgl, Xi; api, singles, N)\n\n\ninitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!. Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\ndoautoinit!(fgl, xsyms; api, singles, N)\n\n\ninitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!.  Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.emptyFactorGraph",
-    "page": "Function Reference",
-    "title": "IncrementalInference.emptyFactorGraph",
-    "category": "function",
-    "text": "emptyFactorGraph(; reference)\n\n\nConstruct an empty FactorGraph object with the minimum amount of information / memory populated.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.encodefg",
-    "page": "Function Reference",
-    "title": "IncrementalInference.encodefg",
-    "category": "function",
-    "text": "encodefg(fgl; api)\n\n\nMake a full memory copy of the graph and encode all composite function node types – assuming that convert methods for \'Packed<type>\' formats exist.  The same converters are used for database persistence with CloudGraphs.jl.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.fifoFreeze!",
-    "page": "Function Reference",
-    "title": "IncrementalInference.fifoFreeze!",
-    "category": "function",
-    "text": "fifoFreeze!(fgl)\n\n\nFreeze nodes that are older than the quasi fixed-lag length defined by fg.qfl, according to fg.fifo ordering.\n\nFuture:\n\nAllow different freezing strategies beyond fifo.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.findRelatedFromPotential",
-    "page": "Function Reference",
-    "title": "IncrementalInference.findRelatedFromPotential",
-    "category": "function",
-    "text": "findRelatedFromPotential(fg, idfct, vertid, N)\nfindRelatedFromPotential(fg, idfct, vertid, N, dbg)\n\n\nCompute proposal belief on varnodeid through fctvert representing some constraint in factor graph. Always full dimension of variable node, where partial constraints will only influence directed subset of variable dimensions. Remaining dimensions will keep existing variable values.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.getCurrentWorkspaceFactors",
-    "page": "Function Reference",
-    "title": "IncrementalInference.getCurrentWorkspaceFactors",
-    "category": "function",
-    "text": "getCurrentWorkspaceFactors()\n\n\nReturn all factors currently registered in the workspace.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.getCurrentWorkspaceVariables",
-    "page": "Function Reference",
-    "title": "IncrementalInference.getCurrentWorkspaceVariables",
-    "category": "function",
-    "text": "getCurrentWorkspaceVariables()\n\n\nReturn all variables currently registered in the workspace.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.initializeNode!",
-    "page": "Function Reference",
-    "title": "IncrementalInference.initializeNode!",
-    "category": "function",
-    "text": "initializeNode!(fgl, sym; N, api)\n\n\nInitialize the belief of a variable node in the factor graph struct.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.landmarks",
-    "page": "Function Reference",
-    "title": "IncrementalInference.landmarks",
-    "category": "function",
-    "text": "landmarks(fgl::FactorGraph, vsym::Symbol)\n\nReturn Vector{Symbol} of landmarks attached to vertex vsym in fgl.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.loadjld",
-    "page": "Function Reference",
-    "title": "IncrementalInference.loadjld",
-    "category": "function",
-    "text": "loadjld(; file)\n\n\nOpposite of savejld(fg, gt=gt, file=\"tempfg.jl\") to load data from file. This function uses the unpacking converters for converting all PackedInferenceType to FunctorInferenceType.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.ls",
-    "page": "Function Reference",
-    "title": "IncrementalInference.ls",
-    "category": "function",
-    "text": "ls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.lsf",
-    "page": "Function Reference",
-    "title": "IncrementalInference.lsf",
-    "category": "function",
-    "text": "lsf(fgl, lbl; api)\n\n\nList factors in a factor graph.\n\nExamples\n\nlsf(fg)\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.lsRear",
-    "page": "Function Reference",
-    "title": "IncrementalInference.lsRear",
-    "category": "function",
-    "text": "lsRear(fgl)\nlsRear(fgl, n)\n\n\nReturn array of all variable nodes connected to the last n many poses (:x*).\n\nExample:\n\n# Shallow copy the tail end of poses from a factor graph `fg1`\nvars = lsRear(fg1, 5)\nfg1_r5 = subgraphFromVerts(fg1, vars)\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.printgraphmax",
-    "page": "Function Reference",
-    "title": "IncrementalInference.printgraphmax",
-    "category": "function",
-    "text": "printgraphmax(fgl)\n\n\nPrint the maximum point values form all variables approximate marginals in the factor graph. The full marginal can be recovered for example X0 = getVertKDE(fg, :x0).\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.savejld",
-    "page": "Function Reference",
-    "title": "IncrementalInference.savejld",
-    "category": "function",
-    "text": "savejld(fgl; file, groundtruth)\n\n\nSave mostly complete Factor Graph type by converting complicated FunctionNodeData types to \'Packed\' types using user supplied converters. Ground truth can also be saved and recovered by the associated loadjld(file=\"tempfg.jld2\") method.\n\n\n\n\n\n"
-},
-
-{
-    "location": "func_ref/#IncrementalInference.subgraphFromVerts",
-    "page": "Function Reference",
-    "title": "IncrementalInference.subgraphFromVerts",
-    "category": "function",
-    "text": "subgraphFromVerts(fgl, verts; neighbors)\n\n\nExplore all shortest paths combinations in verts, add neighbors and reference subgraph using unique index into graph data structure.\n\n\n\n\n\n"
-},
-
-{
     "location": "func_ref/#IncrementalInference-1",
     "page": "Function Reference",
     "title": "IncrementalInference",
     "category": "section",
-    "text": "addNode!\naddFactor!\nallnums\napproxConv\nbatchSolve!\nconvert2packedfunctionnode\ndecodefg\ndoautoinit!\nemptyFactorGraph\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ninitializeNode!\nlandmarks\nloadjld\nls\nlsf\nlsRear\nprintgraphmax\nsavejld\nsubgraphFromVerts"
+    "text": "addNode!\naddFactor!\nallnums\napproxConv\nbatchSolve!\nconvert2packedfunctionnode\ndecodefg\ndoautoinit!\nemptyFactorGraph\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\nfmcmc!\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ninitializeNode!\nlandmarks\nloadjld\nlocalProduct\nls\nlsf\nlsRear\nprintgraphmax\nproductpartials!\nprodmultiplefullpartials\nprodmultipleonefullpartials\nsavejld\nsetfreeze!\nsubgraphFromVerts"
 },
 
 ]}
