@@ -1,4 +1,5 @@
 using Documenter, Caesar
+import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference],

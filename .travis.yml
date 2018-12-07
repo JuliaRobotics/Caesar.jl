@@ -32,5 +32,6 @@ jobs:
         - julia -e 'import Pkg; Pkg.add("Documenter")'
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate();
                                     Pkg.develop(PackageSpec(path=pwd()))'
+        - julia -e 'using Pkg; Pkg.add("IncrementalInference"); Pkg.add("RoME")'
         - julia --project=docs/ docs/make.jl
       after_success: skip
