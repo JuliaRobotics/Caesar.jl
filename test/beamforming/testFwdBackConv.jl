@@ -1,77 +1,41 @@
 using Caesar, RoME, IncrementalInference
-
 using DelimitedFiles
 
-# visualization scripts
-
+# Visualization
 using Colors
-# currently need master branch
 using Gadfly
-# tags waiting on METADATA
 using RoMEPlotting, KernelDensityEstimatePlotting
 
-
-
-
-
-
-sasframe = 64
-logdir = "/media/data1/data/kayaks/20_parsed/array_positions$(sasframe).csv"  # 85
-posData = readdlm(logdir,',',Float64,'\n')
+posFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_positions.csv");
+posData = readdlm(posFile,',',Float64,'\n')
 
 posData[:,1] .+= 13.0
 posData[:,2] .-= 40.0
 
-posData
-
 # gps covariance
 rtkCov = Matrix(Diagonal([0.1;0.1].^2))
-
-
-
 
 N = 200
 fg = initfg()
 
-addNode!(fg, :x1, Point2)
-setVal!(fg, :x1, zeros(2,N))
-addNode!(fg, :x2, Point2)
-setVal!(fg, :x2, zeros(2,N))
-addNode!(fg, :x3, Point2)
-setVal!(fg, :x3, zeros(2,N))
-addNode!(fg, :x4, Point2)
-setVal!(fg, :x4, zeros(2,N))
-addNode!(fg, :x5, Point2)
-setVal!(fg, :x5, zeros(2,N))
-# addNode!(fg, :x6, Point2)
-# setVal!(fg, :x6, zeros(2,N))
-# addNode!(fg, :x7, Point2)
-# setVal!(fg, :x7, zeros(2,N))
-# addNode!(fg, :x8, Point2)
-# setVal!(fg, :x8, zeros(2,N))
-# addNode!(fg, :x9, Point2)
-# setVal!(fg, :x9, zeros(2,N))
-
-
+#landmark
 addNode!(fg, :l1, Point2)
 setVal!(fg, :l1, zeros(2,N))
-# addFactor!(fg, [:l1], Prior(MvNormal(zeros(2), diagm([100;100]) )) )
-
 
 global pp = nothing
-i = 1
 for i in 1:5
     sym = Symbol("x$i")
+    addNode!(fg, sym, Point2)
+    setVal!(fg, sym, zeros(2,N))
     pp = PriorPoint2(MvNormal(posData[i,1:2], rtkCov) )
     addFactor!(fg, [sym;], pp)
-    # manual init
-    setValKDE!(fg, sym, kde!(getSample(pp, N)[1]))
+    # manual init for now
+    setValKDE!(getVert(fg,sym), kde!(getSample(pp, N)[1]))
+    getData(fg,sym).initialized = true
 end
 
-
-
-wavefile = "/media/data1/data/kayaks/20_parsed/array_waveforms$(sasframe).csv"  # 85
-csvWaveData = readdlm(wavefile,',',Float64,'\n')
+dataFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_waveforms.csv");
+csvWaveData = readdlm(dataFile,',',Float64,'\n')
 csvWaveData = csvWaveData[:,1:5]
 #
 sas2d = prepareSAS2DFactor(5, csvWaveData, rangemodel=:Correlator)
