@@ -657,38 +657,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "concepts/literature/#",
-    "page": "Literature References",
-    "title": "Literature References",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "concepts/literature/#Literature-1",
-    "page": "Literature References",
-    "title": "Literature",
-    "category": "section",
-    "text": "Newly created page to list related references and additional literature pertaining to this package."
-},
-
-{
-    "location": "concepts/literature/#Related-Literature-1",
-    "page": "Literature References",
-    "title": "Related Literature",
-    "category": "section",
-    "text": "[1]  Fourie, Dehann, et al. \"A Nonparametric Belief Solution to the Bayes Tree\" IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), (2016).[2]  Fourie, Dehann, \"Multi-modal and Inertial Sensor Solutions for Navigation-type Factor   Graphs\", Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.[3]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: \"SLAMinDB: Centralized graph databases for mobile robotics\", IEEE International Conference on Robotics and Automation (ICRA), Singapore, 2017."
-},
-
-{
-    "location": "concepts/literature/#Additional-Literature-1",
-    "page": "Literature References",
-    "title": "Additional Literature",
-    "category": "section",
-    "text": "[4]  Kaess, Michael, et al. \"iSAM2: Incremental smoothing and mapping using the Bayes tree\" The International Journal of Robotics Research (2011): 0278364911430419."
-},
-
-{
     "location": "examples/examples/#",
     "page": "Caesar Examples",
     "title": "Caesar Examples",
@@ -1105,6 +1073,38 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "refs/literature/#",
+    "page": "References",
+    "title": "References",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "refs/literature/#Literature-1",
+    "page": "References",
+    "title": "Literature",
+    "category": "section",
+    "text": "Newly created page to list related references and additional literature pertaining to this package."
+},
+
+{
+    "location": "refs/literature/#Related-Literature-1",
+    "page": "References",
+    "title": "Related Literature",
+    "category": "section",
+    "text": "[1]  Fourie, Dehann, et al. \"A Nonparametric Belief Solution to the Bayes Tree\" IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), (2016).[2]  Fourie, Dehann, \"Multi-modal and Inertial Sensor Solutions for Navigation-type Factor   Graphs\", Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.[3]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: \"SLAMinDB: Centralized graph databases for mobile robotics\", IEEE International Conference on Robotics and Automation (ICRA), Singapore, 2017."
+},
+
+{
+    "location": "refs/literature/#Additional-Literature-1",
+    "page": "References",
+    "title": "Additional Literature",
+    "category": "section",
+    "text": "[4]  Kaess, Michael, et al. \"iSAM2: Incremental smoothing and mapping using the Bayes tree\" The International Journal of Robotics Research (2011): 0278364911430419."
+},
+
+{
     "location": "func_ref/#",
     "page": "Caesar\'s Reference",
     "title": "Caesar\'s Reference",
@@ -1341,7 +1341,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
@@ -1525,7 +1525,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
+    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
 },
 
 {
