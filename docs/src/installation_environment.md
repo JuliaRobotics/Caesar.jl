@@ -120,7 +120,7 @@ You can work with the packages as regular git repositories there.
 ## Install Visualization Utils (e.g. Arena.jl)
 
 Visualizations were removed from Caesar and moved to a new package [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) instead.
-Please follow instructions on the [Visualizations page](http://www.juliarobotics.org/Caesar.jl/latest/arena_visualizations.html) for a variety of 2D / 3D utilities.
+Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 2D / 3D utilities.
 
 ### Important: Temporary Julia 1.0 Pango Workaround
 
