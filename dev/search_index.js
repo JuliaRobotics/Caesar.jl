@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "TL;DR Installation",
     "category": "section",
-    "text": "If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package \'Caesar\'.Caesar can be installed for latest Julia 0.7/1.0 with:julia> ] # to enable package manager\n(v1.0) pkg> add CaesarUnit tests can further be performed for the upstream packages as follows – NOTE first time runs are slow since each new function call or package must first be precompiled.(v1.0) pkg> test IncrementalInference\n...\n(v1.0) pkg> test RoME\n...\n(v1.0) pkg> test Caesar\n..."
+    "text": "If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package \'Caesar\'.Caesar can be installed for latest Julia 0.7/1.0 with:julia> ] # to enable package manager\n(v1.0) pkg> add CaesarUnit tests can further be performed for the upstream packages as follows – NOTE first time runs are slow since each new function call or package must first be precompiled.(v1.0) pkg> test IncrementalInference\n...\n(v1.0) pkg> test RoME\n...\n(v1.0) pkg> test Caesar\n...(Q4 2018), Temporarily require development version of RoMEPlotting.jl:(v1.0) pkg> add RoMEPlotting#master"
 },
 
 {
@@ -45,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Caesar Core",
     "category": "section",
-    "text": "Caesar is implemented in Julia (and JuliaPro) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.Caesar.jl is the umbrella repo that depends on RoME.jl and others to support that \'passes through\' the same functionality while introducing more. For example, interaction with database server systems, LCMCore.jl, (future ROS support), and more."
+    "text": "Caesar is implemented in Julia (and JuliaPro) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.Caesar.jl is the \"umbrella\" framework that depends on and supports various dedicated purpose packages."
 },
 
 {
@@ -53,7 +53,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Caesar Core Packages",
     "category": "section",
-    "text": "Critically, this package can operate in the conventional SLAM manner, using local dictionaries, or centralize around the FactorGraph through a graph database using CloudGraphs.jl, as discussed here [2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate RoME.jl and back-end solver IncrementalInference.jl.Details about the accompanying packages:IncrementalInference.jl supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself.\nRoME.jl introduces nodes and factors that are useful to robotic navigation.\nRoMEPlotting.jl are a set of scripts that provide MATLAB style plotting of factor graph beliefs, mostly supporting 2D visualization with some support for projections of 3D."
+    "text": "Critically, this package can operate in the conventional SLAM manner, using local memory (dictionaries), or alternatively distribute around a persisted FactorGraph through a graph database using CloudGraphs.jl, as discussed in literature here [2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate RoME.jl and back-end solver IncrementalInference.jl.Details about the accompanying packages:IncrementalInference.jl supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself.\nRoME.jl introduces nodes and factors that are useful to robotic navigation.\nRoMEPlotting.jl are a set of scripts that provide MATLAB style plotting of factor graph beliefs, mostly supporting 2D visualization with some support for projections of 3D."
 },
 
 {
@@ -77,7 +77,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Caesar SDKs and APIs",
     "category": "section",
-    "text": "The Caesar framework is not limited to direct Julia use. The following Github projects provide access to features of Caesar in their language:C/C++:\nGraff Cpp\nCaesar LCM\nPython:\nSynchronySDKContributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below)."
+    "text": "The Caesar framework is not limited to direct Julia use. The following Github projects provide access to features of Caesar in their language:Julia Web interface:\nGraffSDK.jl\nC/C++:\nGraff Cpp\nCaesar LCM\nPython:\nSynchronySDKContributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below)."
+},
+
+{
+    "location": "#Future-Directions-1",
+    "page": "Home",
+    "title": "Future Directions",
+    "category": "section",
+    "text": "Many future directions are in the works – including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion.  For example see ROS integration page here."
 },
 
 {
@@ -110,14 +118,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Contributors",
     "category": "section",
     "text": "Authors directly involved with this package are:D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. LeonardWe are grateful for many, many contributions within the Julia package ecosystem – see the REQUIRE files of Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs and others for a far reaching list of contributions.Consider citing our work:@misc{caesarjl,\n  author = \"Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors\",\n  title =  \"Caesar.jl\",\n  year =   2018,\n  url =    \"https://github.com/JuliaRobotics/Caesar.jl\"\n}"
-},
-
-{
-    "location": "#References-1",
-    "page": "Home",
-    "title": "References",
-    "category": "section",
-    "text": "[1]  Fourie, D.: \"Multi-modal and Inertial Sensor Solutions to Navigation-type Factor Graph\",\n     Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.\n[2]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: \"SLAMinDB: Centralized graph\n     databases for mobile robotics\" IEEE International Conference on Robotics and Automation (ICRA),\n     Singapore, 2017."
 },
 
 {
@@ -654,6 +654,38 @@ var documenterSearchIndex = {"docs": [
     "title": "Common Data Persistence and Inference",
     "category": "section",
     "text": "Coming soon!"
+},
+
+{
+    "location": "concepts/literature/#",
+    "page": "Literature References",
+    "title": "Literature References",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/literature/#Literature-1",
+    "page": "Literature References",
+    "title": "Literature",
+    "category": "section",
+    "text": "Newly created page to list related references and additional literature pertaining to this package."
+},
+
+{
+    "location": "concepts/literature/#Related-Literature-1",
+    "page": "Literature References",
+    "title": "Related Literature",
+    "category": "section",
+    "text": "[1]  Fourie, Dehann, et al. \"A Nonparametric Belief Solution to the Bayes Tree\" IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), (2016).[2]  Fourie, Dehann, \"Multi-modal and Inertial Sensor Solutions for Navigation-type Factor   Graphs\", Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.[3]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: \"SLAMinDB: Centralized graph databases for mobile robotics\", IEEE International Conference on Robotics and Automation (ICRA), Singapore, 2017."
+},
+
+{
+    "location": "concepts/literature/#Additional-Literature-1",
+    "page": "Literature References",
+    "title": "Additional Literature",
+    "category": "section",
+    "text": "[4]  Kaess, Michael, et al. \"iSAM2: Incremental smoothing and mapping using the Bayes tree\" The International Journal of Robotics Research (2011): 0278364911430419."
 },
 
 {
@@ -1309,7 +1341,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
