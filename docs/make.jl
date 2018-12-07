@@ -1,8 +1,11 @@
 using Documenter, Caesar
 import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 
+using KernelDensityEstimatePlotting
+using RoMEPlotting
+
 makedocs(
-    modules = [Caesar, RoME, IncrementalInference],
+    modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
     format = :html,
     sitename = "Caesar.jl",
     pages = Any[
@@ -28,7 +31,8 @@ makedocs(
             "Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
         "Function Reference" => [
-            "Function Reference" => "func_ref.md",
+            "Caesar's Reference" => "func_ref.md",
+            "Visualization Reference" => "vis_func_ref.md",
         ]
     ]
     # html_prettyurls = !("local" in ARGS),
