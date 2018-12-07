@@ -137,6 +137,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "installation_environment/#Local-Dependencies-1",
+    "page": "Installation",
+    "title": "Local Dependencies",
+    "category": "section",
+    "text": "The following system packages are used by Caesar.jl:# required packages\nsudo apt-get install hdf5-tools\n\n# optional packages\nsudo apt-get install graphviz  "
+},
+
+{
     "location": "installation_environment/#Local-Installation-of-Julia-1",
     "page": "Installation",
     "title": "Local Installation of Julia",
@@ -174,6 +182,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Install Visualization Utils (e.g. Arena.jl)",
     "category": "section",
     "text": "Visualizations were removed from Caesar and moved to a new package Arena.jl instead. Please follow instructions on the Visualizations page for a variety of 2D / 3D utilities."
+},
+
+{
+    "location": "installation_environment/#Important:-Temporary-Julia-1.0-Pango-Workaround-1",
+    "page": "Installation",
+    "title": "Important: Temporary Julia 1.0 Pango Workaround",
+    "category": "section",
+    "text": "The RoMEPlotting.jl package must be installed up to latest master branch (development branch) owing to an upstream issue with Pango fonts on Julia 1.0 with Gadfly.jl plotting.  Once this issue is resolved, the next RoMEPlotting stable version can be tagged and be available as a standard stable release.Please install the latest RoMEPlotting using Package manager as follows:$ julia # latest v1.0.x\njulia> ] # to get package manager\n(v1.0) pkg> add RoMEPlotting#masterAlternatively, the dev command –- i.e. (v1.0) pkg> dev RoMEPlotting –- will clone the RoMEPlotting.jl git repository to your local .julia/dev/RoMEPlotting folder.Written December 2018"
 },
 
 {
@@ -389,7 +405,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Arena Visualization",
     "title": "Visualization with Arena.jl",
     "category": "section",
-    "text": "Caesar.jl uses the Arena.jl package for all the visualization requirements.  This part of the documentation discusses the robotic visualization aspects supported by Arena.jl. Arena.jl supports a wide variety of general visualization as well as developer visualization tools more focused on research and development.Over time, Caesar.jl has used a least three different 3D visualization technologies, with the most recent based on WebGL and three.js by means of the MeshCat.jl package. The previous incarnation used a client side installation of VTK  by means of the DrakeVisualizer.jl and Director libraries. Different 2D plotting libraries have also been used, with evolutions to improve usability for a wider user base. Each epoch has aimed at reducing dependencies and increasing multi-platform support.The sections below discuss 2D and 3D visualization techniques available to the Caesar.jl robot navigation system. Visualization examples will be seen throughout the Caesar.jl package documentation.Note that all visualizations used to be part of the Caesar.jl package itself, but was separated out to Arena.jl in early 2018."
+    "text": "Caesar.jl uses the Arena.jl package for all the visualization requirements.  This part of the documentation discusses the robotic visualization aspects supported by Arena.jl. Arena.jl supports a wide variety of general visualization as well as developer visualization tools more focused on research and development."
+},
+
+{
+    "location": "concepts/arena_visualizations/#Current-Work-In-Progress-1",
+    "page": "Arena Visualization",
+    "title": "Current Work In Progress",
+    "category": "section",
+    "text": "Written Nov 2018While Arena.jl is still being upgraded for Julia 1.0 (mostly relating to updates in 3D visualization), the 2D visualizations available through the development master branch in RoMEPlotting.jl are available in Julia 1.0.  The master branch version can be installed using the Julia package manager with add RoMEPlotting#master, see also environment installation page."
+},
+
+{
+    "location": "concepts/arena_visualizations/#Introduction-1",
+    "page": "Arena Visualization",
+    "title": "Introduction",
+    "category": "section",
+    "text": "Over time, Caesar.jl has used a least three different 3D visualization technologies, with the most recent based on WebGL and three.js by means of the MeshCat.jl package. The previous incarnation used a client side installation of VTK  by means of the DrakeVisualizer.jl and Director libraries. Different 2D plotting libraries have also been used, with evolutions to improve usability for a wider user base. Each epoch has aimed at reducing dependencies and increasing multi-platform support.The sections below discuss 2D and 3D visualization techniques available to the Caesar.jl robot navigation system. Visualization examples will be seen throughout the Caesar.jl package documentation. Arena.jl is intended to simplify the process 2D plotting for robot trajectories in two or three dimensions. The visualizations are also intended to help with subgraph plotting for finding loop closures in data or compare two datasets.Note that all visualizations used to be part of the Caesar.jl package itself, but was separated out to Arena.jl in early 2018."
 },
 
 {
@@ -405,7 +437,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Arena Visualization",
     "title": "2D Visualization",
     "category": "section",
-    "text": "2D plot visualizations, provided by RoMEPlotting.jl and KernelDensityEstimatePlotting.jl, are generally useful for repeated analysis of a algorithm or data set being studied. These visualizations are often manipulated to emphasize particular aspects of mobile platform navigation. Arena.jl is intended to simplify the process 2D plotting for robot trajectories in two or three dimensions. The visualizations are also intended to help with subgraph plotting for finding loop closures in data or compare two datasets."
+    "text": "2D plot visualizations, provided by [RoMEPlotting.jl(http://www.github.com/JuliaRobotics/RoMEPlotting.jl) and KernelDensityEstimatePlotting.jl, are generally useful for repeated analysis of a algorithm or data set being studied. These visualizations are often manipulated to emphasize particular aspects of mobile platform navigation."
+},
+
+{
+    "location": "concepts/arena_visualizations/#Interactive-Gadfly.jl-Plots-1",
+    "page": "Arena Visualization",
+    "title": "Interactive Gadfly.jl Plots",
+    "category": "section",
+    "text": "See the following two discussions on Interactive 2D plots:Interactivity\nInteractive-SVGs"
 },
 
 {
@@ -521,9 +561,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "concepts/adding_variables_factors/#Creating-a-Repository-1",
+    "location": "concepts/adding_variables_factors/#[OPTIONAL]-Creating-a-Repository-1",
     "page": "Adding New Variables and Factors",
-    "title": "Creating a Repository",
+    "title": "[OPTIONAL] Creating a Repository",
     "category": "section",
     "text": "You can fork the following template repository to construct your own Caesar Variable and Factor Examples.If this repository is going to be used for development of the new variables/factors as well as for the experiment (i.e. the code that builds the graph and solves it), you should probably start a simple end-to-end test that validates a basic version of your experimental setup (e.g. ):#### This example is a basic test of the new variables and factors\n#### that are added in this repo. The example is derived from\n#### the hexagonal test example.\n\nusing Caesar, RoME\nusing Caesar_VariableFactorExamples # Your new variable/factor repository\n# Using plotting for experiment validation\nusing RoMEPlotting\n\n# 1. Init factor graph\n#TODO\n\n# 2. Add variables\n#TODO\n\n# 3. Add factors\n# 3a. Add a new test prior\n#TODO\n# 3b. Add new types of odometry factors.\n#TODO\n\n# 4. Solve graph\nbatchSolve!(fg)\n\n# 5. Graph solution - assuming that you have this open in Atom.\ndrawPoses(fg)"
 },
@@ -1034,15 +1074,15 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#",
-    "page": "Function Reference",
-    "title": "Function Reference",
+    "page": "Caesar\'s Reference",
+    "title": "Caesar\'s Reference",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "func_ref/#Function-Reference-1",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Function Reference",
     "category": "section",
     "text": "Pages = [\n    \"func_ref.md\"\n]\nDepth = 3WORK IN PROGRESS  Not all functions have been added to this directory yet."
@@ -1050,7 +1090,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getPoseExVertexNeoIDs",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getPoseExVertexNeoIDs",
     "category": "function",
     "text": "getPoseExVertexNeoIDs(conn; ready, backendset, session, reqbackendset)\n\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for all poses.\n\n\n\n\n\n"
@@ -1058,7 +1098,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getLandmOtherSessNeoIDs",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getLandmOtherSessNeoIDs",
     "category": "function",
     "text": "getLandmOtherSessNeoIDs{T <: AbstractString}(::CloudGraph, session::T=\"\", robot::T=\"\", user::T=\"\", multisessions=Vector{T}())\n\nReturn dict of dict of Neo4j vertex IDs by session and landmark symbols.\n\n\n\n\n\n"
@@ -1066,7 +1106,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.db2jld",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.db2jld",
     "category": "function",
     "text": "db2jld(cgl::CloudGraph, session::AbstractString, filename::AbstractString)\n\nFetch and save a FactorGraph session to a jld, using CloudGraph object and session definition.\n\n\n\n\n\ndb2jld(filename::AbstractString; addrdict::NothingUnion{Dict{AbstractString, AbstractString}}=nothing )\n\nFetch and save a FactorGraph session to a jld, using or asking STDIN for credentials in the addrdict field.\n\n\n\n\n\n"
@@ -1074,7 +1114,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.fetchrobotdatafirstpose",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.fetchrobotdatafirstpose",
     "category": "function",
     "text": "fetchrobotdatafirstpose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)\n\nReturn dict of JSON parsed \"robot_description\" field as was inserted by counterpart insertrobotdatafirstpose! function. Used for storing general robot specific data in easily accessible manner.\n\n\n\n\n\n"
@@ -1082,7 +1122,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.executeQuery",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.executeQuery",
     "category": "function",
     "text": "executeQuery(connection, query)\n\n\nRun Neo4j Cypher queries on the cloudGraph database, and return Tuple with the unparsed (results, loadresponse).\n\n\n\n\n\n"
@@ -1090,7 +1130,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.appendvertbigdata!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.appendvertbigdata!",
     "category": "function",
     "text": "appendvertbigdata!(cloudGraph, cv, description, data)\n\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fgl, vert, description, data)\n\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fg, sym, descr, data)\n\nAppend big data element into current blob store using parent appendvertbigdata!, but here specified by symbol of variable node in the FactorGraph. Note the default data layer api definition. User must define dlapi to refetching the  vertex from the data layer. localapi avoids repeated network database fetches.\n\n\n\n\n\n"
@@ -1098,7 +1138,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.updatenewverts!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.updatenewverts!",
     "category": "function",
     "text": "updatenewverts!(fgl::FactorGraph; N::Int)\n\nConvert vertices of session in Neo4j DB with Caesar.jl\'s required data elements in preparation for MM-iSAMCloudSolve process.\n\n\n\n\n\n"
@@ -1106,7 +1146,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getVertNeoIDs!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getVertNeoIDs!",
     "category": "function",
     "text": "getVertNeoIDs!(::CloudGraph, res::Dict{Symbol, Int}; session::AbstractString=\"NA\", robot::AbstractString=\"NA\", user::AbstractString=\"NA\")\n\nInsert into and return dict res with Neo4j IDs of ExVertex labels as stored per session in Neo4j database.\n\n\n\n\n\n"
@@ -1114,7 +1154,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.whosNear3D",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.whosNear3D",
     "category": "function",
     "text": "whosNear3D(cg, session, robot, user; x, y, z, roll, pitch, yaw, dist, angle)\n\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
@@ -1122,7 +1162,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getprpt2kde",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getprpt2kde",
     "category": "function",
     "text": "getprp2kde(::CloudGraph, neoids::Vector{Int}; N::Int=100)\n\nReturn PriorPoint2DensityNH with N points based on beliefs of neoids, and equal share null hypothesis between length(neoids)+1 beliefs.\n\n\n\n\n\n"
@@ -1130,7 +1170,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.whosNear2D",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.whosNear2D",
     "category": "function",
     "text": "whosNear2D(cg, session, robot, user; x, y, yaw, dist, angle)\n\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
@@ -1138,7 +1178,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.hasBigDataElement",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.hasBigDataElement",
     "category": "function",
     "text": "hasBigDataElement(vertex, description)\n\n\nReturn true if vertex has bigDataElements with matching description.\n\n\n\n\n\n"
@@ -1146,7 +1186,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getAllLandmarkNeoIDs",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getAllLandmarkNeoIDs",
     "category": "function",
     "text": "getAllLandmarkNeoIDs(::Dict{Symbol, Dict{Symbol, Int}}, ::Symbol)\n\nReturn Vector{Int} of Neo4j vertex IDs relating to symbol, as listed in lm2others.\n\n\n\n\n\n"
@@ -1154,7 +1194,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.consoleaskuserfordb",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.consoleaskuserfordb",
     "category": "function",
     "text": "consoleaskuserfordb(; nparticles, drawdepth, clearslamindb, multisession, drawedges)\n\n\nObtain database addresses and login credientials from STDIN, as well as a few case dependent options.\n\n\n\n\n\n"
@@ -1162,7 +1202,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.standardcloudgraphsetup",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.standardcloudgraphsetup",
     "category": "function",
     "text": "standardcloudgraphsetup(; addrdict, nparticles, drawdepth, drawedges, clearslamindb, multisession)\n\n\nConnect to databases via network according to addrdict, or ask user for credentials and return active cloudGraph object, as well as addrdict.\n\n\n\n\n\n"
@@ -1170,7 +1210,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.resetentireremotesession",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.resetentireremotesession",
     "category": "function",
     "text": "resetentireremotesession(conn, session, robot, user)\n\nmatch (n:session) remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width set n :NEWDATA return n\n\n\n\n\n\n"
@@ -1178,7 +1218,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getfirstpose",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getfirstpose",
     "category": "function",
     "text": "getfirstpose(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString)\n\nReturn Tuple{Symbol, Int} of first pose symbol and Neo4j node ID.\n\n\n\n\n\n"
@@ -1186,7 +1226,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getExVertexNeoIDs",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getExVertexNeoIDs",
     "category": "function",
     "text": "getExVertexNeoIDs(conn; label, ready, backendset, session, robot, user, reqbackendset)\n\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.\n\n\n\n\n\n"
@@ -1194,7 +1234,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.findExistingMSConstraints",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.findExistingMSConstraints",
     "category": "function",
     "text": "findExistingMSConstraints(fgl::FactorGraph)\n\nReturn Dict{Symbol, Int} of vertex symbol to Neo4j node ID of MULTISESSION constraints in this fgl.sessionname.\n\n\n\n\n\n"
@@ -1202,7 +1242,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.removeNeo4jID",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.removeNeo4jID",
     "category": "function",
     "text": "removeNeo4jID(cg::CloudGraph, neoid=-1)\n\nRemove node from Neo4j according to Neo4j Node ID. Big data elements that may be associated with this node are not removed.\n\n\n\n\n\n"
@@ -1210,7 +1250,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getBigDataElement",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getBigDataElement",
     "category": "function",
     "text": "getBigDataElement(vertex, description)\n\n\nWalk through vertex bigDataElements and return the last matching description.\n\n\n\n\n\n"
@@ -1218,7 +1258,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.rmInstMultisessionPriors!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.rmInstMultisessionPriors!",
     "category": "function",
     "text": "rmInstMultisessionPriors!(::CloudGraph; session<:AbstractString=, multisessions::Vector{<:AbstractString}= )\n\n\n\n\n\n"
@@ -1226,7 +1266,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.insertrobotdatafirstpose!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.insertrobotdatafirstpose!",
     "category": "function",
     "text": "insertrobotdatafirstpose!(cg::CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString, robotdict::Dict)\n\nSaves robotdict via JSON to first pose in a SESSION in the database. Used for storing general robot specific data in easily accessible manner. Can fetch later retrieve same dict with counterpart fetchrobotdatafirstpose function.\n\n\n\n\n\n"
@@ -1234,7 +1274,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.fetchsubgraph!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.fetchsubgraph!",
     "category": "function",
     "text": "fetchsubgraph!(::FactorGraph, ::Vector{CloudVertex}, numneighbors::Int=0)\n\nFetch and insert list of CloudVertices into FactorGraph object, up to neighbor depth.\n\n\n\n\n\nfetchsubgraph!(::FactorGraph, ::Vector{Int}, numneighbors::Int=0)\n\nFetch and insert list of Neo4j IDs into FactorGraph object, up to neighbor depth.\n\n\n\n\n\n"
@@ -1242,7 +1282,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getLocalSubGraphMultisession",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getLocalSubGraphMultisession",
     "category": "function",
     "text": "getLocalSubGraphMultisession{T <: AbstractString}(cg::CloudGraph, lm2others; session::T=\"\", numneighbors::Int=0)\n\nReturn subgraph copy of type FactorGraph contaning values from session in lm2others, and Vector{Symbol} of primary key symbols used for graph exstraction.\n\n\n\n\n\n"
@@ -1250,7 +1290,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar.getnewvertdict",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar.getnewvertdict",
     "category": "function",
     "text": "getnewvertdict(conn, session::AbstractString, robot::AbstractString, user::AbstractString)\n\nReturn a dictionary with frtend and mongo_keys json string information for :NEWDATA elements in Neo4j database.\n\n\n\n\n\n"
@@ -1258,7 +1298,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#Caesar-1",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "Caesar",
     "category": "section",
     "text": "getPoseExVertexNeoIDs\ngetLandmOtherSessNeoIDs\ndb2jld\nfetchrobotdatafirstpose\nexecuteQuery\nappendvertbigdata!\nupdatenewverts!\ngetVertNeoIDs!\nwhosNear3D\ngetprpt2kde\nwhosNear2D\nhasBigDataElement\ngetAllLandmarkNeoIDs\nconsoleaskuserfordb\nstandardcloudgraphsetup\nresetentireremotesession\ngetfirstpose\ngetExVertexNeoIDs\nfindExistingMSConstraints\nremoveNeo4jID\ngetBigDataElement\nrmInstMultisessionPriors!\ninsertrobotdatafirstpose!\nfetchsubgraph!\ngetLocalSubGraphMultisession\ngetnewvertdict"
@@ -1266,15 +1306,15 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#RoME.getRangeKDEMax2D",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
     "location": "func_ref/#RoME.initFactorGraph!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "RoME.initFactorGraph!",
     "category": "function",
     "text": "initFactorGraph!(fg; P0, init, N, lbl, ready, firstPoseType, labels)\n\n\nInitialize a factor graph object as Pose2, Pose3, or neither and returns variable and factor symbols as array.\n\n\n\n\n\n"
@@ -1282,7 +1322,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#RoME.addOdoFG!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "RoME.addOdoFG!",
     "category": "function",
     "text": "addOdoFG!(fg, n, DX, cov; N, ready, labels)\n\n\nCreate a new variable node and insert odometry constraint factor between which will automatically increment latest pose symbol x<k+1> for new node new node and constraint factor are returned as a tuple.\n\n\n\n\n\naddOdoFG!(fgl, odo; N, ready, labels)\n\n\nCreate a new variable node and insert odometry constraint factor between which will automatically increment latest pose symbol x<k+1> for new node new node and constraint factor are returned as a tuple.\n\n\n\n\n\n"
@@ -1290,7 +1330,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#RoME-1",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "RoME",
     "category": "section",
     "text": "getRangeKDEMax2D\ninitFactorGraph!\naddOdoFG!"
@@ -1298,7 +1338,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.addNode!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.addNode!",
     "category": "function",
     "text": "addNode!(fg, lbl, softtype; N, autoinit, ready, dontmargin, labels, api, uid, smalldata)\n\n\nAdd a node (variable) to a graph. Use this over the other dispatches.\n\n\n\n\n\naddNode!(fg, lbl, softtype; N, autoinit, ready, dontmargin, labels, api, uid, smalldata)\n\n\nAdd a node (variable) to a graph. Use this over the other dispatches.\n\n\n\n\n\n"
@@ -1306,7 +1346,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.addFactor!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.addFactor!",
     "category": "function",
     "text": "addFactor!(fgl, Xi, usrfnc; multihypo, ready, api, labels, uid, autoinit, threadmodel)\n\n\nAdd factor with user defined type <: FunctorInferenceType to the factor graph object.  Define whether the automatic initialization of variables should be performed.  Use order sensitive multihypo keyword argument to define if any variables are related to data association uncertainty.\n\n\n\n\n\naddFactor!(fgl, xisyms, usrfnc; multihypo, ready, api, labels, uid, autoinit, threadmodel)\n\n\nAdd factor with user defined type <: FunctorInferenceType to the factor graph object.  Define whether the automatic initialization of variables should be performed.  Use order sensitive multihypo keyword argument to define if any variables are related to data association uncertainty.\n\n\n\n\n\n"
@@ -1314,7 +1354,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.allnums",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.allnums",
     "category": "function",
     "text": "Test if all elements of the string is a number:  Ex, \"123\" is true, \"1_2\" is false.\n\n\n\n\n\n"
@@ -1322,7 +1362,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.approxConv",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.approxConv",
     "category": "function",
     "text": "approxConv(fgl, fct, towards; api, N)\n\n\nDraw samples from the approximate convolution of towards symbol using factor fct relative to the other variables.  In addition the api can be adjusted to recover the data from elsewhere (likely to be replaced/removed in the future).\n\n\n\n\n\n"
@@ -1330,7 +1370,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.batchSolve!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.batchSolve!",
     "category": "function",
     "text": "batchSolve!(fgl; drawpdf, show, N, recursive)\n\n\nPerform multimodal incremental smoothing and mapping (mm-iSAM) computations over given factor graph fgl::FactorGraph on the local computer.  A pdf of the Bayes (Junction) tree will be generated in the working folder with drawpdf=true\n\n\n\n\n\n"
@@ -1338,7 +1378,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.convert2packedfunctionnode",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.convert2packedfunctionnode",
     "category": "function",
     "text": "convert2packedfunctionnode(fgl, fsym)\nconvert2packedfunctionnode(fgl, fsym, api)\n\n\nEncode complicated function node type to related \'Packed<type>\' format assuming a user supplied convert function .\n\n\n\n\n\n"
@@ -1346,7 +1386,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.decodefg",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.decodefg",
     "category": "function",
     "text": "decodefg(fgs; api)\n\n\nUnpack PackedFunctionNodeData formats back to regular FunctonNodeData.\n\n\n\n\n\n"
@@ -1354,7 +1394,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.doautoinit!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.doautoinit!",
     "category": "function",
     "text": "doautoinit!(fgl, Xi; api, singles, N)\n\n\ninitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!. Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\ndoautoinit!(fgl, xsyms; api, singles, N)\n\n\ninitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!.  Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\n"
@@ -1362,7 +1402,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.emptyFactorGraph",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.emptyFactorGraph",
     "category": "function",
     "text": "emptyFactorGraph(; reference)\n\n\nConstruct an empty FactorGraph object with the minimum amount of information / memory populated.\n\n\n\n\n\n"
@@ -1370,7 +1410,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.encodefg",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.encodefg",
     "category": "function",
     "text": "encodefg(fgl; api)\n\n\nMake a full memory copy of the graph and encode all composite function node types – assuming that convert methods for \'Packed<type>\' formats exist.  The same converters are used for database persistence with CloudGraphs.jl.\n\n\n\n\n\n"
@@ -1378,7 +1418,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.fifoFreeze!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.fifoFreeze!",
     "category": "function",
     "text": "fifoFreeze!(fgl)\n\n\nFreeze nodes that are older than the quasi fixed-lag length defined by fg.qfl, according to fg.fifo ordering.\n\nFuture:\n\nAllow different freezing strategies beyond fifo.\n\n\n\n\n\n"
@@ -1386,7 +1426,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.findRelatedFromPotential",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.findRelatedFromPotential",
     "category": "function",
     "text": "findRelatedFromPotential(fg, idfct, vertid, N)\nfindRelatedFromPotential(fg, idfct, vertid, N, dbg)\n\n\nCompute proposal belief on varnodeid through fctvert representing some constraint in factor graph. Always full dimension of variable node, where partial constraints will only influence directed subset of variable dimensions. Remaining dimensions will keep existing variable values.\n\n\n\n\n\n"
@@ -1394,7 +1434,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.fmcmc!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.fmcmc!",
     "category": "function",
     "text": "fmcmc!(fgl, cliq, fmsgs, IDs, N, MCMCIter)\nfmcmc!(fgl, cliq, fmsgs, IDs, N, MCMCIter, dbg)\n\n\nIterate successive approximations of clique marginal beliefs by means  of the stipulated proposal convolutions and products of the functional objects for tree clique cliq.\n\n\n\n\n\n"
@@ -1402,7 +1442,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.getCurrentWorkspaceFactors",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.getCurrentWorkspaceFactors",
     "category": "function",
     "text": "getCurrentWorkspaceFactors()\n\n\nReturn all factors currently registered in the workspace.\n\n\n\n\n\n"
@@ -1410,7 +1450,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.getCurrentWorkspaceVariables",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.getCurrentWorkspaceVariables",
     "category": "function",
     "text": "getCurrentWorkspaceVariables()\n\n\nReturn all variables currently registered in the workspace.\n\n\n\n\n\n"
@@ -1418,7 +1458,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.initializeNode!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.initializeNode!",
     "category": "function",
     "text": "initializeNode!(fgl, sym; N, api)\n\n\nInitialize the belief of a variable node in the factor graph struct.\n\n\n\n\n\n"
@@ -1426,7 +1466,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.landmarks",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.landmarks",
     "category": "function",
     "text": "landmarks(fgl::FactorGraph, vsym::Symbol)\n\nReturn Vector{Symbol} of landmarks attached to vertex vsym in fgl.\n\n\n\n\n\n"
@@ -1434,7 +1474,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.loadjld",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.loadjld",
     "category": "function",
     "text": "loadjld(; file)\n\n\nOpposite of savejld(fg, gt=gt, file=\"tempfg.jl\") to load data from file. This function uses the unpacking converters for converting all PackedInferenceType to FunctorInferenceType.\n\n\n\n\n\n"
@@ -1442,7 +1482,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.localProduct",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.localProduct",
     "category": "function",
     "text": "localProduct(fgl, sym; N, dbg, api)\n\n\nUsing factor graph object fg, project belief through connected factors (convolution with conditional) to variable sym followed by a approximate functional product.\n\nReturn: product belief, full proposals, partial dimension proposals, labels\n\n\n\n\n\nlocalProduct(fgl, lbl; N, dbg)\n\n\nUsing factor graph object fg, project belief through connected factors (convolution with conditional) to variable sym followed by a approximate functional product.\n\nReturn: product belief, full proposals, partial dimension proposals, labels\n\n\n\n\n\n"
@@ -1450,15 +1490,15 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.ls",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
+    "text": "ls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
 },
 
 {
     "location": "func_ref/#IncrementalInference.lsf",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.lsf",
     "category": "function",
     "text": "lsf(fgl, lbl; api)\n\n\nList factors in a factor graph.\n\nExamples\n\nlsf(fg)\n\n\n\n\n\n"
@@ -1466,7 +1506,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.lsRear",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.lsRear",
     "category": "function",
     "text": "lsRear(fgl)\nlsRear(fgl, n)\n\n\nReturn array of all variable nodes connected to the last n many poses (:x*).\n\nExample:\n\n# Shallow copy the tail end of poses from a factor graph `fg1`\nvars = lsRear(fg1, 5)\nfg1_r5 = subgraphFromVerts(fg1, vars)\n\n\n\n\n\n"
@@ -1474,7 +1514,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.printgraphmax",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.printgraphmax",
     "category": "function",
     "text": "printgraphmax(fgl)\n\n\nPrint the maximum point values form all variables approximate marginals in the factor graph. The full marginal can be recovered for example X0 = getVertKDE(fg, :x0).\n\n\n\n\n\n"
@@ -1482,7 +1522,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.productpartials!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.productpartials!",
     "category": "function",
     "text": "productpartials!(pGM, dummy, partials)\n\n\nMultiply different dimensions from partial constraints individually.\n\n\n\n\n\n"
@@ -1490,7 +1530,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.prodmultiplefullpartials",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.prodmultiplefullpartials",
     "category": "function",
     "text": "prodmultiplefullpartials(dens, partials, Ndims, N)\n\n\nMultiply various full and partial dimension constraints.\n\n\n\n\n\n"
@@ -1498,7 +1538,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.prodmultipleonefullpartials",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.prodmultipleonefullpartials",
     "category": "function",
     "text": "prodmultipleonefullpartials(dens, partials, Ndims, N)\n\n\nMultiply a single full and several partial dimension constraints.\n\n\n\n\n\n"
@@ -1506,7 +1546,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.savejld",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.savejld",
     "category": "function",
     "text": "savejld(fgl; file, groundtruth)\n\n\nSave mostly complete Factor Graph type by converting complicated FunctionNodeData types to \'Packed\' types using user supplied converters. Ground truth can also be saved and recovered by the associated loadjld(file=\"tempfg.jld2\") method.\n\n\n\n\n\n"
@@ -1514,7 +1554,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.setfreeze!",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.setfreeze!",
     "category": "function",
     "text": "setfreeze!(fgl, sym)\n\n\nUpdate the frozen node\n\n\n\n\n\n"
@@ -1522,7 +1562,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference.subgraphFromVerts",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference.subgraphFromVerts",
     "category": "function",
     "text": "subgraphFromVerts(fgl, verts; neighbors)\n\n\nExplore all shortest paths combinations in verts, add neighbors and reference subgraph using unique index into graph data structure.\n\n\n\n\n\n"
@@ -1530,10 +1570,82 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "func_ref/#IncrementalInference-1",
-    "page": "Function Reference",
+    "page": "Caesar\'s Reference",
     "title": "IncrementalInference",
     "category": "section",
     "text": "addNode!\naddFactor!\nallnums\napproxConv\nbatchSolve!\nconvert2packedfunctionnode\ndecodefg\ndoautoinit!\nemptyFactorGraph\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\nfmcmc!\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ninitializeNode!\nlandmarks\nloadjld\nlocalProduct\nls\nlsf\nlsRear\nprintgraphmax\nproductpartials!\nprodmultiplefullpartials\nprodmultipleonefullpartials\nsavejld\nsetfreeze!\nsubgraphFromVerts"
+},
+
+{
+    "location": "vis_func_ref/#",
+    "page": "Visualization Reference",
+    "title": "Visualization Reference",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "vis_func_ref/#Visualization-Function-Reference-1",
+    "page": "Visualization Reference",
+    "title": "Visualization Function Reference",
+    "category": "section",
+    "text": "Pages = [\n    \"vis_func_ref.md\"\n]\nDepth = 3"
+},
+
+{
+    "location": "vis_func_ref/#RoMEPlotting.drawLandms",
+    "page": "Visualization Reference",
+    "title": "RoMEPlotting.drawLandms",
+    "category": "function",
+    "text": "drawLandms(fg; from, to, minnei, meanmax, lbls, showmm, drawhist, c, MM, api)\n\n\n2D plot of landmarks, assuming :l1, :l2, ... :ln.  Use from and to to control the range of landmarks n to include.\n\n\n\n\n\n"
+},
+
+{
+    "location": "vis_func_ref/#RoMEPlotting.drawPoses",
+    "page": "Visualization Reference",
+    "title": "RoMEPlotting.drawPoses",
+    "category": "function",
+    "text": "drawPoses(fg; from, to, meanmax, lbls, drawhist, spscale, api)\n\n\n2D plot of all poses, assuming poses are labeled from `::Symbol type :x0, :x1, ..., :xn.  Use to and from to limit the range of numbers n to be drawn.  The underlying histogram can be enabled or disabled, and the size of maximum-point belief estimate cursors can be controlled with spscale.\n\nFuture:\n\nRelax to user defined pose labeling scheme, for example :p1, :p2, ...\n\n\n\n\n\n"
+},
+
+{
+    "location": "vis_func_ref/#RoMEPlotting.drawPosesLandms",
+    "page": "Visualization Reference",
+    "title": "RoMEPlotting.drawPosesLandms",
+    "category": "function",
+    "text": "drawPosesLandms(fgl; from, to, minnei, meanmax, lbls, drawhist, MM, showmm, spscale, window, api, xmin, xmax, ymin, ymax)\n\n\n2D plot of both poses and landmarks contained in factor graph.  Assuming poses and landmarks are labeled :x1, :x2, ... and :l0, :l1, ..., respectively.  The rnage of numbers to include can be controlled with from and to along with other keyword functionality for manipulating the plot. \n\n\n\n\n\n"
+},
+
+{
+    "location": "vis_func_ref/#KernelDensityEstimatePlotting.plotKDE",
+    "page": "Visualization Reference",
+    "title": "KernelDensityEstimatePlotting.plotKDE",
+    "category": "function",
+    "text": "plotKDE(fgl, sym; axis, dims, c, levels, title)\n\n\nA peneric KDE plotting function that allows marginals of higher dimensional beliefs and various keyword options.\n\nExample:\n\np = kde!(randn(3,100))\n\nplotKDE(p)\nplotKDE(p, dims=[1;2], levels=3)\nplotKDE(p, dims=[1])\n\nq = kde!(5*randn(3,100))\nplotKDE([p;q])\nplotKDE([p;q], dims=[1;2], levels=3)\nplotKDE([p;q], dims=[1])\n\n\n\n\n\n"
+},
+
+{
+    "location": "vis_func_ref/#RoMEPlotting.plotProductVsKDE",
+    "page": "Visualization Reference",
+    "title": "RoMEPlotting.plotProductVsKDE",
+    "category": "function",
+    "text": "plotProductVsKDE(fgl, sym; levels, c)\n\n\nAnalysis function to compare KDE plots between the factor graph centric product of a variable with current value stored in the factor graph object.\n\n\n\n\n\n"
+},
+
+{
+    "location": "vis_func_ref/#RoMEPlotting-1",
+    "page": "Visualization Reference",
+    "title": "RoMEPlotting",
+    "category": "section",
+    "text": "drawLandms\ndrawPoses\ndrawPosesLandms\nplotKDE\nplotProductVsKDE"
+},
+
+{
+    "location": "vis_func_ref/#KernelDensityEstimatePlotting-1",
+    "page": "Visualization Reference",
+    "title": "KernelDensityEstimatePlotting",
+    "category": "section",
+    "text": "plotKDEWORK IN PROGRESS  Not all functions have been added to this directory yet."
 },
 
 ]}
