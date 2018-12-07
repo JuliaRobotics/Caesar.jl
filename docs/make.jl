@@ -19,7 +19,8 @@ makedocs(
             "Arena Visualization" => "concepts/arena_visualizations.md",
             "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
             "Adding New Variables and Factors" => "concepts/adding_variables_factors.md",
-            "Using Caesar Database Operation" => "concepts/database_interactions.md"
+            "Using Caesar Database Operation" => "concepts/database_interactions.md",
+            "Literature References" => "concepts/literature.md"
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
