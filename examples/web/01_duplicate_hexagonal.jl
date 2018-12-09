@@ -5,8 +5,9 @@ nprocs() < 3 ? addprocs(4-nprocs()) : nothing
 
 using Caesar
 using GraffSDK
+using UUIDs
 ## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist
-using RoMEPlotting
+# using RoMEPlotting
 
 
 # Graff.....
@@ -15,7 +16,7 @@ cd(joinpath(dirname(pathof(GraffSDK)), "..", "examples"))
 # 1a. Create a Configuration
 config = loadGraffConfig("synchronyConfig1.json")
 #Create a hexagonal sessions
-config.sessionId = "HexDemo01"
+config.sessionId = "Hexagonal_"*replace(string(uuid4()), "-" => "")
 println(getGraffConfig())
 # 1b. Check the credentials and the service status
 printStatus()
@@ -38,6 +39,16 @@ existingSessions = getSessions()
 # getNodes()
 # Decide which ones we want...
 
+# Make a new session
+session = nothing
+if !isSessionExisting()
+    println(" -- Session '$(config.sessionId)' doesn't exist for robot '$(config.robotId)', creating it...")
+    newSessionRequest = SessionDetailsRequest(config.sessionId, "Hexagonal duplication example.", "Pose2", false) #Don't initialize it.
+    session = addSession(newSessionRequest)
+else
+    session = getSession()
+end
+
 ## LOCAL MEMORY
 # start with an empty factor graph object
 fg = initfg()
@@ -46,22 +57,13 @@ fg.qfl = 10
 
 # Add the first pose :x0
 addNode!(fg, :x0, Pose2)
+# Add to Graff
+addVariable("x0", "Pose2", String[])
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (0, 0, 0)
-addFactor!(fg, [:x0], IIF.Prior( MvNormal([0; 0; 0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))
-
-## CLOUD VERSION
-# This code should work for the first session created, but we need to do a little work so the code is good for infinitely many new sessions
-# TODO: manange non-(0,0,0) initialization of new sessions -- i.e. using landmark initialization.
-if !isSessionExisting()
-    # this call in current API will also create the initial x0 pose with a prior (0,0,0)
-    @info "Session $(config.sessionId) doesn't exist, creating.."
-    newSessionRequest = SessionDetailsRequest(config.sessionId, "A test dataset demonstrating data ingestion for a wheeled vehicle driving in a hexagon.", "Pose2")
-    session = addSession(newSessionRequest)
-else
-    @info "Session $(config.sessionId) already exists, carry on!"
-end
-
+prior = IIF.Prior( MvNormal([0; 0; 0], Matrix(Diagonal([0.1;0.1;0.05].^2)) ))
+addFactor!(fg, [:x0], prior)
+addFactor(FactorRequest(["x0"], "Prior", convert(PackedPrior, prior)))
 
 # Drive around in a hexagon
 for i in 0:5
@@ -75,30 +77,26 @@ for i in 0:5
   ## LOCAL MEMORY
   # add next pose variable to local memory version
   addNode!(fg, nsym, Pose2)
+  addVariable(String(nsym), "Pose2", String[])
   # add odometry factor to local memory version
   addFactor!(fg, [psym;nsym], pp )
-
-  ## CLOUD MEMORY
-  # duplicate next pose variable on cloud version
-  # TODO: addVariable!(fg_remote, nsym, Pose2)
-  # duplicate odometry factor on cloud version
-  # TODO addFactor!(fg_remote, [psym;nsym], pp )
-  ## Existing addOdo interface
-  newOdometryMeasurement = AddOdometryRequest(deltaMeasurement, pOdo)
-  @time @show addOdoResponse = addOdometryMeasurement(newOdometryMeasurement)
+  addFactor(FactorRequest([String(psym), String(nsym)], "Pose2Pose2", convert(PackedPose2Pose2, pp)))
 end
 
 # perform inference on local version, and remember first runs are slower owing to Julia's just-in-time compiling
 batchSolve!(fg)
 
+# Let the cloud instance know that the graph is ready
+putReady(true)
+
 # No need to call batchSolve on cloud - it picks up on changes and
 # 8. Let's check on the solver updates.
-# sessionLatest = getSession()
-# while session.lastSolvedTimestamp != sessionLatest.lastSolvedTimestamp
-#   println("Comparing latest session solver timestamp $(sessionLatest.lastSolvedTimestamp) with original $(session.lastSolvedTimestamp) - still the same so sleeping for 2 seconds")
-#   sleep(2)
-#   sessionLatest = getSession()
-# end
+sessionLatest = getSession()
+while session.lastSolvedTimestamp != sessionLatest.lastSolvedTimestamp
+  println("Comparing latest session solver timestamp $(sessionLatest.lastSolvedTimestamp) with original $(session.lastSolvedTimestamp) - still the same so sleeping for 2 seconds")
+  sleep(2)
+  sessionLatest = getSession()
+end
 # get cloud nodes
 getNodes()
 
@@ -109,8 +107,10 @@ Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 # Add landmarks with Bearing range measurements
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable("l1", "Point2", ["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.1), Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
+addFactor(FactorRequest(["x0", "l1"], "Pose2Point2BearingRange", convert(PackedPose2Point2BearingRange, p2br)))
 
 # Initialize :l1 numerical values but do not rerun solver
 ensureAllInitialized!(fg)
@@ -121,6 +121,7 @@ Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf", 20cm, 10cm),pl)  # or PNG(...)
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.1), Normal(20.0,1.0))
 addFactor!(fg, [:x6; :l1], p2br2)
+addFactor(FactorRequest(["x6", "l1"], "Pose2Point2BearingRange", convert(PackedPose2Point2BearingRange, p2br2)))
 
 # solve
 batchSolve!(fg)
