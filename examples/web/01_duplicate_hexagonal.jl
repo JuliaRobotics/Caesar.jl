@@ -55,15 +55,17 @@ fg = initfg()
 fg.isfixedlag = true
 fg.qfl = 10
 
-# Add the first pose :x0
+# Local: Add the first pose :x0
 addNode!(fg, :x0, Pose2)
-# Add to Graff
-addVariable("x0", "Pose2", String[])
+# Graff: Add x0 to Graff
+addVariable(:x0, Pose2, String[])
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (0, 0, 0)
 prior = IIF.Prior( MvNormal([0; 0; 0], Matrix(Diagonal([0.1;0.1;0.05].^2)) ))
+# Local: Add a prior to x0
 addFactor!(fg, [:x0], prior)
-addFactor(FactorRequest(["x0"], "Prior", convert(PackedPrior, prior)))
+# Graff: Add the prior to x0
+addFactor([:x0], prior)
 
 # Drive around in a hexagon
 for i in 0:5
@@ -75,19 +77,19 @@ for i in 0:5
   pp = Pose2Pose2(MvNormal(deltaMeasurement, pOdo.^2))
 
   ## LOCAL MEMORY
-  # add next pose variable to local memory version
+  # Local: add next pose variable +odometry to local memory version
   addNode!(fg, nsym, Pose2)
-  addVariable(String(nsym), "Pose2", String[])
-  # add odometry factor to local memory version
   addFactor!(fg, [psym;nsym], pp )
-  addFactor(FactorRequest([String(psym), String(nsym)], "Pose2Pose2", convert(PackedPose2Pose2, pp)))
+  # Graff: add odometry
+  addVariable(nsym, Pose2, String[])
+  addFactor([psym;nsym], pp)
 end
+
+# Graff: Let the cloud instance know that the graph is ready
+putReady(true)
 
 # perform inference on local version, and remember first runs are slower owing to Julia's just-in-time compiling
 batchSolve!(fg)
-
-# Let the cloud instance know that the graph is ready
-putReady(true)
 
 # No need to call batchSolve on cloud - it picks up on changes and
 # 8. Let's check on the solver updates.
@@ -107,24 +109,28 @@ Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 # Add landmarks with Bearing range measurements
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
-addVariable("l1", "Point2", ["LANDMARK"])
+addVariable(:l1, Point2, ["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.1), Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
-addFactor(FactorRequest(["x0", "l1"], "Pose2Point2BearingRange", convert(PackedPose2Point2BearingRange, p2br)))
+addFactor([:x0, :l1], p2br)
 
 # Initialize :l1 numerical values but do not rerun solver
 ensureAllInitialized!(fg)
 pl = drawPosesLandms(fg)
 Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
-
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.1), Normal(20.0,1.0))
 addFactor!(fg, [:x6; :l1], p2br2)
-addFactor(FactorRequest(["x6", "l1"], "Pose2Point2BearingRange", convert(PackedPose2Point2BearingRange, p2br2)))
+addFactor([:x6, :l1], p2br2)
 
-# solve
+# Graff: PutReady to tell Graff to solve
+putReady(true)
+# Local: Solve
 batchSolve!(fg)
+
+# If you like you can request a full graph solve
+requestSessionSolve()
 
 # redraw
 pl = drawPosesLandms(fg)
