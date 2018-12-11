@@ -1405,7 +1405,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.batchSolve!",
     "category": "function",
-    "text": "batchSolve!(fgl; drawpdf, show, N, recursive)\n\n\nPerform multimodal incremental smoothing and mapping (mm-iSAM) computations over given factor graph fgl::FactorGraph on the local computer.  A pdf of the Bayes (Junction) tree will be generated in the working folder with drawpdf=true\n\n\n\n\n\n"
+    "text": "batchSolve!(fgl; drawpdf, show, N, recursive, dbg)\n\n\nPerform multimodal incremental smoothing and mapping (mm-iSAM) computations over given factor graph fgl::FactorGraph on the local computer.  A pdf of the Bayes (Junction) tree will be generated in the working folder with drawpdf=true\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.childCliqs",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.childCliqs",
+    "category": "function",
+    "text": "childCliqs(treel, cliq)\n\n\nReturn a vector of child cliques to cliq.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.cliqGibbs",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.cliqGibbs",
+    "category": "function",
+    "text": "cliqGibbs(fg, cliq, vertid, inmsgs, N, dbg)\n\n\nPerform one step of the minibatch clique Gibbs operation for solving the Chapman-Kolmogov trasit integral – here involving separate approximate functional convolution and product operations.\n\n\n\n\n\n"
 },
 
 {
@@ -1429,7 +1445,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.doautoinit!",
     "category": "function",
-    "text": "doautoinit!(fgl, Xi; api, singles, N)\n\n\ninitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!. Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\ndoautoinit!(fgl, xsyms; api, singles, N)\n\n\ninitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!.  Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\n"
+    "text": "doautoinit!(fgl, Xi; api, singles, N)\n\n\ninitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!. Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\ndoautoinit!(fgl, xsyms; api, singles, N)\n\n\nInitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!.  Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.downMsgPassingRecursive",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.downMsgPassingRecursive",
+    "category": "function",
+    "text": "downMsgPassingRecursive(inp; N, dbg, drawpdf)\n\n\nPass NBPMessages back down the tree – pre order tree traversal.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.dwnMsg",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.dwnMsg",
+    "category": "function",
+    "text": "dwnMsg(cliq)\n\n\nReturn the last down message stored in cliq of Bayes (Junction) tree.\n\n\n\n\n\n"
 },
 
 {
@@ -1461,7 +1493,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.findRelatedFromPotential",
     "category": "function",
-    "text": "findRelatedFromPotential(fg, idfct, vertid, N)\nfindRelatedFromPotential(fg, idfct, vertid, N, dbg)\n\n\nCompute proposal belief on varnodeid through fctvert representing some constraint in factor graph. Always full dimension of variable node, where partial constraints will only influence directed subset of variable dimensions. Remaining dimensions will keep existing variable values.\n\n\n\n\n\n"
+    "text": "findRelatedFromPotential(fg, idfct, vertid, N)\nfindRelatedFromPotential(fg, idfct, vertid, N, dbg)\n\n\nCompute proposal belief on vertid through idfct representing some constraint in factor graph. Always full dimension variable node – partial constraints will only influence subset of variable dimensions. The remaining dimensions will keep pre-existing variable values.\n\n\n\n\n\n"
 },
 
 {
@@ -1469,7 +1501,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.fmcmc!",
     "category": "function",
-    "text": "fmcmc!(fgl, cliq, fmsgs, IDs, N, MCMCIter)\nfmcmc!(fgl, cliq, fmsgs, IDs, N, MCMCIter, dbg)\n\n\nIterate successive approximations of clique marginal beliefs by means  of the stipulated proposal convolutions and products of the functional objects for tree clique cliq.\n\n\n\n\n\n"
+    "text": "fmcmc!(fgl, cliq, fmsgs, IDs, N, MCMCIter)\nfmcmc!(fgl, cliq, fmsgs, IDs, N, MCMCIter, dbg)\n\n\nIterate successive approximations of clique marginal beliefs by means of the stipulated proposal convolutions and products of the functional objects for tree clique cliq.\n\n\n\n\n\n"
 },
 
 {
@@ -1486,6 +1518,22 @@ var documenterSearchIndex = {"docs": [
     "title": "IncrementalInference.getCurrentWorkspaceVariables",
     "category": "function",
     "text": "getCurrentWorkspaceVariables()\n\n\nReturn all variables currently registered in the workspace.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getKDE",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getKDE",
+    "category": "function",
+    "text": "getKDE(v)\n\n\nGet KernelDensityEstimate kde estimate stored in variable node.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getVertKDE",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getVertKDE",
+    "category": "function",
+    "text": "getVertKDE(v)\n\n\nGet KernelDensityEstimate kde estimate stored in variable node.\n\n\n\n\n\n"
 },
 
 {
@@ -1517,7 +1565,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.localProduct",
     "category": "function",
-    "text": "localProduct(fgl, sym; N, dbg, api)\n\n\nUsing factor graph object fg, project belief through connected factors (convolution with conditional) to variable sym followed by a approximate functional product.\n\nReturn: product belief, full proposals, partial dimension proposals, labels\n\n\n\n\n\nlocalProduct(fgl, lbl; N, dbg)\n\n\nUsing factor graph object fg, project belief through connected factors (convolution with conditional) to variable sym followed by a approximate functional product.\n\nReturn: product belief, full proposals, partial dimension proposals, labels\n\n\n\n\n\n"
+    "text": "localProduct(fgl, sym; N, dbg, api)\n\n\nUsing factor graph object fg, project belief through connected factors (convolution with conditional) to variable sym followed by a approximate functional product.\n\nReturn: product belief, full proposals, partial dimension proposals, labels\n\n\n\n\n\n"
 },
 
 {
@@ -1525,7 +1573,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
+    "text": "ls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
 },
 
 {
@@ -1542,6 +1590,22 @@ var documenterSearchIndex = {"docs": [
     "title": "IncrementalInference.lsRear",
     "category": "function",
     "text": "lsRear(fgl)\nlsRear(fgl, n)\n\n\nReturn array of all variable nodes connected to the last n many poses (:x*).\n\nExample:\n\n# Shallow copy the tail end of poses from a factor graph `fg1`\nvars = lsRear(fg1, 5)\nfg1_r5 = subgraphFromVerts(fg1, vars)\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.manualinit!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.manualinit!",
+    "category": "function",
+    "text": "manualinit!(fgl, sym, usefcts)\n\n\nWorkaround function when first-version (factor graph based) auto initialization fails.  Usually occurs when using factors that have high connectivity to multiple variables.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.packFromLocalPotentials!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.packFromLocalPotentials!",
+    "category": "function",
+    "text": "packFromLocalPotentials!(fgl, dens, wfac, cliq, vertid, N)\npackFromLocalPotentials!(fgl, dens, wfac, cliq, vertid, N, dbg)\n\n\nAdd all potentials associated with this clique and vertid to dens.\n\n\n\n\n\n"
 },
 
 {
@@ -1585,11 +1649,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "func_ref/#IncrementalInference.setDwnMsg!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.setDwnMsg!",
+    "category": "function",
+    "text": "setDwnMsg!(cliql, msgs)\n\n\nSet the downward passing message for Bayes (Junction) tree clique cliql.\n\n\n\n\n\n"
+},
+
+{
     "location": "func_ref/#IncrementalInference.setfreeze!",
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.setfreeze!",
     "category": "function",
-    "text": "setfreeze!(fgl, sym)\n\n\nUpdate the frozen node\n\n\n\n\n\n"
+    "text": "setfreeze!(fgl, sym)\n\n\nSet variable(s) sym of factor graph to be marginalized – i.e. not be updated by inference computation.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.setUpMsg!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.setUpMsg!",
+    "category": "function",
+    "text": "setUpMsg!(cliql, msgs)\n\n\nSet the upward passing message for Bayes (Junction) tree clique cliql.\n\n\n\n\n\n"
 },
 
 {
@@ -1601,11 +1681,59 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "func_ref/#IncrementalInference.treeProductDwn",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.treeProductDwn",
+    "category": "function",
+    "text": "treeProductDwn(fg, tree, cliq, sym; N, dbg)\n\n\nCalculate a fresh–-single step–-approximation to the variable sym in clique cliq as though during the downward message passing.  The full inference algorithm may repeatedly calculate successive apprimxations to the variable based on the structure of variables, factors, and incoming messages to this clique. Which clique to be used is defined by frontal variable symbols (cliq in this case) – see whichCliq(...) for more details.  The sym symbol indicates which symbol of this clique to be calculated.  Note that the sym variable must appear in the clique where cliq is a frontal variable.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.treeProductUp",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.treeProductUp",
+    "category": "function",
+    "text": "treeProductUp(fg, tree, cliq, sym; N, dbg)\n\n\nCalculate a fresh–-single step–-approximation to the variable sym in clique cliq as though during the upward message passing.  The full inference algorithm may repeatedly calculate successive apprimxations to the variable based on the structure of variables, factors, and incoming messages to this clique. Which clique to be used is defined by frontal variable symbols (cliq in this case) – see whichCliq(...) for more details.  The sym symbol indicates which symbol of this clique to be calculated.  Note that the sym variable must appear in the clique where cliq is a frontal variable.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.updateFGBT!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.updateFGBT!",
+    "category": "function",
+    "text": "updateFGBT!(fg, bt, cliqID, ddt; dbg, fillcolor)\n\n\nUpdate cliq cliqID in Bayes (Juction) tree bt according to contents of ddt – intended use is to update main clique after a downward belief propagation computation has been completed per clique.\n\n\n\n\n\nupdateFGBT!(fg, bt, cliqID, urt; dbg, fillcolor)\n\n\nUpdate cliq cliqID in Bayes (Juction) tree bt according to contents of urt – intended use is to update main clique after a upward belief propagation computation has been completed per clique.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.upGibbsCliqueDensity",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.upGibbsCliqueDensity",
+    "category": "function",
+    "text": "upGibbsCliqueDensity(inp)\nupGibbsCliqueDensity(inp, N)\nupGibbsCliqueDensity(inp, N, dbg)\n\n\nPerform computations required for the upward message passing during belief propation on the Bayes (Junction) tree. This function is usually called as part via remote_call for multiprocess dispatch.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.upMsg",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.upMsg",
+    "category": "function",
+    "text": "upMsg(cliq)\n\n\nReturn the last up message stored in cliq of Bayes (Junction) tree.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.writeGraphPdf",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.writeGraphPdf",
+    "category": "function",
+    "text": "writeGraphPdf(fgl; viewerapp, filepath, engine, show)\n\n\nExport a dot and pdf file drawn by Graphviz showing the factor graph.\n\n\n\n\n\n"
+},
+
+{
     "location": "func_ref/#IncrementalInference-1",
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference",
     "category": "section",
-    "text": "addNode!\naddFactor!\nallnums\napproxConv\nbatchSolve!\nconvert2packedfunctionnode\ndecodefg\ndoautoinit!\nemptyFactorGraph\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\nfmcmc!\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ninitializeNode!\nlandmarks\nloadjld\nlocalProduct\nls\nlsf\nlsRear\nprintgraphmax\nproductpartials!\nprodmultiplefullpartials\nprodmultipleonefullpartials\nsavejld\nsetfreeze!\nsubgraphFromVerts"
+    "text": "addNode!\naddFactor!\nallnums\napproxConv\nbatchSolve!\nchildCliqs\ncliqGibbs\nconvert2packedfunctionnode\ndecodefg\ndoautoinit!\ndownMsgPassingRecursive\ndwnMsg\nemptyFactorGraph\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\nfmcmc!\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ngetKDE\ngetVertKDE\ninitializeNode!\nlandmarks\nloadjld\nlocalProduct\nls\nlsf\nlsRear\nmanualinit!\npackFromLocalPotentials!\nprintgraphmax\nproductpartials!\nprodmultiplefullpartials\nprodmultipleonefullpartials\nsavejld\nsetDwnMsg!\nsetfreeze!\nsetUpMsg!\nsubgraphFromVerts\ntreeProductDwn\ntreeProductUp\nupdateFGBT!\nupGibbsCliqueDensity\nupMsg\nwriteGraphPdf"
 },
 
 {
