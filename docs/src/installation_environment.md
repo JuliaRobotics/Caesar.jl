@@ -10,7 +10,7 @@ The following system packages are used by Caesar.jl:
 sudo apt-get install hdf5-tools
 
 # optional packages
-sudo apt-get install graphviz  
+sudo apt-get install graphviz imagemagick
 ```
 
 ## Local Installation of Julia
