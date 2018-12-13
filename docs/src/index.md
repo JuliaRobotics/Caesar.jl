@@ -38,9 +38,12 @@ Unit tests can further be performed for the upstream packages as follows -- **NO
 ...
 ```
 
-(Q4 2018), Temporarily require development version of RoMEPlotting.jl:
+(Q4 2018), Temporarily require development (`master` branch) version of RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
 ```julia
 (v1.0) pkg> add RoMEPlotting#master
+
+# separately
+(v1.0) pkg> add Arena#master
 ```
 
 ## Caesar Framework
