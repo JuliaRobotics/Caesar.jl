@@ -43,6 +43,18 @@ racecarall() {
   racecarslamdefault_8 $* &
 }
 
+racecarsweepfocal() {
+  racecarall --focalscale 1.0
+  racecarall --focalscale 0.95
+  racecarall --focalscale 0.90
+  racecarall --focalscale 0.85
+  #racecarall --focalscale 0.80
+  #racecarall --focalscale 0.75
+  #racecarall --focalscale 0.70
+  #racecarall --focalscale 0.65
+  #racecarall --focalscale 0.60
+}
+
 # racecarall
 #
 # racecarall --focalscale 1.005
