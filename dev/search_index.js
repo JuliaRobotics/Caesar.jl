@@ -141,7 +141,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Installation",
     "title": "Local Dependencies",
     "category": "section",
-    "text": "The following system packages are used by Caesar.jl:# required packages\nsudo apt-get install hdf5-tools\n\n# optional packages\nsudo apt-get install graphviz  "
+    "text": "The following system packages are used by Caesar.jl:# required packages\nsudo apt-get install hdf5-tools\n\n# optional packages\nsudo apt-get install graphviz imagemagick"
 },
 
 {
@@ -1573,7 +1573,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
+    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
 },
 
 {
