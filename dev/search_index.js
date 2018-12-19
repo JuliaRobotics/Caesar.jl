@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "TL;DR Installation",
     "category": "section",
-    "text": "If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package \'Caesar\'.Caesar can be installed for latest Julia 0.7/1.0 with:julia> ] # to enable package manager\n(v1.0) pkg> add CaesarUnit tests can further be performed for the upstream packages as follows – NOTE first time runs are slow since each new function call or package must first be precompiled.(v1.0) pkg> test IncrementalInference\n...\n(v1.0) pkg> test RoME\n...\n(v1.0) pkg> test Caesar\n...(Q4 2018), Temporarily require development version of RoMEPlotting.jl:(v1.0) pkg> add RoMEPlotting#master"
+    "text": "If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package \'Caesar\'.Caesar can be installed for latest Julia 0.7/1.0 with:julia> ] # to enable package manager\n(v1.0) pkg> add CaesarUnit tests can further be performed for the upstream packages as follows – NOTE first time runs are slow since each new function call or package must first be precompiled.(v1.0) pkg> test IncrementalInference\n...\n(v1.0) pkg> test RoME\n...\n(v1.0) pkg> test Caesar\n...(Q4 2018), Temporarily require development (master branch) version of RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:(v1.0) pkg> add RoMEPlotting#master\n\n# separately\n(v1.0) pkg> add Arena#master"
 },
 
 {
@@ -1573,7 +1573,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
+    "text": "ls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
 },
 
 {
