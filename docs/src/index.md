@@ -19,7 +19,7 @@ The Caesar framework has the following features:
 * Local in-memory solving on the device as well as database-driven centralized solving
 * Fixed-lag, continuous operation as well as off-line batch solving
 
-## TLDR Installation
+## TL;DR Installation
 If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package 'Caesar'.
 
 Caesar can be installed for latest Julia 0.7/1.0 with:
@@ -38,15 +38,23 @@ Unit tests can further be performed for the upstream packages as follows -- **NO
 ...
 ```
 
+(Q4 2018), Temporarily require development (`master` branch) version of RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
+```julia
+(v1.0) pkg> add RoMEPlotting#master
+
+# separately
+(v1.0) pkg> add Arena#master
+```
+
 ## Caesar Framework
 
 ## Caesar Core
 Caesar is implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.
 
-[Caesar.jl](http://www.github.com/JuliaRobotics/Caesar.jl) is the umbrella repo that depends on RoME.jl and others to support that 'passes through' the same functionality while introducing more. For example, interaction with database server systems, [LCMCore.jl](http://www.github.com/JuliaRobotics/LCMCore.jl), (future ROS support), and more.
+[Caesar.jl](http://www.github.com/JuliaRobotics/Caesar.jl) is the "umbrella" framework that depends on and supports various dedicated purpose packages.
 
 ### Caesar Core Packages
-Critically, this package can operate in the conventional SLAM manner, using local dictionaries, or centralize around the `FactorGraph` through a graph database using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git), as [discussed here](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) [2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) and back-end solver [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl).
+Critically, this package can operate in the conventional SLAM manner, using local memory (dictionaries), or alternatively distribute around a persisted `FactorGraph` through a graph database using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git), as [discussed in literature here](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) [2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) and back-end solver [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl).
 
 Details about the accompanying packages:
 * [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl) supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself.
@@ -56,11 +64,13 @@ Details about the accompanying packages:
 ## Caesar Extensions
 
 ### Visualization
-Caesar visualization (plotting of results, graphs, and data) is provided in the [Arena.jl](https://github.com/dehann/Arena.jl) package, which is a collection of 3D visualization tools and also depends on RoMEPlotting.jl for 2D visualizations.
+Caesar visualization (plotting of results, graphs, and data) is provided in the [Arena.jl](https://github.com/dehann/Arena.jl) package, which is a collection of 3D visualization tools and also depends on [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) for 2D visualizations.
 
 ## Caesar SDKs and APIs
 The Caesar framework is not limited to direct Julia use. The following Github projects provide access to features of Caesar in their language:
 
+* Julia Web interface:
+  * [GraffSDK.jl](https://github.com/GearsAD/GraffSDK.jl)
 * C/C++:
   * [Graff Cpp](https://github.com/MarineRoboticsGroup/graff_cpp)
   * [Caesar LCM](http://github.com/pvazteixeira/caesar-lcm)
@@ -68,6 +78,10 @@ The Caesar framework is not limited to direct Julia use. The following Github pr
   * [SynchronySDK](https://github.com/nicrip/SynchronySDK_py)
 
 Contributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below).
+
+## Future Directions
+
+Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion.  For example see [ROS integration page here](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
 
 ## Next Steps
 For installation steps, examples/tutorials, and concepts please refer to the following pages:
@@ -107,15 +121,7 @@ Consider citing our work:
 @misc{caesarjl,
   author = "Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors",
   title =  "Caesar.jl",
-  year =   2017,
+  year =   2018,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
-
-## References
-
-    [1]  Fourie, D.: "Multi-modal and Inertial Sensor Solutions to Navigation-type Factor Graph",
-         Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.
-    [2]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: "SLAMinDB: Centralized graph
-         databases for mobile robotics" IEEE International Conference on Robotics and Automation (ICRA),
-         Singapore, 2017.

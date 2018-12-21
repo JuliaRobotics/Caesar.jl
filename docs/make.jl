@@ -1,7 +1,12 @@
 using Documenter, Caesar
+import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
+import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
+
+using KernelDensityEstimatePlotting
+using RoMEPlotting
 
 makedocs(
-    modules = [Caesar, RoME, IncrementalInference],
+    modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
     format = :html,
     sitename = "Caesar.jl",
     pages = Any[
@@ -13,9 +18,9 @@ makedocs(
             "Caesar Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
             "Arena Visualization" => "concepts/arena_visualizations.md",
-            "Using Caesar's Multi-Language Support" => "concepts/zmq.md",
+            "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
             "Adding New Variables and Factors" => "concepts/adding_variables_factors.md",
-            "Using Caesar Database Operation" => "concepts/database_interactions.md"
+            "Using Caesar Database Operation" => "concepts/database_interactions.md",
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
@@ -26,8 +31,12 @@ makedocs(
             "Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
             "Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
+        "Literature" => [
+            "References" => "refs/literature.md"
+        ],
         "Function Reference" => [
-            "Function Reference" => "func_ref.md",
+            "Caesar's Reference" => "func_ref.md",
+            "Visualization Reference" => "vis_func_ref.md",
         ]
     ]
     # html_prettyurls = !("local" in ARGS),

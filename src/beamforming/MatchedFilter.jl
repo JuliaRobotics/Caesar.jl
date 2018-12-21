@@ -27,7 +27,7 @@ function prepMF(chirpIn::Array,n::Int,m::Int)
     thisMF.chirpF = zeros(Complex{Float64},n)
     thisMF.chirpF[1:length(chirpIn)] = chirpIn
     conj!(fft!(thisMF.chirpF))
-    thisMF.filter = repmat(thisMF.chirpF,1,m)
+    thisMF.filter = repeat(thisMF.chirpF,1,m) # repmat
     return thisMF
 end
 

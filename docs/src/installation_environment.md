@@ -2,6 +2,17 @@
 
 Caesar.jl is one of the packages within the [JuliaRobotics](http://www.juliarobotics.org) community, and adheres to the [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 
+## Local Dependencies
+
+The following system packages are used by Caesar.jl:
+```
+# required packages
+sudo apt-get install hdf5-tools
+
+# optional packages
+sudo apt-get install graphviz imagemagick
+```
+
 ## Local Installation of Julia
 
 Although [Julia](https://julialang.org/) (or [JuliaPro](https://juliacomputing.com/)) can be installed on a Linux computer using the `apt` package manager, we are striving for a fully local installation environment which is highly reproducible on a variety of platforms.
@@ -109,7 +120,22 @@ You can work with the packages as regular git repositories there.
 ## Install Visualization Utils (e.g. Arena.jl)
 
 Visualizations were removed from Caesar and moved to a new package [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) instead.
-Please follow instructions on the [Visualizations page](http://www.juliarobotics.org/Caesar.jl/latest/arena_visualizations.html) for a variety of 2D / 3D utilities.
+Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 2D / 3D utilities.
+
+### Important: Temporary Julia 1.0 Pango Workaround
+
+The [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) package must be installed up to latest master branch (development branch) owing to an upstream [issue with Pango fonts on Julia 1.0](https://github.com/GiovineItalia/Gadfly.jl/issues/1206) with [Gadfly.jl](https://github.com/GiovineItalia/Gadfly.jl) plotting.  Once this issue is resolved, the next RoMEPlotting stable version can be tagged and be available as a standard stable release.
+
+Please install the latest RoMEPlotting using Package manager as follows:
+```
+$ julia # latest v1.0.x
+julia> ] # to get package manager
+(v1.0) pkg> add RoMEPlotting#master
+```
+
+Alternatively, the `dev` command --- i.e. `(v1.0) pkg> dev RoMEPlotting` --- will clone the RoMEPlotting.jl git repository to your local `.julia/dev/RoMEPlotting` folder.
+
+> Written December 2018
 
 ## Contributing, Issues, or Comments
 

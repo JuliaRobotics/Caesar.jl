@@ -1,4 +1,8 @@
 
+using Caesar
+using Pkg
+using DelimitedFiles
+
 chirpFile = joinpath(Pkg.dir("Caesar"),"test","testdata","template.txt");
 chirpIn = readdlm(chirpFile,',',Float64,'\n')
 
@@ -8,10 +12,11 @@ rawData = readdlm(logfile,',',Float64,'\n')  # waveform timeseries from hydropho
 nFFT = nextpow(2,size(rawData,1))
 nPhones = 5
 
-mf = prepMF(chirpIn,nFFT,nPhones)
-dataOut = zeros(Complex{Float64}, nFFT,nPhones)
+mf = Caesar.prepMF(chirpIn,nFFT,nPhones)
+dataOut = zeros(Complex{Float64}, nFFT, nPhones)
 mf(rawData,dataOut)
 
+0
 
 # using Plots
 #

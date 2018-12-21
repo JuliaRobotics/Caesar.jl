@@ -8,8 +8,7 @@ A modern robotic toolkit for localization and mapping -- reducing the barrier of
 
 # Documentation
 
-Please see the [documentation](http://juliarobotics.github.io/Caesar.jl/latest/):
-
+Please see the [documentation](http://juliarobotics.github.io/Caesar.jl/latest/): 
 [![docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://juliarobotics.github.io/Caesar.jl/latest/)
 
 
@@ -39,7 +38,7 @@ Consider citing our work:
 @misc{caesarjl,
   author = "Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors",
   title =  "Caesar.jl",
-  year =   2017,
+  year =   2018,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
