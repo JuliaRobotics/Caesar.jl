@@ -26,23 +26,20 @@ Please see the [documentation](http://juliarobotics.github.io/Caesar.jl/latest/)
 
 # Contributors
 
-Authors directly involved with this package are:
-
-D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. Leonard
-
-We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
+We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files for a far reaching list of contributions.
 
 Consider citing our work:
 
 ```
 @misc{caesarjl,
-  author = "Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors",
+  author = "Caesar.jl contributors",
   title =  "Caesar.jl",
   year =   2018,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
 
+Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently conducted by Dehann Fourie who can be contacted for more details.
 
 [cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
