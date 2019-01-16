@@ -429,7 +429,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Arena Visualization",
     "title": "Installation",
     "category": "section",
-    "text": "The current version of Arena has a rather large VTK dependency (which compile just fine on Ubuntu/Debian, or maybe even MacOS) wrapped in the DrakeVisualizer.jl package.  This requires the following preinstalled packages:    sudo apt-get install libvtk5-qt4-dev python-vtkNOTE Smaller individual 2D packages can be installed instead – i.e.:Pkg.add(\"RoMEPlotting\")For the full 2D/3D visualization tools used by Caesar.jl–-in a Julia or (JuliaPro) terminal/REPL–-type:julia> Pkg.add(\"Arena\")NOTE Current development will allow the user to choose a three.js WebGL based viewer instead MeshCat.jl."
+    "text": ""
+},
+
+{
+    "location": "concepts/arena_visualizations/#MeshCat-/-three.js-Viewer-(WebGL)-1",
+    "page": "Arena Visualization",
+    "title": "MeshCat / three.js Viewer (WebGL)",
+    "category": "section",
+    "text": "For the 3D visualization tools provided for Caesar.jl–-in a Julia or (JuliaPro) terminal/REPL–-type ] to activate pkg manager and install Arena the master branch(v1.0) pkg> add Arena#masterCurrent master branch development allows the user to use the three.js WebGL based viewer via MeshCat.jl."
 },
 
 {
@@ -437,7 +445,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Arena Visualization",
     "title": "2D Visualization",
     "category": "section",
-    "text": "2D plot visualizations, provided by [RoMEPlotting.jl(http://www.github.com/JuliaRobotics/RoMEPlotting.jl) and KernelDensityEstimatePlotting.jl, are generally useful for repeated analysis of a algorithm or data set being studied. These visualizations are often manipulated to emphasize particular aspects of mobile platform navigation."
+    "text": "2D plot visualizations, provided by [RoMEPlotting.jl(http://www.github.com/JuliaRobotics/RoMEPlotting.jl) and KernelDensityEstimatePlotting.jl, are generally useful for repeated analysis of a algorithm or data set being studied. These visualizations are often manipulated to emphasize particular aspects of mobile platform navigation.Install RoMEPlotting master branch:(v1.0) pkg> add RoMEPlotting#master"
 },
 
 {
@@ -470,6 +478,14 @@ var documenterSearchIndex = {"docs": [
     "title": "3D Visualization",
     "category": "section",
     "text": "Factor graphs of two or three dimensions can be visualized with the 3D visualizations provided by Arena.jl and it\'s dependencies. The 2D example above and also be visualized in a 3D space with the commands:vc = startdefaultvisualization() # to load a DrakeVisualizer/Director process instance\nvisualize(fg, vc, drawlandms=false)\n# visualizeallposes!(vc, fg, drawlandms=false)Here is a basic example of using visualization and multi-core factor graph solving:addprocs(2)\nusing Caesar, RoME, TransformUtils, Distributions\n\n# load scene and ROV model (might experience UDP packet loss LCM buffer not set)\nsc1 = loadmodel(:scene01); sc1(vc)\nrovt = loadmodel(:rov); rovt(vc)\n\ninitCov = 0.001*eye(6); [initCov[i,i] = 0.00001 for i in 4:6];\nodoCov = 0.0001*eye(6); [odoCov[i,i] = 0.00001 for i in 4:6];\nrangecov, bearingcov = 3e-4, 2e-3\n\n# start and add to a factor graph\nfg = identitypose6fg(initCov=initCov)\ntf = SE3([0.0;0.7;0.0], Euler(pi/4,0.0,0.0) )\naddOdoFG!(fg, Pose3Pose3(MvNormal(veeEuler(tf), odoCov) ) )\n\naddLinearArrayConstraint(fg, (4.0, 0.0), :x0, :l1, rangecov=rangecov,bearingcov=bearingcov)\naddLinearArrayConstraint(fg, (4.0, 0.0), :x1, :l1, rangecov=rangecov,bearingcov=bearingcov)\n\nsolveBatch!(fg)\n\nusing Arena\n\nvc = startdefaultvisualization()\nvisualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])\nvisualizeDensityMesh!(vc, fg, :l1)\n# visualizeallposes!(vc, fg, drawlandms=false)"
+},
+
+{
+    "location": "concepts/arena_visualizations/#Previous-3D-Viewer-(VTK-/-Director)-–-no-longer-required-1",
+    "page": "Arena Visualization",
+    "title": "Previous 3D Viewer (VTK / Director) – no longer required",
+    "category": "section",
+    "text": "Previous versions used the much larger VTK based Director available via DrakeVisualizer.jl package.  This requires the following preinstalled packages:    sudo apt-get install libvtk5-qt4-dev python-vtk"
 },
 
 {
@@ -1573,7 +1589,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
+    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
 },
 
 {
