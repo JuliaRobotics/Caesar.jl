@@ -26,10 +26,21 @@ include(joinpath(Pkg.dir("Caesar"), "examples", "marine", "auv", "Sandshark","Pl
 include(joinpath(Pkg.dir("Caesar"), "examples", "marine", "auv", "Sandshark","DataUtils.jl"))
 
 # Initializing Graff session
+using GraffSDK
+using Dates
 config = loadGraffConfig();
 config.userId = "Dehann"
-config.sessionId = "Sandshark"*replace(string(uuid4()), "-" => "")[1:6]
-if (!isSessionExisting())
+config.robotId = "Sandshark"
+# config.sessionId = "Sandshark_"*Dates.format(now(), "yyyymmdd_HHmmss")
+config.sessionId = "Sandshark_20190126_2101334"
+println(" - Creating or retrieving robot '$(config.robotId)'...")
+if !isRobotExisting()
+    # Create a new one programatically - can also do this via the UI.
+    println(" -- Robot '$(config.robotId)' doesn't exist, creating it...")
+    newRobot = RobotRequest(config.robotId, "Sandshark", "Sandshark dataset", "Active");
+    robot = addRobot(newRobot);
+end
+if !isSessionExisting()
     println(" -- Session '$(config.sessionId)' doesn't exist for robot '$(config.robotId)', creating it...")
     newSessionRequest = SessionDetailsRequest(config.sessionId, "Sandshark dataset!", "Pose2", false)
     session = addSession(newSessionRequest)
@@ -41,33 +52,61 @@ l1Uncertainty = 0.1
 nonParamStep = 1 # Number of poses between nonparametric acoustic factors
 # Add a central beacon with a prior
 addNode!(fg, :l1, Point2)
-addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], l1Uncertainty^2*eye(2)) ))
-index = 0
+addVariable(:l1, Point2, String[])
+prior = IIF.Prior( MvNormal([0.6; -16], l1Uncertainty^2*[1.0 .0;.0 1.0]) )
+addFactor!(fg, [:l1], prior)
+addFactor([:l1], prior)
+global index = 0
 for ep in epochs
+    global index
     curvar = Symbol("x$index")
     addNode!(fg, curvar, Pose2)
+    addVariable(curvar, Pose2, String[])
 
     # xi -> l1 - nonparametric factor
     if (index+1) % nonParamStep == 0
-        info(" - Adding $curvar->l1 factor...")
+        @info " - Adding $curvar->l1 factor..."
         # addFactor!(fg, [curvar; (index < length(epochs)/2 ? :l1 : :l2)], ppbrDict[ep])
         addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+        addFactor([curvar; :l1], ppbrDict[ep])
     end
 
     if ep != epochs[1]
       # Odo factor x(i-1) -> xi
-      info(" - Adding x$(index-1)->$curvar odo factor")
+      @info " - Adding x$(index-1)->$curvar odo factor"
       addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
+      addFactor([Symbol("x$(index-1)"); curvar], odoDict[ep])
     else
       # Prior to the first pose location (a "GPS" prior)
       initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
-      info(" - Adding a initial location prior at $curvar, $initLoc")
-      addFactor!(fg, [curvar], IIF.Prior( MvNormal(initLoc, diagm([0.1;0.1;0.05].^2)) ))
+      @info " - Adding a initial location prior at $curvar, $initLoc"
+      initPrior = IIF.Prior( MvNormal(initLoc, diagm(0 => [0.1;0.1;0.05].^2)) )
+      addFactor!(fg, [curvar], initPrior)
+      addFactor([curvar], initPrior)
     end
     # Heading partial prior
-    info(" - Adding heading prior on $curvar")
-    addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
+    @info " - Adding heading prior on $curvar"
+    headingPrior = RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3)))
+    addFactor!(fg, [curvar], headingPrior)
+    addFactor([curvar], headingPrior)
     index+=1
+end
+
+# Let's wait for all nodes to be processed
+@time while getSessionBacklog() > 0
+    @info "...Session backlog currently has $(getSessionBacklog()) entries, waiting until complete..."
+    sleep(2)
+end
+@info "Okay processing the last node! ...Yeah so we're going to focus on making that faster in the next release (please go write an issue in GraffSDK to spur us along!)"
+
+# Lets see that everything processed successfully
+@info "Session dead queue length = $(getSessionDeadQueueLength())"
+if getSessionDeadQueueLength() > 0
+    @error "This shouldn't happen, please examine the failed messages below to see what went wrong:"
+    deadMsgs = getSessionDeadQueueMessages()
+    map(d -> println(d["error"]), deadMsgs)
+else
+    @info "No messages in the dead queue (errors) on the server, looks good!"
 end
 
 writeGraphPdf(fg, engine="dot")
@@ -77,6 +116,15 @@ batchSolve!(fg)
 
 drawPosesLandms(fg)
 
+
+# Testing packing
+# odoTest = odoDict[epochs[2]]
+# ppbrTest = ppbrDict[epochs[2]]
+# import Base: convert
+# odoPacked = convert(PackedPose2Pose2, odoTest)
+# ppbrPacked = convert(PackedPose2Point2BearingRange, ppbrTest)
+# odoUnpacked = convert(Pose2Pose2, odoTest)
+# ppbrUnpacked = convert(Pose2Point2BearingRange, ppbrPacked)
 
 # IIF.wipeBuildNewTree!(fg, drawpdf=true)
 # run(`evince bt.pdf`)
