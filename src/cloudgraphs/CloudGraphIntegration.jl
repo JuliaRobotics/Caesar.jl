@@ -354,7 +354,7 @@ function getAllExVertexNeoIDs(conn::Neo4j.Connection;
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
   rn = length(robotname) > 0 ? ":"*robotname : ""
   un = length(username) > 0 ? ":"*username : ""
-  query = "match (n$(sn)$(rn)$(un)) where not n:SESSION and exists(n.exVertexId)"
+  query = "match (n$(sn)$(rn)$(un)) where not n:SESSION and not n:MULTISESSION and exists(n.exVertexId)"
   query = reqbackendset || reqready ? query*" and" : query
   query = reqready ? query*" n.ready=$(ready)" : query
   query = reqbackendset && reqready ? query*" and" : query
@@ -411,7 +411,8 @@ function buildSubGraphIdsQuery(;
             ready::Int=1,
             reqbackendset::Bool=true,
             backendset::Int=1,
-            neighbors::Int=0  ) where {AS <: AbstractString}
+            neighbors::Int=0,
+            includeMultisession::Bool=false ) where {AS <: AbstractString}
   #
   sn = length(session) > 0 ? ":"*session : ""
   rn = length(robot) > 0 ? ":"*robot : ""
@@ -432,6 +433,9 @@ function buildSubGraphIdsQuery(;
       query *= "'$(lbl)',"
     end
     query = chop(query)*"] "
+    if !includeMultisession
+      query *= "and not n0:MULTISESSION "
+    end
     query *= "with n$(outerd) as m "
     query *= "return m.exVertexId, id(m), m.label"
     query *= nei != (neighbors) ? " UNION " : ""
@@ -457,10 +461,11 @@ function getLblExVertexNeoIDs(
         ready::Int=1,
         backendset::Int=1,
         reqbackendset::Bool=true,
-        neighbors::Int=0 ) where {AS <: AbstractString}
+        neighbors::Int=0,
+        includeMultisession::Bool=false) where {AS <: AbstractString}
   #
 
-  query = buildSubGraphIdsQuery(lbls=lbls, session=session, robot=robot, user=user, label=label, neighbors=neighbors, reqready=reqready, ready=ready, reqbackendset=reqbackendset, backendset=backendset)
+  query = buildSubGraphIdsQuery(lbls=lbls, session=session, robot=robot, user=user, label=label, neighbors=neighbors, reqready=reqready, ready=ready, reqbackendset=reqbackendset, backendset=backendset, includeMultisession=includeMultisession)
   cph, = executeQuery(conn, query)
 
   ret = Array{Tuple{Int64,Int64,Symbol},1}()
@@ -639,11 +644,12 @@ function subLocalGraphCopy!(
             lbls::Union{Vector{AS}, Vector{Symbol}};
             neighbors::Int=0,
             reqbackendset::Bool=true,
-            reqready::Bool=true ) where {AS <: AbstractString}
+            reqready::Bool=true,
+            includeMultisession::Bool=false) where {AS <: AbstractString}
   #
   @warn "subGraphCopy! is a work in progress"
   conn = fgl.cg.neo4j.connection
-  IDs = getLblExVertexNeoIDs(conn, string.(lbls), session=fgl.sessionname, robot=fgl.robotname, user=fgl.username, reqbackendset=reqbackendset, reqready=reqready, neighbors=neighbors )
+  IDs = getLblExVertexNeoIDs(conn, string.(lbls), session=fgl.sessionname, robot=fgl.robotname, user=fgl.username, reqbackendset=reqbackendset, reqready=reqready, neighbors=neighbors, includeMultisession=includeMultisession)
   println("fullSubGraphCopy: $(length(IDs)) nodes in session $(fgl.sessionname) if reqbackendset=$reqbackendset and reqready=$reqready...")
   copyGraphNodesEdges!(fgl, IDs)
   nothing
