@@ -31,8 +31,9 @@ using Dates
 config = loadGraffConfig();
 config.userId = "Dehann"
 config.robotId = "Sandshark"
-# config.sessionId = "Sandshark_"*Dates.format(now(), "yyyymmdd_HHmmss")
-config.sessionId = "Sandshark_20190126_2101334"
+config.sessionId = "Sandshark_"*Dates.format(now(), "yyyymmdd_HHMMSS")
+# config.sessionId = "Sandshark_20190126_2101334"
+# config.sessionId = "Sandshark_20190126_2201325"
 println(" - Creating or retrieving robot '$(config.robotId)'...")
 if !isRobotExisting()
     # Create a new one programatically - can also do this via the UI.
@@ -90,6 +91,10 @@ for ep in epochs
     addFactor!(fg, [curvar], headingPrior)
     addFactor([curvar], headingPrior)
     index+=1
+
+    if index % 10 == 0
+        putReady(true)
+    end
 end
 
 # Let's wait for all nodes to be processed
@@ -111,10 +116,9 @@ end
 
 writeGraphPdf(fg, engine="dot")
 
-ensureAllInitialized!(fg)
+# ensureAllInitialized!(fg)
 batchSolve!(fg)
 
-drawPosesLandms(fg)
 
 
 # Testing packing
@@ -139,13 +143,13 @@ endDogLeg = [interp_x[epochs[end]]; interp_y[epochs[end]]]
 estDogLeg = [get2DPoseMeans(fg)[1][end]; get2DPoseMeans(fg)[2][end]]
 endDogLeg - estDogLeg
 
-drawPosesLandms(fg)
+drawPosesLandms(fg, meanmax=:max)
 
 
 
 ls(fg, :x25)
 
-#To Boldly Believe... The Good, the Bad, and the Unbeliefable
+#To Boldly Believe... The Good, the Bad, and the Unbelief-able
 X25 = getVertKDE(fg, :x25)
 
 # i
@@ -171,7 +175,7 @@ savejld(fg, file="postsolve_$t.jld")
 ## PLOT BEAM PATTERNS
 Gadfly.push_theme(:default)
 pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
-Gadfly.draw(PDF("sandshark-beacon_$t.pdf", 12cm, 15cm), pla)
+Gadfly.draw(PDF("/tmp/sandshark-beacon_$t.pdf", 12cm, 15cm), pla)
 Gadfly.draw(PNG("sandshark-beacon_$t.png", 12cm, 15cm), pla)
 
 
