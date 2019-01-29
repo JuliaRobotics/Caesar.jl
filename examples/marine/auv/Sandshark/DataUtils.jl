@@ -93,7 +93,7 @@ odoDict = Dict{Int, Pose2Pose2}()
 NAV = Dict{Int, Vector{Float64}}()
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[50:2:100]
+epochs = timestamps[50:2:300]
 global lastepoch = 0
 for ep in epochs
   global lastepoch
