@@ -1357,7 +1357,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
