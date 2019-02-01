@@ -21,11 +21,11 @@ function drawPosesLandmarksAndOdo(fg::FactorGraph,
                                   Y::Array,
                                   lblX::Array,
                                   lblY::Array,
-                                  gTitle::String,
+                                  gTitle::String="",
                                   drawhist=true  )
     #
     PLL = []
-    xx, = ls(fg)
+    xx, = Caesar.ls(fg)
     idx = 0
     for ep in epochs[1:end]
       idx += 1
@@ -45,7 +45,7 @@ function drawPosesLandmarksAndOdo(fg::FactorGraph,
     # pl = Gadfly.layer(navdf, x=:x, y=:y, Geom.path())
     push!(pllandmarks.layers, Gadfly.layer(navdf, x=:x, y=:y, Geom.path(), Theme(default_color=colorant"red"))[1])
     lbldf = DataFrame(
-      ts = lblkeys - lblkeys[1],
+      ts = lblkeys .- lblkeys[1],
       x = lblX,
       y = lblY
     )
@@ -54,7 +54,7 @@ function drawPosesLandmarksAndOdo(fg::FactorGraph,
 
     # Make X/Y range same so no distorted
     # push!(PLL, Coord.Cartesian(xmin=-160.0,xmax=10.0,ymin=-135.0,ymax=35.0))
-    pla = plot([PLL;pllandmarks.layers; ]...,
+    pla = Gadfly.plot([PLL;pllandmarks.layers; ]...,
         Guide.manual_color_key("Legend", ["Particle Filter Est.", "LBL Path", "Non-Gaussian SLAM"], ["red", "green", "light blue"]),
         Guide.title(gTitle))
     return pla
