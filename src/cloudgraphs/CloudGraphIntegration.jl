@@ -46,6 +46,7 @@ export
 
 Run Neo4j Cypher queries on the cloudGraph database, and return Tuple with the
 unparsed (results, loadresponse).
+Throws an error if the query fails.
 """
 function executeQuery(
             connection::Neo4j.Connection,
@@ -53,6 +54,16 @@ function executeQuery(
   #
   loadtx = transaction(connection)
   cph = loadtx(query, submit=true)
+  if length(cph.errors) > 0 #Uh oh, return legible error
+    err = ""
+    for er in cph.errors
+      err*="-\r\n"
+      for (k,v) in er
+        err*=" $k: $v\r\n"
+      end
+    end
+    error("Unable to perform Neo4j query:\r\n$err")
+  end
   loadresult = commit(loadtx)
   return cph, loadresult
 end
