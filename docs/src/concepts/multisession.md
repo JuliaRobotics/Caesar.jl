@@ -19,6 +19,8 @@ Upon request, the solver performs the following actions:
 * Freezes all the session landmarks so that the session solving does not update the consensus result
 * Requests session solves for all the updated sessions
 
+> **Note** the current approach is well positioned to transition to the "Federated Bayes (Junction) Tree" multisession solving method, and will be updated accordingly in due coarse.  The Federated method will allow faster multi-session solving times by avoiding the current iterated approach.
+
 # Example
 Consider three sessions which exist in the same, shared environment.
 In this environment, during each session the robot identified the same `l0` landmark, as shown in the below figure.
