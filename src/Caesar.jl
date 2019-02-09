@@ -165,6 +165,9 @@ include("cloudgraphs/FoveationUtils.jl")
 # ZMQ server and endpoints
 include("zmq/ZmqCaesar.jl")
 
+# Multisession operation
+include("multisession/Multisession.jl")
+
 # SAS-SLAM
 include("beamforming/czt.jl")
 include("beamforming/CBF.jl")
