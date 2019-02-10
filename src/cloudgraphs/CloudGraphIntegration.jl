@@ -48,9 +48,8 @@ Run Neo4j Cypher queries on the cloudGraph database, and return Tuple with the
 unparsed (results, loadresponse).
 Throws an error if the query fails.
 """
-function executeQuery(
-            connection::Neo4j.Connection,
-            query::AS ) where {AS <: AbstractString}
+function executeQuery(connection::Neo4j.Connection,
+                      query::AS ) where {AS <: AbstractString}
   #
   loadtx = transaction(connection)
   cph = loadtx(query, submit=true)
@@ -69,12 +68,17 @@ function executeQuery(
 end
 executeQuery(cg::CloudGraph, query::AS) where {AS <:AbstractString} = executeQuery(cg.neo4j.connection, query)
 
-function getCloudVert(
-            cg::CloudGraph,
-            session::AbstractString,
-            robot::AbstractString,
-            user::AbstractString,
-            vsym::Symbol; bigdata::Bool=false )
+"""
+    $SIGNATURES
+
+Get cloud vertex from Neo4j using CloudGraphs.jl as identified by `session`, `robot`, `user`, and vertex label `vsym::Symbol`.
+"""
+function getCloudVert(cg::CloudGraph,
+                      session::AbstractString,
+                      robot::AbstractString,
+                      user::AbstractString,
+                      vsym::Symbol;
+                      bigdata::Bool=false )
   #
   @warn "getCloudVert(cg, sess, sym) will be deprecated, use getCloudVert(cg, sess, sym=sym) instead."
   # query = " and n.ready=$(ready) and n.label=$(vsym) "
