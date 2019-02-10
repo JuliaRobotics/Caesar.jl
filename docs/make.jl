@@ -24,10 +24,12 @@ makedocs(
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
-            "ContinuousScalar" => "examples/basic_continuousscalar.md",
-            "Singular Ranges-only SLAM (Underdetermined System)" => "examples/basic_slamedonut.md",
+            "ContinuousScalar as 1D Example" => "examples/basic_continuousscalar.md",
+            "Under-defined Trilateration SLAM 2D" => "examples/basic_slamedonut.md",
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
-            "Fixed-Lag Solving" => "examples/interm_fixedlag_hexagonal.md",
+            "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
+        ],
+        "How To?" => [
             "Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
             "Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
