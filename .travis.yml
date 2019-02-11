@@ -12,6 +12,7 @@ matrix:
       julia: nightly
       env: TESTCMD="xvfb-run julia"
   allow_failures:
+    - julia: 1.1
     - julia: nightly
 
 branches:
@@ -28,11 +29,6 @@ addons:
     packages:
       - ffmpeg
       - hdf5-tools
-
-matrix:
-  allow_failures:
-    - julia: 1.1
-    - julia: nightly
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
