@@ -4,6 +4,7 @@ os:
 julia:
   - 0.7
   - 1.0
+  - 1.1
   - nightly
 notifications:
   email: false
@@ -13,6 +14,7 @@ addons:
     - hdf5-tools
 matrix:
   allow_failures:
+    - julia: 1.1
     - julia: nightly
 
 script:
