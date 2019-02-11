@@ -44,8 +44,8 @@ jobs:
                                     Pkg.develop(PackageSpec(path=pwd()))'
         - julia -e 'using Pkg; Pkg.add("IncrementalInference"); Pkg.add("RoME"); Pkg.add("KernelDensityEstimatePlotting")'
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
+        - julia -e 'using Pkg; Pkg.add("MbedTLS"); using MbedTLS'
         - julia -e 'using Pkg; Pkg.add("Arena");'
-        - julia -e 'using Pkg; Pkg.add("MbedTLS");'
         - xvfb-run julia --project=docs/ docs/make.jl
       after_success: skip
 
