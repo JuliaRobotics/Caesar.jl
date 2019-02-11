@@ -2,6 +2,7 @@ using Documenter, Caesar
 import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
 
+using Cairo
 using KernelDensityEstimatePlotting
 using RoMEPlotting
 using Arena
