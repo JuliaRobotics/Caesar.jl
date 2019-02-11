@@ -15,9 +15,9 @@ matrix:
     - julia: 1.1
     - julia: nightly
 
-branches:
-  only:
-    - master
+# branches:
+#   only:
+#     - master
 
 notifications:
   email: false
