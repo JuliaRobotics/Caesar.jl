@@ -15,7 +15,7 @@ makedocs(
         "Getting Started" => [
             "Installation" => "installation_environment.md"
         ],
-        "Concepts" => [
+        "Concept Intro" => [
             "Caesar Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
             "Arena Visualization" => "concepts/arena_visualizations.md",
@@ -30,7 +30,7 @@ makedocs(
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
         ],
-        "How To?" => [
+        "Intermediate How To's?" => [
             "Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
             "Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
