@@ -17,11 +17,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "#Features-1",
+    "location": "#Focus-Area-1",
     "page": "Home",
-    "title": "Features",
+    "title": "Focus Area",
     "category": "section",
-    "text": "The Caesar framework has the following features:Factor-graph representation of pose and sensor data\nLocalization using Multi-modal iSAM\nMulti-core inference supporting Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc\nMulti-modal and non-parametric representation of constraints\nGaussian distributions are but one of the many representations of measurement error\nSimple, extensible framework for creation of new factor types\nMulti-hypothesis representation in the factor-graph\nLocal in-memory solving on the device as well as database-driven centralized solving\nFixed-lag, continuous operation as well as off-line batch solving"
+    "text": "This project focuses on the open development and progression to a public, stable, growing and usable inference library suited to data-fusion aspects of device navigation."
 },
 
 {
@@ -45,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Caesar Core",
     "category": "section",
-    "text": "Caesar is implemented in Julia (and JuliaPro) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.Caesar.jl is the \"umbrella\" framework that depends on and supports various dedicated purpose packages."
+    "text": "Caesar is implemented in Julia (and JuliaPro) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.Caesar.jl is the \"umbrella\" framework that depends on and supports various dedicated purpose packages.Why Julia: The implementation language of choice is Julia, for a wide variety of reasons such as agile development along side modern, high speed, type safe, multi-processor, JIT-dynamic, cross compiling (gcc and clang) and cross-platform technologies.  Julia can be thought of as either {C+, Mex (done right), or a Fortran replacement}.  The Caesar.jl project is expressly focussed on making this algorithmic code available to C/C++/C#/Python/Java/JS/ applications through a variety of interfaces described below.  Please open issues or get in touch for more information about interops."
 },
 
 {
@@ -53,15 +53,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Caesar Core Packages",
     "category": "section",
-    "text": "Critically, this package can operate in the conventional SLAM manner, using local memory (dictionaries), or alternatively distribute around a persisted FactorGraph through a graph database using CloudGraphs.jl, as discussed in literature here [2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate RoME.jl and back-end solver IncrementalInference.jl.Details about the accompanying packages:IncrementalInference.jl supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself.\nRoME.jl introduces nodes and factors that are useful to robotic navigation.\nRoMEPlotting.jl are a set of scripts that provide MATLAB style plotting of factor graph beliefs, mostly supporting 2D visualization with some support for projections of 3D."
-},
-
-{
-    "location": "#Caesar-Extensions-1",
-    "page": "Home",
-    "title": "Caesar Extensions",
-    "category": "section",
-    "text": ""
+    "text": "Critically, this package can operate in the conventional SLAM manner, using local memory (dictionaries), or alternatively distribute around a persisted FactorGraph through a graph database using CloudGraphs.jl, as discussed in literature here [2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate RoME.jl and back-end solver IncrementalInference.jl.Details about the accompanying packages:IncrementalInference.jl supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself.\nRoME.jl introduces nodes and factors that are useful to robotic navigation."
 },
 
 {
@@ -69,15 +61,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Visualization",
     "category": "section",
-    "text": "Caesar visualization (plotting of results, graphs, and data) is provided in the Arena.jl package, which is a collection of 3D visualization tools and also depends on RoMEPlotting.jl for 2D visualizations."
+    "text": "Caesar visualization (plotting of results, graphs, and data) is provided by 2D and 3D packages respectively:RoMEPlotting.jl are a set of scripts that provide MATLAB style plotting of factor graph beliefs, mostly supporting 2D visualization with some support for projections of 3D;\nArena.jl package, which is a collection of 3D visualization tools."
 },
 
 {
-    "location": "#Caesar-SDKs-and-APIs-1",
+    "location": "#Multilanguage-Interops:-Caesar-SDKs-and-APIs-1",
     "page": "Home",
-    "title": "Caesar SDKs and APIs",
+    "title": "Multilanguage Interops: Caesar SDKs and APIs",
     "category": "section",
     "text": "The Caesar framework is not limited to direct Julia use. The following Github projects provide access to features of Caesar in their language:Julia Web interface:\nGraffSDK.jl\nC/C++:\nGraff Cpp\nCaesar LCM\nPython:\nSynchronySDKContributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below)."
+},
+
+{
+    "location": "#Features-1",
+    "page": "Home",
+    "title": "Features",
+    "category": "section",
+    "text": "The Caesar framework has the following features:Factor-graph representation of pose and sensor data\nLocalization using Multi-modal iSAM\nMulti-core inference supporting Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc\nMulti-modal and non-parametric representation of constraints\nGaussian distributions are but one of the many representations of measurement error\nSimple, extensible framework for creation of new factor types\nMulti-hypothesis representation in the factor-graph\nLocal in-memory solving on the device as well as database-driven centralized solving\nFixed-lag, continuous operation as well as off-line batch solving"
 },
 
 {
@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Contributors",
     "category": "section",
-    "text": "Authors directly involved with this package are:D. Fourie, S. Claassens, P. Vaz Teixeira, N. Rypkema, S. Pillai, R. Mata, M. Kaess, J. LeonardWe are grateful for many, many contributions within the Julia package ecosystem – see the REQUIRE files of Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs and others for a far reaching list of contributions.Consider citing our work:@misc{caesarjl,\n  author = \"Dehann Fourie, Sam Claassens, John Leonard, Micheal Kaess, and contributors\",\n  title =  \"Caesar.jl\",\n  year =   2018,\n  url =    \"https://github.com/JuliaRobotics/Caesar.jl\"\n}"
+    "text": "We are grateful for many, many contributions within the Julia package ecosystem – see the REQUIRE files of Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs and others for a far reaching list of contributions.Consider citing our work:@misc{caesarjl,\n  author = \"Caesar.jl Contributors\",\n  title =  \"Caesar.jl\",\n  year =   2018,\n  url =    \"https://github.com/JuliaRobotics/Caesar.jl\"\n}Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently conducted by Dehann Fourie who can be contacted for more details."
 },
 
 {
@@ -782,6 +782,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Simulated Ambiguous SONAR in 3D",
     "category": "section",
     "text": "Intersection of ambiguous elevation angle from planar SONAR sensor:   <a href=\"http://vimeo.com/198237738\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/rovasfm02.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>Bi-modal belief   <a href=\"http://vimeo.com/198872855\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/rovyaw90.gif\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>"
+},
+
+{
+    "location": "examples/examples/#Synthetic-Aperture-Sonar-SLAM-1",
+    "page": "Caesar Examples",
+    "title": "Synthetic Aperture Sonar SLAM",
+    "category": "section",
+    "text": "The full functional (approximate sum-product) inference approach can be used to natively imbed single hydrophone acoustic waveform data into highly non-Gaussian SAS factors–that implicitly perform beamforming/micro-location–-for a simultaneous localization and mapping solution (image links to video):<a href=\"https://vimeo.com/315255651\" target=\"_blank\"><img src=\"https://user-images.githubusercontent.com/6412556/52547229-3048d500-2d94-11e9-8a46-811316a45283.png\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>"
 },
 
 {
