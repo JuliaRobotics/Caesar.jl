@@ -681,6 +681,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "concepts/mmisam_alg/#",
+    "page": "Multimodal iSAM Algorithm",
+    "title": "Multimodal iSAM Algorithm",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/mmisam_alg/#Multimodal-incremental-Smoothing-and-Mapping-Algorithm-1",
+    "page": "Multimodal iSAM Algorithm",
+    "title": "Multimodal incremental Smoothing and Mapping Algorithm",
+    "category": "section",
+    "text": "Placeholder for details on how the approximate sum-product inference algorithm (mmiSAM) works.  In teh meantime, see related literature for more details.(Image: mmfgbt)(Image: bayestreeexample)"
+},
+
+{
     "location": "examples/examples/#",
     "page": "Caesar Examples",
     "title": "Caesar Examples",
@@ -1121,19 +1137,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "refs/literature/#Immediate-Literature-1",
+    "page": "References",
+    "title": "Immediate Literature",
+    "category": "section",
+    "text": "[1.1]  Fourie, Dehann, et al. \"A Nonparametric Belief Solution to the Bayes Tree\" IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), (2016).[1.2]  Fourie, Dehann, \"Multi-modal and Inertial Sensor Solutions for Navigation-type Factor   Graphs\", Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.[1.3]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: \"SLAMinDB: Centralized graph databases for mobile robotics\", IEEE International Conference on Robotics and Automation (ICRA), Singapore, 2017.[1.4]  Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: \"Non-Gaussian SLAM utilizing Synthetic Aperture Sonar\", Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.[1.5]  Doherty, K., Fourie, D., Leonard, J.: \"Multimodal Semantic SLAM with Probabilistic Data Association\", Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019."
+},
+
+{
     "location": "refs/literature/#Related-Literature-1",
     "page": "References",
     "title": "Related Literature",
     "category": "section",
-    "text": "[1]  Fourie, Dehann, et al. \"A Nonparametric Belief Solution to the Bayes Tree\" IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), (2016).[2]  Fourie, Dehann, \"Multi-modal and Inertial Sensor Solutions for Navigation-type Factor   Graphs\", Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.[3]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: \"SLAMinDB: Centralized graph databases for mobile robotics\", IEEE International Conference on Robotics and Automation (ICRA), Singapore, 2017."
-},
-
-{
-    "location": "refs/literature/#Additional-Literature-1",
-    "page": "References",
-    "title": "Additional Literature",
-    "category": "section",
-    "text": "[4]  Kaess, Michael, et al. \"iSAM2: Incremental smoothing and mapping using the Bayes tree\" The International Journal of Robotics Research (2011): 0278364911430419."
+    "text": "[2.1]  Kaess, Michael, et al. \"iSAM2: Incremental smoothing and mapping using the Bayes tree\" The International Journal of Robotics Research (2011): 0278364911430419."
 },
 
 {
