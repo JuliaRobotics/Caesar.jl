@@ -4,6 +4,7 @@ import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPo
 
 using KernelDensityEstimatePlotting
 using RoMEPlotting
+using Arena
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
