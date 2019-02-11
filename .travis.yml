@@ -1,23 +1,18 @@
 language: julia
 
-matrix:
-  include:
-    - os: linux
-      julia: 0.7
-      env: TESTCMD="xvfb-run julia"
-    - os: linux
-      julia: 1.0
-      env: TESTCMD="xvfb-run julia"
-    - os: linux
-      julia: nightly
-      env: TESTCMD="xvfb-run julia"
-  allow_failures:
-    - julia: 1.1
-    - julia: nightly
-
-# branches:
-#   only:
-#     - master
+# os:
+#   - linux
+#
+# julia:
+#   - 0.7
+#   - 1.0
+#   - 1.1
+#   - nightly
+#
+# matrix:
+#   allow_failures:
+#     - julia: 1.1
+#     - julia: nightly
 
 notifications:
   email: false
@@ -47,8 +42,28 @@ jobs:
         - julia -e 'import Pkg; Pkg.add("Documenter")'
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate();
                                     Pkg.develop(PackageSpec(path=pwd()))'
-        - julia -e 'using Pkg; Pkg.add("IncrementalInference"); Pkg.add("RoME"); Pkg.add("KernelDensityEstimatePlotting"); Pkg.add("Arena")'
+        - julia -e 'using Pkg; Pkg.add("IncrementalInference"); Pkg.add("RoME"); Pkg.add("KernelDensityEstimatePlotting")'
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
-        - echo "TESTCMD=${TESTCMD}, pwd=`pwd`"
+        - julia -e 'using Pkg; Pkg.add("Arena"); Pkg.add("MbedTLS")'
         - xvfb-run julia --project=docs/ docs/make.jl
       after_success: skip
+
+# moved comments down for clarity
+# matrix:
+#   include:
+#     - os: linux
+#       julia: 0.7
+#       env: TESTCMD="xvfb-run julia"
+#     - os: linux
+#       julia: 1.0
+#       env: TESTCMD="xvfb-run julia"
+#     - os: linux
+#       julia: nightly
+#       env: TESTCMD="xvfb-run julia"
+#   allow_failures:
+#     - julia: 1.1
+#     - julia: nightly
+
+# branches:
+#   only:
+#     - master
