@@ -68,6 +68,15 @@ Bi-modal belief
 <a href="http://vimeo.com/198872855" target="_blank"><img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/rovyaw90.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 ```
 
+### Synthetic Aperture Sonar SLAM
+
+The full functional (approximate sum-product) inference approach can be used to natively imbed single hydrophone acoustic waveform data into highly non-Gaussian SAS factors--that implicitly perform beamforming/micro-location---for a simultaneous localization and mapping solution ([image links to video](https://vimeo.com/315255651)):
+
+
+```@raw html
+<a href="https://vimeo.com/315255651" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/52547229-3048d500-2d94-11e9-8a46-811316a45283.png" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
+```
+
 ## More Examples
 
 Please see examples folders for Caesar and RoME for more examples, with expanded documentation in the works.
