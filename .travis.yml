@@ -1,17 +1,34 @@
 language: julia
-os:
-  - linux
-julia:
-  - 0.7
-  - 1.0
-  - 1.1
-  - nightly
+
+matrix:
+  include:
+    - os: linux
+      julia: 0.7
+      env: TESTCMD="xvfb-run julia"
+    - os: linux
+      julia: 1.0
+      env: TESTCMD="xvfb-run julia"
+    - os: linux
+      julia: nightly
+      env: TESTCMD="xvfb-run julia"
+  allow_failures:
+    - julia: nightly
+
+branches:
+  only:
+    - master
+
 notifications:
   email: false
+
 addons:
   apt:
+    sources:
+      - trusty-media
     packages:
-    - hdf5-tools
+      - ffmpeg
+      - hdf5-tools
+
 matrix:
   allow_failures:
     - julia: 1.1
@@ -19,7 +36,7 @@ matrix:
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --check-bounds=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.test("Caesar"; coverage=true)'
+  - julia --check-bounds=yes -e 'using Pkg; Pkg.develop("Caesar"); Pkg.test("Caesar"; coverage=true)'
 
 after_success:
   - julia --project=coverage/ -e 'using Pkg; Pkg.instantiate()'
