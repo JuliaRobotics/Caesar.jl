@@ -4,8 +4,9 @@ import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPo
 
 using KernelDensityEstimatePlotting
 using RoMEPlotting
-using Arena
 using MbedTLS
+@info "MbedTLS has been loaded"
+using Arena
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
