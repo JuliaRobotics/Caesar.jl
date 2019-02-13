@@ -1,6 +1,8 @@
 #  Multimodal incremental Smoothing and Mapping Algorithm
 
-Placeholder for details on how the approximate sum-product inference algorithm ([mmiSAM](https://github.com/JuliaRobotics/IncrementalInference.jl)) works.  In teh meantime, see [related literature](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more details.
+> **Work In Progress**
+
+Placeholder for details on how the approximate sum-product inference algorithm ([mmiSAM](https://github.com/JuliaRobotics/IncrementalInference.jl)) works.  Until then, see [related literature](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more details.
 
 ![mmfgbt](https://user-images.githubusercontent.com/6412556/52549388-db5f8b80-2da0-11e9-959c-4a8fe0890a87.gif)
 
