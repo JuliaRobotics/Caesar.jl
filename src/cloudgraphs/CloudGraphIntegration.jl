@@ -176,7 +176,7 @@ end
 
 function initfg(;sessionname="NA",robotname="",username="",cloudgraph=nothing)
   # fgl = RoME.initfg(sessionname=sessionname)
-  fgl = IncrementalInference.emptyFactorGraph()
+  fgl = IIF.FactorGraph()
   fgl.sessionname = sessionname
   fgl.robotname = robotname
   fgl.username = username
