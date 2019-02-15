@@ -120,9 +120,28 @@ You can work with the packages as regular git repositories there.
 ## Install Visualization Utils (e.g. Arena.jl)
 
 Visualizations were removed from Caesar and moved to a new package [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) instead.
-Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 2D / 3D utilities.
+Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
 
-### Important: Temporary Julia 1.0 Pango Workaround
+Arena.jl can be installed with the following steps:
+```julia
+] 
+add Arena
+```
+
+of the latest development version:
+```julia
+(v1.0) pkg> add Arena#master
+```
+
+## RoMEPlotting.jl for 2D plots
+
+Previous versions of libraries required the following Linux system packages be installed:
+```bash
+sudo apt-get install libfontconfig1
+sudo apt-get install gettext
+sudo apt-get install libcairo2
+sudo apt-get install libpango1.0-0  # or libpango1.0-1
+```
 
 The [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) package must be installed up to latest master branch (development branch) owing to an upstream [issue with Pango fonts on Julia 1.0](https://github.com/GiovineItalia/Gadfly.jl/issues/1206) with [Gadfly.jl](https://github.com/GiovineItalia/Gadfly.jl) plotting.  Once this issue is resolved, the next RoMEPlotting stable version can be tagged and be available as a standard stable release.
 
@@ -135,7 +154,7 @@ julia> ] # to get package manager
 
 Alternatively, the `dev` command --- i.e. `(v1.0) pkg> dev RoMEPlotting` --- will clone the RoMEPlotting.jl git repository to your local `.julia/dev/RoMEPlotting` folder.
 
-> Written December 2018
+> Last updated February 2019
 
 ## Contributing, Issues, or Comments
 
