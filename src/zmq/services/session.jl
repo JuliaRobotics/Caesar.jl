@@ -33,7 +33,7 @@ function addVariable(configDict, fg, requestDict)::Dict{String, Any}
 
   @info "Adding variable of type '$(varRequest.variableType)' with id '$(varRequest.label)'..."
 
-  vnext = addNode!(fg, varLabel, varType, N=(varRequest.N==nothing ? 100 : varRequest.N), ready=0, labels=[varRequest.labels; "VARIABLE"])
+  vnext = addVariable!(fg, varLabel, varType, N=(varRequest.N==nothing ? 100 : varRequest.N), ready=0, labels=[varRequest.labels; "VARIABLE"])
   return Dict{String, Any}("status" => "OK", "id" => vnext.label)
 end
 

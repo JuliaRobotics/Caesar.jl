@@ -27,7 +27,7 @@ function findAddNewLandmarks!(fgl::FactorGraph, lmoccur::Dict{Symbol, Int}, meas
       if !(lm in lmsinfgl)
         # add a new landmark
         println("adding lm=$(lm)")
-        addNode!(fgl, lm, softtype, labels=["LANDMARK";])
+        addVariable!(fgl, lm, softtype, labels=["LANDMARK";])
       end
       # @show measurements[landmarknumber(lm)]
     end

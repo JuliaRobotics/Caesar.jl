@@ -38,7 +38,7 @@ saveBF = Dict();
 savedirheader = "0813/0813";
 
 fg = initfg()
-addNode!(fg, beacon, Point2)
+addVariable!(fg, beacon, Point2)
 
 for fitr in 1:nfactors
     navchecked = false;

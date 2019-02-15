@@ -18,7 +18,7 @@ function identitypose6fg!(;fg=nothing,
   # pts = 0.001*randn(6,N)
   initPosePrior = PriorPose3( MvNormal(veeEuler(initpose), initCov)  )
   pts = getSample(initPosePrior,N)[1]
-  v0 = addNode!(fg, :x0,  pts,  N=N, labels=["POSE"])
+  v0 = addVariable!(fg, :x0,  pts,  N=N, labels=["POSE"])
   f1  = addFactor!(fg,[v0], initPosePrior)
   return fg
 end

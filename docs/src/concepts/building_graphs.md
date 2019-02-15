@@ -26,10 +26,10 @@ Variables (a.k.a. poses in localization terminology) are created in the same way
 
 ```julia
 # Add the first pose :x0
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 # Add a few more poses
 for i in 1:10
-  addNode!(fg, Symbol("x$(i)"), Pose2)
+  addVariable!(fg, Symbol("x$(i)"), Pose2)
 end
 ```
 

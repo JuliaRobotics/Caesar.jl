@@ -10,7 +10,7 @@ const TU = TransformUtils
 ## Step: Building the factor graph
 fg = initfg()
 # Add a central beacon with a prior
-addNode!(fg, :l1, ContinuousScalar)
+addVariable!(fg, :l1, ContinuousScalar)
 # Pinger location is (0.6; -16)
 addFactor!(fg, [:l1], IIF.Prior( Normal(0.6, 0.1) ))
 
@@ -19,7 +19,7 @@ epochs = 50:2:100
 index=0
 for ep in epochs
     curvar = Symbol("x$index")
-    addNode!(fg, curvar, ContinuousScalar)
+    addVariable!(fg, curvar, ContinuousScalar)
 
     if ep != epochs[1]
       # Odo factor x(i-1) -> xi
@@ -218,7 +218,7 @@ Gadfly.plot(layers...)
 # getSample(ppbrDict[epoch_slice[1]],100)
 #
 #
-# addNode!(fg, :l1, Point2)
+# addVariable!(fg, :l1, Point2)
 # addFactor!(fg, [:x0; :l1], ppbrDict[epoch_slice[1]])
 #
 # ls(fg, :l1)

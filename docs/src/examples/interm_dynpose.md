@@ -12,7 +12,7 @@ A smaller example in two dimensions where we wish to estimate the velocity of so
 
 Variable nodes retain meta data (so called "soft types") describing the type of variable.  Common VariableNode types are `RoME.Point2D`, `RoME.Pose3D`.  VariableNode soft types are passed during construction of the factor graph, for example:
 ```julia
-v1 = addNode!(fg, :x1, Pose2)
+v1 = addVariable!(fg, :x1, Pose2)
 ```
 
 Certain cases require that more information be retained for each VariableNode, and velocity calculations are a clear example where time stamp data across positions is required.  
@@ -105,14 +105,14 @@ A brief usage example looks as follows, and further questions about how the prei
 ```julia
 using RoME, Distributions
 fg = initfg()
-v0 = addNode!(fg, :x0, DynPoint2(ut=0))
+v0 = addVariable!(fg, :x0, DynPoint2(ut=0))
 
 # Prior factor as boundary condition
 pp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*eye(4)))
 f0 = addFactor!(fg, [:x0;], pp0)
 
 # conditional likelihood between Dynamic Point2
-v1 = addNode!(fg, :x1, DynPoint2(ut=1000_000)) # time in microseconds
+v1 = addVariable!(fg, :x1, DynPoint2(ut=1000_000)) # time in microseconds
 dp2dp2 = DynPoint2DynPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))
 f1 = addFactor!(fg, [:x0;:x1], dp2dp2)
 
@@ -163,9 +163,9 @@ A similar usage example here shows:
 fg = initfg()
 
 # add three point locations
-v0 = addNode!(fg, :x0, DynPoint2(ut=0))
-v1 = addNode!(fg, :x1, DynPoint2(ut=1000_000))
-v2 = addNode!(fg, :x2, DynPoint2(ut=2000_000))
+v0 = addVariable!(fg, :x0, DynPoint2(ut=0))
+v1 = addVariable!(fg, :x1, DynPoint2(ut=1000_000))
+v2 = addVariable!(fg, :x2, DynPoint2(ut=2000_000))
 
 # Prior factor as boundary condition
 pp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*eye(4)))
