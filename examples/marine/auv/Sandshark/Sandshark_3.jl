@@ -52,7 +52,7 @@ fg = initfg()
 l1Uncertainty = 0.1
 nonParamStep = 1 # Number of poses between nonparametric acoustic factors
 # Add a central beacon with a prior
-addNode!(fg, :l1, Point2)
+addVariable!(fg, :l1, Point2)
 addVariable(:l1, Point2, String[])
 prior = IIF.Prior( MvNormal([0.6; -16], l1Uncertainty^2*[1.0 .0;.0 1.0]) )
 addFactor!(fg, [:l1], prior)
@@ -61,7 +61,7 @@ global index = 0
 for ep in epochs
     global index
     curvar = Symbol("x$index")
-    addNode!(fg, curvar, Pose2)
+    addVariable!(fg, curvar, Pose2)
     addVariable(curvar, Pose2, String[])
 
     # xi -> l1 - nonparametric factor
@@ -253,7 +253,7 @@ Gadfly.plot(layers...)
 # getSample(ppbrDict[epoch_slice[1]],100)
 #
 #
-# addNode!(fg, :l1, Point2)
+# addVariable!(fg, :l1, Point2)
 # addFactor!(fg, [:x0; :l1], ppbrDict[epoch_slice[1]])
 #
 # ls(fg, :l1)

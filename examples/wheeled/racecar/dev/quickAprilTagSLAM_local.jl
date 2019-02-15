@@ -36,7 +36,7 @@ fg = initfg()
 psid = 0
 pssym = Symbol("x$psid")
 # first pose with zero prior
-addNode!(fg, pssym, Pose2)
+addVariable!(fg, pssym, Pose2)
 addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
 
 addApriltags!(fg, pssym, tag_bag[psid])

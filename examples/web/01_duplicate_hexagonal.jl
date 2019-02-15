@@ -56,7 +56,7 @@ fg.isfixedlag = true
 fg.qfl = 10
 
 # Local: Add the first pose :x0
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 # Graff: Add x0 to Graff
 addVariable(:x0, Pose2, String[])
 
@@ -78,7 +78,7 @@ for i in 0:5
 
   ## LOCAL MEMORY
   # Local: add next pose variable +odometry to local memory version
-  addNode!(fg, nsym, Pose2)
+  addVariable!(fg, nsym, Pose2)
   addFactor!(fg, [psym;nsym], pp )
   # Graff: add odometry
   addVariable(nsym, Pose2, String[])
@@ -108,7 +108,7 @@ pl = drawPoses(fg)
 Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 # Add landmarks with Bearing range measurements
-addNode!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
 addVariable(:l1, Point2, ["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.1), Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)

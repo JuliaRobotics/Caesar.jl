@@ -88,9 +88,9 @@ using RoME, Distributions
 using RoMEPlotting
 
 fg = initfg()
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), eye(3))))
-addNode!(fg, :x1, Pose2)
+addVariable!(fg, :x1, Pose2)
 addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10.0;0;0], eye(3))))
 
 ensureAllInitialized!(fg)
