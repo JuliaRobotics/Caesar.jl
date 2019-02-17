@@ -49,7 +49,7 @@ addOdoFG!
 
 ### IncrementalInference
 ```@docs
-addNode!
+addVariable!
 addFactor!
 allnums
 approxConv
@@ -68,7 +68,10 @@ findRelatedFromPotential
 fmcmc!
 getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
+getData
+getVal
 getKDE
+getSofttype
 getVertKDE
 initializeNode!
 landmarks
@@ -94,4 +97,6 @@ updateFGBT!
 upGibbsCliqueDensity
 upMsg
 writeGraphPdf
+showFactor
+showVariable
 ```
