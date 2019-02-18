@@ -7,14 +7,14 @@ using RoME, Distributions, LinearAlgebra</code></pre><p>After loading the RoME a
 fg = initfg()
 
 # Add the first pose :x0
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix(LinearAlgebra.I,3,3))) )</code></pre><p>A factor graph object <code>fg</code> (of type <code>::FactorGraph</code>) has been constructed; the first pose <code>:x0</code> has been added; and a prior factor setting the origin at <code>[0,0,0]</code> over variable node dimensions <code>[x,y,θ]</code> in the world frame. The type <code>Pose2</code> is used to indicate what variable is stored in the node. Caesar.jl allows a little more freedom in how factor and variable nodes can be connected, while still allowing for type-assertion to occur.</p><p><strong>NOTE</strong> Julia uses just-in-time compilation (<a href="https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module">unless pre-compiled</a>)  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use.</p><p>The next 6 nodes are added with odometry in an counter-clockwise hexagonal manner. Note how variables are denoted with symbols, <code>:x2 == Symbol(&quot;x2&quot;)</code>:</p><pre><code class="language-julia"># Drive around in a hexagon
 for i in 0:5
   psym = Symbol(&quot;x$i&quot;)
   nsym = Symbol(&quot;x$(i+1)&quot;)
-  addNode!(fg, nsym, Pose2)
+  addVariable!(fg, nsym, Pose2)
   pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
   addFactor!(fg, [psym;nsym], pp )
 end</code></pre><p>At this point it would be good to see what the factor graph actually looks like:</p><pre><code class="language-julia">writeGraphPdf(fg)</code></pre><p>You should see the program <code>evince</code> open with this visual:</p><p><img src="https://user-images.githubusercontent.com/6412556/42296063-0cd056a8-7fbf-11e8-9745-8589446c38f9.png" alt="exfg2d"/></p><h2><a class="nav-anchor" id="Performing-Inference-1" href="#Performing-Inference-1">Performing Inference</a></h2><p>Let&#39;s run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this <code>fg</code> object:</p><pre><code class="language-julia"># perform inference, and remember first runs are slower owing to Julia&#39;s just-in-time compiling
@@ -30,7 +30,7 @@ pl = drawPoses(fg)
 
 # For scripting use-cases you can export the image
 Gadfly.draw(Gadfly.PDF(&quot;/tmp/test.pdf&quot;, 20cm, 10cm),pl)  # or PNG(...)</code></pre><p><img src="https://user-images.githubusercontent.com/6412556/42294545-c6c80f70-7faf-11e8-8167-017889cee932.png" alt="test"/></p><h2><a class="nav-anchor" id="Adding-Landmarks-as-Point2-1" href="#Adding-Landmarks-as-Point2-1">Adding Landmarks as Point2</a></h2><p>Suppose some sensor detected a feature of interest with an associated range and bearing measurement The new variable and measurement can be included into the factor graph as follows:</p><pre><code class="language-julia"># Add landmarks with Bearing range measurements
-addNode!(fg, :l1, Point2, labels=[&quot;LANDMARK&quot;])
+addVariable!(fg, :l1, Point2, labels=[&quot;LANDMARK&quot;])
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 

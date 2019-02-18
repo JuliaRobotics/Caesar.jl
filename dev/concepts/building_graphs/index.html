@@ -3,10 +3,10 @@
 
 # start with an empty factor graph object
 fg = initfg()</code></pre><h2><a class="nav-anchor" id="Adding-to-the-Graph-1" href="#Adding-to-the-Graph-1">Adding to the Graph</a></h2><p>Factor graphs are made of two constituent parts:</p><ul><li>Variables</li><li>Factors</li></ul><h2><a class="nav-anchor" id="Variables-1" href="#Variables-1">Variables</a></h2><p>Variables (a.k.a. poses in localization terminology) are created in the same way  shown above for the landmark. Variables contain a label, a data type (e.g. in 2D <code>RoME.Point2</code> or <code>RoME.Pose2</code>). Note that variables are solved - i.e. they are the product, what you wish to calculate when the solver runs - so you don&#39;t provide any measurements when creating them.</p><pre><code class="language-julia"># Add the first pose :x0
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 # Add a few more poses
 for i in 1:10
-  addNode!(fg, Symbol(&quot;x$(i)&quot;), Pose2)
+  addVariable!(fg, Symbol(&quot;x$(i)&quot;), Pose2)
 end</code></pre><h2><a class="nav-anchor" id="Factors-1" href="#Factors-1">Factors</a></h2><p>Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a prior is defined against x0 with a normal distribution centered around [0,0,0].</p><h3><a class="nav-anchor" id="Priors-1" href="#Priors-1">Priors</a></h3><pre><code class="language-julia"># Add at a fixed location Prior to pin :x0 to a starting location (0,0,pi/6.0)
 addFactor!(fg, [:x0], IIF.Prior( MvNormal([0; 0; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))</code></pre><h3><a class="nav-anchor" id="Factors-Between-Variables-1" href="#Factors-Between-Variables-1">Factors Between Variables</a></h3><pre><code class="language-julia"># Add odometry indicating a zigzag movement
 for i in 1:10
