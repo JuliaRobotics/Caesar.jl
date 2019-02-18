@@ -19,6 +19,8 @@ Upon request, the solver performs the following actions:
 * Freezes all the session landmarks so that the session solving does not update the consensus result
 * Requests session solves for all the updated sessions
 
+> **Note** the current approach is well positioned to transition to the "Federated Bayes (Junction) Tree" multisession solving method, and will be updated accordingly in due coarse.  The Federated method will allow faster multi-session solving times by avoiding the current iterated approach.
+
 # Example
 Consider three sessions which exist in the same, shared environment.
 In this environment, during each session the robot identified the same `l0` landmark, as shown in the below figure.
@@ -40,10 +42,10 @@ This information is then propagated back to the individual session landmarks, gi
 
 ![Prime density](./images/multisessionsolve.png)
 
-The session landmarks are then frozen, and individual session solves are triggered to propagate the information back into the sessions.
+The session landmarks are then frozen, and individual session solves are triggered to propagate the information back into the sessions.  Until the federated upgrade is completed, the above process is iterated a few times to allow information to cross propagate through all sessions.  There federated tree solution requires only a single iteration up and down the federated Bayes (Junction) tree. 
 
 # Next Steps
 
-This provides an initial implementation for stitching data from multiple sessions, robots, and users. In the short term, we may trigger this automatically for any shared environments, allowing the robots to 'dream'.
+This provides an initial implementation for stitching data from multiple sessions, robots, and users. In the short term, we may trigger this automatically for any shared environments.  Multisession solving along with other automated techniques for additional measurement discovery in data allows the system to 'dream' -- i.e. reducing succint info from the large volumes of heterogenous sensor data.
 
 In the medium future we will extend this functionality to operate in the Bayes tree, which we call 'federated solving', so that we perform the operation using cached results of subtrees. 
