@@ -45,7 +45,7 @@ Gets a vector of session IDs that are related to an environment.
 function getSessionsForEnvironment(
     connection::Neo4j.Connection,
     environment::String)::Vector{String}
-  query = "match (session:SESSION) where session.environment = \"$environment\" return session.id"
+  query = "match (env:ENVIRONMENT:$environment)-[SESSION]->(s:SESSION) return s.id"
   cph, = Caesar.executeQuery(connection, query)
   return map(s -> s["row"][1], cph.results[1]["data"])
 end
