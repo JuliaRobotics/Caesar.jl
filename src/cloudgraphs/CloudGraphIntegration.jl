@@ -8,6 +8,7 @@ export
   getCloudVert,
   getfnctype,
   usecloudgraphsdatalayer!,
+  uselocalmemoryonly!,
   standardcloudgraphsetup,
   consoleaskuserfordb,
   registerGeneralVariableTypes!,
