@@ -45,7 +45,7 @@ Gets a vector of session IDs that are related to an environment.
 function getSessionsForEnvironment(
     connection::Neo4j.Connection,
     environment::String)::Vector{String}
-  query = "match (session:SESSION) where session.environment = \"$environment\" return session.id"
+  query = "match (env:ENVIRONMENT:$environment)-[SESSION]->(s:SESSION) return s.id"
   cph, = Caesar.executeQuery(connection, query)
   return map(s -> s["row"][1], cph.results[1]["data"])
 end
@@ -163,7 +163,7 @@ function buildPrimeLandmarksAndFactors(
             @error "Softtypes don't match for $s1:$sym (got $(typeof(land1.packed.softtype))) and $s2:$sym (got $(typeof(land2.packed.softtype)))"
             continue
         end
-        addNode!(fg, sym, deepcopy(land1.packed.softtype), labels=["MULTISESSION"; "LANDMARK"; s1; s2; userId; robotId], uid=100000)
+        addVariable!(fg, sym, deepcopy(land1.packed.softtype), labels=["MULTISESSION"; "LANDMARK"; s1; s2; userId; robotId], uid=100000)
         # NOTE: Until DFG, all prime variables have exVertexId of 100000
         # Add the environment property
         setnodeproperty(getnode(cloudGraph.neo4j.graph, fg.cgIDs[100000]), "environment", environment)
@@ -238,7 +238,7 @@ function getMultiSessionFg(
     # If prime landmark not in FG, add it
     if !(mid in values(fg.IDs))
       mvert = CloudGraphs.get_vertex(fg.cg, mid, false)
-      addNode!(fg, mlabel, mvert.packed.softtype, api=IIF.localapi, uid=mid)
+      addVariable!(fg, mlabel, mvert.packed.softtype, api=IIF.localapi, uid=mid)
       getVert(fg, mlabel, api=localapi).attributes["origlabel"] = mlabel
       # Manually add the cloud node IDs
       push!(fg.cgIDs, mvert.neo4jNodeId => mvert.neo4jNodeId)
@@ -246,7 +246,7 @@ function getMultiSessionFg(
     # If session landmark not in FG, add it
     if !(lid in values(fg.IDs))
       lvert = CloudGraphs.get_vertex(fg.cg, lid, false)
-      addNode!(fg, llabel, lvert.packed.softtype, api=IIF.localapi, uid=lid)
+      addVariable!(fg, llabel, lvert.packed.softtype, api=IIF.localapi, uid=lid)
       getVert(fg, llabel, api=localapi).attributes["origlabel"] = origlabel
       Caesar.setValKDE!(fg, llabel, kde!(lvert.packed.val), api=IIF.localapi)
       # Manually add the cloud node IDs

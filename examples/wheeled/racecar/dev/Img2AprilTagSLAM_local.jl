@@ -104,7 +104,7 @@ fg = initfg()
 psid = 0
 pssym = Symbol("x$psid")
 # first pose with zero prior
-addNode!(fg, pssym, DynPose2(ut=0))
+addVariable!(fg, pssym, DynPose2(ut=0))
 # addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
 addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2)),
                                               MvNormal(zeros(2),diagm([0.1;0.05].^2))))

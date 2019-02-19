@@ -20,7 +20,7 @@ fg = Caesar.initfg(sessionname=user_config["session"], robotname=addrdict["robot
 
 
 # first pose :x0
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 
 # also add a PriorPose2 to pin the first pose at a fixed location
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )
@@ -33,11 +33,11 @@ p1.attributes["data"]
 
 
 
-addNode!(fg, :x1, Pose2)
+addVariable!(fg, :x1, Pose2)
 addFactor!(fg, [:x0;:x1], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0]), autoinit=true )
 
 
-addNode!(fg, :x2, Pose2)
+addVariable!(fg, :x2, Pose2)
 addFactor!(fg, [:x1;:x2], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0]), autoinit=true )
 
 
@@ -56,7 +56,7 @@ inferOverTreeR!(fg, tree)
 #                           DistributionRequest("Normal", Float64[0; 0.1]),
 #                           DistributionRequest("Normal", Float64[20; 1.0]))
 
-addNode!(fg, :l1, Point2, labels=["LANDMARK";])
+addVariable!(fg, :l1, Point2, labels=["LANDMARK";])
 
 br = Pose2Point2BearingRange(Normal(0, 0.1), Normal(20, 1.0))
 

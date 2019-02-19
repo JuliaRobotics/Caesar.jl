@@ -27,7 +27,7 @@ The variable nodes are identified by `Symbol`s, namely `:x0, :x1, :x2, :x3`.
 fg = emptyFactorGraph()
 
 # add the first node
-addNode!(fg, :x0, ContinuousScalar)
+addVariable!(fg, :x0, ContinuousScalar)
 
 # this is unary (prior) factor and does not immediately trigger autoinit of :x0.
 addFactor!(fg, [:x0], Prior(Normal(0,1)))
@@ -60,7 +60,7 @@ Also note that initialization of variables is a local operation based only on th
 
 By adding `:x1` and connecting it through the `LinearConditional` and `Normal` distributed factor, the automatic initialization of `:x0` is triggered.
 ```julia
-addNode!(fg, :x1, ContinuousScalar)
+addVariable!(fg, :x1, ContinuousScalar)
 # P(Z | :x1 - :x0 ) where Z ~ Normal(10,1)
 addFactor!(fg, [:x0, :x1], LinearConditional(Normal(10.0,1)))
 @show isInitialized(fg, :x0) # true
@@ -105,7 +105,7 @@ The red trace (predicted belief of `:x1`) is noting more than the approximated c
 
 Another `ContinuousScalar` variable `:x2` is 'connected' to `:x1` through a more complicated `MixtureLinearConditional` likelihood function.
 ```julia
-addNode!(fg, :x2, ContinuousScalar)
+addVariable!(fg, :x2, ContinuousScalar)
 mmo = MixtureLinearConditional([Rayleigh(3); Uniform(30,55)], Categorical([0.4; 0.6]))
 addFactor!(fg, [:x1, :x2], mmo)
 ```
@@ -133,7 +133,7 @@ plotKDE(fg, [:x0, :x1, :x2])
 
 Adding one more variable `:x3` through another `LinearConditional(Normal(-50,1))`
 ```julia
-addNode!(fg, :x3, ContinuousScalar)
+addVariable!(fg, :x3, ContinuousScalar)
 addFactor!(fg, [:x2, :x3], LinearConditional(Normal(-50, 1)))
 ```
 expands the factor graph to to four variables and four factors.

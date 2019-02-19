@@ -374,6 +374,7 @@ Get all Neo4j node IDs in current session.
 function getAllExVertexNeoIDs(conn::Neo4j.Connection;
         ready::Int=1,
         backendset::Int=1,
+
         sessionname::AS="",
         robotname::AS="",
         username::AS="",
@@ -752,7 +753,7 @@ function askneo4jcredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
   info("Please enter information for Neo4j DB:")
   for n in need
     info(n)
-    str = readline(STDIN)
+    str = readline(stdin)
     addrdict[n] = str
     if length(str) > 0
       if str[end] == "\n"
@@ -774,7 +775,7 @@ function askmongocredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
   for n in need
     info(n)
     n == "mongoHost" && haskey(addrdict, "neo4jHost") ? print(string("[",addrdict["neo4jHost"],"]: ")) : nothing
-    str = readline(STDIN)
+    str = readline(stdin)
     addrdict[n] = str
     if length(str) > 0
       if str[end] == "\n"
@@ -823,7 +824,7 @@ function consoleaskuserfordb(;nparticles=false, drawdepth=false, clearslamindb=f
     n == "user" ? print("[]: ") : nothing
     n == "robot" ? print("[]: ") : nothing
     n == "multisession" ? print("comma separated list session names/[n]: ") : nothing
-    str = readline(STDIN)
+    str = readline(stdin)
     addrdict[n] = str
     if length(str) > 0
       if str[end] == "\n"
