@@ -1389,7 +1389,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
@@ -1421,7 +1421,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference",
     "category": "section",
-    "text": "addVariable!\naddFactor!\nallnums\napproxConv\nbatchSolve!\nchildCliqs\ncliqGibbs\nconvert2packedfunctionnode\ndecodefg\ndoautoinit!\ndownMsgPassingRecursive\ndwnMsg\nemptyFactorGraph\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\nfmcmc!\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ngetData\ngetVal\ngetKDE\ngetSofttype\ngetVertKDE\ninitializeNode!\nlandmarks\nloadjld\nlocalProduct\nls\nlsf\nlsRear\nmanualinit!\npackFromLocalPotentials!\nprintgraphmax\nproductpartials!\nprodmultiplefullpartials\nprodmultipleonefullpartials\nsavejld\nsetDwnMsg!\nsetfreeze!\nsetUpMsg!\nsubgraphFromVerts\ntreeProductDwn\ntreeProductUp\nupdateFGBT!\nupGibbsCliqueDensity\nupMsg\nwriteGraphPdf\nshowFactor\nshowVariable"
+    "text": "addVariable!\naddFactor!\nallnums\napproxCliqMarginalUp!\napproxConv\nbatchSolve!\nchildCliqs\ncliqGibbs\nconvert2packedfunctionnode\ndecodefg\ndeleteFactor!\ndeleteVariable!\ndoautoinit!\ndownMsgPassingRecursive\ndwnMsg\nemptyFactorGraph\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\nfmcmc!\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ngetCliq\ngetData\ngetKDE\ngetParent\ngetSofttype\ngetVal\ngetVertKDE\ngetUpMsgs\ngetDwnMsgs\ninitializeNode!\nlandmarks\nloadjld\nlocalProduct\nls\nlsf\nlsRear\nmanualinit!\nparentCliq\npackFromLocalPotentials!\nprintgraphmax\nproductpartials!\nprodmultiplefullpartials\nprodmultipleonefullpartials\nsavejld\nsetDwnMsg!\nsetfreeze!\nsetUpMsg!\nsubgraphFromVerts\ntreeProductDwn\ntreeProductUp\nupdateFGBT!\nupGibbsCliqueDensity\nupMsg\nwriteGraphPdf\nshowFactor\nshowVariable"
 },
 
 {
