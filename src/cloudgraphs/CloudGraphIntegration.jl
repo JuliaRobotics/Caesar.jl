@@ -8,6 +8,7 @@ export
   getCloudVert,
   getfnctype,
   usecloudgraphsdatalayer!,
+  uselocalmemoryonly!,
   standardcloudgraphsetup,
   consoleaskuserfordb,
   registerGeneralVariableTypes!,
@@ -328,6 +329,19 @@ function usecloudgraphsdatalayer!()
   nothing
 end
 
+function uselocalmemoryonly!()
+  IIF.setdatalayerAPI!(
+    addvertex= IIF.localapi.addvertex!,
+    getvertex= IIF.localapi.getvertex,
+    makeaddedge= IIF.localapi.makeaddedge!,
+    getedge= IIF.localapi.getedge,
+    outneighbors= IIF.localapi.outneighbors,
+    updatevertex= IIF.localapi.updatevertex!,
+    deletevertex= IIF.localapi.deletevertex!,
+    deleteedge= IIF.localapi.deleteedge!,
+    cgEnabled= false )
+  nothing
+end
 
 
 
