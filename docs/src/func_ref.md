@@ -11,32 +11,32 @@ Depth = 3
 
 ### Caesar
 ```@docs
-getPoseExVertexNeoIDs
-getLandmOtherSessNeoIDs
-db2jld
-fetchrobotdatafirstpose
-executeQuery
 appendvertbigdata!
-updatenewverts!
-getVertNeoIDs!
-whosNear3D
-getprpt2kde
-whosNear2D
-hasBigDataElement
-getAllLandmarkNeoIDs
 consoleaskuserfordb
-standardcloudgraphsetup
-resetentireremotesession
-getfirstpose
-getExVertexNeoIDs
-findExistingMSConstraints
-removeNeo4jID
-getBigDataElement
-rmInstMultisessionPriors!
-insertrobotdatafirstpose!
+db2jld
+executeQuery
+fetchrobotdatafirstpose
 fetchsubgraph!
+findExistingMSConstraints
+getAllLandmarkNeoIDs
+getBigDataElement
+getExVertexNeoIDs
+getLandmOtherSessNeoIDs
 getLocalSubGraphMultisession
+getPoseExVertexNeoIDs
+getVertNeoIDs!
+getfirstpose
 getnewvertdict
+getprpt2kde
+hasBigDataElement
+insertrobotdatafirstpose!
+removeNeo4jID
+resetentireremotesession
+rmInstMultisessionPriors!
+standardcloudgraphsetup
+updatenewverts!
+whosNear2D
+whosNear3D
 ```
 
 ### RoME
@@ -64,7 +64,6 @@ deleteVariable!
 doautoinit!
 downMsgPassingRecursive
 dwnMsg
-emptyFactorGraph
 encodefg
 fifoFreeze!
 findRelatedFromPotential
@@ -73,6 +72,7 @@ getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
 getCliq
 getData
+getFactor
 getKDE
 getParent
 getSofttype
@@ -80,7 +80,6 @@ getVal
 getVertKDE
 getUpMsgs
 getDwnMsgs
-initializeNode!
 landmarks
 loadjld
 localProduct
@@ -106,5 +105,7 @@ upGibbsCliqueDensity
 upMsg
 writeGraphPdf
 showFactor
-showVariable
 ```
+
+<!-- IIF v0.5.3 -->
+<!-- showVariable -->
