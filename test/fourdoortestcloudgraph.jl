@@ -41,7 +41,7 @@ cov = 3.0*ones(1,1)
 
 #TODO: WIP
 # robot style, add first pose vertex
-v1 = addNode!(fg,:x1,ContinuousScalar,N=N, labels=["POSE"])
+v1 = addVariable!(fg,:x1,ContinuousScalar,N=N, labels=["POSE"])
 
 # add a prior for the initial position of the robot
 fct = Obsv2(doors, cov, [1.0])
@@ -51,35 +51,35 @@ f1  = addFactor!(fg,[v1], fct)
 
 # add second pose vertex
 tem = 2.0*randn(1,N)+getVal(v1)+50.0
-v2 = addNode!(fg, :x2, ContinuousScalar, N=N,labels=["POSE"])
+v2 = addVariable!(fg, :x2, ContinuousScalar, N=N,labels=["POSE"])
 
 # now add the odometry factor between them
 f1 = addFactor!(fg,[v1;v2],Odo([50.0]',[2.0]',[1.0]))
 
 
-v3=addNode!(fg,:x3,4.0*randn(1,N)+getVal(v2)+50.0, N=N,labels=["POSE"])
+v3=addVariable!(fg,:x3,4.0*randn(1,N)+getVal(v2)+50.0, N=N,labels=["POSE"])
 addFactor!(fg,[v2;v3],Odo([50.0]',[4.0]',[1.0]))
 f2 = addFactor!(fg,[v3], Obsv2(doors, cov', [1.0]))
 
-v4=addNode!(fg,:x4,2.0*randn(1,N)+getVal(v3)+50.0, N=N,labels=["POSE"])
+v4=addVariable!(fg,:x4,2.0*randn(1,N)+getVal(v3)+50.0, N=N,labels=["POSE"])
 addFactor!(fg,[v3;v4],Odo([50.0]',[2.0]',[1.0]))
 
 # if true
-l1=addNode!(fg, :l1, 0.5*randn(1,N)+getVal(v3)+64.0, N=N,labels=["LANDMARK"])
+l1=addVariable!(fg, :l1, 0.5*randn(1,N)+getVal(v3)+64.0, N=N,labels=["LANDMARK"])
 addFactor!(fg, [v3,l1], Ranged([64.0],[0.5],[1.0]))
 addFactor!(fg, [v4,l1], Ranged([16.0],[0.5],[1.0]))
 # end
 
 
-v5=addNode!(fg,:x5,2.0*randn(1,N)+getVal(v4)+50.0, N=N,labels=["POSE"])
+v5=addVariable!(fg,:x5,2.0*randn(1,N)+getVal(v4)+50.0, N=N,labels=["POSE"])
 addFactor!(fg,[v4;v5],Odo([50.0]',[2.0]',[1.0]))
 
 
-v6=addNode!(fg,:x6,1.25*randn(1,N)+getVal(v5)+40.0, N=N,labels=["POSE"])
+v6=addVariable!(fg,:x6,1.25*randn(1,N)+getVal(v5)+40.0, N=N,labels=["POSE"])
 addFactor!(fg,[v5;v6],Odo([40.0]',[1.25]',[1.0]))
 
 
-v7=addNode!(fg,:x7,2.0*randn(1,N)+getVal(v6) +60.0, N=N,labels=["POSE"])
+v7=addVariable!(fg,:x7,2.0*randn(1,N)+getVal(v6) +60.0, N=N,labels=["POSE"])
 addFactor!(fg,[v6;v7],Odo([60.0]',[2.0]',[1.0]))
 
 f3 = addFactor!(fg,[v7], Obsv2(doors, cov', [1.0]))

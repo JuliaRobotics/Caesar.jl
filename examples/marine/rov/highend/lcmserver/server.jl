@@ -71,7 +71,7 @@ function handle_poses!(slam::SLAMWrapper,
     euler = Euler(q)
 
     node_label = Symbol("x$(id)")
-    xn = addNode!(slam.fg, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
+    xn = addVariable!(slam.fg, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
     slam.lastposesym = node_label; # update object
 
     if id == 0
@@ -83,7 +83,7 @@ function handle_poses!(slam::SLAMWrapper,
         addFactor!(slam.fg, [xn], initPosePrior)
 
         # auto init is coming, this code will likely be removed
-        initializeNode!(slam.fg, node_label)
+        initVariable!(slam.fg, node_label)
     end
 
     if id == 1
@@ -148,7 +148,7 @@ function handle_partials!(slam::SLAMWrapper,
     xyh_factor = PartialPose3XYYaw(xyh_dist)
     addFactor!(slam.fg, [xo;xd], xyh_factor)
 
-    initializeNode!(slam.fg, destination_label)
+    initVariable!(slam.fg, destination_label)
     println()
 end
 

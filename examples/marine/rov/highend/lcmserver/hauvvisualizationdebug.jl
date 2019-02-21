@@ -170,17 +170,17 @@ N = 100
 fgnew = Caesar.initfg(cloudgraph=backend_config, sessionname="SESSHAUVCODED")
 
 
-addNode!(fgnew,:x1,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x1,N=N,labels=["POSE"], dims=6)
 addFactor!(fgnew,[:x1], PriorPose3(MvNormal(veeEuler(wTx1), 0.0001*eye(6)) ) )
-initializeNode!(fgnew, :x1)
+initVariable!(fgnew, :x1)
 plotKDE(fgnew, :x1, dims=[1;2], title="$(veeEuler(wTx1))")
 
 
-addNode!(fgnew,:x2,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x2,N=N,labels=["POSE"], dims=6)
 a,b = MvNormal(zpr2[2:3],0.001*eye(2)), Distributions.Normal(zpr2[1], 0.01)
 addFactor!(fgnew,[:x2], PartialPriorRollPitchZ( a, b ) )
 addFactor!(fgnew,[:x1,:x2], PartialPose3XYYaw(MvNormal(XYH1_2,0.001*eye(3)))  )
-initializeNode!(fgnew, :x2)
+initVariable!(fgnew, :x2)
 plotKDE(fgnew, :x2, dims=[6;3], title="$(veeEuler(wTx2))")
 
 visualizeallposes!(vis, fgnew)
@@ -189,28 +189,28 @@ pp, parr, par, = localProduct(fgnew, :x2, api=localapi)
 plotKDE(pp, dims=[6;3], title="$(veeEuler(wTx2))")
 # plotLocalProduct(fgnew, :x2, dims=[6;3], api=localapi)
 
-# addNode!(fgnew,:x2,N=N,labels=["POSE"], dims=6)
+# addVariable!(fgnew,:x2,N=N,labels=["POSE"], dims=6)
 # a,b = MvNormal(zpr2[2:3],0.001*eye(2)), Distributions.Normal(zpr2[1], 0.1)
 # addFactor!(fgnew,[:x2], PartialPriorRollPitchZ( a, b ) )
 # addFactor!(fgnew,[:x1,:x2], deepcopy(odo_xyh_12)  )
-# initializeNode!(fgnew, :x2)
+# initVariable!(fgnew, :x2)
 # plotKDE(fgnew, :x2, dims=[1;2], title="$(veeEuler(wTx2))")
 
 
-# addNode!(fgnew,:x2,N=N,labels=["POSE"], dims=6)
+# addVariable!(fgnew,:x2,N=N,labels=["POSE"], dims=6)
 # a,b = MvNormal(zpr2[2:3],0.001*eye(2)), Distributions.Normal(zpr2[1], 0.1)
 # addFactor!(fgnew,[:x2], PartialPriorRollPitchZ( a, b ) )
 # odo = MvNormal( veeEuler(wTx1\wTx2),0.001*eye(6))
 # addFactor!(fgnew,[:x1,:x2], Pose3Pose3(odo)  )
-# initializeNode!(fgnew, :x2)
+# initVariable!(fgnew, :x2)
 # plotKDE(fgnew, :x2, dims=[1;2], title="$(veeEuler(wTx2))")
 
 
-addNode!(fgnew,:x3,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x3,N=N,labels=["POSE"], dims=6)
 a,b = MvNormal(zpr3[2:3],0.001*eye(2)), Distributions.Normal(zpr3[1], 0.1)
 addFactor!(fgnew,[:x3], PartialPriorRollPitchZ( a, b ) )
 addFactor!(fgnew,[:x2,:x3], PartialPose3XYYaw(MvNormal(XYH2_3,0.001*eye(3)))  )
-initializeNode!(fgnew, :x3)
+initVariable!(fgnew, :x3)
 plotKDE(fgnew, :x3, dims=[1;2], title="$(veeEuler(wTx3))")
 
 
@@ -221,21 +221,21 @@ visualizeallposes!(vis, fgnew)
 
 
 
-addNode!(fgnew,:x4,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x4,N=N,labels=["POSE"], dims=6)
 a,b = MvNormal(zpr4[2:3],0.001*eye(2)), Distributions.Normal(zpr4[1], 0.1)
 addFactor!(fgnew,[:x4], PartialPriorRollPitchZ( a, b ) )
 addFactor!(fgnew,[:x3,:x4], PartialPose3XYYaw(MvNormal(XYH3_4,0.001*eye(3)))  )
-initializeNode!(fgnew, :x4)
+initVariable!(fgnew, :x4)
 plotKDE(fgnew, :x4, dims=[1;2], title="$(veeEuler(wTx4))")
 
 
 
 
-addNode!(fgnew,:x5,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x5,N=N,labels=["POSE"], dims=6)
 a,b = MvNormal(zpr5[2:3],0.001*eye(2)), Distributions.Normal(zpr5[1], 0.1)
 addFactor!(fgnew,[:x5], PartialPriorRollPitchZ( a, b ) )
 addFactor!(fgnew,[:x4,:x5], PartialPose3XYYaw(MvNormal(XYH4_5,0.001*eye(3)))  )
-initializeNode!(fgnew, :x5)
+initVariable!(fgnew, :x5)
 plotKDE(fgnew, :x5, dims=[1;2], title="$(veeEuler(wTx5))")
 
 

@@ -11,32 +11,32 @@ Depth = 3
 
 ### Caesar
 ```@docs
-getPoseExVertexNeoIDs
-getLandmOtherSessNeoIDs
-db2jld
-fetchrobotdatafirstpose
-executeQuery
 appendvertbigdata!
-updatenewverts!
-getVertNeoIDs!
-whosNear3D
-getprpt2kde
-whosNear2D
-hasBigDataElement
-getAllLandmarkNeoIDs
 consoleaskuserfordb
-standardcloudgraphsetup
-resetentireremotesession
-getfirstpose
-getExVertexNeoIDs
-findExistingMSConstraints
-removeNeo4jID
-getBigDataElement
-rmInstMultisessionPriors!
-insertrobotdatafirstpose!
+db2jld
+executeQuery
+fetchrobotdatafirstpose
 fetchsubgraph!
+findExistingMSConstraints
+getAllLandmarkNeoIDs
+getBigDataElement
+getExVertexNeoIDs
+getLandmOtherSessNeoIDs
 getLocalSubGraphMultisession
+getPoseExVertexNeoIDs
+getVertNeoIDs!
+getfirstpose
 getnewvertdict
+getprpt2kde
+hasBigDataElement
+insertrobotdatafirstpose!
+removeNeo4jID
+resetentireremotesession
+rmInstMultisessionPriors!
+standardcloudgraphsetup
+updatenewverts!
+whosNear2D
+whosNear3D
 ```
 
 ### RoME
@@ -49,28 +49,37 @@ addOdoFG!
 
 ### IncrementalInference
 ```@docs
-addNode!
+addVariable!
 addFactor!
 allnums
+approxCliqMarginalUp!
 approxConv
 batchSolve!
 childCliqs
 cliqGibbs
 convert2packedfunctionnode
 decodefg
+deleteFactor!
+deleteVariable!
 doautoinit!
 downMsgPassingRecursive
 dwnMsg
-emptyFactorGraph
 encodefg
 fifoFreeze!
 findRelatedFromPotential
 fmcmc!
 getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
+getCliq
+getData
+getFactor
 getKDE
+getParent
+getSofttype
+getVal
 getVertKDE
-initializeNode!
+getUpMsgs
+getDwnMsgs
 landmarks
 loadjld
 localProduct
@@ -78,6 +87,7 @@ ls
 lsf
 lsRear
 manualinit!
+parentCliq
 packFromLocalPotentials!
 printgraphmax
 productpartials!
@@ -94,4 +104,8 @@ updateFGBT!
 upGibbsCliqueDensity
 upMsg
 writeGraphPdf
+showFactor
 ```
+
+<!-- IIF v0.5.3 -->
+<!-- showVariable -->

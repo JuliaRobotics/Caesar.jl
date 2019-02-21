@@ -12,7 +12,7 @@ N = 100
 fg = initfg()
 
 # Add the first pose :x0
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))))
@@ -23,15 +23,15 @@ side_length = 3.0
 for i in 0:(n_sides-1)
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
-  addNode!(fg, nsym, Pose2)
+  addVariable!(fg, nsym, Pose2)
   pp = Pose2Pose2(MvNormal([side_length;0;2pi/n_sides], diagm([0.01;0.01;0.001].^2)))
   addFactor!(fg, [psym;nsym], pp )
 end
 
 # two acoustic beacons
 
-addNode!(fg, :l1, Point2)
-addNode!(fg, :l2, Point2)
+addVariable!(fg, :l1, Point2)
+addVariable!(fg, :l2, Point2)
 
 pL1 = IIF.Prior(MvNormal([50.0; 50.0], 0.1^2*eye(2)))
 pL2 = IIF.Prior(MvNormal([-50.0; 50.0], 0.1^2*eye(2)))

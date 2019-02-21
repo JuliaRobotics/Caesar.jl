@@ -280,7 +280,7 @@ function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N:
       uidl = elem[:frtend]["uid"]+1 # TODO -- remove +1 and allow :x0, :l0
       nlbsym = Symbol(string('x', uidl))
       initvals = 0.1*randn(3,N) # TODO -- fix init to proper values
-      # v = addNode!(fgl, nlbsym, , 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
+      # v = addVariable!(fgl, nlbsym, , 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
       push!(labels,"POSE")
     elseif elem[:frtend]["t"] == "L"
       @warn "using hack counter for LANDMARKS uid +200000"
@@ -292,7 +292,7 @@ function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N:
     if !haskey(fgl.IDs, nlbsym) && nlbsym != Symbol()
       # @show nlbsym, size(initvals)
       # TODO remove initstdev, deprecated
-      v = addNode!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, ready=0, uid=uidl,api=localapi)
+      v = addVariable!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, ready=0, uid=uidl,api=localapi)
       mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, uidl, v, labels=labels)
       println()
     end

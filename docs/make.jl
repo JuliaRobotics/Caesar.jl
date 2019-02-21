@@ -3,6 +3,7 @@ import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultipl
 import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
 
 using KernelDensityEstimatePlotting
+import KernelDensityEstimatePlotting: plotKDE
 using RoMEPlotting
 using MbedTLS
 @info "MbedTLS has been loaded"
@@ -24,6 +25,7 @@ makedocs(
             "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
             "Adding New Variables and Factors" => "concepts/adding_variables_factors.md",
             "Using Caesar Database Operation" => "concepts/database_interactions.md",
+            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",

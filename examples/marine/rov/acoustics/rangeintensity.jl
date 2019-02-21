@@ -41,7 +41,7 @@ N = 75
 fg = initfg()
 
 
-addNode!(fg, :x0, Pose2, N=N)
+addVariable!(fg, :x0, Pose2, N=N)
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.001^2*eye(3))))
 
 doautoinit!(fg, :x0)
@@ -52,10 +52,10 @@ prevsymm = :null
 for idx in 1:96
 
 lsym = Symbol("l$(idx)")
-addNode!(fg, lsym, Point2, N=N)
+addVariable!(fg, lsym, Point2, N=N)
 
 llsym = Symbol("l$(idx+1000)")
-# addNode!(fg, llsym, Point2, N=N)
+# addVariable!(fg, llsym, Point2, N=N)
 
 bss = IIF.AliasingScalarSampler(collect(ranges),  Float64.(img[:,idx]), SNRfloor=0.70)
 tr = Pose2Point2BearingRange(Normal(azis[idx], 0.005), bss)
@@ -76,7 +76,7 @@ prevsymm = llsym
 end
 
 # the measurement point
-# addNode!(fg, :l48, Point2)
+# addVariable!(fg, :l48, Point2)
 # bss = IIF.AliasingScalarSampler(collect(ranges),  Float64.(img[:,48]), SNRfloor=0.7)
 # tr = Pose2Point2BearingRange(Normal(0.0, 0.005), bss)
 # addFactor!(fg, [:x0;:l48], tr)
