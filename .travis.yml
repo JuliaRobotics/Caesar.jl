@@ -34,7 +34,7 @@ jobs:
         - julia -e 'import Pkg; Pkg.add("Documenter")'
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate();
                                     Pkg.develop(PackageSpec(path=pwd()))'
-        - julia -e 'using Pkg; Pkg.add(PackageSpec("IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
+        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master")); Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting",rev="master"));'
         - julia --project=docs/ docs/make.jl
       after_success: skip
