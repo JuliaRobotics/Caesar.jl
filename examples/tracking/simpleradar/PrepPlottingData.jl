@@ -36,12 +36,12 @@ py_mean = Mmean.*sin.(Amean)
 dferr = vcat(
 DataFrame(
   x = ts,
-  y = (ranges[1:len] - Mmean)./ranges[1:len]*100,
+  y = (ranges[1:len] - Mmean),
   Legend = "mean"
 ),
 DataFrame(
   x = ts,
-  y = (ranges[1:len] - Mmax)./ranges[1:len]*100,
+  y = (ranges[1:len] - Mmax),
   Legend = "max"
 ) )
 
@@ -84,11 +84,18 @@ DataFrame(
 
 dfcm = vcat(
 DataFrame(
-  x = ts,
-  y = px_mean,
+  x=XYdense[1,:],
+  y=XYdense[2,:],
+  Legend="true"
 ),
 DataFrame(
-  x = ts,
-  y = py_mean,
+  x = px_mean[2:end],
+  y = py_mean[2:end],
+  Legend="mean"
+),
+DataFrame(
+  x = px_max,
+  y = py_max,
+  Legend="max"
 )
 )

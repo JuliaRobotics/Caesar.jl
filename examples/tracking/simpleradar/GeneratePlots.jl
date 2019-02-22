@@ -1,22 +1,22 @@
 
 
-## plots
+
+## plot range tracking error
 
 Gadfly.set_default_plot_size(10cm, 5cm)
 pl = Gadfly.plot(dferr,
   x=:x, y=:y, color=:Legend, Geom.line,
   style(line_width=0.5mm, point_size=0.2mm),
   Guide.xlabel("time [s]"),
-  Guide.ylabel("range err [%]"),
+  Guide.ylabel("range err [m]"),
 )
 
-pl |> SVG(joinpath(dirname(@__FILE__),"export","trackingError.svg"),10cm,5cm)
-
-pl
+pl |> SVG(joinpath(dirname(@__FILE__),"exports","rangeTrackingError.svg"),10cm,5cm)
 
 
 
-##
+
+##  Plot Ranges
 
 Gadfly.set_default_plot_size(10cm, 5cm)
 pl = Gadfly.plot(df,
@@ -26,14 +26,13 @@ pl = Gadfly.plot(df,
   Guide.ylabel("range [m]"),
 )
 
-Plots.plot(mt, lab=["true";"mean";"max"])
+
+
+pl |> SVG(joinpath(dirname(@__FILE__),"exports","trackingRange.svg"),10cm,5cm)
 
 
 
-
-
-
-##
+##  Plot angles
 
 Gadfly.set_default_plot_size(10cm, 5cm)
 pl = Gadfly.plot(dfa,
@@ -44,35 +43,24 @@ pl = Gadfly.plot(dfa,
 )
 
 
-
-##
-
-Gadfly.set_default_plot_size(10cm, 5cm)
-pl = Gadfly.plot(dfcm,
-  x=:x, y=:y, Geom.path,
-  style(line_width=0.5mm, point_size=0.2mm),
-  Guide.xlabel("time [s]"),
-  Guide.ylabel("angle [rad]"),
-)
-
-
-
+pl |> SVG(joinpath(dirname(@__FILE__),"exports","trackingAngle.svg"),10cm,5cm)
 
 
 
 ## Plot Cartesian figure
 
-
-
-Gadfly.set_default_plot_size(10cm, 8cm)
-
-
-pl = Gadfly.plot(
-layer(x=XYdense[1,:], y=XYdense[2,:], Geom.line),
-layer(x=px_mean, y=py_mean, Geom.path, Gadfly.Theme(default_color=colorant"red")),
-layer(x=px_max, y=py_max, Geom.path, Gadfly.Theme(default_color=colorant"green")),
+Gadfly.set_default_plot_size(10cm, 5cm)
+pl = Gadfly.plot(dfcm,
+  x=:x, y=:y, color=:Legend, Geom.path,
+  style(line_width=0.5mm, point_size=0.2mm),
+  Guide.xlabel("horizontal [m]"),
+  Guide.ylabel("vertical [m]"),
 )
 
+pl.coord=Gadfly.Coord.Cartesian(xmin=-20,xmax=10, ymin=-60,ymax=20)
+
+# Gadfly.set_default_plot_size(10cm, 8cm)
+pl |> SVG(joinpath(dirname(@__FILE__),"exports","cartesian.svg"),10cm,7cm)
 
 
 
@@ -112,5 +100,17 @@ scene
 
 ##
 
+save(joinpath(dirname(@__FILE__),"exports","plot.png"), scene)
 
-save(joinpath(dirname(@__FILE__),"export","plot.png"), scene)
+
+
+
+## Look at cylindrical product data
+
+
+sym = :t4
+pll, plc = plotLocalProductCylinder(fg, :t4, show=false, scale=0.1)
+
+Gadfly.set_default_plot_size(8cm, 6cm)
+pll |> SVG(joinpath(dirname(@__FILE__),"exports","trackingRange.svg"),8cm, 6cm)
+plc |> SVG(joinpath(dirname(@__FILE__),"exports","trackingRange.svg"),8cm, 6c)
