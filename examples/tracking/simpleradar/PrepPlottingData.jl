@@ -23,6 +23,7 @@ end
 
 len = length(K)
 mt = [reshape(ranges[1:len],:,1) reshape(Mmean,:,1) reshape(Mmax,:,1)]
+angs = [reshape(angles[1:len],:,1) reshape(Amean,:,1) reshape(Amax,:,1)]
 
 
 px_max = Mmax.*cos.(Amax)
@@ -42,6 +43,18 @@ DataFrame(
 DataFrame(
   x = ts,
   y = (ranges[1:len] - Mmax),
+  Legend = "max"
+) )
+
+dferrang = vcat(
+DataFrame(
+  x = ts,
+  y = AMP.difftheta.(angles[1:len], Amean),
+  Legend = "mean"
+),
+DataFrame(
+  x = ts,
+  y = AMP.difftheta.(angles[1:len], Amax),
   Legend = "max"
 ) )
 

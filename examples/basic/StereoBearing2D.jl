@@ -3,35 +3,31 @@
 # Factor graphs can be used to construct either fixed lag smoothing or full blown SLAM solutions.
 
 # Load required libraries
-using Caesar, Distributions
-using RoMEPlotting
-using ApproxManifoldProducts
+using Caesar, RoMEPlotting
+# using Distributions
+# using ApproxManifoldProducts
 
 ## Environment setup -- in Juno you can run cells with Alt+Enter
 
 # true pose position (assume hidden)  - [X Y θ]
-p0 = [2.0;0.0;0.0]
-p1 = [2.0;1.0;0.0]
+p0 = [0.0;0.0;0.0]
 
 # noise level for Gaussian assumption -- see https://github.com/JuliaStats/Distributions.jl/issues/584
 pcov = Matrix(Diagonal([0.01; 0.01; 0.05].^2))
 
 # true landmark positions
-l0 = [0.0;1.0]
-l1 = [0.0;-1.0]
+l0 = [2.0;0.15]
+l1 = [2.0;-0.15]
 
-θ = atan(1.0,2.0)
+d0 = l0-p0[1:2]
+m0 = atan(d0[2],d0[1])
 
-
-# measurements
-m0 = pi-θ
-m1 = -pi+θ
-
-m2 = -pi
-m3 = -pi+pi/4.0
+d1 = l1-p0[1:2]
+m1 = atan(d1[2],d1[1])
 
 
-mstd = 0.5
+
+mstd = 0.1
 
 ## build the factor graph
 
@@ -44,7 +40,7 @@ addVariable!(fg, :l0, Point2, labels=["BEACON"])
 addVariable!(fg, :l1, Point2, labels=["BEACON"])
 # addFactor!(fg, [:l1], Prior(MvNormal(l1, lcov)))
 
-addFactor!(fg, [:l1; :l0], Point2Point2(MvNormal([0.0;2.0], [0.01 0; 0 0.01].^2)))
+addFactor!(fg, [:l0; :l1], Point2Point2(MvNormal(l1-l0, [0.01 0; 0 0.01].^2)))
 
 
 # add unknown pose location
@@ -52,9 +48,10 @@ addVariable!(fg, :x0, Pose2, labels=["POSE"])
 addFactor!(fg, [:x0], PriorPose2(MvNormal(p0, pcov)))
 
 # add two bearing only measurements
-addFactor!(fg, [:x0; :l0], Pose2Point2Bearing(Normal(m0, mstd)))
-addFactor!(fg, [:x0; :l1], Pose2Point2Bearing(Normal(m1, mstd)))
+addFactor!(fg, [:x0; :l0], Pose2Point2BearingRange(Normal(m0, mstd), Rayleigh(2.0)))
+addFactor!(fg, [:x0; :l1], Pose2Point2BearingRange(Normal(m1, mstd), Rayleigh(2.0)))
 
+# addFactor!(fg, [:l1], PartialPrior(Normal(0.0,0.1), (1,)))
 
 
 # # add unknown pose location
@@ -84,7 +81,7 @@ batchSolve!(fg, N=100)
 ## Plot values to see result
 
 
-
+Gadfly.set_default_plot_size(30cm,20cm)
 plotPose(Pose2(), [getKDE(fg, :x0)]) #, axis=[-0.5 2.0; -0.5 1.5])
 
 # plotPose(Pose2(), [getKDE(fg, :x1)]) #, axis=[-0.5 2.0; -0.5 1.5])
@@ -97,17 +94,50 @@ plotKDE(fg, [:l0; :l1],dims=[1;2],levels=3) # ,axis=[0 2.0; 0.0 1.5])
 
 
 
+## Building a test
+
+
+
+fg = initfg()
+
+addVariable!(fg, :x0, Pose2)
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3),Matrix(Diagonal(0.001.*ones(3))))))
+
+addVariable!(fg, :l0, Point2)
+addFactor!(fg, [:l0], PriorPoint2(MvNormal([1.0;0.0],Matrix(Diagonal(0.001.*ones(2))))))
+addFactor!(fg, [:x0;:l0], Pose2Point2Bearing(Normal(0, 0.01)))
+
+
+addVariable!(fg, :l1, Point2)
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([0.0;1.0],Matrix(Diagonal(0.001.*ones(2))))))
+addFactor!(fg, [:x0;:l1], Pose2Point2Bearing(Normal(pi/2, 0.01)))
+
+
+
+
+fg = initfg()
+
+addVariable!(fg, :x0, Pose2)
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3),Matrix(Diagonal(0.001.*ones(3))))))
+
+addVariable!(fg, :l0, Point2)
+# addFactor!(fg, [:l0], PriorPoint2(MvNormal([1.0;0.0],Matrix(Diagonal(0.001.*ones(2))))))
+addFactor!(fg, [:x0;:l0], Pose2Point2Bearing(Normal(0, 0.01)))
+
+
+addVariable!(fg, :l1, Point2)
+# addFactor!(fg, [:l1], PriorPoint(MvNormal([0.0;1.0],Matrix(Diagonal(0.001.*ones(2))))))
+addFactor!(fg, [:x0;:l1], Pose2Point2Bearing(Normal(pi/2, 0.01)))
+
+addFactor!(fg, [:l0;:l1], Point2Point2(MvNormal([-2.0; 2.0], Matrix(Diagonal(0.001.*ones(2))))))
+
+
+
+
 ## util development
 
 
-fsym = :x0l0f1
 
-function plotBearingFactor(fg::FactorGraph, fsym::Symbol)
-
-IIF.getFactor(fg, fsym)
-
-
-end
 
 
 
@@ -210,4 +240,13 @@ Gadfly.plot(x=stuff[1][1,:], y=stuff[1][2,:], Geom.histogram2d)
 
 
 
-#
+
+## Util development
+
+
+
+
+
+
+
+##

@@ -7,7 +7,7 @@ rrstd = 15.0
 aam = 0.0
 aastd = 0.2
 
-N = 100
+
 fg = initfg()
 
 addVariable!(fg, :t0, Polar)

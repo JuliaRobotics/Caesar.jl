@@ -60,7 +60,7 @@ pl = Gadfly.plot(dfcm,
 pl.coord=Gadfly.Coord.Cartesian(xmin=-20,xmax=10, ymin=-60,ymax=20)
 
 # Gadfly.set_default_plot_size(10cm, 8cm)
-pl |> SVG(joinpath(dirname(@__FILE__),"exports","cartesian.svg"),10cm,7cm)
+pl |> SVG(joinpath(dirname(@__FILE__),"exports","cartesian.svg"),10cm,6cm)
 
 
 
@@ -108,9 +108,13 @@ save(joinpath(dirname(@__FILE__),"exports","plot.png"), scene)
 ## Look at cylindrical product data
 
 
-sym = :t4
-pll, plc = plotLocalProductCylinder(fg, :t4, show=false, scale=0.1)
+sym = :t0
+for sym in [Symbol("t$i") for i in 0:(nposes-1)]
 
-Gadfly.set_default_plot_size(8cm, 6cm)
-pll |> SVG(joinpath(dirname(@__FILE__),"exports","trackingRange.svg"),8cm, 6cm)
-plc |> SVG(joinpath(dirname(@__FILE__),"exports","trackingRange.svg"),8cm, 6c)
+pll, plc = plotLocalProductCylinder(fg, sym, show=false, scale=0.1);
+
+# Gadfly.set_default_plot_size(8cm, 6cm)
+pll |> SVG(joinpath(dirname(@__FILE__),"exports","localProductLinear$sym.svg"),8cm, 6cm)
+plc |> SVG(joinpath(dirname(@__FILE__),"exports","localProductCirc$sym.svg"),8cm, 6cm)
+
+end
