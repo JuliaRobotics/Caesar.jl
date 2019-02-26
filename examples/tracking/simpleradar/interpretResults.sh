@@ -25,10 +25,10 @@ find `find . -name  'N100_*' -print`/ | grep maxRanErr.txt | xargs cat > results
 find `find . -name  'N100_*' -print`/ | grep meanRanErr.txt | xargs cat > results/N100_meanRanErr.dat
 
 
-# find `find . -name  'N150_*' -print`/ | grep maxAngErr.txt | xargs cat > results/N150_maxAngErr.dat
-# find `find . -name  'N150_*' -print`/ | grep meanAngErr.txt | xargs cat > results/N150_meanAngErr.dat
-# find `find . -name  'N150_*' -print`/ | grep maxRanErr.txt | xargs cat > results/N150_maxRanErr.dat
-# find `find . -name  'N150_*' -print`/ | grep meanRanErr.txt | xargs cat > results/N150_meanRanErr.dat
+find `find . -name  'N150_*' -print`/ | grep maxAngErr.txt | xargs cat > results/N150_maxAngErr.dat
+find `find . -name  'N150_*' -print`/ | grep meanAngErr.txt | xargs cat > results/N150_meanAngErr.dat
+find `find . -name  'N150_*' -print`/ | grep maxRanErr.txt | xargs cat > results/N150_maxRanErr.dat
+find `find . -name  'N150_*' -print`/ | grep meanRanErr.txt | xargs cat > results/N150_meanRanErr.dat
 
 
 
@@ -70,6 +70,11 @@ echo ../sim1/results/N100_meanAngErr.dat | xargs cat >> results/N100_meanAngErr.
 echo ../sim1/results/N100_maxRanErr.dat | xargs cat >> results/N100_maxRanErr.dat
 echo ../sim1/results/N100_meanRanErr.dat | xargs cat >> results/N100_meanRanErr.dat
 
+echo ../sim1/results/N150_maxAngErr.dat | xargs cat >> results/N150_maxAngErr.dat
+echo ../sim1/results/N150_meanAngErr.dat | xargs cat >> results/N150_meanAngErr.dat
+echo ../sim1/results/N150_maxRanErr.dat | xargs cat >> results/N150_maxRanErr.dat
+echo ../sim1/results/N150_meanRanErr.dat | xargs cat >> results/N150_meanRanErr.dat
+
 echo ../sim1/results/N200_maxAngErr.dat | xargs cat >> results/N200_maxAngErr.dat
 echo ../sim1/results/N200_meanAngErr.dat | xargs cat >> results/N200_meanAngErr.dat
 echo ../sim1/results/N200_maxRanErr.dat | xargs cat >> results/N200_maxRanErr.dat
@@ -97,6 +102,12 @@ julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("resul
 julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("results/N100_meanAngErr.dat")),digits=2))' > results/N100_meanAngErrStd.txt
 julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("results/N100_maxRanErr.dat")),digits=2))' > results/N100_maxRanErrStd.txt
 julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("results/N100_meanRanErr.dat")),digits=2))' > results/N100_meanRanErrStd.txt
+
+julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("results/N150_maxAngErr.dat")),digits=2))' > results/N150_maxAngErrStd.txt
+julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("results/N150_meanAngErr.dat")),digits=2))' > results/N150_meanAngErrStd.txt
+julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("results/N150_maxRanErr.dat")),digits=2))' > results/N150_maxRanErrStd.txt
+julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("results/N150_meanRanErr.dat")),digits=2))' > results/N150_meanRanErrStd.txt
+
 
 julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("results/N200_maxAngErr.dat")),digits=2))' > results/N200_maxAngErrStd.txt
 julia -O3 -e 'using DelimitedFiles, Statistics; println(round(std(readdlm("results/N200_meanAngErr.dat")),digits=2))' > results/N200_meanAngErrStd.txt
@@ -146,13 +157,15 @@ echo "range, \$\\rho\$ &"
 echo `cat results/N50_meanRanErrStd.txt`' / '`cat results/N50_maxRanErrStd.txt`' & '
 echo `cat results/N75_meanRanErrStd.txt`' / '`cat results/N75_maxRanErrStd.txt`' & '
 echo `cat results/N100_meanRanErrStd.txt`' / '`cat results/N100_maxRanErrStd.txt`' & '
+echo `cat results/N150_meanRanErrStd.txt`' / '`cat results/N150_maxRanErrStd.txt`' & '
 }
 
 {
-echo "range, \$\\rho\$ &"
+echo "angle, \$\\rho\$ &"
 echo `cat results/N50_meanAngErrStd.txt`' / '`cat results/N50_maxAngErrStd.txt`' & '
 echo `cat results/N75_meanAngErrStd.txt`' / '`cat results/N75_maxAngErrStd.txt`' & '
 echo `cat results/N100_meanAngErrStd.txt`' / '`cat results/N100_maxAngErrStd.txt`' & '
+echo `cat results/N150_meanAngErrStd.txt`' / '`cat results/N150_maxAngErrStd.txt`' & '
 }
 
 

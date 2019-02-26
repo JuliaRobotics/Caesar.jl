@@ -35,7 +35,7 @@ include(joinpath(dirname(@__FILE__),"GenerateSimData.jl"))
 
 mc = 1; N = 100;
 
-for mc = 1:50, N = [50;75;100;]
+for mc = 1:50, N = [200;]
 
 ## Start building the factor graph in polar coordinates
 include(joinpath(dirname(@__FILE__),"BuildFactorGraph.jl"))
