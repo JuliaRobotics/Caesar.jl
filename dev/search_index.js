@@ -789,7 +789,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar Examples",
     "title": "Multi-session Use-case",
     "category": "section",
-    "text": "Multi-session Turtlebot example of the second floor in the Stata Center:   <img src=\"https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/turtlemultisession.gif\" alt=\"Turtlebot Multi-session animation\" width=\"480\" border=\"0\" /></a>"
+    "text": "Multi-session Turtlebot example of the second floor in the Stata Center:   <img src=\"https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/turtlemultisession.gif\" alt=\"Turtlebot Multi-session animation\" width=\"480\" border=\"0\" /></a>See reference for more details:Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: \"SLAMinDB: Centralized graph databases for mobile robotics\", IEEE International Conference on Robotics and Automation (ICRA), Singapore, 2017."
 },
 
 {
@@ -805,7 +805,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar Examples",
     "title": "Synthetic Aperture Sonar SLAM",
     "category": "section",
-    "text": "The full functional (approximate sum-product) inference approach can be used to natively imbed single hydrophone acoustic waveform data into highly non-Gaussian SAS factors–that implicitly perform beamforming/micro-location–-for a simultaneous localization and mapping solution (image links to video):<a href=\"https://vimeo.com/315255651\" target=\"_blank\"><img src=\"https://user-images.githubusercontent.com/6412556/52547229-3048d500-2d94-11e9-8a46-811316a45283.png\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>"
+    "text": "The full functional (approximate sum-product) inference approach can be used to natively imbed single hydrophone acoustic waveform data into highly non-Gaussian SAS factors–that implicitly perform beamforming/micro-location–-for a simultaneous localization and mapping solution (image links to video):<a href=\"https://www.youtube.com/watch?v=_RfXLQ67N4o\" target=\"_blank\"><img src=\"https://user-images.githubusercontent.com/6412556/52547229-3048d500-2d94-11e9-8a46-811316a45283.png\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>See reference for more details:Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: \"Non-Gaussian SLAM utilizing Synthetic Aperture Sonar\", Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019."
+},
+
+{
+    "location": "examples/examples/#Probabilistic-Data-Association-(Uncertain-loop-closures)-1",
+    "page": "Caesar Examples",
+    "title": "Probabilistic Data Association (Uncertain loop closures)",
+    "category": "section",
+    "text": "Example where the standard multihypothesis addFactor!(.., multihypo=[1.0;0.5;0.5]) interface is used.  This is from the Kitti driving dataset.  Video here.<a href=\"https://www.youtube.com/watch?v=9hEonD8KDrs\" target=\"_blank\"><img src=\"https://user-images.githubusercontent.com/6412556/53611733-9065b680-3b9d-11e9-8b0f-cb292a25fbb3.png\" alt=\"IMAGE ALT TEXT HERE\" width=\"480\" border=\"0\" /></a>See reference for more details:Doherty, K., Fourie, D., Leonard, J.: \"Multimodal Semantic SLAM with Probabilistic Data Association\", Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019."
 },
 
 {
@@ -1389,7 +1397,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
