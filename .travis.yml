@@ -1,11 +1,11 @@
 language: julia
 
-# os:
-#   - linux
-#
-# julia:
+os:
+  - linux
+
+julia:
+  - 1.0
 #   - 0.7
-#   - 1.0
 #   - 1.1
 #   - nightly
 #
@@ -45,8 +45,8 @@ jobs:
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master")); Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting",rev="master"));'
         - julia -e 'using Pkg; Pkg.add("MbedTLS"); using MbedTLS'
-        - julia -e 'using Pkg; Pkg.develop("Arena");'
-        - julia --project=docs/ docs/make.jl
+        - xvfb-run julia -e 'using Pkg; Pkg.develop("Arena");'
+        - xvfb-run julia --project=docs/ docs/make.jl
       after_success: skip
 
 # moved comments down for clarity
