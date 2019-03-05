@@ -55,6 +55,10 @@ Multi-session [Turtlebot](http://www.turtlebot.com/) example of the second floor
 <img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/turtlemultisession.gif" alt="Turtlebot Multi-session animation" width="480" border="0" /></a>
 ```
 
+See reference for more details:
+
+> Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: ["SLAMinDB: Centralized graph databases for mobile robotics"](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf), IEEE International Conference on Robotics and Automation (ICRA), Singapore, 2017.
+
 ### Simulated Ambiguous SONAR in 3D
 
 Intersection of ambiguous elevation angle from planar SONAR sensor:   
@@ -70,12 +74,26 @@ Bi-modal belief
 
 ### Synthetic Aperture Sonar SLAM
 
-The full functional (approximate sum-product) inference approach can be used to natively imbed single hydrophone acoustic waveform data into highly non-Gaussian SAS factors--that implicitly perform beamforming/micro-location---for a simultaneous localization and mapping solution ([image links to video](https://vimeo.com/315255651)):
-
+The full functional (approximate sum-product) inference approach can be used to natively imbed single hydrophone acoustic waveform data into highly non-Gaussian SAS factors--that implicitly perform beamforming/micro-location---for a simultaneous localization and mapping solution ([image links to video](https://www.youtube.com/watch?v=_RfXLQ67N4o)):
 
 ```@raw html
-<a href="https://vimeo.com/315255651" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/52547229-3048d500-2d94-11e9-8a46-811316a45283.png" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
+<a href="https://www.youtube.com/watch?v=_RfXLQ67N4o" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/52547229-3048d500-2d94-11e9-8a46-811316a45283.png" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 ```
+
+See reference for more details:
+
+> Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: "Non-Gaussian SLAM utilizing Synthetic Aperture Sonar", Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
+
+## Probabilistic Data Association (Uncertain loop closures)
+
+Example where the standard multihypothesis `addFactor!(.., multihypo=[1.0;0.5;0.5])` interface is used.  This is from the Kitti driving dataset.  [Video here](https://www.youtube.com/watch?v=9hEonD8KDrs).
+
+```@raw html
+<a href="https://www.youtube.com/watch?v=9hEonD8KDrs" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/53611733-9065b680-3b9d-11e9-8b0f-cb292a25fbb3.png" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
+```
+
+See reference for more details:
+>  Doherty, K., Fourie, D., Leonard, J.: "Multimodal Semantic SLAM with Probabilistic Data Association", Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
 ## More Examples
 
