@@ -23,7 +23,7 @@ function (czt::CZTFilter{T})(dataIn::Array, dataOut::Array{Complex{T}}) where {T
         error("Number of phones: $(size(dataIn,2)). Expected: $(czt.nPhones)")
     end
     vdI = view(dataIn,1:dataLen,:)
-    czt.tempData[:] = 0.0 + 0.0im
+    fill!(czt.tempData, 0.0 + 0.0im)
     czt.tempData[1:dataLen,:] = vdI .* czt.Awk2; #zero out temp data
     fft!(czt.tempData,1)
     # fwk = czt.Fwk2
@@ -32,7 +32,7 @@ function (czt::CZTFilter{T})(dataIn::Array, dataOut::Array{Complex{T}}) where {T
     end
     ifft!(czt.tempData,1)
     vtD = view(czt.tempData, czt.dataLen:(czt.dataLen+czt.outLen-1),:)
-    copy!(dataOut, vtD)
+    copyto!(dataOut, vtD)
     dataOut .*= czt.wk2
     nothing
 end
@@ -81,7 +81,7 @@ function prepCZTFilter(n::Int, nPhones::Int, w::Complex{T}, m::Int=-1, a::Comple
     out.nFFT = nextpow(2,n+m)
     out.fftIter = 1:out.nFFT # linspace(1,out.nFFT,out.nFFT)
     out.tempData = zeros(Complex{T},out.nFFT,nPhones)
-    k = linspace(0,max(n,m)-1,max(n,m))
+    k = LinRange(0,max(n,m)-1,max(n,m))
     wk2 = w.^(k.^2/2); #@show size(wk2)
     out.Awk2 = ((a.^-k) .* wk2)[1:n]
     out.Fwk2 = zeros(Complex{T},out.nFFT)

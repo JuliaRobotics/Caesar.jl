@@ -16,7 +16,9 @@ end
 Prepare a sas2d factor to use in the factor graph where `totalPhones` is the size of the SAS array.  Pass a known `cfgd::Dict{String,} for faster load times.`
 """
 function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
-                cfgd::Dict=loadConfigFile(joinpath(Pkg.dir("ProprietaryFactors"),"config","SAS2D.yaml")), rangemodel=:Rayleigh )
+                cfgd::Dict=loadConfigFile(joinpath(Pkg.dir("ProprietaryFactors"),"config","SAS2D.yaml")),
+                rangemodel=:Rayleigh,
+                chirpFile = joinpath(Pkg.dir("ProprietaryFactors"),"src","beamforming","chirp250.txt")  )
   #
   # @assert size(csvWaveData,2) == totalPhones
   #Constant Acoustic Params
@@ -32,13 +34,12 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
 
   #Params subject to change/ Heuristics
   nPhones = totalPhones - 1;
-  azimuths = linspace(0,360,azimuthDivs)*pi/180;
+  azimuths = LinRange(0,360,azimuthDivs)*pi/180;
 
   #Data preprocessing MF + CZT
   w = exp(-2im*pi*(fCeil-fFloor)/(nFFT_czt*fSampling))
   a = exp(2im*pi*fFloor/fSampling)
 
-  chirpFile = joinpath(Pkg.dir("ProprietaryFactors"),"src","beamforming","chirp250.txt");
   chirpIn = readdlm(chirpFile,',',Float64,'\n')
 
   #Matched Filter on Data In
@@ -52,7 +53,7 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
   filterCZT(mfData,cztData)
 
   #CBF Filter shared by
-  FFTfreqs = collect(linspace(fFloor,fCeil,nFFT_czt))
+  FFTfreqs = collect(LinRange(fFloor,fCeil,nFFT_czt))
   cfgCBF_init = CBFFilterConfig(fFloor,fCeil,nFFT_czt,totalPhones,azimuths,soundSpeed, FFTfreqs)
   cfgCBF_init_LIE = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones,Float64[0.0;],soundSpeed, FFTfreqs)
 
@@ -64,7 +65,7 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
       range_mf = prepMF(chirpIn,nFFT_full,totalPhones) # MF
       range_mf(csvWaveData,range_mfData) # matched filter
       ranget = [0:8000-500;]*soundSpeed/fSampling
-      sas2d.rangemodel = Vector{IIF.AliasingScalarSampler}(totalPhones)
+      sas2d.rangemodel = Vector{IIF.AliasingScalarSampler}(undef, totalPhones)
       for i in 1:totalPhones
         sas2d.rangemodel[i] = IIF.AliasingScalarSampler(ranget, norm.(range_mfData[1:7501,i]), SNRfloor=rngSNRfloor)
       end
@@ -95,7 +96,7 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
   sas2d.debugging = false;
 
   #create memory
-  sas2d.threadreuse = Vector{SASREUSE}(Threads.nthreads())
+  sas2d.threadreuse = Vector{SASREUSE}(undef, Threads.nthreads())
   for thritr in 1:Threads.nthreads()
       sas2d.threadreuse[thritr] = SASREUSE()
       sas2d.threadreuse[thritr].CBFFull = zeros(Complex{Float64}, getCBFFilter2Dsize(cfgCBF_init));

@@ -11,7 +11,7 @@ function (mf::MatchedFilter)(dataIn::Array,dataOut::Array)
     if size(dataOut)!=(mf.nFFT,mf.nPhones) error("Data Out has the wrong dims") end
     dataOut[1:size(dataIn,1),:] = dataIn
     fft!(dataOut,1)
-    dataOut ./= (abs.(dataOut)+1e-9) # OPTIONAL PHAT transform
+    dataOut ./= (abs.(dataOut).+1e-9) # OPTIONAL PHAT transform
     dataOut .*= mf.filter
     ifft!(dataOut,1)
     nothing
