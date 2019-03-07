@@ -18,11 +18,11 @@ makedocs(
         "Concepts" => [
             "Caesar Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
-            "Arena Visualization" => "concepts/arena_visualizations.md",
-            "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
-            "Adding New Variables and Factors" => "concepts/adding_variables_factors.md",
-            "Using Caesar Database Operation" => "concepts/database_interactions.md",
             "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
+            "Using Caesar Database Operation" => "concepts/database_interactions.md",
+            "Variable and Factor Concepts" => "concepts/adding_variables_factors.md",
+            "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
+            "Arena Visualization" => "concepts/arena_visualizations.md",
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
