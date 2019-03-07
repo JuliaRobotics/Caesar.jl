@@ -4,9 +4,9 @@ Newly created page to list related references and additional literature pertaini
 
 ### Direct Literature
 
-[1.1]  Fourie, Dehann, et al. ["A Nonparametric Belief Solution to the Bayes Tree"](http://www.ri.cmu.edu/pub_files/2016/10/Fourie16iros.pdf) IEEE/RSJ Intl. Conf. on Intelligent Robots and Systems (IROS), (2016).
+[1.1]  Fourie, D., Leonard, J., Kaess, M.: ["A Nonparametric Belief Solution to the Bayes Tree"](http://www.ri.cmu.edu/pub_files/2016/10/Fourie16iros.pdf) IEEE/RSJ Intl. Conf. on Intelligent Robots and Systems (IROS), (2016).
 
-[1.2]  Fourie, Dehann, ["Multi-modal and Inertial Sensor Solutions for Navigation-type Factor   Graphs"](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1), Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.
+[1.2]  Fourie, D.: ["Multi-modal and Inertial Sensor Solutions for Navigation-type Factor   Graphs"](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1), Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2017.
 
 [1.3]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: ["SLAMinDB: Centralized graph databases for mobile robotics"](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf), IEEE Intl. Conf. on Robotics and Automation (ICRA), Singapore, 2017.
 
