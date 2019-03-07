@@ -26,11 +26,15 @@ Newly created page to list related references and additional literature pertaini
 
 [2.3]  Kschischang, Frank R., Brendan J. Frey, and Hans-Andrea Loeliger. ["Factor graphs and the sum-product algorithm."](http://www.cs.utoronto.ca/~radford/csc2506/factor.pdf) IEEE Transactions on information theory 47.2 (2001): 498-519.
 
-[2.4]  Sudderth, E.B., Ihler, A.T., Isard, M., Freeman, W.T. and Willsky, A.S., 2010. ["Nonparametric belief propagation."](https://www.microsoft.com/en-us/research/wp-content/uploads/2010/10/p95-sudderth.pdf) Communications of the ACM, 53(10), pp.95-103
+[2.4]  Dellaert, Frank, and Michael Kaess. ["Factor graphs for robot perception."](https://www.nowpublishers.com/article/DownloadSummary/ROB-043) Foundations and Trends® in Robotics 6.1-2 (2017): 1-139.
 
-[2.5]  Farrell, Jay, and Matthew Barth. The global positioning system and inertial navigation. Vol. 61. New York: Mcgraw-hill, 1999.
+[2.5]  Sudderth, E.B., Ihler, A.T., Isard, M., Freeman, W.T. and Willsky, A.S., 2010. ["Nonparametric belief propagation."](https://www.microsoft.com/en-us/research/wp-content/uploads/2010/10/p95-sudderth.pdf) Communications of the ACM, 53(10), pp.95-103
 
-[2.6]  Zarchan, Paul, and Howard Musoff, eds. Fundamentals of Kalman filtering: a practical approach. American Institute of Aeronautics and Astronautics, Inc., 2013.
+[2.6]  Farrell, J., and Matthew B.: "The global positioning system and inertial navigation." Vol. 61. New York: Mcgraw-hill, 1999.
 
-[2.7]  Hanebeck, Uwe D. ["FLUX: Progressive State Estimation Based on Zakai-type Distributed Ordinary Differential Equations."](https://arxiv.org/pdf/1808.02825) arXiv preprint arXiv:1808.02825 (2018).
+[2.7]  Zarchan, Paul, and Howard Musoff, eds. Fundamentals of Kalman filtering: a practical approach. American Institute of Aeronautics and Astronautics, Inc., 2013.
+
+[2.8]  Hanebeck, Uwe D. ["FLUX: Progressive State Estimation Based on Zakai-type Distributed Ordinary Differential Equations."](https://arxiv.org/pdf/1808.02825) arXiv preprint arXiv:1808.02825 (2018).
+
+[2.9]  Muandet, Krikamol, et al. ["Kernel mean embedding of distributions: A review and beyond."](https://www.nowpublishers.com/article/DownloadSummary/MAL-060) Foundations and Trends® in Machine Learning 10.1-2 (2017): 1-141.
 
