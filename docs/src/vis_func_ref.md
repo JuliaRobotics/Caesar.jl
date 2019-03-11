@@ -13,12 +13,9 @@ drawLandms
 drawPoses
 drawPosesLandms
 plotKDE
+plotPose
 plotProductVsKDE
 ```
 
-### KernelDensityEstimatePlotting
-```@docs
-plotKDE
-```
 
 **WORK IN PROGRESS**  Not all functions have been added to this directory yet.
