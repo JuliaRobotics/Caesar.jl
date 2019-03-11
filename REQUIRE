@@ -4,7 +4,7 @@ Rotations 0.8.0
 Graphs 0.10.2
 KernelDensityEstimate 0.5.0 0.6.0
 ApproxManifoldProducts 0.0.3 0.2.0
-IncrementalInference 0.5.3 0.6.0
+IncrementalInference 0.5.4 0.6.0
 RoME 0.3.1 0.4.0
 TransformUtils 0.2.2
 CoordinateTransformations 0.5.0
