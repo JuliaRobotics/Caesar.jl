@@ -8,7 +8,7 @@ import IncrementalInference: batchSolve!, getSample
 using Reexport
 
 @reexport using RoME
-# @reexport using IncrementalInference
+@reexport using IncrementalInference
 @reexport using KernelDensityEstimate
 @reexport using Distributions
 
