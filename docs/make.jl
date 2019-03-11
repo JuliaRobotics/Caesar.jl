@@ -1,10 +1,12 @@
 using Documenter, Caesar
 import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
+import IncrementalInference: initfg
 
 using KernelDensityEstimatePlotting
-import KernelDensityEstimatePlotting: plotKDE
+# import KernelDensityEstimatePlotting: plotKDE
 using RoMEPlotting
+
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
@@ -13,7 +15,8 @@ makedocs(
     pages = Any[
         "Home" => "index.md",
         "Getting Started" => [
-            "Installation" => "installation_environment.md"
+            "Installation" => "installation_environment.md",
+            "FAQ" => "faq.md",
         ],
         "Concepts" => [
             "Caesar Concepts" => "concepts/concepts.md",
@@ -31,9 +34,12 @@ makedocs(
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
         ],
-        "How To?" => [
+        "How to Expand?" => [
             "Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
             "Creating DynPose Factor" => "examples/interm_dynpose.md"
+        ],
+        "Developer Zone" => [
+            "Wiki Pointer" => "dev/wiki.md"
         ],
         "Literature" => [
             "References" => "refs/literature.md"

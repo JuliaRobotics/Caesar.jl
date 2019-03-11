@@ -13,7 +13,46 @@ sudo apt-get install hdf5-tools
 sudo apt-get install graphviz imagemagick
 ```
 
-## Local Installation of Julia
+## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
+
+Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).
+
+## The "I Know Julia" Installation (TL;DR)
+
+### Install Inference Tools
+
+Add Caesar to your Julia packages, you can install the metadata registered package 'Caesar' in Julia 1.0 with:
+```julia
+julia> ] # to enable package manager
+(v1.0) pkg> add Caesar
+```
+
+Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
+```julia
+# the multimodal incremental smoothing and mapping solver
+(v1.0) pkg> test IncrementalInference
+...
+# robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
+(v1.0) pkg> test RoME
+...
+# umbrella framework with interaction tools and more -- allows stand alone and server based solving
+(v1.0) pkg> test Caesar
+...
+```
+
+### Install Visualization Tools
+
+(Q4 2018), Temporarily require development (`master` branch) version of RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
+```julia
+(v1.0) pkg> add RoMEPlotting#master
+
+# separately
+(v1.0) pkg> add Arena#master
+```
+
+## The "I want a Development Environment from Scratch" Install
+
+### Local Installation of Julia
 
 Although [Julia](https://julialang.org/) (or [JuliaPro](https://juliacomputing.com/)) can be installed on a Linux computer using the `apt` package manager, we are striving for a fully local installation environment which is highly reproducible on a variety of platforms.
 
@@ -24,7 +63,7 @@ cd ~
 mkdir -p julia-software
 cd julia-software
 wget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.1-linux-x86_64.tar.gz
-tar -xvf julia-1.0.1-linux-x86_64.tar.gz
+tar -xvf julia-1.0.3-linux-x86_64.tar.gz
 cd /usr/bin
 sudo ln -s ~/julia-software/julia-1.0.1/bin/julia julia
 ```
@@ -52,13 +91,10 @@ user@...$ julia -e "println(\"...testing...\")"
 
 ```
 
->**Note**: When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.
+> **Note**: When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.
 For example, search for 'julialang workflow tips' or 'julialang performance tips'.
 
-## Just-In-Time Compiling (i.e. why are first runs slow?)
-
-Julia uses just-in-time compilation ([unless pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
- which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use.
+> **Note** see [FAQ - Why are first runs slow?](faq.md), because of just of Just-In-Time/Pre compiling and caching.
 
 ## Setup Juno IDE Environment
 
@@ -124,7 +160,7 @@ Please follow instructions on the [Visualizations page](concepts/arena_visualiza
 
 Arena.jl can be installed with the following steps:
 ```julia
-] 
+]
 add Arena
 ```
 

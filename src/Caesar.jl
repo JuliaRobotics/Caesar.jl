@@ -2,12 +2,13 @@ module Caesar
 
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
-import RoME: getRangeKDEMax2D, getLastPose, initfg
-import IncrementalInference: batchSolve!, getSample
+import RoME: getRangeKDEMax2D, getLastPose
+import IncrementalInference: batchSolve!, getSample, initfg
 
 using Reexport
 
 @reexport using RoME
+@reexport using IncrementalInference
 @reexport using KernelDensityEstimate
 @reexport using Distributions
 
@@ -64,9 +65,9 @@ export
   hasval,
 
   # repeats from RoME and IIF
-  initfg,
-  addNode!,
-  addFactor!,
+  # initfg,
+  # addNode!,
+  # addFactor!,
 
   # CloudGraphs helper functions
   insertnodefromcv!,
