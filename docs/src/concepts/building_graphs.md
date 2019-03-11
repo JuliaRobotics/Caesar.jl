@@ -37,6 +37,15 @@ for i in 1:10
 end
 ```
 
+```@docs
+addVariable!
+```
+
+A variable can also be retrieved by means of `getVariable`:
+```@docs
+getVariable
+```
+
 ## Factors
 Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a prior is defined against x0 with a normal distribution centered around [0,0,0].
 
@@ -44,6 +53,11 @@ Factors are algebraic relationships between variables based on data cues such as
 ```julia
 # Add at a fixed location Prior to pin :x0 to a starting location (0,0,pi/6.0)
 addFactor!(fg, [:x0], IIF.Prior( MvNormal([0; 0; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))
+```
+
+```@docs
+addFactor!
+getFactor
 ```
 
 ### Factors Between Variables
