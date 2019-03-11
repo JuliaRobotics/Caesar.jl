@@ -33,9 +33,12 @@ makedocs(
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
         ],
-        "How To?" => [
+        "How to Expand?" => [
             "Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
             "Creating DynPose Factor" => "examples/interm_dynpose.md"
+        ],
+        "Developer Zone" => [
+            "Wiki Pointer" => "dev/wiki.md"
         ],
         "Literature" => [
             "References" => "refs/literature.md"
