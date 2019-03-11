@@ -11,44 +11,6 @@ Caesar is a modern robotic framework for localization and mapping, reducing the 
 
 This project focuses on the open development and progression to a public, stable, growing and usable inference library suited to data-fusion aspects of device navigation.
 
-## TL;DR Installation
-
-### Install Inference Tools
-
-Linux system dependencies are:
-```bash
-sudo apt-get install hdf5-tools
-sudo apt-get install graphviz  # optional
-```
-
-Add Caesar to your Julia packages, you can install the metadata registered package 'Caesar' in Julia 1.0 with:
-```julia
-julia> ] # to enable package manager
-(v1.0) pkg> add Caesar
-```
-
-Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
-```julia
-# the multimodal incremental smoothing and mapping solver
-(v1.0) pkg> test IncrementalInference
-...
-# robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
-(v1.0) pkg> test RoME
-...
-# umbrella framework with interaction tools and more -- allows stand alone and server based solving
-(v1.0) pkg> test Caesar
-...
-```
-
-### Install Visualization Tools
-
-(Q4 2018), Temporarily require development (`master` branch) version of RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
-```julia
-(v1.0) pkg> add RoMEPlotting#master
-
-# separately
-(v1.0) pkg> add Arena#master
-```
 
 ## Caesar Framework
 

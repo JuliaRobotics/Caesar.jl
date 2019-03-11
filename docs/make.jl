@@ -15,7 +15,8 @@ makedocs(
     pages = Any[
         "Home" => "index.md",
         "Getting Started" => [
-            "Installation" => "installation_environment.md"
+            "Installation" => "installation_environment.md",
+            "FAQ" => "faq.md",
         ],
         "Concepts" => [
             "Caesar Concepts" => "concepts/concepts.md",
