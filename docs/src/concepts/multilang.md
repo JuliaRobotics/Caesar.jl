@@ -8,7 +8,7 @@ The current known interface implementations to Caesar.jl are:
 - C/C++ [GraffCPP](https://github.com/MarineRoboticsGroup/graff_cpp),
 - Python [SychronySDK](https://github.com/nicrip/SynchronySDK_py) (needs to be updated),
 
-## Starting the Caesar ZMQ server
+### Starting the Caesar ZMQ Navigation Server
 
 Start the `Caesar.ZmqCaesar` server in a Julia session with a few process cores:
 
@@ -36,11 +36,19 @@ The [current tests are a good place to see some examples](http://github.com/Juli
 
 > TODO: expand the ZMQ documentation
 
+### ROS Integration
+
+Please add your voice of support or suggestions on [ROS integration here](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
+
+> **Note** ROS integration is a priority for this project, and will accompany the so-called ['prime time'](https://github.com/JuliaRobotics/RoME.jl/issues/147) release of the code.  ROS and ZMQ integration are closely related, while the present focus (2018Q3-2019Q2) is on first developing our own ZMQ messaging interface as discussed above.
+
 ## Static, Shared Object `.so` Compilation
 
-The Julia language is a (Just-In-Time / Precompiled) static and strongly typed language.  Modules are already naturally compiled to static objects and can also be compiled to more common `.so` files.  See [this AOT vs JIT compiling blog post](https://juliacomputing.com/blog/2016/02/09/static-julia.html) for a deeper discussion.  
+The Julia language is a (Just-In-Time / Precompiled) static and strongly typed language.  Modules are already naturally compiled to static objects and can also be compiled to more common `.so` files.  See [this AOT vs JIT compiling blog post](https://juliacomputing.com/blog/2016/02/09/static-julia.html) for a deeper discussion.  Also see [this Julia Binaries Blog](https://medium.com/@sdanisch/compiling-julia-binaries-ddd6d4e0caf4).
 
 The future planning for the `Caesar.jl` framework and the mm-iSAM inference algorithm plans to use the package: https://github.com/JuliaLang/PackageCompiler.jl so that linkable `.so` files or even full executables can be compiled.  Please add your comments to [this issue discussion](https://github.com/JuliaRobotics/Caesar.jl/issues/210).
+
+**Note** [recent developments announced on discourse.](https://discourse.julialang.org/t/ann-packagecompiler-with-incremental-system-images/20489)
 
 ## Alternative Methods
 
