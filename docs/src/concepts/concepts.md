@@ -6,17 +6,20 @@ A factor graph is a bipartite representation where variables (denoted by larger 
 
 ## What are Variables and Factors
 
-Factor graphs are bipartite, ie variables and factors.  In practice we use "nodes" to represent both variables and factors with edges between.  In future, we will remove the wording "node" from anything Factor Graph usage/abstraction related (only vars and factors).  Nodes and edges will be used as terminology for actually storing the data on some graph storage/process foundation technology.
- 
+Factor graphs are bipartite, i.e. variables and factors.  In practice we use "nodes" to represent both variables and factors with edges between.  In future, we will remove the wording "node" from anything Factor Graph usage/abstraction related (only vars and factors).  Nodes and edges will be used as terminology for actually storing the data on some graph storage/process foundation technology.
+
 Even more meta -- factors are "variables" that have already been observed and are now stochastically "fixed".  Waving hands over the fact that a factors encode both the algebraic model AND the observed measurement values.
 
-Variables in the factor graph have not been observed, but we want to back them out from the observed values and algebra relating them all.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the algebra already connecting them), then we can use Probabilistic Chain rule to write inference operation down:
+Variables in the factor graph have not been observed, but we want to back them out from the observed values and algebra relating them all.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the algebra already connecting them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):
 
-`` P(VAR | MEAS)  \\propto  P(MEAS | VAR) P(VAR) ``
+`` P(VAR | MEAS)  =  P(MEAS | VAR) P(VAR) ``
 
 where
 
-``P(VAR , MEAS) = P(MEAS | VAR) P(VAR) ``,  or
+``P(VAR , MEAS) = P(MEAS | VAR) P(VAR) ``,
+
+or
+
 ``P(VAR, MEAS) = P(VAR | MEAS) P(MEAS)``
 
 You'll notice the first looks like "Bayes rule" and we take `` P(MEAS) `` as a constant (the uncorrelated assumption).

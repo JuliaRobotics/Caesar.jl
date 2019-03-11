@@ -16,6 +16,10 @@ using Caesar, RoME, Distributions
 fg = initfg()
 ```
 
+```@docs
+initfg
+```
+
 ## Adding to the Graph
 Factor graphs are made of two constituent parts:
 * Variables

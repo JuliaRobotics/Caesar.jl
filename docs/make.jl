@@ -3,8 +3,9 @@ import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultipl
 import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
 
 using KernelDensityEstimatePlotting
-import KernelDensityEstimatePlotting: plotKDE
+# import KernelDensityEstimatePlotting: plotKDE
 using RoMEPlotting
+
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
