@@ -25,14 +25,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "#TL;DR-Installation-1",
-    "page": "Home",
-    "title": "TL;DR Installation",
-    "category": "section",
-    "text": "If you want to skip ahead and add Caesar to your Julia packages, you can install the metadata registered package \'Caesar\'.Caesar can be installed for latest Julia 0.7/1.0 with:julia> ] # to enable package manager\n(v1.0) pkg> add CaesarUnit tests can further be performed for the upstream packages as follows – NOTE first time runs are slow since each new function call or package must first be precompiled.(v1.0) pkg> test IncrementalInference\n...\n(v1.0) pkg> test RoME\n...\n(v1.0) pkg> test Caesar\n...(Q4 2018), Temporarily require development (master branch) version of RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:(v1.0) pkg> add RoMEPlotting#master\n\n# separately\n(v1.0) pkg> add Arena#master"
-},
-
-{
     "location": "#Caesar-Framework-1",
     "page": "Home",
     "title": "Caesar Framework",
@@ -45,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Caesar Core",
     "category": "section",
-    "text": "Caesar is implemented in Julia (and JuliaPro) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.Caesar.jl is the \"umbrella\" framework that depends on and supports various dedicated purpose packages.Why Julia: The implementation language of choice is Julia, for a wide variety of reasons such as agile development along side modern, high speed, type safe, multi-processor, JIT-dynamic, cross compiling (gcc and clang) and cross-platform technologies.  Julia can be thought of as either {C+, Mex (done right), or a Fortran replacement}.  The Caesar.jl project is expressly focussed on making this algorithmic code available to C/C++/C#/Python/Java/JS/ applications through a variety of interfaces described below.  Please open issues or get in touch for more information about interops."
+    "text": "Caesar is implemented in Julia (and JuliaPro) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.Caesar.jl is the \"umbrella\" framework that depends on and supports various dedicated purpose packages.Why Julia: The implementation language of choice is Julia (but not limited to), for a wide variety of reasons such as agile development along side modern, high speed, type safe, multi-processor, JIT-dynamic, cross compiling (gcc and clang) and cross-platform technologies – also see JuliaCon2018 highlights video.  Julia can be thought of as either {C+, Mex (done right), or a Fortran replacement}.  The Caesar.jl project is expressly focussed on making this algorithmic code available to C/C++/C#/Python/Java/JS/ applications through a variety of interfaces described below.  Please open issues or get in touch for more information about interops."
 },
 
 {
@@ -78,6 +70,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Features",
     "category": "section",
     "text": "The Caesar framework has the following features:Factor-graph representation of pose and sensor data\nLocalization using Multi-modal iSAM\nMulti-core inference supporting Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc\nMulti-modal and non-parametric representation of constraints\nGaussian distributions are but one of the many representations of measurement error\nSimple, extensible framework for creation of new factor types\nMulti-hypothesis representation in the factor-graph\nLocal in-memory solving on the device as well as database-driven centralized solving\nFixed-lag, continuous operation as well as off-line batch solving"
+},
+
+{
+    "location": "#Origins-in-Fundamental-Research-1",
+    "page": "Home",
+    "title": "Origins in Fundamental Research",
+    "category": "section",
+    "text": "See related works on the literature page."
 },
 
 {
@@ -145,19 +145,51 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "installation_environment/#Install-\"Just-the-ZMQ/ROS-Runtime-Solver\"-(Linux)-1",
+    "page": "Installation",
+    "title": "Install \"Just the ZMQ/ROS Runtime Solver\" (Linux)",
+    "category": "section",
+    "text": "Work in progress (see issue #278)."
+},
+
+{
+    "location": "installation_environment/#The-\"I-Know-Julia\"-Installation-(TL;DR)-1",
+    "page": "Installation",
+    "title": "The \"I Know Julia\" Installation (TL;DR)",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "installation_environment/#Install-Inference-Tools-1",
+    "page": "Installation",
+    "title": "Install Inference Tools",
+    "category": "section",
+    "text": "Add Caesar to your Julia packages, you can install the metadata registered package \'Caesar\' in Julia 1.0 with:julia> ] # to enable package manager\n(v1.0) pkg> add CaesarUnit tests can further be performed for the upstream packages as follows – NOTE first time runs are slow since each new function call or package must first be precompiled.# the multimodal incremental smoothing and mapping solver\n(v1.0) pkg> test IncrementalInference\n...\n# robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system\n(v1.0) pkg> test RoME\n...\n# umbrella framework with interaction tools and more -- allows stand alone and server based solving\n(v1.0) pkg> test Caesar\n..."
+},
+
+{
+    "location": "installation_environment/#Install-Visualization-Tools-1",
+    "page": "Installation",
+    "title": "Install Visualization Tools",
+    "category": "section",
+    "text": "(Q4 2018), Temporarily require development (master branch) version of RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:(v1.0) pkg> add RoMEPlotting#master\n\n# separately\n(v1.0) pkg> add Arena#master"
+},
+
+{
+    "location": "installation_environment/#The-\"I-want-a-Development-Environment-from-Scratch\"-Install-1",
+    "page": "Installation",
+    "title": "The \"I want a Development Environment from Scratch\" Install",
+    "category": "section",
+    "text": ""
+},
+
+{
     "location": "installation_environment/#Local-Installation-of-Julia-1",
     "page": "Installation",
     "title": "Local Installation of Julia",
     "category": "section",
-    "text": "Although Julia (or JuliaPro) can be installed on a Linux computer using the apt package manager, we are striving for a fully local installation environment which is highly reproducible on a variety of platforms.The easiest method is–-via the terminal–-to download the desired version of Julia as a binary, extract, setup a symbolic link, and run:cd ~\nmkdir -p julia-software\ncd julia-software\nwget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.1-linux-x86_64.tar.gz\ntar -xvf julia-1.0.1-linux-x86_64.tar.gz\ncd /usr/bin\nsudo ln -s ~/julia-software/julia-1.0.1/bin/julia juliaNote Feel free to modify this setup as you see fit.This should allow any terminal or process on the computer to run the Julia REPL by type julia and testing with:println(\"hello world\")\n# Should print \"hello world\"Maybe a script, or command:user@...$ echo \"println(\\\"hello again\\\")\" > myscript.jl\nuser@...$ julia myscript.jl\nhello again\nuser@...$ rm myscript.jl\n\nuser@...$ julia -e \"println(\\\"one more time.\\\")\"\none more time.\nuser@...$ julia -e \"println(\\\"...testing...\\\")\"\n...testing...\nNote: When searching for Julia related help online, use the phrase \'julialang\' instead of just \'julia\'.For example, search for \'julialang workflow tips\' or \'julialang performance tips\'."
-},
-
-{
-    "location": "installation_environment/#Just-In-Time-Compiling-(i.e.-why-are-first-runs-slow?)-1",
-    "page": "Installation",
-    "title": "Just-In-Time Compiling (i.e. why are first runs slow?)",
-    "category": "section",
-    "text": "Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use."
+    "text": "Although Julia (or JuliaPro) can be installed on a Linux computer using the apt package manager, we are striving for a fully local installation environment which is highly reproducible on a variety of platforms.The easiest method is–-via the terminal–-to download the desired version of Julia as a binary, extract, setup a symbolic link, and run:cd ~\nmkdir -p julia-software\ncd julia-software\nwget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.1-linux-x86_64.tar.gz\ntar -xvf julia-1.0.3-linux-x86_64.tar.gz\ncd /usr/bin\nsudo ln -s ~/julia-software/julia-1.0.1/bin/julia juliaNote Feel free to modify this setup as you see fit.This should allow any terminal or process on the computer to run the Julia REPL by type julia and testing with:println(\"hello world\")\n# Should print \"hello world\"Maybe a script, or command:user@...$ echo \"println(\\\"hello again\\\")\" > myscript.jl\nuser@...$ julia myscript.jl\nhello again\nuser@...$ rm myscript.jl\n\nuser@...$ julia -e \"println(\\\"one more time.\\\")\"\none more time.\nuser@...$ julia -e \"println(\\\"...testing...\\\")\"\n...testing...\nNote: When searching for Julia related help online, use the phrase \'julialang\' instead of just \'julia\'.For example, search for \'julialang workflow tips\' or \'julialang performance tips\'.Note see FAQ - Why are first runs slow?, because of just of Just-In-Time/Pre compiling and caching."
 },
 
 {
@@ -181,7 +213,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Installation",
     "title": "Install Visualization Utils (e.g. Arena.jl)",
     "category": "section",
-    "text": "Visualizations were removed from Caesar and moved to a new package Arena.jl instead. Please follow instructions on the Visualizations page for a variety of 3D utilities.Arena.jl can be installed with the following steps:] \nadd Arenaof the latest development version:(v1.0) pkg> add Arena#master"
+    "text": "Visualizations were removed from Caesar and moved to a new package Arena.jl instead. Please follow instructions on the Visualizations page for a variety of 3D utilities.Arena.jl can be installed with the following steps:]\nadd Arenaof the latest development version:(v1.0) pkg> add Arena#master"
 },
 
 {
@@ -198,6 +230,30 @@ var documenterSearchIndex = {"docs": [
     "title": "Contributing, Issues, or Comments",
     "category": "section",
     "text": "Please feel free to open issues with Caesar.jl or even Fork and Pull Request as required. General conversations or comments can be made in the Caesar Gist."
+},
+
+{
+    "location": "faq/#",
+    "page": "FAQ",
+    "title": "FAQ",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "faq/#Frequently-Asked-Questions-1",
+    "page": "FAQ",
+    "title": "Frequently Asked Questions",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "faq/#Just-In-Time-Compiling-(i.e.-why-are-first-runs-slow?)-1",
+    "page": "FAQ",
+    "title": "Just-In-Time Compiling (i.e. why are first runs slow?)",
+    "category": "section",
+    "text": "Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use."
 },
 
 {
@@ -221,7 +277,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar Concepts",
     "title": "What are Variables and Factors",
     "category": "section",
-    "text": "Factor graphs are bipartite, ie variables and factors.  In practice we use \"nodes\" to represent both variables and factors with edges between.  In future, we will remove the wording \"node\" from anything Factor Graph usage/abstraction related (only vars and factors).  Nodes and edges will be used as terminology for actually storing the data on some graph storage/process foundation technology.Even more meta – factors are \"variables\" that have already been observed and are now stochastically \"fixed\".  Waving hands over the fact that a factors encode both the algebraic model AND the observed measurement values.Variables in the factor graph have not been observed, but we want to back them out from the observed values and algebra relating them all.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the algebra already connecting them), then we can use Probabilistic Chain rule to write inference operation down:P(VAR  MEAS)  propto  P(MEAS  VAR) P(VAR)whereP(VAR  MEAS) = P(MEAS  VAR) P(VAR),  or P(VAR MEAS) = P(VAR  MEAS) P(MEAS)You\'ll notice the first looks like \"Bayes rule\" and we take P(MEAS) as a constant (the uncorrelated assumption)."
+    "text": "Factor graphs are bipartite, i.e. variables and factors.  In practice we use \"nodes\" to represent both variables and factors with edges between.  In future, we will remove the wording \"node\" from anything Factor Graph usage/abstraction related (only vars and factors).  Nodes and edges will be used as terminology for actually storing the data on some graph storage/process foundation technology.Even more meta – factors are \"variables\" that have already been observed and are now stochastically \"fixed\".  Waving hands over the fact that a factors encode both the algebraic model AND the observed measurement values.Variables in the factor graph have not been observed, but we want to back them out from the observed values and algebra relating them all.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the algebra already connecting them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):P(VAR  MEAS)  =  P(MEAS  VAR) P(VAR)whereP(VAR  MEAS) = P(MEAS  VAR) P(VAR),orP(VAR MEAS) = P(VAR  MEAS) P(MEAS)You\'ll notice the first looks like \"Bayes rule\" and we take P(MEAS) as a constant (the uncorrelated assumption)."
 },
 
 {
@@ -401,6 +457,214 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "concepts/mmisam_alg/#",
+    "page": "Multimodal iSAM Algorithm",
+    "title": "Multimodal iSAM Algorithm",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/mmisam_alg/#Multimodal-incremental-Smoothing-and-Mapping-Algorithm-1",
+    "page": "Multimodal iSAM Algorithm",
+    "title": "Multimodal incremental Smoothing and Mapping Algorithm",
+    "category": "section",
+    "text": "Work In ProgressPlaceholder for details on how the approximate sum-product inference algorithm (mmiSAM) works.  Until then, see related literature for more details.(Image: mmfgbt)(Image: bayestreeexample)"
+},
+
+{
+    "location": "concepts/database_interactions/#",
+    "page": "Using Caesar Database Operation",
+    "title": "Using Caesar Database Operation",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/database_interactions/#Common-Data-Persistence-and-Inference-1",
+    "page": "Using Caesar Database Operation",
+    "title": "Common Data Persistence and Inference",
+    "category": "section",
+    "text": "See work GraffSDK.jl."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#",
+    "page": "Variable and Factor Concepts",
+    "title": "Variable and Factor Concepts",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Creating-New-Variables-and-Factors-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Creating New Variables and Factors",
+    "category": "section",
+    "text": "In most scenarios, the existing variables and factors should be sufficient for most robotics applications. Caesar however, is extensible and allows you to easily incorporate your own variable and factor types for specialized applications."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Considerations-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Considerations",
+    "category": "section",
+    "text": "A couple of important points:You do not need to modify/fork/edit internal Caesar/RoME/IncrementalInference source code to introduce new variable and factor types!\nAs long as the factors exist in the working space when the solver is run, the factors are automatically used – this is possible due to Julia\'s multiple dispatch design\nCaesar is designed to allow you to add new variables and factors to your own independent repository and incorporate them at will at compile-time or even run-time\nResidual function definitions for new factors types use a callable struct (a.k.a functor) architecture to simultaneously allow:  \nMultiple dispatch (i.e. \'polymorphic\' behavior)\nMeta-data and in-place memory storage for advanced and performant code\nAn outside callback implementation style\nIn most robotics scenarios, there is no need for new variables or factors:\nVariables have various mechanisms that allow you to attach data to them, e.g. raw sensory data or identified April tags, so you do not need to create a new variable type just to store data\nNew variables are required only if you are representing a new state - TODO: Example of needed state\nNew factors are needed if:\nYou need to represent a constraint for a variable (known as a singleton) and that constraint type doesn\'t exist\nYou need to represent a constraint between two variables and that constraint type doesn\'t exist"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Getting-Started-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Getting Started",
+    "category": "section",
+    "text": "We suggest the following design pattern for developing and building new factors:You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see Building and Solving Graphs if you want to review what is currently available\nCreate a GitHub repository to store the new types\nCreate your new variable types\nCreate your new factor types\nImplement unit tests to validate the correct operation of the types\nSet up your solver to make use the custom types1.1. This is much easier than it soundsIf the code is public and may be useful to the community, we ask if you could submit an issue against Caesar with information about the new types and the repository. Ideally we\'d like to continually improve the core code and fold in community contributions.The remainder of this section discusses each of these steps."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Reviewing-the-Existing-Types-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Reviewing the Existing Types",
+    "category": "section",
+    "text": "Please see Building and Solving Graphs to review what variables and factors are currently supported."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#[OPTIONAL]-Creating-a-Repository-1",
+    "page": "Variable and Factor Concepts",
+    "title": "[OPTIONAL] Creating a Repository",
+    "category": "section",
+    "text": "You can fork the following template repository to construct your own Caesar Variable and Factor Examples.If this repository is going to be used for development of the new variables/factors as well as for the experiment (i.e. the code that builds the graph and solves it), you should probably start a simple end-to-end test that validates a basic version of your experimental setup (e.g. ):#### This example is a basic test of the new variables and factors\n#### that are added in this repo. The example is derived from\n#### the hexagonal test example.\n\nusing Caesar, RoME\nusing Caesar_VariableFactorExamples # Your new variable/factor repository\n# Using plotting for experiment validation\nusing RoMEPlotting\n\n# 1. Init factor graph\n#TODO\n\n# 2. Add variables\n#TODO\n\n# 3. Add factors\n# 3a. Add a new test prior\n#TODO\n# 3b. Add new types of odometry factors.\n#TODO\n\n# 4. Solve graph\nbatchSolve!(fg)\n\n# 5. Graph solution - assuming that you have this open in Atom.\ndrawPoses(fg)"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Creating-New-Variables-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Creating New Variables",
+    "category": "section",
+    "text": "All variables have to derive from IncrementalInference.InferenceVariable.What you need to build in the variable:dims - This is used during computation and defines the degrees of freedom (dimensions) for variable\nlabels - This a required field, although it does not need to be populated. It consists of unique, indexable string identifiers, such as \'POSE\', \'LANDMARK\'. It assists with querying the data efficiently in large systems when using the database layer.  You can then also add any additional fields that you would like to use for saving state information in variable. Note that these fields must be serializable as both JSON and Protobufs. Although you don\'t need to validate this, please keep the fields fairly simple and avoid complex structures with optional fields. TBD - provide a compatibility check for serialization and a docpage on it.In a trivial example of Pose2:Our dimensions would then be 3: X, Y, theta\nThe labels for Pose2 could be \"POSE\""
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Creating-New-Factors-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Creating New Factors",
+    "category": "section",
+    "text": "All factors inherit from one of the following types, depending on their function:FunctorSingleton: FunctorSingletons are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a RoME.Pose2 scenario.\nRequires: A getSample function\nFunctorPairwiseMinimize: FunctorPairwiseMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.\nRequires: A getSample function and a residual function definition\nThe minimize suffix specifies that the residual function of this factor will be enforced by numerical minimization (find me the minimum of this function)\nFunctorPairwise: FunctorPairwise are relative factors that introduce algebraic relationships between two or more variables. They are the same as FunctorPairwiseMinimize, however they use root finding to find the zero crossings (rather than numerical minimization).\nRequires: A getSample function and a residual function definitionHow do you decide which to use?If you are creating factors for world-frame information that will be tied to a single variable, inherit from FunctorSingleton\nGPS coordinates should be priors\nIf you are creating factors for local-frame relationships between variables, inherit from FunctorPairwiseMinimize\nOdometry and bearing deltas should be introduced as pairwise factors and should be local frameTBD: sUsers should start with FunctorPairwiseMinimize, discuss why and when they should promote their factors to FunctorPairwise.Note: FunctorPairwiseMinimize does not imply that the overall inference algorithm only minimizes an objective function. The Multi-model iSAM algorithm is built around fixed-point analysis. Minimization is used here to locally enforce the residual function.What you need to build in the new factor:A struct for the factor itself\nA sampler function to return measurements from the random ditributions\nIf you are building a FunctorPairwiseMinimize or a FunctorPairwise you need to define a residual function to introduce the relative algebraic relationship between the variables\nMinimization function should be lower-bounded and smooth\nA packed type of the factor which must be named Packed[Factor name], and allows the factor to be packed/transmitted/unpacked\nSerialization and deserialization methods\nThese are convert functions that pack and unpack the factor (which may be highly complex) into serialization-compatible formats\nAs the factors are mostly comprised of distributions (of type SamplableBelief), functions are provided to pack and unpack the distributions:\nPacking: To convert from a SamplableBelief to a string, use string(::SamplableBelief)::String\nUnpacking: To convert from string back to a SamplableBelief, use extractdistribution(::String)::SamplableBelief  An example of this is the Pose2Point2BearingRange, which provides a bearing+range relationship between a 2D pose and a 2D point."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Struct-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Pose2Point2BearingRange Struct",
+    "category": "section",
+    "text": "mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwise\n    bearing::B\n    range::R\n    Pose2Point2BearingRange{B,R}() where {B,R} = new{B,R}()\n    Pose2Point2BearingRange{B,R}(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = new{B,R}(x1,x2)\nend\n# Convenient constructor\nPose2Point2BearingRange(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = Pose2Point2BearingRange{B,R}(x1,x2)"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Sampler-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Pose2Point2BearingRange Sampler",
+    "category": "section",
+    "text": "# Return N samples from the two distributions\nfunction getSample(pp2br::Pose2Point2BearingRange, N::Int=1)\n  smpls = zeros(2, N)\n  smpls[1,:] = rand(pp2br.bearing, N)[:]\n  smpls[2,:] = rand(pp2br.range, N)[:]\n  return (smpls,)\nend"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Residual-Function-(Functor)-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Pose2Point2BearingRange Residual Function (Functor)",
+    "category": "section",
+    "text": "# define the conditional probability constraint\nfunction (pp2br::Pose2Point2BearingRange)(res::Array{Float64},\n        userdata::FactorMetadata,\n        idx::Int,\n        meas::Tuple{Array{Float64,2}},\n        xi::Array{Float64,2},\n        lm::Array{Float64,2} )\n  #\n  res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])\n  res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])\n  nothing\nend"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Packing-and-Unpacking-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Pose2Point2BearingRange Packing and Unpacking",
+    "category": "section",
+    "text": "The packing structure:mutable struct PackedPose2Point2BearingRange <: IncrementalInference.PackedInferenceType\n    bearstr::String\n    rangstr::String\n    PackedPose2Point2BearingRange() = new()\n    PackedPose2Point2BearingRange(s1::AS, s2::AS) where {AS <: AbstractString} = new(string(s1),string(s2))\nendThe packing and unpacking converters (note the use of string and extractdistribution):function convert(::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange{B, R}) where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}\n  return PackedPose2Point2BearingRange(string(d.bearing), string(d.range))\nend\n\nfunction convert(::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange)\n # where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}\n  Pose2Point2BearingRange(extractdistribution(d.bearstr), extractdistribution(d.rangstr))\nend"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Unit-Tests-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Unit Tests",
+    "category": "section",
+    "text": "What you should test:Creation of the factor\nSampling of the factor\nResidual testing\nSolving using the variables and factors\nSerialization and deserializationAn example of these tests can be seen for the trivial case shown in the example repo ExamplePrior Unit Tests."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Using-your-Types-with-the-Caesar-Solver-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Using your Types with the Caesar Solver",
+    "category": "section",
+    "text": "As above, as long as you bring your factors into the workspace, you should be able to use them in your experimental setup.You can validate this with the existence check code in Building and Solving Graphs.Note: This has been made available as IncrementalInference.getCurrentWorkspaceVariables() and IncrementalInference.getCurrentWorkspaceFactors()in IncrementalInference v0.4.4."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Contributing-to-Community-1",
+    "page": "Variable and Factor Concepts",
+    "title": "Contributing to Community",
+    "category": "section",
+    "text": "We really appreciate any contributions, so if you have developed variables and factors that may be useful to the community, please write up an issue in Caesar.jl with a link to your repo and a short description of the use-case(s)."
+},
+
+{
+    "location": "concepts/multilang/#",
+    "page": "Using Caesar\'s Multi-Language Support",
+    "title": "Using Caesar\'s Multi-Language Support",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/multilang/#Multi-Language-and-Shared-Objects-1",
+    "page": "Using Caesar\'s Multi-Language Support",
+    "title": "Multi-Language and Shared Objects",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "concepts/multilang/#ZMQ-Messaging-Interface-1",
+    "page": "Using Caesar\'s Multi-Language Support",
+    "title": "ZMQ Messaging Interface",
+    "category": "section",
+    "text": "Caesar.jl has a ZMQ messaging interface (interested can see code here  here) that allows users to interact with the solver code base in a variety of ways.  The messaging interface is not meant to replace static .so library file compilation–see below–-but rather a more versatile and flexible development strategy.The current known interface implementations to Caesar.jl are:C/C++ GraffCPP,\nPython SychronySDK (needs to be updated),"
+},
+
+{
+    "location": "concepts/multilang/#Starting-the-Caesar-ZMQ-Navigation-Server-1",
+    "page": "Using Caesar\'s Multi-Language Support",
+    "title": "Starting the Caesar ZMQ Navigation Server",
+    "category": "section",
+    "text": "Start the Caesar.ZmqCaesar server in a Julia session with a few process cores:julia -p 4Then run the following commands, and note these steps have also been scripted here:#import the required modules\nusing Caesar, Caesar.ZmqCaesar\n\n# create empty factor graph and config objects\nfg = Caesar.initfg()\nconfig = Dict{String, String}()\nzmqConfig = ZmqServer(fg, config, true, \"tcp://*:5555\");\n\n# Start the server over ZMQ\nstart(zmqConfig)\n\n# give the server a minute to start up ...The current tests are a good place to see some examples of the current interfacing functions.TODO: expand the ZMQ documentation"
+},
+
+{
+    "location": "concepts/multilang/#ROS-Integration-1",
+    "page": "Using Caesar\'s Multi-Language Support",
+    "title": "ROS Integration",
+    "category": "section",
+    "text": "Please add your voice of support or suggestions on ROS integration here.Note ROS integration is a priority for this project, and will accompany the so-called \'prime time\' release of the code.  ROS and ZMQ integration are closely related, while the present focus (2018Q3-2019Q2) is on first developing our own ZMQ messaging interface as discussed above."
+},
+
+{
+    "location": "concepts/multilang/#Static,-Shared-Object-.so-Compilation-1",
+    "page": "Using Caesar\'s Multi-Language Support",
+    "title": "Static, Shared Object .so Compilation",
+    "category": "section",
+    "text": "The Julia language is a (Just-In-Time / Precompiled) static and strongly typed language.  Modules are already naturally compiled to static objects and can also be compiled to more common .so files.  See this AOT vs JIT compiling blog post for a deeper discussion.  Also see this Julia Binaries Blog.The future planning for the Caesar.jl framework and the mm-iSAM inference algorithm plans to use the package: https://github.com/JuliaLang/PackageCompiler.jl so that linkable .so files or even full executables can be compiled.  Please add your comments to this issue discussion.Note recent developments announced on discourse."
+},
+
+{
+    "location": "concepts/multilang/#Alternative-Methods-1",
+    "page": "Using Caesar\'s Multi-Language Support",
+    "title": "Alternative Methods",
+    "category": "section",
+    "text": "Interfacing from languages like Python may also be achieved using PyCall.jl although little work has been done in the Caesar.jl framework to explore this path.  Julia is itself interactive/dynamic and has plenty of line-by-line and Integrated Development Environment support – consider trying Julia for your application."
+},
+
+{
     "location": "concepts/arena_visualizations/#",
     "page": "Arena Visualization",
     "title": "Arena Visualization",
@@ -494,206 +758,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Previous 3D Viewer (VTK / Director) – no longer required",
     "category": "section",
     "text": "Previous versions used the much larger VTK based Director available via DrakeVisualizer.jl package.  This requires the following preinstalled packages:    sudo apt-get install libvtk5-qt4-dev python-vtk"
-},
-
-{
-    "location": "concepts/multilang/#",
-    "page": "Using Caesar\'s Multi-Language Support",
-    "title": "Using Caesar\'s Multi-Language Support",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "concepts/multilang/#Multi-Language-and-Shared-Objects-1",
-    "page": "Using Caesar\'s Multi-Language Support",
-    "title": "Multi-Language and Shared Objects",
-    "category": "section",
-    "text": ""
-},
-
-{
-    "location": "concepts/multilang/#ZMQ-Messaging-Interface-1",
-    "page": "Using Caesar\'s Multi-Language Support",
-    "title": "ZMQ Messaging Interface",
-    "category": "section",
-    "text": "Caesar.jl has a ZMQ messaging interface (interested can see code here  here) that allows users to interact with the solver code base in a variety of ways.  The messaging interface is not meant to replace static .so library file compilation–see below–-but rather a more versatile and flexible development strategy.The current known interface implementations to Caesar.jl are:C/C++ GraffCPP,\nPython SychronySDK (needs to be updated),"
-},
-
-{
-    "location": "concepts/multilang/#Starting-the-Caesar-ZMQ-server-1",
-    "page": "Using Caesar\'s Multi-Language Support",
-    "title": "Starting the Caesar ZMQ server",
-    "category": "section",
-    "text": "Start the Caesar.ZmqCaesar server in a Julia session with a few process cores:julia -p 4Then run the following commands, and note these steps have also been scripted here:#import the required modules\nusing Caesar, Caesar.ZmqCaesar\n\n# create empty factor graph and config objects\nfg = Caesar.initfg()\nconfig = Dict{String, String}()\nzmqConfig = ZmqServer(fg, config, true, \"tcp://*:5555\");\n\n# Start the server over ZMQ\nstart(zmqConfig)\n\n# give the server a minute to start up ...The current tests are a good place to see some examples of the current interfacing functions.TODO: expand the ZMQ documentation"
-},
-
-{
-    "location": "concepts/multilang/#Static,-Shared-Object-.so-Compilation-1",
-    "page": "Using Caesar\'s Multi-Language Support",
-    "title": "Static, Shared Object .so Compilation",
-    "category": "section",
-    "text": "The Julia language is a (Just-In-Time / Precompiled) static and strongly typed language.  Modules are already naturally compiled to static objects and can also be compiled to more common .so files.  See this AOT vs JIT compiling blog post for a deeper discussion.  The future planning for the Caesar.jl framework and the mm-iSAM inference algorithm plans to use the package: https://github.com/JuliaLang/PackageCompiler.jl so that linkable .so files or even full executables can be compiled.  Please add your comments to this issue discussion."
-},
-
-{
-    "location": "concepts/multilang/#Alternative-Methods-1",
-    "page": "Using Caesar\'s Multi-Language Support",
-    "title": "Alternative Methods",
-    "category": "section",
-    "text": "Interfacing from languages like Python may also be achieved using PyCall.jl although little work has been done in the Caesar.jl framework to explore this path.  Julia is itself interactive/dynamic and has plenty of line-by-line and Integrated Development Environment support – consider trying Julia for your application."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#",
-    "page": "Adding New Variables and Factors",
-    "title": "Adding New Variables and Factors",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Creating-New-Variables-and-Factors-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Creating New Variables and Factors",
-    "category": "section",
-    "text": "In most scenarios, the existing variables and factors should be sufficient for most robotics applications. Caesar however, is extensible and allows you to easily incorporate your own variable and factor types for specialized applications."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Considerations-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Considerations",
-    "category": "section",
-    "text": "A couple of important points:You do not need to modify/fork/edit internal Caesar/RoME/IncrementalInference source code to introduce new variable and factor types!\nAs long as the factors exist in the working space when the solver is run, the factors are automatically used – this is possible due to Julia\'s multiple dispatch design\nCaesar is designed to allow you to add new variables and factors to your own independent repository and incorporate them at will at compile-time or even run-time\nResidual function definitions for new factors types use a callable struct (a.k.a functor) architecture to simultaneously allow:  \nMultiple dispatch (i.e. \'polymorphic\' behavior)\nMeta-data and in-place memory storage for advanced and performant code\nAn outside callback implementation style\nIn most robotics scenarios, there is no need for new variables or factors:\nVariables have various mechanisms that allow you to attach data to them, e.g. raw sensory data or identified April tags, so you do not need to create a new variable type just to store data\nNew variables are required only if you are representing a new state - TODO: Example of needed state\nNew factors are needed if:\nYou need to represent a constraint for a variable (known as a singleton) and that constraint type doesn\'t exist\nYou need to represent a constraint between two variables and that constraint type doesn\'t exist"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Getting-Started-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Getting Started",
-    "category": "section",
-    "text": "We suggest the following design pattern for developing and building new factors:You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see Building and Solving Graphs if you want to review what is currently available\nCreate a GitHub repository to store the new types\nCreate your new variable types\nCreate your new factor types\nImplement unit tests to validate the correct operation of the types\nSet up your solver to make use the custom types1.1. This is much easier than it soundsIf the code is public and may be useful to the community, we ask if you could submit an issue against Caesar with information about the new types and the repository. Ideally we\'d like to continually improve the core code and fold in community contributions.The remainder of this section discusses each of these steps."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Reviewing-the-Existing-Types-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Reviewing the Existing Types",
-    "category": "section",
-    "text": "Please see Building and Solving Graphs to review what variables and factors are currently supported."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#[OPTIONAL]-Creating-a-Repository-1",
-    "page": "Adding New Variables and Factors",
-    "title": "[OPTIONAL] Creating a Repository",
-    "category": "section",
-    "text": "You can fork the following template repository to construct your own Caesar Variable and Factor Examples.If this repository is going to be used for development of the new variables/factors as well as for the experiment (i.e. the code that builds the graph and solves it), you should probably start a simple end-to-end test that validates a basic version of your experimental setup (e.g. ):#### This example is a basic test of the new variables and factors\n#### that are added in this repo. The example is derived from\n#### the hexagonal test example.\n\nusing Caesar, RoME\nusing Caesar_VariableFactorExamples # Your new variable/factor repository\n# Using plotting for experiment validation\nusing RoMEPlotting\n\n# 1. Init factor graph\n#TODO\n\n# 2. Add variables\n#TODO\n\n# 3. Add factors\n# 3a. Add a new test prior\n#TODO\n# 3b. Add new types of odometry factors.\n#TODO\n\n# 4. Solve graph\nbatchSolve!(fg)\n\n# 5. Graph solution - assuming that you have this open in Atom.\ndrawPoses(fg)"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Creating-New-Variables-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Creating New Variables",
-    "category": "section",
-    "text": "All variables have to derive from IncrementalInference.InferenceVariable.What you need to build in the variable:dims - This is used during computation and defines the degrees of freedom (dimensions) for variable\nlabels - This a required field, although it does not need to be populated. It consists of unique, indexable string identifiers, such as \'POSE\', \'LANDMARK\'. It assists with querying the data efficiently in large systems when using the database layer.  You can then also add any additional fields that you would like to use for saving state information in variable. Note that these fields must be serializable as both JSON and Protobufs. Although you don\'t need to validate this, please keep the fields fairly simple and avoid complex structures with optional fields. TBD - provide a compatibility check for serialization and a docpage on it.In a trivial example of Pose2:Our dimensions would then be 3: X, Y, theta\nThe labels for Pose2 could be \"POSE\""
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Creating-New-Factors-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Creating New Factors",
-    "category": "section",
-    "text": "All factors inherit from one of the following types, depending on their function:FunctorSingleton: FunctorSingletons are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a RoME.Pose2 scenario.\nRequires: A getSample function\nFunctorPairwiseMinimize: FunctorPairwiseMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.\nRequires: A getSample function and a residual function definition\nThe minimize suffix specifies that the residual function of this factor will be enforced by numerical minimization (find me the minimum of this function)\nFunctorPairwise: FunctorPairwise are relative factors that introduce algebraic relationships between two or more variables. They are the same as FunctorPairwiseMinimize, however they use root finding to find the zero crossings (rather than numerical minimization).\nRequires: A getSample function and a residual function definitionHow do you decide which to use?If you are creating factors for world-frame information that will be tied to a single variable, inherit from FunctorSingleton\nGPS coordinates should be priors\nIf you are creating factors for local-frame relationships between variables, inherit from FunctorPairwiseMinimize\nOdometry and bearing deltas should be introduced as pairwise factors and should be local frameTBD: sUsers should start with FunctorPairwiseMinimize, discuss why and when they should promote their factors to FunctorPairwise.Note: FunctorPairwiseMinimize does not imply that the overall inference algorithm only minimizes an objective function. The Multi-model iSAM algorithm is built around fixed-point analysis. Minimization is used here to locally enforce the residual function.What you need to build in the new factor:A struct for the factor itself\nA sampler function to return measurements from the random ditributions\nIf you are building a FunctorPairwiseMinimize or a FunctorPairwise you need to define a residual function to introduce the relative algebraic relationship between the variables\nMinimization function should be lower-bounded and smooth\nA packed type of the factor which must be named Packed[Factor name], and allows the factor to be packed/transmitted/unpacked\nSerialization and deserialization methods\nThese are convert functions that pack and unpack the factor (which may be highly complex) into serialization-compatible formats\nAs the factors are mostly comprised of distributions (of type SamplableBelief), functions are provided to pack and unpack the distributions:\nPacking: To convert from a SamplableBelief to a string, use string(::SamplableBelief)::String\nUnpacking: To convert from string back to a SamplableBelief, use extractdistribution(::String)::SamplableBelief  An example of this is the Pose2Point2BearingRange, which provides a bearing+range relationship between a 2D pose and a 2D point."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Struct-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Pose2Point2BearingRange Struct",
-    "category": "section",
-    "text": "mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwise\n    bearing::B\n    range::R\n    Pose2Point2BearingRange{B,R}() where {B,R} = new{B,R}()\n    Pose2Point2BearingRange{B,R}(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = new{B,R}(x1,x2)\nend\n# Convenient constructor\nPose2Point2BearingRange(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = Pose2Point2BearingRange{B,R}(x1,x2)"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Sampler-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Pose2Point2BearingRange Sampler",
-    "category": "section",
-    "text": "# Return N samples from the two distributions\nfunction getSample(pp2br::Pose2Point2BearingRange, N::Int=1)\n  smpls = zeros(2, N)\n  smpls[1,:] = rand(pp2br.bearing, N)[:]\n  smpls[2,:] = rand(pp2br.range, N)[:]\n  return (smpls,)\nend"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Residual-Function-(Functor)-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Pose2Point2BearingRange Residual Function (Functor)",
-    "category": "section",
-    "text": "# define the conditional probability constraint\nfunction (pp2br::Pose2Point2BearingRange)(res::Array{Float64},\n        userdata::FactorMetadata,\n        idx::Int,\n        meas::Tuple{Array{Float64,2}},\n        xi::Array{Float64,2},\n        lm::Array{Float64,2} )\n  #\n  res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])\n  res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])\n  nothing\nend"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Packing-and-Unpacking-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Pose2Point2BearingRange Packing and Unpacking",
-    "category": "section",
-    "text": "The packing structure:mutable struct PackedPose2Point2BearingRange <: IncrementalInference.PackedInferenceType\n    bearstr::String\n    rangstr::String\n    PackedPose2Point2BearingRange() = new()\n    PackedPose2Point2BearingRange(s1::AS, s2::AS) where {AS <: AbstractString} = new(string(s1),string(s2))\nendThe packing and unpacking converters (note the use of string and extractdistribution):function convert(::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange{B, R}) where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}\n  return PackedPose2Point2BearingRange(string(d.bearing), string(d.range))\nend\n\nfunction convert(::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange)\n # where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}\n  Pose2Point2BearingRange(extractdistribution(d.bearstr), extractdistribution(d.rangstr))\nend"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Unit-Tests-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Unit Tests",
-    "category": "section",
-    "text": "What you should test:Creation of the factor\nSampling of the factor\nResidual testing\nSolving using the variables and factors\nSerialization and deserializationAn example of these tests can be seen for the trivial case shown in the example repo ExamplePrior Unit Tests."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Using-your-Types-with-the-Caesar-Solver-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Using your Types with the Caesar Solver",
-    "category": "section",
-    "text": "As above, as long as you bring your factors into the workspace, you should be able to use them in your experimental setup.You can validate this with the existence check code in Building and Solving Graphs.Note: This has been made available as IncrementalInference.getCurrentWorkspaceVariables() and IncrementalInference.getCurrentWorkspaceFactors()in IncrementalInference v0.4.4."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Contributing-to-Community-1",
-    "page": "Adding New Variables and Factors",
-    "title": "Contributing to Community",
-    "category": "section",
-    "text": "We really appreciate any contributions, so if you have developed variables and factors that may be useful to the community, please write up an issue in Caesar.jl with a link to your repo and a short description of the use-case(s)."
-},
-
-{
-    "location": "concepts/database_interactions/#",
-    "page": "Using Caesar Database Operation",
-    "title": "Using Caesar Database Operation",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "concepts/database_interactions/#Common-Data-Persistence-and-Inference-1",
-    "page": "Using Caesar Database Operation",
-    "title": "Common Data Persistence and Inference",
-    "category": "section",
-    "text": "Coming soon!"
-},
-
-{
-    "location": "concepts/mmisam_alg/#",
-    "page": "Multimodal iSAM Algorithm",
-    "title": "Multimodal iSAM Algorithm",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "concepts/mmisam_alg/#Multimodal-incremental-Smoothing-and-Mapping-Algorithm-1",
-    "page": "Multimodal iSAM Algorithm",
-    "title": "Multimodal incremental Smoothing and Mapping Algorithm",
-    "category": "section",
-    "text": "Work In ProgressPlaceholder for details on how the approximate sum-product inference algorithm (mmiSAM) works.  Until then, see related literature for more details.(Image: mmfgbt)(Image: bayestreeexample)"
 },
 
 {
@@ -1021,7 +1085,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fixed-Lag Solving 2D",
     "title": "Results",
     "category": "section",
-    "text": "Preliminary results for the comparison can be seen below. However, this is just a start and we need to perform more testing. At the moment we are working on providing consistent results and further improving performance/flattening the fixed-lag time. It should be noted that the below graph is not to demonstrate the absolute solve time, but rather the relative behavior of full-graph solve vs. fixed-lag.(Image: Timing comparison of full solve vs. fixed-lag)NOTE Work is underway to reduce overhead computations that result in poorer fixed-lag solving times.  We expect the fixed-lag performance to improve in the coming months (Written Nov 2018).  Please file issues if a deeper discussion is required. "
+    "text": "Preliminary results for the comparison can be seen below. However, this is just a start and we need to perform more testing. At the moment we are working on providing consistent results and further improving performance/flattening the fixed-lag time. It should be noted that the below graph is not to demonstrate the absolute solve time, but rather the relative behavior of full-graph solve vs. fixed-lag.(Image: Timing comparison of full solve vs. fixed-lag)NOTE Work is underway (aka \"Project Tree House\") to reduce overhead computations that result in poorer fixed-lag solving times.  We expect the fixed-lag performance to improve in the coming months (Written Nov 2018).  Please file issues if a deeper discussion is required. "
 },
 
 {
@@ -1126,6 +1190,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Contributions",
     "category": "section",
     "text": "Thanks to mc2922 for raising the catalyst issue and conversations that followed from JuliaRobotics/RoME.jl#60."
+},
+
+{
+    "location": "dev/wiki/#",
+    "page": "Wiki Pointer",
+    "title": "Wiki Pointer",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "dev/wiki/#Developer-Wiki-1",
+    "page": "Wiki Pointer",
+    "title": "Developer Wiki",
+    "category": "section",
+    "text": "More developer zone material will be added here in the future, but for the time being check out the Caesar Wiki."
 },
 
 {
@@ -1433,11 +1513,475 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "func_ref/#IncrementalInference.addVariable!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.addVariable!",
+    "category": "function",
+    "text": "addVariable!(fg, lbl, softtype; N, autoinit, ready, dontmargin, labels, api, uid, smalldata, checkduplicates)\n\n\nAdd a variable node lbl::Symbol to fg::FactorGraph, as softtype<:InferenceVariable.  \n\nExample\n\nfg = initfg()\naddVariable!(fg, :x0, Pose2)\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.addFactor!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.addFactor!",
+    "category": "function",
+    "text": "addFactor!(fgl, Xi, usrfnc; multihypo, ready, api, labels, uid, autoinit, threadmodel)\n\n\nAdd factor with user defined type <: FunctorInferenceType to the factor graph object.  Define whether the automatic initialization of variables should be performed.  Use order sensitive multihypo keyword argument to define if any variables are related to data association uncertainty.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.allnums",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.allnums",
+    "category": "function",
+    "text": "Test if all elements of the string is a number:  Ex, \"123\" is true, \"1_2\" is false.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.approxCliqMarginalUp!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.approxCliqMarginalUp!",
+    "category": "function",
+    "text": "approxCliqMarginalUp!(fgl, treel, csym)\napproxCliqMarginalUp!(fgl, treel, csym, onduplicate; N, dbg, drawpdf)\n\n\nApproximate Chapman-Kolmogorov transit integral and return separator marginals as messages to pass up the Bayes (Junction) tree, along with additional clique operation values for debugging.\n\nNotes\n\nonduplicate=true by default internally deep copies a new factor graph and Bayes tree, and does not update the given objects.  Set false to update fgl and treel during compute.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.approxConv",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.approxConv",
+    "category": "function",
+    "text": "approxConv(fgl, fct, towards; api, N)\n\n\nDraw samples from the approximate convolution of towards symbol using factor fct relative to the other variables.  In addition the api can be adjusted to recover the data from elsewhere (likely to be replaced/removed in the future).\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.batchSolve!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.batchSolve!",
+    "category": "function",
+    "text": "batchSolve!(fgl; drawpdf, show, N, recursive, dbg)\n\n\nPerform multimodal incremental smoothing and mapping (mm-iSAM) computations over given factor graph fgl::FactorGraph on the local computer.  A pdf of the Bayes (Junction) tree will be generated in the working folder with drawpdf=true\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.childCliqs",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.childCliqs",
+    "category": "function",
+    "text": "childCliqs(treel, cliq)\n\n\nReturn a vector of child cliques to cliq.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.cliqGibbs",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.cliqGibbs",
+    "category": "function",
+    "text": "cliqGibbs(fg, cliq, vertid, inmsgs, N, dbg, manis)\n\n\nPerform one step of the minibatch clique Gibbs operation for solving the Chapman-Kolmogov trasit integral – here involving separate approximate functional convolution and product operations.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.convert2packedfunctionnode",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.convert2packedfunctionnode",
+    "category": "function",
+    "text": "convert2packedfunctionnode(fgl, fsym)\nconvert2packedfunctionnode(fgl, fsym, api)\n\n\nEncode complicated function node type to related \'Packed<type>\' format assuming a user supplied convert function .\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.decodefg",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.decodefg",
+    "category": "function",
+    "text": "decodefg(fgs; api)\n\n\nUnpack PackedFunctionNodeData formats back to regular FunctonNodeData.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.deleteFactor!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.deleteFactor!",
+    "category": "function",
+    "text": "deleteFactor!(fgl, fsym)\n\n\nDelete factor and its edges.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.deleteVariable!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.deleteVariable!",
+    "category": "function",
+    "text": "deleteVariable!(fgl, vsym; andfactors)\n\n\nDelete variables, and also the factors+edges if andfactors=true (default).\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.doautoinit!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.doautoinit!",
+    "category": "function",
+    "text": "doautoinit!(fgl, Xi; api, singles, N)\n\n\nEXPERIMENTAL: initialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!. Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\ndoautoinit!(fgl, xsyms; api, singles, N)\n\n\nInitialize destination variable nodes based on this factor in factor graph, fg, generally called during addFactor!.  Destination factor is first (singletons) or second (dim 2 pairwise) variable vertex in Xi.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.downMsgPassingRecursive",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.downMsgPassingRecursive",
+    "category": "function",
+    "text": "Pass NBPMessages back down the tree – pre order tree traversal.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.dwnMsg",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.dwnMsg",
+    "category": "function",
+    "text": "dwnMsg(cliq)\n\n\nReturn the last down message stored in cliq of Bayes (Junction) tree.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.encodefg",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.encodefg",
+    "category": "function",
+    "text": "encodefg(fgl; api)\n\n\nMake a full memory copy of the graph and encode all composite function node types – assuming that convert methods for \'Packed<type>\' formats exist.  The same converters are used for database persistence with CloudGraphs.jl.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.fifoFreeze!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.fifoFreeze!",
+    "category": "function",
+    "text": "fifoFreeze!(fgl)\n\n\nFreeze nodes that are older than the quasi fixed-lag length defined by fg.qfl, according to fg.fifo ordering.\n\nFuture:\n\nAllow different freezing strategies beyond fifo.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.findRelatedFromPotential",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.findRelatedFromPotential",
+    "category": "function",
+    "text": "findRelatedFromPotential(fg, idfct, vertid, N)\nfindRelatedFromPotential(fg, idfct, vertid, N, dbg; api)\n\n\nCompute proposal belief on vertid through idfct representing some constraint in factor graph. Always full dimension variable node – partial constraints will only influence subset of variable dimensions. The remaining dimensions will keep pre-existing variable values.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.fmcmc!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.fmcmc!",
+    "category": "function",
+    "text": "fmcmc!(fgl, cliq, fmsgs, IDs, N, MCMCIter)\nfmcmc!(fgl, cliq, fmsgs, IDs, N, MCMCIter, dbg)\nfmcmc!(fgl, cliq, fmsgs, IDs, N, MCMCIter, dbg, api)\n\n\nIterate successive approximations of clique marginal beliefs by means of the stipulated proposal convolutions and products of the functional objects for tree clique cliq.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getCurrentWorkspaceFactors",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getCurrentWorkspaceFactors",
+    "category": "function",
+    "text": "getCurrentWorkspaceFactors()\n\n\nReturn all factors currently registered in the workspace.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getCurrentWorkspaceVariables",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getCurrentWorkspaceVariables",
+    "category": "function",
+    "text": "getCurrentWorkspaceVariables()\n\n\nReturn all variables currently registered in the workspace.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getCliq",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getCliq",
+    "category": "function",
+    "text": "getCliq(bt, frt)\n\n\nReturn the Graphs.ExVertex node object that represents a clique in the Bayes (Junction) tree, as defined by one of the frontal variables frt.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getData",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getData",
+    "category": "function",
+    "text": "getData(v)\n\n\nRetrieve data structure stored in a node.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getFactor",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getFactor",
+    "category": "function",
+    "text": "getFactor(fgl, fsym)\ngetFactor(fgl, lbl, api)\n\n\nReturn reference to a factor in ::FactorGraph identified by ::Symbol.\n\n\n\n\n\ngetFactor(fgl, fsym)\n\n\nReturn the user factor identified by tag name.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getKDE",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getKDE",
+    "category": "function",
+    "text": "getKDE(v)\n\n\nGet KernelDensityEstimate kde estimate stored in variable node.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getParent",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getParent",
+    "category": "function",
+    "text": "getParent(treel, afrontal)\n\n\nReturn cliq\'s parent clique.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getSofttype",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getSofttype",
+    "category": "function",
+    "text": "getSofttype(vnd)\n\n\nVariable nodes softtype information holding a variety of meta data associated with the type of variable stored in that node of the factor graph.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getVal",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getVal",
+    "category": "function",
+    "text": "getVal(vnd)\n\n\nConvenience function to get point values sampled i.i.d from marginal of lbl variable in the current factor graph.\n\n\n\n\n\ngetVal(vA)\n\n\nFetch the variable marginal sample points without the KDE bandwidth parameter.  Use getVertKDE to retrieve the full KDE object.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getVariable",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getVariable",
+    "category": "function",
+    "text": "getVariable(fgl, lbl)\ngetVariable(fgl, lbl, api)\n\n\nReturn reference to a variable in ::FactorGraph identified by ::Symbol.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getVertKDE",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getVertKDE",
+    "category": "function",
+    "text": "getVertKDE(v)\n\n\nGet KernelDensityEstimate kde estimate stored in variable node.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getUpMsgs",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getUpMsgs",
+    "category": "function",
+    "text": "getUpMsgs(btl, sym)\n\n\nReturn the last up message stored in cliq of Bayes (Junction) tree.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.getDwnMsgs",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.getDwnMsgs",
+    "category": "function",
+    "text": "getDwnMsgs(btl, sym)\n\n\nReturn the last down message stored in cliq of Bayes (Junction) tree.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.initfg",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.initfg",
+    "category": "function",
+    "text": "Initialize an empty ::FactorGraph object while initializing sessionname, robotname, and cloudgraph.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.landmarks",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.landmarks",
+    "category": "function",
+    "text": "landmarks(fgl::FactorGraph, vsym::Symbol)\n\nReturn Vector{Symbol} of landmarks attached to vertex vsym in fgl.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.loadjld",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.loadjld",
+    "category": "function",
+    "text": "loadjld(; file)\n\n\nOpposite of savejld(fg, gt=gt, file=\"tempfg.jl\") to load data from file. This function uses the unpacking converters for converting all PackedInferenceType to FunctorInferenceType.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.localProduct",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.localProduct",
+    "category": "function",
+    "text": "localProduct(fgl, sym; N, dbg, api)\n\n\nUsing factor graph object fg, project belief through connected factors (convolution with conditional) to variable sym followed by a approximate functional product.\n\nReturn: product belief, full proposals, partial dimension proposals, labels\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.ls",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.ls",
+    "category": "function",
+    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.lsf",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.lsf",
+    "category": "function",
+    "text": "lsf(fgl, lbl; api)\n\n\nList factors in a factor graph.\n\nExamples\n\nlsf(fg)\n\n\n\n\n\nlsf(fgl, lbl)\n\n\nList factors in a factor graph.\n\nExamples\n\nlsf(fg)\n\n\n\n\n\nlsf(fgl, mt; api)\n\n\nList factors in a factor graph.\n\nExamples\n\nlsf(fg)\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.lsRear",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.lsRear",
+    "category": "function",
+    "text": "lsRear(fgl)\nlsRear(fgl, n)\n\n\nReturn array of all variable nodes connected to the last n many poses (:x*).\n\nExample:\n\n# Shallow copy the tail end of poses from a factor graph `fg1`\nvars = lsRear(fg1, 5)\nfg1_r5 = subgraphFromVerts(fg1, vars)\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.manualinit!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.manualinit!",
+    "category": "function",
+    "text": "manualinit!(fgl, sym, usefcts)\n\n\nWorkaround function when first-version (factor graph based) auto initialization fails.  Usually occurs when using factors that have high connectivity to multiple variables.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.parentCliq",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.parentCliq",
+    "category": "function",
+    "text": "parentCliq(treel, cliq)\n\n\nReturn cliq\'s parent clique.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.packFromLocalPotentials!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.packFromLocalPotentials!",
+    "category": "function",
+    "text": "packFromLocalPotentials!(fgl, dens, wfac, cliq, vertid, N)\npackFromLocalPotentials!(fgl, dens, wfac, cliq, vertid, N, dbg)\n\n\nAdd all potentials associated with this clique and vertid to dens.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.printgraphmax",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.printgraphmax",
+    "category": "function",
+    "text": "printgraphmax(fgl)\n\n\nPrint the maximum point values form all variables approximate marginals in the factor graph. The full marginal can be recovered for example X0 = getVertKDE(fg, :x0).\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.productpartials!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.productpartials!",
+    "category": "function",
+    "text": "productpartials!(pGM, dummy, partials, manis)\n\n\nMultiply different dimensions from partial constraints individually.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.prodmultiplefullpartials",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.prodmultiplefullpartials",
+    "category": "function",
+    "text": "prodmultiplefullpartials(dens, partials, Ndims, N, manis)\n\n\nMultiply various full and partial dimension constraints.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.prodmultipleonefullpartials",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.prodmultipleonefullpartials",
+    "category": "function",
+    "text": "Multiply a single full and several partial dimension constraints.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.savejld",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.savejld",
+    "category": "function",
+    "text": "savejld(fgl; file, groundtruth)\n\n\nSave mostly complete Factor Graph type by converting complicated FunctionNodeData types to \'Packed\' types using user supplied converters. Ground truth can also be saved and recovered by the associated loadjld(file=\"tempfg.jld2\") method.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.setDwnMsg!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.setDwnMsg!",
+    "category": "function",
+    "text": "setDwnMsg!(cliql, msgs)\n\n\nSet the downward passing message for Bayes (Junction) tree clique cliql.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.setfreeze!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.setfreeze!",
+    "category": "function",
+    "text": "setfreeze!(fgl, sym)\n\n\nSet variable(s) sym of factor graph to be marginalized – i.e. not be updated by inference computation.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.setUpMsg!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.setUpMsg!",
+    "category": "function",
+    "text": "setUpMsg!(cliql, msgs)\n\n\nSet the upward passing message for Bayes (Junction) tree clique cliql.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.subgraphFromVerts",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.subgraphFromVerts",
+    "category": "function",
+    "text": "subgraphFromVerts(fgl, verts; neighbors)\n\n\nExplore all shortest paths combinations in verts, add neighbors and reference subgraph using unique index into graph data structure.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.treeProductDwn",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.treeProductDwn",
+    "category": "function",
+    "text": "treeProductDwn(fg, tree, cliq, sym; N, dbg)\n\n\nCalculate a fresh–-single step–-approximation to the variable sym in clique cliq as though during the downward message passing.  The full inference algorithm may repeatedly calculate successive apprimxations to the variable based on the structure of variables, factors, and incoming messages to this clique. Which clique to be used is defined by frontal variable symbols (cliq in this case) – see whichCliq(...) for more details.  The sym symbol indicates which symbol of this clique to be calculated.  Note that the sym variable must appear in the clique where cliq is a frontal variable.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.treeProductUp",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.treeProductUp",
+    "category": "function",
+    "text": "treeProductUp(fg, tree, cliq, sym; N, dbg)\n\n\nCalculate a fresh (single step) approximation to the variable sym in clique cliq as though during the upward message passing.  The full inference algorithm may repeatedly calculate successive apprimxations to the variables based on the structure of the clique, factors, and incoming messages. Which clique to be used is defined by frontal variable symbols (cliq in this case) – see whichCliq(...) for more details.  The sym symbol indicates which symbol of this clique to be calculated.  Note that the sym variable must appear in the clique where cliq is a frontal variable.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.updateFGBT!",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.updateFGBT!",
+    "category": "function",
+    "text": "updateFGBT!(fg, bt, cliqID, ddt; dbg, fillcolor)\n\n\nUpdate cliq cliqID in Bayes (Juction) tree bt according to contents of ddt – intended use is to update main clique after a downward belief propagation computation has been completed per clique.\n\n\n\n\n\nupdateFGBT!(fg, bt, cliqID, urt; dbg, fillcolor)\n\n\nUpdate cliq cliqID in Bayes (Juction) tree bt according to contents of urt – intended use is to update main clique after a upward belief propagation computation has been completed per clique.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.upGibbsCliqueDensity",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.upGibbsCliqueDensity",
+    "category": "function",
+    "text": "upGibbsCliqueDensity(inp)\nupGibbsCliqueDensity(inp, N)\nupGibbsCliqueDensity(inp, N, dbg)\n\n\nPerform computations required for the upward message passing during belief propation on the Bayes (Junction) tree. This function is usually called as part via remote_call for multiprocess dispatch.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.upMsg",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.upMsg",
+    "category": "function",
+    "text": "upMsg(cliq)\n\n\nReturn the last up message stored in cliq of Bayes (Junction) tree.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.writeGraphPdf",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.writeGraphPdf",
+    "category": "function",
+    "text": "writeGraphPdf(fgl; viewerapp, filepath, engine, show)\n\n\nExport a dot and pdf file drawn by Graphviz showing the factor graph.\n\n\n\n\n\n"
+},
+
+{
+    "location": "func_ref/#IncrementalInference.showFactor",
+    "page": "Caesar\'s Reference",
+    "title": "IncrementalInference.showFactor",
+    "category": "function",
+    "text": "showFactor(fgl, fsym; api)\n\n\nDisplay and return to console the user factor identified by tag name.\n\n\n\n\n\n"
+},
+
+{
     "location": "func_ref/#IncrementalInference-1",
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference",
     "category": "section",
-    "text": "addVariable!\naddFactor!\nallnums\napproxCliqMarginalUp!\napproxConv\nbatchSolve!\nchildCliqs\ncliqGibbs\nconvert2packedfunctionnode\ndecodefg\ndeleteFactor!\ndeleteVariable!\ndoautoinit!\ndownMsgPassingRecursive\ndwnMsg\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\nfmcmc!\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ngetCliq\ngetData\ngetFactor\ngetKDE\ngetParent\ngetSofttype\ngetVal\ngetVertKDE\ngetUpMsgs\ngetDwnMsgs\nlandmarks\nloadjld\nlocalProduct\nls\nlsf\nlsRear\nmanualinit!\nparentCliq\npackFromLocalPotentials!\nprintgraphmax\nproductpartials!\nprodmultiplefullpartials\nprodmultipleonefullpartials\nsavejld\nsetDwnMsg!\nsetfreeze!\nsetUpMsg!\nsubgraphFromVerts\ntreeProductDwn\ntreeProductUp\nupdateFGBT!\nupGibbsCliqueDensity\nupMsg\nwriteGraphPdf\nshowFactor<!– IIF v0.5.3 –> <!– showVariable –>"
+    "text": "addVariable!\naddFactor!\nallnums\napproxCliqMarginalUp!\napproxConv\nbatchSolve!\nchildCliqs\ncliqGibbs\nconvert2packedfunctionnode\ndecodefg\ndeleteFactor!\ndeleteVariable!\ndoautoinit!\ndownMsgPassingRecursive\ndwnMsg\nencodefg\nfifoFreeze!\nfindRelatedFromPotential\nfmcmc!\ngetCurrentWorkspaceFactors\ngetCurrentWorkspaceVariables\ngetCliq\ngetData\ngetFactor\ngetKDE\ngetParent\ngetSofttype\ngetVal\ngetVariable\ngetVertKDE\ngetUpMsgs\ngetDwnMsgs\ninitfg\nlandmarks\nloadjld\nlocalProduct\nls\nlsf\nlsRear\nmanualinit!\nparentCliq\npackFromLocalPotentials!\nprintgraphmax\nproductpartials!\nprodmultiplefullpartials\nprodmultipleonefullpartials\nsavejld\nsetDwnMsg!\nsetfreeze!\nsetUpMsg!\nsubgraphFromVerts\ntreeProductDwn\ntreeProductUp\nupdateFGBT!\nupGibbsCliqueDensity\nupMsg\nwriteGraphPdf\nshowFactor<!– IIF v0.5.3 –> <!– showVariable –>"
 },
 
 {
@@ -1489,6 +2033,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "vis_func_ref/#RoMEPlotting.plotPose",
+    "page": "Visualization Reference",
+    "title": "RoMEPlotting.plotPose",
+    "category": "function",
+    "text": "plotPose(fgl, syms; levels, c, axis, show, filepath, app)\n\n\nExample: pl = plotPose(fg, [:x1; :x2; :x3])\n\n\n\n\n\n"
+},
+
+{
     "location": "vis_func_ref/#RoMEPlotting.plotProductVsKDE",
     "page": "Visualization Reference",
     "title": "RoMEPlotting.plotProductVsKDE",
@@ -1501,15 +2053,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Visualization Reference",
     "title": "RoMEPlotting",
     "category": "section",
-    "text": "drawLandms\ndrawPoses\ndrawPosesLandms\nplotKDE\nplotProductVsKDE"
-},
-
-{
-    "location": "vis_func_ref/#KernelDensityEstimatePlotting-1",
-    "page": "Visualization Reference",
-    "title": "KernelDensityEstimatePlotting",
-    "category": "section",
-    "text": "plotKDEWORK IN PROGRESS  Not all functions have been added to this directory yet."
+    "text": "drawLandms\ndrawPoses\ndrawPosesLandms\nplotKDE\nplotPose\nplotProductVsKDEWORK IN PROGRESS  Not all functions have been added to this directory yet."
 },
 
 ]}
