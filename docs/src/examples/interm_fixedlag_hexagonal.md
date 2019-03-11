@@ -126,7 +126,7 @@ Preliminary results for the comparison can be seen below. However, this is just 
 
 ![Timing comparison of full solve vs. fixed-lag](images/fixed_lag_timing.png)
 
-> **NOTE** Work is underway to reduce overhead computations that result in poorer fixed-lag solving times.  We expect the fixed-lag performance to improve in the coming months (Written Nov 2018).  Please file issues if a deeper discussion is required. 
+> **NOTE** Work is underway (aka ["Project Tree House"](https://github.com/JuliaRobotics/IncrementalInference.jl/projects/2)) to reduce overhead computations that result in poorer fixed-lag solving times.  We expect the fixed-lag performance to improve in the coming months (Written Nov 2018).  Please file issues if a deeper discussion is required. 
 
 ## Additional Example
 

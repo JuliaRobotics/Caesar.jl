@@ -9,7 +9,7 @@ using Colors
 using Gadfly
 # tags waiting on METADATA
 using RoMEPlotting, KernelDensityEstimatePlotting
-
+using Pkg
 
 
 
@@ -74,7 +74,11 @@ wavefile = "/media/data1/data/kayaks/20_parsed/array_waveforms$(sasframe).csv"  
 csvWaveData = readdlm(wavefile,',',Float64,'\n')
 csvWaveData = csvWaveData[:,1:5]
 #
-sas2d = prepareSAS2DFactor(5, csvWaveData, rangemodel=:Correlator)
+cfgd=loadConfigFile("/home/dehann/.julia/dev/ProprietaryFactors/config/SAS2D.yaml")
+chirpFile = "/home/dehann/.julia/dev/ProprietaryFactors/src/beamforming/chirp250.txt"
+sas2d = prepareSAS2DFactor(5, csvWaveData, rangemodel=:Correlator, cfgd=cfgd, chirpFile=chirpFile)
+
+
 
 #
 addFactor!(fg, [:l1;:x1;:x2;:x3;:x4;:x5], sas2d, autoinit=false) #, threadmodel=SingleThreaded ) #;:x6;:x7;:x8;:x9

@@ -1,13 +1,15 @@
 using Documenter, Caesar
 import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
+import IncrementalInference: initfg
 
 using KernelDensityEstimatePlotting
-import KernelDensityEstimatePlotting: plotKDE
+# import KernelDensityEstimatePlotting: plotKDE
 using RoMEPlotting
 using MbedTLS
 @info "MbedTLS has been loaded"
 using Arena
+
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
@@ -16,16 +18,17 @@ makedocs(
     pages = Any[
         "Home" => "index.md",
         "Getting Started" => [
-            "Installation" => "installation_environment.md"
+            "Installation" => "installation_environment.md",
+            "FAQ" => "faq.md",
         ],
         "Concept Intro" => [
             "Caesar Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
-            "Arena Visualization" => "concepts/arena_visualizations.md",
-            "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
-            "Adding New Variables and Factors" => "concepts/adding_variables_factors.md",
-            "Using Caesar Database Operation" => "concepts/database_interactions.md",
             "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
+            "Using Caesar Database Operation" => "concepts/database_interactions.md",
+            "Variable and Factor Concepts" => "concepts/adding_variables_factors.md",
+            "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
+            "Arena Visualization" => "concepts/arena_visualizations.md",
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
@@ -34,9 +37,12 @@ makedocs(
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
         ],
-        "Intermediate How To's?" => [
+        "How to Expand?" => [
             "Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
             "Creating DynPose Factor" => "examples/interm_dynpose.md"
+        ],
+        "Developer Zone" => [
+            "Wiki Pointer" => "dev/wiki.md"
         ],
         "Literature" => [
             "References" => "refs/literature.md"

@@ -77,9 +77,11 @@ getKDE
 getParent
 getSofttype
 getVal
+getVariable
 getVertKDE
 getUpMsgs
 getDwnMsgs
+initfg
 landmarks
 loadjld
 localProduct
