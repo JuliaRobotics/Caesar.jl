@@ -1,6 +1,7 @@
 using Documenter, Caesar
 import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
+import IncrementalInference: initfg
 
 using KernelDensityEstimatePlotting
 # import KernelDensityEstimatePlotting: plotKDE
