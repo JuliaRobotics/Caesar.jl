@@ -18,12 +18,12 @@ makedocs(
             "Installation" => "installation_environment.md",
             "FAQ" => "faq.md",
         ],
-        "Concepts" => [
+        "Initial Concepts" => [
             "Caesar Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
+            "Interacting w/ Factor Graphs" => "concepts/interacting_fgs.md",
             "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
             "Using Caesar Database Operation" => "concepts/database_interactions.md",
-            "Variable and Factor Concepts" => "concepts/adding_variables_factors.md",
             "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
             "Arena Visualization" => "concepts/arena_visualizations.md",
         ],
@@ -35,7 +35,8 @@ makedocs(
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
         ],
         "How to Expand?" => [
-            "Creating Custom Variables and Factors" => "examples/basic_definingfactors.md",
+            "Custom Variables and Factors" => "concepts/adding_variables_factors.md",
+            "Creating Variables and Factors" => "examples/basic_definingfactors.md",
             "Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
         "Developer Zone" => [
