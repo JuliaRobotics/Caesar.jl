@@ -405,47 +405,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Building Factor Graphs",
     "title": "Factors Available in Caesar",
     "category": "section",
-    "text": "You can check for the latest factor types by running the following in your terminal:using RoME, Caesar\nprintln(\"- Singletons (priors): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorSingleton))));\nprintln(\"- Pairwise (variable constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwise))));\nprintln(\"- Pairwise (variable minimization constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));Note: This has been made available as IncrementalInference.getCurrentWorkspaceFactors() in IncrementalInference v0.4.4.The current factor types that you will find in the examples are (there are many aside from these):RoME.Prior - A singleton indicating a prior on a variable\nRoME.Point2Point2 - A factor between two 2D points\nRoME.Point2Point2WorldBearing - A factor between two 2D points with bearing\nRoME.Pose2Point2Bearing - A factor between two 2D points with bearing\nRoME.Pose2Point2BearingRange - A factor between two 2D points with bearing and range\nRoME.Pose2Point2Range - A factor between a 2D pose and a 2D point, with range\nRoME.Pose2Pose2 - A factor between two 2D poses\nRoME.Pose3Pose3 - A factor between two 3D poses\nRoME.IntertialPose3 - A factor between two 3D IMU sensor poses"
-},
-
-{
-    "location": "concepts/building_graphs/#Querying-the-FactorGraph-1",
-    "page": "Building Factor Graphs",
-    "title": "Querying the FactorGraph",
-    "category": "section",
-    "text": "There are a variety of functions to query the factor graph, please refer to Function Reference for details.A quick summary of the variables in the factor graph can be retrieved with:# List variables\nls(fg)\n# List factors attached to x0\nls(fg, :x0)\n# TODO: Provide an overview of getVal, getVert, getBW, getVertKDE, etc."
-},
-
-{
-    "location": "concepts/building_graphs/#Solving-Graphs-1",
-    "page": "Building Factor Graphs",
-    "title": "Solving Graphs",
-    "category": "section",
-    "text": "When you have built the graph, you can call the solver to perform inference with the following:# Perform inference\nbatchSolve!(fg)"
-},
-
-{
-    "location": "concepts/building_graphs/#Peeking-at-Results-1",
-    "page": "Building Factor Graphs",
-    "title": "Peeking at Results",
-    "category": "section",
-    "text": "Once you have solved the graph, you can review the full marginal with:X0 = getVertKDE(fg, :x0) # Get the raw KDE\n# Evaluate the marginal density function just for fun at [0.01, 0, 0].\nX0([0.01, 0, 0])For finding the MAP value in the density functions, you can use getKDEMax or getKDEMean. Here we are asking for the MAP values for all the variables in the factor graph:verts = ls(fg)\nmap(v -> println(\"$v : $(getKDEMax(getVertKDE(fg, v)))\"), verts[1]);Also see built-in function printgraphmax(fg) which performs a similar function."
-},
-
-{
-    "location": "concepts/building_graphs/#Plotting-1",
-    "page": "Building Factor Graphs",
-    "title": "Plotting",
-    "category": "section",
-    "text": "Once the graph has been built, a simple plot of the values can be produced with RoMEPlotting.jl. For example:using RoMEPlotting\n\ndrawPoses(fg)\n# If you have landmarks, you can call drawPosesLandms(fg)\n\n# Draw the KDE for x0\nplotKDE(fg, :x0)\n# Draw the KDE\'s for x0 and x1\nplotKDE(fg, [:x0, :x1])"
-},
-
-{
-    "location": "concepts/building_graphs/#Next-Steps-1",
-    "page": "Building Factor Graphs",
-    "title": "Next Steps",
-    "category": "section",
-    "text": "Although the above graph demonstrates the fundamental operations, it\'s not particularly useful. Take a look at Hexagonal Example for a complete example that builds on these operations."
+    "text": "You can check for the latest factor types by running the following in your terminal:using RoME, Caesar\nprintln(\"- Singletons (priors): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorSingleton))));\nprintln(\"- Pairwise (variable constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwise))));\nprintln(\"- Pairwise (variable minimization constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:Prior\nPriorPoint2\nPriorPose2\nPriorPolar\nPriorPoint3\nPriorPose3Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:Point2Point2\nPoint2Point2WorldBearing\nPose2Point2Bearing\nPose2Point2BearingRange\nPose2Point2Range\nPose2Pose2\nPose3Pose3\nInertialPose3"
 },
 
 {
@@ -454,6 +414,54 @@ var documenterSearchIndex = {"docs": [
     "title": "Extending Caesar with New Variables and Factors",
     "category": "section",
     "text": "A question that frequently arises is how to design custom variables and factors to solve a specific type of graph. One strength of Caesar is the ability to incorporate new variables and factors at will. Please refer to Adding Factors for more information on creating your own factors."
+},
+
+{
+    "location": "concepts/interacting_fgs/#",
+    "page": "Interacting w/ Factor Graphs",
+    "title": "Interacting w/ Factor Graphs",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/interacting_fgs/#Querying-the-FactorGraph-1",
+    "page": "Interacting w/ Factor Graphs",
+    "title": "Querying the FactorGraph",
+    "category": "section",
+    "text": "There are a variety of functions to query the factor graph, please refer to Function Reference for details.A quick summary of the variables in the factor graph can be retrieved with:# List variables\nls(fg)\n# List factors attached to x0\nls(fg, :x0)\n# TODO: Provide an overview of getVal, getVert, getBW, getVertKDE, etc."
+},
+
+{
+    "location": "concepts/interacting_fgs/#Solving-Graphs-1",
+    "page": "Interacting w/ Factor Graphs",
+    "title": "Solving Graphs",
+    "category": "section",
+    "text": "When you have built the graph, you can call the solver to perform inference with the following:# Perform inference\nbatchSolve!(fg)"
+},
+
+{
+    "location": "concepts/interacting_fgs/#Peeking-at-Results-1",
+    "page": "Interacting w/ Factor Graphs",
+    "title": "Peeking at Results",
+    "category": "section",
+    "text": "Once you have solved the graph, you can review the full marginal with:X0 = getKDE(fg, :x0) # Get the raw KDE\n# Evaluate the marginal density function just for fun at [0.01, 0, 0].\nX0([0.01, 0, 0])For finding the MAP value in the density functions, you can use getKDEMax or getKDEMean. Here we are asking for the MAP values for all the variables in the factor graph:verts = ls(fg)\nmap(v -> println(\"$v : $(getKDEMax(getVertKDE(fg, v)))\"), verts[1]);Also see built-in function printgraphmax(fg) which performs a similar function."
+},
+
+{
+    "location": "concepts/interacting_fgs/#Plotting-1",
+    "page": "Interacting w/ Factor Graphs",
+    "title": "Plotting",
+    "category": "section",
+    "text": "Once the graph has been built, a simple plot of the values can be produced with RoMEPlotting.jl. For example:using RoMEPlotting\n\ndrawPoses(fg)\n# If you have landmarks, you can instead call\n# drawPosesLandms(fg)\n\n# Draw the KDE for x0\nplotKDE(fg, :x0)\n# Draw the KDE\'s for x0 and x1\nplotKDE(fg, [:x0, :x1])"
+},
+
+{
+    "location": "concepts/interacting_fgs/#Next-Steps-1",
+    "page": "Interacting w/ Factor Graphs",
+    "title": "Next Steps",
+    "category": "section",
+    "text": "Although the above graph demonstrates the fundamental operations, it\'s not particularly useful. Take a look at Hexagonal Example for a complete example that builds on these operations."
 },
 
 {
@@ -486,126 +494,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Common Data Persistence and Inference",
     "category": "section",
     "text": "See work GraffSDK.jl."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#",
-    "page": "Variable and Factor Concepts",
-    "title": "Variable and Factor Concepts",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Creating-New-Variables-and-Factors-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Creating New Variables and Factors",
-    "category": "section",
-    "text": "In most scenarios, the existing variables and factors should be sufficient for most robotics applications. Caesar however, is extensible and allows you to easily incorporate your own variable and factor types for specialized applications."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Considerations-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Considerations",
-    "category": "section",
-    "text": "A couple of important points:You do not need to modify/fork/edit internal Caesar/RoME/IncrementalInference source code to introduce new variable and factor types!\nAs long as the factors exist in the working space when the solver is run, the factors are automatically used – this is possible due to Julia\'s multiple dispatch design\nCaesar is designed to allow you to add new variables and factors to your own independent repository and incorporate them at will at compile-time or even run-time\nResidual function definitions for new factors types use a callable struct (a.k.a functor) architecture to simultaneously allow:  \nMultiple dispatch (i.e. \'polymorphic\' behavior)\nMeta-data and in-place memory storage for advanced and performant code\nAn outside callback implementation style\nIn most robotics scenarios, there is no need for new variables or factors:\nVariables have various mechanisms that allow you to attach data to them, e.g. raw sensory data or identified April tags, so you do not need to create a new variable type just to store data\nNew variables are required only if you are representing a new state - TODO: Example of needed state\nNew factors are needed if:\nYou need to represent a constraint for a variable (known as a singleton) and that constraint type doesn\'t exist\nYou need to represent a constraint between two variables and that constraint type doesn\'t exist"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Getting-Started-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Getting Started",
-    "category": "section",
-    "text": "We suggest the following design pattern for developing and building new factors:You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see Building and Solving Graphs if you want to review what is currently available\nCreate a GitHub repository to store the new types\nCreate your new variable types\nCreate your new factor types\nImplement unit tests to validate the correct operation of the types\nSet up your solver to make use the custom types1.1. This is much easier than it soundsIf the code is public and may be useful to the community, we ask if you could submit an issue against Caesar with information about the new types and the repository. Ideally we\'d like to continually improve the core code and fold in community contributions.The remainder of this section discusses each of these steps."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Reviewing-the-Existing-Types-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Reviewing the Existing Types",
-    "category": "section",
-    "text": "Please see Building and Solving Graphs to review what variables and factors are currently supported."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#[OPTIONAL]-Creating-a-Repository-1",
-    "page": "Variable and Factor Concepts",
-    "title": "[OPTIONAL] Creating a Repository",
-    "category": "section",
-    "text": "You can fork the following template repository to construct your own Caesar Variable and Factor Examples.If this repository is going to be used for development of the new variables/factors as well as for the experiment (i.e. the code that builds the graph and solves it), you should probably start a simple end-to-end test that validates a basic version of your experimental setup (e.g. ):#### This example is a basic test of the new variables and factors\n#### that are added in this repo. The example is derived from\n#### the hexagonal test example.\n\nusing Caesar, RoME\nusing Caesar_VariableFactorExamples # Your new variable/factor repository\n# Using plotting for experiment validation\nusing RoMEPlotting\n\n# 1. Init factor graph\n#TODO\n\n# 2. Add variables\n#TODO\n\n# 3. Add factors\n# 3a. Add a new test prior\n#TODO\n# 3b. Add new types of odometry factors.\n#TODO\n\n# 4. Solve graph\nbatchSolve!(fg)\n\n# 5. Graph solution - assuming that you have this open in Atom.\ndrawPoses(fg)"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Creating-New-Variables-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Creating New Variables",
-    "category": "section",
-    "text": "All variables have to derive from IncrementalInference.InferenceVariable.What you need to build in the variable:dims - This is used during computation and defines the degrees of freedom (dimensions) for variable\nlabels - This a required field, although it does not need to be populated. It consists of unique, indexable string identifiers, such as \'POSE\', \'LANDMARK\'. It assists with querying the data efficiently in large systems when using the database layer.  You can then also add any additional fields that you would like to use for saving state information in variable. Note that these fields must be serializable as both JSON and Protobufs. Although you don\'t need to validate this, please keep the fields fairly simple and avoid complex structures with optional fields. TBD - provide a compatibility check for serialization and a docpage on it.In a trivial example of Pose2:Our dimensions would then be 3: X, Y, theta\nThe labels for Pose2 could be \"POSE\""
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Creating-New-Factors-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Creating New Factors",
-    "category": "section",
-    "text": "All factors inherit from one of the following types, depending on their function:FunctorSingleton: FunctorSingletons are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a RoME.Pose2 scenario.\nRequires: A getSample function\nFunctorPairwiseMinimize: FunctorPairwiseMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.\nRequires: A getSample function and a residual function definition\nThe minimize suffix specifies that the residual function of this factor will be enforced by numerical minimization (find me the minimum of this function)\nFunctorPairwise: FunctorPairwise are relative factors that introduce algebraic relationships between two or more variables. They are the same as FunctorPairwiseMinimize, however they use root finding to find the zero crossings (rather than numerical minimization).\nRequires: A getSample function and a residual function definitionHow do you decide which to use?If you are creating factors for world-frame information that will be tied to a single variable, inherit from FunctorSingleton\nGPS coordinates should be priors\nIf you are creating factors for local-frame relationships between variables, inherit from FunctorPairwiseMinimize\nOdometry and bearing deltas should be introduced as pairwise factors and should be local frameTBD: sUsers should start with FunctorPairwiseMinimize, discuss why and when they should promote their factors to FunctorPairwise.Note: FunctorPairwiseMinimize does not imply that the overall inference algorithm only minimizes an objective function. The Multi-model iSAM algorithm is built around fixed-point analysis. Minimization is used here to locally enforce the residual function.What you need to build in the new factor:A struct for the factor itself\nA sampler function to return measurements from the random ditributions\nIf you are building a FunctorPairwiseMinimize or a FunctorPairwise you need to define a residual function to introduce the relative algebraic relationship between the variables\nMinimization function should be lower-bounded and smooth\nA packed type of the factor which must be named Packed[Factor name], and allows the factor to be packed/transmitted/unpacked\nSerialization and deserialization methods\nThese are convert functions that pack and unpack the factor (which may be highly complex) into serialization-compatible formats\nAs the factors are mostly comprised of distributions (of type SamplableBelief), functions are provided to pack and unpack the distributions:\nPacking: To convert from a SamplableBelief to a string, use string(::SamplableBelief)::String\nUnpacking: To convert from string back to a SamplableBelief, use extractdistribution(::String)::SamplableBelief  An example of this is the Pose2Point2BearingRange, which provides a bearing+range relationship between a 2D pose and a 2D point."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Struct-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Pose2Point2BearingRange Struct",
-    "category": "section",
-    "text": "mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwise\n    bearing::B\n    range::R\n    Pose2Point2BearingRange{B,R}() where {B,R} = new{B,R}()\n    Pose2Point2BearingRange{B,R}(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = new{B,R}(x1,x2)\nend\n# Convenient constructor\nPose2Point2BearingRange(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = Pose2Point2BearingRange{B,R}(x1,x2)"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Sampler-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Pose2Point2BearingRange Sampler",
-    "category": "section",
-    "text": "# Return N samples from the two distributions\nfunction getSample(pp2br::Pose2Point2BearingRange, N::Int=1)\n  smpls = zeros(2, N)\n  smpls[1,:] = rand(pp2br.bearing, N)[:]\n  smpls[2,:] = rand(pp2br.range, N)[:]\n  return (smpls,)\nend"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Residual-Function-(Functor)-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Pose2Point2BearingRange Residual Function (Functor)",
-    "category": "section",
-    "text": "# define the conditional probability constraint\nfunction (pp2br::Pose2Point2BearingRange)(res::Array{Float64},\n        userdata::FactorMetadata,\n        idx::Int,\n        meas::Tuple{Array{Float64,2}},\n        xi::Array{Float64,2},\n        lm::Array{Float64,2} )\n  #\n  res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])\n  res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])\n  nothing\nend"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Packing-and-Unpacking-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Pose2Point2BearingRange Packing and Unpacking",
-    "category": "section",
-    "text": "The packing structure:mutable struct PackedPose2Point2BearingRange <: IncrementalInference.PackedInferenceType\n    bearstr::String\n    rangstr::String\n    PackedPose2Point2BearingRange() = new()\n    PackedPose2Point2BearingRange(s1::AS, s2::AS) where {AS <: AbstractString} = new(string(s1),string(s2))\nendThe packing and unpacking converters (note the use of string and extractdistribution):function convert(::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange{B, R}) where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}\n  return PackedPose2Point2BearingRange(string(d.bearing), string(d.range))\nend\n\nfunction convert(::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange)\n # where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}\n  Pose2Point2BearingRange(extractdistribution(d.bearstr), extractdistribution(d.rangstr))\nend"
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Unit-Tests-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Unit Tests",
-    "category": "section",
-    "text": "What you should test:Creation of the factor\nSampling of the factor\nResidual testing\nSolving using the variables and factors\nSerialization and deserializationAn example of these tests can be seen for the trivial case shown in the example repo ExamplePrior Unit Tests."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Using-your-Types-with-the-Caesar-Solver-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Using your Types with the Caesar Solver",
-    "category": "section",
-    "text": "As above, as long as you bring your factors into the workspace, you should be able to use them in your experimental setup.You can validate this with the existence check code in Building and Solving Graphs.Note: This has been made available as IncrementalInference.getCurrentWorkspaceVariables() and IncrementalInference.getCurrentWorkspaceFactors()in IncrementalInference v0.4.4."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Contributing-to-Community-1",
-    "page": "Variable and Factor Concepts",
-    "title": "Contributing to Community",
-    "category": "section",
-    "text": "We really appreciate any contributions, so if you have developed variables and factors that may be useful to the community, please write up an issue in Caesar.jl with a link to your repo and a short description of the use-case(s)."
 },
 
 {
@@ -1097,16 +985,136 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "concepts/adding_variables_factors/#",
+    "page": "Custom Variables and Factors",
+    "title": "Custom Variables and Factors",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Creating-New-Variables-and-Factors-1",
+    "page": "Custom Variables and Factors",
+    "title": "Creating New Variables and Factors",
+    "category": "section",
+    "text": "In most scenarios, the existing variables and factors should be sufficient for most robotics applications. Caesar however, is extensible and allows you to easily incorporate your own variable and factor types for specialized applications."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Considerations-1",
+    "page": "Custom Variables and Factors",
+    "title": "Considerations",
+    "category": "section",
+    "text": "A couple of important points:You do not need to modify/fork/edit internal Caesar/RoME/IncrementalInference source code to introduce new variable and factor types!\nAs long as the factors exist in the working space when the solver is run, the factors are automatically used – this is possible due to Julia\'s multiple dispatch design\nCaesar is designed to allow you to add new variables and factors to your own independent repository and incorporate them at will at compile-time or even run-time\nResidual function definitions for new factors types use a callable struct (a.k.a functor) architecture to simultaneously allow:  \nMultiple dispatch (i.e. \'polymorphic\' behavior)\nMeta-data and in-place memory storage for advanced and performant code\nAn outside callback implementation style\nIn most robotics scenarios, there is no need for new variables or factors:\nVariables have various mechanisms that allow you to attach data to them, e.g. raw sensory data or identified April tags, so you do not need to create a new variable type just to store data\nNew variables are required only if you are representing a new state - TODO: Example of needed state\nNew factors are needed if:\nYou need to represent a constraint for a variable (known as a singleton) and that constraint type doesn\'t exist\nYou need to represent a constraint between two variables and that constraint type doesn\'t exist"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Getting-Started-1",
+    "page": "Custom Variables and Factors",
+    "title": "Getting Started",
+    "category": "section",
+    "text": "We suggest the following design pattern for developing and building new factors:You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see Building and Solving Graphs if you want to review what is currently available\nCreate a GitHub repository to store the new types\nCreate your new variable types\nCreate your new factor types\nImplement unit tests to validate the correct operation of the types\nSet up your solver to make use the custom types1.1. This is much easier than it soundsIf the code is public and may be useful to the community, we ask if you could submit an issue against Caesar with information about the new types and the repository. Ideally we\'d like to continually improve the core code and fold in community contributions.The remainder of this section discusses each of these steps."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Reviewing-the-Existing-Types-1",
+    "page": "Custom Variables and Factors",
+    "title": "Reviewing the Existing Types",
+    "category": "section",
+    "text": "Please see Building and Solving Graphs to review what variables and factors are currently supported."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#[OPTIONAL]-Creating-a-Repository-1",
+    "page": "Custom Variables and Factors",
+    "title": "[OPTIONAL] Creating a Repository",
+    "category": "section",
+    "text": "You can fork the following template repository to construct your own Caesar Variable and Factor Examples.If this repository is going to be used for development of the new variables/factors as well as for the experiment (i.e. the code that builds the graph and solves it), you should probably start a simple end-to-end test that validates a basic version of your experimental setup (e.g. ):#### This example is a basic test of the new variables and factors\n#### that are added in this repo. The example is derived from\n#### the hexagonal test example.\n\nusing Caesar, RoME\nusing Caesar_VariableFactorExamples # Your new variable/factor repository\n# Using plotting for experiment validation\nusing RoMEPlotting\n\n# 1. Init factor graph\n#TODO\n\n# 2. Add variables\n#TODO\n\n# 3. Add factors\n# 3a. Add a new test prior\n#TODO\n# 3b. Add new types of odometry factors.\n#TODO\n\n# 4. Solve graph\nbatchSolve!(fg)\n\n# 5. Graph solution - assuming that you have this open in Atom.\ndrawPoses(fg)"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Creating-New-Variables-1",
+    "page": "Custom Variables and Factors",
+    "title": "Creating New Variables",
+    "category": "section",
+    "text": "All variables have to derive from IncrementalInference.InferenceVariable.What you need to build in the variable:dims - This is used during computation and defines the degrees of freedom (dimensions) for variable\nlabels - This a required field, although it does not need to be populated. It consists of unique, indexable string identifiers, such as \'POSE\', \'LANDMARK\'. It assists with querying the data efficiently in large systems when using the database layer.  You can then also add any additional fields that you would like to use for saving state information in variable. Note that these fields must be serializable as both JSON and Protobufs. Although you don\'t need to validate this, please keep the fields fairly simple and avoid complex structures with optional fields. TBD - provide a compatibility check for serialization and a docpage on it.In a trivial example of Pose2:Our dimensions would then be 3: X, Y, theta\nThe labels for Pose2 could be \"POSE\""
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Creating-New-Factors-1",
+    "page": "Custom Variables and Factors",
+    "title": "Creating New Factors",
+    "category": "section",
+    "text": "All factors inherit from one of the following types, depending on their function:FunctorSingleton: FunctorSingletons are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a RoME.Pose2 scenario.\nRequires: A getSample function\nFunctorPairwiseMinimize: FunctorPairwiseMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.\nRequires: A getSample function and a residual function definition\nThe minimize suffix specifies that the residual function of this factor will be enforced by numerical minimization (find me the minimum of this function)\nFunctorPairwise: FunctorPairwise are relative factors that introduce algebraic relationships between two or more variables. They are the same as FunctorPairwiseMinimize, however they use root finding to find the zero crossings (rather than numerical minimization).\nRequires: A getSample function and a residual function definitionHow do you decide which to use?If you are creating factors for world-frame information that will be tied to a single variable, inherit from FunctorSingleton\nGPS coordinates should be priors\nIf you are creating factors for local-frame relationships between variables, inherit from FunctorPairwiseMinimize\nOdometry and bearing deltas should be introduced as pairwise factors and should be local frameTBD: sUsers should start with FunctorPairwiseMinimize, discuss why and when they should promote their factors to FunctorPairwise.Note: FunctorPairwiseMinimize does not imply that the overall inference algorithm only minimizes an objective function. The Multi-model iSAM algorithm is built around fixed-point analysis. Minimization is used here to locally enforce the residual function.What you need to build in the new factor:A struct for the factor itself\nA sampler function to return measurements from the random ditributions\nIf you are building a FunctorPairwiseMinimize or a FunctorPairwise you need to define a residual function to introduce the relative algebraic relationship between the variables\nMinimization function should be lower-bounded and smooth\nA packed type of the factor which must be named Packed[Factor name], and allows the factor to be packed/transmitted/unpacked\nSerialization and deserialization methods\nThese are convert functions that pack and unpack the factor (which may be highly complex) into serialization-compatible formats\nAs the factors are mostly comprised of distributions (of type SamplableBelief), functions are provided to pack and unpack the distributions:\nPacking: To convert from a SamplableBelief to a string, use string(::SamplableBelief)::String\nUnpacking: To convert from string back to a SamplableBelief, use extractdistribution(::String)::SamplableBelief  An example of this is the Pose2Point2BearingRange, which provides a bearing+range relationship between a 2D pose and a 2D point."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Struct-1",
+    "page": "Custom Variables and Factors",
+    "title": "Pose2Point2BearingRange Struct",
+    "category": "section",
+    "text": "mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwise\n    bearing::B\n    range::R\n    Pose2Point2BearingRange{B,R}() where {B,R} = new{B,R}()\n    Pose2Point2BearingRange{B,R}(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = new{B,R}(x1,x2)\nend\n# Convenient constructor\nPose2Point2BearingRange(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = Pose2Point2BearingRange{B,R}(x1,x2)"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Sampler-1",
+    "page": "Custom Variables and Factors",
+    "title": "Pose2Point2BearingRange Sampler",
+    "category": "section",
+    "text": "# Return N samples from the two distributions\nfunction getSample(pp2br::Pose2Point2BearingRange, N::Int=1)\n  smpls = zeros(2, N)\n  smpls[1,:] = rand(pp2br.bearing, N)[:]\n  smpls[2,:] = rand(pp2br.range, N)[:]\n  return (smpls,)\nend"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Residual-Function-(Functor)-1",
+    "page": "Custom Variables and Factors",
+    "title": "Pose2Point2BearingRange Residual Function (Functor)",
+    "category": "section",
+    "text": "# define the conditional probability constraint\nfunction (pp2br::Pose2Point2BearingRange)(res::Array{Float64},\n        userdata::FactorMetadata,\n        idx::Int,\n        meas::Tuple{Array{Float64,2}},\n        xi::Array{Float64,2},\n        lm::Array{Float64,2} )\n  #\n  res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])\n  res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])\n  nothing\nend"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Pose2Point2BearingRange-Packing-and-Unpacking-1",
+    "page": "Custom Variables and Factors",
+    "title": "Pose2Point2BearingRange Packing and Unpacking",
+    "category": "section",
+    "text": "The packing structure:mutable struct PackedPose2Point2BearingRange <: IncrementalInference.PackedInferenceType\n    bearstr::String\n    rangstr::String\n    PackedPose2Point2BearingRange() = new()\n    PackedPose2Point2BearingRange(s1::AS, s2::AS) where {AS <: AbstractString} = new(string(s1),string(s2))\nendThe packing and unpacking converters (note the use of string and extractdistribution):function convert(::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange{B, R}) where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}\n  return PackedPose2Point2BearingRange(string(d.bearing), string(d.range))\nend\n\nfunction convert(::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange)\n # where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}\n  Pose2Point2BearingRange(extractdistribution(d.bearstr), extractdistribution(d.rangstr))\nend"
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Unit-Tests-1",
+    "page": "Custom Variables and Factors",
+    "title": "Unit Tests",
+    "category": "section",
+    "text": "What you should test:Creation of the factor\nSampling of the factor\nResidual testing\nSolving using the variables and factors\nSerialization and deserializationAn example of these tests can be seen for the trivial case shown in the example repo ExamplePrior Unit Tests."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Using-your-Types-with-the-Caesar-Solver-1",
+    "page": "Custom Variables and Factors",
+    "title": "Using your Types with the Caesar Solver",
+    "category": "section",
+    "text": "As above, as long as you bring your factors into the workspace, you should be able to use them in your experimental setup.You can validate this with the existence check code in Building and Solving Graphs.Note: This has been made available as IncrementalInference.getCurrentWorkspaceVariables() and IncrementalInference.getCurrentWorkspaceFactors()in IncrementalInference v0.4.4."
+},
+
+{
+    "location": "concepts/adding_variables_factors/#Contributing-to-Community-1",
+    "page": "Custom Variables and Factors",
+    "title": "Contributing to Community",
+    "category": "section",
+    "text": "We really appreciate any contributions, so if you have developed variables and factors that may be useful to the community, please write up an issue in Caesar.jl with a link to your repo and a short description of the use-case(s)."
+},
+
+{
     "location": "examples/basic_definingfactors/#",
-    "page": "Creating Custom Variables and Factors",
-    "title": "Creating Custom Variables and Factors",
+    "page": "Creating Variables and Factors",
+    "title": "Creating Variables and Factors",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "examples/basic_definingfactors/#Defining-New-Variables-and-Factors-1",
-    "page": "Creating Custom Variables and Factors",
+    "page": "Creating Variables and Factors",
     "title": "Defining New Variables and Factors",
     "category": "section",
     "text": "TODO: Smooth text and flow."
@@ -1114,7 +1122,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "examples/basic_definingfactors/#Quick-Example-in-One-Dimension-1",
-    "page": "Creating Custom Variables and Factors",
+    "page": "Creating Variables and Factors",
     "title": "Quick Example in One Dimension",
     "category": "section",
     "text": "Note these factors already exists in IncrementalInference (and many more in RoME) and are presented here as a first introduction into the process of defining your own factors.User scope Prior, LinearOffset, and MultiModalOffset with arbitrary distributions are defined as:import IncrementalInference: getSample\n\nstruct Prior{T} <: IncrementalInference.FunctorSingleton where T <: Distribution\n  z::T\nend\ngetSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,:), )\nstruct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: Distribution\n  z::T\nend\ngetSample(s::LinearOffset, N::Int=1) = (reshape(rand(s.z,N),1,:), )\nfunction (s::LinearOffset)(res::Array{Float64},\n                           userdata::FactorMetadata,\n                           idx::Int,\n                           meas::Tuple{Array{Float64, 2}},\n                           X1::Array{Float64,2},\n                           X2::Array{Float64,2}  )\n  #\n  res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])\n  nothing\nend\nstruct MultiModalOffset <: IncrementalInference.FunctorPairwise\n  z::Vector{Distribution}\n  c::Categorical\nend\ngetSample(s::MultiModalOffset, N::Int=1) = (reshape.(rand.(s.z, N),1,:)..., rand(s.c, N))\nfunction (s::MultiModalOffset)(res::Array{Float64},\n                               userdata::FactorMetadata,\n                               idx::Int,\n                               meas::Tuple,\n                               X1::Array{Float64,2},\n                               X2::Array{Float64,2}  )\n  #\n  res[1] = meas[meas[end][idx]][idx] - (X2[1,idx] - X1[1,idx])\n  nothing\nendNotice the residual function relating to the two PairwiseFunctor derived definitions. The one dimensional residual functions, res[1] = measurement - prediction, are used during inference to approximate the convolution of conditional beliefs from the sample approximate marginal beliefs of the connected variables."
@@ -1485,7 +1493,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
@@ -1805,7 +1813,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
+    "text": "ls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
 },
 
 {
