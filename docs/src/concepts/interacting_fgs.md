@@ -24,7 +24,7 @@ batchSolve!(fg)
 Once you have solved the graph, you can review the full marginal with:
 
 ```julia
-X0 = getVertKDE(fg, :x0) # Get the raw KDE
+X0 = getKDE(fg, :x0) # Get the raw KDE
 # Evaluate the marginal density function just for fun at [0.01, 0, 0].
 X0([0.01, 0, 0])
 ```
@@ -45,7 +45,8 @@ Once the graph has been built, a simple plot of the values can be produced with 
 using RoMEPlotting
 
 drawPoses(fg)
-# If you have landmarks, you can call drawPosesLandms(fg)
+# If you have landmarks, you can instead call
+# drawPosesLandms(fg)
 
 # Draw the KDE for x0
 plotKDE(fg, :x0)

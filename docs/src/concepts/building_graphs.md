@@ -122,7 +122,7 @@ Pose2Point2BearingRange
 Pose2Point2Range
 Pose2Pose2
 Pose3Pose3
-IntertialPose3
+InertialPose3
 ```
 
 ### Extending Caesar with New Variables and Factors
