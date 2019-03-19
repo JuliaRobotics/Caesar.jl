@@ -101,77 +101,29 @@ println("- Pairwise (variable minimization constraints): ")
 println.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));
 ```
 
-Note: This has been made available as `IncrementalInference.getCurrentWorkspaceFactors()` in IncrementalInference v0.4.4.
+Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:
 
-The current factor types that you will find in the examples are (there are many aside from these):
-
-* `RoME.Prior` - A singleton indicating a prior on a variable
-* `RoME.Point2Point2` - A factor between two 2D points
-* `RoME.Point2Point2WorldBearing` - A factor between two 2D points with bearing
-* `RoME.Pose2Point2Bearing` - A factor between two 2D points with bearing
-* `RoME.Pose2Point2BearingRange` - A factor between two 2D points with bearing and range
-* `RoME.Pose2Point2Range` - A factor between a 2D pose and a 2D point, with range
-* `RoME.Pose2Pose2` - A factor between two 2D poses
-* `RoME.Pose3Pose3` - A factor between two 3D poses
-* `RoME.IntertialPose3` - A factor between two 3D IMU sensor poses
-
-## Querying the FactorGraph
-
-There are a variety of functions to query the factor graph, please refer to [Function Reference](../func_ref.md) for details.
-
-A quick summary of the variables in the factor graph can be retrieved with:
-
-```julia
-# List variables
-ls(fg)
-# List factors attached to x0
-ls(fg, :x0)
-# TODO: Provide an overview of getVal, getVert, getBW, getVertKDE, etc.
+```@docs
+Prior
+PriorPoint2
+PriorPose2
+PriorPolar
+PriorPoint3
+PriorPose3
 ```
 
-## Solving Graphs
-When you have built the graph, you can call the solver to perform inference with the following:
+Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:
 
-```julia
-# Perform inference
-batchSolve!(fg)
+```@docs
+Point2Point2
+Point2Point2WorldBearing
+Pose2Point2Bearing
+Pose2Point2BearingRange
+Pose2Point2Range
+Pose2Pose2
+Pose3Pose3
+InertialPose3
 ```
-
-## Peeking at Results
-Once you have solved the graph, you can review the full marginal with:
-
-```julia
-X0 = getVertKDE(fg, :x0) # Get the raw KDE
-# Evaluate the marginal density function just for fun at [0.01, 0, 0].
-X0([0.01, 0, 0])
-```
-
-For finding the MAP value in the density functions, you can use `getKDEMax` or `getKDEMean`. Here we are asking for the MAP values for all the variables in the factor graph:
-
-```julia
-verts = ls(fg)
-map(v -> println("$v : $(getKDEMax(getVertKDE(fg, v)))"), verts[1]);
-```
-
-> Also see built-in function `printgraphmax(fg)` which performs a similar function.
-
-## Plotting
-Once the graph has been built, a simple plot of the values can be produced with RoMEPlotting.jl. For example:
-
-```julia
-using RoMEPlotting
-
-drawPoses(fg)
-# If you have landmarks, you can call drawPosesLandms(fg)
-
-# Draw the KDE for x0
-plotKDE(fg, :x0)
-# Draw the KDE's for x0 and x1
-plotKDE(fg, [:x0, :x1])
-```
-
-## Next Steps
-Although the above graph demonstrates the fundamental operations, it's not particularly useful. Take a look at [Hexagonal Example](../examples/basic_hexagonal2d.md) for a complete example that builds on these operations.
 
 ### Extending Caesar with New Variables and Factors
 A question that frequently arises is how to design custom variables and factors to solve a specific type of graph. One strength of Caesar is the ability to incorporate new variables and factors at will. Please refer to [Adding Factors](adding_variables_factors.md) for more information on creating your own factors.
