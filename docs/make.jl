@@ -25,6 +25,7 @@ makedocs(
             "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
             "Using Caesar Database Operation" => "concepts/database_interactions.md",
             "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
+            "Multisession and Cross-Session Solving" => "concepts/multisession.md",
             "Arena Visualization" => "concepts/arena_visualizations.md",
         ],
         "Examples" => [
