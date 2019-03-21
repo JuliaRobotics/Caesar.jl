@@ -553,6 +553,46 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "concepts/multisession/#",
+    "page": "Multisession and Cross-Session Solving",
+    "title": "Multisession and Cross-Session Solving",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/multisession/#Multisession-Operation-1",
+    "page": "Multisession and Cross-Session Solving",
+    "title": "Multisession Operation",
+    "category": "section",
+    "text": "Having all the data consolidated in a factor graph allows us to do something we find really exciting: reason against data for different robots, different robot sessions, even different users. Of course, this is all optional, and must be explicitly configured, but if enabled, current inference solutions can make use of historical data to continually improve their solutions.Consider a single robot working in a common environment that has driven around the same area a number of times and has identified a landmark that is (probably) the same. We can automatically close the loop and use the information from the prior data to improve our current solution. This is called a multisession solve.To perform a multisession solve, you need to specify that a session is part of a common environment, e.g \'lab\'. A user then requests a multisession solve (manually for the moment), and this creates relationships between common landmarks. The collective information is used to produce a consensus on the shared landmarks. A chain of session solves is then created, and the information is propagated into the individual sessions, improving their results."
+},
+
+{
+    "location": "concepts/multisession/#Steps-in-Multisession-Solve-1",
+    "page": "Multisession and Cross-Session Solving",
+    "title": "Steps in Multisession Solve",
+    "category": "section",
+    "text": "The following steps are performed by the user:Indicate which sessions are part of a common environment - this is done via GraffSDK when the session is created\nRequest a multisession solveUpon request, the solver performs the following actions:Updates the common existing multisession landmarks with any new information (propagation from session to common information)\nBuilds common landmarks for any new sessions or updated data\nSolves the common, multisession graph\nPropagates the common consensus result to the individual sessions\nFreezes all the session landmarks so that the session solving does not update the consensus result\nRequests session solves for all the updated sessionsNote the current approach is well positioned to transition to the \"Federated Bayes (Junction) Tree\" multisession solving method, and will be updated accordingly in due coarse.  The Federated method will allow faster multi-session solving times by avoiding the current iterated approach."
+},
+
+{
+    "location": "concepts/multisession/#Example-1",
+    "page": "Multisession and Cross-Session Solving",
+    "title": "Example",
+    "category": "section",
+    "text": "Consider three sessions which exist in the same, shared environment. In this environment, during each session the robot identified the same l0 landmark, as shown in the below figure. (Image: Independent Sessions)If we examine this in terms of the estimates of the actual landmarks, we have three independent densities (blue, green, and orange) giving measures of l0 located at (20, 0):(Image: Independent densities)Now we trigger a multisession solve. For each landmark that is seen in multiple session, we produce a common landmark (we call a prime landmark) and link it to the session landmarks via factors - all denoted in black outline.(Image: Linked landmarks)A multisession solve is performed, which for each common (prime) landmark, we produce a common estimate. In terms of densities, this is a single answer for the disparate information, as shown in red in the below figure (for a slightly different dataset):(Image: Prime density)This information is then propagated back to the individual session landmarks, giving one common density for each landmark. As above, our green, blue, and orange individual densities are now all updated to match the consensus shown in black:(Image: Prime density)The session landmarks are then frozen, and individual session solves are triggered to propagate the information back into the sessions.  Until the federated upgrade is completed, the above process is iterated a few times to allow information to cross propagate through all sessions.  There federated tree solution requires only a single iteration up and down the federated Bayes (Junction) tree. "
+},
+
+{
+    "location": "concepts/multisession/#Next-Steps-1",
+    "page": "Multisession and Cross-Session Solving",
+    "title": "Next Steps",
+    "category": "section",
+    "text": "This provides an initial implementation for stitching data from multiple sessions, robots, and users. In the short term, we may trigger this automatically for any shared environments.  Multisession solving along with other automated techniques for additional measurement discovery in data allows the system to \'dream\' – i.e. reducing succint info from the large volumes of heterogenous sensor data.In the medium future we will extend this functionality to operate in the Bayes tree, which we call \'federated solving\', so that we perform the operation using cached results of subtrees. "
+},
+
+{
     "location": "concepts/arena_visualizations/#",
     "page": "Arena Visualization",
     "title": "Arena Visualization",
@@ -1013,15 +1053,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Variables and Factors",
     "title": "Getting Started",
     "category": "section",
-    "text": "We suggest the following design pattern for developing and building new factors:You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see Building and Solving Graphs if you want to review what is currently available\nCreate a GitHub repository to store the new types\nCreate your new variable types\nCreate your new factor types\nImplement unit tests to validate the correct operation of the types\nSet up your solver to make use the custom types1.1. This is much easier than it soundsIf the code is public and may be useful to the community, we ask if you could submit an issue against Caesar with information about the new types and the repository. Ideally we\'d like to continually improve the core code and fold in community contributions.The remainder of this section discusses each of these steps."
-},
-
-{
-    "location": "concepts/adding_variables_factors/#Reviewing-the-Existing-Types-1",
-    "page": "Custom Variables and Factors",
-    "title": "Reviewing the Existing Types",
-    "category": "section",
-    "text": "Please see Building and Solving Graphs to review what variables and factors are currently supported."
+    "text": "We suggest the following design pattern for developing and building new factors:You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see Building and Solving Graphs if you want to review what is currently available\n[OPTIONAL] Create a GitHub repository to store the new types (new types in the Julia Main scope is perfectly okay!)\nCreate your new variable types\nCreate your new factor types\nImplement unit tests to validate the correct operation of the types\nSet up your solver to make use the custom types1.1. This is much easier than it soundsIf the code is public and may be useful to the community, we ask if you could submit an issue against Caesar with information about the new types and the repository. Ideally we\'d like to continually improve the core code and fold in community contributions.The remainder of this section discusses each of these steps."
 },
 
 {
@@ -1813,7 +1845,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
+    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
 },
 
 {
