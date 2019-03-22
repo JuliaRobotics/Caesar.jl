@@ -21,6 +21,7 @@ makedocs(
         "Initial Concepts" => [
             "Caesar Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
+            "Available Variables/Factors" => "concepts/available_varfacs.md",
             "Interacting w/ Factor Graphs" => "concepts/interacting_fgs.md",
             "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
             "Using Caesar Database Operation" => "concepts/database_interactions.md",
