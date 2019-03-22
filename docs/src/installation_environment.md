@@ -62,10 +62,10 @@ The easiest method is---via the terminal---to [download the desired](https://jul
 cd ~
 mkdir -p julia-software
 cd julia-software
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.1-linux-x86_64.tar.gz
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.3-linux-x86_64.tar.gz
 tar -xvf julia-1.0.3-linux-x86_64.tar.gz
 cd /usr/bin
-sudo ln -s ~/julia-software/julia-1.0.1/bin/julia julia
+sudo ln -s ~/julia-software/julia-1.0.3/bin/julia julia
 ```
 >**Note** Feel free to modify this setup as you see fit.
 
