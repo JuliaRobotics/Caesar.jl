@@ -4,7 +4,7 @@ using Caesar, Caesar.ZmqCaesar
 export
     start
 
-import Base: start
+# import Base: start
 
 global systemverbs = Symbol[
     :shutdown
