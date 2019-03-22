@@ -401,6 +401,118 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "concepts/building_graphs/#IncrementalInference.Prior",
+    "page": "Building Factor Graphs",
+    "title": "IncrementalInference.Prior",
+    "category": "type",
+    "text": "struct Prior{T} <: FunctorSingleton\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.PriorPoint2",
+    "page": "Building Factor Graphs",
+    "title": "RoME.PriorPoint2",
+    "category": "type",
+    "text": "mutable struct PriorPoint2{T} <: FunctorSingleton\n\nDirection observation information of a Point2 variable.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.PriorPose2",
+    "page": "Building Factor Graphs",
+    "title": "RoME.PriorPose2",
+    "category": "type",
+    "text": "mutable struct PriorPose2{T} <: FunctorSingleton\n\nIntroduce direct observations on all dimensions of a Pose2 variable:\n\nExample:\n\nPriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.PriorPolar",
+    "page": "Building Factor Graphs",
+    "title": "RoME.PriorPolar",
+    "category": "type",
+    "text": "mutable struct PriorPolar{T1<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}, T2<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorSingleton\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.PriorPoint3",
+    "page": "Building Factor Graphs",
+    "title": "RoME.PriorPoint3",
+    "category": "type",
+    "text": "mutable struct PriorPoint3{T} <: FunctorSingleton\n\nDirection observation information of a Point3 variable.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.PriorPose3",
+    "page": "Building Factor Graphs",
+    "title": "RoME.PriorPose3",
+    "category": "type",
+    "text": "mutable struct PriorPose3 <: FunctorSingleton\n\nDirect observation information of Pose3 variable type.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.Point2Point2",
+    "page": "Building Factor Graphs",
+    "title": "RoME.Point2Point2",
+    "category": "type",
+    "text": "mutable struct Point2Point2{D<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorPairwise\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.Point2Point2WorldBearing",
+    "page": "Building Factor Graphs",
+    "title": "RoME.Point2Point2WorldBearing",
+    "category": "type",
+    "text": "mutable struct Point2Point2WorldBearing{T} <: FunctorPairwise\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.Pose2Point2Bearing",
+    "page": "Building Factor Graphs",
+    "title": "RoME.Pose2Point2Bearing",
+    "category": "type",
+    "text": "mutable struct Pose2Point2Bearing{B<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorPairwiseMinimize\n\nSingle dimension bearing constraint from Pose2 to Point2 variable.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.Pose2Point2BearingRange",
+    "page": "Building Factor Graphs",
+    "title": "RoME.Pose2Point2BearingRange",
+    "category": "type",
+    "text": "mutable struct Pose2Point2BearingRange{B<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}, R<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorPairwise\n\nBearing and Range constraint from a Pose2 to Point2 variable.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.Pose2Point2Range",
+    "page": "Building Factor Graphs",
+    "title": "RoME.Pose2Point2Range",
+    "category": "type",
+    "text": "mutable struct Pose2Point2Range{T} <: FunctorPairwise\n\nRange only measurement from Pose2 to Point2 variable.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.Pose2Pose2",
+    "page": "Building Factor Graphs",
+    "title": "RoME.Pose2Pose2",
+    "category": "type",
+    "text": "mutable struct Pose2Pose2{T} <: FunctorPairwise\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.Pose3Pose3",
+    "page": "Building Factor Graphs",
+    "title": "RoME.Pose3Pose3",
+    "category": "type",
+    "text": "mutable struct Pose3Pose3 <: FunctorPairwise\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/building_graphs/#RoME.InertialPose3",
+    "page": "Building Factor Graphs",
+    "title": "RoME.InertialPose3",
+    "category": "type",
+    "text": "mutable struct InertialPose3 <: FunctorPairwise\n\nInertial Odometry version of preintegration procedure and used as a factor between InertialPose3 types for inertial navigation in factor graphs.\n\n\n\n\n\n"
+},
+
+{
     "location": "concepts/building_graphs/#Factors-Available-in-Caesar-1",
     "page": "Building Factor Graphs",
     "title": "Factors Available in Caesar",
