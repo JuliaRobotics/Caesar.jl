@@ -189,7 +189,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Installation",
     "title": "Local Installation of Julia",
     "category": "section",
-    "text": "Although Julia (or JuliaPro) can be installed on a Linux computer using the apt package manager, we are striving for a fully local installation environment which is highly reproducible on a variety of platforms.The easiest method is–-via the terminal–-to download the desired version of Julia as a binary, extract, setup a symbolic link, and run:cd ~\nmkdir -p julia-software\ncd julia-software\nwget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.1-linux-x86_64.tar.gz\ntar -xvf julia-1.0.3-linux-x86_64.tar.gz\ncd /usr/bin\nsudo ln -s ~/julia-software/julia-1.0.1/bin/julia juliaNote Feel free to modify this setup as you see fit.This should allow any terminal or process on the computer to run the Julia REPL by type julia and testing with:println(\"hello world\")\n# Should print \"hello world\"Maybe a script, or command:user@...$ echo \"println(\\\"hello again\\\")\" > myscript.jl\nuser@...$ julia myscript.jl\nhello again\nuser@...$ rm myscript.jl\n\nuser@...$ julia -e \"println(\\\"one more time.\\\")\"\none more time.\nuser@...$ julia -e \"println(\\\"...testing...\\\")\"\n...testing...\nNote: When searching for Julia related help online, use the phrase \'julialang\' instead of just \'julia\'.For example, search for \'julialang workflow tips\' or \'julialang performance tips\'.Note see FAQ - Why are first runs slow?, because of just of Just-In-Time/Pre compiling and caching."
+    "text": "Although Julia (or JuliaPro) can be installed on a Linux computer using the apt package manager, we are striving for a fully local installation environment which is highly reproducible on a variety of platforms.The easiest method is–-via the terminal–-to download the desired version of Julia as a binary, extract, setup a symbolic link, and run:cd ~\nmkdir -p julia-software\ncd julia-software\nwget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.3-linux-x86_64.tar.gz\ntar -xvf julia-1.0.3-linux-x86_64.tar.gz\ncd /usr/bin\nsudo ln -s ~/julia-software/julia-1.0.3/bin/julia juliaNote Feel free to modify this setup as you see fit.This should allow any terminal or process on the computer to run the Julia REPL by type julia and testing with:println(\"hello world\")\n# Should print \"hello world\"Maybe a script, or command:user@...$ echo \"println(\\\"hello again\\\")\" > myscript.jl\nuser@...$ julia myscript.jl\nhello again\nuser@...$ rm myscript.jl\n\nuser@...$ julia -e \"println(\\\"one more time.\\\")\"\none more time.\nuser@...$ julia -e \"println(\\\"...testing...\\\")\"\n...testing...\nNote: When searching for Julia related help online, use the phrase \'julialang\' instead of just \'julia\'.For example, search for \'julialang workflow tips\' or \'julialang performance tips\'.Note see FAQ - Why are first runs slow?, because of just of Just-In-Time/Pre compiling and caching."
 },
 
 {
@@ -377,152 +377,168 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "concepts/building_graphs/#When-to-Create-New-Pose-Variables-1",
+    "location": "concepts/building_graphs/#When-to-Instantiate-Poses-(i.e.-new-Variables-in-Factor-Graph)-1",
     "page": "Building Factor Graphs",
-    "title": "When to Create New Pose Variables",
+    "title": "When to Instantiate Poses (i.e. new Variables in Factor Graph)",
     "category": "section",
     "text": "Consider a robot traversing some area while exploring, localizing, and wanting to find strong loop-closure features for consistent mapping.  The creation of new poses and landmark variables is a trade-off in computational complexity and marginalization errors made during factor graph construction.  Common triggers for new poses are:Time-based trigger (eg. new pose a second or 5 minutes if stationary)\nDistance traveled (eg. new pose every 0.5 meters)\nRotation angle (eg. new pose every 15 degrees)Computation will progress faster if poses and landmarks are very sparse.  To extract the benefit of dense reconstructions, one approach is to use the factor graph as sparse index in history about the general progression of the trajectory and use additional processing from dense sensor data for high-fidelity map reconstructions.  Either interpolations, or better direct reconstructions from inertial data can be used for dense reconstruction.For completeness, one could also re-project the most meaningful measurements from sensor measurements between pose epochs as though measured from the pose epoch.  This approach essentially marginalizes the local dead reckoning drift errors into the local interpose re-projections, but helps keep the pose count low.In addition, see fixed-lag discussion for limiting during inference the number of fluid variables manually to a user desired count."
 },
 
 {
-    "location": "concepts/building_graphs/#Variables-and-Factors-Available-in-Caesar-1",
+    "location": "concepts/building_graphs/#Which-Variables-and-Factors-to-use-1",
     "page": "Building Factor Graphs",
-    "title": "Variables and Factors Available in Caesar",
+    "title": "Which Variables and Factors to use",
+    "category": "section",
+    "text": "See the next page on available variables and factors"
+},
+
+{
+    "location": "concepts/available_varfacs/#",
+    "page": "Available Variables/Factors",
+    "title": "Available Variables/Factors",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/available_varfacs/#Variables-and-Factors-Already-Available-in-Caesar-1",
+    "page": "Available Variables/Factors",
+    "title": "Variables and Factors Already Available in Caesar",
     "category": "section",
     "text": ""
 },
 
 {
-    "location": "concepts/building_graphs/#Variables-Available-in-Caesar-1",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#Variables-Available-in-Caesar-1",
+    "page": "Available Variables/Factors",
     "title": "Variables Available in Caesar",
     "category": "section",
     "text": "You can check for the latest variable types by running the following in your terminal:using RoME, Caesar\nsubtypes(IncrementalInference.InferenceVariable)Note: This has been made available as IncrementalInference.getCurrentWorkspaceVariables() in IncrementalInference v0.4.4.The current list of available variable types is:RoME.Point2 - A 2D coordinate consisting of [x, y, theta]\nRoME.Pose2 - A 2D coordinate and a rotation (i.e. bearing) consisting of [x, y, z, and theta]\nRoME.DynPoint2 - A 2D coordinate and linear velocities\nRoME.DynPose2 - A 2D coordinate, linear velocities, and a rotation\nRoME.Point3 - A 3D coordinate consisting of [x, y, z]\nRoME.Pose3 - A 3D coordinate and 3 associated rotations consisting of [x, y, z, theta, phi, psi]\nRoME.InertialPose3 - A 3D coordinate and rotation pose along with velocity and IMU bias calibration termsNote several more variable and factors types have been implemented which will over time be incorporated into standard RoME release.  Please open an issue with JuliaRobotics/RoME.jl for specific requests, problems, or suggestions.  Contributions are also welcome."
 },
 
 {
-    "location": "concepts/building_graphs/#IncrementalInference.Prior",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#IncrementalInference.Prior",
+    "page": "Available Variables/Factors",
     "title": "IncrementalInference.Prior",
     "category": "type",
     "text": "struct Prior{T} <: FunctorSingleton\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.PriorPoint2",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.PriorPoint2",
+    "page": "Available Variables/Factors",
     "title": "RoME.PriorPoint2",
     "category": "type",
     "text": "mutable struct PriorPoint2{T} <: FunctorSingleton\n\nDirection observation information of a Point2 variable.\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.PriorPose2",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.PriorPose2",
+    "page": "Available Variables/Factors",
     "title": "RoME.PriorPose2",
     "category": "type",
     "text": "mutable struct PriorPose2{T} <: FunctorSingleton\n\nIntroduce direct observations on all dimensions of a Pose2 variable:\n\nExample:\n\nPriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.PriorPolar",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.PriorPolar",
+    "page": "Available Variables/Factors",
     "title": "RoME.PriorPolar",
     "category": "type",
     "text": "mutable struct PriorPolar{T1<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}, T2<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorSingleton\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.PriorPoint3",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.PriorPoint3",
+    "page": "Available Variables/Factors",
     "title": "RoME.PriorPoint3",
     "category": "type",
     "text": "mutable struct PriorPoint3{T} <: FunctorSingleton\n\nDirection observation information of a Point3 variable.\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.PriorPose3",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.PriorPose3",
+    "page": "Available Variables/Factors",
     "title": "RoME.PriorPose3",
     "category": "type",
     "text": "mutable struct PriorPose3 <: FunctorSingleton\n\nDirect observation information of Pose3 variable type.\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.Point2Point2",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.Point2Point2",
+    "page": "Available Variables/Factors",
     "title": "RoME.Point2Point2",
     "category": "type",
     "text": "mutable struct Point2Point2{D<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorPairwise\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.Point2Point2WorldBearing",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.Point2Point2WorldBearing",
+    "page": "Available Variables/Factors",
     "title": "RoME.Point2Point2WorldBearing",
     "category": "type",
     "text": "mutable struct Point2Point2WorldBearing{T} <: FunctorPairwise\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.Pose2Point2Bearing",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.Pose2Point2Bearing",
+    "page": "Available Variables/Factors",
     "title": "RoME.Pose2Point2Bearing",
     "category": "type",
     "text": "mutable struct Pose2Point2Bearing{B<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorPairwiseMinimize\n\nSingle dimension bearing constraint from Pose2 to Point2 variable.\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.Pose2Point2BearingRange",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.Pose2Point2BearingRange",
+    "page": "Available Variables/Factors",
     "title": "RoME.Pose2Point2BearingRange",
     "category": "type",
     "text": "mutable struct Pose2Point2BearingRange{B<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}, R<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorPairwise\n\nBearing and Range constraint from a Pose2 to Point2 variable.\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.Pose2Point2Range",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.Pose2Point2Range",
+    "page": "Available Variables/Factors",
     "title": "RoME.Pose2Point2Range",
     "category": "type",
     "text": "mutable struct Pose2Point2Range{T} <: FunctorPairwise\n\nRange only measurement from Pose2 to Point2 variable.\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.Pose2Pose2",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.Pose2Pose2",
+    "page": "Available Variables/Factors",
     "title": "RoME.Pose2Pose2",
     "category": "type",
     "text": "mutable struct Pose2Pose2{T} <: FunctorPairwise\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.Pose3Pose3",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.Pose3Pose3",
+    "page": "Available Variables/Factors",
     "title": "RoME.Pose3Pose3",
     "category": "type",
     "text": "mutable struct Pose3Pose3 <: FunctorPairwise\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#RoME.InertialPose3",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#RoME.InertialPose3",
+    "page": "Available Variables/Factors",
     "title": "RoME.InertialPose3",
     "category": "type",
     "text": "mutable struct InertialPose3 <: FunctorPairwise\n\nInertial Odometry version of preintegration procedure and used as a factor between InertialPose3 types for inertial navigation in factor graphs.\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/building_graphs/#Factors-Available-in-Caesar-1",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#Factors-Available-in-Caesar-1",
+    "page": "Available Variables/Factors",
     "title": "Factors Available in Caesar",
     "category": "section",
     "text": "You can check for the latest factor types by running the following in your terminal:using RoME, Caesar\nprintln(\"- Singletons (priors): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorSingleton))));\nprintln(\"- Pairwise (variable constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwise))));\nprintln(\"- Pairwise (variable minimization constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:Prior\nPriorPoint2\nPriorPose2\nPriorPolar\nPriorPoint3\nPriorPose3Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:Point2Point2\nPoint2Point2WorldBearing\nPose2Point2Bearing\nPose2Point2BearingRange\nPose2Point2Range\nPose2Pose2\nPose3Pose3\nInertialPose3"
 },
 
 {
-    "location": "concepts/building_graphs/#Extending-Caesar-with-New-Variables-and-Factors-1",
-    "page": "Building Factor Graphs",
+    "location": "concepts/available_varfacs/#Extending-Caesar-with-New-Variables-and-Factors-1",
+    "page": "Available Variables/Factors",
     "title": "Extending Caesar with New Variables and Factors",
     "category": "section",
     "text": "A question that frequently arises is how to design custom variables and factors to solve a specific type of graph. One strength of Caesar is the ability to incorporate new variables and factors at will. Please refer to Adding Factors for more information on creating your own factors."
