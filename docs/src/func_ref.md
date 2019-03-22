@@ -71,6 +71,7 @@ fmcmc!
 getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
 getCliq
+getCliqOrderUpSolve
 getData
 getFactor
 getKDE
@@ -81,6 +82,8 @@ getVariable
 getVertKDE
 getUpMsgs
 getDwnMsgs
+inferOverTree!
+inferOverTreeR!
 initfg
 landmarks
 loadjld
