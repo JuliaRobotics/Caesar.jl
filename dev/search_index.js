@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Future Directions",
     "category": "section",
-    "text": "Many future directions are in the works – including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion.  For example see FAQ: ROS integration."
+    "text": "Many future directions are in the works – including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion."
 },
 
 {
@@ -293,7 +293,7 @@ var documenterSearchIndex = {"docs": [
     "page": "FAQ",
     "title": "ROS Integration",
     "category": "section",
-    "text": "ROS integration is a priority for this project and will accompany the so-called \'prime time\' release of the code.  ROS and ZMQ multi-language integration are closely related.Note the present focus (2018Q3-2019Q2) is on first stabilizing the ZMQ interface.Voice Please add your voice of support or suggestions on ROS integration here."
+    "text": "ROS integration is a priority for this project and will accompany the so-called \'prime time\' release of the code.  ROS and ZMQ interfaces are closely related.Note the present focus (2018Q3-2019Q2) is to stabilize the ZMQ interface.Voice Please add your voice of support or suggestions on ROS integration here."
 },
 
 {
@@ -397,7 +397,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Building Factor Graphs",
     "title": "Factors",
     "category": "section",
-    "text": "Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a prior is defined against x0 with a normal distribution centered around [0,0,0]."
+    "text": "Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a IIF.Prior belief is add to x0 (using the addFactor call) as a normal distribution centered around [0,0,0]."
 },
 
 {
@@ -441,27 +441,107 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "concepts/available_varfacs/#Variables-and-Factors-Already-Available-in-Caesar-1",
+    "location": "concepts/available_varfacs/#IncrementalInference.ContinuousScalar",
     "page": "Available Variables/Factors",
-    "title": "Variables and Factors Already Available in Caesar",
-    "category": "section",
-    "text": ""
-},
-
-{
-    "location": "concepts/available_varfacs/#Variables-Available-in-Caesar-1",
-    "page": "Available Variables/Factors",
-    "title": "Variables Available in Caesar",
-    "category": "section",
-    "text": "You can check for the latest variable types by running the following in your terminal:using RoME, Caesar\nsubtypes(IncrementalInference.InferenceVariable)Note: This has been made available as IncrementalInference.getCurrentWorkspaceVariables() in IncrementalInference v0.4.4.The current list of available variable types is:RoME.Point2 - A 2D coordinate consisting of [x, y, theta]\nRoME.Pose2 - A 2D coordinate and a rotation (i.e. bearing) consisting of [x, y, z, and theta]\nRoME.DynPoint2 - A 2D coordinate and linear velocities\nRoME.DynPose2 - A 2D coordinate, linear velocities, and a rotation\nRoME.Point3 - A 3D coordinate consisting of [x, y, z]\nRoME.Pose3 - A 3D coordinate and 3 associated rotations consisting of [x, y, z, theta, phi, psi]\nRoME.InertialPose3 - A 3D coordinate and rotation pose along with velocity and IMU bias calibration termsNote several more variable and factors types have been implemented which will over time be incorporated into standard RoME release.  Please open an issue with JuliaRobotics/RoME.jl for specific requests, problems, or suggestions.  Contributions are also welcome."
-},
-
-{
-    "location": "concepts/available_varfacs/#IncrementalInference.Prior",
-    "page": "Available Variables/Factors",
-    "title": "IncrementalInference.Prior",
+    "title": "IncrementalInference.ContinuousScalar",
     "category": "type",
-    "text": "struct Prior{T} <: FunctorSingleton\n\n\n\n\n\n"
+    "text": "struct ContinuousScalar <: InferenceVariable\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#IncrementalInference.ContinuousMultivariate",
+    "page": "Available Variables/Factors",
+    "title": "IncrementalInference.ContinuousMultivariate",
+    "category": "type",
+    "text": "struct ContinuousMultivariate{T1<:Tuple} <: InferenceVariable\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#Variables-in-Caesar.jl-1",
+    "page": "Available Variables/Factors",
+    "title": "Variables in Caesar.jl",
+    "category": "section",
+    "text": "You can check for the latest variable types by running the following in your terminal:using RoME, Caesar\nsubtypes(IncrementalInference.InferenceVariable)\nIncrementalInference.getCurrentWorkspaceVariables()Default variables in IncrementalInferenceContinuousScalar\nContinuousMultivariate"
+},
+
+{
+    "location": "concepts/available_varfacs/#RoME.Point2",
+    "page": "Available Variables/Factors",
+    "title": "RoME.Point2",
+    "category": "type",
+    "text": "struct Point2 <: InferenceVariable\n\nXY Euclidean manifold variable node softtype.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#RoME.Pose2",
+    "page": "Available Variables/Factors",
+    "title": "RoME.Pose2",
+    "category": "type",
+    "text": "struct Pose2 <: InferenceVariable\n\nPose2 is a SE(2) mechanization of two Euclidean translations and one Circular rotation, used for general 2D SLAM.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#RoME.DynPoint2",
+    "page": "Available Variables/Factors",
+    "title": "RoME.DynPoint2",
+    "category": "type",
+    "text": "mutable struct DynPoint2 <: InferenceVariable\n\nDynamic point in 2D space with velocity components: x, y, dx/dt, dy/dt\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#RoME.DynPose2",
+    "page": "Available Variables/Factors",
+    "title": "RoME.DynPose2",
+    "category": "type",
+    "text": "mutable struct DynPose2 <: InferenceVariable\n\nDynamic pose variable with velocity components: x, y, theta, dx/dt, dy/dt\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#D-Variables-1",
+    "page": "Available Variables/Factors",
+    "title": "2D Variables",
+    "category": "section",
+    "text": "The current variables types are:Point2\nPose2\nDynPoint2\nDynPose2"
+},
+
+{
+    "location": "concepts/available_varfacs/#RoME.Point3",
+    "page": "Available Variables/Factors",
+    "title": "RoME.Point3",
+    "category": "type",
+    "text": "struct Point3 <: InferenceVariable\n\nXYZ Euclidean manifold variable node softtype.\n\nExample\n\np3 = Point3()\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#RoME.Pose3",
+    "page": "Available Variables/Factors",
+    "title": "RoME.Pose3",
+    "category": "type",
+    "text": "struct Pose3 <: InferenceVariable\n\nPose3 is currently a Euler angle mechanization of three Euclidean translations and three Circular rotation.\n\nFuture:\n\nWork in progress on AMP3D for proper non-Euler angle on-manifold operations.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#RoME.InertialPose3",
+    "page": "Available Variables/Factors",
+    "title": "RoME.InertialPose3",
+    "category": "type",
+    "text": "mutable struct InertialPose3 <: FunctorPairwise\n\nInertial Odometry version of preintegration procedure and used as a factor between InertialPose3 types for inertial navigation in factor graphs.\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#D-Variables-2",
+    "page": "Available Variables/Factors",
+    "title": "3D Variables",
+    "category": "section",
+    "text": "Point3\nPose3\nInertialPose3Note Please open an issue with JuliaRobotics/RoME.jl for specific requests, problems, or suggestions.  Contributions are also welcome.Note There might be more variable types in Caesar/RoME/IIF not yet documented here."
+},
+
+{
+    "location": "concepts/available_varfacs/#Factors-in-Caesar.jl-1",
+    "page": "Available Variables/Factors",
+    "title": "Factors in Caesar.jl",
+    "category": "section",
+    "text": "You can check for the latest factor types by running the following in your terminal:using RoME, Caesar\nprintln(\"- Singletons (priors): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorSingleton))));\nprintln(\"- Pairwise (variable constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwise))));\nprintln(\"- Pairwise (variable minimization constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));"
 },
 
 {
@@ -505,75 +585,59 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "concepts/available_varfacs/#RoME.Point2Point2",
+    "location": "concepts/available_varfacs/#IncrementalInference.Prior",
     "page": "Available Variables/Factors",
-    "title": "RoME.Point2Point2",
+    "title": "IncrementalInference.Prior",
     "category": "type",
-    "text": "mutable struct Point2Point2{D<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorPairwise\n\n\n\n\n\n"
+    "text": "struct Prior{T} <: FunctorSingleton\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/available_varfacs/#RoME.Point2Point2WorldBearing",
+    "location": "concepts/available_varfacs/#IncrementalInference.PartialPrior",
     "page": "Available Variables/Factors",
-    "title": "RoME.Point2Point2WorldBearing",
+    "title": "IncrementalInference.PartialPrior",
     "category": "type",
-    "text": "mutable struct Point2Point2WorldBearing{T} <: FunctorPairwise\n\n\n\n\n\n"
+    "text": "struct PartialPrior{T, P} <: FunctorSingleton\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/available_varfacs/#RoME.Pose2Point2Bearing",
+    "location": "concepts/available_varfacs/#IncrementalInference.MixturePrior",
     "page": "Available Variables/Factors",
-    "title": "RoME.Pose2Point2Bearing",
+    "title": "IncrementalInference.MixturePrior",
     "category": "type",
-    "text": "mutable struct Pose2Point2Bearing{B<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorPairwiseMinimize\n\nSingle dimension bearing constraint from Pose2 to Point2 variable.\n\n\n\n\n\n"
+    "text": "struct MixturePrior{T} <: FunctorSingleton\n\n\n\n\n\n"
 },
 
 {
-    "location": "concepts/available_varfacs/#RoME.Pose2Point2BearingRange",
+    "location": "concepts/available_varfacs/#Priors-(Absolute-Data)-1",
     "page": "Available Variables/Factors",
-    "title": "RoME.Pose2Point2BearingRange",
-    "category": "type",
-    "text": "mutable struct Pose2Point2BearingRange{B<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}, R<:Union{AliasingScalarSampler, BallTreeDensity, Distribution}} <: FunctorPairwise\n\nBearing and Range constraint from a Pose2 to Point2 variable.\n\n\n\n\n\n"
-},
-
-{
-    "location": "concepts/available_varfacs/#RoME.Pose2Point2Range",
-    "page": "Available Variables/Factors",
-    "title": "RoME.Pose2Point2Range",
-    "category": "type",
-    "text": "mutable struct Pose2Point2Range{T} <: FunctorPairwise\n\nRange only measurement from Pose2 to Point2 variable.\n\n\n\n\n\n"
-},
-
-{
-    "location": "concepts/available_varfacs/#RoME.Pose2Pose2",
-    "page": "Available Variables/Factors",
-    "title": "RoME.Pose2Pose2",
-    "category": "type",
-    "text": "mutable struct Pose2Pose2{T} <: FunctorPairwise\n\n\n\n\n\n"
-},
-
-{
-    "location": "concepts/available_varfacs/#RoME.Pose3Pose3",
-    "page": "Available Variables/Factors",
-    "title": "RoME.Pose3Pose3",
-    "category": "type",
-    "text": "mutable struct Pose3Pose3 <: FunctorPairwise\n\n\n\n\n\n"
-},
-
-{
-    "location": "concepts/available_varfacs/#RoME.InertialPose3",
-    "page": "Available Variables/Factors",
-    "title": "RoME.InertialPose3",
-    "category": "type",
-    "text": "mutable struct InertialPose3 <: FunctorPairwise\n\nInertial Odometry version of preintegration procedure and used as a factor between InertialPose3 types for inertial navigation in factor graphs.\n\n\n\n\n\n"
-},
-
-{
-    "location": "concepts/available_varfacs/#Factors-Available-in-Caesar-1",
-    "page": "Available Variables/Factors",
-    "title": "Factors Available in Caesar",
+    "title": "Priors (Absolute Data)",
     "category": "section",
-    "text": "You can check for the latest factor types by running the following in your terminal:using RoME, Caesar\nprintln(\"- Singletons (priors): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorSingleton))));\nprintln(\"- Pairwise (variable constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwise))));\nprintln(\"- Pairwise (variable minimization constraints): \")\nprintln.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:Prior\nPriorPoint2\nPriorPose2\nPriorPolar\nPriorPoint3\nPriorPose3Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:Point2Point2\nPoint2Point2WorldBearing\nPose2Point2Bearing\nPose2Point2BearingRange\nPose2Point2Range\nPose2Pose2\nPose3Pose3\nInertialPose3"
+    "text": "Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:PriorPoint2\nPriorPose2\nPriorPolar\nPriorPoint3\nPriorPose3Defaults in IncrementalInference.jl:Prior\nPartialPrior\nMixturePrior"
+},
+
+{
+    "location": "concepts/available_varfacs/#IncrementalInference.LinearConditional",
+    "page": "Available Variables/Factors",
+    "title": "IncrementalInference.LinearConditional",
+    "category": "type",
+    "text": "struct LinearConditional{T} <: FunctorPairwise\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#IncrementalInference.MixtureLinearConditional",
+    "page": "Available Variables/Factors",
+    "title": "IncrementalInference.MixtureLinearConditional",
+    "category": "type",
+    "text": "struct MixtureLinearConditional{T} <: FunctorPairwise\n\n\n\n\n\n"
+},
+
+{
+    "location": "concepts/available_varfacs/#Conditional-Likelihoods-(Relative-Data)-1",
+    "page": "Available Variables/Factors",
+    "title": "Conditional Likelihoods (Relative Data)",
+    "category": "section",
+    "text": "Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:Point2Point2\nPoint2Point2WorldBearing\nPose2Point2Bearing\nPose2Point2BearingRange\nPose2Point2Range\nPose2Pose2\nDynPoint2VelocityPrior\nDynPoint2DynPoint2\nVelPoint2VelPoint2\nPoint2Point2Velocity\nDynPose2VelocityPrior\nVelPose2VelPose2\nDynPose2Pose2\nPose3Pose3\nInertialPose3Defaults in IncrementalInference.jl:LinearConditional\nMixtureLinearConditional"
 },
 
 {
@@ -1493,7 +1557,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.appendvertbigdata!",
     "category": "function",
-    "text": "appendvertbigdata!(cloudGraph, cv, description, data)\n\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fgl, vert, description, data)\n\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fg, sym, descr, data)\n\nAppend big data element into current blob store using parent appendvertbigdata!, but here specified by symbol of variable node in the FactorGraph. Note the default data layer api definition. User must define dlapi to refetching the  vertex from the data layer. localapi avoids repeated network database fetches.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nTYPEDSIGNATURES\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fg, sym, descr, data)\n\nAppend big data element into current blob store using parent appendvertbigdata!, but here specified by symbol of variable node in the FactorGraph. Note the default data layer api definition. User must define dlapi to refetching the  vertex from the data layer. localapi avoids repeated network database fetches.\n\n\n\n\n\n"
 },
 
 {
@@ -1501,7 +1565,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.consoleaskuserfordb",
     "category": "function",
-    "text": "consoleaskuserfordb(; nparticles, drawdepth, clearslamindb, multisession, drawedges)\n\n\nObtain database addresses and login credientials from STDIN, as well as a few case dependent options.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nObtain database addresses and login credientials from STDIN, as well as a few case dependent options.\n\n\n\n\n\n"
 },
 
 {
@@ -1517,7 +1581,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.executeQuery",
     "category": "function",
-    "text": "executeQuery(connection, query)\n\n\nRun Neo4j Cypher queries on the cloudGraph database, and return Tuple with the unparsed (results, loadresponse). Throws an error if the query fails.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nRun Neo4j Cypher queries on the cloudGraph database, and return Tuple with the unparsed (results, loadresponse). Throws an error if the query fails.\n\n\n\n\n\n"
 },
 
 {
@@ -1557,7 +1621,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.getBigDataElement",
     "category": "function",
-    "text": "getBigDataElement(vertex, description)\n\n\nWalk through vertex bigDataElements and return the last matching description.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nWalk through vertex bigDataElements and return the last matching description.\n\n\n\n\n\n"
 },
 
 {
@@ -1565,7 +1629,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.getExVertexNeoIDs",
     "category": "function",
-    "text": "getExVertexNeoIDs(conn; label, ready, backendset, session, robot, user, reqbackendset)\n\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.\n\n\n\n\n\n"
 },
 
 {
@@ -1589,7 +1653,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.getPoseExVertexNeoIDs",
     "category": "function",
-    "text": "getPoseExVertexNeoIDs(conn; ready, backendset, session, reqbackendset)\n\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for all poses.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for all poses.\n\n\n\n\n\n"
 },
 
 {
@@ -1629,7 +1693,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.hasBigDataElement",
     "category": "function",
-    "text": "hasBigDataElement(vertex, description)\n\n\nReturn true if vertex has bigDataElements with matching description.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nReturn true if vertex has bigDataElements with matching description.\n\n\n\n\n\n"
 },
 
 {
@@ -1669,7 +1733,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.standardcloudgraphsetup",
     "category": "function",
-    "text": "standardcloudgraphsetup(; addrdict, nparticles, drawdepth, drawedges, clearslamindb, multisession)\n\n\nConnect to databases via network according to addrdict, or ask user for credentials and return active cloudGraph object, as well as addrdict.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nConnect to databases via network according to addrdict, or ask user for credentials and return active cloudGraph object, as well as addrdict.\n\n\n\n\n\n"
 },
 
 {
@@ -1685,7 +1749,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.whosNear2D",
     "category": "function",
-    "text": "whosNear2D(cg, session, robot, user; x, y, yaw, dist, angle)\n\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
 },
 
 {
@@ -1693,7 +1757,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.whosNear3D",
     "category": "function",
-    "text": "whosNear3D(cg, session, robot, user; x, y, z, roll, pitch, yaw, dist, angle)\n\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
+    "text": "TYPEDSIGNATURES\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
 },
 
 {
@@ -2029,7 +2093,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
+    "text": "ls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nTYPEDSIGNATURES\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
 },
 
 {
