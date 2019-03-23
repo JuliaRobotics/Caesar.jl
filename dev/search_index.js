@@ -37,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Caesar Core",
     "category": "section",
-    "text": "Caesar is implemented in Julia (and JuliaPro) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.Caesar.jl is the \"umbrella\" framework that depends on and supports various dedicated purpose packages.Why Julia: The implementation language of choice is Julia (but not limited to), for a wide variety of reasons such as agile development along side modern, high speed, type safe, multi-processor, JIT-dynamic, cross compiling (gcc and clang) and cross-platform technologies – also see JuliaCon2018 highlights video.  Julia can be thought of as either {C+, Mex (done right), or a Fortran replacement}.  The Caesar.jl project is expressly focussed on making this algorithmic code available to C/C++/C#/Python/Java/JS/ applications through a variety of interfaces described below.  Please open issues or get in touch for more information about interops."
+    "text": "Caesar is implemented in Julia (and JuliaPro) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.Caesar.jl is the \"umbrella\" framework that depends on and supports various dedicated purpose packages.FAQ: Why use Julia?FAQ: Interop with other languages"
 },
 
 {
@@ -246,6 +246,30 @@ var documenterSearchIndex = {"docs": [
     "title": "Frequently Asked Questions",
     "category": "section",
     "text": ""
+},
+
+{
+    "location": "faq/#Why-Julia-1",
+    "page": "FAQ",
+    "title": "Why Julia",
+    "category": "section",
+    "text": "The implementation language of choice is Julia for a wide variety of reasons, such as agile development along side modern, high speed, type safe, multi-processor, JIT-dynamic, cross compiling (gcc and clang) and cross-platform technologies – also see JuliaCon2018 highlights video.  Julia can be thought of as either {C+, Mex (done right), or a Fortran replacement}.  "
+},
+
+{
+    "location": "faq/#Is-Caesar.jl-limited-to-Julia?-No.-1",
+    "page": "FAQ",
+    "title": "Is Caesar.jl limited to Julia? No.",
+    "category": "section",
+    "text": "The Caesar.jl project is expressly focused on making this algorithmic code available to C/Fortran/C++/C#/Python/Java/JS.  Julia itself offers many additional interops.  ZMQ and HTTP/WebSockets are the standardized interfaces of choice, please see details at the multi-language section).  Consider opening issues or getting in touch for more information."
+},
+
+{
+    "location": "faq/#Can-Julia-be-Embedded-from-C/C-1",
+    "page": "FAQ",
+    "title": "Can Julia be Embedded from C/C++",
+    "category": "section",
+    "text": "Yes, see the Julia embedding documentation page."
 },
 
 {
@@ -1653,7 +1677,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
@@ -1973,7 +1997,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\nls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\n"
+    "text": "ls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl, session, robot, user; sym, neoid, exvid)\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
 },
 
 {
