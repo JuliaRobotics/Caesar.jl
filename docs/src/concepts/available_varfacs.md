@@ -77,6 +77,13 @@ Pose2Point2Bearing
 Pose2Point2BearingRange
 Pose2Point2Range
 Pose2Pose2
+DynPoint2VelocityPrior
+DynPoint2DynPoint2
+VelPoint2VelPoint2
+Point2Point2Velocity
+DynPose2VelocityPrior
+VelPose2VelPose2
+DynPose2Pose2
 Pose3Pose3
 InertialPose3
 ```
