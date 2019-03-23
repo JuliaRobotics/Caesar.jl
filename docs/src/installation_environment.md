@@ -94,7 +94,7 @@ user@...$ julia -e "println(\"...testing...\")"
 > **Note**: When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.
 For example, search for 'julialang workflow tips' or 'julialang performance tips'.
 
-> **Note** see [FAQ - Why are first runs slow?](faq.md), because of just of Just-In-Time/Pre compiling and caching.
+> **Note** see [FAQ - Why are first runs slow?](faq), because of just of Just-In-Time/Pre compiling and caching.
 
 ## Setup Juno IDE Environment
 
