@@ -59,7 +59,7 @@ Yes, but not yet.  See:
 
 ## Static, Shared Object `.so` Compilation
 
-> [FAQ: Static, Shared Object `.so` Compilation](faq/#Static-Shared-Object-.so-Compilation)
+> [FAQ: Static, Shared Object `.so` Compilation](../../faq/#Static-Shared-Object-.so-Compilation)
 
 The future planning for the `Caesar.jl` framework and the mm-iSAM inference algorithm is to use the package: https://github.com/JuliaLang/PackageCompiler.jl so that linkable `.so` files or even full executables can be compiled.  Please add your comments to [this issue discussion](https://github.com/JuliaRobotics/Caesar.jl/issues/210).
 
