@@ -13,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Introduction",
     "category": "section",
-    "text": "Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar attempts to address a number of issues that arise in normal SLAM solutions - solving under-defined systems, inference with non-Gaussian measurement distributions, simplifying factor creation, and centralizing factor-graph persistence with databases. Caesar started as part of the thesis \"Multi-modal and Inertial Sensor Solutions for Navigation-type Factor Graphs\" [1]."
+    "text": "Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar attempts to address a number of issues that arise in normal SLAM solutions - solving under-defined systems, inference with non-Gaussian measurement distributions, simplifying factor creation, and centralizing factor-graph persistence with databases. Caesar started as part of the thesis \"Multi-modal and Inertial Sensor Solutions for Navigation-type Factor Graphs\" [1.2]."
 },
 
 {
@@ -25,33 +25,33 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "#Caesar-Framework-1",
+    "location": "#The-Caesar-Framework-1",
     "page": "Home",
-    "title": "Caesar Framework",
+    "title": "The Caesar Framework",
     "category": "section",
     "text": ""
 },
 
 {
-    "location": "#Caesar-Core-1",
+    "location": "#Caesar-1",
     "page": "Home",
-    "title": "Caesar Core",
+    "title": "Caesar",
     "category": "section",
-    "text": "Caesar is implemented in Julia (and JuliaPro) for a fast, flexible, dynamic and productive robot designer experience. This framework maintains good interoperability with other languages as listed in features below.Caesar.jl is the \"umbrella\" framework that depends on and supports various dedicated purpose packages.FAQ: Why use Julia?FAQ: Interop with other languages"
+    "text": "Caesar.jl is the \"umbrella\" framework for other dedicated algorithmic/supporting packages that are implemented in Julia (and JuliaPro).FAQ: Why use Julia?FAQ: Interop with other languages"
 },
 
 {
-    "location": "#Caesar-Core-Packages-1",
+    "location": "#RoME.jl/IncrementalInference.jl/ApproxManifoldProducts.jl-1",
     "page": "Home",
-    "title": "Caesar Core Packages",
+    "title": "RoME.jl/IncrementalInference.jl/ApproxManifoldProducts.jl",
     "category": "section",
-    "text": "Critically, this package can operate in the conventional SLAM manner, using local memory (dictionaries), or alternatively distribute around a persisted FactorGraph through a graph database using CloudGraphs.jl, as discussed in literature here [2]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate RoME.jl and back-end solver IncrementalInference.jl.Details about the accompanying packages:IncrementalInference.jl supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself.\nRoME.jl introduces nodes and factors that are useful to robotic navigation."
+    "text": "Critically, this package can operate in the conventional SLAM manner, using local memory (dictionaries), or alternatively distribute around a persisted FactorGraph through a graph database using CloudGraphs.jl, as discussed in literature here [1.3]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate RoME.jl and back-end solver IncrementalInference.jl.Details about the accompanying packages:IncrementalInference.jl supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself.\nRoME.jl introduces nodes and factors that are useful to robotic navigation."
 },
 
 {
-    "location": "#Visualization-1",
+    "location": "#Visualization-(Arena.jl/RoMEPlotting.jl)-1",
     "page": "Home",
-    "title": "Visualization",
+    "title": "Visualization (Arena.jl/RoMEPlotting.jl)",
     "category": "section",
     "text": "Caesar visualization (plotting of results, graphs, and data) is provided by 2D and 3D packages respectively:RoMEPlotting.jl are a set of scripts that provide MATLAB style plotting of factor graph beliefs, mostly supporting 2D visualization with some support for projections of 3D;\nArena.jl package, which is a collection of 3D visualization tools."
 },
@@ -61,15 +61,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Multilanguage Interops: Caesar SDKs and APIs",
     "category": "section",
-    "text": "The Caesar framework is not limited to direct Julia use. The following Github projects provide access to features of Caesar in their language:Julia Web interface:\nGraffSDK.jl\nC/C++:\nGraff Cpp\nCaesar LCM\nPython:\nSynchronySDKContributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below)."
+    "text": "The Caesar framework is not limited to direct Julia use.  See the multi-language page for details.Also see Frequently Asked Questions for more."
 },
 
 {
-    "location": "#Features-1",
+    "location": "#A-Few-Highlights-1",
     "page": "Home",
-    "title": "Features",
+    "title": "A Few Highlights",
     "category": "section",
-    "text": "The Caesar framework has the following features:Factor-graph representation of pose and sensor data\nLocalization using Multi-modal iSAM\nMulti-core inference supporting Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc\nMulti-modal and non-parametric representation of constraints\nGaussian distributions are but one of the many representations of measurement error\nSimple, extensible framework for creation of new factor types\nMulti-hypothesis representation in the factor-graph\nLocal in-memory solving on the device as well as database-driven centralized solving\nFixed-lag, continuous operation as well as off-line batch solving"
+    "text": "Work In Progress: (must be updated, 2019Q1)The Caesar framework has the following features:Factor-graph representation of pose and sensor data\nLocalization using Multi-modal iSAM\nMulti-core inference supporting Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc\nMulti-modal and non-parametric representation of constraints\nGaussian distributions are but one of the many representations of measurement error\nSimple, extensible framework for creation of new factor types\nMulti-hypothesis representation in the factor-graph\nLocal in-memory solving on the device as well as database-driven centralized solving\nFixed-lag, continuous operation as well as off-line batch solving"
 },
 
 {
@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Future Directions",
     "category": "section",
-    "text": "Many future directions are in the works – including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion.  For example see ROS integration page here."
+    "text": "Many future directions are in the works – including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion.  For example see FAQ: ROS integration."
 },
 
 {
@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Contributors",
     "category": "section",
-    "text": "We are grateful for many, many contributions within the Julia package ecosystem – see the REQUIRE files of Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs and others for a far reaching list of contributions.Consider citing our work:@misc{caesarjl,\n  author = \"Caesar.jl Contributors\",\n  title =  \"Caesar.jl\",\n  year =   2018,\n  url =    \"https://github.com/JuliaRobotics/Caesar.jl\"\n}Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently conducted by Dehann Fourie who can be contacted for more details."
+    "text": "We are grateful for many, many contributions within the Julia package ecosystem – see the REQUIRE files of Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs and others for a far reaching list of contributions.Consider citing our work:@misc{caesarjl,\n  author = \"Contributors\",\n  title =  \"Caesar.jl\",\n  year =   2019,\n  url =    \"https://github.com/JuliaRobotics/Caesar.jl\"\n}Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently conducted by Dehann Fourie who can be contacted for more details."
 },
 
 {
@@ -253,7 +253,7 @@ var documenterSearchIndex = {"docs": [
     "page": "FAQ",
     "title": "Why Julia",
     "category": "section",
-    "text": "The implementation language of choice is Julia for a wide variety of reasons, such as agile development along side modern, high speed, type safe, multi-processor, JIT-dynamic, cross compiling (gcc and clang) and cross-platform technologies – also see JuliaCon2018 highlights video.  Julia can be thought of as either {C+, Mex (done right), or a Fortran replacement}.  "
+    "text": "The JuliaLang and (JuliaPro) is an open-source Just-In-Time (JIT) & optionally precompiled, strongly-typed, and high-performance programming language. The algorithmic code is implemented in Julia for many reasons, such as agile development, high level syntax, performance, type safety, parallel computing, dynamic development, cross compilable (with gcc and clang) and foundational cross-platform (LLVM) technologies.   See JuliaCon2018 highlights video.  Julia can be thought of as either {C+, Mex (done right), or as a modern Fortran replacement}.  "
 },
 
 {
@@ -265,9 +265,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "faq/#Can-Julia-be-Embedded-from-C/C-1",
+    "location": "faq/#Can-Julia-be-Embedded-into-C/C-1",
     "page": "FAQ",
-    "title": "Can Julia be Embedded from C/C++",
+    "title": "Can Julia be Embedded into C/C++",
     "category": "section",
     "text": "Yes, see the Julia embedding documentation page."
 },
@@ -277,7 +277,23 @@ var documenterSearchIndex = {"docs": [
     "page": "FAQ",
     "title": "Just-In-Time Compiling (i.e. why are first runs slow?)",
     "category": "section",
-    "text": "Julia uses just-in-time compilation (unless pre-compiled)  which is slow the first time a function is called but fast from the second call onwards, since the static function is now cached and ready for use."
+    "text": "Julia uses just-in-time compilation (unless already pre-compiled)  which takes additional time the first time a new function is called. Additional calls to a function is fast from the second call onwards since the static function is now cached and ready for use."
+},
+
+{
+    "location": "faq/#Static,-Shared-Object-.so-Compilation-1",
+    "page": "FAQ",
+    "title": "Static, Shared Object .so Compilation",
+    "category": "section",
+    "text": "Packages are already compiled to static objects (.ji files), but can also be compiled to more common .so files.  See this AOT vs JIT compiling blog post for a deeper discussion.  Also see this Julia Binaries Blog.Note recent developments announced on discourse."
+},
+
+{
+    "location": "faq/#ROS-Integration-1",
+    "page": "FAQ",
+    "title": "ROS Integration",
+    "category": "section",
+    "text": "ROS integration is a priority for this project and will accompany the so-called \'prime time\' release of the code.  ROS and ZMQ multi-language integration are closely related.Note the present focus (2018Q3-2019Q2) is on first stabilizing the ZMQ interface.Voice Please add your voice of support or suggestions on ROS integration here."
 },
 
 {
@@ -633,40 +649,32 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "concepts/database_interactions/#",
-    "page": "Using Caesar Database Operation",
-    "title": "Using Caesar Database Operation",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "concepts/database_interactions/#Common-Data-Persistence-and-Inference-1",
-    "page": "Using Caesar Database Operation",
-    "title": "Common Data Persistence and Inference",
-    "category": "section",
-    "text": "See work GraffSDK.jl."
-},
-
-{
     "location": "concepts/multilang/#",
-    "page": "Using Caesar\'s Multi-Language Support",
-    "title": "Using Caesar\'s Multi-Language Support",
+    "page": "Multi-Language Support",
+    "title": "Multi-Language Support",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "concepts/multilang/#Multi-Language-and-Shared-Objects-1",
-    "page": "Using Caesar\'s Multi-Language Support",
+    "page": "Multi-Language Support",
     "title": "Multi-Language and Shared Objects",
     "category": "section",
     "text": ""
 },
 
 {
+    "location": "concepts/multilang/#Multilanguage-Interops:-Caesar-SDKs-and-APIs-1",
+    "page": "Multi-Language Support",
+    "title": "Multilanguage Interops: Caesar SDKs and APIs",
+    "category": "section",
+    "text": "The Caesar framework is not limited to direct Julia use. The following Github projects provide access to features of Caesar in their language:Julia Web interface:\nGraffSDK.jl\nZMQ Interface\nC/C++:\nGraff Cpp\nCaesar LCM\nPython:\nSynchronySDKContributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below)."
+},
+
+{
     "location": "concepts/multilang/#ZMQ-Messaging-Interface-1",
-    "page": "Using Caesar\'s Multi-Language Support",
+    "page": "Multi-Language Support",
     "title": "ZMQ Messaging Interface",
     "category": "section",
     "text": "Caesar.jl has a ZMQ messaging interface (interested can see code here  here) that allows users to interact with the solver code base in a variety of ways.  The messaging interface is not meant to replace static .so library file compilation–see below–-but rather a more versatile and flexible development strategy.The current known interface implementations to Caesar.jl are:C/C++ GraffCPP,\nPython SychronySDK (needs to be updated),"
@@ -674,7 +682,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "concepts/multilang/#Starting-the-Caesar-ZMQ-Navigation-Server-1",
-    "page": "Using Caesar\'s Multi-Language Support",
+    "page": "Multi-Language Support",
     "title": "Starting the Caesar ZMQ Navigation Server",
     "category": "section",
     "text": "Start the Caesar.ZmqCaesar server in a Julia session with a few process cores:julia -p 4Then run the following commands, and note these steps have also been scripted here:#import the required modules\nusing Caesar, Caesar.ZmqCaesar\n\n# create empty factor graph and config objects\nfg = Caesar.initfg()\nconfig = Dict{String, String}()\nzmqConfig = ZmqServer(fg, config, true, \"tcp://*:5555\");\n\n# Start the server over ZMQ\nstart(zmqConfig)\n\n# give the server a minute to start up ...The current tests are a good place to see some examples of the current interfacing functions.TODO: expand the ZMQ documentation"
@@ -682,66 +690,26 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "concepts/multilang/#ROS-Integration-1",
-    "page": "Using Caesar\'s Multi-Language Support",
+    "page": "Multi-Language Support",
     "title": "ROS Integration",
     "category": "section",
-    "text": "Please add your voice of support or suggestions on ROS integration here.Note ROS integration is a priority for this project, and will accompany the so-called \'prime time\' release of the code.  ROS and ZMQ integration are closely related, while the present focus (2018Q3-2019Q2) is on first developing our own ZMQ messaging interface as discussed above."
+    "text": "Yes, but not yet.  See:FAQ: ROS Integration"
 },
 
 {
     "location": "concepts/multilang/#Static,-Shared-Object-.so-Compilation-1",
-    "page": "Using Caesar\'s Multi-Language Support",
+    "page": "Multi-Language Support",
     "title": "Static, Shared Object .so Compilation",
     "category": "section",
-    "text": "The Julia language is a (Just-In-Time / Precompiled) static and strongly typed language.  Modules are already naturally compiled to static objects and can also be compiled to more common .so files.  See this AOT vs JIT compiling blog post for a deeper discussion.  Also see this Julia Binaries Blog.The future planning for the Caesar.jl framework and the mm-iSAM inference algorithm plans to use the package: https://github.com/JuliaLang/PackageCompiler.jl so that linkable .so files or even full executables can be compiled.  Please add your comments to this issue discussion.Note recent developments announced on discourse."
+    "text": "FAQ: Static, Shared Object .so CompilationThe future planning for the Caesar.jl framework and the mm-iSAM inference algorithm is to use the package: https://github.com/JuliaLang/PackageCompiler.jl so that linkable .so files or even full executables can be compiled.  Please add your comments to this issue discussion."
 },
 
 {
     "location": "concepts/multilang/#Alternative-Methods-1",
-    "page": "Using Caesar\'s Multi-Language Support",
+    "page": "Multi-Language Support",
     "title": "Alternative Methods",
     "category": "section",
     "text": "Interfacing from languages like Python may also be achieved using PyCall.jl although little work has been done in the Caesar.jl framework to explore this path.  Julia is itself interactive/dynamic and has plenty of line-by-line and Integrated Development Environment support – consider trying Julia for your application."
-},
-
-{
-    "location": "concepts/multisession/#",
-    "page": "Multisession and Cross-Session Solving",
-    "title": "Multisession and Cross-Session Solving",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "concepts/multisession/#Multisession-Operation-1",
-    "page": "Multisession and Cross-Session Solving",
-    "title": "Multisession Operation",
-    "category": "section",
-    "text": "Having all the data consolidated in a factor graph allows us to do something we find really exciting: reason against data for different robots, different robot sessions, even different users. Of course, this is all optional, and must be explicitly configured, but if enabled, current inference solutions can make use of historical data to continually improve their solutions.Consider a single robot working in a common environment that has driven around the same area a number of times and has identified a landmark that is (probably) the same. We can automatically close the loop and use the information from the prior data to improve our current solution. This is called a multisession solve.To perform a multisession solve, you need to specify that a session is part of a common environment, e.g \'lab\'. A user then requests a multisession solve (manually for the moment), and this creates relationships between common landmarks. The collective information is used to produce a consensus on the shared landmarks. A chain of session solves is then created, and the information is propagated into the individual sessions, improving their results."
-},
-
-{
-    "location": "concepts/multisession/#Steps-in-Multisession-Solve-1",
-    "page": "Multisession and Cross-Session Solving",
-    "title": "Steps in Multisession Solve",
-    "category": "section",
-    "text": "The following steps are performed by the user:Indicate which sessions are part of a common environment - this is done via GraffSDK when the session is created\nRequest a multisession solveUpon request, the solver performs the following actions:Updates the common existing multisession landmarks with any new information (propagation from session to common information)\nBuilds common landmarks for any new sessions or updated data\nSolves the common, multisession graph\nPropagates the common consensus result to the individual sessions\nFreezes all the session landmarks so that the session solving does not update the consensus result\nRequests session solves for all the updated sessionsNote the current approach is well positioned to transition to the \"Federated Bayes (Junction) Tree\" multisession solving method, and will be updated accordingly in due coarse.  The Federated method will allow faster multi-session solving times by avoiding the current iterated approach."
-},
-
-{
-    "location": "concepts/multisession/#Example-1",
-    "page": "Multisession and Cross-Session Solving",
-    "title": "Example",
-    "category": "section",
-    "text": "Consider three sessions which exist in the same, shared environment. In this environment, during each session the robot identified the same l0 landmark, as shown in the below figure. (Image: Independent Sessions)If we examine this in terms of the estimates of the actual landmarks, we have three independent densities (blue, green, and orange) giving measures of l0 located at (20, 0):(Image: Independent densities)Now we trigger a multisession solve. For each landmark that is seen in multiple session, we produce a common landmark (we call a prime landmark) and link it to the session landmarks via factors - all denoted in black outline.(Image: Linked landmarks)A multisession solve is performed, which for each common (prime) landmark, we produce a common estimate. In terms of densities, this is a single answer for the disparate information, as shown in red in the below figure (for a slightly different dataset):(Image: Prime density)This information is then propagated back to the individual session landmarks, giving one common density for each landmark. As above, our green, blue, and orange individual densities are now all updated to match the consensus shown in black:(Image: Prime density)The session landmarks are then frozen, and individual session solves are triggered to propagate the information back into the sessions.  Until the federated upgrade is completed, the above process is iterated a few times to allow information to cross propagate through all sessions.  There federated tree solution requires only a single iteration up and down the federated Bayes (Junction) tree. "
-},
-
-{
-    "location": "concepts/multisession/#Next-Steps-1",
-    "page": "Multisession and Cross-Session Solving",
-    "title": "Next Steps",
-    "category": "section",
-    "text": "This provides an initial implementation for stitching data from multiple sessions, robots, and users. In the short term, we may trigger this automatically for any shared environments.  Multisession solving along with other automated techniques for additional measurement discovery in data allows the system to \'dream\' – i.e. reducing succint info from the large volumes of heterogenous sensor data.In the medium future we will extend this functionality to operate in the Bayes tree, which we call \'federated solving\', so that we perform the operation using cached results of subtrees. "
 },
 
 {
@@ -838,6 +806,70 @@ var documenterSearchIndex = {"docs": [
     "title": "Previous 3D Viewer (VTK / Director) – no longer required",
     "category": "section",
     "text": "Previous versions used the much larger VTK based Director available via DrakeVisualizer.jl package.  This requires the following preinstalled packages:    sudo apt-get install libvtk5-qt4-dev python-vtk"
+},
+
+{
+    "location": "concepts/database_interactions/#",
+    "page": "Cloud Server/Database",
+    "title": "Cloud Server/Database",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/database_interactions/#Using-The-Cloud-Server-1",
+    "page": "Cloud Server/Database",
+    "title": "Using The Cloud Server",
+    "category": "section",
+    "text": "See ongoing work at GraffSDK.jl."
+},
+
+{
+    "location": "concepts/database_interactions/#Cloud-Server-offers-Multi-session/agent-Support-1",
+    "page": "Cloud Server/Database",
+    "title": "Cloud Server offers Multi-session/agent Support",
+    "category": "section",
+    "text": "Next page Multisession"
+},
+
+{
+    "location": "concepts/multisession/#",
+    "page": "Multi/Cross Session Solving",
+    "title": "Multi/Cross Session Solving",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "concepts/multisession/#Multisession-Operation-1",
+    "page": "Multi/Cross Session Solving",
+    "title": "Multisession Operation",
+    "category": "section",
+    "text": "Having all the data consolidated in a factor graph allows us to do something we find really exciting: reason against data for different robots, different robot sessions, even different users. Of course, this is all optional, and must be explicitly configured, but if enabled, current inference solutions can make use of historical data to continually improve their solutions.Consider a single robot working in a common environment that has driven around the same area a number of times and has identified a landmark that is (probably) the same. We can automatically close the loop and use the information from the prior data to improve our current solution. This is called a multisession solve.To perform a multisession solve, you need to specify that a session is part of a common environment, e.g \'lab\'. A user then requests a multisession solve (manually for the moment), and this creates relationships between common landmarks. The collective information is used to produce a consensus on the shared landmarks. A chain of session solves is then created, and the information is propagated into the individual sessions, improving their results."
+},
+
+{
+    "location": "concepts/multisession/#Steps-in-Multisession-Solve-1",
+    "page": "Multi/Cross Session Solving",
+    "title": "Steps in Multisession Solve",
+    "category": "section",
+    "text": "The following steps are performed by the user:Indicate which sessions are part of a common environment - this is done via GraffSDK when the session is created\nRequest a multisession solveUpon request, the solver performs the following actions:Updates the common existing multisession landmarks with any new information (propagation from session to common information)\nBuilds common landmarks for any new sessions or updated data\nSolves the common, multisession graph\nPropagates the common consensus result to the individual sessions\nFreezes all the session landmarks so that the session solving does not update the consensus result\nRequests session solves for all the updated sessionsNote the current approach is well positioned to transition to the \"Federated Bayes (Junction) Tree\" multisession solving method, and will be updated accordingly in due coarse.  The Federated method will allow faster multi-session solving times by avoiding the current iterated approach."
+},
+
+{
+    "location": "concepts/multisession/#Example-1",
+    "page": "Multi/Cross Session Solving",
+    "title": "Example",
+    "category": "section",
+    "text": "Consider three sessions which exist in the same, shared environment. In this environment, during each session the robot identified the same l0 landmark, as shown in the below figure. (Image: Independent Sessions)If we examine this in terms of the estimates of the actual landmarks, we have three independent densities (blue, green, and orange) giving measures of l0 located at (20, 0):(Image: Independent densities)Now we trigger a multisession solve. For each landmark that is seen in multiple session, we produce a common landmark (we call a prime landmark) and link it to the session landmarks via factors - all denoted in black outline.(Image: Linked landmarks)A multisession solve is performed, which for each common (prime) landmark, we produce a common estimate. In terms of densities, this is a single answer for the disparate information, as shown in red in the below figure (for a slightly different dataset):(Image: Prime density)This information is then propagated back to the individual session landmarks, giving one common density for each landmark. As above, our green, blue, and orange individual densities are now all updated to match the consensus shown in black:(Image: Prime density)The session landmarks are then frozen, and individual session solves are triggered to propagate the information back into the sessions.  Until the federated upgrade is completed, the above process is iterated a few times to allow information to cross propagate through all sessions.  There federated tree solution requires only a single iteration up and down the federated Bayes (Junction) tree. "
+},
+
+{
+    "location": "concepts/multisession/#Next-Steps-1",
+    "page": "Multi/Cross Session Solving",
+    "title": "Next Steps",
+    "category": "section",
+    "text": "This provides an initial implementation for stitching data from multiple sessions, robots, and users. In the short term, we may trigger this automatically for any shared environments.  Multisession solving along with other automated techniques for additional measurement discovery in data allows the system to \'dream\' – i.e. reducing succint info from the large volumes of heterogenous sensor data.In the medium future we will extend this functionality to operate in the Bayes tree, which we call \'federated solving\', so that we perform the operation using cached results of subtrees. "
 },
 
 {
