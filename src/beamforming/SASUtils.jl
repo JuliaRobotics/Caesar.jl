@@ -1,7 +1,7 @@
 
 
 """
-    $(SIGNATURES)
+    $(:TYPEDSIGNATURES)
 
 Convenience function to load yaml config files, commonly used to prepare the required beamforming computational objects.
 """
@@ -11,7 +11,7 @@ end
 
 
 """
-    $(SIGNATURES)
+    $(:TYPEDSIGNATURES)
 
 Prepare a sas2d factor to use in the factor graph where `totalPhones` is the size of the SAS array.  Pass a known `cfgd::Dict{String,} for faster load times.`
 """
