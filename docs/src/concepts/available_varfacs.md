@@ -1,28 +1,43 @@
 
-## Variables and Factors Already Available in Caesar
-
-### Variables Available in Caesar
+## Variables in Caesar.jl
 You can check for the latest variable types by running the following in your terminal:
 
 ```julia
 using RoME, Caesar
 subtypes(IncrementalInference.InferenceVariable)
+IncrementalInference.getCurrentWorkspaceVariables()
 ```
 
-Note: This has been made available as `IncrementalInference.getCurrentWorkspaceVariables()` in IncrementalInference v0.4.4.
+Default variables in IncrementalInference
 
-The current list of available variable types is:
-* `RoME.Point2` - A 2D coordinate consisting of [x, y, theta]
-* `RoME.Pose2` - A 2D coordinate and a rotation (i.e. bearing) consisting of [x, y, z, and theta]
-* `RoME.DynPoint2` - A 2D coordinate and linear velocities
-* `RoME.DynPose2` - A 2D coordinate, linear velocities, and a rotation
-* `RoME.Point3` - A 3D coordinate consisting of [x, y, z]
-* `RoME.Pose3` - A 3D coordinate and 3 associated rotations consisting of [x, y, z, theta, phi, psi]
-* `RoME.InertialPose3` - A 3D coordinate and rotation pose along with velocity and IMU bias calibration terms
+```@docs
+ContinuousScalar
+ContinuousMultivariate
+```
 
-> **Note** several more variable and factors types have been implemented which will over time be incorporated into standard `RoME` release.  Please open an issue with [JuliaRobotics/RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) for specific requests, problems, or suggestions.  Contributions are also welcome.
+### 2D Variables
 
-### Factors Available in Caesar
+The current variables types are:
+```@docs
+Point2
+Pose2
+DynPoint2
+DynPose2
+```
+
+### 3D Variables
+
+```@docs
+Point3
+Pose3
+InertialPose3
+```
+
+> **Note** Please open an issue with [JuliaRobotics/RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) for specific requests, problems, or suggestions.  Contributions are also welcome.
+
+> **Note** There might be more variable types in Caesar/RoME/IIF not yet documented here.
+
+## Factors in Caesar.jl
 You can check for the latest factor types by running the following in your terminal:
 
 ```julia
@@ -35,10 +50,10 @@ println("- Pairwise (variable minimization constraints): ")
 println.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));
 ```
 
+### Priors (Absolute Data)
 Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:
 
 ```@docs
-Prior
 PriorPoint2
 PriorPose2
 PriorPolar
@@ -46,8 +61,15 @@ PriorPoint3
 PriorPose3
 ```
 
-Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:
+Defaults in IncrementalInference.jl:
+```@docs
+Prior
+PartialPrior
+MixturePrior
+```
 
+### Conditional Likelihoods (Relative Data)
+Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:
 ```@docs
 Point2Point2
 Point2Point2WorldBearing
@@ -55,9 +77,22 @@ Pose2Point2Bearing
 Pose2Point2BearingRange
 Pose2Point2Range
 Pose2Pose2
+DynPoint2VelocityPrior
+DynPoint2DynPoint2
+VelPoint2VelPoint2
+Point2Point2Velocity
+DynPose2VelocityPrior
+VelPose2VelPose2
+DynPose2Pose2
 Pose3Pose3
 InertialPose3
 ```
 
-### Extending Caesar with New Variables and Factors
+Defaults in IncrementalInference.jl:
+```@docs
+LinearConditional
+MixtureLinearConditional
+```
+
+## Extending Caesar with New Variables and Factors
 A question that frequently arises is how to design custom variables and factors to solve a specific type of graph. One strength of Caesar is the ability to incorporate new variables and factors at will. Please refer to [Adding Factors](adding_variables_factors.md) for more information on creating your own factors.

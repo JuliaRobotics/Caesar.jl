@@ -34,7 +34,7 @@ end
 ```
 
 ## Factors
-Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a prior is defined against x0 with a normal distribution centered around [0,0,0].
+Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a [`IIF.Prior`](../concepts/available_varfacs/#IncrementalInference.Prior) belief is add to `x0` (using the [`addFactor`](../func_ref/#IncrementalInference.addFactor!) call) as a normal distribution centered around `[0,0,0]`.
 
 ### Priors
 ```julia
