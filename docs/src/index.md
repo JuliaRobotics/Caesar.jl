@@ -58,9 +58,7 @@ See related works on [the literature page](refs/literature/).
 
 ## Future Directions
 
-Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion.  
-
-> For example see [FAQ: ROS integration](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
+Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion.
 
 ## Next Steps
 For installation steps, examples/tutorials, and concepts please refer to the following pages:

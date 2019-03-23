@@ -55,7 +55,7 @@ The [current tests are a good place to see some examples](http://github.com/Juli
 
 Yes, but not yet.  See:
 
-> [FAQ: ROS Integration](faq/#ROS-Integration)
+> [FAQ: ROS Integration](../faq/#ROS-Integration-1)
 
 ## Static, Shared Object `.so` Compilation
 
