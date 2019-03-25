@@ -19,8 +19,8 @@ A couple of important points:
 
 ## Getting Started
 We suggest the following design pattern for developing and building new factors:
-1. You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see [Building and Solving Graphs](building_graphs.md) if you want to review what is currently available
-1. Create a GitHub repository to store the new types
+1. You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see [Building and Solving Graphs](building_graphs/#Factors-Available-in-Caesar-1) if you want to review what is currently available
+1. [OPTIONAL] Create a GitHub repository to store the new types (new types in the Julia Main scope is perfectly okay!)
 1. Create your new variable types
 1. Create your new factor types
 1. Implement unit tests to validate the correct operation of the types
@@ -29,9 +29,6 @@ We suggest the following design pattern for developing and building new factors:
 1. If the code is public and may be useful to the community, we ask if you could submit an issue against Caesar with information about the new types and the repository. Ideally we'd like to continually improve the core code and fold in community contributions.
 
 The remainder of this section discusses each of these steps.
-
-## Reviewing the Existing Types
-Please see [Building and Solving Graphs](building_graphs.md) to review what variables and factors are currently supported.
 
 ## [OPTIONAL] Creating a Repository
 You can fork the following template repository to construct your own [Caesar Variable and Factor Examples](https://github.com/GearsAD/Caesar_VariableFactorExamples.jl.git).

@@ -21,11 +21,13 @@ makedocs(
         "Initial Concepts" => [
             "Caesar Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
+            "Available Variables/Factors" => "concepts/available_varfacs.md",
             "Interacting w/ Factor Graphs" => "concepts/interacting_fgs.md",
             "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
-            "Using Caesar Database Operation" => "concepts/database_interactions.md",
-            "Using Caesar's Multi-Language Support" => "concepts/multilang.md",
+            "Multi-Language Support" => "concepts/multilang.md",
             "Arena Visualization" => "concepts/arena_visualizations.md",
+            "Cloud Server/Database" => "concepts/database_interactions.md",
+            "Multi/Cross Session Solving" => "concepts/multisession.md",
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",

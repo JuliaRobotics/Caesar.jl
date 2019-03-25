@@ -19,10 +19,11 @@ Please see the [documentation](http://juliarobotics.github.io/Caesar.jl/latest/)
 | Caesar.jl | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] |
 | [RoME.jl][rome-url] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] |
 | [IncrementalInference.jl][iif-url] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] |
+| [ApproxManifoldProducts.jl][amp-url] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] |
 | [KernelDensityEstimate.jl][kde-url] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] |
 | [TransformUtils.jl][tf-url] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] |
 | [Graphs.jl][graphs-url] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] |
-| [CloudGraphs.jl][cloudgraphs-url] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] |
+| [~~CloudGraphs.jl~~][cloudgraphs-url] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] |
 
 # Contributors
 
@@ -82,6 +83,13 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [graphs-build-img]: https://travis-ci.org/JuliaAttic/Graphs.jl.svg?branch=master
 [graphs-build-url]: https://travis-ci.org/JuliaAttic/Graphs.jl
 [graphs-url]: http://www.github.com/JuliaAttic/Graphs.jl
+
+[amp-cov-img]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl/coverage.svg?branch=master
+[amp-cov-url]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl?branch=master
+[amp-build-img]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl.svg?branch=master
+[amp-build-url]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl
+[amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
+
 
 [cloudgraphs-cov-img]: https://codecov.io/github/GearsAD/CloudGraphs.jl/coverage.svg?branch=master
 [cloudgraphs-cov-url]: https://codecov.io/github/GearsAD/CloudGraphs.jl?branch=master
