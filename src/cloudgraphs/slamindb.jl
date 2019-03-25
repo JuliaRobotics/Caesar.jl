@@ -15,7 +15,7 @@ function slamindbsavejld(fgl::FactorGraph, session::AbstractString, itercount::I
 end
 
 """
-    $(:TYPEDSIGNATURES)
+    $(TYPEDSIGNATURES)
 
 Runs SlamInDb for given number of iterations against a specific session.
 """
@@ -128,7 +128,7 @@ function runSlamInDbOnSession(
 end
 
 """
-    $(:TYPEDSIGNATURES)
+    $(TYPEDSIGNATURES)
 
 Low-level call to iterate the SlamInDb solver for given number of iterations against a specific session and keyword parameters.
 """

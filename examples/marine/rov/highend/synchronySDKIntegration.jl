@@ -1,7 +1,7 @@
 # GraffSDK integration file
 
 using GraffSDK
-using DocStringExtensions # temporary while $(:TYPEDSIGNATURES) is in use in this file
+using DocStringExtensions # temporary while $(TYPEDSIGNATURES) is in use in this file
 
 const Graff = GraffSDK
 
@@ -35,7 +35,7 @@ end
 
 
 """
-$(:TYPEDSIGNATURES)
+$(TYPEDSIGNATURES)
 
 Get  Graff configuration, default filepath location assumed as `~/Documents/graffConfig.json`.
 """
@@ -58,7 +58,7 @@ function loadGraffConfig(;
 end
 
 """
-$(:TYPEDSIGNATURES)
+$(TYPEDSIGNATURES)
 
 Confirm that the robot already exists, create if it doesn't.
 """
@@ -83,7 +83,7 @@ function graffRobot(
 end
 
 """
-$(:TYPEDSIGNATURES)
+$(TYPEDSIGNATURES)
 
 Get sessions, if it already exists, add to it.
 """
@@ -109,7 +109,7 @@ function graffSession(
 end
 
 """
-$(:TYPEDSIGNATURES)
+$(TYPEDSIGNATURES)
 
 Intialize the `sslaml` object using configuration file defined in `graffconfpath`.
 """
