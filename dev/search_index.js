@@ -285,7 +285,7 @@ var documenterSearchIndex = {"docs": [
     "page": "FAQ",
     "title": "Static, Shared Object .so Compilation",
     "category": "section",
-    "text": "Packages are already compiled to static objects (.ji files), but can also be compiled to more common .so files.  See this AOT vs JIT compiling blog post for a deeper discussion.  Also see this Julia Binaries Blog.Note recent developments announced on discourse."
+    "text": "Packages are already compiled to static objects (.ji files), but can also be compiled to more common .so files.  See this AOT vs JIT compiling blog post for a deeper discussion.  Also see this Julia Binaries Blog.Note recent developments announced on discourse..  Also see new brute force sysimg work at Fezzik.jl."
 },
 
 {
@@ -1557,7 +1557,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.appendvertbigdata!",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nTYPEDSIGNATURES\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fg, sym, descr, data)\n\nAppend big data element into current blob store using parent appendvertbigdata!, but here specified by symbol of variable node in the FactorGraph. Note the default data layer api definition. User must define dlapi to refetching the  vertex from the data layer. localapi avoids repeated network database fetches.\n\n\n\n\n\n"
+    "text": "appendvertbigdata!(cloudGraph::CloudGraphs.CloudGraph, cv::CloudGraphs.CloudVertex, description::Any, data::Array{UInt8,1})\n\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fgl::FactorGraph, vert::ExVertex, description::AbstractString, data::Array{UInt8,1})\n\n\nAppend big data element into current blob store and update associated global vertex information.\n\n\n\n\n\nappendvertbigdata!(fg, sym, descr, data)\n\nAppend big data element into current blob store using parent appendvertbigdata!, but here specified by symbol of variable node in the FactorGraph. Note the default data layer api definition. User must define dlapi to refetching the  vertex from the data layer. localapi avoids repeated network database fetches.\n\n\n\n\n\n"
 },
 
 {
@@ -1565,7 +1565,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.consoleaskuserfordb",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nObtain database addresses and login credientials from STDIN, as well as a few case dependent options.\n\n\n\n\n\n"
+    "text": "consoleaskuserfordb(; nparticles, drawdepth, clearslamindb, multisession, drawedges)\n\n\nObtain database addresses and login credientials from STDIN, as well as a few case dependent options.\n\n\n\n\n\n"
 },
 
 {
@@ -1581,7 +1581,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.executeQuery",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nRun Neo4j Cypher queries on the cloudGraph database, and return Tuple with the unparsed (results, loadresponse). Throws an error if the query fails.\n\n\n\n\n\n"
+    "text": "executeQuery(connection::AS<:AbstractString, query::AS<:AbstractString)\n\n\nRun Neo4j Cypher queries on the cloudGraph database, and return Tuple with the unparsed (results, loadresponse). Throws an error if the query fails.\n\n\n\n\n\n"
 },
 
 {
@@ -1597,7 +1597,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.fetchsubgraph!",
     "category": "function",
-    "text": "fetchsubgraph!(::FactorGraph, ::Vector{CloudVertex}, numneighbors::Int=0)\n\nFetch and insert list of CloudVertices into FactorGraph object, up to neighbor depth.\n\n\n\n\n\nfetchsubgraph!(::FactorGraph, ::Vector{Int}, numneighbors::Int=0)\n\nFetch and insert list of Neo4j IDs into FactorGraph object, up to neighbor depth.\n\n\n\n\n\n"
+    "text": "fetchsubgraph!(fgl::FactorGraph, cvs::Array{CloudGraphs.CloudVertex,1}; numneighbors)\n\n\nFetch and insert list of CloudVertices into FactorGraph object, up to neighbor depth.\n\n\n\n\n\nfetchsubgraph!(fgl, neoids; numneighbors)\n\n\nFetch and insert list of Neo4j IDs into FactorGraph object, up to neighbor depth.\n\n\n\n\n\n"
 },
 
 {
@@ -1621,7 +1621,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.getBigDataElement",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nWalk through vertex bigDataElements and return the last matching description.\n\n\n\n\n\n"
+    "text": "getBigDataElement(vertex::CloudGraphs.CloudVertex, description::AbstractString) -> Union{Nothing, BigDataElement}\n\n\nWalk through vertex bigDataElements and return the last matching description.\n\n\n\n\n\n"
 },
 
 {
@@ -1629,7 +1629,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.getExVertexNeoIDs",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.\n\n\n\n\n\n"
+    "text": "getExVertexNeoIDs(conn::Neo4j.Connection; label, ready, backendset, session, robot, user, reqbackendset) -> Array{Tuple{Int64,Int64,Symbol},1}\n\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.\n\n\n\n\n\n"
 },
 
 {
@@ -1645,7 +1645,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.getLocalSubGraphMultisession",
     "category": "function",
-    "text": "getLocalSubGraphMultisession{T <: AbstractString}(cg::CloudGraph, lm2others; session::T=\"\", numneighbors::Int=0)\n\nReturn subgraph copy of type FactorGraph contaning values from session in lm2others, and Vector{Symbol} of primary key symbols used for graph exstraction.\n\n\n\n\n\n"
+    "text": "getLocalSubGraphMultisession(cg::T<:AbstractString, lm2others::T<:AbstractString; session, robot, user, numneighbors)\n\n\nReturn subgraph copy of type FactorGraph contaning values from session in lm2others, and Vector{Symbol} of primary key symbols used for graph exstraction.\n\n\n\n\n\n"
 },
 
 {
@@ -1653,7 +1653,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.getPoseExVertexNeoIDs",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for all poses.\n\n\n\n\n\n"
+    "text": "getPoseExVertexNeoIDs(conn::Neo4j.Connection; ready, backendset, session, reqbackendset)\n\n\nReturn array of tuples with ExVertex IDs and Neo4j IDs for all poses.\n\n\n\n\n\n"
 },
 
 {
@@ -1693,7 +1693,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.hasBigDataElement",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nReturn true if vertex has bigDataElements with matching description.\n\n\n\n\n\n"
+    "text": "hasBigDataElement(vertex::CloudGraphs.CloudVertex, description::AbstractString) -> Bool\n\n\nReturn true if vertex has bigDataElements with matching description.\n\n\n\n\n\n"
 },
 
 {
@@ -1733,7 +1733,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.standardcloudgraphsetup",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nConnect to databases via network according to addrdict, or ask user for credentials and return active cloudGraph object, as well as addrdict.\n\n\n\n\n\n"
+    "text": "standardcloudgraphsetup(; addrdict, nparticles, drawdepth, drawedges, clearslamindb, multisession)\n\n\nConnect to databases via network according to addrdict, or ask user for credentials and return active cloudGraph object, as well as addrdict.\n\n\n\n\n\n"
 },
 
 {
@@ -1749,7 +1749,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.whosNear2D",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
+    "text": "whosNear2D(cg::CloudGraphs.CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString; x, y, yaw, dist, angle)\n\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
 },
 
 {
@@ -1757,7 +1757,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "Caesar.whosNear3D",
     "category": "function",
-    "text": "TYPEDSIGNATURES\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
+    "text": "whosNear3D(cg::CloudGraphs.CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString; x, y, z, roll, pitch, yaw, dist, angle)\n\n\nFind vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.\n\n\n\n\n\n"
 },
 
 {
@@ -1773,7 +1773,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "RoME.getRangeKDEMax2D",
     "category": "function",
-    "text": "getRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\n"
+    "text": "getRangeKDEMax2D(cgl::CloudGraph, session::AbstractString, vsym1::Symbol, vsym2::Symbol)\n\nCalculate the cartesian distange between two vertices in the graph, by session and symbol names, and by maximum belief point.\n\n\n\n\n\ngetRangeKDEMax2D(fgl, vsym1, vsym2)\n\n\nCalculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.\n\n\n\n\n\n"
 },
 
 {
@@ -2093,7 +2093,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Caesar\'s Reference",
     "title": "IncrementalInference.ls",
     "category": "function",
-    "text": "ls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nTYPEDSIGNATURES\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
+    "text": "ls(fgl, lbl; api, ring)\n\n\nReturn all elements ls(fg) as tuples, or nodes connected to the a specific element, eg. `ls(fg, :x1)\n\n\n\n\n\nls(fgl, lbls; api, ring)\n\n\nExperimental union of elements version of ls(::FactorGraph, ::Symbol).  Not mean\'t to replace broadcasting ls.(fg, [:x1;:x2])\n\n\n\n\n\nls(fgl; key1, key2)\n\n\nList the nodes in a factor graph.\n\nExamples\n\nls(fg)\n\n\n\n\n\nls(cgl::CloudGraphs.CloudGraph, session::AbstractString, robot::AbstractString, user::AbstractString; sym, neoid, exvid) -> Dict{Symbol,Tuple{Int64,Int64,Array{Symbol,1}}}\n\n\nList neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes being returned.\n\n\n\n\n\n"
 },
 
 {
