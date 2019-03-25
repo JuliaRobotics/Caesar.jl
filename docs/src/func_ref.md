@@ -101,6 +101,7 @@ prodmultipleonefullpartials
 savejld
 setDwnMsg!
 setfreeze!
+setValKDE!
 setUpMsg!
 subgraphFromVerts
 treeProductDwn
