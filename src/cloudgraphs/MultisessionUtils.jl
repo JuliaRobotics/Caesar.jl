@@ -120,17 +120,17 @@ end
 
 
 """
-    getLocalSubGraphMultisession{T <: AbstractString}(cg::CloudGraph, lm2others; session::T="", numneighbors::Int=0)
+    $TYPEDSIGNATURES
 
 Return subgraph copy of type FactorGraph contaning values from session in lm2others, and Vector{Symbol} of primary
 key symbols used for graph exstraction.
 """
 function getLocalSubGraphMultisession(cg::CloudGraph,
-            lm2others;
-            session::T="",
-            robot::T="",
-            user::T="",
-            numneighbors::Int=0  ) where {T <: AbstractString}
+                                      lm2others;
+                                      session::T="",
+                                      robot::T="",
+                                      user::T="",
+                                      numneighbors::Int=0  ) where {T <: AbstractString}
   #
   res = Dict{Symbol, Int}()
   sfg = Caesar.initfg(sessionname=session, robotname=robot, username=user, cloudgraph=cg)
