@@ -72,6 +72,11 @@ getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
 getCliq
 getCliqOrderUpSolve
+getCliqAllVarIds
+getCliqFrontalVarIds
+getCliqSeparatorVarIds
+getCliqVarIdsPriors
+getCliqVarsSingletons
 getData
 getFactor
 getKDE
