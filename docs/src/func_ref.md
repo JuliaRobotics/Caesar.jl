@@ -76,7 +76,7 @@ getCliqAllVarIds
 getCliqFrontalVarIds
 getCliqSeparatorVarIds
 getCliqVarIdsPriors
-getCliqVarsSingletons
+getCliqVarSingletons
 getData
 getFactor
 getKDE
