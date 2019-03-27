@@ -97,7 +97,7 @@ addFactor!(fg, [:x0], PartialPrior(Normal(0.0, 0.01), (2,)) )
 addFactor!(fg, [:x0; :l0], Pose2Point2BearingRange(pcLeft, Rayleigh(1.0)))
 addFactor!(fg, [:x0; :l1], Pose2Point2BearingRange(pcRight, Rayleigh(1.0)))
 
-# writeGraphPdf(fg, show=true)
+writeGraphPdf(fg, show=true)
 
 ##
 
@@ -131,3 +131,16 @@ getKDEMax(getKDE(fg, :l0))
 
 getKDEMean(getKDE(fg, :l1))
 getKDEMax(getKDE(fg, :l1))
+
+
+##
+
+
+pl |> PDF("/tmp/test.pdf",30cm,20cm)
+pl |> SVG("/tmp/test.svg",15cm,6cm)
+
+##
+
+@async run(`evince /tmp/test.pdf`)
+
+##
