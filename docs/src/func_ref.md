@@ -90,6 +90,9 @@ getDwnMsgs
 inferOverTree!
 inferOverTreeR!
 initfg
+initOnTree!
+isPartial
+isInitialized
 landmarks
 loadjld
 localProduct
