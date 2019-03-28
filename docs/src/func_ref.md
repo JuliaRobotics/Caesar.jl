@@ -87,6 +87,7 @@ getVariable
 getVertKDE
 getUpMsgs
 getDwnMsgs
+hasOrphans
 inferOverTree!
 inferOverTreeR!
 initfg
