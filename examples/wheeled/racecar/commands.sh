@@ -44,10 +44,23 @@ racecarall() {
 }
 
 racecarsweepfocal() {
-  racecarall --focalscale 1.0
-  racecarall --focalscale 0.95
-  racecarall --focalscale 0.90
-  racecarall --focalscale 0.85
+  #racecarall --focalscale 1.0
+  racecarall --focalscale 0.99
+  racecarall --focalscale 0.98
+  sleep 1000
+  racecarall --focalscale 0.97
+  sleep 1000
+  racecarall --focalscale 0.96
+
+  #racecarall --focalscale 0.95
+
+  sleep 1000
+  racecarall --focalscale 0.94
+  sleep 1000
+  racecarall --focalscale 0.93
+
+  #racecarall --focalscale 0.90
+  #racecarall --focalscale 0.85
   #racecarall --focalscale 0.80
   #racecarall --focalscale 0.75
   #racecarall --focalscale 0.70
