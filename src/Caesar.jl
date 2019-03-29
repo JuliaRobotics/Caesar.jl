@@ -2,16 +2,18 @@ module Caesar
 
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
-import RoME: getRangeKDEMax2D, getLastPose, initfg
-import IncrementalInference: batchSolve!
+import RoME: getRangeKDEMax2D, getLastPose
+import IncrementalInference: batchSolve!, getSample, initfg
 
 using Reexport
 
 @reexport using RoME
+@reexport using IncrementalInference
 @reexport using KernelDensityEstimate
 @reexport using Distributions
 
 using
+  DelimitedFiles,
   Distributed,
   Statistics,
   LinearAlgebra,
@@ -27,10 +29,12 @@ using
   ImageMagick,
   ImageCore,
   DocStringExtensions,
-  CloudGraphs,
-  Neo4j,
-  Mongoc,
-  Unmarshal
+  CloudGraphs, # TODO: will be movedd to DFG
+  Neo4j, # TODO: will be movedd to DFG
+  Mongoc, # TODO: will be movedd to DFG
+  Unmarshal,
+  YAML,
+  FFTW
 
 export
   GenericInSituSystem,  # insitu components
@@ -61,9 +65,9 @@ export
   hasval,
 
   # repeats from RoME and IIF
-  initfg,
-  addNode!,
-  addFactor!,
+  # initfg,
+  # addNode!,
+  # addFactor!,
 
   # CloudGraphs helper functions
   insertnodefromcv!,
@@ -112,7 +116,30 @@ export
   findExistingMSConstraints,
   getprpt2kde,
   rmInstMultisessionPriors!,
-  removeMultisessions!
+  removeMultisessions!,
+
+  # sas-slam
+  CBFFilterConfig,
+  CZTFilter,
+  prepCZTFilter,
+  getCBFFilter2Dsize,
+  constructCBFFilter2D!,
+  CBF2D_DelaySum!,
+  MatchedFilter,
+  SASBearing2D,
+  PackedSASBearing2D,
+  compare,
+  SASDebug,
+  reset!,
+  prepMF,
+  loadConfigFile,
+  prepareSAS2DFactor,
+  wrapRad,
+  phaseShiftSingle!,
+  liebf!,
+  SASDebug
+
+
 
 NothingUnion{T} = Union{Nothing, T}
 
@@ -135,6 +162,19 @@ include("cloudgraphs/slamindb.jl")
 include("cloudgraphs/MultisessionUtils.jl")
 include("cloudgraphs/FoveationUtils.jl")
 
+
 # ZMQ server and endpoints
 include("zmq/ZmqCaesar.jl")
+
+# Multisession operation
+include("multisession/Multisession.jl")
+
+# SAS-SLAM
+include("beamforming/czt.jl")
+include("beamforming/CBF.jl")
+include("beamforming/MatchedFilter.jl")
+include("beamforming/SASBearing2D.jl")
+include("beamforming/SASUtils.jl")
+
+
 end

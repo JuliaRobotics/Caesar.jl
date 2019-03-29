@@ -1,4 +1,4 @@
-# Example: Singular Ranges-only SLAM Solution (i.e. "Under-Constrained")
+# Singular Ranges-only SLAM Solution (i.e. "Under-Constrained")
 
 
 This tutorial describes a range-only system where there are always more variable dimensions than range measurements made.
@@ -14,8 +14,8 @@ This example is also available as a script [here in RoME.jl](https://github.com/
 
 ## REQUIRES
 
-- `RoME v0.2.5`
-- `RoMEPlotting v0.0.2`
+- `RoME v0.2.2`
+- `RoMEPlotting v0.1.0+`
 
 ## Loading The Data
 
@@ -52,10 +52,11 @@ GTl[:l4] = [120.0;-50]
 The first step is to load the required modules, and in our case we will add a few Julia processes to help with the compute later on.  
 ```julia
 # add more julia processes
-nprocs() < 7 ? addprocs(7-nprocs()) : nothing
+using Distributed
+nprocs() < 4 ? addprocs(4-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
-using RoME, Distributions
+using RoME, LinearAlgebra
 ```
 **NOTE** Julia uses just-in-time compiling ([unless pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module)), therefore each time a new function call on a Julia process will be slow, but all following calls to the same functions will be as fast as the statically compiled code.
 
@@ -67,21 +68,21 @@ Next construct the factor graph containing the first pose `:l100` (without any k
 fg = initfg()
 
 # first pose with no initial estimate
-addNode!(fg, :l100, Point2)
+addVariable!(fg, :l100, Point2)
 
 # add three landmarks
-addNode!(fg, :l1, Point2)
-addNode!(fg, :l2, Point2)
-addNode!(fg, :l3, Point2)
+addVariable!(fg, :l1, Point2)
+addVariable!(fg, :l2, Point2)
+addVariable!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
-addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], eye(2))) )
-addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], eye(2))) )
+addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], Matrix(LinearAlgebra.I,2,2))) )
+addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], Matrix(LinearAlgebra.I,2,2))) )
 ```
-The `PriorPoint2` is assumed to be a multivariate normal distribution of covariance `eye(2)`, as well as a weighting factor of `[1.0]`.
+The `PriorPoint2` is assumed to be a multivariate normal distribution of covariance `Matrix(LinearAlgebra.I,2,2)`, as well as a weighting factor of `[1.0]`.
 
 
-**NOTE** API change: `PriorPoint2D` changed to `PriorPoint2{T}` to accept distribution objects and discard (standard in `RoME v0.1.5` -- see [issue 72 here](https://github.com/JuliaRobotics/RoME.jl/issues/72)).
+**NOTE** API changed to `PriorPoint2(::T) where T <: SamplableBelief = PriorPoint2{T}` to accept distribution objects and discard (standard in `RoME v0.1.5` -- see [issue 72 here](https://github.com/JuliaRobotics/RoME.jl/issues/72)).
 
 ## Adding Range Measurements Between Variables
 
@@ -89,17 +90,17 @@ Next we connect the three range measurements from the vehicle location `:l0` to 
 ```julia
 # first range measurement
 rhoZ1 = norm(GTl[:l1]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ1], 2.0, [1.0])
-addFactor!(fg, [:l100;:l101], ppr)
+ppr = Point2Point2Range( Normal(rhoZ1, 2.0) )
+addFactor!(fg, [:l100;:l1], ppr)
 
 # second range measurement
 rhoZ2 = norm(GTl[:l2]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ2], 3.0, [1.0])
+ppr = Point2Point2Range( Normal(rhoZ2, 3.0) )
 addFactor!(fg, [:l100; :l2], ppr)
 
 # second range measurement
 rhoZ3 = norm(GTl[:l3]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ3], 3.0, [1.0])
+ppr = Point2Point2Range( Normal(rhoZ3, 3.0) )
 addFactor!(fg, [:l100; :l3], ppr)
 ```
 
@@ -110,14 +111,13 @@ The factor graph should look as follows:
 writeGraphPdf(fg) # show the factor graph
 ```
 
-![exranges01](https://user-images.githubusercontent.com/6412556/42350352-1f36072e-807e-11e8-997b-846223cc5262.png)
+![rangesonlyfirstfg](https://user-images.githubusercontent.com/6412556/49518425-a1d44680-f86c-11e8-8548-c384bc6df2a6.png)
 
 ## Inference and Visualizations
 
 At this point we can call the solver start interpreting the first results:
 ```julia
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+tree = batchSolve!(fg)
 ```
 
 The factor graph figure above showed the structure between variables and factors.
@@ -129,14 +129,14 @@ First look at the two landmark positions `:l1, :l2` at `(10.0,30)`,`(30.0,-30)` 
 ```julia
 using RoMEPlotting
 
-plotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)
+plotKDE(fg, [:l1;:l2], dims=[1;2])
 ```
 
 ![testl1_2](https://user-images.githubusercontent.com/6412556/42423068-ca8690c2-82c1-11e8-8f9c-d5df13cca264.png)
 
 Similarly, the belief estimate for the first vehicle position `:l100` is bi-modal, due to the intersection of two range measurements:
 ```julia
-plotKDE(fg, :l100, dims=[1;2])
+plotKDE(fg, :l100, dims=[1;2], levels=6)
 ```
 
 ![testl100](https://user-images.githubusercontent.com/6412556/42423069-d188212e-82c1-11e8-8af6-7b82f3f14030.png)
@@ -151,11 +151,11 @@ drawLandms(fg, from=1, to=101)
 Notice the ring of particles which represents the belief on the third beacon/landmark `:l3`, which was not constrained by a prior factor.
 Instead, the belief over the position of `:l3` is being estimated simultaneous to estimating the vehicle position `:l100`.
 
-## Stochastic Growth and Decay of Modes (i.e. Hypotheses)
+## Implicit Growth and Decay of Modes (i.e. Hypotheses)
 
 Next consider the vehicle moving a distance of `50` units---and by design the direction of travel is not known---to the next true position.
 The video above gives away the vehicle position with the cyan line, showing travel in the shape of a lower case 'e'.
-Finally, to speed things up, lets write a function that handles the travel (pseudo odometry factors between positions) and ranging measurement factors to beacons.
+The following function handles (pseudo odometry) factors as range-only between positions and range-only measurement factors to beacons as the vehice travels.
 
 ```julia
 function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R <: Real}
@@ -163,9 +163,9 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
   prev_sym = Symbol("l$(maximum(Int[parse(Int,string(currvar[i])[2:end]) for i in 2:length(currvar)]))")
   if !(pos_sym in currvar)
     println("Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.")
-    addNode!(fgl, pos_sym, Point2)
+    addVariable!(fgl, pos_sym, Point2)
     @show rho = norm(GTp[prev_sym] - GTp[pos_sym])
-    ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+    ppr = Point2Point2Range( Normal(rho, 3.0) )
     addFactor!(fgl, [prev_sym;pos_sym], ppr)
   else
     @warn "Variable node $pos_sym already in the factor graph."
@@ -175,10 +175,10 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
     rho = norm(GTl[ll] - GTp[pos_sym])
     # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks
     if rho < measurelimit
-      ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+      ppr = Point2Point2Range( Normal(rho, 3.0) )
       if !(ll in currvar)
         println("Adding variable vertex $ll, not yet in fgl::FactorGraph.")
-        addNode!(fgl, ll, Point2)
+        addVariable!(fgl, ll, Point2)
       end
       addFactor!(fgl, [pos_sym;ll], ppr)
     end
@@ -187,10 +187,9 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
 end
 ```
 
-After pasting (or running) this function in the Julia, a new member definition exists for `vehicle_drives_to!`.
+After pasting (or running) this function in Julia, a new member definition `vehicle_drives_to!` can be used line any other function.  Julia will handle the just-in-time compiling for the type specific function required and cach the static code for repeat executions.
 
-**NOTE** The exclamation mark at the end of the function name has no syntactic significance in Julia, since the full UTF8 character set is available for functions or variables.
-Instead, the exclamation serves as a Julia community convention to tell the caller that this function will modify the contents of at least some of the variables being passed into it -- in this case the factor graph `fg` will be modified.
+> **NOTE** The exclamation mark at the end of the function name has no syntactic significance in Julia, since the full UTF8 character set is available for functions or variables.  Instead, the exclamation serves as a Julia community convention to tell the caller that this function will modify the contents of at least some of the variables being passed into it -- in this case the factor graph `fg` will be modified.
 
 Now the actual driving event can be added to the factor graph:
 
@@ -203,13 +202,13 @@ vehicle_drives_to!(fg, :l102, GTp, GTl)
 writeGraphPdf(fg)
 ```
 
-**NOTE** The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.
+> **NOTE** The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.
 
 The marginal posterior estimates are found by repeating inference over the factor graph, followed drawing all vehicle locations as a contour map:
 
 ```julia
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+# solve and show message passing on Bayes (Juntion) tree
+tree = batchSolve!(fg, drawpdf=true, show=true)
 
 # draw all vehicle locations
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:2], dims=[1;2])
@@ -232,8 +231,7 @@ The two "free" beacons/landmarks `:l3,:l4` still have several modes each, implyi
 vehicle_drives_to!(fg, :l103, GTp, GTl)
 vehicle_drives_to!(fg, :l104, GTp, GTl)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+tree = batchSolve!(fg)
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2])
 # Gadfly.draw(PDF("/tmp/testL100_104.pdf", 20cm, 10cm),pl)
@@ -247,20 +245,17 @@ Moving up to position `:l104` still shows strong multiodality in the vehicle pos
 vehicle_drives_to!(fg, :l105, GTp, GTl)
 vehicle_drives_to!(fg, :l106, GTp, GTl)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+tree = batchSolve!(fg)
 
 
 vehicle_drives_to!(fg, :l107, GTp, GTl)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+tree = batchSolve!(fg)
 
 
 vehicle_drives_to!(fg, :l108, GTp, GTl)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+tree = batchSolve!(fg)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 2:8], dims=[1;2], levels=6)
@@ -273,15 +268,13 @@ Next we see a strong return to a single dominant mode in all vehicle position es
 vehicle_drives_to!(fg, :l109, GTp, GTl)
 vehicle_drives_to!(fg, :l110, GTp, GTl)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+tree = batchSolve!(fg)
 
 
 vehicle_drives_to!(fg, :l111, GTp, GTl)
 vehicle_drives_to!(fg, :l112, GTp, GTl)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree, N=200)
+tree = batchSolve!(fg)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 7:12], dims=[1;2])

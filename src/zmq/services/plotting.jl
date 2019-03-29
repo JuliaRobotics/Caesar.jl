@@ -34,5 +34,5 @@ if isLoadingPlottingEndpoints
         return Dict{String, Any}("status" => "ok", "mimetype" => "image/png", "encoding" => "none", "data" => io.data)
     end
 else
-    @info "[ZMQ Server] Plotting endpoints are disabled! Please call 'using RoMEPlotting' before 'using Caesar' if you would like to enable them."
+    @info "[ZMQ Server] Plotting endpoints are disabled in ZMQ server. Please call 'using RoMEPlotting' before 'using Caesar' if you would like to enable them."
 end

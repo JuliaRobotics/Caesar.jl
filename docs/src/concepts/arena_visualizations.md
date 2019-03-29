@@ -3,6 +3,14 @@
 Caesar.jl uses the [Arena.jl](https://github.com/dehann/Arena.jl) package for all the visualization requirements.  This part of the documentation discusses the robotic visualization aspects supported by Arena.jl.
 Arena.jl supports a wide variety of general visualization as well as developer visualization tools more focused on research and development.
 
+## Current Work In Progress
+
+> Written Nov 2018
+
+While Arena.jl is still being upgraded for Julia 1.0 (mostly relating to updates in 3D visualization), the 2D visualizations available through the development master branch in [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) are available in Julia 1.0.  The master branch version can be installed using the Julia package manager with `add RoMEPlotting#master`, see also [environment installation page](../installation_environment.md).
+
+## Introduction
+
 Over time, Caesar.jl has used a least three different 3D visualization technologies, with the most recent based on WebGL and [three.js](https://threejs.org/) by means of the [MeshCat.jl](https://github.com/rdeits/MeshCat.jl) package.
 The previous incarnation used a client side installation of [VTK](https://www.vtk.org/)  by means of the [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) and [Director](https://github.com/RobotLocomotion/director) libraries.
 Different 2D plotting libraries have also been used, with evolutions to improve usability for a wider user base.
@@ -10,34 +18,38 @@ Each epoch has aimed at reducing dependencies and increasing multi-platform supp
 
 The sections below discuss 2D and 3D visualization techniques available to the Caesar.jl robot navigation system.
 Visualization examples will be seen throughout the Caesar.jl package documentation.
+Arena.jl is intended to simplify the process 2D plotting for robot trajectories in two or three dimensions.
+The visualizations are also intended to help with subgraph plotting for finding loop closures in data or compare two datasets.
 
-**Note** that all visualizations used to be part of the Caesar.jl package itself, but was separated out to Arena.jl in early 2018.
+> **Note** that all visualizations used to be part of the Caesar.jl package itself, but was separated out to Arena.jl in early 2018.
 
 ## Installation
 
-The current version of `Arena` has a rather large VTK dependency (which compile just fine on Ubuntu/Debian, or maybe even MacOS) wrapped in the [DrakeVisualizer.jl package](https://github.com/rdeits/DrakeVisualizer.jl).  This requires the following preinstalled packages:
-```bash
-    sudo apt-get install libvtk5-qt4-dev python-vtk
-```
+### MeshCat / three.js Viewer (WebGL)
 
-**NOTE** Smaller individual 2D packages can be installed instead -- i.e.:
+For the 3D visualization tools provided for Caesar.jl---in a [Julia](http://www.julialang.org) or ([JuliaPro](http://www.juliacomputing.com)) terminal/REPL---type `]` to activate pkg manager and install Arena the master branch
 ```julia
-Pkg.add("RoMEPlotting")
+(v1.0) pkg> add Arena#master
 ```
 
-For the full 2D/3D visualization tools used by Caesar.jl---in a [Julia](http://www.julialang.org) or ([JuliaPro](http://www.juliacomputing.com)) terminal/REPL---type:
-```julia
-julia> Pkg.add("Arena")
-```
+Current master branch development allows the user to use the [three.js](https://threejs.org/) WebGL based viewer via [MeshCat.jl](https://github.com/rdeits/MeshCat.jl).
 
-**NOTE** Current development will allow the user to choose a [three.js](https://threejs.org/) WebGL based viewer instead [MeshCat.jl](https://github.com/rdeits/MeshCat.jl).
 
-## 2D Visualization
+### 2D Visualization
 
-2D plot visualizations, provided by `RoMEPlotting.jl` and `KernelDensityEstimatePlotting.jl`, are generally useful for repeated analysis of a algorithm or data set being studied.
+2D plot visualizations, provided by [RoMEPlotting.jl(http://www.github.com/JuliaRobotics/RoMEPlotting.jl) and [KernelDensityEstimatePlotting.jl](http://www.github.com/JuliaRobotics/KernelDensityEstimatePlotting.jl), are generally useful for repeated analysis of a algorithm or data set being studied.
 These visualizations are often manipulated to emphasize particular aspects of mobile platform navigation.
-Arena.jl is intended to simplify the process 2D plotting for robot trajectories in two or three dimensions.
-The visualizations are also intended to help with subgraph plotting for finding loop closures in data or compare two datasets.
+
+Install RoMEPlotting master branch:
+```julia
+(v1.0) pkg> add RoMEPlotting#master
+```
+
+## Interactive Gadfly.jl Plots
+
+See the following two discussions on Interactive 2D plots:
+- [Interactivity](http://gadflyjl.org/stable/tutorial/#Interactivity-1)
+- [Interactive-SVGs](http://gadflyjl.org/stable/man/backends/#Interactive-SVGs-1)
 
 ### Hexagonal 2D SLAM example visualization
 
@@ -76,9 +88,9 @@ using RoME, Distributions
 using RoMEPlotting
 
 fg = initfg()
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), eye(3))))
-addNode!(fg, :x1, Pose2)
+addVariable!(fg, :x1, Pose2)
 addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10.0;0;0], eye(3))))
 
 ensureAllInitialized!(fg)
@@ -172,4 +184,11 @@ vc = startdefaultvisualization()
 visualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
 visualizeDensityMesh!(vc, fg, :l1)
 # visualizeallposes!(vc, fg, drawlandms=false)
+```
+
+## Previous 3D Viewer (VTK / Director) -- no longer required
+
+Previous versions used the much larger VTK based Director available via [DrakeVisualizer.jl package](https://github.com/rdeits/DrakeVisualizer.jl).  This requires the following preinstalled packages:
+```bash
+    sudo apt-get install libvtk5-qt4-dev python-vtk
 ```

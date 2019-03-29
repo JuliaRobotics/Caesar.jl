@@ -1,4 +1,4 @@
-# Tutorial: Hexagonal 2D SLAM Example (Local Compute)
+# Hexagonal 2D SLAM Example (Local Compute)
 
 A simple 2D robot trajectory example is expanded below using techniques developed in simultaneous localization and mapping (SLAM).
 This example is available as a [single script here](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/Hexagonal2D_SLAM.jl).
@@ -11,7 +11,7 @@ The first step is to load the required modules, and in our case we will add a fe
 nprocs() < 4 ? addprocs(4-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
-using RoME, Distributions
+using RoME, Distributions, LinearAlgebra
 ```
 After loading the RoME and Distributions modules, we construct a local factor graph object in memory:
 ```julia
@@ -19,10 +19,10 @@ After loading the RoME and Distributions modules, we construct a local factor gr
 fg = initfg()
 
 # Add the first pose :x0
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix(LinearAlgebra.I,3,3))) )
 ```
 A factor graph object `fg` (of type `::FactorGraph`) has been constructed; the first pose `:x0` has been added; and a prior factor setting the origin at `[0,0,0]` over variable node dimensions `[x,y,θ]` in the world frame.
 The type `Pose2` is used to indicate what variable is stored in the node.
@@ -37,8 +37,8 @@ The next 6 nodes are added with odometry in an counter-clockwise hexagonal manne
 for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
-  addNode!(fg, nsym, Pose2)
-  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
+  addVariable!(fg, nsym, Pose2)
+  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
   addFactor!(fg, [psym;nsym], pp )
 end
 ```
@@ -56,9 +56,11 @@ You should see the program `evince` open with this visual:
 Let's run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this `fg` object:
 ```julia
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
-# batchSolve!(fg) # coming soon
+batchSolve!(fg)
+
+# For those interested, the internal batch solve steps currently involve:
+# tree = wipeBuildNewTree!(fg)
+# inferOverTree!(fg, tree)
 ```
 This will take a couple of seconds (including first time compiling for all Julia processes).
 
@@ -84,8 +86,8 @@ Suppose some sensor detected a feature of interest with an associated range and 
 The new variable and measurement can be included into the factor graph as follows:
 ```julia
 # Add landmarks with Bearing range measurements
-addNode!(fg, :l1, Point2, labels=["LANDMARK"])
-p2br = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))
+addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 
 # Initialize :l1 numerical values but do not rerun solver
@@ -104,12 +106,11 @@ Loop-closures are a major part of SLAM based state estimation.
 One illustration is to take a second sighting of the same `:l1` landmark from the last pose `:x6`; followed by repeating the inference and re-plotting the result -- notice the tighter confidences over all variables:
 ```julia
 # Add landmarks with Bearing range measurements
-p2br2 = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))
+p2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x6; :l1], p2br2)
 
 # solve
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+batchSolve!(fg)
 
 # redraw
 pl = drawPosesLandms(fg)

@@ -3,5 +3,6 @@
 *.pyc
 examples/lcmserver/lcmtypes/rome/
 examples/lcmserver/rome/
+examples/tracking/simpleradar/exports/*
 docs/build
 results/*

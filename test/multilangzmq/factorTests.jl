@@ -1,5 +1,6 @@
 using Caesar, Caesar.ZmqCaesar
 using Distributions
+using LinearAlgebra
 
 # Distribution: AliasingScalarSampler
 packed = Packed_AliasingScalarSampler(collect(1:10), collect(11:20), 0, "AliasingScalarSampler")
@@ -14,7 +15,7 @@ packed = convert(Dict{String, Any}, normal)
 back = convert(Normal, JSON.parse(JSON.json(packed)))
 
 # Factor: PartialPriorRollPitchZ
-a = MvNormal([0, 0, 0, 0], eye(4))
+a = MvNormal([0, 0, 0, 0], Matrix(LinearAlgebra.I, 4, 4))
 b = Normal(0, 1)
 partPrior = PartialPriorRollPitchZ(a, b)
 j = JSON.json(convert(Dict{String, Any}, partPrior))

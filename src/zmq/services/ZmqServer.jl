@@ -4,7 +4,7 @@ using Caesar, Caesar.ZmqCaesar
 export
     start
 
-import Base: start
+# import Base: start
 
 global systemverbs = Symbol[
     :shutdown
@@ -46,7 +46,7 @@ try
         :drawPosesLandms
     ];
 catch ex
-    @info "[ZMQ Server] Plotting is disabled!"
+    @debug "[ZMQ Server] Plotting is disabled!"
 end
 
 function shutdown(zmqServer, request)::Dict{String, Any}
@@ -64,6 +64,8 @@ function start(zmqServer::ZmqServer)
     ctx=Context()
     s1=Socket(ctx, REP)
     ZMQ.bind(s1, "tcp://*:5555")
+
+    drawcounter = 0
 
     try
         while zmqServer.isServerActive
@@ -88,6 +90,13 @@ function start(zmqServer::ZmqServer)
                     end
                     if !haskey(resp, "status")
                         resp["status"] = "OK"
+                        drawcounter += 1
+                    end
+                    # TODO: make this an ArgParse.jl enableable feature
+                    if drawcounter % 20 == 0
+                        IIF.writeGraphPdf(zmqServer.fg, show=true)
+                    else
+                        drawcounter = 0
                     end
                 catch ex
                     io = IOBuffer()

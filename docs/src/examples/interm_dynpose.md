@@ -1,67 +1,18 @@
-# Intermediate Example: Adding Dynamic Factors and Variables
+# Adding Dynamic Factors and Variables
 
 This tutorial describes how a new factor can be developed, beyond the pre-existing implementation in [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl).  Factors can accept any number of variable dependencies and allow for a wide class of allowable function calls can be used.  Our intention is to make it as easy as possible for users to create their own factor types.
 
-## Quick Example in One Dimension
-
-Already exists in IncrementalInference
-
-TODO: Smooth this over.
-
-This tutorial calls for multiple variable nodes connected through algebraic functions stochastic uncertainty.
-User scope `Prior`, `LinearOffset`, and `MultiModalOffset` with arbitrary distributions are defined as:
-```julia
-import IncrementalInference: getSample
-
-struct Prior{T} <: IncrementalInference.FunctorSingleton where T <: Distribution
-  z::T
-end
-getSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,:), )
-struct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: Distribution
-  z::T
-end
-getSample(s::LinearOffset, N::Int=1) = (reshape(rand(s.z,N),1,:), )
-function (s::LinearOffset)(res::Array{Float64},
-                           userdata::FactorMetadata,
-                           idx::Int,
-                           meas::Tuple{Array{Float64, 2}},
-                           X1::Array{Float64,2},
-                           X2::Array{Float64,2}  )
-  #
-  res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])
-  nothing
-end
-struct MultiModalOffset <: IncrementalInference.FunctorPairwise
-  z::Vector{Distribution}
-  c::Categorical
-end
-getSample(s::MultiModalOffset, N::Int=1) = (reshape.(rand.(s.z, N),1,:)..., rand(s.c, N))
-function (s::MultiModalOffset)(res::Array{Float64},
-                               userdata::FactorMetadata,
-                               idx::Int,
-                               meas::Tuple,
-                               X1::Array{Float64,2},
-                               X2::Array{Float64,2}  )
-  #
-  res[1] = meas[meas[end][idx]][idx] - (X2[1,idx] - X1[1,idx])
-  nothing
-end
-```
-Notice the residual function relating to the two `PairwiseFunctor` derived definitions.
-The one dimensional residual functions, `res[1] = measurement - prediction`, are used during inference to approximate the convolution of conditional beliefs from the sample approximate marginal beliefs of the connected variables.
-
-
-## Example: Adding Velocity to Point2D
+## Example: Adding Velocity to `RoME.Point2`
 
 A smaller example in two dimensions where we wish to estimate the velocity of some target:  Consider two variables `:x0` with a prior as well as a conditional---likelihood for short---to variable `:x1`.  Priors are in the "global" reference frame (how ever you choose to define it), while likelihoods are in the "local" / "relative" frame that only exist between variables.
 
 ![dynpoint2fg](https://user-images.githubusercontent.com/6412556/40951628-caf1d332-6845-11e8-9710-9f6fcd92a8ca.png)
 
-### Brief on Variable Node softtypes
+### Brief on Variable Node `softtypes`
 
 Variable nodes retain meta data (so called "soft types") describing the type of variable.  Common VariableNode types are `RoME.Point2D`, `RoME.Pose3D`.  VariableNode soft types are passed during construction of the factor graph, for example:
 ```julia
-v1 = addNode!(fg, :x1, Pose2)
+v1 = addVariable!(fg, :x1, Pose2)
 ```
 
 Certain cases require that more information be retained for each VariableNode, and velocity calculations are a clear example where time stamp data across positions is required.  
@@ -154,14 +105,14 @@ A brief usage example looks as follows, and further questions about how the prei
 ```julia
 using RoME, Distributions
 fg = initfg()
-v0 = addNode!(fg, :x0, DynPoint2(ut=0))
+v0 = addVariable!(fg, :x0, DynPoint2(ut=0))
 
 # Prior factor as boundary condition
 pp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*eye(4)))
 f0 = addFactor!(fg, [:x0;], pp0)
 
 # conditional likelihood between Dynamic Point2
-v1 = addNode!(fg, :x1, DynPoint2(ut=1000_000)) # time in microseconds
+v1 = addVariable!(fg, :x1, DynPoint2(ut=1000_000)) # time in microseconds
 dp2dp2 = DynPoint2DynPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))
 f1 = addFactor!(fg, [:x0;:x1], dp2dp2)
 
@@ -212,9 +163,9 @@ A similar usage example here shows:
 fg = initfg()
 
 # add three point locations
-v0 = addNode!(fg, :x0, DynPoint2(ut=0))
-v1 = addNode!(fg, :x1, DynPoint2(ut=1000_000))
-v2 = addNode!(fg, :x2, DynPoint2(ut=2000_000))
+v0 = addVariable!(fg, :x0, DynPoint2(ut=0))
+v1 = addVariable!(fg, :x1, DynPoint2(ut=1000_000))
+v2 = addVariable!(fg, :x2, DynPoint2(ut=2000_000))
 
 # Prior factor as boundary condition
 pp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*eye(4)))

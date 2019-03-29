@@ -1,56 +1,113 @@
 ## Function Reference
 
-**NOTE** WORK IN PROGRESS
-
 ```@contents
 Pages = [
     "func_ref.md"
 ]
 Depth = 3
 ```
+
+**WORK IN PROGRESS**  Not all functions have been added to this directory yet.
+
 ### Caesar
 ```@docs
-    Caesar.loadmodel
-    Caesar.getPoseExVertexNeoIDs
-    Caesar.askneo4jcredentials!
-    RoME.getRangeKDEMax2D
-    Caesar.getLandmOtherSessNeoIDs
-    Caesar.db2jld
-    Caesar.identitypose6fg
-    Caesar.fetchrobotdatafirstpose
-    Caesar.executeQuery
-    IncrementalInference.ls
-    Caesar.updateparallelposes!
-    Caesar.removeReinsertMultisessionPrior!
-    Caesar.appendvertbigdata!
-    Caesar.parseMergeVertAttr!
-    Caesar.updatenewverts!
-    Caesar.mergeCloudVertex!
-    Caesar.getVertNeoIDs!
-    Caesar.whosNear3D
-    Caesar.getprpt2kde
-    Caesar.whosNear2D
-    Caesar.hasBigDataElement
-    Caesar.getAllLandmarkNeoIDs
-    Caesar.consoleaskuserfordb
-    Caesar.drawAllOdometryEdges!
-    Caesar.standardcloudgraphsetup
-    Caesar.resetentireremotesession
-    Caesar.getfirstpose
-    Caesar.getExVertexNeoIDs
-    Caesar.findExistingMSConstraints
-    Caesar.removeNeo4jID
-    Caesar.drawLineBetween!
-    Caesar.getBigDataElement
-    Caesar.askmongocredentials!
-    Caesar.rmInstMultisessionPriors!
-    RoME.getLastPose
-    Caesar.insertrobotdatafirstpose!
-    Caesar.fetchsubgraph!
-    Caesar.getLocalSubGraphMultisession
-    Caesar.getnewvertdict
+appendvertbigdata!
+consoleaskuserfordb
+db2jld
+executeQuery
+fetchrobotdatafirstpose
+fetchsubgraph!
+findExistingMSConstraints
+getAllLandmarkNeoIDs
+getBigDataElement
+getExVertexNeoIDs
+getLandmOtherSessNeoIDs
+getLocalSubGraphMultisession
+getPoseExVertexNeoIDs
+getVertNeoIDs!
+getfirstpose
+getnewvertdict
+getprpt2kde
+hasBigDataElement
+insertrobotdatafirstpose!
+removeNeo4jID
+resetentireremotesession
+rmInstMultisessionPriors!
+standardcloudgraphsetup
+updatenewverts!
+whosNear2D
+whosNear3D
 ```
 
-## Index
-```@index
+### RoME
+
+```@docs
+getRangeKDEMax2D
+initFactorGraph!
+addOdoFG!
 ```
+
+### IncrementalInference
+```@docs
+addVariable!
+addFactor!
+allnums
+approxCliqMarginalUp!
+approxConv
+batchSolve!
+childCliqs
+cliqGibbs
+convert2packedfunctionnode
+decodefg
+deleteFactor!
+deleteVariable!
+doautoinit!
+downMsgPassingRecursive
+dwnMsg
+encodefg
+fifoFreeze!
+findRelatedFromPotential
+fmcmc!
+getCurrentWorkspaceFactors
+getCurrentWorkspaceVariables
+getCliq
+getData
+getFactor
+getKDE
+getParent
+getSofttype
+getVal
+getVariable
+getVertKDE
+getUpMsgs
+getDwnMsgs
+initfg
+landmarks
+loadjld
+localProduct
+ls
+lsf
+lsRear
+manualinit!
+parentCliq
+packFromLocalPotentials!
+printgraphmax
+productpartials!
+prodmultiplefullpartials
+prodmultipleonefullpartials
+savejld
+setDwnMsg!
+setfreeze!
+setUpMsg!
+subgraphFromVerts
+treeProductDwn
+treeProductUp
+updateFGBT!
+upGibbsCliqueDensity
+upMsg
+writeGraphPdf
+showFactor
+```
+
+<!-- IIF v0.5.3 -->
+<!-- showVariable -->

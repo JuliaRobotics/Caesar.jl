@@ -59,7 +59,7 @@ lsrNoise=diagm([0.1;1.0])
 # idx = 2
 # prev, X, nextn = getLastPose2D(fg)
 # vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N)
-# addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
+# addLandmarksFactorGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
 # # ==============================================================================
 
 
@@ -68,7 +68,7 @@ for idx=2:5
   prev, X, nextn = getLastPose2D(fg)
   vp, fp = addOdoFG!(fg, nextn, d[idx][1:3], Podo, N=N)
   # add landmarks
-  addLandmarksFactoGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
+  addLandmarksFactorGraph!(fg, f, idx, prevn, nextn, lcmode=lcmode, lsrNoise=lsrNoise, N=N, MM=MM)
   prevn = nextn
   # if (idx%10==0)
   #    Solve

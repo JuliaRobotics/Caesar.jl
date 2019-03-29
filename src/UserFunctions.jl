@@ -6,7 +6,7 @@
 Initialize a and exiting or new factor graph with a first pose and prior as specified by default
 keywords or user.
 """
-function identitypose6fg(;fg=nothing,
+function identitypose6fg!(;fg=nothing,
       N::Int=100,
       initCov::Array{Float64,2}=0.001*eye(6),
       initpose::SE3=SE3(0) )
@@ -18,11 +18,18 @@ function identitypose6fg(;fg=nothing,
   # pts = 0.001*randn(6,N)
   initPosePrior = PriorPose3( MvNormal(veeEuler(initpose), initCov)  )
   pts = getSample(initPosePrior,N)[1]
-  v0 = addNode!(fg, :x0,  pts,  N=N, labels=["POSE"])
+  v0 = addVariable!(fg, :x0,  pts,  N=N, labels=["POSE"])
   f1  = addFactor!(fg,[v0], initPosePrior)
   return fg
 end
 
+function identitypose6fg(;fg=nothing,
+      N::Int=100,
+      initCov::Array{Float64,2}=0.001*eye(6),
+      initpose::SE3=SE3(0) )
+   @warn "Caesar.identitypose6fg deprecated, use identitypose6fg! instead"
+   identitypose6fg!(fg=fg, N=N, initCov=initCov, initpose=initpose)
+end
 
 # function solveandvisualize(fg::FactorGraph,
 #       vc::DrakeVisualizer.Visualizer;
