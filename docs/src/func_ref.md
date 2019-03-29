@@ -73,7 +73,9 @@ getCurrentWorkspaceVariables
 getCliq
 getCliqOrderUpSolve
 getCliqAllVarIds
+getCliqAssocMat
 getCliqFrontalVarIds
+getCliqMat
 getCliqSeparatorVarIds
 getCliqVarIdsPriors
 getCliqVarSingletons
