@@ -122,7 +122,5 @@ upGibbsCliqueDensity
 upMsg
 writeGraphPdf
 showFactor
+showVariable
 ```
-
-<!-- IIF v0.5.3 -->
-<!-- showVariable -->
