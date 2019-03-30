@@ -7,6 +7,13 @@ Pages = [
 Depth = 3
 ```
 
+### Arena
+```@docs
+visualize
+stopvis!
+setGlobalDrawTransform!
+```
+
 ### RoMEPlotting
 ```@docs
 drawLandms

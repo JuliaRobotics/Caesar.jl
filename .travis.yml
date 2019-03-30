@@ -1,21 +1,29 @@
 language: julia
+
 os:
   - linux
+
 julia:
-  - 0.7
   - 1.0
-  - 1.1
-  - nightly
+#   - 0.7
+#   - 1.1
+#   - nightly
+#
+# matrix:
+#   allow_failures:
+#     - julia: 1.1
+#     - julia: nightly
+
 notifications:
   email: false
+
 addons:
   apt:
+    sources:
+      - trusty-media
     packages:
-    - hdf5-tools
-matrix:
-  allow_failures:
-    - julia: 1.1
-    - julia: nightly
+      - ffmpeg
+      - hdf5-tools
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
@@ -36,5 +44,27 @@ jobs:
                                     Pkg.develop(PackageSpec(path=pwd()))'
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master")); Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting",rev="master"));'
-        - julia --project=docs/ docs/make.jl
+        - julia -e 'using Pkg; Pkg.add("MbedTLS"); using MbedTLS'
+        - xvfb-run julia -e 'using Pkg; Pkg.develop("Arena");'
+        - xvfb-run julia --project=docs/ docs/make.jl
       after_success: skip
+
+# moved comments down for clarity
+# matrix:
+#   include:
+#     - os: linux
+#       julia: 0.7
+#       env: TESTCMD="xvfb-run julia"
+#     - os: linux
+#       julia: 1.0
+#       env: TESTCMD="xvfb-run julia"
+#     - os: linux
+#       julia: nightly
+#       env: TESTCMD="xvfb-run julia"
+#   allow_failures:
+#     - julia: 1.1
+#     - julia: nightly
+
+# branches:
+#   only:
+#     - master

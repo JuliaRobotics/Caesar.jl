@@ -6,6 +6,9 @@ import IncrementalInference: initfg
 using KernelDensityEstimatePlotting
 # import KernelDensityEstimatePlotting: plotKDE
 using RoMEPlotting
+#using MbedTLS
+#@info "MbedTLS has been loaded"
+using Arena
 
 
 makedocs(
