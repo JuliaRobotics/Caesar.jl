@@ -75,6 +75,7 @@ getCliqOrderUpSolve
 getCliqAllVarIds
 getCliqAssocMat
 getCliqFrontalVarIds
+getCliqInitVarOrderUp
 getCliqMat
 getCliqSeparatorVarIds
 getCliqVarIdsPriors
