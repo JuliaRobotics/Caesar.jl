@@ -62,6 +62,7 @@ decodefg
 deleteFactor!
 deleteVariable!
 doautoinit!
+doCliqAutoInitUp!
 downMsgPassingRecursive
 dwnMsg
 encodefg
