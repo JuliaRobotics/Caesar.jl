@@ -75,6 +75,7 @@ getCliq
 getCliqOrderUpSolve
 getCliqAllVarIds
 getCliqAssocMat
+getCliqChildMsgsUp
 getCliqFrontalVarIds
 getCliqInitVarOrderUp
 getCliqMat
@@ -98,6 +99,7 @@ inferOverTreeR!
 initfg
 initOnTree!
 isPartial
+isCliqReadyInferenceUp
 isInitialized
 landmarks
 loadjld
