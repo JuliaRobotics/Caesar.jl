@@ -35,6 +35,10 @@ global sessionverbs = [
     :getVarMAPFit; # default=Normal
 ]
 
+additionalVerbs = [
+    :multiplyFunctions;
+];
+
 plottingVerbs = [];
 try
     # Test - if passed, declare verbs
@@ -77,7 +81,7 @@ function start(zmqServer::ZmqServer)
 
             cmdtype = haskey(request, "request") ? Symbol(request["request"]) : :ERROR_NOCOMMANDPROVIDED
             @info "[ZMQ Server] REQUEST: Received request '$cmdtype' in payload '$str'..."
-            if cmdtype in union(configverbs, sessionverbs)
+            if cmdtype in union(configverbs, sessionverbs, additionalVerbs)
                 resp = Dict{String, Any}()
                 try
                     # Mocking server
