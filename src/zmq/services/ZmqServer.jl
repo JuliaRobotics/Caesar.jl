@@ -75,7 +75,7 @@ function start(zmqServer::ZmqServer)
     try
         while zmqServer.isServerActive
             println("waiting to receive...")
-            msg = ZMQ.recv(s1)
+            @show msg = ZMQ.recv(s1)
             out = ZMQ.convert(IOStream, msg)
             str = String(take!(out))
             request = JSON.parse(str)
