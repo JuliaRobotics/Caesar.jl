@@ -38,7 +38,7 @@ makedocs(
         ],
         "Principles" => [
             "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
-        ]
+        ],
         "How to Expand?" => [
             "Custom Variables and Factors" => "concepts/adding_variables_factors.md",
             "Creating Variables and Factors" => "examples/basic_definingfactors.md",
