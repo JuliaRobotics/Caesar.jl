@@ -11,7 +11,7 @@ The Caesar framework is not limited to direct Julia use. The following Github pr
     * [Graff Cpp](https://github.com/ MarineRoboticsGroup/graff_cpp)
     * [Caesar LCM](http://github.com/pvazteixeira/  caesar-lcm)
   * Python:
-    * [SynchronySDK](https://github.com/nicrip/ SynchronySDK_py)
+    * [GraffSDK.py](https://github.com/nicrip/graff_py)
 
 Contributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below).
 
@@ -21,7 +21,7 @@ Caesar.jl has a ZMQ messaging interface ([interested can see code here  here](ht
 
 The current known interface implementations to Caesar.jl are:
 - C/C++ [GraffCPP](https://github.com/MarineRoboticsGroup/graff_cpp),
-- Python [SychronySDK](https://github.com/nicrip/SynchronySDK_py) (needs to be updated),
+- Python [GraffSDK.py](https://github.com/nicrip/graff_py) (needs to be updated),
 
 ### Starting the Caesar ZMQ Navigation Server
 
