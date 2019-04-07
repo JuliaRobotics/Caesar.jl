@@ -102,6 +102,11 @@ function getCloudVert(cgl::CloudGraph,
         sym::NothingUnion{Symbol}=nothing,
         bigdata=false  )
   #
+
+  @warn "HERE!"
+  @info stacktrace()
+  @warn "--- END HERE!"
+
   query = "match (n:$(session):$robot:$user) "
 
   if sym != nothing
@@ -201,6 +206,11 @@ function getExVertFromCloud(fgl::FactorGraph,
         fgid::Int64;
         bigdata::Bool=false  )
   #
+
+  @warn "GET HERE!"
+  @info stacktrace()
+  @warn "--- GET END HERE!"
+
   neoID = fgl.cgIDs[fgid]
   cvr = CloudGraphs.get_vertex(fgl.cg, neoID, false)
   CloudGraphs.cloudVertex2ExVertex(cvr)
@@ -220,6 +230,11 @@ function updateFullCloudVertData!(fgl::FactorGraph,
         bigdata::Bool=false  )
  #
   # TODO -- this get_vertex seems excessive, but we need the CloudVertex
+
+  @warn "UPDATE HERE!"
+  @info stacktrace()
+  @warn "--- UPDATE END HERE!"
+
 
   if(!haskey(fgl.cgIDs, nv.index))
       error("Cannot find $(nv.index) in $(fgl.cgIDs)...")
