@@ -1,4 +1,3 @@
-using Revise
 using Caesar;
 using Caesar.ZmqCaesar;
 fg = Caesar.initfg();
