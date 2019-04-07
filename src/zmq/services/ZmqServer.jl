@@ -37,6 +37,7 @@ global sessionverbs = [
 
 additionalVerbs = [
     :multiplyDistributions;
+    :status
 ];
 
 plottingVerbs = [];

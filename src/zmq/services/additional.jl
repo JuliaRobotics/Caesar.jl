@@ -1,7 +1,12 @@
 
 export
-  multiplyDistributions
+  multiplyDistributions,
+  status
 
+function status(cfg, fg, requestDict)
+  @info "got status request"
+  Dict{String, Any}("status" => "OK")
+end
 
 function multiplyDistributions(cfg, fg, requestDict)::Dict{String, Any}
   requestVal = Unmarshal.unmarshal(MultiplyDistributionsRequest, requestDict["payload"])
