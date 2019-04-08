@@ -1,18 +1,18 @@
-# Principle: Multiplying Functions
+# Principle: Multiplying Functions (Python)
 
 This example illustrates a central concept in Caesar.jl (and the multimodal-iSAM algorithm), whereby different probability belief functions are multiplied together.
 The true product between various likelihood beliefs is very complicated to compute, but a good approximations exist.
 In addition, `ZmqCaesar` offers a `ZMQ` interface to the factor graph solution for multilanguage support.  This example is a small subset that shows how to use the `ZMQ` infrastructure, but avoids the larger factor graph related calls.
 
-## Operation
+## Products of Infinite Objects (Functionals)
 
 Consider multiplying multiple belief density functions together, for example 
 ```math
-f123 = f1 x f2 x f3
+f = \\prod_i f_i
 ```
 which is a core operation required for solving the [Chapman-Kolmogorov transit equations](http://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/).
 
-## Direct Julia Calculation
+### Direct Julia Calculation
 
 The [ApproxManifoldProducts.jl](http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl) package (under development) is meant to unify many on-manifold product operations, and can be called directly in Julia:
 ```julia
@@ -28,6 +28,12 @@ f12 = maniproduct([f1;f2], (:Euclid,))
 > Also see previous [KernelDensityEstimate.jl](http://www.github.com/JuliaRobotics/KernelDensityEstimate.jl).
 
 To make Caesar.jl usable from other languages, a ZMQ server interface model has been developed which can also be used to test this principle functional product operation.
+
+### Not Susceptible to Particle Depletion
+
+The product process of say `f1*f2` **is not a importance sampling procedure** that is commonly used in particle filtering, but instead a more advanced Bayesian inference process based on a wide variety of academic literature.  The KernelDensityEstimate method is a stochastic method, what active research is looking into deterministic homotopy/continuation methods.
+
+The easy example that demonstrates that particle depletion is avoided here, is where `f1` and `f2` are represented by well separated and evenly weighted samples -- the Bayesian inference 'product' technique efficiently produces new (evenly weighted) samples for `f12` somewhere in between `f1` and `f2`, but clearly not overlapping the original population of samples used for `f1` and `f2`.  In contrast, conventional particle filtering measurement updates would have "de-weighted" particles of either input function and then be rejected during an eventual resampling step, thereby depleting the sample population.
 
 ## Starting the ZMQ server
 
