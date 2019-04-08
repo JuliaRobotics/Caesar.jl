@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Multiplying Functions (.py) · Caesar.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>Caesar.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><span class="toctext">Getting Started</span><ul><li><a class="toctext" href="../../installation_environment/">Installation</a></li><li><a class="toctext" href="../../faq/">FAQ</a></li></ul></li><li><span class="toctext">Initial Concepts</span><ul><li><a class="toctext" href="../../concepts/concepts/">Caesar Concepts</a></li><li><a class="toctext" href="../../concepts/building_graphs/">Building Factor Graphs</a></li><li><a class="toctext" href="../../concepts/available_varfacs/">Available Variables/Factors</a></li><li><a class="toctext" href="../../concepts/interacting_fgs/">Interacting w/ Factor Graphs</a></li><li><a class="toctext" href="../../concepts/mmisam_alg/">Multimodal iSAM Algorithm</a></li><li><a class="toctext" href="../../concepts/multilang/">Multi-Language Support</a></li><li><a class="toctext" href="../../concepts/arena_visualizations/">Arena Visualization</a></li><li><a class="toctext" href="../../concepts/database_interactions/">Cloud Server/Database</a></li><li><a class="toctext" href="../../concepts/multisession/">Multi/Cross Session Solving</a></li></ul></li><li><span class="toctext">Examples</span><ul><li><a class="toctext" href="../../examples/examples/">Caesar Examples</a></li><li><a class="toctext" href="../../examples/basic_continuousscalar/">ContinuousScalar as 1D Example</a></li><li><a class="toctext" href="../../examples/basic_slamedonut/">Under-defined Trilateration SLAM 2D</a></li><li><a class="toctext" href="../../examples/basic_hexagonal2d/">Hexagonal 2D SLAM</a></li><li><a class="toctext" href="../../examples/interm_fixedlag_hexagonal/">Fixed-Lag Solving 2D</a></li></ul></li><li><span class="toctext">Principles</span><ul><li class="current"><a class="toctext" href>Multiplying Functions (.py)</a><ul class="internal"><li><a class="toctext" href="#Starting-the-ZMQ-server-1">Starting the ZMQ server</a></li><li><a class="toctext" href="#Functional-Products-via-Python-1">Functional Products via Python</a></li><li><a class="toctext" href="#A-Basic-Factor-Graph-Product-Illustration-1">A Basic Factor Graph Product Illustration</a></li></ul></li></ul></li><li><span class="toctext">How to Expand?</span><ul><li><a class="toctext" href="../../concepts/adding_variables_factors/">Custom Variables and Factors</a></li><li><a class="toctext" href="../../examples/basic_definingfactors/">Creating Variables and Factors</a></li><li><a class="toctext" href="../../examples/interm_dynpose/">Creating DynPose Factor</a></li></ul></li><li><span class="toctext">Developer Zone</span><ul><li><a class="toctext" href="../../dev/wiki/">Wiki Pointer</a></li></ul></li><li><span class="toctext">Literature</span><ul><li><a class="toctext" href="../../refs/literature/">References</a></li></ul></li><li><span class="toctext">Function Reference</span><ul><li><a class="toctext" href="../../func_ref/">Caesar&#39;s Reference</a></li><li><a class="toctext" href="../../vis_func_ref/">Visualization Reference</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Principles</li><li><a href>Multiplying Functions (.py)</a></li></ul><a class="edit-page" href="https://github.com/JuliaRobotics/Caesar.jl/blob/master/docs/src/principles/multiplyingDensities.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Multiplying Functions (.py)</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Principle:-Multiplying-Functions-1" href="#Principle:-Multiplying-Functions-1">Principle: Multiplying Functions</a></h1><p>This example illustrates a central concept in Caesar.jl (and the multimodal-iSAM algorithm), whereby different probability belief functions are multiplied together. The true product between various likelihood beliefs is very complicated to compute, but a good approximations exist. In addition, <code>ZmqCaesar</code> offers a <code>ZMQ</code> interface to the factor graph solution for multilanguage support.  This example is a small subset that shows how to use the <code>ZMQ</code> infrastructure, but avoids the larger factor graph related calls.</p><h2><a class="nav-anchor" id="Starting-the-ZMQ-server-1" href="#Starting-the-ZMQ-server-1">Starting the ZMQ server</a></h2><p>Caesar.jl provides a <a href="https://github.com/JuliaRobotics/Caesar.jl/blob/master/scripts/zmqServer.sh">startup script for a default ZMQ instance</a>.  Start a server and allow precompilations to finish until a printout message &quot;waiting to receive...&quot; is seen.  Feel free to change the ZMQ interface for TCP vs. shared memory or any of the ZMQ supported modes of data transport.</p><h2><a class="nav-anchor" id="Functional-Products-via-Python-1" href="#Functional-Products-via-Python-1">Functional Products via Python</a></h2><p>Clone the Python <a href="http://github.com/nicrip/graff_py/examples"><code>GraffSDK.py</code> code here</a> and find the <code>product.py</code> file.</p><pre><code class="language-python">import sys
+sys.path.append(&#39;..&#39;)
+
+import numpy as np
+from graff.Endpoint import Endpoint
+from graff.Distribution.Normal import Normal
+from graff.Distribution.SampleWeights import SampleWeights
+from graff.Distribution.BallTreeDensity import BallTreeDensity
+
+from graff.Core import MultiplyDistributions
+
+import matplotlib.pyplot as plt
+
+if __name__ == &#39;__main__&#39;:
+    e = Endpoint()
+
+    e.Connect(&#39;tcp://192.168.0.102:5555&#39;)
+    print(e.Status())
+
+    N = 1000
+    u1 = 0.0
+    s1 = 10.0
+    x1 = u1+s1*np.random.randn(N)
+
+    u2 = 50.0
+    s2 = 10.0
+    x2 = u2+s2*np.random.randn(N)
+    b1 = BallTreeDensity(&#39;Gaussian&#39;, np.ones(N), np.ones(N), x1)
+    b2 = BallTreeDensity(&#39;Gaussian&#39;, np.ones(N), np.ones(N), x2)
+
+    rep = MultiplyDistributions(e, [b1,b2])
+    print(rep)
+    x = np.array(rep[&#39;points&#39;] )
+    # plt.stem(x, np.ones(len(x)) )
+    plt.hist(x, bins = int(len(x)/10.0), color= &#39;m&#39;)
+    plt.hist(x1, bins = int(len(x)/10.0),color=&#39;r&#39;)
+    plt.hist(x2, bins = int(len(x)/10.0),color=&#39;b&#39;)
+    plt.show()
+
+    e.Disconnect()</code></pre><h2><a class="nav-anchor" id="A-Basic-Factor-Graph-Product-Illustration-1" href="#A-Basic-Factor-Graph-Product-Illustration-1">A Basic Factor Graph Product Illustration</a></h2><p>Using the factor graph methodology, we can repeat the example by adding variable and two prior factors.  This can be done directly in Julia (or via ZMQ in the further Python example below)</p><h3><a class="nav-anchor" id="Products-of-Functions-(Factor-Graphs-in-Julia)-1" href="#Products-of-Functions-(Factor-Graphs-in-Julia)-1">Products of Functions (Factor Graphs in Julia)</a></h3><p>Directly in Julia:</p><pre><code class="language-julia">using IncrementalInference
+
+fg = initfg()
+
+addVariable!(fg, :x0, ContinuousScalar)
+addFactor!(fg, [:x0], Prior(Normal(-3.0,1.0)))
+addFactor!(fg, [:x0], Prior(Normal(+3.0,1.0)))
+
+batchSolve!(fg)
+
+# plot the results
+using KernelDensityEstimatePlotting
+
+plotKDE(getKDE(fg, :x0))</code></pre><p>Example figure:</p><p align="center">
+<img src="https://github.com/JuliaRobotics/Caesar.jl/tree/master/docs/imgs/productexample.png" width="480" border="0" />
+</p><h3><a class="nav-anchor" id="Products-of-Functions-(Via-Python-and-ZmqCaesar)-1" href="#Products-of-Functions-(Via-Python-and-ZmqCaesar)-1">Products of Functions (Via Python and ZmqCaesar)</a></h3><p>We repeat the example using Python and the ZMQ interface:</p><pre><code class="language-python">import sys
+sys.path.append(&#39;..&#39;)
+
+import numpy as np
+from graff.Endpoint import Endpoint
+from graff.Distribution.Normal import Normal
+from graff.Distribution.SampleWeights import SampleWeights
+from graff.Distribution.BallTreeDensity import BallTreeDensity
+
+from graff.Core import MultiplyDistributions
+
+
+if __name__ == &#39;__main__&#39;:
+    &quot;&quot;&quot;
+
+    &quot;&quot;&quot;
+    e.Connect(&#39;tcp://127.0.0.1:5555&#39;)
+    print(e.Status())
+
+    # Add the first pose x0
+    x0 = Variable(&#39;x0&#39;, &#39;ContinuousScalar&#39;)
+    e.AddVariable(x0)
+
+    # Add at a fixed location PriorPose2 to pin x0 to a starting location
+    prior = Factor(&#39;Prior&#39;, [&#39;x0&#39;], Normal(np.zeros(1,1)-3.0, np.eye(1)) )
+    e.AddFactor(prior)
+    prior = Factor(&#39;Prior&#39;, [&#39;x0&#39;], Normal(np.zeros(1,1)+3.0, np.eye(1)) )
+    e.AddFactor(prior)</code></pre><footer><hr/><a class="previous" href="../../examples/interm_fixedlag_hexagonal/"><span class="direction">Previous</span><span class="title">Fixed-Lag Solving 2D</span></a><a class="next" href="../../concepts/adding_variables_factors/"><span class="direction">Next</span><span class="title">Custom Variables and Factors</span></a></footer></article></body></html>
