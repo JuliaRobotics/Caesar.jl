@@ -8,7 +8,7 @@ In addition, `ZmqCaesar` offers a `ZMQ` interface to the factor graph solution f
 
 Consider multiplying multiple belief density functions together, for example 
 ```math
-f = \\prod_i f_i
+f = f_1 \times f_2 \times f_3
 ```
 which is a core operation required for solving the [Chapman-Kolmogorov transit equations](http://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/).
 
