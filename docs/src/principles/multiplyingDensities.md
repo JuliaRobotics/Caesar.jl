@@ -4,13 +4,38 @@ This example illustrates a central concept in Caesar.jl (and the multimodal-iSAM
 The true product between various likelihood beliefs is very complicated to compute, but a good approximations exist.
 In addition, `ZmqCaesar` offers a `ZMQ` interface to the factor graph solution for multilanguage support.  This example is a small subset that shows how to use the `ZMQ` infrastructure, but avoids the larger factor graph related calls.
 
+## Operation
+
+Consider multiplying multiple belief density functions together, for example 
+```math
+f123 = f1 x f2 x f3
+```
+which is a core operation required for solving the [Chapman-Kolmogorov transit equations](http://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/).
+
+## Direct Julia Calculation
+
+The [ApproxManifoldProducts.jl](http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl) package (under development) is meant to unify many on-manifold product operations, and can be called directly in Julia:
+```julia
+using ApproxManifoldProducts
+
+f1 = manikde!(randn(100,1).-3.0, (:Euclid,))
+f2 = manikde!(randn(100,1).+3.0, (:Euclid,))
+...
+
+f12 = maniproduct([f1;f2], (:Euclid,))
+```
+
+> Also see previous [KernelDensityEstimate.jl](http://www.github.com/JuliaRobotics/KernelDensityEstimate.jl).
+
+To make Caesar.jl usable from other languages, a ZMQ server interface model has been developed which can also be used to test this principle functional product operation.
+
 ## Starting the ZMQ server
 
-Caesar.jl provides a [startup script for a default ZMQ instance](https://github.com/JuliaRobotics/Caesar.jl/blob/master/scripts/zmqServer.sh).  Start a server and allow precompilations to finish until a printout message "waiting to receive..." is seen.  Feel free to change the ZMQ interface for TCP vs. shared memory or any of the ZMQ supported modes of data transport.
+Caesar.jl provides a [startup script for a default ZMQ instance](http://github.com/JuliaRobotics/Caesar.jl/blob/master/scripts/zmqServer.sh).  Start a server and allow precompilations to finish until a printout message "waiting to receive..." is seen.  Feel free to change the ZMQ interface for TCP vs. shared memory or any of the ZMQ supported modes of data transport.
 
 ## Functional Products via Python
 
-Clone the Python [`GraffSDK.py` code here](http://github.com/nicrip/graff_py/examples) and find the `product.py` file.
+Clone the Python [`GraffSDK.py` code here](http://github.com/nicrip/graff_py/blob/4ab4691f457f6ff816356df79850dd6c47809115/examples/product.py#L1) and look at the `product.py` file.
 ```python
 import sys
 sys.path.append('..')
@@ -81,7 +106,7 @@ plotKDE(getKDE(fg, :x0))
 Example figure:
 ```@raw html
 <p align="center">
-<img src="https://github.com/JuliaRobotics/Caesar.jl/tree/master/docs/imgs/productexample.png" width="480" border="0" />
+<img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/productexample.png" width="480" border="0" />
 </p>
 ```
 
