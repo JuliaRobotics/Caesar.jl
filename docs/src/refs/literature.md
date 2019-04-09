@@ -30,13 +30,15 @@ Newly created page to list related references and additional literature pertaini
 
 [2.5]  Sudderth, E.B., Ihler, A.T., Isard, M., Freeman, W.T. and Willsky, A.S., 2010. ["Nonparametric belief propagation."](https://www.microsoft.com/en-us/research/wp-content/uploads/2010/10/p95-sudderth.pdf) Communications of the ACM, 53(10), pp.95-103
 
-[2.6]  Farrell, J., and Matthew B.: "The global positioning system and inertial navigation." Vol. 61. New York: Mcgraw-hill, 1999.
+[2.6] Paskin, Mark A. ["Thin junction tree filters for simultaneous localization and mapping."](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.15.7602&rep=rep1&type=pdf) in Int. Joint Conf. on Artificial Intelligence. 2003.
 
-[2.7]  Zarchan, Paul, and Howard Musoff, eds. Fundamentals of Kalman filtering: a practical approach. American Institute of Aeronautics and Astronautics, Inc., 2013.
+[2.7]  Farrell, J., and Matthew B.: "The global positioning system and inertial navigation." Vol. 61. New York: Mcgraw-hill, 1999.
 
-[2.8]  Hanebeck, Uwe D. ["FLUX: Progressive State Estimation Based on Zakai-type Distributed Ordinary Differential Equations."](https://arxiv.org/pdf/1808.02825) arXiv preprint arXiv:1808.02825 (2018).
+[2.8]  Zarchan, Paul, and Howard Musoff, eds. Fundamentals of Kalman filtering: a practical approach. American Institute of Aeronautics and Astronautics, Inc., 2013.
 
-[2.9]  Muandet, Krikamol, et al. ["Kernel mean embedding of distributions: A review and beyond."](https://www.nowpublishers.com/article/DownloadSummary/MAL-060) Foundations and Trends® in Machine Learning 10.1-2 (2017): 1-141.
+[2.9]  Hanebeck, Uwe D. ["FLUX: Progressive State Estimation Based on Zakai-type Distributed Ordinary Differential Equations."](https://arxiv.org/pdf/1808.02825) arXiv preprint arXiv:1808.02825 (2018).
+
+[2.10]  Muandet, Krikamol, et al. ["Kernel mean embedding of distributions: A review and beyond."](https://www.nowpublishers.com/article/DownloadSummary/MAL-060) Foundations and Trends® in Machine Learning 10.1-2 (2017): 1-141.
 
 ### Additional References
 
