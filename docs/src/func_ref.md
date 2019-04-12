@@ -57,6 +57,12 @@ approxConv
 batchSolve!
 childCliqs
 cliqGibbs
+compareAllVariables
+compareFactorGraphs
+compareSimilarFactors
+compareSimilarVariables
+compareSubsetFactorGraph
+compareVariable
 convert2packedfunctionnode
 decodefg
 deleteFactor!
