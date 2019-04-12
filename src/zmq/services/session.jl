@@ -50,6 +50,7 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
     factor = nothing
     try
         factType = _evalType(factorRequest["factorType"])
+        error("$factType")
         factor = convert(factType, packedFactor)
     catch ex
         io = IOBuffer()

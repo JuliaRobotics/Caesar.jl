@@ -3,6 +3,8 @@ module ZmqCaesar
     using Distributions, IncrementalInference, Caesar
     using Unmarshal
     using Dates
+    using Glob
+    using DocStringExtensions
 
     include("models/distributions.jl")
     include("models/factors.jl")
