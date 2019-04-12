@@ -9,6 +9,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
     if !(lmsym in currtags)
       @info "adding node $lmsym"
       addVariable!(fg, lmsym, lmtype)
+      @info "new variable $lmsym added."
     end
     ppbr = nothing
     if lmtype == RoME.Point2
@@ -137,7 +138,7 @@ function main(resultsdir::String,
               show::Bool=false  )
 
 # Factor graph construction
-fg = initfg()
+fg = IIF.initfg()
 prev_psid = 0
 
 # load from previous file

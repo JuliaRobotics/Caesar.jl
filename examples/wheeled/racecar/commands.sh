@@ -8,7 +8,7 @@
 
 
 racecarslamdefault_1() {
-    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun1" --failsafe $*
+    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun1" $*
 }
 racecarslamdefault_2() {
     julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun2" --failsafe $*
