@@ -78,12 +78,38 @@ function logEventFile(logdir, msg; eventtime=round(Int,time()*1e6))::Nothing
   nothing
 end
 
+function processJsonCmd(zmqServer, cmdtype, request, drawcounter, drawpdf)
+  # Mocking server
+  if haskey(zmqServer.config, "isMockServer") && zmqServer.config["isMockServer"] == "true" && cmdtype != :toggleMockServer
+      @warn "[ZMQ Server] MOCKING ENABLED - Ignoring request!"
+  else
+      # Otherwise actually perform the command
+      @show cmd = getfield(Caesar.ZmqCaesar, cmdtype)
+      resp = cmd(zmqServer.config, zmqServer.fg, request)
+  end
+  if !haskey(resp, "status")
+      resp["status"] = "OK"
+      drawcounter += 1
+  end
+  # TODO: make this an ArgParse.jl enableable feature
+  if drawpdf && (drawcounter % 20 == 0)
+      IIF.writeGraphPdf(zmqServer.fg, show=true)
+  else
+      drawcounter = 0
+  end
+end
+
 """
     $(SIGNATURES)
 
 Process JSON strings
 """
-function processJsonString(zmqServer::ZmqServer, str::String, drawcounter::Int)
+function processJsonString(zmqServer::ZmqServer,
+                           str::String,
+                           drawcounter::Int;
+                           drawpdf::Bool=false,
+                           yodamode::Bool=false   )
+  #
   global systemverbs
   global configverbs
   global sessionverbs
@@ -96,56 +122,43 @@ function processJsonString(zmqServer::ZmqServer, str::String, drawcounter::Int)
   cmdtype = haskey(request, "request") ? Symbol(request["request"]) : :ERROR_NOCOMMANDPROVIDED
   @info "[ZMQ Server] REQUEST: Received request '$cmdtype' in payload '$str'..."
   if cmdtype in union(configverbs, sessionverbs, additionalVerbs)
+    if yodamode
+      processJsonCmd(zmqServer, cmdtype, request, drawcounter, drawpdf)
+    else
       try
-          # Mocking server
-          if haskey(zmqServer.config, "isMockServer") && zmqServer.config["isMockServer"] == "true" && cmdtype != :toggleMockServer
-              @warn "[ZMQ Server] MOCKING ENABLED - Ignoring request!"
-          else
-              # Otherwise actually perform the command
-              @show cmd = getfield(Caesar.ZmqCaesar, cmdtype)
-              resp = cmd(zmqServer.config, zmqServer.fg, request)
-          end
-          if !haskey(resp, "status")
-              resp["status"] = "OK"
-              drawcounter += 1
-          end
-          # TODO: make this an ArgParse.jl enableable feature
-          if drawcounter % 20 == 0
-              IIF.writeGraphPdf(zmqServer.fg, show=true)
-          else
-              drawcounter = 0
-          end
+        processJsonCmd(zmqServer, cmdtype, request, drawcounter, drawpdf)
       catch ex
-          io = IOBuffer()
-          showerror(io, ex, catch_backtrace())
-          err = String(take!(io))
-          @warn "[ZMQ Server] Exception: $err"
-          resp["status"] = "ERROR"
-          resp["error"] = err
+        io = IOBuffer()
+        showerror(io, ex, catch_backtrace())
+        err = String(take!(io))
+        @warn "[ZMQ Server] Exception: $err"
+        resp["status"] = "ERROR"
+        resp["error"] = err
       end
-      @info "[ZMQ Server] RESPONSE: $(JSON.json(resp))"
+    end
+    @info "[ZMQ Server] RESPONSE: $(JSON.json(resp))"
   elseif cmdtype in systemverbs
-      if cmdtype == :shutdown
-          #TODO: Call shutdown from here.
-          @info "Shutting down ZMQ server on request..."
-          zmqServer.isServerActive  = false
-          resp = Dict{String, Any}("status" => "OK")
-          # Send response before shutting down.
-      elseif cmdtype == :resetfg
-          @info "Resetting the factor graph..."
-          zmqServer.fg = initfg()
-          resp = Dict{String,Any}("status" => "OK")
-          # Send response before shutting down.
-      elseif cmdtype == :savecheckpoint
-          timest = Dates.format(now(), DateFormat("yyyy-mm-dd_HHMMSS"))
-          filename = "/tmp/zmqFG-$(timest).jld2"
-          @info "saving checkpoint to $filename"
-          savejld(zmqServer.fg, file=filename)
-          resp = Dict{String,Any}("status" => "OK", "destination" => filename)
-          # Send response before shutting down.
-      else
-          error("zmqServer: unknown systemverbs command $cmdtype")
-      end
+    if cmdtype == :shutdown
+      #TODO: Call shutdown from here.
+      @info "Shutting down ZMQ server on request..."
+      zmqServer.isServerActive  = false
+      resp = Dict{String, Any}("status" => "OK")
+      # Send response before shutting down.
+    elseif cmdtype == :resetfg
+      @info "Resetting the factor graph..."
+      zmqServer.fg = initfg()
+      resp = Dict{String,Any}("status" => "OK")
+      # Send response before shutting down.
+    elseif cmdtype == :savecheckpoint
+      timest = Dates.format(now(), DateFormat("yyyy-mm-dd_HHMMSS"))
+      filename = "/tmp/zmqFG-$(timest).jld2"
+      @info "saving checkpoint to $filename"
+      savejld(zmqServer.fg, file=filename)
+      resp = Dict{String,Any}("status" => "OK", "destination" => filename)
+      # Send response before shutting down.
+    else
+      error("zmqServer: unknown systemverbs command $cmdtype")
+    end
   else
       @warn "[ZMQ Server] Received invalid command $cmdtype"
       resp = Dict{String, String}("status" => "ERROR", "error" => "Command '$cmdtype' not a valid command.")
@@ -202,7 +215,7 @@ end
 
 
 
-function processJsonDir(zmqServer::ZmqServer, jsondir::String)
+function processJsonDir(zmqServer::ZmqServer, jsondir::String; yodamode::Bool=true)
   global systemverbs
   global configverbs
   global sessionverbs
@@ -226,7 +239,7 @@ function processJsonDir(zmqServer::ZmqServer, jsondir::String)
     @show ""
 
     # process the request
-    resp = processJsonString(zmqServer, str, drawcounter)
+    resp = processJsonString(zmqServer, str, drawcounter, yodamode=yodamode)
 
     # save the response to file
     fid = open(joinpath(respdir,split(fn,'/')[end]), "w")
