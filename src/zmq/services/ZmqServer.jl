@@ -7,7 +7,8 @@ export
 # import Base: start
 
 global systemverbs = Symbol[
-    :shutdown
+    :shutdown;
+    :resetfg
 ]
 global configverbs = Symbol[
     :initDfg;
@@ -119,6 +120,12 @@ function start(zmqServer::ZmqServer)
                     @info "Shutting down ZMQ server on request..."
                     zmqServer.isServerActive  = false
                     resp = Dict{String, Any}("status" => "OK")
+                    # Send response before shutting down.
+                    ZMQ.send(s1, JSON.json(resp))
+                elseif cmdtype == :resetfg
+                    @info "Resetting the factor graph..."
+                    zmqServer.fg = initfg()
+                    resp = Dict{String,Any}("status" => "OK")
                     # Send response before shutting down.
                     ZMQ.send(s1, JSON.json(resp))
                 end
