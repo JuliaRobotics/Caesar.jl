@@ -1,0 +1,13 @@
+{
+  "$schema": "http://www.github.com/JuliaRobotics/Caesar.jl/src/schema/SamplableBelief.json/r0",
+  "properties": {
+    "samples": "array",
+    "weights": "array",
+    "distType": "string"
+  },
+  "required": [
+    "samples",
+    "weights",
+    "distType"
+  ]
+}
