@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://www.github.com/JuliaRobotics/Caesar.jl/src/schema/r0/Request.json",
+  "title": "Request",
+  "type": "object",
+  "properties": {
+    "request": "string",
+    "payload": "object"
+  },
+  "required": [
+    "request"
+  ]
+}
