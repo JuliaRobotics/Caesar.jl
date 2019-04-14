@@ -84,7 +84,7 @@ function processJsonCmd(zmqServer, cmdtype, request, drawcounter, drawpdf)
       @warn "[ZMQ Server] MOCKING ENABLED - Ignoring request!"
   else
       # Otherwise actually perform the command
-      @show cmd = getfield(Caesar.ZmqCaesar, cmdtype)
+      cmd = getfield(Caesar.ZmqCaesar, cmdtype)
       resp = cmd(zmqServer.config, zmqServer.fg, request)
   end
   if !haskey(resp, "status")
