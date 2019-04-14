@@ -32,3 +32,7 @@ ROS integration is a priority for this project and will accompany the so-called 
 > **Note** the present focus (2018Q3-2019Q2) is to stabilize the [ZMQ interface](../concepts/multilang).
 
 > **Voice** Please add your voice of support or suggestions on [ROS integration here](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
+
+### How does JSON-Schema work?
+
+Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).
