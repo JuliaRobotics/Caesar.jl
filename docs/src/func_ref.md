@@ -55,6 +55,7 @@ allnums
 approxCliqMarginalUp!
 approxConv
 batchSolve!
+buildSubgraphFromLabels
 childCliqs
 cliqGibbs
 compareAllVariables
@@ -104,9 +105,11 @@ inferOverTree!
 inferOverTreeR!
 initfg
 initOnTree!
-isPartial
 isCliqReadyInferenceUp
+isFactor
 isInitialized
+isPartial
+isVariable
 landmarks
 loadjld
 localProduct
@@ -126,6 +129,7 @@ setfreeze!
 setValKDE!
 setUpMsg!
 subgraphFromVerts
+transferUpdateSubGraph!
 treeProductDwn
 treeProductUp
 updateFGBT!
