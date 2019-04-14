@@ -123,6 +123,7 @@ printgraphmax
 productpartials!
 prodmultiplefullpartials
 prodmultipleonefullpartials
+resetData!
 savejld
 setDwnMsg!
 setfreeze!
