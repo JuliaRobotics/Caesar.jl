@@ -37,7 +37,7 @@ The easy example that demonstrates that particle depletion is avoided here, is w
 
 ## Starting the ZMQ server
 
-Caesar.jl provides a [startup script for a default ZMQ instance](http://github.com/JuliaRobotics/Caesar.jl/blob/master/scripts/zmqServer.sh).  Start a server and allow precompilations to finish until a printout message "waiting to receive..." is seen.  Feel free to change the ZMQ interface for TCP vs. shared memory or any of the ZMQ supported modes of data transport.
+Caesar.jl provides a [startup script for a default ZMQ instance](http://github.com/JuliaRobotics/Caesar.jl/blob/master/scripts/zmqServer.sh).  Start a server and allow precompilations to finish, as indicated by a printout message "waiting to receive...".  More [details here](http://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#Starting-the-Caesar-ZMQ-Navigation-Server-1).
 
 ## Functional Products via Python
 
