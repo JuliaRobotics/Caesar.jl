@@ -130,8 +130,8 @@ end
 function main(resultsdir::String,
               camidxs,
               tag_bagl;
-              BB=10,
-              N=100,
+              BB=15,
+              N=50,
               lagLength=50,
               dofixedlag=true,
               jldfile::String="",
