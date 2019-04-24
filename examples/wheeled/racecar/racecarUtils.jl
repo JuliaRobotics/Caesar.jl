@@ -2,13 +2,13 @@
 
 
 # add AprilTag sightings from this pose
-function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true )
+function addApriltags!(fg, pssym, posetags; bnoise=0.01, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true )
   @show currtags = ls(fg)[2]
   for lmid in keys(posetags)
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
       @info "adding node $lmsym"
-      addVariable!(fg, lmsym, lmtype)
+      addVariable!(fg, lmsym, lmtype, dontmargin=true)
     end
     ppbr = nothing
     if lmtype == RoME.Point2
@@ -50,7 +50,9 @@ function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odot
   # first pose with zero prior
   if odotype == Pose2Pose2
     addVariable!(fg, new_pssym, Pose2)
-    addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))), autoinit=autoinit)
+    # addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),Matrix(Diagonal([0.4;0.4;0.3].^2)) )), autoinit=autoinit)
+    addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal([0.1;0.0;0.0],Matrix(Diagonal([0.4;0.2;0.3].^2)) )), autoinit=autoinit)
+
   elseif odotype == VelPose2VelPose2
     addVariable!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
     addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([0.4;0.4;0.3].^2))),
@@ -128,9 +130,9 @@ end
 function main(resultsdir::String,
               camidxs,
               tag_bagl;
-              BB=20,
+              BB=10,
               N=100,
-              lagLength=75,
+              lagLength=50,
               dofixedlag=true,
               jldfile::String="",
               failsafe::Bool=false,
@@ -153,12 +155,16 @@ fg.qfl = lagLength
 psid = 0
 pssym = Symbol("x$psid")
 # first pose with zero prior
-addVariable!(fg, pssym, DynPose2(ut=0))
-# addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
-addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
-                                              MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))
 
-addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
+addVariable!(fg, pssym, Pose2)
+# addVariable!(fg, pssym, DynPose2(ut=0))
+
+addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2)))))
+# addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
+#                                               MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))
+
+
+addApriltags!(fg, pssym, tag_bagl[psid], lmtype=RoME.Point2, fcttype=Pose2Pose2)
 
 show ? writeGraphPdf(fg) : nothing
 
@@ -176,7 +182,8 @@ for psid in (prev_psid+1):1:maxlen
   prev_psid
   maxlen
   @show psym = Symbol("x$psid")
-  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
+  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Point2, odotype=Pose2Pose2, fcttype=Pose2Point2BearingRange, autoinit=true)
+  # addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=DynPose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
   # writeGraphPdf(fg)
 
   if psid % BB == 0 || psid == maxlen
