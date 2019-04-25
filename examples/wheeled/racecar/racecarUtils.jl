@@ -59,7 +59,7 @@ function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odot
                                                              MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2)))), autoinit=autoinit)
   end
 
-  addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors)
+  addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors, autoinit=autoinit)
   new_pssym
 end
 
@@ -132,11 +132,12 @@ function main(resultsdir::String,
               tag_bagl;
               BB=15,
               N=50,
-              lagLength=50,
-              dofixedlag=true,
+              lagLength=500,
+              dofixedlag=false,
               jldfile::String="",
               failsafe::Bool=false,
-              show::Bool=false  )
+              show::Bool=false,
+              treeinit::Bool=false  )
 
 # Factor graph construction
 fg = initfg()
@@ -159,17 +160,17 @@ pssym = Symbol("x$psid")
 addVariable!(fg, pssym, Pose2)
 # addVariable!(fg, pssym, DynPose2(ut=0))
 
-addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2)))))
+addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2)))), autoinit=!treeinit)
 # addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
 #                                               MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))
 
 
-addApriltags!(fg, pssym, tag_bagl[psid], lmtype=RoME.Point2, fcttype=Pose2Pose2)
+addApriltags!(fg, pssym, tag_bagl[psid], lmtype=RoME.Point2, fcttype=Pose2Pose2, autoinit=!treeinit)
 
 show ? writeGraphPdf(fg) : nothing
 
 # quick solve as sanity check
-tree = batchSolve!(fg, N=N, drawpdf=true, show=show, recursive=failsafe)
+tree = batchSolve!(fg, N=N, drawpdf=true, show=show, recursive=failsafe, treeinit=treeinit)
 
 # add other positions
 maxlen = (length(tag_bagl)-1)
@@ -182,7 +183,7 @@ for psid in (prev_psid+1):1:maxlen
   prev_psid
   maxlen
   @show psym = Symbol("x$psid")
-  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Point2, odotype=Pose2Pose2, fcttype=Pose2Point2BearingRange, autoinit=true)
+  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Point2, odotype=Pose2Pose2, fcttype=Pose2Point2BearingRange, autoinit=!treeinit)
   # addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=DynPose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
   # writeGraphPdf(fg)
 

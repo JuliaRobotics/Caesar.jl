@@ -19,6 +19,9 @@ function parse_commandline()
         "--failsafe"
             help = "Single process and recursive Bayes tree solving, slower by but more robust with better error stack traces."
             action = :store_true
+        "--treeinit"
+            help = "Initialize variables during tree upsolve, not on factor graph."
+            action = :store_true
         "--cxoffset"
             help = "Center x offset"
             arg_type = Float64

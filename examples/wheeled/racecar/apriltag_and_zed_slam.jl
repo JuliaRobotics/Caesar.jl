@@ -10,6 +10,7 @@ using Distributed
 # check_procs(4) # make sure there are 4 processes waiting before loading packages
 
 using Dates, Statistics
+using Caesar
 @everywhere using Caesar
 @everywhere using JLD2
 using CoordinateTransformations, Rotations, StaticArrays
@@ -89,7 +90,7 @@ end
 
 
 
-fg = main(resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"]  )
+fg = main(resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], treeinit=parsed_args["treeinit"]  )
 
 
 

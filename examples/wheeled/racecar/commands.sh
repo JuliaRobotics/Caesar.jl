@@ -8,28 +8,28 @@
 
 
 racecarslamdefault_1() {
-    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun1" --failsafe $*
+    julia102 -O 3 -p 2 apriltag_and_zed_slam.jl --folder_name "labrun1" --failsafe --treeinit $*
 }
 racecarslamdefault_2() {
-    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun2" --failsafe $*
+    julia102 -O 3 -p 2 apriltag_and_zed_slam.jl --folder_name "labrun2" --failsafe --treeinit $*
 }
 racecarslamdefault_3() {
-    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun3" --failsafe $*
+    julia102 -O 3 -p 2 apriltag_and_zed_slam.jl --folder_name "labrun3" --failsafe --treeinit $*
 }
 racecarslamdefault_4() {
-    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun4" --failsafe $*
+    julia102 -O 3 -p 2 apriltag_and_zed_slam.jl --folder_name "labrun4" --failsafe --treeinit $*
 }
 racecarslamdefault_5() {
-    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun5" --failsafe $*
+    julia102 -O 3 -p 2 apriltag_and_zed_slam.jl --folder_name "labrun5" --failsafe --treeinit $*
 }
 racecarslamdefault_6() {
-    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun6" --failsafe $*
+    julia102 -O 3 -p 2 apriltag_and_zed_slam.jl --folder_name "labrun6" --failsafe --treeinit $*
 }
 racecarslamdefault_7() {
-    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun7" --failsafe $*
+    julia102 -O 3 -p 2 apriltag_and_zed_slam.jl --folder_name "labrun7" --failsafe --treeinit $*
 }
 racecarslamdefault_8() {
-    julia102 -O 3 -p 4 apriltag_and_zed_slam.jl --folder_name "labrun8" --failsafe $*
+    julia102 -O 3 -p 2 apriltag_and_zed_slam.jl --folder_name "labrun8" --failsafe --treeinit $*
 }
 
 racecarall() {
