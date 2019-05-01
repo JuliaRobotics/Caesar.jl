@@ -33,9 +33,9 @@ Consider citing our work:
 
 ```
 @misc{caesarjl,
-  author = "Caesar.jl contributors",
+  author = "Contributors",
   title =  "Caesar.jl",
-  year =   2018,
+  year =   2016-2019,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
