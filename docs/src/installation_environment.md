@@ -13,15 +13,6 @@ sudo apt-get install hdf5-tools
 sudo apt-get install graphviz imagemagick
 ```
 
-## TEMPORARY NOTICE
-
-Small issues with Julia package registration and management require temporary install of latest master bracnh of IncrementalInference.jl:
-```julia
-julia> ]dev IncrementalInference
-```
-
-> Can follow progress [here](https://github.com/JuliaRegistries/General/pull/49), and [here](https://discourse.julialang.org/t/trouble-registering-package/22896/8).
-
 ## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
 
 Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).
