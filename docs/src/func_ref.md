@@ -55,7 +55,7 @@ allnums
 approxCliqMarginalUp!
 approxConv
 areCliqChildrenNeedDownMsg
-doCliqUpSolve!
+areCliqVariablesAllMarginalized
 batchSolve!
 blockCliqUntilChildrenHaveUpStatus
 buildSubgraphFromLabels
@@ -75,6 +75,7 @@ deleteFactor!
 deleteVariable!
 doautoinit!
 doCliqAutoInitUp!
+doCliqUpSolve!
 downGibbsCliqueDensity
 downMsgPassingRecursive
 dwnMsg
@@ -106,6 +107,7 @@ getManifolds
 getMaxVertId
 getParent
 getSofttype
+getTreeCliqSolveOrderUp
 getVal
 getVariable
 getVertKDE
@@ -143,6 +145,7 @@ setCliqAsMarginalized!
 setCliqStatus!
 setDwnMsg!
 setfreeze!
+setTreeCliquesMarginalized!
 setUpMsg!
 subgraphFromVerts
 treeProductDwn
