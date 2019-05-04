@@ -59,6 +59,7 @@ areCliqVariablesAllMarginalized
 batchSolve!
 blockCliqUntilChildrenHaveUpStatus
 buildSubgraphFromLabels
+buildTreeFromOrdering!
 childCliqs
 cliqGibbs
 cliqInitSolveUp!
@@ -132,6 +133,7 @@ lsRear
 manualinit!
 parentCliq
 packFromLocalPotentials!
+prepBatchTree!
 prepCliqInitMsgsDown!
 prepCliqInitMsgsUp!
 printgraphmax
