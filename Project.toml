@@ -1,0 +1,44 @@
+name = "Caesar"
+uuid = "62eebf14-49bc-5f46-9df9-f7b7ef379406"
+keywords = ["SLAM", "state-estimation", "mm-iSAM", "inference", "robotics"]
+desc = "Non-Gaussian simultaneous localization and mapping"
+version = "0.3.1"
+
+[deps]
+Distributions = "0.18"
+Rotations = "0.11"
+Graphs = "0.10.2"
+KernelDensityEstimate = "0.5"
+ApproxManifoldProducts = "0.0.3"
+IncrementalInference = "0.5.7, 0.6"
+RoME = "0.3.4"
+TransformUtils = "0.2.2"
+CoordinateTransformations = "0.5"
+JLD2 = "0.1"
+JSON = "0.18"
+FileIO = "1.0"
+NLsolve = "3, 4"
+LCMCore = "0.4"
+DataStructures = "0.9"
+ProgressMeter = "0.9"
+ImageMagick = "0.7"
+ImageCore = "0.7"
+DocStringExtensions = "0.7"
+Reexport = "0.2"
+CloudGraphs = "0.1.1"
+Neo4j = "2"
+Mongoc = "0.1.2"
+Unmarshal = "0.2.1"
+ZMQ = "1.0"
+YAML = "0.3"
+FFTW = "0.2.4"
+Combinatorics = "0.7"
+
+[compat]
+julia = "0.7, 1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
