@@ -367,6 +367,12 @@ git-tree-sha1 = "b8fe8321b0e17ac6f7b0b4f5df628610024acb11"
 uuid = "d2adbeaf-5838-5367-8a2f-e46d570981db"
 version = "2.0.0"
 
+[[Nullables]]
+deps = ["Compat"]
+git-tree-sha1 = "ae1a63457e14554df2159b0b028f48536125092d"
+uuid = "4d1e1d77-625e-5b40-9113-a560ec7a8ecd"
+version = "0.0.8"
+
 [[OffsetArrays]]
 deps = ["DelimitedFiles"]
 git-tree-sha1 = "49a6d9b5b3dedec18035e4d97ce77e2b2a182c05"
@@ -584,6 +590,12 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[Unmarshal]]
+deps = ["JSON", "LinearAlgebra", "Missings", "Nullables", "Test"]
+git-tree-sha1 = "2b1f8a501a6c9932721e791f5586b7a48f4e0c2f"
+uuid = "cbff2730-442d-58d7-89d1-8e530c41eb02"
+version = "0.2.1"
 
 [[UnsafeArrays]]
 deps = ["Compat"]
