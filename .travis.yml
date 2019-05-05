@@ -14,7 +14,6 @@ addons:
     - hdf5-tools
 matrix:
   allow_failures:
-    - julia: 1.1
     - julia: nightly
 
 # script:
