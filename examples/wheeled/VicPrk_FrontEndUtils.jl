@@ -11,7 +11,7 @@ function addoccurance!(lmo::Dict{Symbol, Int}, lm::Symbol)
 end
 
 """
-    $(SIGNATURES)
+    $(TYPEDSIGNATURES)
 
 For multiple measurements::Dict{Int,T} with unique Int signature, add "LANDMARK" `;softtype=Point2` to the fg::FactorGraph.  Type T not used in this function.
 """

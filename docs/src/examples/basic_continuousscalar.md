@@ -24,7 +24,7 @@ The first step is to create an empty factor graph object and start populating it
 The variable nodes are identified by `Symbol`s, namely `:x0, :x1, :x2, :x3`.
 ```julia
 # Start with an empty factor graph
-fg = emptyFactorGraph()
+fg = initfg()
 
 # add the first node
 addVariable!(fg, :x0, ContinuousScalar)

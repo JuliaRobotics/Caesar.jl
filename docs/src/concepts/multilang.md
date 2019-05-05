@@ -1,19 +1,34 @@
 # Multi-Language and Shared Objects
 
+## Multilanguage Interops: Caesar SDKs and APIs
+The Caesar framework is not limited to direct Julia use. The following Github projects provide access to features of Caesar in their language:
+
+* Julia Web interface:
+  * [GraffSDK.jl](https://github.com/GearsAD/GraffSDK.jl)
+
+* ZMQ Interface
+  * C/C++:
+    * [Graff Cpp](https://github.com/MarineRoboticsGroup/graff_cpp)
+    * [Caesar LCM](http://github.com/pvazteixeira/  caesar-lcm)
+  * Python:
+    * [GraffSDK.py](https://github.com/nicrip/graff_py)
+
+Contributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below).
+
 ## ZMQ Messaging Interface
 
 Caesar.jl has a ZMQ messaging interface ([interested can see code here  here](https://github.com/JuliaRobotics/Caesar.jl/blob/master/src/zmq/ZmqCaesar.jl)) that allows users to interact with the solver code base in a variety of ways.  The messaging interface is not meant to replace static `.so` library file compilation--see below---but rather a more versatile and flexible development strategy.
 
 The current known interface implementations to Caesar.jl are:
 - C/C++ [GraffCPP](https://github.com/MarineRoboticsGroup/graff_cpp),
-- Python [SychronySDK](https://github.com/nicrip/SynchronySDK_py) (needs to be updated),
+- Python [GraffSDK.py](https://github.com/nicrip/graff_py) (needs to be updated),
 
 ### Starting the Caesar ZMQ Navigation Server
 
-Start the `Caesar.ZmqCaesar` server in a Julia session with a few process cores:
+Start the `Caesar.ZmqCaesar` server in a Julia session with a few process cores and full optimization:
 
 ```bash
-julia -p 4
+julia -p4 -O3
 ```
 
 Then run the following commands, and note these steps have also been [scripted here](https://github.com/JuliaRobotics/Caesar.jl/blob/master/scripts/zmqServer.jl):
@@ -32,23 +47,22 @@ start(zmqConfig)
 # give the server a minute to start up ...
 ```
 
-The [current tests are a good place to see some examples](http://github.com/JuliaRobotics/Caesar.jl/tree/master/test/multilangzmq) of the current interfacing functions.
+The [current tests are a good place to see some examples](http://github.com/JuliaRobotics/Caesar.jl/tree/master/test/multilangzmq) of the current interfacing functions.  Feel free to change the ZMQ interface for to any of the ZMQ supported modes of data transport, such as [Interprocess Communication (IPC)](http://api.zeromq.org/2-1:zmq-ipc) vs. TCP.
 
 > TODO: expand the ZMQ documentation
 
 ### ROS Integration
 
-Please add your voice of support or suggestions on [ROS integration here](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
+Yes, but not yet.  See:
 
-> **Note** ROS integration is a priority for this project, and will accompany the so-called ['prime time'](https://github.com/JuliaRobotics/RoME.jl/issues/147) release of the code.  ROS and ZMQ integration are closely related, while the present focus (2018Q3-2019Q2) is on first developing our own ZMQ messaging interface as discussed above.
+> [FAQ: ROS Integration](http://www.juliarobotics.org/Caesar.jl/latest/faq/#ROS-Integration-1)
 
 ## Static, Shared Object `.so` Compilation
 
-The Julia language is a (Just-In-Time / Precompiled) static and strongly typed language.  Modules are already naturally compiled to static objects and can also be compiled to more common `.so` files.  See [this AOT vs JIT compiling blog post](https://juliacomputing.com/blog/2016/02/09/static-julia.html) for a deeper discussion.  Also see [this Julia Binaries Blog](https://medium.com/@sdanisch/compiling-julia-binaries-ddd6d4e0caf4).
+> [FAQ: Static, Shared Object `.so` Compilation](.http://www.juliarobotics.org/Caesar.jl/latest/faq/#Static,-Shared-Object-.so-Compilation-1)
 
-The future planning for the `Caesar.jl` framework and the mm-iSAM inference algorithm plans to use the package: https://github.com/JuliaLang/PackageCompiler.jl so that linkable `.so` files or even full executables can be compiled.  Please add your comments to [this issue discussion](https://github.com/JuliaRobotics/Caesar.jl/issues/210).
+The future planning for the `Caesar.jl` framework and the mm-iSAM inference algorithm is to use the package: https://github.com/JuliaLang/PackageCompiler.jl so that linkable `.so` files or even full executables can be compiled.  Please add your comments to [this issue discussion](https://github.com/JuliaRobotics/Caesar.jl/issues/210).
 
-**Note** [recent developments announced on discourse.](https://discourse.julialang.org/t/ann-packagecompiler-with-incremental-system-images/20489)
 
 ## Alternative Methods
 

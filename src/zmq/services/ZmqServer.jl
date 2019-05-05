@@ -4,7 +4,7 @@ using Caesar, Caesar.ZmqCaesar
 export
     start
 
-import Base: start
+# import Base: start
 
 global systemverbs = Symbol[
     :shutdown
@@ -34,6 +34,11 @@ global sessionverbs = [
     :getVarMAPMax; # Future, how many maxes should you get?
     :getVarMAPFit; # default=Normal
 ]
+
+additionalVerbs = [
+    :multiplyDistributions;
+    :status
+];
 
 plottingVerbs = [];
 try
@@ -77,7 +82,7 @@ function start(zmqServer::ZmqServer)
 
             cmdtype = haskey(request, "request") ? Symbol(request["request"]) : :ERROR_NOCOMMANDPROVIDED
             @info "[ZMQ Server] REQUEST: Received request '$cmdtype' in payload '$str'..."
-            if cmdtype in union(configverbs, sessionverbs)
+            if cmdtype in union(configverbs, sessionverbs, additionalVerbs)
                 resp = Dict{String, Any}()
                 try
                     # Mocking server

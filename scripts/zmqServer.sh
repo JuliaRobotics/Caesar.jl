@@ -1,1 +1,1 @@
-julia -p 4 zmqServer.jl
+julia -p4 -O3 zmqServer.jl

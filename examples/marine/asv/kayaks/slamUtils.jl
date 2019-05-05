@@ -37,7 +37,7 @@ function sanitycheck_nav(navdata)
 end
 
 """
-    $(SIGNATURES)
+    $(TYPEDSIGNATURES)
 
 Load hydrophone waveform data from hard drive, after it has been processed from MOOS [a/b]log.  Processing from MOOS format can be done according to scripts/parseData.py -- Mei says so, call on @mc2922 if you can't find it...
 
