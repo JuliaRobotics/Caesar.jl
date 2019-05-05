@@ -17,9 +17,9 @@ matrix:
     - julia: 1.1
     - julia: nightly
 
-script:
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --check-bounds=yes -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.test("Caesar"; coverage=true)'
+# script:
+#   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+#   - julia --check-bounds=yes -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.test("Caesar"; coverage=true)'
 
 after_success:
   - julia --project=coverage/ -e 'using Pkg; Pkg.instantiate()'
