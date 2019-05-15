@@ -88,7 +88,7 @@ ls(fg, lms[7])
 
 fc = getVert(fg, :x29x30, nt=:fnc, api=localapi)
 
-pts = findRelatedFromPotential(fg, fc, fg.IDs[:x30], 100)
+pts, = findRelatedFromPotential(fg, fc, fg.IDs[:x30], 100)
 
 plotKDE(fg, :x29)
 plotKDE(pts,dims=[1;2])
