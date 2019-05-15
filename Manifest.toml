@@ -1,8 +1,8 @@
 [[AbstractFFTs]]
-deps = ["LinearAlgebra", "Test"]
-git-tree-sha1 = "dfaf23dba016254bb0eed6de326510caea2889bf"
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "380e36c66edfa099cd90116b24c1ce8cafccac40"
 uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
-version = "0.4.0"
+version = "0.4.1"
 
 [[ApproxManifoldProducts]]
 deps = ["CoordinateTransformations", "DocStringExtensions", "KernelDensityEstimate", "LinearAlgebra", "NLsolve", "Optim", "Random", "Reexport", "Requires", "Test", "TransformUtils"]
@@ -30,18 +30,6 @@ deps = ["Libdl", "SHA"]
 git-tree-sha1 = "c7361ce8a2129f20b0e05a89f7070820cfed6648"
 uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
 version = "0.5.4"
-
-[[CMake]]
-deps = ["BinDeps", "Libdl", "Test"]
-git-tree-sha1 = "6e39bef3cbb8321e8a464b18a5c20d7cef813938"
-uuid = "631607c0-34d2-5d66-819e-eb0f9aa2061a"
-version = "1.1.1"
-
-[[CMakeWrapper]]
-deps = ["BinDeps", "CMake", "Libdl", "Parameters", "Test"]
-git-tree-sha1 = "2b43d451639984e3571951cc687b8509b0a86c6d"
-uuid = "d5fb7624-851a-54ee-a528-d3f3bac0b4a0"
-version = "0.2.2"
 
 [[Calculus]]
 deps = ["Compat"]
@@ -182,10 +170,9 @@ uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 version = "0.2.4"
 
 [[FastIOBuffers]]
-deps = ["Compat"]
-git-tree-sha1 = "c150c7f2a83d8621bdaaf98756f23d594d907077"
+git-tree-sha1 = "11f1c9d72edb1eeb433c5c48dd8f4eb7ff9e5f9f"
 uuid = "6ccb8d0d-f5f8-5ae0-a392-f5aa62729a81"
-version = "0.2.0"
+version = "0.3.0"
 
 [[FileIO]]
 deps = ["Pkg", "Random", "Test"]
@@ -197,10 +184,9 @@ version = "1.0.6"
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
-deps = ["Test"]
-git-tree-sha1 = "b8045033701c3b10bf2324d7203404be7aef88ba"
+git-tree-sha1 = "5eac756947a90dad3899dad1d6c7eb90e8b58678"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
-version = "0.5.3"
+version = "0.6.0"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "InteractiveUtils", "LinearAlgebra", "NaNMath", "Random", "SparseArrays", "SpecialFunctions", "StaticArrays", "Test"]
@@ -230,17 +216,11 @@ git-tree-sha1 = "25db0e3f27bd5715814ca7e4ad22025fdcf5cc6e"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 version = "0.8.0"
 
-[[Homebrew]]
-deps = ["BinDeps", "InteractiveUtils", "JSON", "Libdl", "Test", "Unicode"]
-git-tree-sha1 = "f01fb2f34675f9839d55ba7238bab63ebd2e531e"
-uuid = "d9be37ee-ecc9-5288-90f1-b9ca67657a75"
-version = "0.7.1"
-
 [[ImageCore]]
-deps = ["ColorTypes", "Colors", "FFTW", "FixedPointNumbers", "Graphics", "MappedArrays", "OffsetArrays", "PaddedViews", "Random", "Statistics", "Test"]
-git-tree-sha1 = "bd41f7febe7b4d7914c08c5b6d0a69dcd627e3b9"
+deps = ["ColorTypes", "Colors", "FFTW", "FixedPointNumbers", "Graphics", "MappedArrays", "OffsetArrays", "PaddedViews", "Reexport"]
+git-tree-sha1 = "38d9e5c3d0ab79b6062de40ad6cfbf47574c25b6"
 uuid = "a09fc81d-aa75-5fe9-8630-4744c3626534"
-version = "0.7.4"
+version = "0.8.2"
 
 [[ImageMagick]]
 deps = ["BinaryProvider", "ColorTypes", "FileIO", "FixedPointNumbers", "ImageCore", "InteractiveUtils", "Libdl", "Pkg", "Random"]
@@ -288,10 +268,10 @@ uuid = "2472808a-b354-52ea-a80e-1658a3c6056d"
 version = "0.5.0"
 
 [[LCMCore]]
-deps = ["BinDeps", "CMakeWrapper", "Dates", "FastIOBuffers", "FileWatching", "Homebrew", "Libdl", "Pkg", "Random", "StaticArrays", "Test", "UnsafeArrays"]
-git-tree-sha1 = "9859335c6d09e6aa1ddfcd5fcac365b7600bc9fc"
+deps = ["Dates", "FastIOBuffers", "FileWatching", "Libdl", "StaticArrays", "UnsafeArrays"]
+git-tree-sha1 = "f6922bb63dd78375bd9ff9544c65e6df8a66d9d3"
 uuid = "0ea44823-1ff1-5b9a-8293-5fd55a38e746"
-version = "0.5.4"
+version = "0.6.0"
 
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -329,19 +309,19 @@ uuid = "739be429-bea8-5141-9913-cc70e7f3736d"
 version = "0.6.8"
 
 [[Missings]]
-deps = ["Dates", "InteractiveUtils", "SparseArrays", "Test"]
-git-tree-sha1 = "d1d2585677f2bd93a97cfeb8faa7a0de0f982042"
+deps = ["SparseArrays", "Test"]
+git-tree-sha1 = "f0719736664b4358aa9ec173077d4285775f8007"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
-version = "0.4.0"
+version = "0.4.1"
 
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[Mongoc]]
 deps = ["BinaryProvider", "Dates", "Libdl", "Test"]
-git-tree-sha1 = "cbc8809e937a8e774e574d9a150eeb3ff6b1777e"
+git-tree-sha1 = "c028ec2dfad92d9a3718ccc94800fe0d634b9985"
 uuid = "4fe8b98c-fc19-5c23-8ec2-168ff83495f2"
-version = "0.1.2"
+version = "0.2.1"
 
 [[NLSolversBase]]
 deps = ["Calculus", "DiffEqDiffTools", "DiffResults", "Distributed", "ForwardDiff", "LinearAlgebra", "Random", "SparseArrays", "Test"]
