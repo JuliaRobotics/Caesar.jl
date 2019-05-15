@@ -57,6 +57,11 @@ Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:
 PriorPoint2
 PriorPose2
 PriorPolar
+```
+
+### Prior 3D (unary) factors
+
+```@docs
 PriorPoint3
 PriorPose3
 ```
@@ -86,6 +91,10 @@ VelPose2VelPose2
 DynPose2Pose2
 Pose3Pose3
 InertialPose3
+PriorPose3ZRP
+PartialPriorRollPitchZ
+PartialPose3XYYaw
+Pose3Pose3XYYaw
 ```
 
 Defaults in IncrementalInference.jl:
