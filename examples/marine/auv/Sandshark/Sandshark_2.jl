@@ -225,11 +225,11 @@ ls(fg, :x25)
 X25 = getVertKDE(fg, :x25)
 
 # i
-pts = predictbelief(fg, :x21, [:x20x21f1; :x21l1f1])
+pts, = predictbelief(fg, :x21, [:x20x21f1; :x21l1f1])
 plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
 
 
-pts = predictbelief(fg, :x25, :)
+pts, = predictbelief(fg, :x25, :)
 plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
 plotKDE([kde!(pts);X25], dims=[3], levels=1, c=["red";"green"])
 
