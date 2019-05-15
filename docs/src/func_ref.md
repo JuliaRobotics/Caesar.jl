@@ -60,6 +60,8 @@ batchSolve!
 blockCliqUntilChildrenHaveUpStatus
 buildSubgraphFromLabels
 buildTreeFromOrdering!
+buildCliqSubgraphDown
+buildCliqSubgraphUp
 childCliqs
 cliqGibbs
 cliqInitSolveUp!
@@ -84,6 +86,12 @@ encodefg
 fifoFreeze!
 findRelatedFromPotential
 fmcmc!
+getCliq
+getCliqChildMsgsUp
+getCliqMsgsDown
+getCliqMsgsUp
+getCliqParentMsgDown
+getCliqSolveHistory
 getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
 getCliq
@@ -140,6 +148,7 @@ printgraphmax
 productpartials!
 prodmultiplefullpartials
 prodmultipleonefullpartials
+resetBuildTreeFromOrder!
 resetData!
 resetTreeCliquesForUpSolve!
 savejld
@@ -156,6 +165,7 @@ updateFGBT!
 updateTreeCliquesAsMarginalizedFromVars!
 upGibbsCliqueDensity
 upMsg
+wipeBuildNewTree!
 writeGraphPdf
 showFactor
 ```
