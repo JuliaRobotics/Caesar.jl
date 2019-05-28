@@ -64,6 +64,7 @@ buildCliqSubgraphDown
 buildCliqSubgraphUp
 childCliqs
 cliqGibbs
+cliqHistFilterTransitions
 cliqInitSolveUp!
 compareAllVariables
 compareFactorGraphs
@@ -81,9 +82,11 @@ doCliqAutoInitUp!
 doCliqUpSolve!
 downGibbsCliqueDensity
 downMsgPassingRecursive
+drawCliqSubgraphUp
 dwnMsg
 encodefg
 fifoFreeze!
+filterHistAllToArray
 findRelatedFromPotential
 fmcmc!
 getCliq
@@ -144,6 +147,7 @@ packFromLocalPotentials!
 prepBatchTree!
 prepCliqInitMsgsDown!
 prepCliqInitMsgsUp!
+printCliqHistorySummary
 printgraphmax
 productpartials!
 prodmultiplefullpartials
@@ -151,6 +155,8 @@ prodmultipleonefullpartials
 resetBuildTreeFromOrder!
 resetData!
 resetTreeCliquesForUpSolve!
+sandboxStateMachineStep
+sandboxCliqResolveStep
 savejld
 setCliqAsMarginalized!
 setCliqStatus!
@@ -158,6 +164,7 @@ setDwnMsg!
 setfreeze!
 setTreeCliquesMarginalized!
 setUpMsg!
+showVariable
 subgraphFromVerts
 treeProductDwn
 treeProductUp
@@ -169,6 +176,3 @@ wipeBuildNewTree!
 writeGraphPdf
 showFactor
 ```
-
-<!-- IIF v0.5.3 -->
-<!-- showVariable -->
