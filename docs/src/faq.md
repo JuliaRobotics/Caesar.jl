@@ -36,3 +36,14 @@ ROS integration is a priority for this project and will accompany the so-called 
 ### How does JSON-Schema work?
 
 Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).
+
+
+## Solver FAQ (mm-iSAM)
+
+### Why Bayes (Juntion) tree?
+
+We want to perform inference on acyclic graphs, as well as exploit the benefits of knowing the full conditional independence structure of the graph -- trees represent the "complete form" when marginalizing each variable one at a time (also known as elimination game, marginalization, or smart factors).  In loose terms---and assume if the system were to be linearlized parametric---think of the Bayes (Junction) tree as having implicit access to all Schlur compliments of each variable to all others.
+
+### Are cliques in the Bayes (Junction) tree densly connected?
+
+No, since we assuming the factor graph as sparse, and that no new information can be created out of nothing -- hence each clique must be sparse.  That said, the potential exists for the inference within a clique to become densly connected (experience full "fill-in").  See the paper on square-root-SAM, where the connection between dense covariance matrix of a Kalman filter (EKF-SLAM) is actually related to the inverse square root (rectangular) matrix which structure equivalent to the clique subgraph adjacency matrix.
