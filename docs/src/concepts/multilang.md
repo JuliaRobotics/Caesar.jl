@@ -8,7 +8,7 @@ The Caesar framework is not limited to direct Julia use. The following Github pr
 
 * ZMQ Interface
   * C/C++:
-    * [Graff Cpp](https://github.com/ MarineRoboticsGroup/graff_cpp)
+    * [Graff Cpp](https://github.com/MarineRoboticsGroup/graff_cpp)
     * [Caesar LCM](http://github.com/pvazteixeira/  caesar-lcm)
   * Python:
     * [GraffSDK.py](https://github.com/nicrip/graff_py)
@@ -25,10 +25,10 @@ The current known interface implementations to Caesar.jl are:
 
 ### Starting the Caesar ZMQ Navigation Server
 
-Start the `Caesar.ZmqCaesar` server in a Julia session with a few process cores:
+Start the `Caesar.ZmqCaesar` server in a Julia session with a few process cores and full optimization:
 
 ```bash
-julia -p 4
+julia -p4 -O3
 ```
 
 Then run the following commands, and note these steps have also been [scripted here](https://github.com/JuliaRobotics/Caesar.jl/blob/master/scripts/zmqServer.jl):
@@ -47,7 +47,7 @@ start(zmqConfig)
 # give the server a minute to start up ...
 ```
 
-The [current tests are a good place to see some examples](http://github.com/JuliaRobotics/Caesar.jl/tree/master/test/multilangzmq) of the current interfacing functions.
+The [current tests are a good place to see some examples](http://github.com/JuliaRobotics/Caesar.jl/tree/master/test/multilangzmq) of the current interfacing functions.  Feel free to change the ZMQ interface for to any of the ZMQ supported modes of data transport, such as [Interprocess Communication (IPC)](http://api.zeromq.org/2-1:zmq-ipc) vs. TCP.
 
 > TODO: expand the ZMQ documentation
 

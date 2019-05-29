@@ -126,8 +126,12 @@ getVariable
 getVertKDE
 getUpMsgs
 getDwnMsgs
+hasOrphans
+inferOverTree!
+inferOverTreeR!
 initfg
 initInferTreeUp!
+initOnTree!
 isCliqMarginalizedFromVars
 isCliqReadyInferenceUp
 isFactor
@@ -164,10 +168,12 @@ setCliqStatus!
 setDwnMsg!
 setfreeze!
 setTreeCliquesMarginalized!
+setValKDE!
 setUpMsg!
 showVariable
 solveCliqWithStateMachine!
 subgraphFromVerts
+transferUpdateSubGraph!
 treeProductDwn
 treeProductUp
 unfreezeVariablesAll!
@@ -179,4 +185,5 @@ upMsg
 wipeBuildNewTree!
 writeGraphPdf
 showFactor
+showVariable
 ```
