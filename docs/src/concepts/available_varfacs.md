@@ -19,6 +19,7 @@ ContinuousMultivariate
 
 The current variables types are:
 ```@docs
+Polar
 Point2
 Pose2
 DynPoint2
@@ -54,6 +55,7 @@ println.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));
 Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:
 
 ```@docs
+PriorPolar
 PriorPoint2
 PriorPose2
 PriorPolar
@@ -76,6 +78,7 @@ MixturePrior
 ### Conditional Likelihoods (Relative Data)
 Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:
 ```@docs
+PolarPolar
 Point2Point2
 Point2Point2WorldBearing
 Pose2Point2Bearing
