@@ -184,6 +184,7 @@ upGibbsCliqueDensity
 upMsg
 wipeBuildNewTree!
 writeGraphPdf
+resetVariableAllInitializations!
 showFactor
 showVariable
 ```
