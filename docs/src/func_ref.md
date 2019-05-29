@@ -119,6 +119,7 @@ getManifolds
 getMaxVertId
 getParent
 getSofttype
+getTreeAllFrontalSyms
 getTreeCliqSolveOrderUp
 getVal
 getVariable
@@ -165,9 +166,12 @@ setfreeze!
 setTreeCliquesMarginalized!
 setUpMsg!
 showVariable
+solveCliqWithStateMachine!
 subgraphFromVerts
 treeProductDwn
 treeProductUp
+unfreezeVariablesAll!
+unmarginalizeVariablesAll!
 updateFGBT!
 updateTreeCliquesAsMarginalizedFromVars!
 upGibbsCliqueDensity
