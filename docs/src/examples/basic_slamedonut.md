@@ -23,6 +23,8 @@ julia> ]
 
 The Julia REPL/console is sufficient for this example (copy-paste from this page).  Note that more involved work in Julia is simplified by using the Juno IDE.
 
+> **Note** A recent test (May 2019, IIF v0.6.0) showed a possible bug was introduced with one of the solver upgrades.  THe figures shown on this example page are still, however, valid.  Previous versions of the solver, such as IncrementalInference v0.4.x and v0.5.x, should still work as expected.  Follow progress on [issue 335 here](https://github.com/JuliaRobotics/Caesar.jl/issues/335) as bug is being resolved.  Previous versions of the solver can be installed with the package manager, for example: `(v1.0) pkg> add IncrementalInference@v0.5.7`.  Please comment for further details.
+
 ## Loading The Data
 
 Starting a Juno IDE or Julia REPL session, the ground truth positions for vehicle positions `GTp` and landmark positions `GTl` can be loaded into memory directly with these values:
