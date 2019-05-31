@@ -12,10 +12,18 @@ Multi-modal range only example ([click here or image for full Vimeo](http://vime
 
 This example is also available as a script [here in RoME.jl](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/RangesExample.jl).
 
-## REQUIRES
+## Quick Install
 
-- `RoME v0.2.2`
-- `RoMEPlotting v0.1.0+`
+If you already have Julia 1.0 or above, alternatively see [complete installation instructions here](http://www.juliarobotics.org/Caesar.jl/latest/installation_environment/):
+```julia
+julia> ]
+(v1.0) pkg> add RoME, Distributed, LinearAlgebra
+(v1.0) pkg> add RoMEPlotting#master
+```
+
+The Julia REPL/console is sufficient for this example (copy-paste from this page).  Note that more involved work in Julia is simplified by using the Juno IDE.
+
+> **Note** A recent test (May 2019, IIF v0.6.0) showed a possible bug was introduced with one of the solver upgrades.  THe figures shown on this example page are still, however, valid.  Previous versions of the solver, such as IncrementalInference v0.4.x and v0.5.x, should still work as expected.  Follow progress on [issue 335 here](https://github.com/JuliaRobotics/Caesar.jl/issues/335) as bug is being resolved.  Previous versions of the solver can be installed with the package manager, for example: `(v1.0) pkg> add IncrementalInference@v0.5.7`.  Please comment for further details.
 
 ## Loading The Data
 
@@ -76,8 +84,8 @@ addVariable!(fg, :l2, Point2)
 addVariable!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
-addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], Matrix(LinearAlgebra.I,2,2))) )
-addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], Matrix(LinearAlgebra.I,2,2))) )
+addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], Matrix{Float64}(LinearAlgebra.I,2,2))) )
+addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], Matrix{Float64}(LinearAlgebra.I,2,2))) )
 ```
 The `PriorPoint2` is assumed to be a multivariate normal distribution of covariance `Matrix(LinearAlgebra.I,2,2)`, as well as a weighting factor of `[1.0]`.
 
@@ -199,7 +207,7 @@ vehicle_drives_to!(fg, :l101, GTp, GTl)
 vehicle_drives_to!(fg, :l102, GTp, GTl)
 
 # see the graph
-writeGraphPdf(fg)
+writeGraphPdf(fg, engine="neato")
 ```
 
 > **NOTE** The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.
