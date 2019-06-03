@@ -10,6 +10,8 @@ Newly created page to list related references and additional literature pertaini
 
 [1.3]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: ["SLAMinDB: Centralized graph databases for mobile robotics"](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf), IEEE Intl. Conf. on Robotics and Automation (ICRA), Singapore, 2017.
 
+[1.4]  Rypkema, N. R.,: "Underwater \& Out of Sight: Towards Ubiquity in UnderwaterRobotics", Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2019.
+
 [1.4]  Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: ["Non-Gaussian SLAM utilizing Synthetic Aperture Sonar"](https://marinerobotics.mit.edu/sites/default/files/cheung_icra2019.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
 [1.5]  Doherty, K., Fourie, D., Leonard, J.: ["Multimodal Semantic SLAM with Probabilistic Data Association"](https://marinerobotics.mit.edu/sites/default/files/doherty_icra2019_revised.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
