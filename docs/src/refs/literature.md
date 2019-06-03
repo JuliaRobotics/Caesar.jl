@@ -12,13 +12,13 @@ Newly created page to list related references and additional literature pertaini
 
 [1.4]  Rypkema, N. R.,: "Underwater \& Out of Sight: Towards Ubiquity in UnderwaterRobotics", Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2019.
 
-[1.4]  Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: ["Non-Gaussian SLAM utilizing Synthetic Aperture Sonar"](https://marinerobotics.mit.edu/sites/default/files/cheung_icra2019.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
+[1.5]  Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: ["Non-Gaussian SLAM utilizing Synthetic Aperture Sonar"](https://marinerobotics.mit.edu/sites/default/files/cheung_icra2019.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
-[1.5]  Doherty, K., Fourie, D., Leonard, J.: ["Multimodal Semantic SLAM with Probabilistic Data Association"](https://marinerobotics.mit.edu/sites/default/files/doherty_icra2019_revised.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
+[1.6]  Doherty, K., Fourie, D., Leonard, J.: ["Multimodal Semantic SLAM with Probabilistic Data Association"](https://marinerobotics.mit.edu/sites/default/files/doherty_icra2019_revised.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
-[1.6]  Fourie, D., Vaz Teixeira, P., Leonard, J.: "Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities", IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019), under-review.
+[1.7]  Fourie, D., Vaz Teixeira, P., Leonard, J.: "Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities", IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019), under-review.
 
-[1.7]  Fourie, D., Leonard, J.: "Inertial Odometry with Retroactive Sensor Calibration", publication under review.
+[1.8]  Fourie, D., Leonard, J.: "Inertial Odometry with Retroactive Sensor Calibration", publication under review.
 
 ### Important References
 
