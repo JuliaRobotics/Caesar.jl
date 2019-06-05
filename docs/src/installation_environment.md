@@ -42,13 +42,15 @@ Unit tests can further be performed for the upstream packages as follows -- **NO
 
 ### Install Visualization Tools
 
-(Q4 2018), Temporarily require development (`master` branch) version of RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
+RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
 ```julia
-(v1.0) pkg> add RoMEPlotting#master
+(v1.0) pkg> add RoMEPlotting
 
 # separately
 (v1.0) pkg> add Arena#master
 ```
+
+> **Note** currently requires `Arena#master` branch (2019Q2).
 
 ## The "I want a Development Environment from Scratch" Install
 
