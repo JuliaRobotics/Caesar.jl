@@ -29,7 +29,7 @@ Please see the [documentation](http://juliarobotics.github.io/Caesar.jl/latest/)
 
 # Contributors
 
-We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files for a far reaching list of contributions.
+We are grateful for many, many contributions within the Julia package ecosystem -- see the [`Manifest.toml` ](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Manifest.toml) and [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of contributions.
 
 Consider citing our work:
 
@@ -42,7 +42,7 @@ Consider citing our work:
 }
 ```
 
-Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently conducted by Dehann Fourie who can be contacted for more details.
+Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently conducted by @dehann who can be contacted for more details.
 
 [cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
