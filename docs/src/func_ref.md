@@ -94,6 +94,7 @@ getCliqChildMsgsUp
 getCliqMsgsDown
 getCliqMsgsUp
 getCliqParentMsgDown
+getCliqSiblings
 getCliqSolveHistory
 getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
