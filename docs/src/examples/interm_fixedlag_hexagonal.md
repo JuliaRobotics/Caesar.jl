@@ -48,7 +48,7 @@ function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPe
         end
         if i % iterationsPerSolve == 0 && i != 0
             @info "Performing inference!"
-            if fg.isfixedlag
+            if getSolverParams(fg).isfixedlag
                 @info "Quasi fixed-lag is enabled (a feature currently in testing)!"
                 fifoFreeze!(fg)
             end
@@ -76,8 +76,8 @@ solverTimesForBatch = runHexagonalExample(fg, numVariables, solveEveryNVariables
 
 ```julia
 fgFixedLag = initfg()
-fgFixedLag.isfixedlag = true
-fgFixedLag.qfl = lagLength
+fgFixedLag.solverParams.isfixedlag = true
+fgFixedLag.solverParams.qfl = lagLength
 
 solverTimesFixedLag = runHexagonalExample(fgFixedLag, numVariables, solveEveryNVariables)
 ```
@@ -126,7 +126,7 @@ Preliminary results for the comparison can be seen below. However, this is just 
 
 ![Timing comparison of full solve vs. fixed-lag](images/fixed_lag_timing.png)
 
-> **NOTE** Work is underway (aka ["Project Tree House"](https://github.com/JuliaRobotics/IncrementalInference.jl/projects/2)) to reduce overhead computations that result in poorer fixed-lag solving times.  We expect the fixed-lag performance to improve in the coming months (Written Nov 2018).  Please file issues if a deeper discussion is required. 
+> **NOTE** Work is underway (aka ["Project Tree House"](https://github.com/JuliaRobotics/IncrementalInference.jl/projects/2)) to reduce overhead computations that result in poorer fixed-lag solving times.  We expect the fixed-lag performance to improve in the coming months (Written Nov 2018).  Please file issues if a deeper discussion is required.
 
 ## Additional Example
 

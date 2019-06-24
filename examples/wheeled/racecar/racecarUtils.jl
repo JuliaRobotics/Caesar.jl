@@ -147,8 +147,8 @@ if jldfile != ""
   prev_psid = parse(Int, string(xx[end])[2:end])
 end
 
-fg.isfixedlag = dofixedlag
-fg.qfl = lagLength
+fg.solverParams.isfixedlag = dofixedlag
+fg.solverParams.qfl = lagLength
 
 psid = 0
 pssym = Symbol("x$psid")
