@@ -58,7 +58,7 @@ function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOu
         end
 
         # @time filterOut[iter,:,:] = transpose(conj!(exp.(-2im*pi*tDelays*FFTfreqs'))) #conjugate transpose in place
-        transpose!(view(filterOut,iter,:,:),dataTemp)
+        adjoint!(view(filterOut,iter,:,:),dataTemp)
     end
     nothing
 end
