@@ -22,7 +22,7 @@ info(dfg)
 ####### ---- MAIN Example
 
 # ... And away we go!
-# fg = Caesar.initfg()
+# fg = initfg()
 
 # Add a first pose variable - x0
 addV!(dfg, :x0, Pose2()) # , labels=["POSE"]

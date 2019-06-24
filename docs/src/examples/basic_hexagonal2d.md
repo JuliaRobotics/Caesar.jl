@@ -24,7 +24,7 @@ addVariable!(fg, :x0, Pose2)
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix(LinearAlgebra.I,3,3))) )
 ```
-A factor graph object `fg` (of type `::FactorGraph`) has been constructed; the first pose `:x0` has been added; and a prior factor setting the origin at `[0,0,0]` over variable node dimensions `[x,y,θ]` in the world frame.
+A factor graph object `fg` (of type `<:AbstractDFG`) has been constructed; the first pose `:x0` has been added; and a prior factor setting the origin at `[0,0,0]` over variable node dimensions `[x,y,θ]` in the world frame.
 The type `Pose2` is used to indicate what variable is stored in the node.
 Caesar.jl allows a little more freedom in how factor and variable nodes can be connected, while still allowing for type-assertion to occur.
 

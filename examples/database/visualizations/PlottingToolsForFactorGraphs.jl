@@ -10,7 +10,7 @@ addrdict["user"] = "user"
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 
 
-fg = Caesar.initfg(cloudgraph=cloudGraph, sessionname=addrdict["session"])
+fg = initfg(cloudgraph=cloudGraph, sessionname=addrdict["session"])
 fullLocalGraphCopy!(fg)
 savejld(fg, file="sandshark_testing_seg417_iNA.jld")
 

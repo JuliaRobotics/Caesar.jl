@@ -41,7 +41,7 @@ db = client[:CloudGraphs]
 
 
 
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
 
 # totally reset to frontend built state in DB
@@ -66,19 +66,7 @@ C = Vector{AbstractString}()
 lbl = xx[2]
 
 
-# function getmongokeys(fgl::FactorGraph, x::Symbol, IDs)
-#   cvid = -1
-#   for id in IDs
-#     if Symbol(fgl.g.vertices[id[1]].label) == x
-#       cvid = id[2]
-#       break
-#     end
-#   end
-#   # @show cvid
-#   cv = CloudGraphs.get_vertex(fgl.cg, cvid)
-#   jsonstr = cv.properties["mongo_keys"]
-#   return JSON.parse(jsonstr)
-# end
+
 
 mongk = getmongokeys(fg, lbl, IDs)
 

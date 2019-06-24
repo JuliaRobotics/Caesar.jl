@@ -13,8 +13,8 @@ IncrementalInference.setCloudDataLayerAPI!()
 
 nprocs() > 1 ? thxl = 2 : nothing
 
-type SLAMWrapper
-  fg::FactorGraph
+mutable struct SLAMWrapper{G}
+  fg::G
   tree
   lndmidx::Int
 end

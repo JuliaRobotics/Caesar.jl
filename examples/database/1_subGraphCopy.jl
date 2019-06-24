@@ -12,7 +12,7 @@ addrdict["robotId"] = "PixieBot"
 
 
 # 2. Create a local empty factor graph object
-fg = Caesar.initfg(sessionname=addrdict["sessionId"], robotname=addrdict["robotId"], cloudgraph=cg)
+fg = initfg(sessionname=addrdict["sessionId"], robotname=addrdict["robotId"], cloudgraph=cg)
 # fg.stateless = true # so that we don't update local elements
 
 
@@ -26,7 +26,7 @@ Graphs.plot(fg.g)
 
 # ===========ALTERNATIVE========================================================
 
-fg = Caesar.initfg(sessionname=addrdict["sessionId"], robotname=addrdict["robotId"], cloudgraph=cg)
+fg = initfg(sessionname=addrdict["sessionId"], robotname=addrdict["robotId"], cloudgraph=cg)
 # 3.b Or fetch the entire factor graph
 Caesar.fullLocalGraphCopy!(fg, reqbackendset=false, reqready=false)
 

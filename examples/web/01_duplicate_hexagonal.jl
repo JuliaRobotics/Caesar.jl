@@ -52,7 +52,7 @@ end
 ## LOCAL MEMORY
 # start with an empty factor graph object
 fg = initfg()
-fg.isfixedlag = true
+fg.solverParams.isfixedlag = true
 fg.qfl = 10
 
 # Local: Add the first pose :x0

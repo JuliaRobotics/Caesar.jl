@@ -17,7 +17,7 @@ addOdo2DCmd = Dict{String, Any}(
 
 @info "Starting the ZMQ server in an @async..."
 @async begin
-    fg = Caesar.initfg()
+    fg = initfg()
     config = Dict{String, String}()
     zmqConfig = ZmqServer(fg, config, true, "tcp://*:5555")
     start(zmqConfig)

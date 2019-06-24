@@ -63,7 +63,7 @@ vc = startdefaultvisualization()
 
 
 N = 200
-fg = Caesar.initfg()
+fg = initfg()
 
 sqrtinv = [[10;0;0;0;0;0]';
 [0;10;0;0;0;0]';

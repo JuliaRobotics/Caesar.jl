@@ -16,9 +16,7 @@ end
 Prepare a sas2d factor to use in the factor graph where `totalPhones` is the size of the SAS array.  Pass a known `cfgd::Dict{String,} for faster load times.`
 """
 function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
-                cfgd::Dict=loadConfigFile(joinpath(Pkg.dir("ProprietaryFactors"),"config","SAS2D.yaml")),
-                rangemodel=:Rayleigh,
-                chirpFile = joinpath(Pkg.dir("ProprietaryFactors"),"src","beamforming","chirp250.txt")  )
+              cfgd::Dict=loadConfigFile(joinpath(dirname(pathof(Caesar)),"config","SAS2D.yaml")), rangemodel=:Rayleigh )
   #
   # @assert size(csvWaveData,2) == totalPhones
   #Constant Acoustic Params
@@ -35,10 +33,11 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
   #Params subject to change/ Heuristics
   nPhones = totalPhones - 1;
   azimuths = LinRange(0,360,azimuthDivs)*pi/180;
-
   #Data preprocessing MF + CZT
   w = exp(-2im*pi*(fCeil-fFloor)/(nFFT_czt*fSampling))
   a = exp(2im*pi*fFloor/fSampling)
+
+  chirpFile = joinpath(dirname(pathof(Caesar)),"config","chirp250.txt");
 
   chirpIn = readdlm(chirpFile,',',Float64,'\n')
 
@@ -53,6 +52,7 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
   filterCZT(mfData,cztData)
 
   #CBF Filter shared by
+
   FFTfreqs = collect(LinRange(fFloor,fCeil,nFFT_czt))
   cfgCBF_init = CBFFilterConfig(fFloor,fCeil,nFFT_czt,totalPhones,azimuths,soundSpeed, FFTfreqs)
   cfgCBF_init_LIE = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones,Float64[0.0;],soundSpeed, FFTfreqs)
@@ -109,11 +109,7 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
       sas2d.threadreuse[thritr].arrayPosLIE = zeros(Float64,totalPhones-1,2)
       sas2d.threadreuse[thritr].waveformsLIE = zeros(Complex{Float64},nFFT_czt,totalPhones-1)
       sas2d.threadreuse[thritr].waveformsLOOc = zeros(Complex{Float64},nFFT_czt)
-      # sas2s.threadreuse[thritr].corrCost = zeros(Float64, nFFT_czt)
-      # sas2s.threadreuse[thritr].sumCost = zeros(Float64, 1)
 
-      #sas2d.threadreuse[thritr].BFtDelays = zeros(Complex{Float64},nFFT_czt)
-      #sas2d.threadreuse[thritr].LIEtDelays = zeros(Complex{Float64},nFFT_czt)
       sas2d.threadreuse[thritr].BFtemp = zeros(Complex{Float64}, totalPhones,nFFT_czt)
       sas2d.threadreuse[thritr].LIEtemp = zeros(Complex{Float64}, totalPhones-1,nFFT_czt)
 

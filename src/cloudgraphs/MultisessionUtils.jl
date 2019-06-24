@@ -104,7 +104,7 @@ end
 
 
 """
-    getAllLandmarkNeoIDs(::Dict{Symbol, Dict{Symbol, Int}}, ::Symbol)
+    $(SIGNATURES)
 
 Return Vector{Int} of Neo4j vertex IDs relating to symbol, as listed in lm2others.
 """
@@ -120,7 +120,7 @@ end
 
 
 """
-    $TYPEDSIGNATURES
+    $(SIGNATURES)
 
 Return subgraph copy of type FactorGraph contaning values from session in lm2others, and Vector{Symbol} of primary
 key symbols used for graph exstraction.
@@ -133,7 +133,7 @@ function getLocalSubGraphMultisession(cg::CloudGraph,
                                       numneighbors::Int=0  ) where {T <: AbstractString}
   #
   res = Dict{Symbol, Int}()
-  sfg = Caesar.initfg(sessionname=session, robotname=robot, username=user, cloudgraph=cg)
+  sfg = initfg(sessionname=session, robotname=robot, username=user, cloudgraph=cg)
   if length(lm2others) > 0
     for (sess,ms) in lm2others
       for (sym, neoid) in ms
@@ -149,11 +149,11 @@ end
 
 
 """
-    findExistingMSConstraints(fgl::FactorGraph)
+    $(SIGNATURES)
 
 Return Dict{Symbol, Int} of vertex symbol to Neo4j node ID of MULTISESSION constraints in this `fgl.sessionname`.
 """
-function findExistingMSConstraints(fgl::FactorGraph)
+function findExistingMSConstraints(fgl::G) where G <: AbstractDFG
   query =  "match (n:$(fgl.sessionname):$(fgl.robotname):$(fgl.username):MULTISESSION)
             return id(n), n.exVertexId, n.label"
   cph, = executeQuery(cg, query)
@@ -169,17 +169,17 @@ end
 
 
 """
-    removeReinsertMultisessionPrior!{T <: FunctorSingleton}(fgl::FactorGraph, exims::Dict{Symbol, Int}, prp2::T, sym::Symbol, uid::Int)
+    $SIGNATURES
 
 Return new multisession factor, symbol sym, inserted using prp2::PriorPoint2DensityNH using user ExVertex id (uid),
 after checking existing multisession dict (exims::(exvsym=>neoid)) if any nodes should be removed before inserting new ones
 on that graph node. Assuming just one multisession prior per node.
 """
-function removeReinsertMultisessionPrior!(fgl::FactorGraph,
+function removeReinsertMultisessionPrior!(fgl::G,
         exims::Dict{Symbol, Int},
         prp2::T,
         sym::Symbol,
-        uid::Int  ) where {T <: FunctorSingleton}
+        uid::Int  ) where {G <: AbstractDFG, T <: FunctorSingleton}
   #
   # remove previous Multi session constraint on this sym vertex
   if haskey(exims, sym)

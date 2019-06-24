@@ -32,7 +32,7 @@ println("[Caesar.jl] Importing LCM message types")
 function initialize!(backend_config,
                     user_config)
     println("[Caesar.jl] Setting up factor graph")
-    fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+    fg = initfg(sessionname=user_config["session"], cloudgraph=backend_config)
     println("[Caesar.jl] Creating SLAM client/object")
     return  SLAMWrapper(fg, nothing, 0)
 end

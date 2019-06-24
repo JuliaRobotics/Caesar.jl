@@ -16,7 +16,7 @@ Nparticles = parse(Int,addrdict["num particles"])
 
 # fieldnames(fg.cg.neo4j)
 
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
 # setBackendWorkingSet!(conn, session)
 fullLocalGraphCopy!(fg)

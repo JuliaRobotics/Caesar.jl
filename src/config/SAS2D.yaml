@@ -1,0 +1,13 @@
+#######################################
+# 2D Conventional Beamforming for SAS #
+#######################################
+
+azimuth_divs: 180                         #number of azimuthal divisions for precomputed grid of look angles
+nfft_full: 8192                           #size of full FFT for matched filtering
+nfft_czt: 1024                            #size of CZT for beamforming
+freq_sampling: 37500.0                    #DAQ sampling frequency
+freq_lower_cutoff: 250.0                  #lower frequency cutoff of chirp
+freq_upper_cutoff: 2050.0                 #upper frequency cutoff of chirp
+sound_speed: 1481.0                       #sound speed of water
+range_snr_floor: 0.8                      #floor cutoff for range sampler
+azi_snr_floor: 0.8                        #floor cutoff for range sampler

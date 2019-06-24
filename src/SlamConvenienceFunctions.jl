@@ -83,9 +83,9 @@ function parseLandmBRMM!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString}
   lm1 = string(getVert(slam.fg,lm1id).label)
   lm2 = string(getVert(slam.fg,lm2id).label)
   addMMBRFG!(slam.fg, pose, [lm1;lm2], zbr, cov, w=[w1;w2], ready=USEREADY)
-  # function addMMBRFG!(fg::FactorGraph, pose::AbstractString,
+  # function addMMBRFG!(fg::G, pose::AbstractString,
   #                   lm::Array{AbstractString,1}, br::Array{Float64,1},
-  #                   cov::Array{Float64,2}; w=[0.5;0.5])
+  #                   cov::Array{Float64,2}; w=[0.5;0.5]) where G <: AbstractDFG
   return "$(lm1), $(lm2)"
 end
 

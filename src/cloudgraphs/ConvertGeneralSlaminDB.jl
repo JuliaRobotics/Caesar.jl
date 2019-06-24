@@ -152,12 +152,12 @@ function mergeBigDataElements!(bdes::Vector{BigDataElement}, mongos::Dict)
   nothing
 end
 
-function mergeValuesIntoCloudVert!(fgl::FactorGraph,
+function mergeValuesIntoCloudVert!(fgl::G,
       neoNodeId::Int,
       elem,
       uidl,
       v::Graphs.ExVertex;
-      labels::Vector{T}=String[]  ) where {T <: AbstractString}
+      labels::Vector{T}=String[]  ) where {G <: AbstractDFG, T <: AbstractString}
   #
 
   # why am I getting a node again (because we don't have the labels here)?
@@ -268,7 +268,7 @@ function recoverConstraintType(cgl::CloudGraph,
 end
 
 
-function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N::Int=100)
+function populatenewvariablenodes!(fgl::G, newvertdict::SortedDict; N::Int=100) where G <: AbstractDFG
 
   for (neoNodeId,elem) in newvertdict
     # @show neoNodeId
@@ -301,7 +301,7 @@ function populatenewvariablenodes!(fgl::FactorGraph, newvertdict::SortedDict; N:
   nothing
 end
 
-function populatenewfactornodes!(fgl::FactorGraph, newvertdict::SortedDict, maxfuid::Int)
+function populatenewfactornodes!(fgl::G, newvertdict::SortedDict, maxfuid::Int) where G <: AbstractDFG
   foffset = 100000
   fuid = maxfuid >= foffset ? maxfuid : maxfuid+foffset # offset factor values
   @warn "using hack counter for FACTOR uid starting at $(fuid)"
@@ -355,12 +355,12 @@ end
 
 
 """
-    updatenewverts!(fgl::FactorGraph; N::Int)
+    $(SIGNATURES)
 
 Convert vertices of session in Neo4j DB with Caesar.jl's required data elements
 in preparation for MM-iSAMCloudSolve process.
 """
-function updatenewverts!(fgl::FactorGraph; N::Int=100)
+function updatenewverts!(fgl::G; N::Int=100) where G <: AbstractDFG
   sortedvd = getnewvertdict(fgl.cg.neo4j.connection, fgl.sessionname, fgl.robotname, fgl.username)
   populatenewvariablenodes!(fgl, sortedvd, N=N)
   maxfuid = getmaxfactorid(fgl.cg.neo4j.connection, fgl.sessionname, fgl.robotname, fgl.username)
@@ -370,7 +370,7 @@ end
 
 
 """
-    resetentireremotesession(conn, session, robot, user)
+    $(SIGNATURES)
 
 match (n:\$(session))
 remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width
