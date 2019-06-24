@@ -166,11 +166,11 @@ The video above gives away the vehicle position with the cyan line, showing trav
 The following function handles (pseudo odometry) factors as range-only between positions and range-only measurement factors to beacons as the vehice travels.
 
 ```julia
-function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R <: Real}
+function vehicle_drives_to!(fgl::G, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {G <: AbstractDFG, R <: Real}
   currvar = union(ls(fgl)...)
   prev_sym = Symbol("l$(maximum(Int[parse(Int,string(currvar[i])[2:end]) for i in 2:length(currvar)]))")
   if !(pos_sym in currvar)
-    println("Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.")
+    println("Adding variable vertex $pos_sym, not yet in fgl<:AbstractDFG.")
     addVariable!(fgl, pos_sym, Point2)
     @show rho = norm(GTp[prev_sym] - GTp[pos_sym])
     ppr = Point2Point2Range( Normal(rho, 3.0) )
@@ -185,7 +185,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
     if rho < measurelimit
       ppr = Point2Point2Range( Normal(rho, 3.0) )
       if !(ll in currvar)
-        println("Adding variable vertex $ll, not yet in fgl::FactorGraph.")
+        println("Adding variable vertex $ll, not yet in fgl<:AbstractDFG.")
         addVariable!(fgl, ll, Point2)
       end
       addFactor!(fgl, [pos_sym;ll], ppr)

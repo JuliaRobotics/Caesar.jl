@@ -3,12 +3,6 @@
 
 nprocs() > 1 ? thxl = 2 : nothing
 
-#
-# type SLAMWrapper
-#   fg::FactorGraph
-#   tree
-#   lndmidx::Int
-# end
 
 USEREADY=1
 include("SlamConvenienceFunctions.jl")

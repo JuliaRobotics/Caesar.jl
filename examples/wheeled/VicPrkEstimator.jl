@@ -11,7 +11,7 @@ function loadVicPrkDataset(filename::AbstractString="datasets/VicPrk.jld")
   return DRS,GPS,LsrFeats,d,f
 end
 
-function addLandmarksFactorGraph!(fg::FactorGraph,
+function addLandmarksFactorGraph!(fg::G,
                                  f,
                                  idx,
                                  prevn,
@@ -19,7 +19,7 @@ function addLandmarksFactorGraph!(fg::FactorGraph,
                                  lcmode=:mmodal,
                                  lsrNoise=diagm([0.1;1.0]),
                                  N::Int=100,
-                                 MM=nothing  )
+                                 MM=nothing  ) where G <: AbstractDFG
     #
     @show I = intersect(keys(f[idx-1]),keys(f[idx]))
     for i in I
@@ -63,10 +63,10 @@ end
 #plotParVicPrk(DRS)
 
 
-function appendFactorGraph!(fg::FactorGraph, d, f;
+function appendFactorGraph!(fg::G, d, f;
                   toT=Inf, fgpdf=false, lcmode=:mmodal,
                   lsrNoise=diagm([0.1;1.0]), P0=diagm([0.01;0.01;0.001]), Podo=diagm([0.5;0.5;0.005]),
-                  idx::Int=1, N::Int=100, MM=Union{})
+                  idx::Int=1, N::Int=100, MM=Union{}) where G <: AbstractDFG
 
   len = length(d)
   T = d[idx][4]
@@ -117,7 +117,7 @@ end
 # end
 #
 #
-# function drawIROSVicPrkFig(fgl::FactorGraph, d, f, T, isamdict, fgu)
+# function drawIROSVicPrkFig(fgl::G, d, f, T, isamdict, fgu) where G <: AbstractDFG
 #   p1 = progressExamplePlot(d,f,toT=T);
 #   p2 = drawCompPosesLandm(fg,isamdict, fgu, lbls=false,drawunilm=false);
 #

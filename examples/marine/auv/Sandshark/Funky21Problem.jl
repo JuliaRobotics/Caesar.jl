@@ -204,7 +204,7 @@ drawPosesLandms(fg)
 
 # IIF.wipeBuildNewTree!(fg, drawpdf=true)
 # run(`evince bt.pdf`)
-# run(`evince /tmp/bt.pdf`)
+# run(`evince /tmp/caesar/bt.pdf`)
 
 
 endDogLeg = [interp_x[epochs[end]]; interp_y[epochs[end]]]

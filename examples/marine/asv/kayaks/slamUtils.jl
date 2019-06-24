@@ -84,7 +84,7 @@ function cumulativeDrift!(cdata::AbstractArray,cstart::Array,σ::Array)
     nothing
 end
 
-function addsascluster_velpt!(fg::FactorGraph,
+function addsascluster_velpt!(fg::G,
                               poses::Vector{Symbol},
                               beacon::Symbol,
                               sasframes::Array{Int},
@@ -93,7 +93,7 @@ function addsascluster_velpt!(fg::FactorGraph,
                               element::Int=2,
                               autoinit::Bool=false,
                               datadir::String="/media/data1/data/kayaks/20_gps_pos",
-                              N::Int=100  )
+                              N::Int=100  ) where G <: AbstractDFG
 
     if length(sasframes) != length(poses)
         error("Frames and Poses are different lengths")
@@ -150,7 +150,7 @@ end
 
 #
 
-function addsascluster_only_gps!(fg::FactorGraph,
+function addsascluster_only_gps!(fg::G,
                                  poses::Vector{Symbol},
                                  beacon::Symbol,
                                  sasframes::Array{Int};
@@ -158,7 +158,7 @@ function addsascluster_only_gps!(fg::FactorGraph,
                                  datadir::String="/media/data1/data/kayaks/20_gps_pos",
                                  element::Int=2,
                                  autoinit::Bool=false,
-                                 N::Int=100  )
+                                 N::Int=100  ) where G <: AbstractDFG
 
   # "/media/data1/data/kayaks/20_parsed" this data is windowed 10 elements referenced to the first
   # get position data

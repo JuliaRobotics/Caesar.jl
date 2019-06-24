@@ -132,7 +132,7 @@ batchSolve!(fg)
 
 # IIF.wipeBuildNewTree!(fg, drawpdf=true)
 # run(`evince bt.pdf`)
-# run(`evince /tmp/bt.pdf`)
+# run(`evince /tmp/caesar/bt.pdf`)
 
 # And I'll redefine anywhere
 # Anywhere I RoME

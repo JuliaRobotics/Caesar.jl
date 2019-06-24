@@ -11,11 +11,11 @@ function addoccurance!(lmo::Dict{Symbol, Int}, lm::Symbol)
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
-For multiple measurements::Dict{Int,T} with unique Int signature, add "LANDMARK" `;softtype=Point2` to the fg::FactorGraph.  Type T not used in this function.
+For multiple measurements::Dict{Int,T} with unique Int signature, add "LANDMARK" `;softtype=Point2` to the fg<:AbstractDFG.  Type T not used in this function.
 """
-function findAddNewLandmarks!(fgl::FactorGraph, lmoccur::Dict{Symbol, Int}, measurements::Dict{Int, T}; min_occurance::Int=2, softtype=Point2) where T
+function findAddNewLandmarks!(fgl::G, lmoccur::Dict{Symbol, Int}, measurements::Dict{Int, T}; min_occurance::Int=2, softtype=Point2) where {G <: AbstractDFG, T}
   # Count occurances of each landmark
   lmsyms = landmarksymbol.(collect(keys(measurements)))
   addoccurance!.(lmoccur, lmsyms)
@@ -35,8 +35,8 @@ function findAddNewLandmarks!(fgl::FactorGraph, lmoccur::Dict{Symbol, Int}, meas
   nothing
 end
 
-function findAddLandmFactorsByPose!(fgl::FactorGraph, psym::Symbol, meas::Dict{Int, T};
-                    range_sigma::Float64=1.0, bearing_sigma::Float64=0.05, N::Int=100) where T
+function findAddLandmFactorsByPose!(fgl::G, psym::Symbol, meas::Dict{Int, T};
+                    range_sigma::Float64=1.0, bearing_sigma::Float64=0.05, N::Int=100) where {G <: AbstractDFG, T}
   lmsyms = landmarksymbol.(collect(keys(meas)))
   posels = ls(fgl, psym)
   lmsinfg = ls(fgl)[2]
@@ -54,8 +54,9 @@ function findAddLandmFactorsByPose!(fgl::FactorGraph, psym::Symbol, meas::Dict{I
 end
 
 
-function drive!(fgl::FactorGraph, idx::Int, odos::Dict, meas::Dict, lmoccurl::Dict, Podo;
-                N::Int=100, min_occurance::Int=2 )
+function drive!(fgl::G, idx::Int, odos::Dict, meas::Dict, lmoccurl::Dict, Podo;
+                N::Int=100, min_occurance::Int=2 ) where G <: AbstractDFG
+  #
   prev, X, nextn = getLastPose2D(fgl)
   vp, fp = addOdoFG!(fgl, nextn, odos[idx][1:3], Podo, N=N)
 
@@ -73,7 +74,7 @@ function drive!(fgl::FactorGraph, idx::Int, odos::Dict, meas::Dict, lmoccurl::Di
   nothing
 end
 
-function donextframe!(fgl::FactorGraph, idx::Int, odos::Dict, meas::Dict, lmoccurl::Dict, Podo; N::Int=100)
+function donextframe!(fgl::G, idx::Int, odos::Dict, meas::Dict, lmoccurl::Dict, Podo; N::Int=100) where G <: AbstractDFG
   drive!(fgl, idx, odos, meas, lmoccurl, Podo, N=N)
 
   tree = wipeBuildNewTree!(fgl, drawpdf=true)

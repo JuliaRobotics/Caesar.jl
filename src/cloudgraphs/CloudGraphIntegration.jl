@@ -175,9 +175,9 @@ function getfnctype(cvl::CloudGraphs.CloudVertex)
   return getfnctype(vert)
 end
 
-function addCloudVert!(fgl::FactorGraph,
+function addCloudVert!(fgl::G,
         exvert::Graphs.ExVertex;
-        labels::Vector{T}=String[]  ) where {T <: AbstractString}
+        labels::Vector{T}=String[]  ) where {G <: AbstractDFG, T <: AbstractString}
   #
   cv = CloudGraphs.exVertex2CloudVertex(exvert);
   cv.labels = labels
@@ -187,27 +187,27 @@ function addCloudVert!(fgl::FactorGraph,
 end
 
 # Return Graphs.ExVertex type containing data according to id
-function getExVertFromCloud(fgl::FactorGraph,
-        fgid::Int64;
-        bigdata::Bool=false  )
+function getExVertFromCloud(fgl::G,
+                            fgid::Int64;
+                            bigdata::Bool=false  ) where G <: AbstractDFG
   #
   neoID = fgl.cgIDs[fgid]
   cvr = CloudGraphs.get_vertex(fgl.cg, neoID, false)
   CloudGraphs.cloudVertex2ExVertex(cvr)
 end
 
-function getExVertFromCloud(fgl::FactorGraph,
-        lbl::Symbol;
-        nt::Symbol=:var,
-        bigdata::Bool=false  )
+function getExVertFromCloud(fgl::G,
+                            lbl::Symbol;
+                            nt::Symbol=:var,
+                            bigdata::Bool=false  ) where G <: AbstractDFG
   # getExVertFromCloud(fgl, fgl.IDs[lbl], bigdata=bigdata)
   getExVertFromCloud(fgl, (nt==:var ? fgl.IDs[lbl] : fgl.fIDs[lbl]), bigdata=bigdata)
 end
 
-function updateFullCloudVertData!(fgl::FactorGraph,
-        nv::Graphs.ExVertex;
-        updateMAPest::Bool=false,
-        bigdata::Bool=false  )
+function updateFullCloudVertData!(fgl::G,
+                                  nv::Graphs.ExVertex;
+                                  updateMAPest::Bool=false,
+                                  bigdata::Bool=false  ) where G <: AbstractDFG
  #
   # TODO -- this get_vertex seems excessive, but we need the CloudVertex
 
@@ -237,7 +237,7 @@ function updateFullCloudVertData!(fgl::FactorGraph,
   CloudGraphs.update_vertex!(fgl.cg, vert, bigdata)
 end
 
-function makeAddCloudEdge!(fgl::FactorGraph, v1::Graphs.ExVertex, v2::Graphs.ExVertex)
+function makeAddCloudEdge!(fgl::G, v1::Graphs.ExVertex, v2::Graphs.ExVertex) where G <: AbstractDFG
   cv1 = CloudGraphs.get_vertex(fgl.cg, fgl.cgIDs[v1.index], false)
   cv2 = CloudGraphs.get_vertex(fgl.cg, fgl.cgIDs[v2.index], false)
   ce = CloudGraphs.CloudEdge(cv1, cv2, "DEPENDENCE");
@@ -253,11 +253,11 @@ end
 
 
 # TODO -- fetching of CloudVertex propably not required, make faster request to @GearsAD
-function getCloudOutNeighbors(fgl::FactorGraph,
-      exVertId::Int64;
-      ready::Int=1,
-      backendset::Int=1,
-      needdata::Bool=false  )
+function getCloudOutNeighbors(fgl::G,
+                              exVertId::Int64;
+                              ready::Int=1,
+                              backendset::Int=1,
+                              needdata::Bool=false  ) where G <: AbstractDFG
   #
   # println("Looking for cloud out neighbors")
   cgid = fgl.cgIDs[exVertId]
@@ -277,28 +277,28 @@ function getCloudOutNeighbors(fgl::FactorGraph,
 end
 
 # return list of neighbors as Graphs.ExVertex type
-function getCloudOutNeighbors(fgl::FactorGraph,
-      vert::Graphs.ExVertex;
-      ready::Int=1,
-      backendset::Int=1,
-      needdata::Bool=false  )
+function getCloudOutNeighbors(fgl::G,
+                              vert::Graphs.ExVertex;
+                              ready::Int=1,
+                              backendset::Int=1,
+                              needdata::Bool=false  ) where G <: AbstractDFG
   # TODO -- test for ready and backendset here
   getCloudOutNeighbors(fgl, vert.index, ready=ready,backendset=backendset, needdata=needdata )
 end
 
 
-function getEdgeFromCloud(fgl::FactorGraph, id::Int64)
+function getEdgeFromCloud(fgl::G, id::Int64) where G <: AbstractDFG
   println("getting id=$(id)")
   CloudGraphs.get_edge(fgl.cg, id)
 end
 
-function deleteCloudVertex!(fgl::FactorGraph, vert::Graphs.ExVertex)
+function deleteCloudVertex!(fgl::G, vert::Graphs.ExVertex) where G <: AbstractDFG
   neoID = fgl.cgIDs[vert.index]
   cvr = CloudGraphs.get_vertex(fgl.cg, neoID, false)
   CloudGraphs.delete_vertex!(fgl.cg, cvr)
 end
 
-function deleteCloudEdge!(fgl::FactorGraph, edge::CloudEdge)
+function deleteCloudEdge!(fgl::G, edge::CloudEdge) where G <: AbstractDFG
   CloudGraphs.delete_edge!(fgl.cg, edge)
 end
 
@@ -551,7 +551,7 @@ function getPoseExVertexNeoIDs(conn::Neo4j.Connection;
 end
 
 
-function checkandinsertedges!(fgl::FactorGraph, exvid::Int, nei::CloudVertex; ready::Int=1, backendset::Int=1)
+function checkandinsertedges!(fgl::G, exvid::Int, nei::CloudVertex; ready::Int=1, backendset::Int=1) where G <: AbstractDFG
   if nei.properties["ready"]==ready &&
      nei.properties["backendset"] == backendset &&
      haskey(fgl.g.vertices, nei.exVertexId)
@@ -576,7 +576,7 @@ function checkandinsertedges!(fgl::FactorGraph, exvid::Int, nei::CloudVertex; re
   nothing
 end
 
-function copyAllEdges!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64, Symbol},1})
+function copyAllEdges!(fgl::G, cverts::Dict{Int64, CloudVertex}, IDs::Array{Tuple{Int64,Int64, Symbol},1}) where G <: AbstractDFG
   # TODO -- major opportunity for streamlining and improving performance
   # do entire graph, one node at a time
   @showprogress 1 "Copy all edges..." for ids in IDs
@@ -587,7 +587,7 @@ function copyAllEdges!(fgl::FactorGraph, cverts::Dict{Int64, CloudVertex}, IDs::
   nothing
 end
 
-function insertnodefromcv!(fgl::FactorGraph, cvert::CloudGraphs.CloudVertex)
+function insertnodefromcv!(fgl::G, cvert::CloudGraphs.CloudVertex) where G <: AbstractDFG
   exvid = cvert.exVertexId
   neoid = cvert.neo4jNodeId
   exvert = cloudVertex2ExVertex(cvert)
@@ -610,11 +610,10 @@ end
 
 Copy all variable and factor nodes from DB into fgl as listed in IDs vector.
 """
-function copyAllNodes!(
-            fgl::FactorGraph,
-            cverts::Dict{Int64, CloudVertex},
-            IDs::Array{Tuple{Int64,Int64, Symbol},1}  )
-            # conn::Neo4j.Connection  ) # what the?
+function copyAllNodes!(fgl::G,
+                       cverts::Dict{Int64, CloudVertex},
+                       IDs::Array{Tuple{Int64,Int64, Symbol},1}  ) where G <: AbstractDFG
+                       # conn::Neo4j.Connection  ) # what the?
   #
   @showprogress 1 "Copy all nodes..." for ids in IDs
     cvert = CloudGraphs.get_vertex(fgl.cg, ids[2], false)
@@ -629,9 +628,8 @@ end
 
 Copy nodes into `fgl` from DB as listed in the `IDs` vector.
 """
-function copyGraphNodesEdges!(
-            fgl::FactorGraph,
-            IDs::Array{Tuple{Int64,Int64, Symbol},1}  )
+function copyGraphNodesEdges!(fgl::G,
+                              IDs::Array{Tuple{Int64,Int64, Symbol},1}  ) where G <: AbstractDFG
   #
   if length(IDs) > 0
     cverts = Dict{Int64, CloudVertex}()
@@ -659,13 +657,12 @@ end
 
 Copy sub graph portion defined by, and including a depth of neighbors, from the lbls vector.
 """
-function subLocalGraphCopy!(
-            fgl::FactorGraph,
-            lbls::Union{Vector{AS}, Vector{Symbol}};
-            neighbors::Int=0,
-            reqbackendset::Bool=true,
-            reqready::Bool=true,
-            includeMultisession::Bool=false) where {AS <: AbstractString}
+function subLocalGraphCopy!(fgl::G,
+                            lbls::Union{Vector{AS}, Vector{Symbol}};
+                            neighbors::Int=0,
+                            reqbackendset::Bool=true,
+                            reqready::Bool=true,
+                            includeMultisession::Bool=false) where {G <: AbstractDFG, AS <: AbstractString}
   #
   @warn "subGraphCopy! is a work in progress"
   conn = fgl.cg.neo4j.connection
@@ -681,10 +678,9 @@ end
 
 Fetch a full copy of the DB factor graph under fgl.sessionname.
 """
-function fullLocalGraphCopy!(
-            fgl::FactorGraph;
-            reqbackendset::Bool=true,
-            reqready::Bool=true  )
+function fullLocalGraphCopy!(fgl::G;
+                             reqbackendset::Bool=true,
+                             reqready::Bool=true  ) where G <: AbstractDFG
   #
   conn = fgl.cg.neo4j.connection
   IDs = getAllExVertexNeoIDs(conn, sessionname=fgl.sessionname, robotname=fgl.robotname, username=fgl.username, reqbackendset=reqbackendset, reqready=reqready)
@@ -697,11 +693,10 @@ end
 
 Set all Neo4j nodes in this session ready = 1, warning function does not support new GraffSDK data storage formats.
 """
-function setDBAllReady!(
-            conn::Neo4j.Connection,
-            sessionname::AS,
-            robotname::AS,
-            username::AS) where {AS <: AbstractString}
+function setDBAllReady!(conn::Neo4j.Connection,
+                        sessionname::AS,
+                        robotname::AS,
+                        username::AS) where {AS <: AbstractString}
   #
   @warn "Obsolete setDBAllReady! function, see GraffSDK for example ready function instead."
   sn = length(sessionname) > 0 ? ":"*sessionname : ""
@@ -713,7 +708,7 @@ function setDBAllReady!(
 end
 
 # TODO --this will only work with DB version, introduces a bug
-function setDBAllReady!(fgl::FactorGraph)
+function setDBAllReady!(fgl::G) where G <: AbstractDFG
   setDBAllReady!(fgl.cg.neo4j.connection, fgl.sessionname)
 end
 
@@ -931,10 +926,10 @@ end
 Append big data element into current blob store and update associated global
 vertex information.
 """
-function appendvertbigdata!(fgl::FactorGraph,
+function appendvertbigdata!(fgl::G,
       vert::Graphs.ExVertex,
       description::AbstractString,
-      data::Vector{UInt8}  )
+      data::Vector{UInt8}  ) where G <: AbstractDFG
   #
   # TODO -- improve get/fetch vertex abstraction
   cvid = fgl.cgIDs[vert.index]
@@ -951,14 +946,13 @@ but here specified by symbol of variable node in the FactorGraph. Note the
 default data layer api definition. User must define dlapi to refetching the
  vertex from the data layer. localapi avoids repeated network database fetches.
 """
-function appendvertbigdata!(fgl::FactorGraph,
+function appendvertbigdata!(fgl::G,
       sym::Symbol,
       description::AbstractString,
-      data;
-      api=IncrementalInference.localapi  )
+      data  ) where G <: AbstractDFG
   #
   appendvertbigdata!(fgl,
-        getVert(fgl, sym, api=api),
+        getVert(fgl, sym),
         description,
         data  )
 end
@@ -969,9 +963,9 @@ end
 
 Fetch and insert list of CloudVertices into FactorGraph object, up to neighbor depth.
 """
-function fetchsubgraph!(fgl::FactorGraph,
+function fetchsubgraph!(fgl::G,
                         cvs::Vector{CloudGraphs.CloudVertex};
-                        numneighbors::Int=0 )
+                        numneighbors::Int=0 ) where G <: AbstractDFG
           # overwrite::Bool=false  )
   # recursion termination condition
   numneighbors >= 0 ? nothing : (return nothing)
@@ -1003,9 +997,9 @@ end
 
 Fetch and insert list of Neo4j IDs into FactorGraph object, up to neighbor depth.
 """
-function fetchsubgraph!(fgl::FactorGraph,
+function fetchsubgraph!(fgl::G,
                         neoids::Vector{Int};
-                        numneighbors::Int=0 )
+                        numneighbors::Int=0 ) where G <: AbstractDFG
                         # overwrite::Bool=false  )
   #
   for nid in neoids

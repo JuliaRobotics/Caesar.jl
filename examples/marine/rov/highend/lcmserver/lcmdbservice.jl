@@ -161,10 +161,7 @@ function lcmpointcloudmsg!(slaml::SLAMWrapper,
   @show typeof(msg[:points_local])
 
   node_name =  Symbol("x$(odomsg[:node_1_id]+1)")
-  # function appendvertbigdata!(fgl::FactorGraph,
-  #       vert::Graphs.ExVertex,
-  #       description::AbstractString,
-  #       data  )
+  # function appendvertbigdata!(
   vert = getVert(slaml.fg, )
   appendvertbigdata!(slaml.fg, )
 
