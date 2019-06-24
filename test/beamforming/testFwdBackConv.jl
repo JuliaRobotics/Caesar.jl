@@ -2,8 +2,7 @@ using Caesar, RoME, IncrementalInference
 using DelimitedFiles
 
 # Visualization
-using Colors
-using Gadfly
+using Colors, Gadfly
 using RoMEPlotting, KernelDensityEstimatePlotting
 
 posFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_positions.csv");

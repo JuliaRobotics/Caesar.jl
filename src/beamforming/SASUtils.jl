@@ -52,7 +52,7 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
   filterCZT(mfData,cztData)
 
   #CBF Filter shared by
-  FFTfreqs = collect(linspace(fFloor,fCeil,nFFT_czt))
+  FFTfreqs = collect(range(fFloor,stop=fCeil,length=nFFT_czt))
   cfgCBF_init = CBFFilterConfig(fFloor,fCeil,nFFT_czt,totalPhones,azimuths,soundSpeed, FFTfreqs)
   cfgCBF_init_LIE = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones,Float64[0.0;],soundSpeed, FFTfreqs)
 

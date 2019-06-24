@@ -56,7 +56,7 @@ function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOu
         end
 
         # @time filterOut[iter,:,:] = transpose(conj!(exp.(-2im*pi*tDelays*FFTfreqs'))) #conjugate transpose in place
-        ctranspose!(view(filterOut,iter,:,:),dataTemp)
+        adjoint!(view(filterOut,iter,:,:),dataTemp)
     end
     nothing
 end
@@ -81,7 +81,7 @@ function CBF2D_DelaySum!(thisCfg::CBFFilterConfig,dataIn::Array,dataOut::Array,t
         #          temp2[diter,phiter] = dataIn[diter,phiter]
         #      end
         #  end
-        copy!(temp2,dataIn)
+        copyto!(temp2,dataIn)
         #temp2 = deepcopy(dataIn) # think somethign not zeroing properly?
         @fastmath temp2 .*= @view thisFilter[iter,:,:]
         @fastmath @inbounds sum!(temp1,temp2)
