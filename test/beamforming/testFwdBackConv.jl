@@ -19,13 +19,13 @@ N = 200
 fg = initfg()
 
 #landmark
-addNode!(fg, :l1, Point2)
+addVariable!(fg, :l1, Point2)
 setVal!(fg, :l1, zeros(2,N))
 
 global pp = nothing
 for i in 1:5
     sym = Symbol("x$i")
-    addNode!(fg, sym, Point2)
+    addVariable!(fg, sym, Point2)
     setVal!(fg, sym, zeros(2,N))
     pp = PriorPoint2(MvNormal(posData[i,1:2], rtkCov) )
     addFactor!(fg, [sym;], pp)
