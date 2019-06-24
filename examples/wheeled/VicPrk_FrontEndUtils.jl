@@ -11,7 +11,7 @@ function addoccurance!(lmo::Dict{Symbol, Int}, lm::Symbol)
 end
 
 """
-    $(SIGNATURES)
+    $(TYPEDSIGNATURES)
 
 For multiple measurements::Dict{Int,T} with unique Int signature, add "LANDMARK" `;softtype=Point2` to the fg::FactorGraph.  Type T not used in this function.
 """
@@ -27,7 +27,7 @@ function findAddNewLandmarks!(fgl::FactorGraph, lmoccur::Dict{Symbol, Int}, meas
       if !(lm in lmsinfgl)
         # add a new landmark
         println("adding lm=$(lm)")
-        addNode!(fgl, lm, softtype, labels=["LANDMARK";])
+        addVariable!(fgl, lm, softtype, labels=["LANDMARK";])
       end
       # @show measurements[landmarknumber(lm)]
     end

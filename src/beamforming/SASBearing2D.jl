@@ -87,8 +87,8 @@ function forwardsas(sas2d::SASBearing2D,
 
     thread_data.hackazi[1][1] = idx
 
-    azi_weights = (repmat(norm.(thread_data.BFOutFull), 1,8)')[:]
-    azi_domain = collect(range(0,stop=2pi-1e-10,length=length(azi_weights)))
+    azi_weights = (repeat(norm.(thread_data.BFOutFull), 1,8)')[:]
+    azi_domain = collect(LinRange(0,2pi-1e-10,length(azi_weights)))
     bss = AliasingScalarSampler(azi_domain, azi_weights, SNRfloor=sas2d.cfg["azi_snr_floor"])
 
     thread_data.hackazi[2][1] = wrapRad(rand(bss)[1])

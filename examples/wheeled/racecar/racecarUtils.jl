@@ -8,7 +8,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
       @info "adding node $lmsym"
-      addNode!(fg, lmsym, lmtype)
+      addVariable!(fg, lmsym, lmtype)
     end
     ppbr = nothing
     if lmtype == RoME.Point2
@@ -49,10 +49,10 @@ function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odot
   new_pssym = Symbol("x$(new_psid)")
   # first pose with zero prior
   if odotype == Pose2Pose2
-    addNode!(fg, new_pssym, Pose2)
+    addVariable!(fg, new_pssym, Pose2)
     addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))), autoinit=autoinit)
   elseif odotype == VelPose2VelPose2
-    addNode!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
+    addVariable!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
     addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([0.4;0.4;0.3].^2))),
                                                              MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2)))), autoinit=autoinit)
   end
@@ -153,7 +153,7 @@ fg.qfl = lagLength
 psid = 0
 pssym = Symbol("x$psid")
 # first pose with zero prior
-addNode!(fg, pssym, DynPose2(ut=0))
+addVariable!(fg, pssym, DynPose2(ut=0))
 # addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
 addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
                                               MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))

@@ -4,6 +4,8 @@ os:
 julia:
   - 0.7
   - 1.0
+  - 1.1
+  - 1.2
   - nightly
 notifications:
   email: false
@@ -13,11 +15,12 @@ addons:
     - hdf5-tools
 matrix:
   allow_failures:
+    - julia: 1.2
     - julia: nightly
 
-script:
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --check-bounds=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.test("Caesar"; coverage=true)'
+# script:
+#   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+#   - julia --check-bounds=yes -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.test("Caesar"; coverage=true)'
 
 after_success:
   - julia --project=coverage/ -e 'using Pkg; Pkg.instantiate()'
@@ -27,10 +30,14 @@ jobs:
   include:
     - stage: "Documentation"
       julia: 1.0
+      sudo: required
       os: linux
       script:
         - julia -e 'import Pkg; Pkg.add("Documenter")'
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate();
                                     Pkg.develop(PackageSpec(path=pwd()))'
+        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
+        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master")); Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting",rev="master"));'
         - julia --project=docs/ docs/make.jl
+      name: "HTML"
       after_success: skip

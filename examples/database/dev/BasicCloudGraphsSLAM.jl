@@ -29,7 +29,7 @@ odoCov = diagm([3.0;3.0;0.01].^2)
 
 
 # Some starting position
-v1 = addNode!(fg, :x1, zeros(3,1), diagm([1.0;1.0;0.1]), N=N,labels=["POSE"])
+v1 = addVariable!(fg, :x1, zeros(3,1), diagm([1.0;1.0;0.1]), N=N,labels=["POSE"])
 initPosePrior = PriorPose2(MvNormal(zeros(3), initCov) )
 f1  = addFactor!(fg,[v1], initPosePrior)
 
@@ -75,14 +75,14 @@ inferOverTreeR!(fgs, tree)
 # cov = [3.0]
 #
 # # robot style, add first pose vertex
-# v1 = addNode!(fg,:x1,doors,N=N)
+# v1 = addVariable!(fg,:x1,doors,N=N)
 #
 # # add a prior for the initial position of the robot
 # f0  = addFactor!(fg,[v1], Obsv2(doors, cov', [1.0]))
 #
 # # add second pose vertex
 # tem = 2.0*randn(1,N)+getVal(v1)+50.0
-# v2 = addNode!(fg, :x2, tem, N=N)
+# v2 = addVariable!(fg, :x2, tem, N=N)
 #
 # # now add the odometry factor between them
 # f1 = addFactor!(fg,[v1;v2],Odo([50.0]',[2.0]',[1.0]))

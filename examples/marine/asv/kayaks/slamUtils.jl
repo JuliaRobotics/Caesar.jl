@@ -37,7 +37,7 @@ function sanitycheck_nav(navdata)
 end
 
 """
-    $(SIGNATURES)
+    $(TYPEDSIGNATURES)
 
 Load hydrophone waveform data from hard drive, after it has been processed from MOOS [a/b]log.  Processing from MOOS format can be done according to scripts/parseData.py -- Mei says so, call on @mc2922 if you can't find it...
 
@@ -110,7 +110,7 @@ function addsascluster_velpt!(fg::FactorGraph,
   tcurrent = tstart*1_000_000
 
   for sym in poses
-    addNode!(fg, sym, DynPoint2(ut=tcurrent))
+    addVariable!(fg, sym, DynPoint2(ut=tcurrent))
     tcurrent += 1_000_000
   end
 
@@ -178,7 +178,7 @@ function addsascluster_only_gps!(fg::FactorGraph,
 
   for sym in poses
     count += 1
-    addNode!(fg, sym, Point2)
+    addVariable!(fg, sym, Point2)
     pp = PriorPoint2(MvNormal(posData[count,:], rtkCov) )
     addFactor!(fg, [sym;], pp, autoinit=true)
     IncrementalInference.doautoinit!(fg,sym)

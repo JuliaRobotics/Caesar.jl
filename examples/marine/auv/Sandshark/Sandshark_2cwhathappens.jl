@@ -137,12 +137,12 @@ end
 fg = initfg()
 l1Uncertainty = 0.1
 # Add a central beacon with a prior
-addNode!(fg, :l1, Point2)
+addVariable!(fg, :l1, Point2)
 addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], l1Uncertainty^2*eye(2)) ))
 index = 0
 for ep in epochs
     curvar = Symbol("x$index")
-    addNode!(fg, curvar, Pose2)
+    addVariable!(fg, curvar, Pose2)
 
     # xi -> l1 - nonparametric factor
     info(" - Adding $curvar->l1 factor...")

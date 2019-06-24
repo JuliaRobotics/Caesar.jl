@@ -83,7 +83,7 @@ println("Adding PriorPose3 and :x1 to graph...")
 initp = SE3(zeros(3),TransformUtils.AngleAxis(pi/2,[0;0;1.0]))
 initPosePrior = PriorPose3( MVNormal(veeEuler(initp), initCov) )
 X= getSample(initPosePrior,N)[1]
-v0 = addNode!(fg, :x1,  X,  N=N)
+v0 = addVariable!(fg, :x1,  X,  N=N)
 f1  = addFactor!(fg,[v0], initPosePrior)
 
 rangecov, bearingcov=3e-3, 3e-3

@@ -135,14 +135,14 @@ end
 ## Step: Building the factor graph
 fg = initfg()
 # Add a central beacon with a prior
-addNode!(fg, :l1, Point2)
+addVariable!(fg, :l1, Point2)
 # Pinger location is (0.6; -16)
 addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], 0.1^2*eye(2)) ))
 
 index = 0
 for ep in epochs
     curvar = Symbol("x$index")
-    addNode!(fg, curvar, Pose2)
+    addVariable!(fg, curvar, Pose2)
 
     # xi -> l1 - nonparametric factor
     # addFactor!(fg, [curvar; :l1], ppbrDict[ep]) #  #Hierdie lyk soos die nagmerrie
@@ -225,11 +225,11 @@ ls(fg, :x25)
 X25 = getVertKDE(fg, :x25)
 
 # i
-pts = predictbelief(fg, :x21, [:x20x21f1; :x21l1f1])
+pts, = predictbelief(fg, :x21, [:x20x21f1; :x21l1f1])
 plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
 
 
-pts = predictbelief(fg, :x25, :)
+pts, = predictbelief(fg, :x25, :)
 plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
 plotKDE([kde!(pts);X25], dims=[3], levels=1, c=["red";"green"])
 
@@ -325,7 +325,7 @@ Gadfly.plot(layers...)
 # getSample(ppbrDict[epoch_slice[1]],100)
 #
 #
-# addNode!(fg, :l1, Point2)
+# addVariable!(fg, :l1, Point2)
 # addFactor!(fg, [:x0; :l1], ppbrDict[epoch_slice[1]])
 #
 # ls(fg, :l1)

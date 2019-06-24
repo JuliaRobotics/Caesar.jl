@@ -9,7 +9,7 @@ for p in poses
     lmsyms = ls(fg)[2]
     atsym = Symbol("l$(detection.id)")
     if !(atsym in lmsyms)
-      addNode!(fg, atsym, Point2(labels=["LANDMARK"; "APRILTAG"]))
+      addVariable!(fg, atsym, Point2(labels=["LANDMARK"; "APRILTAG"]))
     end
 
     # reverse homography to range, bearing

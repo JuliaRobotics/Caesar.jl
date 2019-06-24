@@ -1,7 +1,7 @@
 # GraffSDK integration file
 
 using GraffSDK
-using DocStringExtensions # temporary while $(SIGNATURES) is in use in this file
+using DocStringExtensions # temporary while $(TYPEDSIGNATURES) is in use in this file
 
 const Graff = GraffSDK
 
@@ -35,11 +35,12 @@ end
 
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Get  Graff configuration, default filepath location assumed as `~/Documents/graffConfig.json`.
 """
 function loadGraffConfig(;
+            console::Vector{Symbol}=[],
             filepath::AS=joinpath(ENV["HOME"],"Documents","graffConfig.json")
          ) where {AS <: AbstractString}
   #
@@ -47,11 +48,17 @@ function loadGraffConfig(;
   configFile = open(filepath)
   configData = JSON.parse(readstring(configFile))
   close(configFile)
-  Unmarshal.unmarshal(GraffConfig, configData) # graffConfig =
+  cfg = Unmarshal.unmarshal(GraffConfig, configData) # graffConfig =
+
+  :userId in console ? (println("userId: "); cfg.userId = readline(stdin);) : nothing
+  :robotId in console ? (println("robotId: "); cfg.robotId = readline(stdin);) : nothing
+  :sessionId in console ? (println("sessionId: "); cfg.sessionId = readline(stdin);) : nothing
+
+  return cfg
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Confirm that the robot already exists, create if it doesn't.
 """
@@ -76,7 +83,7 @@ function graffRobot(
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Get sessions, if it already exists, add to it.
 """
@@ -102,7 +109,7 @@ function graffSession(
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Intialize the `sslaml` object using configuration file defined in `graffconfpath`.
 """
@@ -119,7 +126,7 @@ function initialize!(sslaml::GraffSLAM;
   if isSessionExisting(slam_client.graffconf, sslaml.robotId, sslaml.sessionId)
       @warn "There is already a session named '$sessionId' for robot '$robotId'. This example will fail if it tries to add duplicate nodes. We strongly recommend providing a new session name."
       print(" Should we delete it? [Y/N] - ")
-      if lowercase(strip(readline(STDIN))) == "y"
+      if lowercase(strip(readline(stdin))) == "y"
           deleteSession(sslaml.graffconf, sslaml.robotId, sslaml.sessionId)
           println(" -- Session '$sessionId' deleted!")
       else

@@ -27,6 +27,8 @@ function getCBFFilter2Dsize(thisCfg::CBFFilterConfig)
     return (length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
 end
 
+# import Caesar: constructCBFFilter2D!
+
 function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array,sourceXY::Array, dataTemp::Array)
 
     #if size(filterOut)!=(length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
@@ -119,7 +121,7 @@ end
 
 
 """
-    $(SIGNATURES)
+    $(TYPEDSIGNATURES)
 
 Phase shifting ztransWave contents of leave one out element of `elemPositions` (positions of array elements)
 based on dx,dy position perturbation.  The ztransWave is chirp z-transform of LOO elements's waveform data,
@@ -145,7 +147,7 @@ function phaseShiftSingle!(sourceXY::Vector{Float64},
 end
 
 """
-    $(SIGNATURES)
+    $(TYPEDSIGNATURES)
 
 Phase shifting ztransWave contents of leave one out element of `elemPositions` (positions of array elements)
 based on dx,dy position perturbation.  The ztransWave is chirp z-transform of LOO elements's waveform data,
@@ -171,7 +173,7 @@ end
 
 
 """
-    $(SIGNATURES)
+    $(TYPEDSIGNATURES)
 
 Generate the incoming waveform (into `bfOutLIEl`) at the desired look angle `aziInd`.
 """

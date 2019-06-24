@@ -8,6 +8,7 @@ using RoMEPlotting, KernelDensityEstimatePlotting
 posFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_positions.csv");
 posData = readdlm(posFile,',',Float64,'\n')
 
+
 posData[:,1] .+= 13.0
 posData[:,2] .-= 40.0
 
@@ -37,7 +38,11 @@ dataFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_w
 csvWaveData = readdlm(dataFile,',',Float64,'\n')
 csvWaveData = csvWaveData[:,1:5]
 #
-sas2d = prepareSAS2DFactor(5, csvWaveData, rangemodel=:Correlator)
+cfgd=loadConfigFile("/home/dehann/.julia/dev/ProprietaryFactors/config/SAS2D.yaml")
+chirpFile = "/home/dehann/.julia/dev/ProprietaryFactors/src/beamforming/chirp250.txt"
+sas2d = prepareSAS2DFactor(5, csvWaveData, rangemodel=:Correlator, cfgd=cfgd, chirpFile=chirpFile)
+
+
 
 #
 addFactor!(fg, [:l1;:x1;:x2;:x3;:x4;:x5], sas2d, autoinit=false) #, threadmodel=SingleThreaded ) #;:x6;:x7;:x8;:x9
@@ -225,27 +230,27 @@ function main()
     N = 200
     fg = initfg()
 
-    addNode!(fg, :x1, Point2)
+    addVariable!(fg, :x1, Point2)
     setVal!(fg, :x1, zeros(2,N))
-    addNode!(fg, :x2, Point2)
+    addVariable!(fg, :x2, Point2)
     setVal!(fg, :x2, zeros(2,N))
-    addNode!(fg, :x3, Point2)
+    addVariable!(fg, :x3, Point2)
     setVal!(fg, :x3, zeros(2,N))
-    addNode!(fg, :x4, Point2)
+    addVariable!(fg, :x4, Point2)
     setVal!(fg, :x4, zeros(2,N))
-    addNode!(fg, :x5, Point2)
+    addVariable!(fg, :x5, Point2)
     setVal!(fg, :x5, zeros(2,N))
-    # addNode!(fg, :x6, Point2)
+    # addVariable!(fg, :x6, Point2)
     # setVal!(fg, :x6, zeros(2,N))
-    # addNode!(fg, :x7, Point2)
+    # addVariable!(fg, :x7, Point2)
     # setVal!(fg, :x7, zeros(2,N))
-    # addNode!(fg, :x8, Point2)
+    # addVariable!(fg, :x8, Point2)
     # setVal!(fg, :x8, zeros(2,N))
-    # addNode!(fg, :x9, Point2)
+    # addVariable!(fg, :x9, Point2)
     # setVal!(fg, :x9, zeros(2,N))
 
 
-    addNode!(fg, :l1, Point2)
+    addVariable!(fg, :l1, Point2)
     setVal!(fg, :l1, zeros(2,N))
     # addFactor!(fg, [:l1], Prior(MvNormal(zeros(2), diagm([100;100]) )) )
 

@@ -22,13 +22,13 @@ lagLength = 30
 # Standard Hexagonal example for totalIterations - solve every iterationsPerSolve iterations.
 function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPerSolve::Int)::DataFrame
     # Add the first pose :x0
-    addNode!(fg, :x0, Pose2)
+    addVariable!(fg, :x0, Pose2)
 
     # Add at a fixed location PriorPose2 to pin :x0 to a starting location
     addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))
 
     # Add a landmark l1
-    addNode!(fg, :l1, Point2, labels=["LANDMARK"])
+    addVariable!(fg, :l1, Point2, labels=[:LANDMARK])
 
     # Drive around in a hexagon a number of times
     solveTimes = DataFrame(GraphSize = [], TimeBuildBayesTree = [], TimeSolveGraph = [])
@@ -36,7 +36,7 @@ function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPe
         psym = Symbol("x$i")
         nsym = Symbol("x$(i+1)")
         @info "Adding pose $nsym..."
-        addNode!(fg, nsym, Pose2)
+        addVariable!(fg, nsym, Pose2)
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal( [0.1;0.1;0.1].^2 ) )))
         @info "Adding odometry factor between $psym -> $nsym..."
         addFactor!(fg, [psym;nsym], pp )
@@ -126,7 +126,7 @@ Preliminary results for the comparison can be seen below. However, this is just 
 
 ![Timing comparison of full solve vs. fixed-lag](images/fixed_lag_timing.png)
 
-> **NOTE** Work is underway to reduce overhead computations that result in poorer fixed-lag solving times.  We expect the fixed-lag performance to improve in the coming months (Written Nov 2018).  Please file issues if a deeper discussion is required. 
+> **NOTE** Work is underway (aka ["Project Tree House"](https://github.com/JuliaRobotics/IncrementalInference.jl/projects/2)) to reduce overhead computations that result in poorer fixed-lag solving times.  We expect the fixed-lag performance to improve in the coming months (Written Nov 2018).  Please file issues if a deeper discussion is required. 
 
 ## Additional Example
 

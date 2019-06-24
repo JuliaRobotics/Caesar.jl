@@ -38,7 +38,7 @@ saveBF = Dict();
 savedirheader = "0813/0813";
 
 fg = initfg()
-addNode!(fg, beacon, Point2)
+addVariable!(fg, beacon, Point2)
 
 for fitr in 1:nfactors
     navchecked = false;
@@ -164,7 +164,7 @@ keep = setdiff(allv, lo)
 plotKDE([getVertKDE(fg,:l1);stuff[2][keep]],levels=1,c=["red";["blue" for i in 1:12]])
 
 
-something = predictbelief(fg, :l1, ll[keep])
+something, = predictbelief(fg, :l1, ll[keep])
 
 
 plotKDE([getVertKDE(fg,:l1);kde!(something);stuff[2][keep]],levels=1,c=["red";"cyan";["blue" for i in 1:12]])
