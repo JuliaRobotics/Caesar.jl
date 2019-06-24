@@ -20,7 +20,7 @@ solveEveryNVariables = 20
 lagLength = 30
 
 # Standard Hexagonal example for totalIterations - solve every iterationsPerSolve iterations.
-function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPerSolve::Int)::DataFrame
+function runHexagonalExample(fg::G, totalIterations::Int, iterationsPerSolve::Int)::DataFrame where {G <: AbstractDFG}
     # Add the first pose :x0
     addVariable!(fg, :x0, Pose2)
 

@@ -63,7 +63,7 @@ include(joinpath(dirname(@__FILE__),"cameraUtils.jl") )
 
 
 
-@everywhere function plotRacecarInterm(fgl::FactorGraph, resultsdirl, psyml::Symbol)::Nothing
+@everywhere function plotRacecarInterm(fgl::G, resultsdirl, psyml::Symbol)::Nothing where G <: AbstractDFG
   @show ls(fgl)
   pl = drawPosesLandms(fgl, spscale=0.1, drawhist=false, meanmax=:mean) #,xmin=-3,xmax=6,ymin=-5,ymax=2);
   Gadfly.draw(PNG(joinpath(resultsdirl, "images", "$(psyml).png"),15cm, 10cm),pl)

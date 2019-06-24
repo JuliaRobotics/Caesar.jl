@@ -222,7 +222,7 @@ federated solve.
 function getMultiSessionFg(
     cloudGraph::CloudGraph,
     sessions::Vector{String},
-    environment::String)::FactorGraph
+    environment::String)
 # #
   fg = initfg(cloudgraph=cloudGraph)
 
@@ -273,9 +273,9 @@ Returns a symbol dictionary of the provided landmarks and a tuple of (new KDE, K
 which is useful for plotting with plotKDE.
 """
 function updateLandmarkProducts(
-    fg::FactorGraph,
+    fg::G,
     landmarkSymbols::Vector{Symbol},
-    shouldFreeze::Bool)::Dict{Symbol, Tuple{BallTreeDensity, Vector{BallTreeDensity}}}
+    shouldFreeze::Bool)::Dict{Symbol, Tuple{BallTreeDensity, Vector{BallTreeDensity}}} where G <: AbstractDFG
   retDict = Dict{Symbol, Tuple{BallTreeDensity, Vector{BallTreeDensity}}}()
   for landmarkSymbol in landmarkSymbols
     @debug "Calculating local product for $landmarkSymbol..."

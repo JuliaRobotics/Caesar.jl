@@ -6,7 +6,7 @@ function getcredentials(;nparticles=true, drawdepth=true, multisession=false, dr
   return addrdict
 end
 
-function slamindbsavejld(fgl::FactorGraph, session::AbstractString, itercount::Int)
+function slamindbsavejld(fgl::G, session::AbstractString, itercount::Int) where G <: AbstractDFG
   dt = Base.Dates.now()
   filenamejld = "$(session)_$(Dates.format(dt, "dduyy-HH:MM:SS"))_slamindb_$(itercount).jld"
   println("------Save fg to file: $(filenamejld)------")

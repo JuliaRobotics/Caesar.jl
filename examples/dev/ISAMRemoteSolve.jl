@@ -16,7 +16,7 @@ function addLandmMeasRemote(frm,to,DX,cov)
   nothing
 end
 
-function requestAllPosesLandmsRemote(fg::FactorGraph)
+function requestAllPosesLandmsRemote(fg::G) where G <: AbstractDFG
   if !ENABLISAMREF return nothing end
   dict = Dict{Int,Array{Float64,1}}()
   xx,ll=ls(fg)
@@ -69,7 +69,7 @@ function doISAMSolve(d,f;toT=Inf, savejld=false, retfg=false, MM=MM)
   return !retfg ? gtvals : gtvals, fgu
 end
 
-function computeGraphResiduals(fgl::FactorGraph, dict::Dict{Int,Array{Float64,1}})
+function computeGraphResiduals(fgl::G, dict::Dict{Int,Array{Float64,1}}) where G <: AbstractDFG
   X,Y,Th,LB = get2DPoseMax(fgl)
   XL,YL,ThL,LBL = get2DLandmMax(fgl)
 
@@ -120,7 +120,7 @@ function drawUnimodalLandm(LBL, Xpp, Ypp;c="red", lbls=true)
   return psplt
 end
 
-function convertISAMDictArr(fgu::FactorGraph, isamdict::Dict{Int,Array{Float64,1}})
+function convertISAMDictArr(fgu::G, isamdict::Dict{Int,Array{Float64,1}}) where G <: AbstractDFG
   X=Float64[];Y=Float64[];Th=Float64[];
   Xl=Float64[];Yl=Float64[];
 
@@ -141,7 +141,7 @@ function convertISAMDictArr(fgu::FactorGraph, isamdict::Dict{Int,Array{Float64,1
   return xx, X, Y, Th, ll, Xl, Yl
 end
 
-function drawUniPosesLandm(fgu::FactorGraph, isamdict::Dict{Int,Array{Float64,1}})
+function drawUniPosesLandm(fgu::G, isamdict::Dict{Int,Array{Float64,1}}) where G <: AbstractDFG
 
   xx, X, Y, Th, ll, Xl, Yl = convertISAMDictArr(fgu, isamdict)
 
@@ -154,8 +154,8 @@ function drawUniPosesLandm(fgu::FactorGraph, isamdict::Dict{Int,Array{Float64,1}
   return p
 end
 
-function drawCompPosesLandm(fgl::FactorGraph,isamdict::Dict{Int,Array{Float64,1}},fgu::FactorGraph;
-                            lbls=true, drawhist=false, drawunilm=true)
+function drawCompPosesLandm(fgl::G,isamdict::Dict{Int,Array{Float64,1}},fgu::G;
+                            lbls=true, drawhist=false, drawunilm=true) where G <: AbstractDFG
   p=drawPosesLandms(fgl,lbls=lbls,drawhist=drawhist, sho)
 
   xx, X, Y, Th, ll, Xl, Yl = convertISAMDictArr(fgu, isamdict)

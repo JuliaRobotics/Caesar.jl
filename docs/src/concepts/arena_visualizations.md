@@ -64,7 +64,7 @@ and `KernelDensityEstimatePlotting.jl`:
 
 This simplest example for visualizing a 2D robot trajectory---such as first running [the Hexagonal 2D SLAM example](http://www.juliarobotics.org/Caesar.jl/latest/tut_hexagonal2d.html)---
 ```julia
-# Assuming some fg::FactorGraph has been loaded/constructed
+# Assuming some fg<:AbstractDFG has been loaded/constructed
 # ...
 
 using RoMEPlotting
