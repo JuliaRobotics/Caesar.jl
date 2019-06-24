@@ -20,7 +20,7 @@ segment = ""
 info("remember to set n.ready=1")
 if !clearslamindbdata
   println("converting front end data")
-  fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+  fg = initfg(sessionname=session, cloudgraph=cloudGraph)
   Nparticles = parse(Int, addrdict["num particles"])
   updatenewverts!(fg, N=Nparticles)
 else

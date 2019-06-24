@@ -17,7 +17,7 @@ Nparticles = parse(Int,addrdict["num particles"])
 N=Nparticles profroot
 profroot
 
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
 
 # Robot navigation and inference type stuff

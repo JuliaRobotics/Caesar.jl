@@ -16,7 +16,7 @@ addrdict["robotId"] = "TestRobot"
 
 
 # Start with an empty graph (local dictionary version) # fg = initfg(sessionname="SLAM2D_TUTORIAL")
-fg = Caesar.initfg(sessionname=user_config["session"], robotname=addrdict["robotId"], cloudgraph=backend_config)
+fg = initfg(sessionname=user_config["session"], robotname=addrdict["robotId"], cloudgraph=backend_config)
 
 
 # first pose :x0

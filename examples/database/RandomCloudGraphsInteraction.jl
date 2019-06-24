@@ -15,7 +15,7 @@ include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 
 
 
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 fullLocalGraphCopy!(fg)
 
 @show usrf = getData(fg.g.vertices[100003]).fnc.usrfnc!

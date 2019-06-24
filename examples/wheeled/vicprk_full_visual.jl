@@ -24,7 +24,7 @@ include(joinpath(Pkg.dir("Caesar"),"examples","wheeled","loadVicPrkData.jl"))
 # # Start new session
 # addrdict["sessionId"] = "VICPRK_VID"
 # addrdict["robotId"] = "Ute"
-# fg = Caesar.initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
+# fg = initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
 # deleteServerSession!(fg.cg, user_config["sessionId"])
 
 
@@ -50,7 +50,7 @@ function mainrun(dd,ff; frames=3, coord=Coord.Cartesian(xmin=-100,xmax=100,ymin=
 
     # start factor graph
     N=75
-    fg = Caesar.initfg()
+    fg = initfg()
     lmoccur = Dict{Symbol, Int}()
 
     # init pose

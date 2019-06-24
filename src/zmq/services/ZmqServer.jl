@@ -24,6 +24,8 @@ global sessionverbs = [
     :addFactorBearingRangeNormal;
     :ls;
     :getNode;
+    :getVariable;
+    :getFactor;
     :setReady;
     :batchSolve;
     # per variable

@@ -14,7 +14,7 @@ function layerBeamPatternRose(bear::BallTreeDensity; scale::Float64=1.0, c=color
   Gadfly.layer(x=belRose[1,:], y=belRose[2,:], Geom.path, Theme(default_color=c))
 end
 
-function drawPosesLandmarksAndOdo(fg::FactorGraph,
+function drawPosesLandmarksAndOdo(fg::G,
                                   ppbrDict::Dict,
                                   navkeys::Array,
                                   X::Array,
@@ -22,7 +22,7 @@ function drawPosesLandmarksAndOdo(fg::FactorGraph,
                                   lblX::Array,
                                   lblY::Array,
                                   gTitle::String="",
-                                  drawhist=true  )
+                                  drawhist=true  ) where G <: AbstractDFG
     #
     PLL = []
     xx, = Caesar.ls(fg)

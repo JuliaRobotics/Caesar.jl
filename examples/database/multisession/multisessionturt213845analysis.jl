@@ -51,7 +51,7 @@ for ANAITER in Int[1;2;3;4;5]
     sfg, lms = getLocalSubGraphMultisession(cloudGraph, lm2others,
                     session=session, numneighbors=1)
 
-    fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+    fg = initfg(sessionname=session, cloudgraph=cloudGraph)
     fullLocalGraphCopy!(fg)
 
     jldfile = string(resultsfolder,"/", session, "_$(ANAITER).jld")

@@ -18,7 +18,7 @@ include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 
 
 
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 println("Working with session $(fg.sessionname)...")
 
 
@@ -52,7 +52,7 @@ neighs = CloudGraphs.get_neighbors(fg.cg, cv1r)
 
 
 # now solve using separate variable
-fgs = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fgs = initfg(sessionname=session, cloudgraph=cloudGraph)
 
 setBackendWorkingSet!(conn, session)
 fullLocalGraphCopy!(fgs)

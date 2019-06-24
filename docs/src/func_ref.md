@@ -187,4 +187,5 @@ writeGraphPdf
 resetVariableAllInitializations!
 showFactor
 showVariable
+solveTree!
 ```

@@ -46,7 +46,7 @@ plotKDE(prp2.belief)
 
 # setBackendWorkingSet!(fg.cg.neo4j.connection, session)
 # get full graph copy
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 fullLocalGraphCopy!(fg)
 
 # import IncrementalInference: saveplot

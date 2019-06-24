@@ -14,7 +14,7 @@ using RoMEPlotting
 # MMr = reworked to map to only one previous feature
 # examplefolder, datafolder
 
-function evalLikelihood(fg::FactorGraph, sym::Symbol, point::Vector{Float64})
+function evalLikelihood(fg::G, sym::Symbol, point::Vector{Float64}) where G <: AbstractDFG
   p = getVertKDE(fg, sym)
   Ndim(p) == length(point) ? nothing : error("point (dim=$(length(point))) must have same dimension as belief (dim=$(Ndim(p)))")
   evaluateDualTree(p, (point')')[1]
@@ -22,7 +22,7 @@ end
 
 # Evaluate the likelihood of an Array{2} of points on the marginal belief of some variable
 # note the dimensions must match
-function evalLikelihood(fg::FactorGraph, sym::Symbol, points::Array{Float64,2})
+function evalLikelihood(fg::G, sym::Symbol, points::Array{Float64,2}) where G <: AbstractDFG
   p = getVertKDE(fg, sym)
   Ndim(p) == size(points,1) ? nothing : error("points (dim=$(size(points,1))) must have same dimension as belief (dim=$(Ndim(p)))")
   evaluateDualTree(p, (points))
@@ -43,7 +43,7 @@ addrdict["robotId"] = "Ute"
 
 # Graphs.plot(fg.g)
 
-fg = Caesar.initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
+fg = initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
 
 # deleteServerSession!(fg.cg, user_config["session"])
 
@@ -93,7 +93,7 @@ Gadfly.draw(PDF("/tmp/before.pdf",20cm,20cm),pl)
 
 # fetch a local copy
 
-fg = Caesar.initfg(sessionname=user_config["sessionId"], cloudgraph=backend_config) #, robotname=user_config["robotId"]
+fg = initfg(sessionname=user_config["sessionId"], cloudgraph=backend_config) #, robotname=user_config["robotId"]
 fullLocalGraphCopy!(fg)
 pl1=drawPosesLandms(fg)
 
@@ -133,7 +133,7 @@ for l1 in L
   j+=1
 end
 #run Server Code
-fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+fg = initfg(sessionname=user_config["session"], cloudgraph=backend_config)
 fullLocalGraphCopy!(fg)
 pl2=drawPosesLandms(fg)
 draw(PDF("daniel.pdf",20cm,20cm),pl2)

@@ -2,7 +2,7 @@ export
     ZmqServer
 
 mutable struct ZmqServer
-    fg::IncrementalInference.FactorGraph
+    fg::GraphsDFG
     config::Dict{String, Any}
     isServerActive::Bool
     binding::String

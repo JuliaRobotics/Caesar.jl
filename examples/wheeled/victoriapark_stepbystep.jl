@@ -9,7 +9,7 @@ using Caesar, IncrementalInference, RoME
 
 # Evaluate the likelihood of a point on the marginal belief of some variable
 # note the dimensions must match
-function evalLikelihood(fg::FactorGraph, sym::Symbol, point::Vector{Float64})
+function evalLikelihood(fg::G, sym::Symbol, point::Vector{Float64}) where G <: AbstractDFG
   p = getVertKDE(fg, sym)
   Ndim(p) == length(point) ? nothing : error("point (dim=$(length(point))) must have same dimension as belief (dim=$(Ndim(p)))")
   evaluateDualTree(p, reshape(point,Ndim(p),1))[1]
@@ -17,7 +17,7 @@ end
 
 # Evaluate the likelihood of an Array{2} of points on the marginal belief of some variable
 # note the dimensions must match
-function evalLikelihood(fg::FactorGraph, sym::Symbol, points::Array{Float64,2})
+function evalLikelihood(fg::G, sym::Symbol, points::Array{Float64,2}) where G <: AbstractDFG
   p = getVertKDE(fg, sym)
   Ndim(p) == size(points,1) ? nothing : error("points (dim=$(size(points,1))) must have same dimension as belief (dim=$(Ndim(p)))")
   evaluateDualTree(p, (points))
@@ -37,7 +37,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 
 # T=30 # 1400
-# fg = Caesar.initfg();
+# fg = initfg();
 # idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:unimodal, MM=MMr);
 
 
@@ -49,7 +49,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 
 # Go look at what this function,
-#  function appendFactorGraph!(fg::FactorGraph,
+#  function appendFactorGraph!(fg::G,
 # is doing and see if you can build the new pose functions line by line, similar to
 # what you had done in the first ROV example.
 
@@ -60,7 +60,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 
   # init pose
-fg = Caesar.initfg()
+fg = initfg()
 prevn = initFactorGraph!(fg, init=d[1][1:3])
 Podo=diagm([0.5;0.5;0.005])
 N=100

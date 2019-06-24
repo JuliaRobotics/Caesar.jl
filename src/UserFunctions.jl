@@ -31,39 +31,6 @@ function identitypose6fg(;fg=nothing,
    identitypose6fg!(fg=fg, N=N, initCov=initCov, initpose=initpose)
 end
 
-# function solveandvisualize(fg::FactorGraph,
-#       vc::DrakeVisualizer.Visualizer;
-#       refresh::Number=1.0,
-#       densitymeshes::Vector{Symbol}=Symbol[],
-#       drawlandms::Bool=true,
-#       N::Int=100,
-#       drawtype::Symbol=:max,
-#       gt::Dict{Symbol, Tuple{Symbol,Vector{Float64}}}=Dict{Symbol, Tuple{Symbol,Vector{Float64}}}() )
-#   #
-#   deletemeshes!(vc)
-#
-#   # draw while solving[1]==true
-#   solving = [true]
-#   @async begin
-#     while solving[1]
-#       println(".")
-#       visualizeallposes!(vc, fg, drawlandms=drawlandms, drawtype=drawtype, gt=gt)
-#       i = 1
-#       deletemeshes!(vc)
-#       for dm in densitymeshes
-#         i+=1
-#         visualizeDensityMesh!(vc, fg, dm)
-#       end
-#       sleep(1)
-#     end
-#   end
-#
-#   # solve
-#   tree = wipeBuildNewTree!(fg)
-#   @time inferOverTree!(fg, tree, N=N)
-#   solving[1]=false;
-#   nothing
-# end
 
 function hasval(d::Dict, va)
   for (k,v) in d
@@ -75,7 +42,7 @@ function hasval(d::Dict, va)
 end
 
 
-function projectrbe(fgl::FactorGraph, from::Symbol, to::Vector{Float64})
+function projectrbe(fgl::G, from::Symbol, to::Vector{Float64}) where G <: AbstractDFG
   x1 = getKDEMax(getVertKDE(fgl,from))
   x2 = to
 
@@ -92,7 +59,7 @@ function projectrbe(fgl::FactorGraph, from::Symbol, to::Vector{Float64})
 end
 
 
-function projectrbe(fgl::FactorGraph, from::Symbol, to::Symbol)
+function projectrbe(fgl::G, from::Symbol, to::Symbol) where G <: AbstractDFG
   # x1 = getKDEMax(getVertKDE(fg,from))
   x2 = getKDEMax(getVertKDE(fgl,to))
   return projectrbe(fgl, from, x2[1:3])

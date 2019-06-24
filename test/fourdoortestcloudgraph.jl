@@ -31,7 +31,7 @@ Caesar.usecloudgraphsdatalayer!()
 
 
 # this is being replaced by cloudGraph, added here for development period
-fg = Caesar.initfg(sessionname=session, robotname=robot, username=user, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, robotname=robot, username=user, cloudgraph=cloudGraph)
 
 
 # Robot navigation and inference type stuff

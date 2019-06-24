@@ -1,6 +1,6 @@
 module ZmqCaesar
     using ZMQ, JSON
-    using Distributions, IncrementalInference, Caesar
+    using Distributions, IncrementalInference, DistributedFactorGraphs, Caesar
     using Unmarshal
     using Dates
 

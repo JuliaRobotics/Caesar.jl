@@ -33,7 +33,7 @@ function addVariable(configDict, fg, requestDict)::Dict{String, Any}
 
   @info "Adding variable of type '$(varRequest.variableType)' with id '$(varRequest.label)'..."
 
-  vnext = addVariable!(fg, varLabel, varType, N=(varRequest.N==nothing ? 100 : varRequest.N), ready=0, labels=[varRequest.labels; "VARIABLE"])
+  vnext = addVariable!(fg, varLabel, varType, N=(varRequest.N==nothing ? 100 : varRequest.N), ready=0, labels=Symbol.([varRequest.labels; "VARIABLE"]))
   return Dict{String, Any}("status" => "OK", "id" => vnext.label)
 end
 
@@ -88,13 +88,13 @@ function ls(configDict, fg, requestDict)::Dict{String, Any}
 
     resp = Dict{String, Any}()
     if lsr.variables == "true"
-        vars = Caesar.ls(fg)
-        resp["variables"] = map(v -> Dict{String, Any}("id" => v), vars[1])
+        vars = DistributedFactorGraphs.ls(fg)
+        resp["variables"] = map(v -> Dict{String, Any}("id" => v), vars)
     end
     if lsr.factors == "true"
         # Variables
         for vDict in resp["variables"]
-            factors = Caesar.ls(fg, Symbol(vDict["id"]))
+            factors = DistributedFactorGraphs.ls(fg, Symbol(vDict["id"]))
             vDict["factors"] = String.(factors)
         end
     end
@@ -102,9 +102,20 @@ function ls(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function getNode(configDict, fg, requestDict)::Dict{String, Any}
+    error("Please use getVariable or getFactor, this function is deprecated")
     # TODO: Build a cleaner contract to return this value.
     vert = RoME.getVert(fg, Symbol(requestDict["payload"]))
     return JSON.parse(JSON.json(vert))
+end
+
+function getVariable(configDict, fg, requestDict)::Dict{String, Any}
+    variable = DistributedFactorGraphs.getVariable(fg, Symbol(requestDict["payload"]))
+    return JSON.parse(JSON.json(variable))
+end
+
+function getFactor(configDict, fg, requestDict)::Dict{String, Any}
+    factor = DistributedFactorGraphs.getFactor(fg, Symbol(requestDict["payload"]))
+    return JSON.parse(JSON.json(factor))
 end
 
 function setReady(configDict, fg, requestDict)::Dict{String, Any}
@@ -121,11 +132,18 @@ function setReady(configDict, fg, requestDict)::Dict{String, Any}
     end
 
     # Action
-    varLabels = readyRequest["variables"]==nothing ? union(Caesar.ls(fg)...) : Symbol.(requestDict["variables"])
+    if readyRequest["variables"]!=nothing
+        error("setReady does not support a request list yet.")
+        #TODO: Fix to use getVariable/getFactor for requestDict["variables"]...
+    end
     # Do specific variables
-    for varLabel in varLabels
-        v = getVert(fg, varLabel)
-        v.attributes["ready"] = readyRequest["isReady"]
+    for varLabel in DistributedFactorGraphs.ls(fg)
+        v = DistributedFactorGraphs.getVariable(fg, varLabel)
+        v.ready = readyRequest["isReady"]
+    end
+    for varLabel in DistributedFactorGraphs.lsf(fg)
+        v = DistributedFactorGraphs.getFactor(fg, varLabel)
+        v.ready = readyRequest["isReady"]
     end
 
     # Generate return payload

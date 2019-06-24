@@ -48,7 +48,7 @@ end
 # this function is on notice!
 function setupSLAMinDB(;cloudGraph=nothing, addrdict=nothing)
   if cloudGraph != nothing
-    return SLAMWrapper(Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph), nothing, 0)
+    return SLAMWrapper(initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph), nothing, 0)
   else
     return SLAMWrapper(RoME.initfg(), nothing, 0)
   end

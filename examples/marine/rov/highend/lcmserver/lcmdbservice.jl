@@ -161,10 +161,7 @@ function lcmpointcloudmsg!(slaml::SLAMWrapper,
   @show typeof(msg[:points_local])
 
   node_name =  Symbol("x$(odomsg[:node_1_id]+1)")
-  # function appendvertbigdata!(fgl::FactorGraph,
-  #       vert::Graphs.ExVertex,
-  #       description::AbstractString,
-  #       data  )
+  # function appendvertbigdata!(
   vert = getVert(slaml.fg, )
   appendvertbigdata!(slaml.fg, )
 
@@ -238,7 +235,7 @@ end
 
 function setupSLAMinDB(;cloudGraph=nothing, addrdict=nothing)
   if cloudGraph != nothing
-    return SLAMWrapper(Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph), nothing, 0)
+    return SLAMWrapper(initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph), nothing, 0)
   else
     return SLAMWrapper(RoME.initfg(), nothing, 0)
   end

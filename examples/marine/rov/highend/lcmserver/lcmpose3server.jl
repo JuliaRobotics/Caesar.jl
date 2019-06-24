@@ -125,7 +125,7 @@ function runlistener(
 end
 
 function setupSLAMinDB(cloudGraph, addrdict)
-  SLAMWrapper(Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph), nothing, 0)
+  SLAMWrapper(initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph), nothing, 0)
 end
 
 function lcmsendpose(lc, vert::Graphs.ExVertex, usrid::Int)
