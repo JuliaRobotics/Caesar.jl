@@ -20,6 +20,8 @@ Newly created page to list related references and additional literature pertaini
 
 [1.8]  Fourie, D., Leonard, J.: "Inertial Odometry with Retroactive Sensor Calibration", publication under review.
 
+[1.9]  Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. Submitted to ICRA.
+
 ### Important References
 
 [2.1]  Kaess, Michael, et al. ["iSAM2: Incremental smoothing and mapping using the Bayes tree"](http://journals.sagepub.com/doi/abs/10.1177/0278364911430419) The International Journal of Robotics Research (2011): 0278364911430419.
