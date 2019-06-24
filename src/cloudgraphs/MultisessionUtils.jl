@@ -104,7 +104,7 @@ end
 
 
 """
-    getAllLandmarkNeoIDs(::Dict{Symbol, Dict{Symbol, Int}}, ::Symbol)
+    $(SIGNATURES)
 
 Return Vector{Int} of Neo4j vertex IDs relating to symbol, as listed in lm2others.
 """
@@ -120,7 +120,7 @@ end
 
 
 """
-    $TYPEDSIGNATURES
+    $(SIGNATURES)
 
 Return subgraph copy of type FactorGraph contaning values from session in lm2others, and Vector{Symbol} of primary
 key symbols used for graph exstraction.
@@ -149,11 +149,11 @@ end
 
 
 """
-    findExistingMSConstraints(fgl<:AbstractDFG)
+    $(SIGNATURES)
 
 Return Dict{Symbol, Int} of vertex symbol to Neo4j node ID of MULTISESSION constraints in this `fgl.sessionname`.
 """
-function findExistingMSConstraints(fgl<:G) where G <: AbstractDFG
+function findExistingMSConstraints(fgl::G) where G <: AbstractDFG
   query =  "match (n:$(fgl.sessionname):$(fgl.robotname):$(fgl.username):MULTISESSION)
             return id(n), n.exVertexId, n.label"
   cph, = executeQuery(cg, query)

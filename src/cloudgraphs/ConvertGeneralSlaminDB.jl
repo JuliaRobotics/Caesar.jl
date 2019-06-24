@@ -355,7 +355,7 @@ end
 
 
 """
-    updatenewverts!(fgl<:AbstractDFG; N::Int)
+    $(SIGNATURES)
 
 Convert vertices of session in Neo4j DB with Caesar.jl's required data elements
 in preparation for MM-iSAMCloudSolve process.
@@ -370,7 +370,7 @@ end
 
 
 """
-    resetentireremotesession(conn, session, robot, user)
+    $(SIGNATURES)
 
 match (n:\$(session))
 remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width

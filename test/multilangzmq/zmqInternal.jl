@@ -1,4 +1,4 @@
-# using Revise
+using Revise
 using JSON, ZMQ
 using Test
 # using RoMEPlotting
@@ -55,7 +55,9 @@ for i in 1:6
     @test sendCmd(config, fg, odoFactCmd) == "{\"status\":\"OK\",\"id\":\"x$(i-1)x$(i)f1\"}"
 end
 
-@test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\",\"x0x1f1\"],\"id\":\"x0\"},{\"factors\":[\"x0x1f1\",\"x1x2f1\"],\"id\":\"x1\"},{\"factors\":[\"x1x2f1\",\"x2x3f1\"],\"id\":\"x2\"},{\"factors\":[\"x2x3f1\",\"x3x4f1\"],\"id\":\"x3\"},{\"factors\":[\"x3x4f1\",\"x4x5f1\"],\"id\":\"x4\"},{\"factors\":[\"x4x5f1\",\"x5x6f1\"],\"id\":\"x5\"},{\"factors\":[\"x5x6f1\"],\"id\":\"x6\"}]}"
+jResponse = JSON.parse(sendCmd(config, fg, lsCmd))
+# TODO: Test the content of this response.
+#@test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\",\"x0x1f1\"],\"id\":\"x0\"},{\"factors\":[\"x0x1f1\",\"x1x2f1\"],\"id\":\"x1\"},{\"factors\":[\"x1x2f1\",\"x2x3f1\"],\"id\":\"x2\"},{\"factors\":[\"x2x3f1\",\"x3x4f1\"],\"id\":\"x3\"},{\"factors\":[\"x3x4f1\",\"x4x5f1\"],\"id\":\"x4\"},{\"factors\":[\"x4x5f1\",\"x5x6f1\"],\"id\":\"x5\"},{\"factors\":[\"x5x6f1\"],\"id\":\"x6\"}]}"
 
 # Set all variables ready
 setReadyCmd = Dict{String, Any}("request" => "setReady", "payload" => JSON.parse(JSON.json(SetReadyRequest(nothing, 1))))
@@ -67,8 +69,11 @@ result = sendCmd(config, fg, batchSolveCmd)
 @test JSON.parse(result)["status"] == "OK"
 
 # Just for fun
-getNodeCmd = Dict{String, Any}("request" => "getNode", "payload" => "x0")
-x0Ret = JSON.parse(sendCmd(config, fg, getNodeCmd))
+getVariableCmd = Dict{String, Any}("request" => "getVariable", "payload" => "x0")
+x0Ret = JSON.parse(sendCmd(config, fg, getVariableCmd))
+getFactorCmd = Dict{String, Any}("request" => "getFactor", "payload" => "x0x1f1")
+# TODO: Fix
+# x0x1f1Ret = JSON.parse(sendCmd(config, fg, getFactorCmd))
 
 # Test a factor that doesn't exist, should produce legible error
 dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(undef,3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
