@@ -5,6 +5,7 @@ julia:
   - 0.7
   - 1.0
   - 1.1
+  - 1.2
   - nightly
 notifications:
   email: false
@@ -14,6 +15,7 @@ addons:
     - hdf5-tools
 matrix:
   allow_failures:
+    - julia: 1.2
     - julia: nightly
 
 # script:
@@ -28,6 +30,7 @@ jobs:
   include:
     - stage: "Documentation"
       julia: 1.0
+      sudo: required
       os: linux
       script:
         - julia -e 'import Pkg; Pkg.add("Documenter")'

@@ -28,7 +28,7 @@ function runHexagonalExample(fg::G, totalIterations::Int, iterationsPerSolve::In
     addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))
 
     # Add a landmark l1
-    addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
+    addVariable!(fg, :l1, Point2, labels=[:LANDMARK])
 
     # Drive around in a hexagon a number of times
     solveTimes = DataFrame(GraphSize = [], TimeBuildBayesTree = [], TimeSolveGraph = [])

@@ -18,7 +18,7 @@ If you already have Julia 1.0 or above, alternatively see [complete installation
 ```julia
 julia> ]
 (v1.0) pkg> add RoME, Distributed, LinearAlgebra
-(v1.0) pkg> add RoMEPlotting#master
+(v1.0) pkg> add RoMEPlotting
 ```
 
 The Julia REPL/console is sufficient for this example (copy-paste from this page).  Note that more involved work in Julia is simplified by using the Juno IDE.
