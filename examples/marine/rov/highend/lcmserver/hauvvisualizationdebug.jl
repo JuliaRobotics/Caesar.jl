@@ -63,7 +63,7 @@ end
 # fetch and study the graph as built by server.jl
 
 # setBackendWorkingSet!(fg.cg.neo4j.connection, user_config["session"])
-fg = Caesar.initfg(cloudgraph=backend_config, sessionname=user_config["session"])
+fg = initfg(cloudgraph=backend_config, sessionname=user_config["session"])
 fullLocalGraphCopy!(fg, reqbackendset=true)
 writeGraphPdf(fg)
 run(`evince fg.pdf`)
@@ -167,7 +167,7 @@ zpr5 = veeEuler(wTx5)[[3;4;5]]
 
 # build a new factor graph from this info
 N = 100
-fgnew = Caesar.initfg(cloudgraph=backend_config, sessionname="SESSHAUVCODED")
+fgnew = initfg(cloudgraph=backend_config, sessionname="SESSHAUVCODED")
 
 
 addVariable!(fgnew,:x1,N=N,labels=["POSE"], dims=6)

@@ -54,7 +54,7 @@ function runSlamInDbOnSession(
 
           println("===================CONVERT===================")
           solverStatus.currentStep = "Prep_Convert"
-          fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
+          fg = initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
           updatenewverts!(fg, N=N)
           println()
 
@@ -70,7 +70,7 @@ function runSlamInDbOnSession(
 
           println("====================SOLVE====================")
           solverStatus.currentStep = "Init_Solve"
-          fg = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
+          fg = initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
 
           setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionId, robotId, userId)
 
@@ -148,7 +148,7 @@ function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
   while loopctrl[1] && (iterations > 0 || iterations == -1) # loopctrl for future use
     iterations = iterations == -1 ? iterations : iterations-1 # stop at 0 or continue indefinitely if -1
     println("===================CONVERT===================")
-    fgl = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
+    fgl = initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
     updatenewverts!(fgl, N=N)
     println()
 
@@ -161,7 +161,7 @@ function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
     println()
 
     println("====================SOLVE====================")
-    fgl = Caesar.initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
+    fgl = initfg(sessionname=sessionId, robotname=robotId, username=userId, cloudgraph=cloudGraph)
 
     setBackendWorkingSet!(cloudGraph.neo4j.connection, sessionId, robotId, userId)
 
@@ -244,7 +244,7 @@ function convertdb(;addrdict=nothing,
   end
   cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict, nparticles=nparticles)
   N = parse(Int, addrdict["num particles"])
-  fg = Caesar.initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph)
+  fg = initfg(sessionname=addrdict["session"], cloudgraph=cloudGraph)
   updatenewverts!(fg, N=N)
 end
 

@@ -17,14 +17,14 @@ Nparticles = parse(Int, addrdict["num particles"])
 println("Attempting to solve session $(session) with $(Nparticles) particles per marginal...")
 
 
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
 setBackendWorkingSet!(fg.cg.neo4j.connection, session)
 
 # TODO -- incremental graph and subgraphs are works in progress
 while true
   println("=================================================")
-  fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+  fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
   setBackendWorkingSet!(fg.cg.neo4j.connection, session)
 
@@ -49,7 +49,7 @@ end
 
 
 
-# fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+# fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 # fullLocalGraphCopy!(fg, conn)
 #
 # ls(fg)

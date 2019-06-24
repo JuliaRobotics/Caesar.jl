@@ -14,7 +14,7 @@ addrdict["robotId"] = "TestRobot"
 
 # Start with an empty graph (local dictionary version) # fg = initfg(sessionname="SLAM2D_TUTORIAL")
 ## TODO -- ISSUE Julia 0.6.0-0.6.2 dives into some StackOverflow problem using the functions, but fine when called separately.
-fg = Caesar.initfg(sessionname=user_config["session"], robotname=addrdict["robotId"], cloudgraph=backend_config)
+fg = initfg(sessionname=user_config["session"], robotname=addrdict["robotId"], cloudgraph=backend_config)
 
 # fg = RoME.initfg(sessionname=addrdict["session"])
 # fg = IncrementalInference.emptyFactorGraph()

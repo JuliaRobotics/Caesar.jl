@@ -43,7 +43,7 @@ addrdict["robotId"] = "Ute"
 
 # Graphs.plot(fg.g)
 
-fg = Caesar.initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
+fg = initfg(sessionname=user_config["sessionId"], robotname=user_config["robotId"], cloudgraph=backend_config)
 
 # deleteServerSession!(fg.cg, user_config["session"])
 
@@ -93,7 +93,7 @@ Gadfly.draw(PDF("/tmp/before.pdf",20cm,20cm),pl)
 
 # fetch a local copy
 
-fg = Caesar.initfg(sessionname=user_config["sessionId"], cloudgraph=backend_config) #, robotname=user_config["robotId"]
+fg = initfg(sessionname=user_config["sessionId"], cloudgraph=backend_config) #, robotname=user_config["robotId"]
 fullLocalGraphCopy!(fg)
 pl1=drawPosesLandms(fg)
 
@@ -133,7 +133,7 @@ for l1 in L
   j+=1
 end
 #run Server Code
-fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+fg = initfg(sessionname=user_config["session"], cloudgraph=backend_config)
 fullLocalGraphCopy!(fg)
 pl2=drawPosesLandms(fg)
 draw(PDF("daniel.pdf",20cm,20cm),pl2)

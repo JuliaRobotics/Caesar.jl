@@ -41,7 +41,7 @@ db = client[:CloudGraphs]
 
 
 
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
 
 # totally reset to frontend built state in DB

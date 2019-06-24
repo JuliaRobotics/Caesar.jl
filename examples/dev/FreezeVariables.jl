@@ -3,7 +3,7 @@ using Caesar
 robotId = "Munster"
 sessionId = "Test"
 
-fg = Caesar.initfg(sessionname=sessionId, robotname=robotId)
+fg = initfg(sessionname=sessionId, robotname=robotId)
 
 # also add a PriorPose2 to pin the first pose at a fixed location
 addVariable!(fg, :x0, Pose2) # , labels=["POSE"]

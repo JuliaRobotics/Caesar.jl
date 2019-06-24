@@ -175,16 +175,6 @@ function getfnctype(cvl::CloudGraphs.CloudVertex)
   return getfnctype(vert)
 end
 
-function initfg(;sessionname="NA",robotname="",username="",cloudgraph=nothing)
-  # fgl = RoME.initfg(sessionname=sessionname)
-  fgl = IIF.FactorGraph()
-  fgl.sessionname = sessionname
-  fgl.robotname = robotname
-  fgl.username = username
-  fgl.cg = cloudgraph
-  return fgl
-end
-
 function addCloudVert!(fgl::FactorGraph,
         exvert::Graphs.ExVertex;
         labels::Vector{T}=String[]  ) where {T <: AbstractString}
@@ -1171,7 +1161,7 @@ end
 Fetch and save a FactorGraph session to a jld, using CloudGraph object and session definition.
 """
 function db2jld(cgl::CloudGraph, session::AbstractString, filename::AbstractString)
-  fg = Caesar.initfg(sessionname=session, cloudgraph=cgl)
+  fg = initfg(sessionname=session, cloudgraph=cgl)
   fullLocalGraphCopy!(fg)
   savejld(fg, file=filename)
   return fg

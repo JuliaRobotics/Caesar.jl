@@ -133,7 +133,7 @@ function getLocalSubGraphMultisession(cg::CloudGraph,
                                       numneighbors::Int=0  ) where {T <: AbstractString}
   #
   res = Dict{Symbol, Int}()
-  sfg = Caesar.initfg(sessionname=session, robotname=robot, username=user, cloudgraph=cg)
+  sfg = initfg(sessionname=session, robotname=robot, username=user, cloudgraph=cg)
   if length(lm2others) > 0
     for (sess,ms) in lm2others
       for (sym, neoid) in ms

@@ -80,7 +80,7 @@ poseswithdepth["x1"] = 0 # skip this pose -- there is no big data before ICRA
 while true
 
   # this is being replaced by cloudGraph, added here for development period
-  fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+  fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
   IDs = getPoseExVertexNeoIDs(fg.cg.neo4j.connection, session=session, reqbackendset=false);
 

@@ -37,7 +37,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 
 # T=30 # 1400
-# fg = Caesar.initfg();
+# fg = initfg();
 # idx = appendFactorGraph!(fg, d, f, toT=T, lcmode=:unimodal, MM=MMr);
 
 
@@ -60,7 +60,7 @@ include(joinpath(dirname(@__FILE__),"loadVicPrkData.jl"))
 
 
   # init pose
-fg = Caesar.initfg()
+fg = initfg()
 prevn = initFactorGraph!(fg, init=d[1][1:3])
 Podo=diagm([0.5;0.5;0.005])
 N=100

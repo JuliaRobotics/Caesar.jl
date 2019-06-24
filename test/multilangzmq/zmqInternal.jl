@@ -13,7 +13,7 @@ addLandmark2DJson = "{\n  \"landmark_id\": \"l1\",\n  \"robot_id\": \"Hexagonal\
 addOdo2DCmd = JSON.parse(addOdo2DJson)
 addLandmark2DCmd = JSON.parse(addLandmark2DJson)
 
-fg = Caesar.initfg()
+fg = initfg()
 config = Dict{String, String}()
 
 # Send a command locally.

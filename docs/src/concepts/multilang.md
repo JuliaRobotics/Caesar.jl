@@ -37,7 +37,7 @@ Then run the following commands, and note these steps have also been [scripted h
 using Caesar, Caesar.ZmqCaesar
 
 # create empty factor graph and config objects
-fg = Caesar.initfg()
+fg = initfg()
 config = Dict{String, String}()
 zmqConfig = ZmqServer(fg, config, true, "tcp://*:5555");
 

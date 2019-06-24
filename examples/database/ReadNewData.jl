@@ -23,7 +23,7 @@ include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 # fieldnames(fg.cg.neo4j)
 
 N=Nparticles
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
 # setBackendWorkingSet!(conn, session)
 fullLocalGraphCopy!(fg)
@@ -45,7 +45,7 @@ writeGraphPdf(fg)
 
 
 # Okay now solve locally, or start MM-iSAMCloudSolve.jl
-fg = Caesar.initfg(sessionname=session, cloudgraph=cloudGraph)
+fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
 setDBAllReady!(fg)
 setBackendWorkingSet!(conn, session)
