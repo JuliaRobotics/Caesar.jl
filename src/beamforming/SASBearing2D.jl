@@ -169,7 +169,7 @@ function (sas2d::SASBearing2D)(
         elem = thread_data.elementset[i]
         thread_data.arrayPosLIE[i,j] = thread_data.arrayPos[elem,j]
     end
-    azi = atan2(dy,dx)
+    azi = atan(dy,dx)
     sas2d.cfgLIE.azimuths = [azi;]
 
 

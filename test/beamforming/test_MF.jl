@@ -3,18 +3,22 @@ using Caesar
 using Pkg
 using DelimitedFiles
 
-chirpFile = joinpath(Pkg.dir("Caesar"),"test","testdata","template.txt");
+chirpFile = joinpath(ENV["HOME"],"data", "sas","chirp250.txt");
 chirpIn = readdlm(chirpFile,',',Float64,'\n')
 
-logfile = joinpath(Pkg.dir("Caesar"),"test","testdata","wavetest01.txt");
-rawData = readdlm(logfile,',',Float64,'\n')  # waveform timeseries from hydrophone
+logFile = joinpath(ENV["HOME"],"liljondir", "kayaks","20_gps_pos","waveform300.csv");
+rawData = readdlm(logFile,',',Float64,'\n')  # waveform timeseries from hydrophone
 
-nFFT = nextpow(2,size(rawData,1))
+#tranpose data to get format datavec x nphones
+rawDataAdj = zeros(Float64,size(rawData,2),size(rawData,1))
+adjoint!(rawDataAdj,rawData) #data x phones
+
+nFFT = nextpow(2,size(rawDataAdj,1))
 nPhones = 5
 
 mf = Caesar.prepMF(chirpIn,nFFT,nPhones)
 dataOut = zeros(Complex{Float64}, nFFT, nPhones)
-mf(rawData,dataOut)
+@time mf(rawDataAdj,dataOut)
 
 0
 

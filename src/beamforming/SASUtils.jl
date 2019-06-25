@@ -16,7 +16,7 @@ end
 Prepare a sas2d factor to use in the factor graph where `totalPhones` is the size of the SAS array.  Pass a known `cfgd::Dict{String,} for faster load times.`
 """
 function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
-              cfgd::Dict=loadConfigFile(joinpath(dirname(pathof(Caesar)),"config","SAS2D.yaml")), rangemodel=:Rayleigh )
+              cfgd::Dict=loadConfigFile(joinpath(dirname(pathof(Caesar)),"config","SAS2D.yaml")), rangemodel=:Rayleigh, chirpFile=joinpath(dirname(pathof(Caesar)),"config","chirp250.txt"))
   #
   # @assert size(csvWaveData,2) == totalPhones
   #Constant Acoustic Params
@@ -36,8 +36,6 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
   #Data preprocessing MF + CZT
   w = exp(-2im*pi*(fCeil-fFloor)/(nFFT_czt*fSampling))
   a = exp(2im*pi*fFloor/fSampling)
-
-  chirpFile = joinpath(dirname(pathof(Caesar)),"config","chirp250.txt");
 
   chirpIn = readdlm(chirpFile,',',Float64,'\n')
 
