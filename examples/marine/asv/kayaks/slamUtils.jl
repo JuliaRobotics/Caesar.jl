@@ -123,8 +123,8 @@ function addsascluster_velpt!(fg::G,
 
   pp = DynPoint2VelocityPrior(MvNormal(dpμ,dpσ))
   addFactor!(fg, [poses[1];], pp, autoinit=true)
-  IncrementalInference.doautoinit!(fg,[getVert(fg,poses[1])])
-  setValKDE!(getVert(fg,poses[1]),kde!(getSample(getfnctype(getVert(fg, Symbol("$(poses[1])f1"),nt=:fnc)),N)[1]))
+  IncrementalInference.doautoinit!(fg,[getVariable(fg,poses[1])])
+  setValKDE!(getVariable(fg,poses[1]),kde!(getSample(getfnctype(getFactor(fg, Symbol("$(poses[1])f1"))),N)[1]))
 
   #Add odo factors
   for i in 2:numelems
@@ -134,11 +134,11 @@ function addsascluster_velpt!(fg::G,
       dpσ = diagm([0.5;0.5;0.1;0.1].^2)
       vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
       addFactor!(fg, [poses[i-1];poses[i]], vp, autoinit=true)
-      IncrementalInference.doautoinit!(fg,[getVert(fg,poses[i])])
+      IncrementalInference.doautoinit!(fg,[getVariable(fg,poses[i])])
       #factorsym = Symbol("$(poses[i-1])$(poses[i])f1")
-      #setValKDE!(getVert(fg,poses[i]),kde!(getSample(getfnctype(getVert(fg, factorsym,nt=:fnc)),N)[1]))
+      #setValKDE!(getVariable(fg,poses[i]),kde!(getSample(getfnctype(getVariable(fg, factorsym,nt=:fnc)),N)[1]))
       @show hackinit = ones(4,N).*[dposData[i-1,:];xdotp;ydotp] + rand(MvNormal(dpμ,dpσ),N)
-      setVal!(getVert(fg,poses[i]),hackinit)
+      setVal!(getVariable(fg,poses[i]),hackinit)
   end
 
   sas2d = prepareSAS2DFactor(numelems, waveformData, rangemodel=:Correlator)
@@ -182,7 +182,7 @@ function addsascluster_only_gps!(fg::G,
     pp = PriorPoint2(MvNormal(posData[count,:], rtkCov) )
     addFactor!(fg, [sym;], pp, autoinit=true)
     IncrementalInference.doautoinit!(fg,sym)
-    setValKDE!(getVert(fg,sym),kde!(getSample(getfnctype(getVert(fg, Symbol("$(sym)f1"),nt=:fnc)),N)[1]))
+    setValKDE!(getVariable(fg,sym),kde!(getSample(getfnctype(getFactor(fg, Symbol("$(sym)f1"))),N)[1]))
   end
 
   sas2d = prepareSAS2DFactor(numelems, waveformData, rangemodel=:Correlator)
@@ -191,10 +191,16 @@ function addsascluster_only_gps!(fg::G,
   nothing
 end
 
-function approxConvFwdBFRaw(fg, poses, beacon, origin, scale, snrfloor; N::Int=100)
+function approxConvFwdBFRaw(fg,
+                            poses,
+                            beacon,
+                            origin,
+                            scale,
+                            snrfloor;
+                            N::Int=100  )
   #
   fctsym = Symbol(string(beacon,poses...,:f1))
-  sas2d = IncrementalInference.getfnctype(getVert(fg, fctsym, nt=:fnc))
+  sas2d = IncrementalInference.getfnctype(getFactor(fg, fctsym))
   sas2d.debugging = true
   for ti in 1:Threads.nthreads() reset!(sas2d.threadreuse[ti].dbg) end
   predL1 = IncrementalInference.approxConv(fg, fctsym, beacon, N=N)
@@ -217,7 +223,7 @@ function approxConvFwdBFRaw(fg, poses, beacon, origin, scale, snrfloor; N::Int=1
 
   circ_avg_beam = zeros(2,length(avg_beam))
   count = 0
-  for th in linspace(0,2pi,length(avg_beam))
+  for th in range(0,2pi,length=length(avg_beam))
     count += 1
     circ_avg_beam[:,count] = R(th)*scale*[avg_beam[count];0.0]+origin
   end
@@ -225,7 +231,13 @@ function approxConvFwdBFRaw(fg, poses, beacon, origin, scale, snrfloor; N::Int=1
   allbeams
 end
 
-function approxConvFwdBFlayer(fg, poses, beacon, origin, scale, snrfloor; N::Int=100)
+function approxConvFwdBFlayer(fg,
+                              poses,
+                              beacon,
+                              origin,
+                              scale,
+                              snrfloor::Float64=0.0;
+                              N::Int=100  )
   #
   circ_avg_beam = approxConvFwdBFRaw(fg, poses, beacon, origin, scale, snrfloor, N=N)
 
