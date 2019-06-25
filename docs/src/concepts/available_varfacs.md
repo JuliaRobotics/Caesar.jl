@@ -58,7 +58,6 @@ Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:
 PriorPolar
 PriorPoint2
 PriorPose2
-PriorPolar
 ```
 
 ### Prior 3D (unary) factors
