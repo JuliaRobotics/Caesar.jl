@@ -5,7 +5,8 @@ using DelimitedFiles
 using Colors, Gadfly
 using RoMEPlotting, KernelDensityEstimatePlotting
 
-posFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_positions.csv");
+#posFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_positions.csv");
+posFile = joinpath("/home",ENV["USER"],"data","sas","test_array_positions.csv");
 posData = readdlm(posFile,',',Float64,'\n')
 
 
@@ -15,7 +16,7 @@ posData[:,2] .-= 40.0
 # gps covariance
 rtkCov = Matrix(Diagonal([0.1;0.1].^2))
 
-N = 200
+N = 100
 fg = initfg()
 
 #landmark
@@ -30,16 +31,19 @@ for i in 1:5
     pp = PriorPoint2(MvNormal(posData[i,1:2], rtkCov) )
     addFactor!(fg, [sym;], pp)
     # manual init for now
-    setValKDE!(getVert(fg,sym), kde!(getSample(pp, N)[1]))
-    getData(fg,sym).initialized = true
+    #setValKDE!(getVariable(fg,sym), kde!(getSample(pp, N)[1]))
+    #getData(fg,sym).initialized = true
 end
 
-dataFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_waveforms.csv");
+#dataFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_waveforms.csv");
+dataFile = joinpath("/home",ENV["USER"],"data","sas","test_array_waveforms.csv");
+
 csvWaveData = readdlm(dataFile,',',Float64,'\n')
 csvWaveData = csvWaveData[:,1:5]
 #
-cfgd=loadConfigFile("/home/dehann/.julia/dev/ProprietaryFactors/config/SAS2D.yaml")
-chirpFile = "/home/dehann/.julia/dev/ProprietaryFactors/src/beamforming/chirp250.txt"
+cfgFile = joinpath("/home",ENV["USER"],"data","sas","SAS2D.yaml");
+cfgd=loadConfigFile(cfgFile)
+chirpFile = joinpath("/home",ENV["USER"],"data","sas","chirp250.txt");
 sas2d = prepareSAS2DFactor(5, csvWaveData, rangemodel=:Correlator, cfgd=cfgd, chirpFile=chirpFile)
 
 
