@@ -33,21 +33,21 @@ function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOu
 
     # combination of fCeil and fSampling limit information content extracted by thirsCfg.azimuths. Sample faster to get higher res BF
     for iter in eachindex(thisCfg.azimuths)
-        sourceXY[1] = -cos(thisCfg.azimuths[iter])
-        sourceXY[2] = -sin(thisCfg.azimuths[iter])
+        @inbounds sourceXY[1] = -cos(thisCfg.azimuths[iter])
+        @inbounds sourceXY[2] = -sin(thisCfg.azimuths[iter])
         #tDelays[:] = (arrayPos * sourceXY)/thisCfg.soundSpeed
 
         for piter in 1:thisCfg.nPhones
-            dt = (arrayPos[piter,1]*sourceXY[1] + arrayPos[piter,2]*sourceXY[2])/thisCfg.soundSpeed
+            @inbounds dt = (arrayPos[piter,1]*sourceXY[1] + arrayPos[piter,2]*sourceXY[2])/thisCfg.soundSpeed
 
-            dataTemp[piter,:] = exp.(delaysTemp.*-2im*pi*dt)
+            @inbounds dataTemp[piter,:] = exp.(delaysTemp.*-2im*pi*dt)
             #for fftiter in 1:thisCfg.dataLen
             #     @time dataTemp[piter,fftiter] = exp(-2im*pi*dt*thisCfg.FFTfreqs[fftiter])
             #end
         end
 
         # @time filterOut[iter,:,:] = transpose(conj!(exp.(-2im*pi*tDelays*FFTfreqs'))) #conjugate transpose in place
-        adjoint!(view(filterOut,iter,:,:),dataTemp)
+        @inbounds adjoint!(view(filterOut,iter,:,:),dataTemp)
     end
     nothing
 end
