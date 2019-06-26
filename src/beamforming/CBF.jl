@@ -121,45 +121,18 @@ function phaseShiftSingle!(sourceXY::Vector{Float64},
                            azi::R,
                            positions::Array,
                            ztransWave::Array{Complex{R2}}  ) where {R <: Real, R2 <: Real}
-  #
-  # sourceXY = zeros(2)
-  # FFTfreqs = linspace(thisCfg.fFloor,thisCfg.fCeil,thisCfg.dataLen)
+
   sourceXY[1] = -cos(azi) # unit vector in azimuth direction
   sourceXY[2] = -sin(azi)
   dt = (positions' * sourceXY)/thisCfg.soundSpeed
+  ztransWave .*= conj(exp.(-2im*pi*dt*thisCfg.FFTfreqs))
 
   # @assert thisCfg.dataLen == length(ztransWave)
-  for j in 1:thisCfg.dataLen
-    ztransWave[j] *= conj(exp(-2im*pi*dt*thisCfg.FFTfreqs[j]))
-  end
+  # for j in 1:thisCfg.dataLen
+  #    ztransWave[j] *= conj(exp(-2im*pi*dt*thisCfg.FFTfreqs[j]))
+  # end
   nothing
 end
-
-"""
-    $(TYPEDSIGNATURES)
-
-Phase shifting ztransWave contents of leave one out element of `elemPositions` (positions of array elements)
-based on dx,dy position perturbation.  The ztransWave is chirp z-transform of LOO elements's waveform data,
-and only considering subset of frequencies in ztransWave (i.e. smaller than size of raw waveform data)
-"""
-function phaseShiftSingle!(thisCfg::CBFFilterConfig,
-                           azi::R,
-                           positions::Array,
-                           ztransWave::Array{Complex{R2}}  ) where {R <: Real, R2 <: Real}
-  #
-  # FFTfreqs = linspace(thisCfg.fFloor,thisCfg.fCeil,thisCfg.dataLen)
-  sourceXY = zeros(2)
-  phaseShiftSingle!(sourceXY, thisCfg, azi, positions, ztransWave)
-  # sourceXY[1] = -cos(azi) # unit vector in azimuth direction
-  # sourceXY[2] = -sin(azi)
-  # dt = (positions' * sourceXY)/thisCfg.soundSpeed
-  # # @assert thisCfg.dataLen == length(ztransWave)
-  # for j in 1:thisCfg.dataLen
-  #   ztransWave[j] *= conj(exp(-2im*pi*dt*FFTfreqs[j]))
-  # end
-  # nothing
-end
-
 
 """
     $(TYPEDSIGNATURES)

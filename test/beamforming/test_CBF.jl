@@ -11,11 +11,25 @@ soundSpeed = 1481;
 azimuthDivs = 180;
 azimuths = range(0,360,length=azimuthDivs)*pi/180;
 
-posFile = joinpath(ENV["HOME"],"data","sas","test_array_positions.csv");
-arrayElemPos = readdlm(posFile,',',Float64,'\n')
-arrayElemPos = arrayElemPos[:,1:2]
-dataFile = joinpath(ENV["HOME"],"data","sas","test_array_waveforms.csv");
-rawWaveData = readdlm(dataFile,',',Float64,'\n')
+#Single Test Array of length 10
+# posFile = joinpath(ENV["HOME"],"data","sas","test_array_positions.csv");
+# dataFile = joinpath(ENV["HOME"],"data","sas","test_array_waveforms.csv");
+# arrayElemPos = readdlm(posFile,',',Float64,'\n')
+# arrayElemPos = arrayElemPos[:,1:2]
+
+#Load Experimental Data - 10 frames
+winstart = 1600;
+rawWaveData = zeros(8000,nPhones);
+arrayElemPos = zeros(nPhones,2);
+for ele in winstart:winstart+nPhones-1
+    dataFile = joinpath(ENV["HOME"],"data", "sas", "sample_data","waveform$(ele).csv");
+    posFile = joinpath(ENV["HOME"],"data", "sas", "sample_data","nav$(ele).csv");
+    tempRead = readdlm(dataFile,',',Float64,'\n') #first element only
+    rawWaveData[:,ele-winstart+1] = adjoint(tempRead[1,:]);
+    tempRead = readdlm(posFile,',',Float64,'\n');
+    arrayElemPos[ele-winstart+1,:] = tempRead;
+end
+
 chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
 
 FFTfreqs = collect(LinRange(fFloor,fCeil,nFFT_czt))
@@ -51,7 +65,7 @@ temp2 = zeros(Complex{Float64},size(cztData));
 @time CBF2D_DelaySum!(cfg, cztData, dataOut,temp1,temp2,myCBF)
 
 pl = Gadfly.plot(
- Gadfly.layer(y=real(dataOut), Geom.line),
- #Gadfly.Coord.cartesian(xmin=0, xmax=m),
- Guide.ylabel(nothing),Guide.xlabel("Samples")
+ Gadfly.layer(x=azimuths, y=real(dataOut), Geom.line),
+ Gadfly.Coord.cartesian(xmin=0, xmax=2*pi),
+ Guide.ylabel(nothing),Guide.xlabel("Azimuths (rad)")
  ) ; pl |> PDF("/tmp/test_CBF.pdf")
