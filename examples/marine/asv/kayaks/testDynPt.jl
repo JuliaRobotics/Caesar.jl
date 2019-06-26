@@ -1,5 +1,5 @@
-using Distributed
-addprocs(5)
+# using Distributed
+# addprocs(5)
 
 
 using Caesar, RoME
@@ -86,29 +86,13 @@ getSolverParams(fg).showtree = true
 tree, smt, hist = solveTree!(fg)
 
 
-
-# Gadfly.push_theme(:default)
-
-PL = [];
-
-for i in 1:5
-    L1 = getVal(fg, Symbol("x$(i)"))
-    push!(PL, layer(x=L1[1,:],y=L1[2,:], Geom.histogram2d))
-end
+## Plot the SAS factor pairs
+fsym = :l1x1x2x3x4x5f1
+pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
 
 
-# push!(PL, approxConvFwdBFlayer(fg, poses, :l1, posData[1,:], 2000 ))
 
-push!(PL, plotKDE(getKDE(getVariable(fg, :l1)), levels=4, layers=true)...)
-
-pl = Gadfly.plot(PL...);
-pl.coord = Coord.Cartesian(xmin=10,xmax=30,ymin=-60,ymax=-45)
-
-pl |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
-
-plname = "testDP_2pp_3vpvp_init.png"
-Gadfly.draw(PNG(plname,1.5*20cm,1.5*20cm),pl)
+## More debugging below
 
 stuff = IncrementalInference.localProduct(fg, :x1)
-
 pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
