@@ -1,17 +1,22 @@
 language: julia
+
 os:
   - linux
+  
 julia:
   - 1.0
   - 1.1
   - 1.2
   - nightly
+  
 notifications:
   email: false
+  
 addons:
   apt:
     packages:
     - hdf5-tools
+
 matrix:
   allow_failures:
     - julia: nightly
