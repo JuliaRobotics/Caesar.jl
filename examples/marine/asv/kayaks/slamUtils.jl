@@ -37,7 +37,7 @@ function sanitycheck_nav(navdata)
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Load hydrophone waveform data from hard drive, after it has been processed from MOOS [a/b]log.  Processing from MOOS format can be done according to scripts/parseData.py -- Mei says so, call on @mc2922 if you can't find it...
 
@@ -244,4 +244,55 @@ function approxConvFwdBFlayer(fg,
   plPica = Gadfly.layer(x=circ_avg_beam[1,:], y=circ_avg_beam[2,:], Geom.path(),   Theme(default_color=colorant"magenta", line_width=2pt))
 
   plPica
+end
+
+"""
+    $SIGNATURES
+
+Plot side by side pair of poses and beacon for a particular SAS factor.
+
+Notes:
+- Specify non-default `filepath<:String`
+- can show pdf via evince if `show::Bool`
+"""
+function plotSASPair(fg::G,
+                     fsym::Symbol;
+                     show::Bool=true,
+                     filepath::AS="/tmp/test.pdf") where {G <: AbstractDFG, AS <: AbstractString}
+    #
+    PL = [];
+
+    @show fsym
+    @show vars = lsf(fg, fsym)
+    beac = vars[1]
+
+    for var in vars[2:end]
+        X1 = getVal(getVariable(fg, var))
+        push!(PL, layer(x=X1[1,:],y=X1[2,:], Geom.histogram2d))
+    end
+
+    # push!(PL, approxConvFwdBFlayer(fg, poses, :l1, posData[1,:], 2000 ))
+
+    pl11 = Gadfly.plot(PL...);
+    # pl.coord = Coord.Cartesian(xmin=10,xmax=30,ymin=-60,ymax=-45)
+
+    pl21 = plotKDE(fg, vars[2:end], levels=1, dims=[1;2])
+
+    L1v = getVariable(fg, beac)
+    L1 = getVal(L1v)
+    pl12 = Gadfly.plot(x=L1[1,:],y=L1[2,:], Geom.histogram2d)
+
+    pl22 = plotKDE(getKDE(L1v), levels=3)
+
+    # stack all images together
+    plT = Gadfly.hstack(pl11,pl12)
+    plB = Gadfly.hstack(pl21,pl22)
+    plA = Gadfly.vstack(plT, plB)
+
+    # if the user wants to see a file rendering
+    if show
+      plA |> PDF(filepath);  @async run(`evince $filepath`)
+    end
+
+    plA
 end
