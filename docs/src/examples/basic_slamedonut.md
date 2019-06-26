@@ -1,11 +1,9 @@
-# Singular Ranges-only SLAM Solution (i.e. "Under-Constrained")
-
+# Range only SLAM, Singular -- i.e. "Under-Constrained"
 
 This tutorial describes a range-only system where there are always more variable dimensions than range measurements made.
 The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point -- other examples show inference results where highly non-Gaussian error distributions are used.
-The one pre-baked result of this of this singular range-only illustration can be seen in this video:
+A file version of this example is provided in [RoME/examples here](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/RangesExample.jl). The one pre-baked result of this of this singular range-only illustration can be seen in this video:  Multi-modal range only example ([click here or image for full Vimeo](http://vimeo.com/190052649)),
 
-Multi-modal range only example ([click here or image for full Vimeo](http://vimeo.com/190052649)):   
 ```@raw html
 <a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="640" border="0" /></a>
 ```
@@ -17,7 +15,7 @@ This example is also available as a script [here in RoME.jl](https://github.com/
 If you already have Julia 1.0 or above, alternatively see [complete installation instructions here](http://www.juliarobotics.org/Caesar.jl/latest/installation_environment/):
 ```julia
 julia> ]
-(v1.0) pkg> add RoME, Distributed, LinearAlgebra
+(v1.0) pkg> add RoME, Distributed
 (v1.0) pkg> add RoMEPlotting
 ```
 
@@ -64,7 +62,7 @@ using Distributed
 nprocs() < 4 ? addprocs(4-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
-using RoME, LinearAlgebra
+using RoME
 ```
 **NOTE** Julia uses just-in-time compiling ([unless pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module)), therefore each time a new function call on a Julia process will be slow, but all following calls to the same functions will be as fast as the statically compiled code.
 
@@ -125,7 +123,7 @@ writeGraphPdf(fg) # show the factor graph
 
 At this point we can call the solver start interpreting the first results:
 ```julia
-tree = batchSolve!(fg)
+tree, smt, hist = solveTree!(fg)
 ```
 
 The factor graph figure above showed the structure between variables and factors.
@@ -239,7 +237,7 @@ The two "free" beacons/landmarks `:l3,:l4` still have several modes each, implyi
 vehicle_drives_to!(fg, :l103, GTp, GTl)
 vehicle_drives_to!(fg, :l104, GTp, GTl)
 
-tree = batchSolve!(fg)
+tree, smt, hist = solveTree!(fg)
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2])
 # Gadfly.draw(PDF("/tmp/testL100_104.pdf", 20cm, 10cm),pl)
@@ -253,17 +251,17 @@ Moving up to position `:l104` still shows strong multiodality in the vehicle pos
 vehicle_drives_to!(fg, :l105, GTp, GTl)
 vehicle_drives_to!(fg, :l106, GTp, GTl)
 
-tree = batchSolve!(fg)
+tree, smt, hist = solveTree!(fg)
 
 
 vehicle_drives_to!(fg, :l107, GTp, GTl)
 
-tree = batchSolve!(fg)
+tree, smt, hist = solveTree!(fg)
 
 
 vehicle_drives_to!(fg, :l108, GTp, GTl)
 
-tree = batchSolve!(fg)
+tree, smt, hist = solveTree!(fg)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 2:8], dims=[1;2], levels=6)
@@ -276,13 +274,13 @@ Next we see a strong return to a single dominant mode in all vehicle position es
 vehicle_drives_to!(fg, :l109, GTp, GTl)
 vehicle_drives_to!(fg, :l110, GTp, GTl)
 
-tree = batchSolve!(fg)
+tree, smt, hist = solveTree!(fg)
 
 
 vehicle_drives_to!(fg, :l111, GTp, GTl)
 vehicle_drives_to!(fg, :l112, GTp, GTl)
 
-tree = batchSolve!(fg)
+tree, smt, hist = solveTree!(fg)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 7:12], dims=[1;2])
