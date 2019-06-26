@@ -1,28 +1,49 @@
 
-using ProprietaryFactors
+using Caesar, DelimitedFiles
+using Gadfly
 
 fFloor = 250;
 fCeil = 1750;
 nFFT_czt = 1024;
 fSampling = 37500.0
-totalPhones = 10;
+nPhones = 10;
 soundSpeed = 1481;
 azimuthDivs = 180;
-azimuths = linspace(0,360,azimuthDivs)*pi/180;
+azimuths = range(0,360,length=azimuthDivs)*pi/180;
 
-logfile = joinpath(Pkg.dir("ProprietaryFactors"),"test","testdata","syntheticArray.csv");
-arrayElemPos = readdlm(logfile,',',Float64,'\n')
+posFile = joinpath(ENV["HOME"],"data","sas","test_array_positions.csv");
+arrayElemPos = readdlm(posFile,',',Float64,'\n')
 arrayElemPos = arrayElemPos[:,1:2]
-logfile = joinpath(Pkg.dir("ProprietaryFactors"),"test","testdata","synthetic_data.csv");
-rawWaveData = readdlm(logfile,',',Float64,'\n')
+dataFile = joinpath(ENV["HOME"],"data","sas","test_array_waveforms.csv");
+rawWaveData = readdlm(dataFile,',',Float64,'\n')
+chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
 
-#chirpFile = joinpath(Pkg.dir("ProprietaryFactors"),"test","testdata","chirp_signal_synth.csv");
-#chirpIn = readdlm(chirpFile,',',Float64,'\n')
+FFTfreqs = collect(LinRange(fFloor,fCeil,nFFT_czt))
 
-# Perturb array positions
-samples = 100
-exPos =
+cfg = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones,azimuths,soundSpeed,FFTfreqs)
+myCBF = zeros(Complex{Float64}, getCBFFilter2Dsize(cfg));
+lm = zeros(2,1);
+dataTempHolder = zeros(Complex{Float64},nPhones,nFFT_czt)
+@time constructCBFFilter2D!(cfg, arrayElemPos, myCBF, lm, dataTempHolder)
 
-cfg = CBFFilterConfig(arrayPosLIE,fFloor,fCeil,nFFT_czt,nPhones,azimuths,soundSpeed)
-bfFilterLIE = zeros(Complex{Float64}, getCBFFilter2Dsize(cfg));
-updateCBFFilter2D!(cfg, bfFilterLIE)
+# MF and CZT
+w = exp(-2im*pi*(fCeil-fFloor)/(nFFT_czt*fSampling))
+a = exp(2im*pi*fFloor/fSampling)
+
+chirpIn = readdlm(chirpFile,',',Float64,'\n')
+
+#Matched Filter on Data In
+nFFT_full = nextpow(2,size(rawWaveData,1))  # MF
+mfData = zeros(Complex{Float64}, nFFT_full, nPhones)
+mf = prepMF(chirpIn,nFFT_full,nPhones) # MF
+mf(rawWaveData,mfData) # MF
+
+cztData = zeros(Complex{Float64}, nFFT_czt,nPhones)
+filterCZT = prepCZTFilter(nFFT_full,nPhones,w,nFFT_czt,a)
+filterCZT(mfData,cztData)
+
+# CBF step
+dataOut = zeros(length(azimuths));
+temp1 = zeros(Complex{Float64},nFFT_czt);
+temp2 = zeros(Complex{Float64},size(cztData));
+@time CBF2D_DelaySum!(cfg, cztData, dataOut,temp1,temp2,myCBF)
