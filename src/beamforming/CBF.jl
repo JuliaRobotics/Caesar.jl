@@ -27,16 +27,8 @@ function getCBFFilter2Dsize(thisCfg::CBFFilterConfig)
     return (length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
 end
 
-# import Caesar: constructCBFFilter2D!
+function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array,sourceXY::Array, dataTemp::Array, delaysTemp::Array)
 
-function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array,sourceXY::Array, dataTemp::Array)
-
-    #if size(filterOut)!=(length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
-    #    error("Provided Filter has wrong dimensions.")
-    #end
-    #Allocations
-    #tDelays = zeros(thisCfg.nPhones)
-    #sourceXY = zeros(2)
     #dataTemp = zeros(Complex{Float64}, thisCfg.nPhones,thisCfg.dataLen)
 
     # combination of fCeil and fSampling limit information content extracted by thirsCfg.azimuths. Sample faster to get higher res BF
@@ -48,13 +40,10 @@ function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOu
         for piter in 1:thisCfg.nPhones
             dt = (arrayPos[piter,1]*sourceXY[1] + arrayPos[piter,2]*sourceXY[2])/thisCfg.soundSpeed
 
-            #copy!(tDelays,thisCfg.FFTfreqs)
-            #tDelays .*= -2im*pi*dt
-            #dataTemp[piter,:] .= exp.(tDelays)
-            for fftiter in 1:thisCfg.dataLen
-                 dataTemp[piter,fftiter] = exp(-2im*pi*dt*thisCfg.FFTfreqs[fftiter])
-            #     #dataTemp[piter,fftiter] = exp(-2im*pi*tDelays[piter]*thisCfg.FFTfreqs[fftiter])
-            end
+            dataTemp[piter,:] = exp.(delaysTemp.*-2im*pi*dt)
+            #for fftiter in 1:thisCfg.dataLen
+            #     @time dataTemp[piter,fftiter] = exp(-2im*pi*dt*thisCfg.FFTfreqs[fftiter])
+            #end
         end
 
         # @time filterOut[iter,:,:] = transpose(conj!(exp.(-2im*pi*tDelays*FFTfreqs'))) #conjugate transpose in place

@@ -1,6 +1,6 @@
 
 using Caesar, DelimitedFiles
-using Gadfly
+using Gadfly, Cairo, Fontconfig
 
 fFloor = 250;
 fCeil = 1750;
@@ -24,7 +24,9 @@ cfg = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones,azimuths,soundSpeed,FFTfreqs
 myCBF = zeros(Complex{Float64}, getCBFFilter2Dsize(cfg));
 lm = zeros(2,1);
 dataTempHolder = zeros(Complex{Float64},nPhones,nFFT_czt)
-@time constructCBFFilter2D!(cfg, arrayElemPos, myCBF, lm, dataTempHolder)
+delaysHolder = FFTfreqs;
+
+@time constructCBFFilter2D!(cfg, arrayElemPos, myCBF, lm, dataTempHolder,delaysHolder)
 
 # MF and CZT
 w = exp(-2im*pi*(fCeil-fFloor)/(nFFT_czt*fSampling))
@@ -47,3 +49,9 @@ dataOut = zeros(length(azimuths));
 temp1 = zeros(Complex{Float64},nFFT_czt);
 temp2 = zeros(Complex{Float64},size(cztData));
 @time CBF2D_DelaySum!(cfg, cztData, dataOut,temp1,temp2,myCBF)
+
+pl = Gadfly.plot(
+ Gadfly.layer(y=real(dataOut), Geom.line),
+ #Gadfly.Coord.cartesian(xmin=0, xmax=m),
+ Guide.ylabel(nothing),Guide.xlabel("Samples")
+ ) ; pl |> PDF("/tmp/test_CBF.pdf")
