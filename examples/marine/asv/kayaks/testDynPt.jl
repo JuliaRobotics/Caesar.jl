@@ -2,7 +2,7 @@ using Distributed
 addprocs(5)
 
 
-using Caesar, RoME, Distributions
+using Caesar, RoME
 using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting
 using KernelDensityEstimate
 using IncrementalInference
