@@ -91,8 +91,29 @@ fsym = :l1x1x2x3x4x5f1
 pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
 
 
+plotKDE(fg, ls(fg,r"x"), dims=[1;2])
+
 
 ## More debugging below
 
 stuff = IncrementalInference.localProduct(fg, :x1)
 pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
+
+
+
+## debug init order
+
+isInitialized(fg,:x1)
+
+IIF.spyCliqMat(tree, :l1)
+
+syms = getCliqInitVarOrderUp(whichCliq(tree, :l1))
+
+getCliqSubgraph(fg, whichCliq(tree,:l1))
+
+
+cfg = buildSubgraphFromLabels(fg,syms)
+
+writeGraphPdf(cfg)
+
+getVal(fg, :l1)
