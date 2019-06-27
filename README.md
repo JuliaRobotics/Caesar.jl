@@ -25,6 +25,7 @@ Click on the badges to follow web url links:
 | [FunctionalStateMachine.jl][fsm-url] | ![][fsm-stable] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] |
 | [DistributedFactorGraphs.jl][dfg-url] | ![][dfg-stable] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] |
 | [Graphs.jl][graphs-url] | ![][gjl-stable] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] |
+| [RoMEPlotting.jl][rp-url] | ![][rp-stable] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] |
 | [~~CloudGraphs.jl~~][cloudgraphs-url] | ![][cg-stable] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] |
 
 # Contributors
@@ -51,7 +52,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
 [build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
-[caesar-stable]: https://img.shields.io/badge/2019Q1-v0.3.x-green.svg
+[caesar-stable]: https://img.shields.io/badge/2019Q2-v0.4.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://caesarjl.slack.com
 
@@ -102,7 +103,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
 [dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2019Q2-v0.1.x-green.svg
+[dfg-stable]: https://img.shields.io/badge/2019Q2-v0.2.x-green.svg
 
 [amp-cov-img]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl/coverage.svg?branch=master
 [amp-cov-url]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl?branch=master
@@ -124,3 +125,10 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [cloudgraphs-build-url]: https://travis-ci.org/GearsAD/CloudGraphs.jl
 [cloudgraphs-url]: http://www.github.com/GearsAD/CloudGraphs.jl
 [cg-stable]: https://img.shields.io/badge/2019Q3-WIP-yellowgreen.svg
+
+[rp-url]: http://www.github.com/JuliaRobotics/RoMEPlotting.jl
+[rp-cov-img]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl/coverage.svg?branch=master
+[rp-cov-url]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl?branch=master
+[rp-build-img]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl.svg?branch=master
+[rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
+[rp-stable]: https://img.shields.io/badge/2019Q2-v0.1.x-green.svg
