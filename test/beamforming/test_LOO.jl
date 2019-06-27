@@ -1,6 +1,8 @@
 
-using Caesar, DelimitedFiles, MAT
+using Caesar, DelimitedFiles
 using Gadfly, Cairo, Fontconfig
+#using MAT
+using AbstractPlotting, Makie
 
 fFloor = 250;
 fCeil = 1750;
@@ -134,17 +136,17 @@ for xInd in 1:length(variation)
     end
 end
 
-tmpfile = "/tmp/res$(winstart).mat";
-file = matopen(tmpfile, "w")
-write(file, "allshifts", allshifts)
-close(file)
+# tmpfile = "/tmp/res$(winstart).mat";
+# file = matopen(tmpfile, "w")
+# write(file, "allshifts", allshifts)
+# close(file)
 
 
 #Visualize residual over many look angles
 variation = -10:0.1:10;
 allshiftsAzi = zeros(Complex{Float64},length(azimuths),length(variation),length(cztData[:,leaveout]));
 dataOutRes = zeros(Complex{Float64}, nFFT_czt);
-
+z = zeros(length(azimuths),length(variation));
 for aziInd in 1:length(azimuths)
     cfgLIE = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones-1,[azimuths[aziInd];],soundSpeed,FFTfreqs)
     myCBFLIE = zeros(Complex{Float64}, getCBFFilter2Dsize(cfgLIE));
@@ -162,10 +164,14 @@ for aziInd in 1:length(azimuths)
             phaseshiftLOO = cztData[:,leaveout];
             phaseShiftSingle!(lm, cfgLIE, azi,newPos , phaseshiftLOO)
             allshiftsAzi[aziInd,yInd,:] = phaseshiftLOO .+ dataOutRes;
+            z[aziInd,yInd] = sum(norm.(phaseshiftLOO .+ dataOutRes));
     end
 end
 
-tmpfile = "/tmp/resAzisX$(winstart).mat";
-file = matopen(tmpfile, "w")
-write(file, "allshiftsAziX", allshiftsAzi)
-close(file)
+scene = AbstractPlotting.surface(azimuths, variation, z)
+Makie.save("plot.png", scene)
+
+# tmpfile = "/tmp/resAzisX$(winstart).mat";
+# file = matopen(tmpfile, "w")
+# write(file, "allshiftsAziX", allshiftsAzi)
+# close(file)
