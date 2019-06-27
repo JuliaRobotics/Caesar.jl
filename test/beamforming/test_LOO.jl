@@ -4,6 +4,9 @@ using Gadfly, Cairo, Fontconfig
 #using MAT
 using AbstractPlotting, Makie
 
+using DocStringExtensions
+include(joinpath(@__DIR__,"..","..","examples","marine","asv","kayaks","slamUtils.jl"))
+
 fFloor = 250;
 fCeil = 1750;
 nFFT_czt = 1024;
@@ -168,7 +171,7 @@ for aziInd in 1:length(azimuths)
     end
 end
 
-scene = AbstractPlotting.surface(azimuths, variation, z)
+scene = AbstractPlotting.surface(azimuths, variation, z./maximum(z))
 Makie.save("plot.png", scene)
 
 # tmpfile = "/tmp/resAzisX$(winstart).mat";
