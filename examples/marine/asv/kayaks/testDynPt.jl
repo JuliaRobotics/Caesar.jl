@@ -83,7 +83,8 @@ writeGraphPdf(fg, engine="dot")
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 
-tree, smt, hist = solveTree!(fg)
+## solve the factor graph
+tree, smt, hist = solveTree!(fg, recordcliqs=[:x1; :x5])
 
 
 ## Plot the SAS factor pairs
@@ -98,22 +99,3 @@ plotKDE(fg, ls(fg,r"x"), dims=[1;2])
 
 stuff = IncrementalInference.localProduct(fg, :x1)
 pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
-
-
-
-## debug init order
-
-isInitialized(fg,:x1)
-
-IIF.spyCliqMat(tree, :l1)
-
-syms = getCliqInitVarOrderUp(whichCliq(tree, :l1))
-
-getCliqSubgraph(fg, whichCliq(tree,:l1))
-
-
-cfg = buildSubgraphFromLabels(fg,syms)
-
-writeGraphPdf(cfg)
-
-getVal(fg, :l1)
