@@ -83,13 +83,16 @@ writeGraphPdf(fg, engine="dot")
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 
-tree, smt, hist = solveTree!(fg)
+## solve the factor graph
+tree, smt, hist = solveTree!(fg, recordcliqs=[:x1; :x5])
 
 
 ## Plot the SAS factor pairs
 fsym = :l1x1x2x3x4x5f1
 pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
 
+
+plotKDE(fg, ls(fg,r"x"), dims=[1;2])
 
 
 ## More debugging below
