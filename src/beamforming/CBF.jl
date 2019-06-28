@@ -119,12 +119,14 @@ and only considering subset of frequencies in ztransWave (i.e. smaller than size
 function phaseShiftSingle!(sourceXY::Vector{Float64},
                            thisCfg::CBFFilterConfig,
                            azi::R,
-                           positions::Array,
+                           arrayElemPos::Array,
                            ztransWave::Array{Complex{R2}}  ) where {R <: Real, R2 <: Real}
 
-  sourceXY[1] = -cos(azi) # unit vector in azimuth direction
-  sourceXY[2] = -sin(azi)
-  dt = (positions' * sourceXY)/thisCfg.soundSpeed
+  #sourceXY[1] = -cos(azi) # unit vector in azimuth direction
+  #sourceXY[2] = -sin(azi)
+  # eliminating data placeholder/ no impact on mallocs
+  dt = (arrayElemPos[1] * -cos(azi) + arrayElemPos[2] * -sin(azi))/thisCfg.soundSpeed
+  #dt = (positions' * sourceXY)/thisCfg.soundSpeed
   ztransWave .*= conj(exp.(-2im*pi*dt*thisCfg.FFTfreqs))
 
   # @assert thisCfg.dataLen == length(ztransWave)

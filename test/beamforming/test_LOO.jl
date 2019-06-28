@@ -1,8 +1,8 @@
 
 using Caesar, DelimitedFiles
 using Gadfly, Cairo, Fontconfig
-#using MAT
-using AbstractPlotting, Makie
+# using MAT
+# using AbstractPlotting, Makie
 
 using DocStringExtensions
 include(joinpath(@__DIR__,"..","..","examples","marine","asv","kayaks","slamUtils.jl"))
@@ -25,17 +25,20 @@ azimuths = range(0,360,length=azimuthDivs)*pi/180;
 # rawWaveData = readdlm(dataFile,',',Float64,'\n')
 
 #Load Experimental Data - 10 frames
-# winstart = 1570;
+# winstart = 160;
 # rawWaveData = zeros(8000,nPhones);
 # arrayElemPos = zeros(nPhones,2);
 # for ele in winstart:winstart+nPhones-1
-#     dataFile = joinpath(ENV["HOME"],"data", "sas", "sample_data","waveform$(ele).csv");
-#     posFile = joinpath(ENV["HOME"],"data", "sas", "sample_data","nav$(ele).csv");
+#     dataFile = joinpath(ENV["HOME"],"data", "sas", "06_20_sample","waveform$(ele).csv");
+#     posFile = joinpath(ENV["HOME"],"data", "sas", "06_20_sample","nav$(ele).csv");
+#     #dataFile = joinpath(ENV["HOME"],"liljondir", "kayaks", "20_gps_pos","waveform$(ele).csv");
+#     #posFile = joinpath(ENV["HOME"],"liljondir", "kayaks", "20_gps_pos","nav$(ele).csv");
 #     tempRead = readdlm(dataFile,',',Float64,'\n') #first element only
 #     rawWaveData[:,ele-winstart+1] = adjoint(tempRead[1,:]);
 #     tempRead = readdlm(posFile,',',Float64,'\n');
 #     arrayElemPos[ele-winstart+1,:] = tempRead;
 # end
+# beacongt = [17.0499;1.7832];
 
 # chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
 
@@ -47,13 +50,14 @@ arrayElemPos = arrayElemPos[:,1:2]
 dataFile = joinpath(ENV["HOME"],"data","sas","synthetic_data.csv");
 rawWaveData = readdlm(dataFile,',',Float64,'\n')
 chirpFile = joinpath(ENV["HOME"],"data","sas","chirp_signal_synth.csv");
-chirpIn = readdlm(chirpFile,',',Float64,'\n')
 nPhones = 11;
+beacongt = [100,125];
 
+chirpIn = readdlm(chirpFile,',',Float64,'\n')
 FFTfreqs = collect(LinRange(fFloor,fCeil,nFFT_czt))
 
 #Leave One Out Full CBF
-leaveout = 8;
+leaveout = 6;
 elementset = setdiff(Int[1:nPhones;],[leaveout;]);
 arrayLIE = arrayElemPos[elementset,:];
 
@@ -94,8 +98,6 @@ pl = Gadfly.plot(
  ) ; pl |> PDF("/tmp/test_CBF_LIE.pdf")
 
 # LIE CBF - Assume Known Source, azi phase shift
-#beacongt = [17.0499;1.7832];
-beacongt = [10;0];
 dataOutLIE = zeros(Complex{Float64}, 1);
 dx = arrayLIE[1,1] - beacongt[1];
 dy = arrayLIE[1,2] - beacongt[2];
@@ -146,35 +148,87 @@ end
 
 
 #Visualize residual over many look angles
-variation = -10:0.1:10;
-allshiftsAzi = zeros(Complex{Float64},length(azimuths),length(variation),length(cztData[:,leaveout]));
+variation = range(-5,5,length=200);
+uvec = arrayElemPos[leaveout,1:2]-beacongt
+uvec ./= norm(uvec)
+rvec = R(pi/2)*uvec;
+
+allshiftsAziX = zeros(Complex{Float64},length(azimuths),length(variation),length(cztData[:,leaveout]));
 dataOutRes = zeros(Complex{Float64}, nFFT_czt);
-z = zeros(length(azimuths),length(variation));
+allshiftsAziY = zeros(Complex{Float64},length(azimuths),length(variation),length(cztData[:,leaveout]));
+dataOutRes = zeros(Complex{Float64}, nFFT_czt);
+allshiftsAzilin = zeros(Complex{Float64},length(azimuths),length(variation),length(cztData[:,leaveout]));
+dataOutRes = zeros(Complex{Float64}, nFFT_czt);
+
+zdx = zeros(length(azimuths),length(variation)); #plot vars
+zdy = zeros(length(azimuths),length(variation));
+zlin = zeros(length(azimuths),length(variation));
+
+dataOutHolder = zeros(Complex{Float64}, nFFT_czt);
+
 for aziInd in 1:length(azimuths)
     cfgLIE = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones-1,[azimuths[aziInd];],soundSpeed,FFTfreqs)
     myCBFLIE = zeros(Complex{Float64}, getCBFFilter2Dsize(cfgLIE));
     constructCBFFilter2D!(cfgLIE, arrayLIE, myCBFLIE, lm, dataTempHolder,delaysHolder)
-
-    #Try Correlation
     cztDataHolder = zeros(Complex{Float64},size(cztDataLIE));
     liebf!(dataOutRes, cztDataLIE, myCBFLIE, 1, cztDataHolder, normalize=true)
 
-    for yInd in 1:length(variation)
-            dx = arrayElemPos[leaveout,1] - beacongt[1] + variation[yInd];
-            dy = arrayElemPos[leaveout,2] - beacongt[2];
+    for xInd in 1:length(variation)
+            newPos = arrayElemPos[leaveout,1:2]+[variation[xInd];0];
+            dx = newPos[1] - beacongt[1];
+            dy = newPos[2] - beacongt[2];
             azi = atan(dy,dx);
-            newPos = arrayElemPos[leaveout,1:2]+[variation[yInd];0];
             phaseshiftLOO = cztData[:,leaveout];
             phaseShiftSingle!(lm, cfgLIE, azi,newPos , phaseshiftLOO)
-            allshiftsAzi[aziInd,yInd,:] = phaseshiftLOO .+ dataOutRes;
-            z[aziInd,yInd] = sum(norm.(phaseshiftLOO .+ dataOutRes));
+            zdx[aziInd,xInd] = 0.0;
+            copy!(dataOutHolder,dataOutRes)
+            @inbounds for i in 1:length(phaseshiftLOO)
+              dataOutHolder[i] += phaseshiftLOO[i]
+              zdx[aziInd,xInd] += norm(dataOutHolder[i])
+            end
+    end
+
+    for yInd in 1:length(variation)
+            # newPos = arrayElemPos[leaveout,1:2]+[0;variation[yInd]];
+            dlin = variation[yInd]*rvec;
+            newPos = arrayElemPos[leaveout,1:2]+dlin;
+
+            dx = newPos[1] - beacongt[1];
+            dy = newPos[2] - beacongt[2];
+            azi = atan(dy,dx);
+            phaseshiftLOO = cztData[:,leaveout];
+            phaseShiftSingle!(lm, cfgLIE, azi,newPos, phaseshiftLOO)
+            zdy[aziInd,yInd] = 0.0;
+            copy!(dataOutHolder,dataOutRes)
+            @inbounds for i in 1:length(phaseshiftLOO)
+              dataOutHolder[i] += phaseshiftLOO[i]
+              zdy[aziInd,yInd] += norm(dataOutHolder[i])
+            end
+    end
+
+    for linInd in 1:length(variation)
+            dlin = variation[linInd]*uvec;
+            newPos = arrayElemPos[leaveout,1:2]+dlin;
+            dx = newPos[1] - beacongt[1];
+            dy = newPos[2] - beacongt[2];
+            azi = atan(dy,dx);
+            phaseshiftLOO = cztData[:,leaveout];
+            phaseShiftSingle!(lm, cfgLIE, azi,newPos, phaseshiftLOO)
+            zlin[aziInd,linInd] = 0.0;
+            copy!(dataOutHolder,dataOutRes)
+            @inbounds for i in 1:length(phaseshiftLOO)
+              dataOutHolder[i] += phaseshiftLOO[i]
+              zlin[aziInd,linInd] += norm(dataOutHolder[i])
+          end
     end
 end
 
-scene = AbstractPlotting.surface(azimuths, variation, z./maximum(z))
-Makie.save("plot.png", scene)
-
-# tmpfile = "/tmp/resAzisX$(winstart).mat";
+# scene = AbstractPlotting.surface(azimuths, variation, z./maximum(z))
+# Makie.save("plot.png", scene)
+#
+# tmpfile = "/tmp/resAzis$(winstart).mat";
 # file = matopen(tmpfile, "w")
-# write(file, "allshiftsAziX", allshiftsAzi)
+# write(file, "zdx", zdx)
+# write(file, "zdy", zdy)
+# write(file, "zlin", zlin)
 # close(file)
