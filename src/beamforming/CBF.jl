@@ -27,38 +27,27 @@ function getCBFFilter2Dsize(thisCfg::CBFFilterConfig)
     return (length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
 end
 
-# import Caesar: constructCBFFilter2D!
+function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array,sourceXY::Array, dataTemp::Array, delaysTemp::Array)
 
-function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array,sourceXY::Array, dataTemp::Array)
-
-    #if size(filterOut)!=(length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
-    #    error("Provided Filter has wrong dimensions.")
-    #end
-    #Allocations
-    #tDelays = zeros(thisCfg.nPhones)
-    #sourceXY = zeros(2)
     #dataTemp = zeros(Complex{Float64}, thisCfg.nPhones,thisCfg.dataLen)
 
     # combination of fCeil and fSampling limit information content extracted by thirsCfg.azimuths. Sample faster to get higher res BF
     for iter in eachindex(thisCfg.azimuths)
-        sourceXY[1] = -cos(thisCfg.azimuths[iter])
-        sourceXY[2] = -sin(thisCfg.azimuths[iter])
+        @inbounds sourceXY[1] = -cos(thisCfg.azimuths[iter])
+        @inbounds sourceXY[2] = -sin(thisCfg.azimuths[iter])
         #tDelays[:] = (arrayPos * sourceXY)/thisCfg.soundSpeed
 
         for piter in 1:thisCfg.nPhones
-            dt = (arrayPos[piter,1]*sourceXY[1] + arrayPos[piter,2]*sourceXY[2])/thisCfg.soundSpeed
+            @inbounds dt = (arrayPos[piter,1]*sourceXY[1] + arrayPos[piter,2]*sourceXY[2])/thisCfg.soundSpeed
 
-            #copy!(tDelays,thisCfg.FFTfreqs)
-            #tDelays .*= -2im*pi*dt
-            #dataTemp[piter,:] .= exp.(tDelays)
-            for fftiter in 1:thisCfg.dataLen
-                 dataTemp[piter,fftiter] = exp(-2im*pi*dt*thisCfg.FFTfreqs[fftiter])
-            #     #dataTemp[piter,fftiter] = exp(-2im*pi*tDelays[piter]*thisCfg.FFTfreqs[fftiter])
-            end
+            @inbounds dataTemp[piter,:] = exp.(delaysTemp.*-2im*pi*dt)
+            #for fftiter in 1:thisCfg.dataLen
+            #     @time dataTemp[piter,fftiter] = exp(-2im*pi*dt*thisCfg.FFTfreqs[fftiter])
+            #end
         end
 
         # @time filterOut[iter,:,:] = transpose(conj!(exp.(-2im*pi*tDelays*FFTfreqs'))) #conjugate transpose in place
-        adjoint!(view(filterOut,iter,:,:),dataTemp)
+        @inbounds adjoint!(view(filterOut,iter,:,:),dataTemp)
     end
     nothing
 end
@@ -130,47 +119,22 @@ and only considering subset of frequencies in ztransWave (i.e. smaller than size
 function phaseShiftSingle!(sourceXY::Vector{Float64},
                            thisCfg::CBFFilterConfig,
                            azi::R,
-                           positions::Array,
+                           arrayElemPos::Array,
                            ztransWave::Array{Complex{R2}}  ) where {R <: Real, R2 <: Real}
-  #
-  # sourceXY = zeros(2)
-  # FFTfreqs = linspace(thisCfg.fFloor,thisCfg.fCeil,thisCfg.dataLen)
-  sourceXY[1] = -cos(azi) # unit vector in azimuth direction
-  sourceXY[2] = -sin(azi)
-  dt = (positions' * sourceXY)/thisCfg.soundSpeed
+
+  #sourceXY[1] = -cos(azi) # unit vector in azimuth direction
+  #sourceXY[2] = -sin(azi)
+  # eliminating data placeholder/ no impact on mallocs
+  dt = (arrayElemPos[1] * -cos(azi) + arrayElemPos[2] * -sin(azi))/thisCfg.soundSpeed
+  #dt = (positions' * sourceXY)/thisCfg.soundSpeed
+  ztransWave .*= conj(exp.(-2im*pi*dt*thisCfg.FFTfreqs))
 
   # @assert thisCfg.dataLen == length(ztransWave)
-  for j in 1:thisCfg.dataLen
-    ztransWave[j] *= conj(exp(-2im*pi*dt*thisCfg.FFTfreqs[j]))
-  end
+  # for j in 1:thisCfg.dataLen
+  #    ztransWave[j] *= conj(exp(-2im*pi*dt*thisCfg.FFTfreqs[j]))
+  # end
   nothing
 end
-
-"""
-    $(TYPEDSIGNATURES)
-
-Phase shifting ztransWave contents of leave one out element of `elemPositions` (positions of array elements)
-based on dx,dy position perturbation.  The ztransWave is chirp z-transform of LOO elements's waveform data,
-and only considering subset of frequencies in ztransWave (i.e. smaller than size of raw waveform data)
-"""
-function phaseShiftSingle!(thisCfg::CBFFilterConfig,
-                           azi::R,
-                           positions::Array,
-                           ztransWave::Array{Complex{R2}}  ) where {R <: Real, R2 <: Real}
-  #
-  # FFTfreqs = linspace(thisCfg.fFloor,thisCfg.fCeil,thisCfg.dataLen)
-  sourceXY = zeros(2)
-  phaseShiftSingle!(sourceXY, thisCfg, azi, positions, ztransWave)
-  # sourceXY[1] = -cos(azi) # unit vector in azimuth direction
-  # sourceXY[2] = -sin(azi)
-  # dt = (positions' * sourceXY)/thisCfg.soundSpeed
-  # # @assert thisCfg.dataLen == length(ztransWave)
-  # for j in 1:thisCfg.dataLen
-  #   ztransWave[j] *= conj(exp(-2im*pi*dt*FFTfreqs[j]))
-  # end
-  # nothing
-end
-
 
 """
     $(TYPEDSIGNATURES)
