@@ -12,6 +12,8 @@ using ProgressMeter
 
 const TU = TransformUtils
 
+Gadfly.set_default_plot_size(35cm,25cm)
+
 include(joinpath(Pkg.dir("Caesar"), "examples", "marine", "auv", "Sandshark","Plotting.jl"))
 
 # datadir = joinpath(ENV["HOME"],"data","sandshark","sample_wombat_2018_09_07","processed","extracted")

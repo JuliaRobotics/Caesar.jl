@@ -9,106 +9,21 @@ using Distributions
 using RoMEPlotting
 using Gadfly, DataFrames
 using ProgressMeter
+using DelimitedFiles
 
 const TU = TransformUtils
 
-include(joinpath(Pkg.dir("Caesar"), "examples", "marine", "auv", "Sandshark","Plotting.jl"))
+Gadfly.set_default_plot_size(35cm,25cm)
 
-# datadir = joinpath(ENV["HOME"],"data","sandshark","sample_wombat_2018_09_07","processed","extracted")
-datadir = joinpath(ENV["HOME"],"data","sandshark","full_wombat_2018_07_09","extracted")
-matcheddir = joinpath(datadir, "matchedfilter", "particles")
-beamdir = joinpath(datadir, "beamformer", "particles")
+include(joinpath(@__DIR__,"Plotting.jl"))
+include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
-function loaddircsvs(datadir)
-  # https://docs.julialang.org/en/v0.6.1/stdlib/file/#Base.Filesystem.walkdir
-  datadict = Dict{Int, Array{Float64}}()
-  for (root, dirs, files) in walkdir(datadir)
-    # println("Files in $root")
-    for file in files
-      # println(joinpath(root, file)) # path to files
-      data = readdlm(joinpath(root, file),',')
-      datadict[parse(Int,split(file,'.')[1])/1000000] = data
-    end
-  end
-  return datadict
-end
-
-rangedata = loaddircsvs(matcheddir)
-azidata = loaddircsvs(beamdir)
-timestamps = intersect(sort(collect(keys(rangedata))), sort(collect(keys(azidata))))
-
-
-# NAV data
-navdata = Dict{Int, Vector{Float64}}()
-navfile = readdlm(joinpath(datadir, "nav_data.csv"))
-for row in navfile
-    s = split(row, ",")
-    id = round(Int, 1000*parse(s[1]))
-    # round(Int, 1000 * parse(s[1])) = 1531153292381
-    navdata[id] = parse.(s)
-end
-navkeys = sort(collect(keys(navdata)))
-# NAV colums are X,Y = 7,8
-# lat,long = 9,10
-# time,pitch,roll,heading,speed,[Something], internal_x,internal_y,internal_lat,internal_long, yaw_rad
-
-# LBL data - note the timestamps need to be exported as float in future.
-lbldata = Dict{Int,  Vector{Float64}}()
-lblfile = readdlm(joinpath(datadir, "lbl.csv"))
-for row in lblfile
-    s = split(row, ",")
-    id = round(Int, 1000*parse(s[1]))
-    @show s
-    if s[2] != "NaN"
-        lbldata[id] = parse.(s)
-    end
-end
-lblkeys = sort(collect(keys(lbldata)))
-
-
-# GET Y = north,  X = East,  Heading along +Y clockwise [0,360)]
-# east = Float64[]
-# north = Float64[]
-# heading = Float64[]
-
-# WANT X = North,  Y = West,  Yaw is right and rule from +X (0) towards +Y pi/2, [-pi,pi)
-# so the drawPoses picture will look flipped from Nicks picture
-# remember theta = atan2(y,x)    # this is right hand rule
-X = Float64[]
-Y = Float64[]
-yaw = Float64[]
-for id in navkeys
-  # push!(east, getindex(navdata[id],7)) # x-column csv
-  # push!(north, getindex(navdata[id],8)) # y-column csv
-  # push!(heading, getindex(navdata[id],4))
-  # push!(yaw, TU.wrapRad(-deg2rad(getindex(navdata[id],4))))
-
-  push!(X, getindex(navdata[id],8) )
-  push!(Y, -getindex(navdata[id],7) )
-  push!(yaw, TU.wrapRad(-deg2rad(getindex(navdata[id],4))) )  # rotation about +Z
-end
-
-lblX = Float64[]
-lblY = Float64[]
-for id in lblkeys
-    push!(lblX, getindex(lbldata[id],3) )
-    push!(lblY, -getindex(lbldata[id],2) )
-end
-
-# Build interpolators for x, y, yaw
-interp_x = LinearInterpolation(navkeys, X)
-interp_y = LinearInterpolation(navkeys, Y)
-interp_yaw = LinearInterpolation(navkeys, yaw)
-
-## Caching factors
-ppbrDict = Dict{Int, Pose2Point2BearingRange}()
-odoDict = Dict{Int, Pose2Pose2}()
-NAV = Dict{Int, Vector{Float64}}()
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
 epochs = timestamps[50:2:100]
 lastepoch = 0
 for ep in epochs
+  global lastepoch
   if lastepoch != 0
     # @show interp_yaw(ep)
     deltaAng = interp_yaw(ep) - interp_yaw(lastepoch)
@@ -119,7 +34,7 @@ for ep in epochs
     NAV[ep] = iDXj
     # println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
 
-    odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], diagm([0.1;0.1;0.005].^2)))
+    odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], Matrix(Diagonal([0.1;0.1;0.005].^2))))
   end
   rangepts = rangedata[ep][:]
   rangeprob = kde!(rangepts)
@@ -137,50 +52,61 @@ fg = initfg()
 # Add a central beacon with a prior
 addVariable!(fg, :l1, Point2)
 # Pinger location is (0.6; -16)
-addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], 0.1^2*eye(2)) ))
+addFactor!(fg, [:l1], PriorPose2( MvNormal([0.6; -16], Matrix(Diagonal([0.1; 0.1].^2)) ) ), autoinit=false)
 
 index = 0
 for ep in epochs
+    global index
     curvar = Symbol("x$index")
     addVariable!(fg, curvar, Pose2)
 
     # xi -> l1 - nonparametric factor
-    # addFactor!(fg, [curvar; :l1], ppbrDict[ep]) #  #Hierdie lyk soos die nagmerrie
+    # addFactor!(fg, [curvar; :l1], ppbrDict[ep]) #  #Hierdie lyk soos die nagmerri, autoinit=falsee
 
     if ep != epochs[1]
       # Odo factor x(i-1) -> xi
-      addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep])
+      addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep], autoinit=false)
     else
       # Prior to the first pose location (a "GPS" prior)
       initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
       println("Adding a prior at $curvar, $initLoc")
-      addFactor!(fg, [curvar], IIF.Prior( MvNormal(initLoc, diagm([0.1;0.1;0.05].^2)) ))
+      addFactor!(fg, [curvar], PriorPose2( MvNormal(initLoc, Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=false)
     end
     # Heading partial prior
-    addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
+    # addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=false)
     index+=1
 end
 
 # Just adding the first one...
-addFactor!(fg, [:x0; :l1], ppbrDict[epochs[1]])
+addFactor!(fg, [:x0; :l1], ppbrDict[epochs[1]], autoinit=false)
 
-addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]])
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
 
-addFactor!(fg, [:x10; :l1], ppbrDict[epochs[11]])
+# first solve and initialization
+tree, smt, hist = solveTree!(fg, recordcliqs=[:x0; :x2; :x4; :x5])
 
-addFactor!(fg, [:x13; :l1], ppbrDict[epochs[14]])
+writeGraphPdf(fg, show=true)
 
-addFactor!(fg, [:x15; :l1], ppbrDict[epochs[16]])
+drawPosesLandms(fg)
 
-addFactor!(fg, [:x17; :l1], ppbrDict[epochs[18]])
-addFactor!(fg, [:x18; :l1], ppbrDict[epochs[19]])
-addFactor!(fg, [:x19; :l1], ppbrDict[epochs[20]])
-addFactor!(fg, [:x20; :l1], ppbrDict[epochs[21]])
-# addFactor!(fg, [:x21; :l1], ppbrDict[epochs[22]]) # breaks it!
-addFactor!(fg, [:x22; :l1], ppbrDict[epochs[23]])
-addFactor!(fg, [:x23; :l1], ppbrDict[epochs[24]])
-addFactor!(fg, [:x24; :l1], ppbrDict[epochs[25]])
-addFactor!(fg, [:x25; :l1], ppbrDict[epochs[26]])
+addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=false)
+
+addFactor!(fg, [:x10; :l1], ppbrDict[epochs[11]], autoinit=false)
+
+addFactor!(fg, [:x13; :l1], ppbrDict[epochs[14]], autoinit=false)
+
+addFactor!(fg, [:x15; :l1], ppbrDict[epochs[16]], autoinit=false)
+
+addFactor!(fg, [:x17; :l1], ppbrDict[epochs[18]], autoinit=false)
+addFactor!(fg, [:x18; :l1], ppbrDict[epochs[19]], autoinit=false)
+addFactor!(fg, [:x19; :l1], ppbrDict[epochs[20]], autoinit=false)
+addFactor!(fg, [:x20; :l1], ppbrDict[epochs[21]], autoinit=false)
+# addFactor!(fg, [:x21; :l1], ppbrDict[epochs[22]]) # breaks it, autoinit=false!
+addFactor!(fg, [:x22; :l1], ppbrDict[epochs[23]], autoinit=false)
+addFactor!(fg, [:x23; :l1], ppbrDict[epochs[24]], autoinit=false)
+addFactor!(fg, [:x24; :l1], ppbrDict[epochs[25]], autoinit=false)
+addFactor!(fg, [:x25; :l1], ppbrDict[epochs[26]], autoinit=false)
 
 
 plotKDE(ppbrDict[epochs[22]].bearing)
@@ -196,11 +122,12 @@ plotKDE([ppbrDict[epochs[21]].range; ppbrDict[epochs[22]].range; ppbrDict[epochs
 
 writeGraphPdf(fg, engine="dot")
 
-ensureAllInitialized!(fg)
-batchSolve!(fg)
+tree, smt, hist = solveTree!(fg, tree)
 
 drawPosesLandms(fg)
 
+ls(fg, :l1)
+drawTree(tree, imgs=true)
 
 # IIF.wipeBuildNewTree!(fg, drawpdf=true)
 # run(`evince bt.pdf`)
@@ -222,7 +149,7 @@ drawPosesLandms(fg)
 ls(fg, :x25)
 
 #To Boldly Believe... The Good, the Bad, and the Unbeliefable
-X25 = getVertKDE(fg, :x25)
+X25 = getKDE(getVariable(fg, :x25))
 
 # i
 pts, = predictbelief(fg, :x21, [:x20x21f1; :x21l1f1])
@@ -326,7 +253,7 @@ Gadfly.plot(layers...)
 #
 #
 # addVariable!(fg, :l1, Point2)
-# addFactor!(fg, [:x0; :l1], ppbrDict[epoch_slice[1]])
+# addFactor!(fg, [:x0; :l1], ppbrDict[epoch_slice[1]], autoinit=false)
 #
 # ls(fg, :l1)
 # pts = IIF.approxConv(fg, :x0l1f1, :l1)

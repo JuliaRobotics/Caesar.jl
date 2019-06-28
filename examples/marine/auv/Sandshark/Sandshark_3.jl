@@ -14,6 +14,8 @@ const TU = TransformUtils
 using Pkg
 using DelimitedFiles
 
+Gadfly.set_default_plot_size(35cm,25cm)
+
 include(joinpath(Pkg.dir("Caesar"), "examples", "marine", "auv", "Sandshark","Plotting.jl"))
 
 
