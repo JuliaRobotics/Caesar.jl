@@ -1,8 +1,10 @@
 # new Sandshark example
 # add more julia processes
-# nprocs() < 7 ? addprocs(7-nprocs()) : nothing
+# using Distributed
+# nprocs() < 4 ? addprocs(4-nprocs()) : nothing
 
-using Caesar, RoME, KernelDensityEstimate, IncrementalInference
+using Caesar, RoME
+# @everywhere using Caesar, RoME
 using Interpolations
 using Distributions
 
@@ -80,19 +82,21 @@ end
 # Just adding the first one...
 addFactor!(fg, [:x0; :l1], ppbrDict[epochs[1]], autoinit=false)
 
-getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
-
-# first solve and initialization
-tree, smt, hist = solveTree!(fg, recordcliqs=[:x0; :x2; :x4; :x5])
-
-writeGraphPdf(fg, show=true)
-
-drawPosesLandms(fg)
-
 addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=false)
 
 addFactor!(fg, [:x10; :l1], ppbrDict[epochs[11]], autoinit=false)
+
+# first solve and initialization
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
+tree, smt, hist = solveTree!(fg) #, recordcliqs=[:x0; :x2; :x4; :x5])
+
+# writeGraphPdf(fg, show=true)
+
+drawPosesLandms(fg)
+
+ls(fg, :l1)
+
 
 addFactor!(fg, [:x13; :l1], ppbrDict[epochs[14]], autoinit=false)
 
