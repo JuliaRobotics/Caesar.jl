@@ -27,9 +27,7 @@ function getCBFFilter2Dsize(thisCfg::CBFFilterConfig)
     return (length(thisCfg.azimuths),thisCfg.dataLen,thisCfg.nPhones)
 end
 
-function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array,sourceXY::Array, dataTemp::Array, delaysTemp::Array)
-
-    #dataTemp = zeros(Complex{Float64}, thisCfg.nPhones,thisCfg.dataLen)
+function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOut::Array,sourceXY::Array, dataHolder::Array)
 
     # combination of fCeil and fSampling limit information content extracted by thirsCfg.azimuths. Sample faster to get higher res BF
     for iter in eachindex(thisCfg.azimuths)
@@ -40,14 +38,15 @@ function constructCBFFilter2D!(thisCfg::CBFFilterConfig,arrayPos::Array,filterOu
         for piter in 1:thisCfg.nPhones
             @inbounds dt = (arrayPos[piter,1]*sourceXY[1] + arrayPos[piter,2]*sourceXY[2])/thisCfg.soundSpeed
 
-            @inbounds dataTemp[piter,:] = exp.(delaysTemp.*-2im*pi*dt)
-            #for fftiter in 1:thisCfg.dataLen
-            #     @time dataTemp[piter,fftiter] = exp(-2im*pi*dt*thisCfg.FFTfreqs[fftiter])
-            #end
-        end
+            copyto!(view(dataHolder,piter,:),thisCfg.FFTfreqs)
+            lmul!(-2im*pi*dt,view(dataHolder,piter,:))
 
+            # for fftiter in 1:thisCfg.dataLen
+            #     @inbounds dataHolder[piter,fftiter] = exp(-2im*pi*dt*thisCfg.FFTfreqs[fftiter])
+            # end
+        end
         # @time filterOut[iter,:,:] = transpose(conj!(exp.(-2im*pi*tDelays*FFTfreqs'))) #conjugate transpose in place
-        @inbounds adjoint!(view(filterOut,iter,:,:),dataTemp)
+        @inbounds adjoint!(view(filterOut,iter,:,:),exp.(dataHolder))
     end
     nothing
 end

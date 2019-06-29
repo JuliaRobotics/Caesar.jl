@@ -1,9 +1,9 @@
 # using Distributed
-# addprocs(5)
+addprocs(5)
 
 
 using Caesar, RoME
-using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting
+# using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting
 using KernelDensityEstimate
 using IncrementalInference
 using DocStringExtensions
@@ -24,13 +24,14 @@ saswindow = 5;
 poses = [Symbol("x$i") for i in symbolstart:(symbolstart+saswindow-1)]
 sasframes = collect(windowstart:1:(windowstart+saswindow-1))
 
-dataDir = joinpath(ENV["HOME"],"data","sas","06_20_sample");
+# dataDir = joinpath(ENV["HOME"],"data","sas","06_20_sample");
+dataDir = joinpath("/media","data1","data","kayaks","20_gps_pos")
 posData = importdata_nav(sasframes, datadir=dataDir);
 navchecked, errorind = sanitycheck_nav(posData)
 
-cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml");
+cfgFile = joinpath("/media","data1","data","kayaks","SAS2D.yaml")
 cfgd=loadConfigFile(cfgFile)
-chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
+chirpFile = joinpath("/media","data1","data","kayaks","chirp250.txt");
 
 ## Build the factor graph
 fg = initfg();
@@ -79,8 +80,8 @@ addFactor!(fg, [beacon;poses], sas2d, autoinit=false)
 
 writeGraphPdf(fg, engine="dot")
 
-getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
+getSolverParams(fg).drawtree = false
+getSolverParams(fg).showtree = false
 
 ## solve the factor graph
 @time tree, smt, hist = solveTree!(fg, recordcliqs=[:x1; :x5])
@@ -88,13 +89,13 @@ getSolverParams(fg).showtree = true
 
 ## Plot the SAS factor pairs
 fsym = :l1x1x2x3x4x5f1
-pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
+pl = plotSASPair(fg, fsym, show=false, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
 
 
-plotKDE(fg, ls(fg,r"x"), dims=[1;2])
+# plotKDE(fg, ls(fg,r"x"), dims=[1;2])
 
 
 ## More debugging below
 
-stuff = IncrementalInference.localProduct(fg, :x1)
-pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
+# stuff = IncrementalInference.localProduct(fg, :x1)
+# pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
