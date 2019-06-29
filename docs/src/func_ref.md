@@ -56,6 +56,8 @@ approxCliqMarginalUp!
 approxConv
 areCliqChildrenNeedDownMsg
 areCliqVariablesAllMarginalized
+asyncTreeInferUp!
+attemptTreeSimilarClique
 batchSolve!
 blockCliqUntilChildrenHaveUpStatus
 buildSubgraphFromLabels
@@ -128,6 +130,7 @@ getVariable
 getVertKDE
 getUpMsgs
 getDwnMsgs
+hasCliq
 hasOrphans
 inferOverTree!
 inferOverTreeR!
