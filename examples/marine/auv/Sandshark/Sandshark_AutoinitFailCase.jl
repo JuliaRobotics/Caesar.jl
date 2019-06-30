@@ -84,7 +84,7 @@ getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 # getSolverParams(fg).async = true
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), delaycliqs=[:l1;])
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), delaycliqs=[:x4;])
 
 
 # writeGraphPdf(fg, show=true)
@@ -93,6 +93,7 @@ drawPosesLandms(fg)
 
 
 # printCliqHistorySummary(tree, :l1)
+
 
 # #
 # using Profile, ProfileView
