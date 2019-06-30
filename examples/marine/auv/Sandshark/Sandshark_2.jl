@@ -22,7 +22,7 @@ include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[50:2:100]
+epochs = timestamps[50:2:60]
 lastepoch = 0
 for ep in epochs
   global lastepoch
@@ -78,6 +78,8 @@ for ep in epochs
     # addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=false)
     index+=1
 end
+
+ls(fg)
 
 # Just adding the first one...
 addFactor!(fg, [:x0; :l1], ppbrDict[epochs[1]], autoinit=false)
