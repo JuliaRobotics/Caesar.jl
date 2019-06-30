@@ -83,7 +83,7 @@ addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=false)
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), delaycliq=[:l1;])
 
 
 # writeGraphPdf(fg, show=true)
@@ -93,10 +93,13 @@ drawPosesLandms(fg)
 
 printCliqHistorySummary(tree, :l1)
 
-using Profile
+#
+using Profile, ProfileView
 
+# do this twice
+Profile.clear()
 @profile stuff = sandboxCliqResolveStep(tree,:l1,8)
-
+#
 ProfileView.view()
-
-Juno.profiler()
+#
+# Juno.profiler()
