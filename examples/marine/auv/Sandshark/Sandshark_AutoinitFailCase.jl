@@ -13,7 +13,7 @@ using Gadfly, DataFrames
 using ProgressMeter
 using DelimitedFiles
 
-const TU = TransformUtils
+# const TU = TransformUtils
 
 Gadfly.set_default_plot_size(35cm,25cm)
 
@@ -84,7 +84,7 @@ getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 # getSolverParams(fg).async = true
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), delaycliqs=[:x4;])
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg)) #, delaycliqs=[:x4;])
 
 
 # writeGraphPdf(fg, show=true)
@@ -92,8 +92,12 @@ tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), delaycliqs=[:x4;])
 drawPosesLandms(fg)
 
 
-# printCliqHistorySummary(tree, :l1)
+fsy = getTreeAllFrontalSyms(fg, tree)
 
+@show fsy
+
+printCliqHistorySummary(tree, fsy[5])
+0
 
 # #
 # using Profile, ProfileView
@@ -105,3 +109,70 @@ drawPosesLandms(fg)
 # ProfileView.view()
 # #
 # Juno.profiler()
+
+
+
+# csmAnimation()
+
+
+
+animateCliqStateMachines(tree,fsy,frames=500)
+
+
+0
+
+## dev new animation
+
+
+
+
+# using Graphs
+# using FunctionalStateMachine
+# import FunctionalStateMachine: animateStateMachineHistoryByTimeCompound
+
+# animateStateMachineHistoryByTimeCompound(hists, folder="caesar/csmCompound")
+
+
+using Dates
+
+function csmAnimate(tree::BayesTree,
+                    cliqsyms::Vector{Symbol};
+                    frames::Int=100  )
+  #
+  hists = getTreeCliqsSolverHistories(fg,tree)
+
+  startT = Dates.now()
+  stopT = Dates.now()
+
+  # get start and stop times across all cliques
+  first = true
+  for (csym, hist) in hists
+    # global startT, stopT
+    @show csym
+    if hist[1][1] < startT
+      startT = hist[1][1]
+    end
+    if first
+      stopT = hist[end][1]
+    end
+    if stopT < hist[end][1]
+      stopT= hist[end][1]
+    end
+  end
+
+  # export all figures
+  animateStateMachineHistoryByTimeCompound(hists, startT, stopT, folder="caesar/csmCompound", frames=500)
+end
+
+
+# import IncrementalInference: animateStateMachineHistoryByTimeCompound
+
+# folders = String[]
+# for sym in cliqsyms
+#   hist = getCliqSolveHistory(tree, sym)
+#   # retval = animateStateMachineHistoryByTime(hist, frames=frames, folder="caesar/animatecsm/cliq$sym", title="$sym", startT=startT, stopT=stopT, rmfirst=true)
+#   push!(folders, "cliq$sym")
+# end
+
+  # return folders
+# end
