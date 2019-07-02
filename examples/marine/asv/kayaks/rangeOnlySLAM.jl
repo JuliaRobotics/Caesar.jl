@@ -13,7 +13,7 @@ for files in collect(60:20:360)
 end
 datadir = joinpath(ENV["HOME"],"liljondir", "kayaks","20_gps_pos")
 
-window = 70:40:320;
+window = 70:20:130;
 
 posDataAll = zeros(window[end]-window[1]+1,2);
 for i in window[1]:window[end]
@@ -24,7 +24,7 @@ end
 dposData = deepcopy(posDataAll)
 cumulativeDrift!(dposData,[0.0;0],[0.2,0.2])
 
-# Gadfly.plot(layer(x=posDataAll[:,1],y=posDataAll[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=dposData[:,1],y=dposData[:,2],Geom.path))
+#Gadfly.plot(layer(x=posDataAll[:,1],y=posDataAll[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=dposData[:,1],y=dposData[:,2],Geom.path))
 
 fg = initfg();
 beacon = :l1
@@ -44,22 +44,20 @@ for i in fullwindowt
     rtkCov = Matrix(Diagonal([0.1;0.1].^2));
 
     if i == fullwindow[1] || i == fullwindow[end]-1
-        # navfile = datadir*"/nav$i.csv"
-        # posData = readdlm(navfile,',',Float64,'\n')
         pp = PriorPoint2(MvNormal(posDataAll[i,:], rtkCov))
         addFactor!(fg, [sym;], pp, autoinit=false)
 
         dx = dposData[i+1,1] - posDataAll[i,1];
         dy = dposData[i+1,2] - posDataAll[i,2];
-        dpμ = [xdotp;ydotp];
-        dpσ = Matrix(Diagonal([0.1;0.1].^2))
+        dpμ = [dx;dy];
+        dpσ = Matrix(Diagonal([0.5;0.5].^2))
         p2p2 = Point2Point2(MvNormal(dpμ,dpσ))
         addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
     else
         dx = dposData[i+1,1] - dposData[i,1];
         dy = dposData[i+1,2] - dposData[i,2];
-        dpμ = [xdotp;ydotp];
-        dpσ = Matrix(Diagonal([0.1;0.1].^2))
+        dpμ = [dx;dy];
+        dpσ = Matrix(Diagonal([0.5;0.5].^2))
         p2p2 = Point2Point2(MvNormal(dpμ,dpσ))
         addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
     end
@@ -74,7 +72,7 @@ for i = window
 end
 
 
-writeGraphPdf(fg, engine="dot")
+# writeGraphPdf(fg, engine="dot")
 
 tree, smt, hist = solveTree!(fg, recordcliqs=[:l1;])
 
@@ -87,11 +85,15 @@ push!(plk,Gadfly.Theme(key_position = :none));
 # pl12 = Gadfly.plot(x=L1[1,:],y=L1[2,:], Geom.histogram2d); pl12 |> PDF("/tmp/test.pdf")
 
 for var in window
-    X1 = getVal(getVariable(fg, Symbol("x$var")))
-    push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.histogram2d))
-    navfile = datadir*"/nav$var.csv"
-    posData = readdlm(navfile,',',Float64,'\n')
-    push!(plk, layer(x=[posData[1];],y=[posData[2];], Geom.point))
+    windowi = var-window[1]+1
+    sym = Symbol("x$windowi")
+    X1 = getKDEMean(getVertKDE(fg,sym))
+    push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point))
+    # X1 = getVal(getVariable(fg,sym))
+    # push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.histogram2d))
+    # navfile = datadir*"/nav$var.csv"
+    # posData = readdlm(navfile,',',Float64,'\n')
+    # push!(plk, layer(x=[posData[1];],y=[posData[2];], Geom.point,Theme(default_color=colorant"green")))
 end
 
 igt = [17.0499;1.7832];

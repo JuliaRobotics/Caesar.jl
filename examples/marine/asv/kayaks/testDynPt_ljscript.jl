@@ -1,5 +1,5 @@
-using Distributed
-addprocs(5)
+# using Distributed
+# addprocs(5)
 
 using Caesar, RoME
 using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting, Cairo, Fontconfig
@@ -18,7 +18,7 @@ function main(savedir::String, gap_in::Int, gps_gap_in::Int)
     pσ = Matrix(Diagonal([0.1;0.1;0.1;0.1].^2))
 
     symbolstart = 1;
-    windowstart = 55; windowend = 55+16;
+    windowstart = 55; windowend = 55+20;
     # windowstart = 55; windowend = 350;
     totalposes = windowend-windowstart;
     saswindow = 8;
@@ -109,42 +109,34 @@ function main(savedir::String, gap_in::Int, gps_gap_in::Int)
                        getSolverParams(fg).drawtree = false
                        getSolverParams(fg).showtree = false
 
-                       if !isInitialized(fg,:l1)
-                           IIF.doautoinit!(fg, :l1)
+                       if sas_counter > 1
+                           tree, smt, hist = solveTree!(fg,tree)
+                       else
+                           tree, smt, hist = solveTree!(fg,tree)
                        end
 
-                       tree, smt, hist = solveTree!(fg)
+                       L1 = getVal(getVariable(fg, beacon))
+                       plk = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
+                       push!(plk,Gadfly.Theme(key_position = :none));
+                       push!(plk, layer(x=navtemp[:,1],y=navtemp[:,2], Geom.point),Theme(default_color=colorant"green"))
+
+                       for i in pose_counter-saswindow+1:pose_counter
+                           X1 = getKDEMean(getVertKDE(fg,sym))
+                           push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point))
+                       end
+
+                       igt = [17.0499;1.7832];
+                       push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon Ground Truth";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red")));
+
+                       plkplot = Gadfly.plot(plk...); plkplot |> PDF("sasframe$sas_counter.pdf")
 
                        jldname2 = "$(pwd())/" * savedirheader * "_nav_$(sas_counter).jld"
-                       save(jldname2,"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "errorinds", errorind)
+                       save(jldname2,"beacon",L1,"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "errorinds", errorind)
 
                        sas_counter +=1
                        sas_gap_counter = 0
                    end
-               end
-
-               pose_counter+=1
-           end
-  end
-
-
-
-    ## solve the factor graph
-
-    L1v = getVariable(fg, beacon)
-    L1 = getVal(L1v)
-    plk = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
-    push!(plk,Gadfly.Theme(key_position = :none));
-
-    for var in window
-        X1 = getVal(getVariable(fg, Symbol("x$var")))
-        push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.histogram2d))
-        navfile = datadir*"/nav$var.csv"
-        posData = readdlm(navfile,',',Float64,'\n')
-        push!(plk, layer(x=[posData[1];],y=[posData[2];], Geom.point))
-    end
-
-    igt = [17.0499;1.7832];
-    push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon Ground Truth";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red")));
-
-    plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
+       end
+       pose_counter+=1
+   end
+end
