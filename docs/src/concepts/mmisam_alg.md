@@ -38,6 +38,10 @@ Tentatively see [the multisession page](http://www.juliarobotics.org/Caesar.jl/l
 
 The main computational effort is to focus compute cycles on dominant modes exhibited by the data, by dropping low likelihood modes (although not indefinitely) and not sacrificing accuracy individual major features. 
 
+## Clique State Machine
+
+The CSM is used to govern the inference process within a clique.  A [FunctionalStateMachine.jl](http://www.github.com/JuliaRobotics/FunctionStateMachine.jl) implementation is used to allow for initialization / incremental-recycling / fixed-lag solving, and will soon support federated branch solving as well as unidirectional message passing for fixed-lead operations.  See [the following video](https://vimeo.com/345576689) for an auto-generated---using `csmAnimate`---concurrent clique solving example.
+
 ## Mixture Parametric Method
 
 Work In Progress -- deferred for progress on full functional methods, but likely to have Gaussian legacy algorithm with mixture model expansion added in the near future.
