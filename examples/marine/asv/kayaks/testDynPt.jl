@@ -2,7 +2,7 @@
 # addprocs(5)
 
 
-using Caesar, RoME
+using Caesar, RoME, Profile
 using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting
 using KernelDensityEstimate
 using IncrementalInference
@@ -79,15 +79,21 @@ addFactor!(fg, [beacon;poses], sas2d, autoinit=false)
 
 writeGraphPdf(fg, engine="dot")
 
-getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
+#getSolverParams(fg).drawtree = true
+#getSolverParams(fg).showtree = true
 
 ## solve the factor graph
-@time tree, smt, hist = solveTree!(fg, recordcliqs=[:x1; :x5])
+tree, smt, hist = solveTree!(fg, recordcliqs=[:x3; :l1])
 
+Profile.init(n = 10^7, delay = 0.01)
+@profile stuff = sandboxCliqResolveStep(tree,:x3,6)
+ProfileView.view()
+Profile.print(format=:flat)
 
 ## Plot the SAS factor pairs
 fsym = :l1x1x2x3x4x5f1
+
+
 pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
 
 
@@ -96,5 +102,5 @@ plotKDE(fg, ls(fg,r"x"), dims=[1;2])
 
 ## More debugging below
 
-stuff = IncrementalInference.localProduct(fg, :x1)
+stuff = IncrementalInference.localproduct(fg, :x1)
 pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])

@@ -1,5 +1,5 @@
 
-using Caesar, DelimitedFiles
+using Caesar, DelimitedFiles, Profile
 using Gadfly, Cairo, Fontconfig
 
 fFloor = 250;
