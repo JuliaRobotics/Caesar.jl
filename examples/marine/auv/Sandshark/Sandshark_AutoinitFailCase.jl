@@ -83,8 +83,14 @@ addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=false)
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 # getSolverParams(fg).async = true
+# getSolverParams(fg).downsolve = false
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg)) #, delaycliqs=[:x4;])
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), skipcliqids=[:x1;:x4])
+
+
+# # now solve the second portion of the tree.
+# getSolverParams(fg).downsolve = true
+# tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
 
 
 # writeGraphPdf(fg, show=true)
@@ -95,9 +101,14 @@ drawPosesLandms(fg)
 fsy = getTreeAllFrontalSyms(fg, tree)
 
 @show fsy
-
+printCliqHistorySummary(tree, fsy[1])
+printCliqHistorySummary(tree, fsy[2])
+printCliqHistorySummary(tree, fsy[3])
+printCliqHistorySummary(tree, fsy[4])
 printCliqHistorySummary(tree, fsy[5])
 0
+
+
 
 # #
 # using Profile, ProfileView
@@ -111,68 +122,59 @@ printCliqHistorySummary(tree, fsy[5])
 # Juno.profiler()
 
 
-
-# csmAnimation()
-
-
-
-animateCliqStateMachines(tree,fsy,frames=500)
+csmAnimate(fg, tree, fsy, frames=1000)
+# Base.rm("/tmp/caesar/csmCompound/out.mp4")
+run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/csm_%d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" /tmp/caesar/csmCompound/out.mp4`)
+run(`vlc /tmp/caesar/csmCompound/out.mp4`)
 
 
-0
-
-## dev new animation
+# animateCliqStateMachines(tree,fsy,frames=100)
 
 
 
+## the success case x4 second last and x1 last
 
-# using Graphs
-# using FunctionalStateMachine
-# import FunctionalStateMachine: animateStateMachineHistoryByTimeCompound
-
-# animateStateMachineHistoryByTimeCompound(hists, folder="caesar/csmCompound")
-
+# smt, hist = solveCliq!(fg, tree, :x0)
 
 using Dates
 
-function csmAnimate(tree::BayesTree,
-                    cliqsyms::Vector{Symbol};
-                    frames::Int=100  )
-  #
-  hists = getTreeCliqsSolverHistories(fg,tree)
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+fsy = getTreeAllFrontalSyms(fg, tree)
 
-  startT = Dates.now()
-  stopT = Dates.now()
+resetTreeCliquesForUpSolve!(tree)
+setTreeCliquesMarginalized!(fg, tree)
 
-  # get start and stop times across all cliques
-  first = true
-  for (csym, hist) in hists
-    # global startT, stopT
-    @show csym
-    if hist[1][1] < startT
-      startT = hist[1][1]
-    end
-    if first
-      stopT = hist[end][1]
-    end
-    if stopT < hist[end][1]
-      stopT= hist[end][1]
-    end
-  end
-
-  # export all figures
-  animateStateMachineHistoryByTimeCompound(hists, startT, stopT, folder="caesar/csmCompound", frames=500)
-end
+# queue all the tasks
+alltasks = Vector{Task}(undef, length(tree.cliques))
+cliqHistories = Dict{Int,Vector{Tuple{DateTime, Int, Function, CliqStateMachineContainer}}}()
 
 
-# import IncrementalInference: animateStateMachineHistoryByTimeCompound
+# preempt X4 10 steps so that X2 can fully solve first
+idx = whichCliq(tree, :x4).index
+stf_x4 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, limititers=10, drawtree=true, N=100, recordcliqs=fsy)
+# t_x4 = @async
 
-# folders = String[]
-# for sym in cliqsyms
-#   hist = getCliqSolveHistory(tree, sym)
-#   # retval = animateStateMachineHistoryByTime(hist, frames=frames, folder="caesar/animatecsm/cliq$sym", title="$sym", startT=startT, stopT=stopT, rmfirst=true)
-#   push!(folders, "cliq$sym")
-# end
+idx = whichCliq(tree, :x0).index
+stf_x0 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
+# t_x0 = @async
 
-  # return folders
-# end
+idx = whichCliq(tree, :l1).index
+stf_l1 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
+# t_l1 = @async
+
+idx = whichCliq(tree, :x2).index
+stf_x2 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
+# t_x2 = @async
+
+idx = whichCliq(tree, :x4).index
+stf_x4 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
+# t_x4 = @async
+
+idx = whichCliq(tree, :x1).index
+stf_x1 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
+# t_x1 = @async
+
+
+getData(getVariable(fg, :x5))
+
+drawPosesLandms(fg)
