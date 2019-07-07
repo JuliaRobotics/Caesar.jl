@@ -85,7 +85,8 @@ getSolverParams(fg).showtree = true
 # getSolverParams(fg).async = true
 # getSolverParams(fg).downsolve = false
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), skipcliqids=[:x1;:x4])
+
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
 
 # # now solve the second portion of the tree.
@@ -162,19 +163,41 @@ idx = whichCliq(tree, :l1).index
 stf_l1 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
 # t_l1 = @async
 
+
+
+
 idx = whichCliq(tree, :x2).index
-stf_x2 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
+stf_x2 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy) # , limititers=14
 # t_x2 = @async
 
+
 idx = whichCliq(tree, :x4).index
-stf_x4 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
+@async stf_x4 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy) # , limititers=8
 # t_x4 = @async
+
+
+#
+# drawTree(tree)
+# # partial block on :x4 should return true
+# cliq = whichCliq(tree, :x4)
+# prnt = getParent(tree, cliq)[1]
+# dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
+# getCliqSiblingsPartialNeeds(tree, cliq, prnt, dwinmsgs)
+#
+# # partial block on :x2 should return false
+# cliq = whichCliq(tree, :x2)
+# prnt = getParent(tree, cliq)[1]
+# dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
+# getCliqSiblingsPartialNeeds(tree, cliq, prnt, dwinmsgs)
+#
+#
+# # after :x2 finishes, partial block on :x4 should return false
+
 
 idx = whichCliq(tree, :x1).index
 stf_x1 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
 # t_x1 = @async
 
 
-getData(getVariable(fg, :x5))
 
 drawPosesLandms(fg)
