@@ -1,7 +1,7 @@
 # new Sandshark example
 # add more julia processes
-# using Distributed
-# nprocs() < 4 ? addprocs(4-nprocs()) : nothing
+using Distributed
+addprocs(4)
 
 using Caesar, RoME
 # @everywhere using Caesar, RoME
@@ -13,7 +13,7 @@ using Gadfly, DataFrames
 using ProgressMeter
 using DelimitedFiles
 
-const TU = TransformUtils
+# const TU = TransformUtils
 
 Gadfly.set_default_plot_size(35cm,25cm)
 
@@ -22,7 +22,7 @@ include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[50:2:60]
+epochs = timestamps[50:2:70]
 lastepoch = 0
 for ep in epochs
   global lastepoch
@@ -79,7 +79,6 @@ for ep in epochs
     index+=1
 end
 
-ls(fg)
 
 # Just adding the first one...
 addFactor!(fg, [:x0; :l1], ppbrDict[epochs[1]], autoinit=false)
@@ -91,13 +90,17 @@ addFactor!(fg, [:x10; :l1], ppbrDict[epochs[11]], autoinit=false)
 # first solve and initialization
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
-tree, smt, hist = solveTree!(fg) #, recordcliqs=[:x0; :x2; :x4; :x5])
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
 # writeGraphPdf(fg, show=true)
 
 drawPosesLandms(fg)
 
-ls(fg, :l1)
+
+csmAnimate(fg, tree, getTreeAllFrontalSyms(fg, tree), frames=1000)
+Base.rm("/tmp/caesar/csmCompound/out.ogv")
+run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/csm_%d.png -c:v libtheora -vf fps=25 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`)
+run(`totem /tmp/caesar/csmCompound/out.ogv`)
 
 
 addFactor!(fg, [:x13; :l1], ppbrDict[epochs[14]], autoinit=false)
