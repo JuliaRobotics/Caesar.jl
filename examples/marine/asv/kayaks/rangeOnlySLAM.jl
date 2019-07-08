@@ -107,39 +107,39 @@ end
 
 # writeGraphPdf(fg, engine="dot")
 
-for i in fullwindowt
-    sym = Symbol("x$i")
-    nextsymi = i+1;
-    nextsym = Symbol("x$nextsymi")
-    rtkCov = Matrix(Diagonal([0.1;0.1].^2));
-
-    if i == fullwindow[1] || i == fullwindow[end]-1
-        pp = PriorPoint2(MvNormal(posDataAll[i,:], rtkCov))
-        addFactor!(fg, [sym;], pp, autoinit=false)
-
-        dx = dposData[i+1,1] - posDataAll[i,1];
-        dy = dposData[i+1,2] - posDataAll[i,2];
-        dpμ = [dx;dy];
-        dpσ = Matrix(Diagonal([0.5;0.5].^2))
-        p2p2 = Point2Point2(MvNormal(dpμ,dpσ))
-        addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
-    else
-        dx = dposData[i+1,1] - dposData[i,1];
-        dy = dposData[i+1,2] - dposData[i,2];
-        dpμ = [dx;dy];
-        dpσ = Matrix(Diagonal([0.5;0.5].^2))
-        p2p2 = Point2Point2(MvNormal(dpμ,dpσ))
-        addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
-    end
-end
-
-for i = window
-    windowi = i-window[1]+1
-    sym = Symbol("x$windowi")
-    mykde = kde!(rangesin[:,i-window[1]+1])
-    ppR = Point2Point2Range(mykde)
-    addFactor!(fg, [beacon;sym], ppR, autoinit=false)
-end
+# for i in fullwindowt
+#     sym = Symbol("x$i")
+#     nextsymi = i+1;
+#     nextsym = Symbol("x$nextsymi")
+#     rtkCov = Matrix(Diagonal([0.1;0.1].^2));
+#
+#     if i == fullwindow[1] || i == fullwindow[end]-1
+#         pp = PriorPoint2(MvNormal(posDataAll[i,:], rtkCov))
+#         addFactor!(fg, [sym;], pp, autoinit=false)
+#
+#         dx = dposData[i+1,1] - posDataAll[i,1];
+#         dy = dposData[i+1,2] - posDataAll[i,2];
+#         dpμ = [dx;dy];
+#         dpσ = Matrix(Diagonal([0.5;0.5].^2))
+#         p2p2 = Point2Point2(MvNormal(dpμ,dpσ))
+#         addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
+#     else
+#         dx = dposData[i+1,1] - dposData[i,1];
+#         dy = dposData[i+1,2] - dposData[i,2];
+#         dpμ = [dx;dy];
+#         dpσ = Matrix(Diagonal([0.5;0.5].^2))
+#         p2p2 = Point2Point2(MvNormal(dpμ,dpσ))
+#         addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
+#     end
+# end
+#
+# for i = window
+#     windowi = i-window[1]+1
+#     sym = Symbol("x$windowi")
+#     mykde = kde!(rangesin[:,i-window[1]+1])
+#     ppR = Point2Point2Range(mykde)
+#     addFactor!(fg, [beacon;sym], ppR, autoinit=false)
+# end
 
 
 # writeGraphPdf(fg, engine="dot")
@@ -147,7 +147,7 @@ end
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 getSolverParams(fg).async = true
-getSolverParams(fg).downsolve = false
+# getSolverParams(fg).downsolve = false
 
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg)) # [:l1;]
@@ -178,22 +178,49 @@ push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon Ground Truth";],Ge
 
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
 @async run(`evince /tmp/test.pdf`)
+plkplot |> PNG("/tmp/test.png")
 
 
 
 
 
+## other visualizations
+
+using RoMEPlotting
+
+vars = ls(fg, r"x")
+svars = sortVarNested(vars)
+plotKDE(fg, svars[1:8])
+plotKDE(fg, svars[8:15])
+plotKDE(fg, svars[15:21])
+
+plotKDE(fg, svars[1:3:21]) |> PNG("/tmp/test.png")
 
 
 
 
 ## dev work below
 
-getVariableType(fg, :x1)
+
+lsTypes(fg)
+
+lsfTypes(fg)
+
 
 
 lsfPriors(fg)
-# lsfPriors(fg) = Symbol[:x1f2, :x1f1, :x60f1, :x60f2]
+
+
+
+
+sortVarNested(ls(fg))[[1;21]]
+
+
+ls(fg, :l1)
+
+
+
+
 
 ## moved to DistributedFactorGraphs
 # """
@@ -230,15 +257,27 @@ lsfPriors(fg)
 # function getVariableType(dfg::G, lbl::Symbol) where G <: AbstractDFG
 #     getVariableType(getVariable(dfg, lbl))
 # end
-
-getFactorType(fg, :x1f1)
-
-function lsfTypes(dfg::G) where G <: AbstractDFG
-  alltypes = String[]
-  for fc in lsf(dfg)
-    union!(alltypes, getFactorType(dfg, fc)
-  end
-end
+# """
+# $SIGNATURES
+#
+# Return `::Dict{Symbol, Vector{String}}` of all unique factor types in factor graph.
+# """
+# function lsfTypes(dfg::G)::Dict{Symbol, Vector{String}} where G <: AbstractDFG
+#     alltypes = Dict{Symbol,Vector{String}}()
+#     for fc in lsf(dfg)
+#         Tt = typeof(getFactorType(dfg, fc))
+#         sTt = string(Tt)
+#         name = Symbol(Tt.name)
+#         if !haskey(alltypes, name)
+#             alltypes[name] = String[string(Tt)]
+#         else
+#             if sum(alltypes[name] .== sTt) == 0
+#                 push!(alltypes[name], sTt)
+#             end
+#         end
+#     end
+#     return alltypes
+# end
 
 
 #
