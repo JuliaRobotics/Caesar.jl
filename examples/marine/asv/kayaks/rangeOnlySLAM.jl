@@ -8,10 +8,43 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 
 rangesin = zeros(1000,320);
 for files in collect(60:20:360)
-    rangeFile = joinpath(ENV["HOME"],"liljondir", "kayaks","rangesonly_6_20","range$(files).txt");
+    rangeFile = joinpath(ENV["HOME"],"data", "kayaks","rangesonly_6_20","range$(files).txt");
     rangesin[:,files-60+1:files-60+20] = readdlm(rangeFile,',',Float64,'\n')
 end
-datadir = joinpath(ENV["HOME"],"liljondir", "kayaks","20_gps_pos")
+datadir = joinpath(ENV["HOME"],"data", "kayaks","20_gps_pos")
+
+window = 70:20:130;
+
+posDataAll = zeros(window[end]-window[1]+1,2);
+for i in window[1]:window[end]
+    navfile = datadir*"/nav$i.csv"
+    posDataAll[i-window[1]+1,:] = readdlm(navfile,',',Float64,'\n')
+end
+
+dposData = deepcopy(posDataAll)
+cumulativeDrift!(dposData,[0.0;0],[0.2,0.2])
+
+#Gadfly.plot(layer(x=posDataAll[:,1],y=posDataAll[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=dposData[:,1],y=dposData[:,2],Geom.path))
+
+fg = initfg();
+beacon = :l1
+addVariable!(fg, beacon, Point2 )
+
+fullwindow = 1:window[end]-window[1]+1
+fullwindowt = 1:window[end]-window[1]
+for i in fullwindow
+    sym = Symbol("x$i")
+    addVariable!(fg, sym, Point2)
+end
+
+include(joinpath(@__DIR__,"slamUtils.jl"))
+
+rangesin = zeros(1000,320);
+for files in collect(60:20:360)
+    rangeFile = joinpath(ENV["HOME"],"data", "kayaks","rangesonly_6_20","range$(files).txt");
+    rangesin[:,files-60+1:files-60+20] = readdlm(rangeFile,',',Float64,'\n')
+end
+datadir = joinpath(ENV["HOME"],"data", "kayaks","20_gps_pos")
 
 window = 70:20:130;
 
@@ -74,7 +107,48 @@ end
 
 # writeGraphPdf(fg, engine="dot")
 
-tree, smt, hist = solveTree!(fg, recordcliqs=[:l1;])
+for i in fullwindowt
+    sym = Symbol("x$i")
+    nextsymi = i+1;
+    nextsym = Symbol("x$nextsymi")
+    rtkCov = Matrix(Diagonal([0.1;0.1].^2));
+
+    if i == fullwindow[1] || i == fullwindow[end]-1
+        pp = PriorPoint2(MvNormal(posDataAll[i,:], rtkCov))
+        addFactor!(fg, [sym;], pp, autoinit=false)
+
+        dx = dposData[i+1,1] - posDataAll[i,1];
+        dy = dposData[i+1,2] - posDataAll[i,2];
+        dpμ = [dx;dy];
+        dpσ = Matrix(Diagonal([0.5;0.5].^2))
+        p2p2 = Point2Point2(MvNormal(dpμ,dpσ))
+        addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
+    else
+        dx = dposData[i+1,1] - dposData[i,1];
+        dy = dposData[i+1,2] - dposData[i,2];
+        dpμ = [dx;dy];
+        dpσ = Matrix(Diagonal([0.5;0.5].^2))
+        p2p2 = Point2Point2(MvNormal(dpμ,dpσ))
+        addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
+    end
+end
+
+for i = window
+    windowi = i-window[1]+1
+    sym = Symbol("x$windowi")
+    mykde = kde!(rangesin[:,i-window[1]+1])
+    ppR = Point2Point2Range(mykde)
+    addFactor!(fg, [beacon;sym], ppR, autoinit=false)
+end
+
+
+# writeGraphPdf(fg, engine="dot")
+
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
+getSolverParams(fg).async = true
+
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg)) # [:l1;]
 
 L1v = getVariable(fg, beacon)
 L1 = getVal(L1v)
