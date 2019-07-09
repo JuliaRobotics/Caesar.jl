@@ -46,7 +46,7 @@ end
 datadir = joinpath(ENV["HOME"],"data", "kayaks","20_gps_pos")
 
 window = 70:20:130;
-window = 70:20:100;
+# window = 70:20:100;
 
 posDataAll = zeros(window[end]-window[1]+1,2);
 for i in window[1]:window[end]
@@ -143,14 +143,24 @@ end
 
 
 # writeGraphPdf(fg, engine="dot")
-
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 getSolverParams(fg).async = true
-# getSolverParams(fg).downsolve = false
+getSolverParams(fg).downsolve = false
 
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg)) # [:l1;]
+
+
+whichCliq(tree, :x10)
+
+drawTree(tree)
+
+whichCliq(tree, :x11)
+
+# smt47_it = @async Base.throwto(smt[47],InterruptException())
+# smt25_it = @async Base.throwto(smt[25],InterruptException())
+# smt9_it = @async Base.throwto(smt[9],InterruptException())
 
 
 L1v = getVariable(fg, beacon)
@@ -199,26 +209,29 @@ plotKDE(fg, svars[1:3:21]) |> PNG("/tmp/test.png")
 
 
 
+
 ## dev work below
 
 
-lsTypes(fg)
-
-lsfTypes(fg)
+# debugging 47 stalled
 
 
-
-lsfPriors(fg)
-
-
-
-
-sortVarNested(ls(fg))[[1;21]]
+cliq = whichCliq(tree, :x10)
+prnt = getParent(tree, cliq)[1]
+dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
 
 
-ls(fg, :l1)
+plotKDE(dwinmsgs[:x12][1], levels=3)
+
+# determine if more info is needed for partial
+partialneedsmore = getCliqSiblingsPartialNeeds(csmc.tree, csmc.cliq, prnt, dwinmsgs)
 
 
+
+
+
+
+notifyCSMCondition(tree, :x11)
 
 
 
