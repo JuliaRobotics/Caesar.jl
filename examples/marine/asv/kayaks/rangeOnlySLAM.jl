@@ -153,12 +153,16 @@ getSolverParams(fg).downsolve = true
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
+
 # notifyCSMCondition(tree, :x6)
 
 
 
-assignTreeHistory!(tree, hist)
-csmAnimate(fg, tree, [:x12;:x6;:x8;:x7], frames=1000)
+# assignTreeHistory!(tree, hist)
+# csmAnimate(fg, tree, [:x12;:x6;:x8;:x7], frames=1000)
+# Base.rm("/tmp/caesar/csmCompound/out.ogv")
+# run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/csm_%d.png -c:v libtheora -vf fps=25 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`)
+# run(`totem /tmp/caesar/csmCompound/out.ogv`)
 
 # smt47_it = @async Base.throwto(smt[47],InterruptException())
 # smt25_it = @async Base.throwto(smt[25],InterruptException())
