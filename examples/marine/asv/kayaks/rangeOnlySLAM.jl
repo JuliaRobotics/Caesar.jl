@@ -146,17 +146,19 @@ end
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 getSolverParams(fg).async = true
-getSolverParams(fg).downsolve = false
+getSolverParams(fg).downsolve = true
 
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg)) # [:l1;]
 
 
-whichCliq(tree, :x10)
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
-drawTree(tree)
+# notifyCSMCondition(tree, :x6)
 
-whichCliq(tree, :x11)
+
+
+assignTreeHistory!(tree, hist)
+csmAnimate(fg, tree, [:x12;:x6;:x8;:x7], frames=1000)
 
 # smt47_it = @async Base.throwto(smt[47],InterruptException())
 # smt25_it = @async Base.throwto(smt[25],InterruptException())
@@ -188,7 +190,7 @@ push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon Ground Truth";],Ge
 
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
 @async run(`evince /tmp/test.pdf`)
-plkplot |> PNG("/tmp/test.png")
+# plkplot |> PNG("/tmp/test.png")
 
 
 
