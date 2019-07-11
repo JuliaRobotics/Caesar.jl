@@ -1,7 +1,12 @@
 
+using Distributed
+addprocs(4)
+
 using Caesar, DelimitedFiles
+@everywhere using Caesar
 using KernelDensityEstimatePlotting
 using Gadfly, Cairo, Fontconfig
+
 
 # include(joinpath(@__DIR__,"slamUtils.jl"))
 #
@@ -151,15 +156,6 @@ getSolverParams(fg).downsolve = true
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
-
-getCliqInitUpMsgs(whichCliq(tree,:x6))
-
-
-whichCliq(tree, :x6)
-
-drawTree(tree)
-
-whichCliq(tree, :x11)
 
 # smt47_it = @async Base.throwto(smt[47],InterruptException())
 # smt25_it = @async Base.throwto(smt[25],InterruptException())
