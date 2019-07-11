@@ -90,14 +90,12 @@ for i in rangewindow
 end
 
 #writeGraphPdf(fg, engine="dot")
-getSolverParams(fg).drawtree = false
-getSolverParams(fg).showtree = false
 
 # writeGraphPdf(fg, engine="dot")
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
-getSolverParams(fg).async = true
-getSolverParams(fg).downsolve = true
+# getSolverParams(fg).async = true
+# getSolverParams(fg).downsolve = true
 
 tree, smt, hist = solveTree!(fg, maxparallel=100)
 # tree, smt = batchSolve!(fg,maxparallel=100)
