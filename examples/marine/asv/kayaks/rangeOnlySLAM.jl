@@ -90,15 +90,22 @@ for i in rangewindow
 end
 
 #writeGraphPdf(fg, engine="dot")
-getSolverParams(fg).drawtree = false
-getSolverParams(fg).showtree = false
 
-# tree, smt = batchSolve!(fg,maxparallel=100)
+# writeGraphPdf(fg, engine="dot")
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
+# getSolverParams(fg).async = true
+# getSolverParams(fg).downsolve = true
 
 tree, smt, hist = solveTree!(fg, maxparallel=100)
+# tree, smt = batchSolve!(fg,maxparallel=100)
+
 # fg2 = deepcopy(fg)
 # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
 
+
+# assignTreeHistory!(tree, hist)
+# csmAnimate(fg, tree, [:x12;:x6;:x8;:x7], frames=1000)
 
 #PLOTTING ------------
 plk= [];
@@ -170,3 +177,18 @@ plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
 # mykde = kde!(rangesin[:,260]);
 # K1 = plotKDE(mykde); K1 |> PDF("/tmp/testkde.pdf")
 # getKDEMax(mykde)
+
+
+
+
+# using RoMEPlotting
+#
+# vars = ls(fg, r"x")
+# svars = sortVarNested(vars)
+# plotKDE(fg, svars[1:8])
+# plotKDE(fg, svars[8:15])
+# plotKDE(fg, svars[15:21])
+#
+# plotKDE(fg, svars[1:3:21]) |> PNG("/tmp/test.png")
+#
+# notifyCSMCondition(tree, :x11)
