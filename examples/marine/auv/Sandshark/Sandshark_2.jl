@@ -90,6 +90,7 @@ addFactor!(fg, [:x10; :l1], ppbrDict[epochs[11]], autoinit=false)
 # first solve and initialization
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
+
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
 # writeGraphPdf(fg, show=true)

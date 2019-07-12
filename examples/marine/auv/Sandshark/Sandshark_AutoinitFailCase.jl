@@ -82,7 +82,7 @@ addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=false)
 # first solve and initialization
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
-# getSolverParams(fg).async = true
+getSolverParams(fg).async = true
 # getSolverParams(fg).downsolve = false
 
 
@@ -92,6 +92,13 @@ tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 # # now solve the second portion of the tree.
 # getSolverParams(fg).downsolve = true
 # tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+
+
+# assignTreeHistory!(tree, hist)
+# csmAnimate(fg, tree, [:x0; :l1])
+# Base.rm("/tmp/caesar/csmCompound/out.ogv")
+# run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/csm_%d.png -c:v libtheora -vf fps=25 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`)
+# run(`totem /tmp/caesar/csmCompound/out.ogv`)
 
 
 # writeGraphPdf(fg, show=true)
