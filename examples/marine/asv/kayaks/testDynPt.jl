@@ -24,7 +24,8 @@ saswindow = 5;
 poses = [Symbol("x$i") for i in symbolstart:(symbolstart+saswindow-1)]
 sasframes = collect(windowstart:1:(windowstart+saswindow-1))
 
-dataDir = joinpath(ENV["HOME"],"data","sas","06_20_sample");
+# dataDir = joinpath(ENV["HOME"],"data","sas","06_20_sample");
+dataDir = joinpath(ENV["HOME"],"data","kayaks","20_gps_pos");
 posData = importdata_nav(sasframes, datadir=dataDir);
 navchecked, errorind = sanitycheck_nav(posData)
 
@@ -79,11 +80,15 @@ addFactor!(fg, [beacon;poses], sas2d, autoinit=false)
 
 writeGraphPdf(fg, engine="dot")
 
-#getSolverParams(fg).drawtree = true
-#getSolverParams(fg).showtree = true
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
+# getSolverParams(fg).downsolve
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=[:x3; :l1])
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+
+printCliqHistorySummary(tree,:x5)
+drawTree(tree)
 
 Profile.init(n = 10^7, delay = 0.01)
 @profile stuff = sandboxCliqResolveStep(tree,:x3,6)
@@ -105,5 +110,5 @@ plotKDE(fg, ls(fg,r"x"), dims=[1;2])
 
 ## More debugging below
 
-stuff = IncrementalInference.localproduct(fg, :x1)
+stuff = IIF.localProduct(fg, :x1)
 pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
