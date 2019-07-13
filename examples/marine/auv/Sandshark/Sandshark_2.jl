@@ -4,7 +4,7 @@ using Distributed
 addprocs(4)
 
 using Caesar, RoME
-# @everywhere using Caesar, RoME
+@everywhere using Caesar, RoME
 using Interpolations
 using Distributions
 
