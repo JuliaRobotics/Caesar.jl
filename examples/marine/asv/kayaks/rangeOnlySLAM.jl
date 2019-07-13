@@ -90,7 +90,7 @@ for i in rangewindow
 end
 
 #writeGraphPdf(fg, engine="dot")
-getSolverParams(fg).drawtree = false
+getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = false
 
 # tree, smt = batchSolve!(fg,maxparallel=100)
@@ -124,16 +124,19 @@ for var in window       #Plot only for range factors
     global onetime
     for mysym in ls(fg,sym)
         if occursin(r"l1",string(mysym))
-            if var > 150 && !onetime       #Plot one or more approxConv
+            # if var > 130 && !onetime       #Plot one or more approxConv
                 L1ac = approxConv(fg,mysym,:l1)
                 # K1 = plotKDEContour(kde!(L1ac),xlbl="X (m)", ylbl="Y (m)",levels=3,layers=true)
                 # push!(plk,K1...)
                 push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-                push!(pkde,plotKDE(kde!(L1ac),layers=true)...)
-                onetime = true
-                push!(plk,Gadfly.Theme(key_position = :none));
-                push!(plk, Guide.xlabel("X (m)"), Guide.ylabel("Y (m)"))
-            end
+                # push!(pkde,plotKDE(kde!(L1ac),layers=true)...)
+                # onetime = true
+                # push!(plk,Gadfly.Theme(key_position = :none));
+                # push!(plk, Guide.xlabel("X (m)"), Guide.ylabel("Y (m)"))
+
+                X1 = getKDEMean(getVertKDE(fg,sym))
+                push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"magenta",point_size=1.5pt,highlight_width=0pt)))
+            # end
             X1 = getKDEMean(getVertKDE(fg,sym))
             push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"red",point_size=1.5pt,highlight_width=0pt)))
         end
