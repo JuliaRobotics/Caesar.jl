@@ -15,7 +15,7 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 N = 100
 
 windowstart = 400;
-windowlen = 10;
+windowlen = 9;
 saswindow = 5;
 sasstart = 5;
 
@@ -59,7 +59,7 @@ for i in priors
     addFactor!(fg, [poses[i];], pp, autoinit=false)
 end
 
-vps = [1,2,3,4,5,6,7,8,9]
+vps = 1:windowlen-1
 for i in vps
     xdotp = dposData[i+1,1] - dposData[i,1];
     ydotp = dposData[i+1,2] - dposData[i,2];
@@ -75,7 +75,7 @@ sas2d = prepareSAS2DFactor(saswindow, waveformData, rangemodel=:Correlator,
                            cfgd=cfgd, chirpFile=chirpFile)
 addFactor!(fg, [beacon;sasposes], sas2d, autoinit=false)
 
-writeGraphPdf(fg, engine="dot")
+# writeGraphPdf(fg, engine="dot")
 
 getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
