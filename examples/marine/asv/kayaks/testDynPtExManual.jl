@@ -67,7 +67,7 @@ for i in vps
     dpσ = Matrix(Diagonal([0.1;0.1;0.1;0.1].^2))
     vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
     addFactor!(fg, [poses[i];poses[i+1]], vp, autoinit=false)
-    # IncrementalInference.doautoinit!(fg,[getVariable(fg,poses[i])])
+    manualinit!(fg,poses[i],kde!(rand(MvNormal(dpμ,dpσ),100)))
 end
 
 # IncrementalInference.doautoinit!(fg,[getVariable(fg,poses[5])])
@@ -81,7 +81,7 @@ getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=[:x3; :l1])
+tree, smt, hist = solveTree!(fg)
 
 
 
@@ -89,16 +89,11 @@ plk= [];
 
 for sym in ls(fg) #plotting all syms labeled
     X1 = getKDEMean(getVertKDE(fg,sym))
-    push!(plk, layer(x=[X1[1];],y=[X1[2];], Geom.point), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
+    push!(plk, layer(x=[X1[1];],y=[X1[2];], label=[String(sym);],Geom.point,Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
 end
-#
-# for i in 1:pose_counter
-#      X1 = getKDEMean(getVertKDE(fg,Symbol("x$i")))
-#      push!(plk, layer(x=[X1[1];],y=[X1[2];], Geom.point), Theme(point_size = 1.5pt,highlight_width = 0pt))
-# end
-#
-# push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")))
-#
+
+push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")))
+
 # igt = [17.0499;1.7832];
 # push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red")));
 #
@@ -108,7 +103,7 @@ end
 # push!(plk,Gadfly.Theme(key_position = :none));
 # push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-150, ymax=75,fixed=true))
 
-plkplot = Gadfly.plot(plk...); plkplot |> PDF("test.pdf");
+plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf");
 
 
 
