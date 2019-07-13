@@ -48,6 +48,11 @@ Current default inference method.
 
 ### Convolution Approximation (Quasi-Deterministic)
 
+Convolution operations are used to implement the numerical computation of the probabilistic chain rule:
+```math
+P(A, B) = P(A | B)P(B)
+```
+
 Proposal distributions are computed by means of (analytical or numerical -- i.e. "algebraic") factor which defines a residual function:
 ```math
 \delta : S \times \Eta \rightarrow \mathcal{R}
@@ -64,6 +69,11 @@ Or minimization of "low dimension" equations that might not have any roots in ``
 ```
 
 The factor noise term can be any samplable belief (a.k.a. [`IIF.SamplableBelief`](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/2b9f1c3d03e796bc24fbcc622329769dadd94288/src/DefaultNodeTypes.jl#L3)), either through algebraic modeling, or (**critically**) directly from the sensor measurement that is driven by the underlying physics process.  Parametric factors ([Distributions.jl](https://github.com/JuliaStats/Distributions.jl)) or direct physical measurement noise can be used via `AliasingScalarSampler` or `KernelDensityEstimate`.
+
+This figure shows an example of the quasi-deterministic convolution of green and red functions to produce the black trace as proposal distribution 
+```@raw html
+<a href="https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/61175404-3b4f9d80-a59e-11e9-85db-ca6bbdb73ffd.png" alt="Bayes/Junction tree example" width="640" border="0" /></a>
+```
 
 > Also see [1.2], Chap. 5, Approximate Convolutions.
 
