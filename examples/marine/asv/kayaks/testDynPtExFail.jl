@@ -75,7 +75,10 @@ sas2d = prepareSAS2DFactor(saswindow, waveformData, rangemodel=:Correlator,
                            cfgd=cfgd, chirpFile=chirpFile)
 addFactor!(fg, [beacon;sasposes], sas2d, autoinit=false)
 
-# writeGraphPdf(fg, engine="dot")
+# visualization tools for debugging
+writeGraphPdf(fg, engine="dot")
+wipeBuildNewTree!(fg, drawpdf=true, show=true)
+
 
 getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
