@@ -92,7 +92,7 @@ for sym in ls(fg) #plotting all syms labeled
     push!(plk, layer(x=[X1[1];],y=[X1[2];], label=[String(sym);],Geom.point,Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
 end
 
-push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")))
+push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.point, Theme(default_color=colorant"green",point_size = 1.5pt)))
 
 # igt = [17.0499;1.7832];
 # push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red")));
