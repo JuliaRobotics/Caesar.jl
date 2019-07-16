@@ -16,6 +16,20 @@ function plotSASDefault(fg, posData::Array, expnum::Int ; datadir::String=joinpa
     plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
 end
 
+function plottoPDF(layersin)
+    plkplot = Gadfly.plot(layersin...); plkplot |> PDF("/tmp/test.pdf")
+end
+
+function plotBeaconSolve(fg)
+    plk=[];
+    L1 = getVal(getVariable(fg, :l1))
+    push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
+    # K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
+    # push!(plk,K1...)
+    # push!(plk,Gadfly.Theme(key_position = :none));
+    return plk
+end
+
 function plotMeans!(plk,fg;regx::Regex=r"x")
     for sym in ls(fg)
         if occursin(regx,string(sym))

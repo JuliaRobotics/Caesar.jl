@@ -65,24 +65,8 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
       ranget = [0:8000-500;]*soundSpeed/fSampling
       sas2d.rangemodel = Vector{IIF.AliasingScalarSampler}(undef, totalPhones)
       for i in 1:totalPhones
-        sas2d.rangemodel[i] = IIF.AliasingScalarSampler(ranget, norm.(range_mfData[1:7501,i]), SNRfloor=rngSNRfloor)
+        sas2d.rangemodel[i] = IIF.AliasingScalarSampler(ranget, exp.(norm.(range_mfData[1:7501,i])), SNRfloor=rngSNRfloor)
       end
-  # elseif rangemodel == :Correlator
-  #   # ...
-  #   range_mfData = zeros(Complex{Float64}, nFFT_full, totalPhones)
-  #   range_mf = prepMF(chirpIn,nFFT_full,totalPhones) # MF
-  #   range_mf(csvWaveData,range_mfData) # matched filter
-  #
-  #   sas2d.ranget = [0:8000-500;]*soundSpeed/fSampling
-  #
-  #   sas2d.rangemodel = Vector{StatsBase.ProbabilityWeights}(totalPhones)
-  #   for i in 1:totalPhones
-  #     safe_W = norm.(range_mfData[1:7501,i])
-  #     safe_W .-= quantile(safe_W,0.4)
-  #     safe_W[safe_W .< 0.0] = 0.0
-  #     sas2d.rangemodel[i] = StatsBase.ProbabilityWeights(deepcopy(safe_W))
-  #   end
-
   else
     error("No can do: what is a $rangemodel rangemodel?")
   end
