@@ -99,6 +99,10 @@ tree, smt, hist = solveTree!(fg, maxparallel=100)
 # fg2 = deepcopy(fg)
 # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
 
+include(joinpath(@__DIR__,"plotSASUtils.jl"))
+
+
+plotSASDefault(fg,posData,1,datadir=datadir)
 
 #PLOTTING ------------
 plk= [];
