@@ -83,7 +83,7 @@ addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=false)
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 getSolverParams(fg).async = true
-# getSolverParams(fg).downsolve = false
+getSolverParams(fg).downsolve = false
 
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
