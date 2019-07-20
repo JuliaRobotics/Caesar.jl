@@ -9,7 +9,6 @@ function loadConfigFile(file::A) where {A <: AbstractString}
   YAML.load(open(file))
 end
 
-
 """
     $(TYPEDSIGNATURES)
 
@@ -17,8 +16,7 @@ Prepare a sas2d factor to use in the factor graph where `totalPhones` is the siz
 """
 function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
               cfgd::Dict=loadConfigFile(joinpath(dirname(pathof(Caesar)),"config","SAS2D.yaml")), rangemodel=:Rayleigh, chirpFile=joinpath(dirname(pathof(Caesar)),"config","chirp250.txt"))
-  #
-  # @assert size(csvWaveData,2) == totalPhones
+  # # @assert size(csvWaveData,2) == totalPhones
   #Constant Acoustic Params
   fFloor = cfgd["freq_lower_cutoff"];
   fCeil = cfgd["freq_upper_cutoff"];
@@ -67,21 +65,21 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
       for i in 1:totalPhones
         sas2d.rangemodel[i] = IIF.AliasingScalarSampler(ranget, norm.(range_mfData[1:7501,i]), SNRfloor=rngSNRfloor)
       end
-  # elseif rangemodel == :Correlator
-  #   # ...
-  #   range_mfData = zeros(Complex{Float64}, nFFT_full, totalPhones)
-  #   range_mf = prepMF(chirpIn,nFFT_full,totalPhones) # MF
-  #   range_mf(csvWaveData,range_mfData) # matched filter
-  #
-  #   sas2d.ranget = [0:8000-500;]*soundSpeed/fSampling
-  #
-  #   sas2d.rangemodel = Vector{StatsBase.ProbabilityWeights}(totalPhones)
-  #   for i in 1:totalPhones
-  #     safe_W = norm.(range_mfData[1:7501,i])
-  #     safe_W .-= quantile(safe_W,0.4)
-  #     safe_W[safe_W .< 0.0] = 0.0
-  #     sas2d.rangemodel[i] = StatsBase.ProbabilityWeights(deepcopy(safe_W))
-  #   end
+  elseif rangemodel == :Correlator
+    # ...
+    range_mfData = zeros(Complex{Float64}, nFFT_full, totalPhones)
+    range_mf = prepMF(chirpIn,nFFT_full,totalPhones) # MF
+    range_mf(csvWaveData,range_mfData) # matched filter
+
+    sas2d.ranget = [0:8000-500;]*soundSpeed/fSampling
+
+    sas2d.rangemodel = Vector{StatsBase.ProbabilityWeights}(totalPhones)
+    for i in 1:totalPhones
+      safe_W = norm.(range_mfData[1:7501,i])
+      safe_W .-= quantile(safe_W,0.4)
+      safe_W[safe_W .< 0.0] = 0.0
+      sas2d.rangemodel[i] = StatsBase.ProbabilityWeights(deepcopy(safe_W))
+    end
 
   else
     error("No can do: what is a $rangemodel rangemodel?")
@@ -90,15 +88,69 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
   #thread safe
   sas2d.cfgTotal = cfgCBF_init
   sas2d.cfgLIE = cfgCBF_init_LIE
-  sas2d.waveformsIn = cztData;
-  sas2d.debugging = false;
+  sas2d.cfg = deepcopy(cfgd)
+  sas2d.waveformsRaw = deepcopy(csvWaveData)
+  sas2d.waveformsIn = cztData
+  sas2d.debugging = false
+
+  #create memory
+  prepareSASMemory(sas2d)
+  # sas2d.threadreuse = Vector{SASREUSE}(undef, Threads.nthreads())
+  # for thritr in 1:Threads.nthreads()
+  #     sas2d.threadreuse[thritr] = SASREUSE()
+  #     sas2d.threadreuse[thritr].CBFFull = zeros(Complex{Float64}, getCBFFilter2Dsize(cfgCBF_init));
+  #     sas2d.threadreuse[thritr].CBFLIE = zeros(Complex{Float64}, getCBFFilter2Dsize(cfgCBF_init_LIE));
+  #     sas2d.threadreuse[thritr].BFOutFull = zeros(length(azimuths))
+  #     sas2d.threadreuse[thritr].BFOutLIE = zeros(Complex{Float64},nFFT_czt)
+  #     sas2d.threadreuse[thritr].BFOutLIETemp = zeros(Complex{Float64},nFFT_czt)
+  #     sas2d.threadreuse[thritr].phaseshiftLOO = zeros(Complex{Float64},nFFT_czt)
+  #     sas2d.threadreuse[thritr].arrayPos = zeros(Float64,totalPhones,2)
+  #     sas2d.threadreuse[thritr].arrayPosLIE = zeros(Float64,totalPhones-1,2)
+  #     sas2d.threadreuse[thritr].waveformsLIE = zeros(Complex{Float64},nFFT_czt,totalPhones-1)
+  #     sas2d.threadreuse[thritr].waveformsLOOc = zeros(Complex{Float64},nFFT_czt)
+  #
+  #     sas2d.threadreuse[thritr].BFtemp = zeros(Complex{Float64}, totalPhones,nFFT_czt)
+  #     sas2d.threadreuse[thritr].LIEtemp = zeros(Complex{Float64}, totalPhones-1,nFFT_czt)
+  #
+  #     # caching hack
+  #     sas2d.threadreuse[thritr].hackazi = (Int[0;], Float64[0.0;])
+  #     sas2d.threadreuse[thritr].oncebackidx = Int[0;]
+  #
+  #     # a few more memory reuse positions
+  #     sas2d.threadreuse[thritr].sourceXY = zeros(2)
+  #
+  #     # beamformer update
+  #     sas2d.threadreuse[thritr].temp1 = zeros(Complex{Float64},nFFT_czt);
+  #     sas2d.threadreuse[thritr].temp2 = zeros(Complex{Float64},size(cztData));
+  #     sas2d.threadreuse[thritr].temp = zeros(Complex{Float64},nFFT_czt,totalPhones-1);
+  #
+  #     sas2d.threadreuse[thritr].dbg = SASDebug()
+  #     reset!(sas2d.threadreuse[thritr].dbg)
+  # end
+
+  sas2d
+end
+
+function prepareSASMemory(sas2d::SASBearing2D)::Nothing
+  #Constant Acoustic Params
+  fFloor = sas2d.cfg["freq_lower_cutoff"];
+  fCeil = sas2d.cfg["freq_upper_cutoff"];
+  fSampling = sas2d.cfg["freq_sampling"];
+  soundSpeed = sas2d.cfg["sound_speed"];
+  nFFT_full = sas2d.cfg["nfft_full"];
+  nFFT_czt = sas2d.cfg["nfft_czt"];
+  azimuthDivs = sas2d.cfg["azimuth_divs"];
+  rngSNRfloor = sas2d.cfg["range_snr_floor"];
+  aziSNRfloor = sas2d.cfg["azi_snr_floor"];
+  totalPhones = size(sas2d.waveformsRaw,2)
+  azimuths = LinRange(0,360,azimuthDivs)*pi/180;
 
   #create memory
   sas2d.threadreuse = Vector{SASREUSE}(undef, Threads.nthreads())
   for thritr in 1:Threads.nthreads()
       sas2d.threadreuse[thritr] = SASREUSE()
-      sas2d.threadreuse[thritr].CBFFull = zeros(Complex{Float64}, getCBFFilter2Dsize(cfgCBF_init));
-      sas2d.threadreuse[thritr].CBFLIE = zeros(Complex{Float64}, getCBFFilter2Dsize(cfgCBF_init_LIE));
+      sas2d.threadreuse[thritr].CBFFull = zeros(Complex{Float64}, getCBFFilter2Dsize(sas2d.cfgTotal));
+      sas2d.threadreuse[thritr].CBFLIE = zeros(Complex{Float64}, getCBFFilter2Dsize(sas2d.cfgLIE));
       sas2d.threadreuse[thritr].BFOutFull = zeros(length(azimuths))
       sas2d.threadreuse[thritr].BFOutLIE = zeros(Complex{Float64},nFFT_czt)
       sas2d.threadreuse[thritr].BFOutLIETemp = zeros(Complex{Float64},nFFT_czt)
@@ -120,24 +172,13 @@ function prepareSAS2DFactor(totalPhones::Int, csvWaveData::Array{<:Real};
 
       # beamformer update
       sas2d.threadreuse[thritr].temp1 = zeros(Complex{Float64},nFFT_czt);
-      sas2d.threadreuse[thritr].temp2 = zeros(Complex{Float64},size(cztData));
+      sas2d.threadreuse[thritr].temp2 = zeros(Complex{Float64},size(sas2d.waveformsIn));
       sas2d.threadreuse[thritr].temp = zeros(Complex{Float64},nFFT_czt,totalPhones-1);
 
       sas2d.threadreuse[thritr].dbg = SASDebug()
       reset!(sas2d.threadreuse[thritr].dbg)
   end
-
-
-  sas2d.cfg = deepcopy(cfgd)
-  sas2d.waveformsRaw = deepcopy(csvWaveData)
-
-  sas2d
 end
-
-
-
-
-
 
 # plot(x=azimuths, y=acceptRatio, Geom.path())
 # careful -- this great function depends on how you discretize the azimuths in CBF

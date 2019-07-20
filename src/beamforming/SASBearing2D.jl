@@ -1,3 +1,4 @@
+using DistributedFactorGraphs
 
 mutable struct SASDebug
   beams::Vector{Vector{Float64}}
@@ -190,10 +191,6 @@ function (sas2d::SASBearing2D)(
   res[1]
 end
 
-
-
-
-
 function reset!(dbg::SASDebug)
   dbg.beams = [Float64[];]
   dbg.azi_smpls = Float64[]
@@ -209,20 +206,62 @@ end
 
 
 mutable struct PackedSASBearing2D <: IncrementalInference.PackedInferenceType
+    rangemodel::String
     totalPhones::Int
     wavedataRawV::Vector{Float64}
     wavedataRawV_dim::Int
-    cfg_json::String
+    cfgJson::String
+    cfgTotal::String
+    cfgLIE::String
+    waveformsInReal::Vector{Float64}
+    waveformsInIm::Vector{Float64}
     PackedSASBearing2D() = new()
-    PackedSASBearing2D(tp::Int, wd::Array{Float64,2}, cf::Dict) = new(tp, wd[:], size(wd,1), JSON.json(cf) )
+    PackedSASBearing2D(rangemodel::String, tp::Int, wavedataRawV::Vector{Float64}, wavedataRawV_dim::Int, cfgJson::String, cfgTotal::String, cfgLIE::String, waveformsInReal::Vector{Float64}, waveformsInIm::Vector{Float64}) = new(rangemodel, tp, wavedataRawV, wavedataRawV_dim, cfgJson, cfgTotal, cfgLIE, waveformsInReal, waveformsInIm)
+    PackedSASBearing2D(rangemodel::String, tp::Int, wd::Array{Float64,2}, cf::Dict, cfgTotal::String, cfgLIE::String, waveformsInReal::Vector{Float64}, waveformsInIm::Vector{Float64}) = new(rangemodel, tp, wd[:], size(wd,1), JSON2.write(cf), cfgTotal, cfgLIE, waveformsInReal, waveformsInIm)
 end
 
-function convert(::Type{PackedSASBearing2D}, d::SASBearing2D)
-  PackedSASBearing2D(size(d.waveformsRaw,2), d.waveformsRaw, d.cfg)
+# Note: Need this otherwise it uses a default converter and causes type conversion issues.
+# Safest to just do it here to guarantee it's done.
+import Base.convert
+
+function convert(::Type{PackedSASBearing2D}, d::SASBearing2D)::PackedSASBearing2D
+  # range model is vector, packing it cleanly
+  rangeString = ""
+  if typeof(d.rangemodel) == Vector{AliasingScalarSampler}
+    rangeString = JSON.json(map(rm -> string(rm), d.rangemodel))
+  else
+    error("Can't pack range model of type $(typeof(d.rangemodel)) yet.")
+  end
+
+  cfgTotalJson = JSON2.write(d.cfgTotal)
+  cfgLIEJson = JSON2.write(d.cfgLIE)
+  waveformsInReal = map(r -> real(r), d.waveformsIn[:])
+  waveformsInIm = map(r -> imag(r), d.waveformsIn[:])
+  totalPhones = size(d.waveformsRaw,2)
+  pPacked = PackedSASBearing2D(rangeString, totalPhones, d.waveformsRaw, d.cfg, cfgTotalJson, cfgLIEJson, waveformsInReal, waveformsInIm)
+  return pPacked
 end
 
-function convert(::Type{SASBearing2D}, d::PackedSASBearing2D)
-  prepareSAS2DFactor(d.totalPhones, reshape(d.wavedataRawV,d.wavedataRawV_dim,:), cfgd=JSON.parse(d.cfg_json))
+function convert(::Type{SASBearing2D}, d::PackedSASBearing2D)::SASBearing2D
+  rangePacked = JSON2.read(d.rangemodel)
+  rangeModel = map(r -> extractdistribution(r), rangePacked)
+  cfgJson = JSON2.read(d.cfgJson, Dict)
+  cfgTotal = JSON2.read(d.cfgTotal, CBFFilterConfig)
+  cfgLIE = JSON2.read(d.cfgLIE, CBFFilterConfig)
+  waveformsIn = map(i -> Complex{Float64}(d.waveformsInReal[i], d.waveformsInIm[i]), 1:(length(d.waveformsInReal)))
+  waveformsIn = reshape(waveformsIn, Int(length(waveformsIn)/d.totalPhones), :)
+
+  sas2d = SASBearing2D()
+  sas2d.rangemodel = rangeModel
+  sas2d.cfg = cfgJson
+  sas2d.cfgTotal = cfgTotal
+  sas2d.cfgLIE = cfgLIE
+  sas2d.waveformsIn = waveformsIn
+  sas2d.debugging = false
+  sas2d.waveformsRaw = reshape(d.wavedataRawV, d.wavedataRawV_dim, :)
+  prepareSASMemory(sas2d)
+
+  return sas2d
 end
 
 function compare(a::SASBearing2D, b::SASBearing2D)
