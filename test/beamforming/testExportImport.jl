@@ -1,6 +1,7 @@
 using Revise
 using Caesar, RoME, IncrementalInference, DistributedFactorGraphs
 using DelimitedFiles
+using Test
 
 # Visualization
 # using Colors, Gadfly
@@ -68,5 +69,9 @@ saveDFG(fg, saveFolder)
 retDFG = loadDFG(saveFolder, IncrementalInference)
 
 #### Comparing
-lin = getData(f).fnc.usrfnc!.waveformsIn
-lRet = getData(getFactor(retDFG, f.label)).fnc.usrfnc!.waveformsIn
+# Enable debugging everywhere
+ENV["JULIA_DEBUG"] = "all"
+#https://stackoverflow.com/questions/53548681/how-to-enable-debugging-messages-in-juno-julia-editor
+d = getData(f).fnc.usrfnc!
+dataRet = getData(getFactor(retDFG, f.label)).fnc.usrfnc!
+@test Caesar.compare(d, dataRet)

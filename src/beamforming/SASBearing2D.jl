@@ -264,21 +264,51 @@ function convert(::Type{SASBearing2D}, d::PackedSASBearing2D)::SASBearing2D
   return sas2d
 end
 
+import Base.compare
+
 function compare(a::SASBearing2D, b::SASBearing2D)
   TP = true
-  TP = TP && compare(a.cfgTotal, b.cfgTotal)               # CBFFilterConfig
-  TP = TP && compare(a.cfgLIE, b.cfgLIE)                   # CBFFilterConfig
-  TP = TP && a.filterCBFTotal == b.filterCBFTotal   # Array{Complex{Float64}}
-  TP = TP && a.CBFLIE == b.CBFLIE       # Array{Complex{Float64}}
-  TP = TP && a.waveformsIn == b.waveformsIn         # Array{Complex{Float64}}
-  TP = TP && a.BFOut == b.BFOut                     # Array{Complex{Float64}}
-  TP = TP && a.BFOutLIE == b.BFOutLIE               # Array{Complex{Float64}}
-  TP = TP && a.phaseshiftLOO == b.phaseshiftLOO     # Array{Complex{Float64}}
-  TP = TP && a.hackazi[1] == b.hackazi[1]           # Tuple{Vector{Int}, Vector{Float64}}
-  TP = TP && a.hackazi[2] == b.hackazi[2]
-  TP = TP && a.rangemodel.σ == b.rangemodel.σ       # Distributions.Rayleigh
-  TP = TP && compare(a.dbg, b.dbg)                       # SASDebug
-  TP = TP && a.cfg == b.cfg                         # Dict
-  TP = TP && a.waveformsRaw == b.waveformsRaw       # Array{Float64,2}
-  TP
+  TP &= compare(a.cfgTotal, b.cfgTotal)               # CBFFilterConfig
+  @debug "cfgTotal: $(compare(a.cfgTotal, b.cfgTotal))"
+  TP &= compare(a.cfgLIE, b.cfgLIE)                   # CBFFilterConfig
+  @debug "cfgLIE: $(compare(a.cfgLIE, b.cfgLIE))"
+  TP &= a.waveformsIn == b.waveformsIn         # Array{Complex{Float64}}
+  @debug "waveformsIn: $(a.waveformsIn == b.waveformsIn)"
+
+  # Rangemodel
+  # Utility dist formula
+  calcArrayDist = (a,b, percAcceptable=1) -> begin
+    sum(a) == 0 && sum(b) == 0 && return false
+    sum(a) == 0 && return false
+    sum(abs.(a-b))/sum(abs.(a)) * 100.0 < percAcceptable && return true
+    return false
+  end
+  TP &= typeof(a.rangemodel) == typeof(b.rangemodel)
+  @debug "typeof(rangemodel): $((typeof(a.rangemodel) == typeof(b.rangemodel)))"
+  if typeof(a.rangemodel) == typeof(b.rangemodel) == Array{AliasingScalarSampler,1}
+    TP &= length(a.rangemodel) == length(b.rangemodel)
+    @debug "rangemodel (length): $(length(a.rangemodel) == length(b.rangemodel))"
+
+    if length(a.rangemodel) == length(b.rangemodel)
+      for i in 1:length(a.rangemodel)
+        # Domain
+        TP &= calcArrayDist(a.rangemodel[i].domain, b.rangemodel[i].domain)
+        @debug "rangemodel (model[$i].domain): $(calcArrayDist(a.rangemodel[i].domain, b.rangemodel[i].domain))"
+        # Weights
+        TP &= calcArrayDist(a.rangemodel[i].weights, b.rangemodel[i].weights)
+        @debug "rangemodel (model[$i].weights): $(calcArrayDist(a.rangemodel[i].weights, b.rangemodel[i].weights))"
+      end
+    end
+  elseif typeof(a.rangemodel) == typeof(b.rangemodel) == Rayleigh
+    TP &= a.rangemodel == b.rangemodel
+    @debug "rangemodel (Raleigh): $(a.rangemodel == b.rangemodel)"
+  end
+
+  TP &= a.cfg == b.cfg                         # Dict
+  @debug "cfg: $(a.cfg == b.cfg)"
+  TP &= a.waveformsRaw == b.waveformsRaw       # Array{Float64,2}
+  @debug "waveformsRaw: $(a.waveformsRaw == b.waveformsRaw)"
+  TP &= a.debugging == b.debugging                       # SASDebug
+  @debug "debugging: $(a.debugging == b.debugging)"
+  return TP
 end
