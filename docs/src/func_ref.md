@@ -127,6 +127,9 @@ getTreeAllFrontalSyms
 getTreeCliqSolveOrderUp
 getVal
 getVariable
+getVariableDim
+getVariableInferredDim
+getVariableInferredDimFraction
 getVertKDE
 getUpMsgs
 getDwnMsgs
@@ -192,5 +195,8 @@ writeGraphPdf
 resetVariableAllInitializations!
 showFactor
 showVariable
+solveCliq!
 solveTree!
 ```
+
+<!-- lsfPriors -->
