@@ -56,6 +56,7 @@ approxCliqMarginalUp!
 approxConv
 areCliqChildrenNeedDownMsg
 areCliqVariablesAllMarginalized
+assignTreeHistory!
 asyncTreeInferUp!
 attemptTreeSimilarClique
 batchSolve!
