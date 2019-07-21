@@ -79,11 +79,12 @@ end
 addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=false)
 
 
-# first solve and initialization
+# Debugging options
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 getSolverParams(fg).async = true
 getSolverParams(fg).downsolve = false
+getSolverParams(fg).multiproc = false
 
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
