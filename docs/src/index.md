@@ -5,11 +5,20 @@
 ```
 
 ## Introduction
-Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM). Caesar attempts to address a number of issues that arise in normal SLAM solutions - solving under-defined systems, inference with non-Gaussian measurement distributions, simplifying factor creation, and centralizing factor-graph persistence with databases. Caesar started as part of [the thesis "Multi-modal and Inertial Sensor Solutions for Navigation-type Factor Graphs" [1.2]](refs/literature).
+Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).  Caesar attempts to address a number of issues that arise in prior SLAM solutions - solving under-defined systems, inference with non-Gaussian measurements, simplifying factor creation, and centralizing factor-graph persistence with databases and cloud infrastructure.  Caesar started as part of reseach work in navigation systems and direct the reader to the [literature reference page](refs/literature) for more information.
 
 ## Focus Area
 
-This project focuses on the open development and progression to a public, stable, growing and usable inference library suited to data-fusion aspects of device navigation.
+This project focuses on the open development and progression to a public, stable, growing and usable inference library suited to various data-fusion / state-estimation aspects of robot and/or device navigation.
+
+!!! note
+
+    Please help improve this documentation--if something confuses you, chances
+    are you're not alone. It's easy to do as you read along: just click on the
+    "Edit on GitHub" link above, and then
+    [edit the files directly in your browser](https://help.github.com/articles/editing-files-in-another-user-s-repository/).
+    Your changes will be vetted by developers before becoming permanent, so don't
+    worry about whether you might say something wrong.
 
 ## The Caesar Framework
 
