@@ -146,7 +146,9 @@ end
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 getSolverParams(fg).async = true
-getSolverParams(fg).downsolve = true
+getSolverParams(fg).multiproc = false
+getSolverParams(fg).downsolve = false
+
 
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
