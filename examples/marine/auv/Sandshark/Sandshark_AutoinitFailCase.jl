@@ -102,7 +102,7 @@ drawPosesLandms(fg, meanmax=:max)
 # csmAnimate(fg, tree, ls(fg), frames=1000) #[:x0; :x2]
 # # Base.rm("/tmp/caesar/csmCompound/out.ogv")
 # run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/csm_%d.png -c:v libtheora -vf fps=25 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`)
-# run(`totem /tmp/caesar/csmCompound/out.ogv`)
+# @async run(`totem /tmp/caesar/csmCompound/out.ogv`)
 
 
 
