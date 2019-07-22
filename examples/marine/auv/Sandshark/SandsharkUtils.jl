@@ -44,7 +44,6 @@ lblfile = readdlm(joinpath(datadir, "lbl.csv"))
 for row in lblfile
     s = split(row, ",")
     id = round(Int, 1000*parse(Float64, s[1]))
-    @show s
     if s[2] != "NaN"
         lbldata[id] = parse.(Float64, s)
     end

@@ -12,6 +12,7 @@ using RoMEPlotting
 using Gadfly, DataFrames
 using ProgressMeter
 using DelimitedFiles
+using Logging
 
 # const TU = TransformUtils
 
@@ -85,127 +86,146 @@ getSolverParams(fg).showtree = true
 getSolverParams(fg).async = true
 getSolverParams(fg).downsolve = false
 getSolverParams(fg).multiproc = false
+getSolverParams(fg).limititers = 30
 
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
 
-# # now solve the second portion of the tree.
-# getSolverParams(fg).downsolve = true
-# tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+drawPosesLandms(fg, meanmax=:max)
+
+0
 
 
 # assignTreeHistory!(tree, hist)
-# csmAnimate(fg, tree, [:x0; :l1])
-# Base.rm("/tmp/caesar/csmCompound/out.ogv")
+#
+# csmAnimate(fg, tree, ls(fg), frames=1000) #[:x0; :x2]
+# # Base.rm("/tmp/caesar/csmCompound/out.ogv")
 # run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/csm_%d.png -c:v libtheora -vf fps=25 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`)
 # run(`totem /tmp/caesar/csmCompound/out.ogv`)
 
 
-# writeGraphPdf(fg, show=true)
-
-drawPosesLandms(fg)
-
-
-fsy = getTreeAllFrontalSyms(fg, tree)
-
-@show fsy
-printCliqHistorySummary(tree, fsy[1])
-printCliqHistorySummary(tree, fsy[2])
-printCliqHistorySummary(tree, fsy[3])
-printCliqHistorySummary(tree, fsy[4])
-printCliqHistorySummary(tree, fsy[5])
-0
 
 
 
-# #
-# using Profile, ProfileView
+
+
+
+# getVariableInferredDim(fg, :x0)
+# getVariableInferredDim(fg, :x1)
+# getVariableInferredDim(fg, :x2)
+# getVariableInferredDim(fg, :x3)
+# getVariableInferredDim(fg, :x4)
+# getVariableInferredDim(fg, :x5)
+# getVariableInferredDim(fg, :l1)
+
+
+
+
+## OR Do it manually??
+tree = wipeBuildNewTree!(fg)
+drawTree(tree, show=true)
+
+smt, hist = solveCliq!(fg, tree, :x0)
+smt, hist = solveCliq!(fg, tree, :l1)
+
+smt, hist = solveCliq!(fg, tree, :x4)
+smt, hist = solveCliq!(fg, tree, :x2)
+smt, hist = solveCliq!(fg, tree, :x1)
+
+
+
+
+### DEV work below
+
+
+cliq = whichCliq(tree,:x0)
+
+getCliqVariableInferredPercent(fg, cliq)
+
+
+
+
+
+
+
+
+### Pretend solve cliq 2
+
+
+cliq = whichCliq(tree, :x2)
+syms = getCliqAllVarSyms(fg, cliq)
+c3sfg = buildSubgraphFromLabels(fg, syms)
+# c2sfg = buildSubgraphFromLabels(fg, syms)
+
+
+
+dfg = fg
+@info "8a, needs down message -- attempt down init"
+prnt = getParent(tree, cliq)[1]
+
+# take atomic lock when waiting for down ward information
+lockUpStatus!(getData(prnt))
+
+dwinmsgs = prepCliqInitMsgsDown!(dfg, tree, prnt, logger=ConsoleLogger()) # cliqSubFg
+dwnkeys = collect(keys(dwinmsgs))
+
+## DEVIdea
+msgfcts = addMsgFactors!(c3sfg, dwinmsgs)
+# writeGraphPdf(c3sfg, show=true)
+
+
+@info "8a, attemptCliqInitD., dwinmsgs=$(dwnkeys)"
+
+# DEVidea
+sdims = getCliqVariableMoreInitDims(c3sfg, cliq)
+updateCliqSolvableDims!(cliq, sdims)
+
+# determine if more info is needed for partial
+# priorize solve order for mustinitdown with lowest dependency first
+# follow example from issue #344
+mustwait = false
+if length(intersect(dwnkeys, getCliqSeparatorVarIds(cliq))) == 0 # length(dwinmsgs) == 0 ||
+  @info "8a, attemptCliqInitDown_StateMachine, no can do, must wait for siblings to update parent first."
+  global mustwait = true
+elseif getSiblingsDelayOrder(tree, cliq, prnt, dwinmsgs, logger=ConsoleLogger())
+  @info "8a, attemptCliqInitD., prioritize"
+  global mustwait = true
+elseif getCliqSiblingsPartialNeeds(tree, cliq, prnt, dwinmsgs, logger=ConsoleLogger())
+  @info "8a, attemptCliqInitD., partialneedsmore"
+  global mustwait = true
+end
+
+
+# remove the downward messages too
+deleteMsgFactors!(c3sfg, msgfcts)
+
+# unlock
+@info "8a, attemptCliqInitD., unlockUpStatus!"
+unlockUpStatus!(getData(prnt))
+
+
+
+
+
+
+
+
+
+fetchCliqSolvableDims(whichCliq(tree, :x4))
+fetchCliqSolvableDims(whichCliq(tree, :x2))
+fetchCliqSolvableDims(whichCliq(tree, :x0))
+
+
+
+
+
+
+prnt = whichCliq(tree, :x1)
+getCliqSiblingsPriorityInitOrder(tree, prnt)
+
+getData(whichCliq(tree, :x0)).solvableDims
+
+fetch(getData(whichCliq(tree, :x0)).solvableDims)
+
 #
-# # do this twice
-# Profile.clear()
-# @profile stuff = sandboxCliqResolveStep(tree,:l1,8)
-# #
-# ProfileView.view()
-# #
-# Juno.profiler()
-
-
-csmAnimate(fg, tree, fsy, frames=1000)
-# Base.rm("/tmp/caesar/csmCompound/out.mp4")
-run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/csm_%d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" /tmp/caesar/csmCompound/out.mp4`)
-run(`vlc /tmp/caesar/csmCompound/out.mp4`)
-
-
-# animateCliqStateMachines(tree,fsy,frames=100)
-
-
-
-## the success case x4 second last and x1 last
-
-# smt, hist = solveCliq!(fg, tree, :x0)
-
-using Dates
-
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-fsy = getTreeAllFrontalSyms(fg, tree)
-
-resetTreeCliquesForUpSolve!(tree)
-setTreeCliquesMarginalized!(fg, tree)
-
-# queue all the tasks
-alltasks = Vector{Task}(undef, length(tree.cliques))
-cliqHistories = Dict{Int,Vector{Tuple{DateTime, Int, Function, CliqStateMachineContainer}}}()
-
-
-# preempt X4 10 steps so that X2 can fully solve first
-idx = whichCliq(tree, :x4).index
-stf_x4 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, limititers=10, drawtree=true, N=100, recordcliqs=fsy)
-# t_x4 = @async
-
-idx = whichCliq(tree, :x0).index
-stf_x0 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
-# t_x0 = @async
-
-idx = whichCliq(tree, :l1).index
-stf_l1 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
-# t_l1 = @async
-
-
-
-
-idx = whichCliq(tree, :x2).index
-stf_x2 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy) # , limititers=14
-# t_x2 = @async
-
-
-idx = whichCliq(tree, :x4).index
-@async stf_x4 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy) # , limititers=8
-# t_x4 = @async
-
-
-#
-# drawTree(tree)
-# # partial block on :x4 should return true
-# cliq = whichCliq(tree, :x4)
-# prnt = getParent(tree, cliq)[1]
-# dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
-# getCliqSiblingsPartialNeeds(tree, cliq, prnt, dwinmsgs)
-#
-# # partial block on :x2 should return false
-# cliq = whichCliq(tree, :x2)
-# prnt = getParent(tree, cliq)[1]
-# dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
-# getCliqSiblingsPartialNeeds(tree, cliq, prnt, dwinmsgs)
-#
-#
-# # after :x2 finishes, partial block on :x4 should return false
-
-
-idx = whichCliq(tree, :x1).index
-stf_x1 = IIF.tryCliqStateMachineSolve!(fg, tree, idx, cliqHistories, drawtree=true, N=100, recordcliqs=fsy)
-# t_x1 = @async
-
-
-
-drawPosesLandms(fg)
