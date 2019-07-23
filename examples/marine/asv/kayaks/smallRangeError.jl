@@ -1,5 +1,3 @@
-# using Distributed
-# addprocs(5)
 
 using Caesar
 using RoMEPlotting, KernelDensityEstimatePlotting
@@ -32,15 +30,13 @@ dposData = deepcopy(posData)
 cumulativeDrift!(dposData,[0.0;0],[0.2,0.2])
 
 fg = initfg();
-beacon = :l1
-addVariable!(fg, beacon, Point2 )
 
 poses = [Symbol("x$i") for i in 1:wlen]
 for sym in poses
   addVariable!(fg, sym, Point2)
 end
 
-priors = [1,8]
+priors = [1,9]
 rtkCov = Matrix(Diagonal([0.1;0.1].^2))
 #Priors
 for i in priors
@@ -57,6 +53,10 @@ for i in vps
     addFactor!(fg, [Symbol("x$i");Symbol("x$(i+1)")], p2p2, autoinit=false)
 end
 
+beacon = :l1
+addVariable!(fg, beacon, Point2 )
+manualinit!(fg,beacon,kde!(rand(MvNormal([0;0],Matrix(Diagonal([7.0;7].^2))),100)))
+
 rangewindow = 1:3:wlen
 for i in rangewindow
     sym = Symbol("x$i")
@@ -65,48 +65,78 @@ for i in rangewindow
 end
 
 writeGraphPdf(fg, engine="neato")
-wipeBuildNewTree!(fg, drawpdf=true, show=true)
-
-getSolverParams(fg).drawtree = true
+wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=true)
+# getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
 tree, smt, hist = solveTree!(fg, recordcliqs=[:x1; :l1; :x8])
 
-
+using FunctionalStateMachine
+using IncrementalInference
+csmAnimate(fg,tree,[:x1; :l1; :x8])
 
 # Debugging here
 
 bss = AliasingScalarSampler(mfin[:,1,4],exp.(mfin[:,2,4]),SNRfloor=0.8)
 out = rand(bss,1000)
-Gadfly.plot(x=out,Geom.histogram)
+Gadfly.plot(x=out,Geom.histogram,Coord.cartesian(xmin=0, xmax=100, ymin=0, ymax=400,fixed=true))
 
 
+pdict = getCliqParentMsgDown(tree,tree.cliques[5])
+mykde = pdict[:x4][1];
 
-getFrontals(tree.cliques[3])
-cdict = getCliqChildMsgsUp(tree,tree.cliques[3],BallTreeDensity)
 
-mykde = cdict[:x7][1][1];
-plotKDE(marginal(mykde,[1;]),axis=[0.0 100],N=100)
+xx = rand(mykde,1000)
+plt = Gadfly.plot(layer(x=xx,Geom.histogram(density=true)),Guide.xlabel("X,Y(m)"));  plt |> PDF("/tmp/plt.pdf");
 
-plotKDE(getVertKDE(fg,:x4))
+
+plt = plotKDEContour(mykde,xlbl="X (m)", ylbl="Y (m)",levels=4); plt |> PDF("/tmp/plt.pdf")
+
+getFrontals(tree.cliques[4])
+cdict = getCliqChildMsgsUp(tree,tree.cliques[4],BallTreeDensity)
+
+mykde = cdict[:x4][1][1];
+# X1 = rand(mykde,400)
+# plk = Gadfly.plot(layer(x=X1[1,:],y=X1[2,:],Geom.histogram2d(xbincount=400, ybincount=400)),Theme(key_position = :none));  plk |> PDF("/tmp/plt.pdf");
+
+# plt = plotKDE(marginal(mykde,[1;]),axis=[0.0 100],N=100); plt |> PDF("/tmp/plt.pdf");
+
+xx = rand(marginal(mykde,[2]),1000)
+plt = Gadfly.plot(layer(x=xx,Geom.histogram(density=true)));  plt |> PDF("/tmp/plt.pdf");
+
+plt = plotKDE(mykde,levels=4); plt |> "/tmp/plt.pdf"
+
 plk= [];
 
 for sym in poses #plotting all syms labeled
     X1 = getKDEMean(getVertKDE(fg,sym))
-    push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
+    push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
+    # push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Geom.label, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
+    K1 = plotKDEContour(getVertKDE(fg,sym),xlbl="", ylbl="",levels=2,layers=true);
+    push!(plk,K1...)
+    push!(plk,Gadfly.Theme(key_position = :none));
 end
 
 igt = [17.0499;1.7832];
 
 push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon Ground Truth";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt)));
 
-L1 = getVal(getVariable(fg, beacon))
-K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
-push!(plk,K1...)
-push!(plk,Gadfly.Theme(key_position = :none));
-push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-150, ymax=75,fixed=true))
+X1 = approxConv(fg,:x4l1f1,:l1,N=200)
+push!(plk,layer(x=X1[1,:],y=X1[2,:],Geom.histogram2d(xbincount=400, ybincount=400)))
+# K1 = plotKDEContour(kde!(X1),xlbl="X (m)", ylbl="Y (m)",levels=4,layers=true);
+# push!(plk,K1...)
+# push!(plk,Gadfly.Theme(key_position = :none));
 
+# L1 = getVal(getVariable(fg, beacon))
+# L1 = rand(getVertKDE(fg,:l1),1000)
+# push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
+# K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=6,layers=true);
+# push!(plk,K1...)
+# push!(plk,Gadfly.Theme(key_position = :none));
+push!(plk, Coord.cartesian(xmin=-40, xmax=120, ymin=-120, ymax=25,fixed=true))
+push!(plk, Guide.xlabel("X (m)"),Guide.ylabel("Y (m)"))
+# push!(plk, Coord.cartesian(xmin=35, xmax=45, ymin=-50, ymax=-35,fixed=true))
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf");
 
 

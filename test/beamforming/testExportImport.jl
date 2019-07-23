@@ -4,8 +4,8 @@ using DelimitedFiles
 using Test
 
 # Visualization
-# using Colors, Gadfly
-# using RoMEPlotting, KernelDensityEstimatePlotting
+using Colors, Gadfly
+using RoMEPlotting, KernelDensityEstimatePlotting
 
 #posFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_positions.csv");
 posFile = joinpath(ENV["HOME"],"data","sas","test_array_positions.csv");
@@ -66,8 +66,12 @@ using JSON2
 saveFolder = "/tmp/sasDFG"
 saveDFG(fg, saveFolder)
 
-retDFG = loadDFG(saveFolder, IncrementalInference)
+fg2 = initfg();
+loadDFG(saveFolder, IncrementalInference,fg2)
+tree, smt, hist = solveTree!(fg)
 
+
+retDFG.solverParams = SolverParams()
 #### Comparing
 # Enable debugging everywhere
 ENV["JULIA_DEBUG"] = "all"
@@ -75,3 +79,5 @@ ENV["JULIA_DEBUG"] = "all"
 d = getData(f).fnc.usrfnc!
 dataRet = getData(getFactor(retDFG, f.label)).fnc.usrfnc!
 @test Caesar.compare(d, dataRet)
+
+@time predL1 = IncrementalInference.approxConv(fg, ls(fg, :l1)[1], :l1, N=N)s
