@@ -4,47 +4,48 @@
 
 
 function plotSASDefault(fg, posData::Array, expnum::Int ; datadir::String=joinpath(ENV["HOME"],"data", "kayaks", "08_10_parsed") , savedir::String="/tmp/test.pdf")
-    plk = [];
-    push!(plk,plotBeaconGT(expnum,datadir=datadir));
-    plotMeans!(plk,fg);
-    push!(plk,plotPath(posData));
+    pltemp = [];
+    push!(pltemp,plotBeaconGT(expnum,datadir=datadir));
+    push!(pltemp,plotBeaconSolve(fg));
+    push!(pltemp,plotPath(posData));
+    plotMeans!(pltemp,fg);
     if expnum == 1
-        push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-150, ymax=30,fixed=true))
+        push!(pltemp, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
     elseif expnum ==2
-        push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
+        push!(pltemp, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
     end
-    plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
+    push!(pltemp,Gadfly.Theme(key_position = :none));
+    push!(pltemp,Gadfly.Guide.xlabel("X (m)"),Gadfly.Guide.ylabel("Y (m)"));
+    pltempplot = Gadfly.plot(pltemp...); pltempplot |> PDF("/tmp/test.pdf")
 end
 
 function plottoPDF(layersin)
-    plkplot = Gadfly.plot(layersin...); plkplot |> PDF("/tmp/test.pdf")
+    pltempplot = Gadfly.plot(layersin...); pltempplot |> PDF("/tmp/test.pdf")
 end
 
 function plotBeaconSolve(fg)
-    plk=[];
     L1 = getVal(getVariable(fg, :l1))
-    push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
     # K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
-    # push!(plk,K1...)
-    # push!(plk,Gadfly.Theme(key_position = :none));
-    return plk
+    # push!(pltemp,K1...)
+    # push!(pltemp,Gadfly.Theme(key_position = :none));
+    return layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300))
 end
 
-function plotMeans!(plk,fg;regx::Regex=r"x")
+function plotMeans!(pltemp,fg;regx::Regex=r"x")
     for sym in ls(fg)
         if occursin(regx,string(sym))
             xData = getKDEMean(getVertKDE(fg,sym))
-            push!(plk, plotPoint(xData))
+            push!(pltemp, plotPoint(xData))
         end
     end
 end
 
 function plotPoint(posData::Array)
-    return layer(x=[posData[1];],y=[posData[2];],Geom.point,Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt))
+    return layer(x=[posData[1];],y=[posData[2];],Geom.point,Theme(default_color=colorant"blue",point_size = 1.25pt,highlight_width = 0pt))
 end
 
 function plotPoints(pos::Array;colorIn::String="blue")
-        return layer(x=posData[:,1],y=posData[:,2],Geom.point,Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt))
+        return layer(x=posData[:,1],y=posData[:,2],Geom.point,Theme(default_color=colorant"blue",point_size = 1.25pt,highlight_width = 0pt))
 end
 
 function plotPath(pos::Array)
