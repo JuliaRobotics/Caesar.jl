@@ -78,13 +78,21 @@ addFactor!(fg, [beacon;sasposes], sas2d, autoinit=false)
 # visualization tools for debugging
 writeGraphPdf(fg, engine="dot")
 wipeBuildNewTree!(fg, drawpdf=true, show=true)
+# drawTree(tree, show=true, imgs=true)
 
 
 getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
+getSolverParams(fg).async = true
+getSolverParams(fg).downsolve = false
+getSolverParams(fg).multiproc = false
+getSolverParams(fg).limititers = 30
+
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=[:x3; :l1])
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+
+# makeCsmMovie(fg, tree, assignhist=hist)
 
 
 

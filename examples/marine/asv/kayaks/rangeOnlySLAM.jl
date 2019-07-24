@@ -92,6 +92,10 @@ end
 #writeGraphPdf(fg, engine="dot")
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = false
+getSolverParams(fg).async = true
+getSolverParams(fg).multiproc = false
+getSolverParams(fg).downsolve = false
+
 
 # tree, smt = batchSolve!(fg,maxparallel=100)
 
