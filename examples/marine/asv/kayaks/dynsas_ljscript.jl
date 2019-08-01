@@ -90,7 +90,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
        end
 
        if sas_gap_counter >= sas_gap
-           println("Trying to add SAS at pose:$pose_counter")
+           println("Trying to add SAS at pose: $pose_counter")
            navframes = collect(pose_counter-saswindow+1:1:pose_counter)
            navtemp = posData[navframes,:];
            navchecked, errorind = sanitycheck_nav(navtemp);
@@ -99,7 +99,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
            if navchecked
                poses[sas_counter] = [Symbol("x$i") for i in pose_counter-saswindow+1:pose_counter]
                currentstart = datastart+pose_counter-saswindow
-               println("Adding SAS at pose:$currentstart")
+               println("Adding SAS at dataframe: $currentstart")
                sasframes = collect(currentstart:1:currentstart+saswindow-1);
                allsasframes[sas_counter] = sasframes;
                waveformData = importdata_waveforms(sasframes,element);
@@ -128,7 +128,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                    maxerror = sqrt((igt[1]-l1max[1])^2+(igt[2]-l1max[2])^2)
 
                    mykde = getVertKDE(fg,:l1)
-                   mynorm = kde!(rand(fit(MvNormal,L1),200))
+                   mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
                    kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
                elseif expID == "drift"
                    l1fit = getKDEMean(getVertKDE(fg,:l1))
@@ -138,7 +138,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                    maxerror = sqrt((mean(igt[:,1])-l1max[1])^2+(mean(igt[:,2])-l1max[2])^2)
 
                    mykde = getVertKDE(fg,:l1)
-                   mynorm = kde!(rand(fit(MvNormal,L1),200))
+                   mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
                    kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
                end
 
