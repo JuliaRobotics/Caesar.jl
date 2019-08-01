@@ -77,7 +77,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
 
     #RangeOnly PLOTTING ------------
     plk= [];
-    push!(plk,plotBeaconGT(iGTtemp));
+    push!(plk,plotBeaconGT(igt));
     plotBeaconContours!(plk,fg);
 
     for var in rangewindow
