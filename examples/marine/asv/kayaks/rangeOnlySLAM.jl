@@ -63,7 +63,7 @@ for i in rangewindow
     addFactor!(fg, [sym;beacon], ppR, autoinit=false)
 end
 
-writeGraphPdf(fg, engine="neato", filepath = "/tmp/test.pdf")
+writeGraphPdf(fg,viewerapp=nothing, engine="neato", filepath = "/tmp/test.pdf")
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = false

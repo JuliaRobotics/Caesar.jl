@@ -63,7 +63,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
         addFactor!(fg, [sym;beacon], ppR, autoinit=false)
     end
 
-    writeGraphPdf(fg,show=false, engine="neato", filepath=scriptHeader*"fg.pdf")
+    writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
 
     getSolverParams(fg).drawtree = false
     getSolverParams(fg).showtree = false
@@ -113,9 +113,9 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     push!(plk,plotPath(posData));
 
     if expID == "dock"
-        push!(pltemp, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
+        push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
     elseif expID == "drift"
-        push!(pltemp, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
+        push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
     end
     savefile = scriptHeader*"showRanges.pdf"
     Gadfly.plot(plk...) |> PDF(savefile)
