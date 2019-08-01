@@ -73,7 +73,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     tree, smt, hist = solveTree!(fg, maxparallel=100)
     drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
-    plotSASDefault(fg,posData,exptype,datadir=datadir,savedir=scriptHeader*"SASdefault.pdf")
+    plotSASDefault(fg,posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
 
     #RangeOnly PLOTTING ------------
     plk= [];
