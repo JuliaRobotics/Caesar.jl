@@ -78,7 +78,9 @@ drawTree(tree,filepath = "/tmp/test.pdf")
 # fg2 = deepcopy(fg)
 # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
 
-plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1])
+plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1], savedir="/tmp/caesar/test.pdf")
+run(`evince /tmp/caesar/test.pdf`)
+
 
 #PLOTTING ------------
 plk= [];
