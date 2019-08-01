@@ -64,7 +64,6 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     end
 
     writeGraphPdf(fg, engine="neato", filepath=scriptHeader*"fg.pdf")
-    drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
     getSolverParams(fg).drawtree = false
     getSolverParams(fg).showtree = false
@@ -72,6 +71,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     # tree, smt = batchSolve!(fg,maxparallel=100)
 
     tree, smt, hist = solveTree!(fg, maxparallel=100)
+    drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
     plotSASDefault(fg,posData,exptype,datadir=datadir,savedir=scriptHeader*"SASdefault.pdf")
 
