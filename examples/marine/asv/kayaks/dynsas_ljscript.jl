@@ -145,7 +145,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                jldname2 = scriptHeader * "solve_$(sas_counter).jld"
                JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld)
 
-               # saveDFG(fg,scriptHeader * "fg$(sas_counter)")
+               saveDFG(fg,scriptHeader * "fg$(sas_counter)")
 
                sas_counter +=1
                sas_gap_counter = 0
