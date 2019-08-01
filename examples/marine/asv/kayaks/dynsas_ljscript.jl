@@ -157,4 +157,6 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
        println("Trying next SAS: $sas_counter")
 
    end
+
+   return fg
 end
