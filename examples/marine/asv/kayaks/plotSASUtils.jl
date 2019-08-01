@@ -44,16 +44,16 @@ function plotKDEMeans!(plHolderIn,fg;regx::Regex=r"x")
     end
 end
 
-function plotPoint(posData::Array; colorIn = colorant"blue")
-    return layer(x=[posData[1];],y=[posData[2];],Geom.point,Theme(default_color=colorIn,point_size = 1.25pt,highlight_width = 0pt))
+function plotPoint(pointIn::Array; colorIn = colorant"blue")
+    return layer(x=[pointIn[1];],y=[pointIn[2];],Geom.point,Theme(default_color=colorIn,point_size = 1.25pt,highlight_width = 0pt))
 end
 
-function plotPoints(pos::Array;colorIn::String="blue")
-        return layer(x=posData[:,1],y=posData[:,2],Geom.point,Theme(default_color=colorant"blue",point_size = 1.25pt,highlight_width = 0pt))
+function plotPoints(pointsIn::Array;colorIn::String="blue")
+        return layer(x=pointsIn[:,1],y=pointsIn[:,2],Geom.point,Theme(default_color=colorant"blue",point_size = 1.25pt,highlight_width = 0pt))
 end
 
-function plotPath(pos::Array)
-    return layer(x=posData[:,1],y=posData[:,2], Geom.path,Theme(default_color=colorant"green"))
+function plotPath(pathIn::Array)
+    return layer(x=pathIn[:,1],y=pathIn[:,2], Geom.path,Theme(default_color=colorant"green"))
 end
 
 function plotBeaconGT(iGTtemp::Array)
