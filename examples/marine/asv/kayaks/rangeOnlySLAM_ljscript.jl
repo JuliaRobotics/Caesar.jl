@@ -20,6 +20,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     dposData = deepcopy(posData)
     cumulativeDrift!(dposData,[0.0;0],[0.2,0.2])
 
+    window = 1:datawindow[end]-datawindow[1];
     fg = initfg();
     beacon = :l1
     addVariable!(fg, beacon, Point2 )
