@@ -3,7 +3,7 @@
 # For mix and match purposes these functions return Gadfly layers except for default plot
 
 
-function plotSASDefault(fg, posData::Array, iGTtemp::Array ; datadir::String=joinpath(ENV["HOME"],"data", "kayaks", "08_10_parsed") , savedir::String="/tmp/test.pdf")
+function plotSASDefault(fg, expID::String, posData::Array, iGTtemp::Array ; datadir::String=joinpath(ENV["HOME"],"data", "kayaks", "08_10_parsed") , savedir::String="/tmp/test.pdf")
     pltemp = [];
     push!(pltemp,plotBeaconGT(iGTtemp));
     push!(pltemp,plotBeaconHist(fg));

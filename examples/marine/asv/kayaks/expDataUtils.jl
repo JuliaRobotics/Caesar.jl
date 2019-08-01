@@ -20,21 +20,19 @@ function getPaths(expID::String , expType::String ; currloc::String="local" , tr
 
     if expID == "dock"
         trialstr = "20_gps_pos";
-        rangedir = joinpath(topdir, expstr*"_"*trialstr)
-        datadir = joinpath(topdir,trialstr)
-        savedir = joinpath(topdir,expstr)
         gtjldpath = ""
     elseif expID == "drift"
         trialstr = "08_10_parsed";
-        datadir = joinpath(topdir,trialstr)
-        rangedir = joinpath(topdir, expstr*trialstr)
-        savedir = joinpath(topdir,expstr)
         if trialID == -1
             error("Specify Trial ID: 1-3")
         else
-            gtjldpath = joinpath(datadir,"exp$(trialID).jld")
+            gtjldpath = joinpath(topdir,trialstr,"exp$(trialID).jld")
         end
     end
+
+    rangedir = joinpath(topdir, expstr*"_"*trialstr)
+    datadir = joinpath(topdir,trialstr)
+    savedir = joinpath(topdir,expstr)
 
     return datadir, rangedir, savedir, gtjldpath
 end

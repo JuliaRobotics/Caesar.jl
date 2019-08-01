@@ -63,7 +63,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
         addFactor!(fg, [sym;beacon], ppR, autoinit=false)
     end
 
-    writeGraphPdf(fg, engine="neato", filepath=scriptHeader*"fg.pdf")
+    writeGraphPdf(fg,show=false, engine="neato", filepath=scriptHeader*"fg.pdf")
 
     getSolverParams(fg).drawtree = false
     getSolverParams(fg).showtree = false
@@ -73,7 +73,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     tree, smt, hist = solveTree!(fg, maxparallel=100)
     drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
-    plotSASDefault(fg,posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
+    plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
 
     #RangeOnly PLOTTING ------------
     plk= [];
