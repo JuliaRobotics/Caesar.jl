@@ -1,4 +1,9 @@
-using Caesar, DelimitedFiles, JLD
+using Distributed
+addprocs(8)
+
+using Caesar
+# @everywhere using Caesar
+using DelimitedFiles, JLD
 using IncrementalInference
 using KernelDensityEstimatePlotting
 using Gadfly, Cairo, Fontconfig
@@ -68,8 +73,8 @@ writeGraphPdf(fg,viewerapp="", engine="neato", filepath = "/tmp/test.pdf")
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = false
 getSolverParams(fg).async = true
-getSolverParams(fg).multiproc = false
-getSolverParams(fg).downsolve = false
+getSolverParams(fg).multiproc = true
+getSolverParams(fg).downsolve = true
 
 
 tree, smt, hist = solveTree!(fg, maxparallel=100)
