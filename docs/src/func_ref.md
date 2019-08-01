@@ -75,6 +75,7 @@ compareSimilarVariables
 compareSubsetFactorGraph
 compareVariable
 convert2packedfunctionnode
+csmAnimate
 cycleInitByVarOrder!
 decodefg
 deleteFactor!
@@ -93,13 +94,13 @@ findRelatedFromPotential
 fmcmc!
 getCliq
 getCliqChildMsgsUp
+getCliqDepth
 getCliqDownMsgsAfterDownSolve
 getCliqMsgsDown
 getCliqMsgsUp
 getCliqParentMsgDown
 getCliqSiblings
 getCliqSolveHistory
-getCliq
 getCliqOrderUpSolve
 getCliqAllVarIds
 getCliqAllVarSyms
@@ -154,6 +155,7 @@ localProduct
 ls
 lsf
 lsRear
+makeCsmMovie
 manualinit!
 parentCliq
 packFromLocalPotentials!
@@ -166,8 +168,10 @@ productpartials!
 prodmultiplefullpartials
 prodmultipleonefullpartials
 resetBuildTreeFromOrder!
+resetCliqSolve!
 resetData!
 resetTreeCliquesForUpSolve!
+resetVariable!
 sandboxStateMachineStep
 sandboxCliqResolveStep
 savejld
@@ -176,8 +180,10 @@ setCliqStatus!
 setDwnMsg!
 setfreeze!
 setTreeCliquesMarginalized!
-setValKDE!
 setUpMsg!
+setValKDE!
+setVariableInitialized!
+setVariableInferDim!
 showVariable
 solveCliqWithStateMachine!
 subgraphFromVerts
