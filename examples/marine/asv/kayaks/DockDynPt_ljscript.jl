@@ -7,20 +7,18 @@ using KernelDensityEstimate
 using IncrementalInference
 using DocStringExtensions
 using DelimitedFiles, JLD
-# using TransformUtils
 
 include(joinpath(@__DIR__,"slamUtils.jl"))
 
-function main(savedir::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::Int)
+function main(savedir::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::Int; saswindow::Int=8)
     ## Default parameters
     println("Start Script\n")
     symbolstart = 1;
-    saswindow = 8;
     totalposes = dataend-datastart;
     sas_gap = saswindow+fgap;
     tstart = 1_000_000;
     element = 2
-    savedirheader = savedir * "/dock_fgap$(fgap)_gpsgap$(gps_gap)";
+    savedirheader = savedir * "/dock_fgap$(fgap)_gpsgap$(gps_gap)_swind$(saswindow)";
 
     poses = Dict{Int,Array}();
     nav = Dict{Int,Array}();

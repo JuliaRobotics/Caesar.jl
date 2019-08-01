@@ -4,41 +4,18 @@ using KernelDensityEstimatePlotting
 using Gadfly, Cairo, Fontconfig
 
 include(joinpath(@__DIR__,"slamUtils.jl"))
+include(joinpath(@__DIR__,"plotSASUtils.jl"))
+include(joinpath(@__DIR__,"expDataUtils.jl"))
 
-function main(exptype::Int, rangegap::Int; dstart::Int=0, dend::Int=0)
-    topdir = joinpath("/media","data1","data","kayaks")
-    if exptype == 1
-        trialstr = "20_gps_pos";
-        # frames = collect(1:1341);
-        if dstart==0
-            datawindow = collect(400:700);
-        else
-            datawindow = collect(dstart:dend);
-        end
-    elseif exptype == 2
-        trialstr = "08_10_parsed";
-        expnum = "/exp1";
-        # frames = collect(1545:1950)
-        if dstart==0
-            datawindow = collect(1550:1950);
-        else
-            datawindow = collect(dstart:dend);
-        end
-    end
-    
-    datadir = joinpath(topdir,trialstr);
-    rangedir = joinpath(topdir, "rangeOnly_"*trialstr)
+function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int)
 
-    window = 1:datawindow[end]-datawindow[1]
-    mfin = zeros(7501,2,length(window));
-    posData = zeros(length(window),2);
-    for i in window
-        dataindex = datawindow[i];
-        navfile = datadir*"/nav$(dataindex).csv"
-        posData[i,:] = readdlm(navfile,',',Float64,'\n')
-        rangeFile = rangedir*"/range$(dataindex).txt";
-        mfin[:,:,i] = readdlm(rangeFile,',',Float64,'\n')
-    end
+    datawindow = collect(wstart:wend);
+    allpaths = getPaths(expID,"range", currloc = "lj", trialID = trialID);
+    scriptHeader = joinpath(allpaths[3],expID*"_rgap$(rangegap)_trial$(trialID)_f$(wstart)t$(wend)_")
+
+    igt = loadGT(datawindow,expID,allpaths);
+    mfin = loadRanges(datawindow,allpaths)
+    posData = loadNav(datawindow,allpaths)
 
     dposData = deepcopy(posData)
     cumulativeDrift!(dposData,[0.0;0],[0.2,0.2])
@@ -57,8 +34,7 @@ function main(exptype::Int, rangegap::Int; dstart::Int=0, dend::Int=0)
 
     for i in window
         sym = Symbol("x$i")
-        nextsymi = i+1;
-        nextsym = Symbol("x$nextsymi")
+        nextsym = Symbol("x$(i+1)")
 
         if i == window[1]
             pp = PriorPoint2(MvNormal(posData[i,:], rtkCov))
@@ -86,89 +62,60 @@ function main(exptype::Int, rangegap::Int; dstart::Int=0, dend::Int=0)
         addFactor!(fg, [sym;beacon], ppR, autoinit=false)
     end
 
-    #writeGraphPdf(fg, engine="dot")
-    getSolverParams(fg).drawtree = true
+    writeGraphPdf(fg, engine="neato", filepath=scriptHeader*"fg.pdf")
+    drawTree(tree, filepath=scriptHeader*"bt.pdf")
+
+    getSolverParams(fg).drawtree = false
     getSolverParams(fg).showtree = false
 
     # tree, smt = batchSolve!(fg,maxparallel=100)
 
     tree, smt, hist = solveTree!(fg, maxparallel=100)
-    # fg2 = deepcopy(fg)
-    # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
 
-    include(joinpath(@__DIR__,"plotSASUtils.jl"))
+    plotSASDefault(fg,posData,exptype,datadir=datadir,savedir=scriptHeader*"SASdefault.pdf")
 
-
-    plotSASDefault(fg,posData,exptype,datadir=datadir)
-
-    #PLOTTING ------------
+    #RangeOnly PLOTTING ------------
     plk= [];
-    pkde = [];
+    push!(plk,plotBeaconGT(iGTtemp));
+    plotBeaconContours!(plk,fg);
 
-    if exptype ==1 #plot gt
-        igt = [17.0499;1.7832];
-
-        push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon Ground Truth";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt)));
-    else
-        ijldname = datadir * expnum * ".jld"
-        iload = load(ijldname)
-        igt = iload["icarus_gt"]
-        windowstart = iload["ibegin"];
-        windowend = iload["iend"];
-        push!(plk,layer(x=igt[:,1],y=igt[:,2], label=String["Beacon Ground Truth";],Geom.path,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt)));
+    for var in rangewindow
+        mysym = Symbol("x$var")
+        push!(plk, plotPoint(getVal(fg,mysym), colorIn = colorant"orange"))
     end
 
-    onetime = false;
-    plotbeacon = true;
-    for var in window       #Plot only for range factors
-        sym = Symbol("x$var")
-        global onetime
-        for mysym in ls(fg,sym)
-            if occursin(r"l1",string(mysym))
-                if var > 130 && onetime       #Plot one or more approxConv
-                    L1ac = approxConv(fg,mysym,:l1)
-                    # K1 = plotKDEContour(kde!(L1ac),xlbl="X (m)", ylbl="Y (m)",levels=3,layers=true)
-                    # push!(plk,K1...)
-                    push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-                    # push!(pkde,plotKDE(kde!(L1ac),layers=true)...)
-                    onetime = false
-                    # push!(plk,Gadfly.Theme(key_position = :none));
-                    # push!(plk, Guide.xlabel("X (m)"), Guide.ylabel("Y (m)"))
+    # for var in window       #Plot only for range factors
+    #     sym = Symbol("x$var")
+    #     global onetime
+    #     for mysym in ls(fg,sym)
+    #         if occursin(r"l1",string(mysym))
+    #             if var > 130 && onetime       #Plot one or more approxConv
+    #                 L1ac = approxConv(fg,mysym,:l1)
+    #                 # K1 = plotKDEContour(kde!(L1ac),xlbl="X (m)", ylbl="Y (m)",levels=3,layers=true)
+    #                 # push!(plk,K1...)
+    #                 push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
+    #                 # push!(pkde,plotKDE(kde!(L1ac),layers=true)...)
+    #                 onetime = false
+    #                 # push!(plk,Gadfly.Theme(key_position = :none));
+    #                 # push!(plk, Guide.xlabel("X (m)"), Guide.ylabel("Y (m)"))
+    #
+    #                 X1 = getKDEMean(getVertKDE(fg,sym))
+    #                 push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"magenta",point_size=1.5pt,highlight_width=0pt)))
+    #             end
+    #             X1 = getKDEMean(getVertKDE(fg,sym))
+    #             push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"red",point_size=1.5pt,highlight_width=0pt)))
+    #         end
+    #     end
+    # end
 
-                    X1 = getKDEMean(getVertKDE(fg,sym))
-                    push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"magenta",point_size=1.5pt,highlight_width=0pt)))
-                end
-                X1 = getKDEMean(getVertKDE(fg,sym))
-                push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"red",point_size=1.5pt,highlight_width=0pt)))
-            end
-        end
+    plotKDEMeans!(plk,fg);
+    push!(plk,plotPath(posData));
+
+    if expID == "dock"
+        push!(pltemp, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
+    elseif expID == "drift"
+        push!(pltemp, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
     end
-
-    #Ground Truth Trajectory
-    push!(plk, layer(x=posData[:,1],y=posData[:,2], Geom.path,Theme(default_color=colorant"green",point_size = 1.5pt,highlight_width = 0pt)))
-
-    #KDE Mean Vehicle Locations
-    for var in window
-        sym = Symbol("x$var")
-        X1 = getKDEMean(getVertKDE(fg,sym))
-        push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"blue",point_size=1pt,highlight_width=0pt)))
-    end
-
-    if plotbeacon #Beacon Final solve
-        L1v = getVariable(fg, beacon)
-        lkde = getVertKDE(fg, beacon)
-        # L1 = rand(lkde,1000);
-        # push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-        K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
-        push!(plk,K1...)
-        push!(plk,Gadfly.Theme(key_position = :none));
-    end
-
-    if exptype == 1
-        push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-150, ymax=30,fixed=true))
-    else
-        push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=-25,fixed=true))
-    end
-    savedir = joinpath(topdir,"rangeOnly","etype$(exptype)_rgap$(rangegap).pdf"
-    plkplot = Gadfly.plot(plk...); plkplot |> PDF(savefile)
+    savefile = scriptHeader*"showRanges.pdf"
+    Gadfly.plot(plk...) |> PDF(savefile)
 end
