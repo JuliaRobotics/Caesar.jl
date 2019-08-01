@@ -102,7 +102,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                println("Adding SAS at dataframe: $currentstart")
                sasframes = collect(currentstart:1:currentstart+saswindow-1);
                allsasframes[sas_counter] = sasframes;
-               waveformData = importdata_waveforms(sasframes,element);
+               waveformData = importdata_waveforms(sasframes,element,datadir=allpaths[1]);
                sas2d = prepareSAS2DFactor(saswindow, waveformData, rangemodel=:Correlator,cfgd=cfgd, chirpFile=chirpFile)
                addFactor!(fg, [beacon;poses[sas_counter]], sas2d, autoinit=false)
 
