@@ -79,17 +79,16 @@ sas2d = prepareSAS2DFactor(saswindow, waveformData, rangemodel=:Correlator,
 addFactor!(fg, [beacon;sasposes], sas2d, autoinit=false)
 
 # visualization tools for debugging
-writeGraphPdf(fg, engine="dot")
-wipeBuildNewTree!(fg, drawpdf=true, show=true)
+writeGraphPdf(fg,viewerapp="", engine="neato", filepath="/media/data1/data/kayaks/testfg.pdf")
+# wipeBuildNewTree!(fg, drawpdf=false, show=true)
 
-
-getSolverParams(fg).drawtree = true
+getSolverParams(fg).drawtree = false
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
 tree, smt, hist = solveTree!(fg, recordcliqs=[:x3; :l1])
 
-
+drawTree(tree, filepath="/media/data1/data/kayaks/testbt.pdf")
 
 plk= [];
 
