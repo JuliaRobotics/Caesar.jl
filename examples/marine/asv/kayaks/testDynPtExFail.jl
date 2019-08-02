@@ -92,7 +92,7 @@ plk= [];
 
 for sym in ls(fg) #plotting all syms labeled
     X1 = getKDEMean(getVertKDE(fg,sym))
-    push!(plk, layer(x=[X1[1];],y=[X1[2];], Geom.point), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
+    push!(plk, layer(x=[X1[1];],y=[X1[2];], Geom.point), Theme(default_color=colorant"green",point_size = 1.5pt,highlight_width = 0pt))
 end
 #
 # for i in 1:pose_counter
@@ -102,38 +102,38 @@ end
 #
 # push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")))
 #
-# igt = [17.0499;1.7832];
-# push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red")));
+igt = [17.0499;1.7832];
+push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red")));
 #
-# L1 = getVal(getVariable(fg, beacon))
-# K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
-# push!(plk,K1...)
-# push!(plk,Gadfly.Theme(key_position = :none));
-# push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-150, ymax=75,fixed=true))
+L1 = getVal(getVariable(fg, beacon))
+K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
+push!(plk,K1...)
+push!(plk,Gadfly.Theme(key_position = :none));
+push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-150, ymax=75,fixed=true))
 
-plkplot = Gadfly.plot(plk...); plkplot |> PDF("test.pdf");
-
-
-
-Profile.init(n = 10^7, delay = 0.01)
-@profile stuff = sandboxCliqResolveStep(tree,:x3,6)
-ProfileView.view()
-Profile.print(format=:flat)
-
-## Plot the SAS factor pairs
-fsym = :l1x1x2x3x4x5f1
-pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
-
-plk=[]
-X1 = getKDEMean(getVertKDE(fg,:x1))
-push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point))
-tplt = Gadfly.plot(plk...); tplt |> SVG("/tmp/test.svg") ; tplt |> PDF("/tmp/test.pdf")
-
-
-plotKDE(fg, ls(fg,r"x"), dims=[1;2])
-
-
-## More debugging below
-
-stuff = IncrementalInference.localproduct(fg, :x1)
-pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
+plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/mctest.pdf");
+#
+#
+#
+# Profile.init(n = 10^7, delay = 0.01)
+# @profile stuff = sandboxCliqResolveStep(tree,:x3,6)
+# ProfileView.view()
+# Profile.print(format=:flat)
+#
+# ## Plot the SAS factor pairs
+# fsym = :l1x1x2x3x4x5f1
+# pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
+#
+# plk=[]
+# X1 = getKDEMean(getVertKDE(fg,:x1))
+# push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point))
+# tplt = Gadfly.plot(plk...); tplt |> SVG("/tmp/test.svg") ; tplt |> PDF("/tmp/test.pdf")
+#
+#
+# plotKDE(fg, ls(fg,r"x"), dims=[1;2])
+#
+#
+# ## More debugging below
+#
+# stuff = IncrementalInference.localproduct(fg, :x1)
+# pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
