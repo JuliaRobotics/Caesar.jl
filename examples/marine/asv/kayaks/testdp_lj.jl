@@ -73,9 +73,9 @@ addFactor!(fg, [beacon;sasposes], sas2d, autoinit=false)
 
 # visualization tools for debugging
 writeGraphPdf(fg,viewerapp="", engine="neato", filepath="/media/data1/data/kayaks/testfg.pdf")
-# wipeBuildNewTree!(fg, drawpdf=false, show=true)
+# wipeBuildNewTree!(fg, drawpdf=true, show=false)
 
-getSolverParams(fg).drawtree = false
+getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
