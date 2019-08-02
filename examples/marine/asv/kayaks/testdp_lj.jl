@@ -40,7 +40,6 @@ waveformData = importdata_waveforms(sasdataframes,2, datadir=dataDir);
 tcurrent = 1_000_000
 
 for sym in poses
-  global tcurrent
   addVariable!(fg, sym, DynPoint2(ut=tcurrent))
   tcurrent += 1_000_000
 end
