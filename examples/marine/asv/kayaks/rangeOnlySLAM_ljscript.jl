@@ -127,9 +127,10 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
         push!(plk, plotPoint(getVal(fg,mysym), colorIn = colorant"orange"))
     end
 
-    L1ac = predictbelief(fg, :l1,ls(fg, :l1))
+    L1pd = predictbelief(fg, :l1,ls(fg, :l1))
+    L1ac = L1pd[1];
     push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=400, ybincount=400)))
-    
+
     plotKDEMeans!(plk,fg);
     push!(plk,plotPath(posData));
     push!(plk,plotPath(dposData,colorIn=colorant"blue"));
