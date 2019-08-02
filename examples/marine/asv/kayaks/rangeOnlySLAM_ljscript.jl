@@ -85,22 +85,22 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
         push!(plk, plotPoint(getVal(fg,mysym), colorIn = colorant"orange"))
     end
 
-    counter = 1;
+    # counter = 1;
     for var in rangewindow       #Plot only for range factors
         sym = Symbol("x$var")
         for mysym in ls(fg,sym)
             if occursin(r"l1",string(mysym))
-                if counter < 4       #Plot one or more approxConv
+                # if counter < 4       #Plot one or more approxConv
                     L1ac = approxConv(fg,mysym,:l1)
                     # K1 = plotKDEContour(kde!(L1ac),xlbl="X (m)", ylbl="Y (m)",levels=3,layers=true)
                     # push!(plk,K1...)
-                    push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
+                    push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=400, ybincount=400)))
                     # push!(pkde,plotKDE(kde!(L1ac),layers=true)...)
                     # onetime = false
                     # push!(plk,Gadfly.Theme(key_position = :none));
                     # push!(plk, Guide.xlabel("X (m)"), Guide.ylabel("Y (m)"))
-                    counter +=1;
-                end
+                    # counter +=1;
+                # end
 
             end
         end
