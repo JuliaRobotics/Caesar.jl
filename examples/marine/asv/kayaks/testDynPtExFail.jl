@@ -84,9 +84,9 @@ wipeBuildNewTree!(fg, drawpdf=true, show=true)
 getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
 getSolverParams(fg).async = true
-getSolverParams(fg).downsolve = false
+getSolverParams(fg).downsolve = true
 getSolverParams(fg).multiproc = false
-getSolverParams(fg).limititers = 30
+# getSolverParams(fg).limititers = 50
 
 
 ## solve the factor graph
@@ -129,7 +129,7 @@ ProfileView.view()
 Profile.print(format=:flat)
 
 ## Plot the SAS factor pairs
-fsym = :l1x1x2x3x4x5f1
+fsym = :l1x5x6x7x8x9f1 #:l1x1x2x3x4x5f1
 pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
 
 plk=[]
