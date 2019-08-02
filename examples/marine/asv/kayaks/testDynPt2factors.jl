@@ -15,7 +15,7 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 N = 100
 
 windowstart = 400;
-windowlen = 20;
+windowlen = 25;
 saswindow = 8;
 sasstart = 5;
 sasgap = 1;
@@ -79,7 +79,8 @@ addFactor!(fg, [beacon;sasposes], sas2d, autoinit=false)
 
 newstart = windowstart+sasstart+saswindow+sasgap;
 sasdataframes2 = collect(newstart:1:newstart+saswindow-1)
-sasposes2 = [Symbol("x$i") for i in sasstart:sasstart+saswindow-1]
+posestart = sasstart+saswindow+sasgap;
+sasposes2 = [Symbol("x$i") for i in posestart:posestart+saswindow-1]
 waveformData = importdata_waveforms(sasdataframes2,2, datadir=dataDir);
 sas2d = prepareSAS2DFactor(saswindow, waveformData, rangemodel=:Correlator,
                            cfgd=cfgd, chirpFile=chirpFile)
@@ -87,9 +88,9 @@ addFactor!(fg, [beacon;sasposes2], sas2d, autoinit=false)
 
 # visualization tools for debugging
 writeGraphPdf(fg,viewerapp="", engine="neato", filepath="/tmp/testfg.pdf")
-# wipeBuildNewTree!(fg, drawpdf=false, show=true)
+wipeBuildNewTree!(fg, drawpdf=true, show=false)
 
-getSolverParams(fg).drawtree = false
+getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
