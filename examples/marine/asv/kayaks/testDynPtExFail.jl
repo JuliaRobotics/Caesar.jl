@@ -25,9 +25,12 @@ sasdataframes = collect(windowstart+sasstart:1:(windowstart+sasstart+saswindow-1
 sasposes = [Symbol("x$i") for i in sasstart:sasstart+saswindow-1]
 
 dataDir = joinpath("/media","data1","data","kayaks","20_gps_pos") #liljon data
-dataDir = joinpath(ENV["HOME"],"data","kayaks","20_gps_pos") #local copy
-cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml");
-chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
+cfgFile = joinpath("/media","data1","data","kayaks","SAS2D.yaml");
+chirpFile = joinpath("/media","data1","data","kayaks","chirp250.txt");
+
+# dataDir = joinpath(ENV["HOME"],"data","kayaks","20_gps_pos") #local copy
+# cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml");
+# chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
 cfgd=loadConfigFile(cfgFile)
 
 fg = initfg();
