@@ -52,8 +52,8 @@ function plotPoints(pointsIn::Array;colorIn::String="blue")
         return layer(x=pointsIn[:,1],y=pointsIn[:,2],Geom.point,Theme(default_color=colorant"blue",point_size = 1.25pt,highlight_width = 0pt))
 end
 
-function plotPath(pathIn::Array)
-    return layer(x=pathIn[:,1],y=pathIn[:,2], Geom.path,Theme(default_color=colorant"green"))
+function plotPath(pathIn::Array; colorIn = colorant"green")
+    return layer(x=pathIn[:,1],y=pathIn[:,2], Geom.path,Theme(default_color=colorIn))
 end
 
 function plotBeaconGT(iGTtemp::Array)
