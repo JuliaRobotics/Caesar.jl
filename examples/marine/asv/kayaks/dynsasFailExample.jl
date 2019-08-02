@@ -44,8 +44,8 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
     # posPl = Gadfly.plot(layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=dposData[:,1],y=dposData[:,2],Geom.path)); posPl |> PDF(scriptHeader*"posGT.pdf")
 
-    chirpFile = joinpath("/media","data1","data","kayaks","chirp250.txt");
-    cfgFile = joinpath("/media","data1","data","kayaks","SAS2D.yaml")
+    chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
+    cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml")
     cfgd=loadConfigFile(cfgFile)
 
     fg = initfg();
