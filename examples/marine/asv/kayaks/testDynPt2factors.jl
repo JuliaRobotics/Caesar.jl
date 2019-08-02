@@ -15,22 +15,21 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 N = 100
 
 windowstart = 400;
-windowlen = 9;
-saswindow = 5;
+windowlen = 25;
+saswindow = 8;
 sasstart = 5;
+sasgap = 1;
 
 poses = [Symbol("x$i") for i in 1:windowlen]
 alldataframes = collect(windowstart:windowstart+windowlen);
-sasdataframes = collect(windowstart+sasstart:1:(windowstart+sasstart+saswindow-1))
-sasposes = [Symbol("x$i") for i in sasstart:sasstart+saswindow-1]
 
-dataDir = joinpath("/media","data1","data","kayaks","20_gps_pos") #liljon data
-cfgFile = joinpath("/media","data1","data","kayaks","SAS2D.yaml");
-chirpFile = joinpath("/media","data1","data","kayaks","chirp250.txt");
+# dataDir = joinpath("/media","data1","data","kayaks","20_gps_pos") #liljon data
+# cfgFile = joinpath("/media","data1","data","kayaks","SAS2D.yaml");
+# chirpFile = joinpath("/media","data1","data","kayaks","chirp250.txt");
 
-# dataDir = joinpath(ENV["HOME"],"data","kayaks","20_gps_pos") #local copy
-# cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml");
-# chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
+dataDir = joinpath(ENV["HOME"],"data","kayaks","20_gps_pos") #local copy
+cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml");
+chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
 cfgd=loadConfigFile(cfgFile)
 
 fg = initfg();
@@ -42,7 +41,6 @@ navchecked, errorind = sanitycheck_nav(posData)
 dposData = deepcopy(posData)
 cumulativeDrift!(dposData,[0.0;0],[0.1,0.1])
 
-waveformData = importdata_waveforms(sasdataframes,2, datadir=dataDir);
 tcurrent = 1_000_000
 
 for sym in poses
@@ -70,30 +68,33 @@ for i in vps
     dpσ = Matrix(Diagonal([0.1;0.1;0.1;0.1].^2))
     vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
     addFactor!(fg, [poses[i];poses[i+1]], vp, autoinit=false)
-    # IncrementalInference.doautoinit!(fg,[getVariable(fg,poses[i])])
 end
 
-# IncrementalInference.doautoinit!(fg,[getVariable(fg,poses[5])])
+sasdataframes = collect(windowstart+sasstart:1:(windowstart+sasstart+saswindow-1))
+sasposes = [Symbol("x$i") for i in sasstart:sasstart+saswindow-1]
+waveformData = importdata_waveforms(sasdataframes,2, datadir=dataDir);
 sas2d = prepareSAS2DFactor(saswindow, waveformData, rangemodel=:Correlator,
                            cfgd=cfgd, chirpFile=chirpFile)
 addFactor!(fg, [beacon;sasposes], sas2d, autoinit=false)
 
+newstart = windowstart+sasstart+saswindow+sasgap;
+sasdataframes2 = collect(newstart:1:newstart+saswindow-1)
+posestart = sasstart+saswindow+sasgap;
+sasposes2 = [Symbol("x$i") for i in posestart:posestart+saswindow-1]
+waveformData = importdata_waveforms(sasdataframes2,2, datadir=dataDir);
+sas2d = prepareSAS2DFactor(saswindow, waveformData, rangemodel=:Correlator,
+                           cfgd=cfgd, chirpFile=chirpFile)
+addFactor!(fg, [beacon;sasposes2], sas2d, autoinit=false)
+
 # visualization tools for debugging
-writeGraphPdf(fg,viewerapp="", engine="neato", filepath=ENV["HOME"]*"/data/kayaks/testfg.pdf")
-# wipeBuildNewTree!(fg, drawpdf=false, show=true)
+writeGraphPdf(fg,viewerapp="", engine="neato", filepath="/tmp/testfg.pdf")
+wipeBuildNewTree!(fg, drawpdf=true, show=false)
 
-getSolverParams(fg).drawtree = false
+getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
-getSolverParams(fg).async = true
-getSolverParams(fg).downsolve = true
-getSolverParams(fg).multiproc = false
-# getSolverParams(fg).limititers = 50
-
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
-
-# makeCsmMovie(fg, tree, assignhist=hist)
+tree, smt, hist = solveTree!(fg, recordcliqs=[:x3; :l1])
 
 drawTree(tree, filepath="/media/data1/data/kayaks/testbt.pdf")
 

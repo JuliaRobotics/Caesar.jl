@@ -109,11 +109,11 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                getSolverParams(fg).drawtree = false
                getSolverParams(fg).showtree = false
 
-               if sas_counter > 1
-                   tree, smt, hist = solveTree!(fg,tree)
-               else
+               # if sas_counter > 1
+                   # tree, smt, hist = solveTree!(fg,tree)
+               # else
                    tree, smt, hist = solveTree!(fg)
-               end
+               # end
 
                writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
                drawTree(tree, filepath=scriptHeader*"bt.pdf")
@@ -158,5 +158,6 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
    end
 
+   println("This Solve was saved under: "*scriptHeader)
    return fg
 end
