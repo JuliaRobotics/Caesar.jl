@@ -72,7 +72,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
             dpσ = Matrix(Diagonal([0.1;0.1;0.2;0.2].^2))
 
             pp = DynPoint2VelocityPrior(MvNormal(dpμ,dpσ))
-            addFactor!(fg, [current_symbol;], pp, autoinit=false)
+            addFactor!(fg, [current_symbol;], pp, autoinit=true)
             # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
        end
 
@@ -85,7 +85,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
            dpμ = [xdotp;ydotp;xdotf-xdotp;xdotf-xdotp];
            dpσ = Matrix(Diagonal([0.2;0.2;0.2;0.2].^2))
            vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
-           addFactor!(fg, [Symbol("x$(pose_counter-1)");current_symbol], vp, autoinit=false)
+           addFactor!(fg, [Symbol("x$(pose_counter-1)");current_symbol], vp, autoinit=true)
            # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
        end
 
@@ -109,11 +109,11 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                getSolverParams(fg).drawtree = false
                getSolverParams(fg).showtree = false
 
-               # if sas_counter > 1
-                   # tree, smt, hist = solveTree!(fg,tree)
-               # else
-                   tree, smt, hist = solveTree!(fg)
-               # end
+               if sas_counter > 1
+                   tree, smt, hist = solveTree!(fg,tree)
+               else
+                   tree, smt, hist = solveTree!(fg, maxparallel=100)
+               end
 
                writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
                drawTree(tree, filepath=scriptHeader*"bt.pdf")

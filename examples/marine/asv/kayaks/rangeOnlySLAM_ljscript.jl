@@ -44,7 +44,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
             dx = dposData[i+1,1] - dposData[i,1];
             dy = dposData[i+1,2] - dposData[i,2];
             p2p2 = Point2Point2(MvNormal([dx;dy],dpσ))
-            addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
+            addFactor!(fg, [sym;nextsym], p2p2, autoinit=true)
         elseif  i == window[end]
             pp = PriorPoint2(MvNormal(posData[i,:], rtkCov))
             addFactor!(fg, [sym;], pp, autoinit=false)
@@ -52,7 +52,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
             dx = dposData[i+1,1] - dposData[i,1];
             dy = dposData[i+1,2] - dposData[i,2];
             p2p2 = Point2Point2(MvNormal([dx;dy],dpσ))
-            addFactor!(fg, [sym;nextsym], p2p2, autoinit=false)
+            addFactor!(fg, [sym;nextsym], p2p2, autoinit=true)
         end
     end
 
