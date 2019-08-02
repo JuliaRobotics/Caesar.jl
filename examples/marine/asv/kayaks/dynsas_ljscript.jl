@@ -158,5 +158,6 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
    end
 
+   println("This Solve was saved under: "*scriptHeader)
    return fg
 end
