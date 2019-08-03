@@ -112,7 +112,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     plotKDEMeans!(plk,fg);
     push!(plk,plotPath(posData));
     push!(plk,plotPath(dposData,colorIn=colorant"blue"));
-    # plotBeaconContours!(plk,fg);
+    plotBeaconContours!(plk,fg);
 
     if expID == "dock"
         push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
@@ -143,7 +143,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     plotKDEMeans!(plk,fg);
     push!(plk,plotPath(posData));
     push!(plk,plotPath(dposData,colorIn=colorant"blue"));
-    plotBeaconContours!(plk,fg);
+    # plotBeaconContours!(plk,fg);
     if expID == "dock"
         push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
     elseif expID == "drift"
