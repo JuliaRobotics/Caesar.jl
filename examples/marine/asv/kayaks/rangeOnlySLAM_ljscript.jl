@@ -72,6 +72,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     # tree, smt = batchSolve!(fg,maxparallel=100)
 
     tree, smt, hist = solveTree!(fg, maxparallel=400)
+    tree, smt, hist = solveTree!(fg, maxparallel=400)
     drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
     plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
