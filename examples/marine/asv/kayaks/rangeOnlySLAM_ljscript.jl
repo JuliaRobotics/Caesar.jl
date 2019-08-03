@@ -173,5 +173,5 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
         mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
         kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
     end
-    writedlm(scriptheader*"/stats.txt", [meanerror maxerror kld], ",")
+    writedlm(scriptHeader*"/stats.txt", [meanerror maxerror kld], ",")
 end
