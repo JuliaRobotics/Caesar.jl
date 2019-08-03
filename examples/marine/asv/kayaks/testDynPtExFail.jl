@@ -15,7 +15,7 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 N = 100
 
 windowstart = 400;
-windowlen = 9;
+windowlen = 60;
 saswindow = 5;
 sasstart = 5;
 
@@ -79,23 +79,29 @@ sas2d = prepareSAS2DFactor(saswindow, waveformData, rangemodel=:Correlator,
 addFactor!(fg, [beacon;sasposes], sas2d, autoinit=false)
 
 # visualization tools for debugging
-writeGraphPdf(fg,viewerapp="", engine="neato", filepath=ENV["HOME"]*"/data/kayaks/testfg.pdf")
+writeGraphPdf(fg,viewerapp="", engine="neato", filepath="/media/data1/data/kayaks/testfg.pdf") #
 # wipeBuildNewTree!(fg, drawpdf=false, show=true)
 
-getSolverParams(fg).drawtree = false
+getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
 getSolverParams(fg).async = true
 getSolverParams(fg).downsolve = true
 getSolverParams(fg).multiproc = false
-# getSolverParams(fg).limititers = 50
-
+# getSolverParams(fg).limititers = 200
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree, smt, hist = solveTree!(fg)
 
-# makeCsmMovie(fg, tree, assignhist=hist)
+
+# because async solve, cliq histories are stored in task returns instead
+fetchAssignTaskHistoryAll!(tree, smt)
+
 
 drawTree(tree, filepath="/media/data1/data/kayaks/testbt.pdf")
+
+# makeCsmMovie(fg, tree, assignhist=hist)
+# assignTreeHistory!(tree, hist)
+# getCliqSolveHistory(tree, :x1)
 
 plk= [];
 
@@ -120,6 +126,7 @@ push!(plk,K1...)
 push!(plk,Gadfly.Theme(key_position = :none));
 push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-150, ymax=75,fixed=true))
 
+Gadfly.set_default_plot_size(35cm, 25cm)
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/mctest.pdf");
 #
 #
