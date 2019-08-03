@@ -6,6 +6,8 @@
 function plotSASDefault(fg, expID::String, posData::Array, iGTtemp::Array ; datadir::String=joinpath(ENV["HOME"],"data", "kayaks", "08_10_parsed") , savedir::String="/tmp/test.pdf")
     pltemp = [];
     push!(pltemp,plotBeaconGT(iGTtemp));
+    push!(pltemp,plotBeaconMax(fg));
+    push!(pltemp,plotBeaconMean(fg));
     push!(pltemp,plotBeaconHist(fg));
     push!(pltemp,Gadfly.Theme(key_position = :none));
     plotKDEMeans!(pltemp,fg);
@@ -22,6 +24,16 @@ end
 
 function pltoPDF(plHolderIn ; savedir::String="/tmp/test.pdf")
     Gadfly.plot(plHolderIn...) |> PDF(savedir)
+end
+
+function plotBeaconMax(fg)
+    L1 = getKDEMax(getVertKDE(fg, :l1))
+    return layer(x=[L1[1];],y=[L1[2];], label=String["Beacon Max";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"darkorange",highlight_width = 0pt));
+end
+
+function plotBeaconMean(fg)
+    L1 = getKDEMean(getVertKDE(fg, :l1))
+    return layer(x=[L1[1];],y=[L1[2];], label=String["Beacon Mean";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"orangered",highlight_width = 0pt));
 end
 
 function plotBeaconHist(fg)
@@ -58,8 +70,8 @@ end
 
 function plotBeaconGT(iGTtemp::Array)
     if size(iGTtemp,2) ==  1
-        return layer(x=[iGTtemp[1];],y=[iGTtemp[2];], label=String["Beacon Ground Truth";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt));
+        return layer(x=[iGTtemp[1];],y=[iGTtemp[2];], label=String["Beacon GT";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt));
     else
-        return layer(x=iGTtemp[:,1],y=iGTtemp[:,2], label=String["Beacon Ground Truth";],Geom.path,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt));
+        return layer(x=iGTtemp[:,1],y=iGTtemp[:,2], label=String["Beacon GT";],Geom.path,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt));
     end
 end
