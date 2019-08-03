@@ -80,7 +80,8 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     #RangeOnly PLOTTING ------------
     plk= [];
     push!(plk,plotBeaconGT(igt));
-    plotBeaconContours!(plk,fg);
+    push!(plk,plotBeaconMax(fg));
+    push!(plk,plotBeaconMean(fg));
 
     for var in rangewindow
         mysym = Symbol("x$var")
@@ -108,10 +109,11 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
         end
     end
 
-
     plotKDEMeans!(plk,fg);
     push!(plk,plotPath(posData));
     push!(plk,plotPath(dposData,colorIn=colorant"blue"));
+    plotBeaconContours!(plk,fg);
+
     if expID == "dock"
         push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
     elseif expID == "drift"
@@ -122,8 +124,9 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
 
     plk= [];
     push!(plk,plotBeaconGT(igt));
-    plotBeaconContours!(plk,fg);
-
+    push!(plk,plotBeaconMax(fg));
+    push!(plk,plotBeaconMean(fg));
+    
     for var in rangewindow
         mysym = Symbol("x$var")
         push!(plk, plotPoint(getVal(fg,mysym), colorIn = colorant"orange"))
@@ -136,6 +139,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     plotKDEMeans!(plk,fg);
     push!(plk,plotPath(posData));
     push!(plk,plotPath(dposData,colorIn=colorant"blue"));
+    plotBeaconContours!(plk,fg);
     if expID == "dock"
         push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
     elseif expID == "drift"

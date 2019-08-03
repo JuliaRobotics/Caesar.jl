@@ -12,12 +12,13 @@ function plotSASDefault(fg, expID::String, posData::Array, iGTtemp::Array ; data
     push!(pltemp,Gadfly.Theme(key_position = :none));
     plotKDEMeans!(pltemp,fg);
     push!(pltemp,plotPath(posData));
+    plotBeaconContours!(pltemp,fg);
+    
     if expID == "dock"
         push!(pltemp, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
     elseif expID == "drift"
-        push!(pltemp, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
+        push!(pltemp, Coord.cartesian(xmin=20, xmax=200, ymin=-260, ymax=0,fixed=true))
     end
-    plotBeaconContours!(pltemp,fg);
     # push!(pltemp,Gadfly.Guide.xlabel("X (m)"),Gadfly.Guide.ylabel("Y (m)"));
     pltempplot = Gadfly.plot(pltemp...); pltempplot |> PDF(savedir)
 end
