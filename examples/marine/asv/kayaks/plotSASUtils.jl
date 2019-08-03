@@ -3,17 +3,19 @@
 # For mix and match purposes these functions return Gadfly layers except for default plot
 
 
-function plotSASDefault(fg, expID::String, posData::Array, iGTtemp::Array ; datadir::String=joinpath(ENV["HOME"],"data", "kayaks", "08_10_parsed") , savedir::String="/tmp/test.pdf")
+function plotSASDefault(fg, expID::String, posData::Array, iGTtemp::Array, dposData::Array ; datadir::String=joinpath(ENV["HOME"],"data", "kayaks", "08_10_parsed") , savedir::String="/tmp/test.pdf")
     pltemp = [];
     push!(pltemp,plotBeaconGT(iGTtemp));
     push!(pltemp,plotBeaconMax(fg));
     push!(pltemp,plotBeaconMean(fg));
     push!(pltemp,plotBeaconHist(fg));
     push!(pltemp,Gadfly.Theme(key_position = :none));
-    plotKDEMeans!(pltemp,fg);
+    plotPriors(pltemp,fg);
+    plotKDEMaxs!(pltemp,fg);
     push!(pltemp,plotPath(posData));
+    push!(pltemp,plotPath(dposData,colorIn=colorant"steelblue1"));
     plotBeaconContours!(pltemp,fg);
-    
+
     if expID == "dock"
         push!(pltemp, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
     elseif expID == "drift"
@@ -21,6 +23,17 @@ function plotSASDefault(fg, expID::String, posData::Array, iGTtemp::Array ; data
     end
     # push!(pltemp,Gadfly.Guide.xlabel("X (m)"),Gadfly.Guide.ylabel("Y (m)"));
     pltempplot = Gadfly.plot(pltemp...); pltempplot |> PDF(savedir)
+end
+
+function plotPriors!(plHolderIn,fg)
+    for mysym in ls(fg)
+        for myfac in ls(fg,mysym)
+            if occursin(r"^x\df",string(myfac))
+                xData = getKDEMax(getVertKDE(fg,mysym))
+                push!(plHolderIn,plotPoint(xData,colorIn=colorant"green2"))
+            end
+        end
+    end
 end
 
 function pltoPDF(plHolderIn ; savedir::String="/tmp/test.pdf")
@@ -46,6 +59,15 @@ function plotBeaconContours!(plHolderIn, fg)
     K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
     push!(plHolderIn,K1...)
     push!(plHolderIn,Gadfly.Theme(key_position = :none));
+end
+
+function plotKDEMaxs!(plHolderIn,fg;regx::Regex=r"x")
+    for sym in ls(fg)
+        if occursin(regx,string(sym))
+            xData = getKDEMax(getVertKDE(fg,sym))
+            push!(plHolderIn, plotPoint(xData))
+        end
+    end
 end
 
 function plotKDEMeans!(plHolderIn,fg;regx::Regex=r"x")

@@ -109,23 +109,27 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
                getSolverParams(fg).drawtree = false
                getSolverParams(fg).showtree = false
-               getSolverParams(fg).limititers=500
+               getSolverParams(fg).limititers = 500
 
-               # if sas_counter > 1
-                   # tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
-               # else
+               if sas_counter > 1
+                   tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
+               else
                    tree, smt, hist = solveTree!(fg, maxparallel=400)
-               # end
+               end
 
                writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
                drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
-               plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"$sas_counter.pdf")
+               plotSASDefault(fg,expID, posData,igt,dposData,datadir=allpaths[1],savedir=scriptHeader*"$sas_counter.pdf")
 
                if debug
                    plk = [];
                    push!(plk,plotBeaconGT(igt));
                    plotBeaconContours!(plk,fg);
+                   for mysym in poses[sas_counter]
+                       xData = getKDEMax(getVertKDE(fg,mysym))
+                       push!(plk, plotPoint(xData,colorIn=colorant"orange"))
+                   end
                    L1p = approxConv(fg,[beacon;poses[sas_counter]],:l1);
                    push!(plk,layer(x=L1p[1,:],y=L1p[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
                    Gadfly.plot(plk...) |> PDF(scriptHeader*"debug$sas_counter.pdf");
