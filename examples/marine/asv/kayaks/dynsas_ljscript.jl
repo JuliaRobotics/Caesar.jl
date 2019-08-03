@@ -12,7 +12,7 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
 include(joinpath(@__DIR__,"expDataUtils.jl"))
 
-function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::Int; saswindow::Int=8, trialID::Int=1)
+function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::Int; saswindow::Int=8, trialID::Int=1, debug::Bool=false, dataloc::String="lj")
     ## Default parameters
     println("Start Script\n")
 
@@ -22,7 +22,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
     totalposes = dataend-datastart;
     datawindow = collect(datastart:dataend);
-    allpaths = getPaths(expID,"dynsas", currloc = "lj", trialID = trialID);
+    allpaths = getPaths(expID,"dynsas", currloc = dataloc, trialID = trialID);
     scriptHeader = joinpath(allpaths[3],expID*"_fgap$(fgap)_gpsgap$(gps_gap)_swind$(saswindow)_f$(datastart)t$(dataend)_")
 
     poses = Dict{Int,Array}();
@@ -72,20 +72,21 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
             dpσ = Matrix(Diagonal([0.1;0.1;0.2;0.2].^2))
 
             pp = DynPoint2VelocityPrior(MvNormal(dpμ,dpσ))
-            addFactor!(fg, [current_symbol;], pp, autoinit=false)
+            addFactor!(fg, [current_symbol;], pp, autoinit=true)
             # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
        end
 
        #odo factors
        if pose_counter > 1
-           xdotp = dposData[pose_counter-1,1] - dposData[pose_counter,1];
-           ydotp = dposData[pose_counter-1,2] - dposData[pose_counter,2];
+           xdotp = dposData[pose_counter,1] - dposData[pose_counter-1,1];
+           ydotp = dposData[pose_counter,2] - dposData[pose_counter-1,2];
            xdotf = dposData[pose_counter+1,1] - dposData[pose_counter,1];
            ydotf = dposData[pose_counter+1,2] - dposData[pose_counter,2];
-           dpμ = [xdotp;ydotp;xdotf-xdotp;xdotf-xdotp];
+           # dpμ = [xdotp;ydotp;xdotf-xdotp;ydotf-ydotp];
+           dpμ = [xdotp;ydotp;0;0];
            dpσ = Matrix(Diagonal([0.2;0.2;0.2;0.2].^2))
            vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
-           addFactor!(fg, [Symbol("x$(pose_counter-1)");current_symbol], vp, autoinit=false)
+           addFactor!(fg, [Symbol("x$(pose_counter-1)");current_symbol], vp, autoinit=true)
            # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
        end
 
@@ -108,17 +109,31 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
                getSolverParams(fg).drawtree = false
                getSolverParams(fg).showtree = false
+               getSolverParams(fg).limititers = 500
 
-               # if sas_counter > 1
-                   # tree, smt, hist = solveTree!(fg,tree)
-               # else
-                   tree, smt, hist = solveTree!(fg)
-               # end
+               if sas_counter > 1
+                   tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
+               else
+                   tree, smt, hist = solveTree!(fg, maxparallel=400)
+               end
 
                writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
                drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
-               plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"$sas_counter.pdf")
+               plotSASDefault(fg,expID, posData,igt,dposData,datadir=allpaths[1],savedir=scriptHeader*"$sas_counter.pdf")
+
+               if debug
+                   plk = [];
+                   push!(plk,plotBeaconGT(igt));
+                   plotBeaconContours!(plk,fg);
+                   for mysym in poses[sas_counter]
+                       xData = getKDEMax(getVertKDE(fg,mysym))
+                       push!(plk, plotPoint(xData,colorIn=colorant"orange"))
+                   end
+                   L1p = approxConv(fg,ls(fg,:l1)[end],:l1);
+                   push!(plk,layer(x=L1p[1,:],y=L1p[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
+                   Gadfly.plot(plk...) |> PDF(scriptHeader*"debug$sas_counter.pdf");
+               end
 
                if expID == "dock"
                    l1fit = getKDEMean(getVertKDE(fg,:l1))
@@ -153,8 +168,8 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
        end
        pose_counter+=1
 
-       println("Trying next Variable: $pose_counter")
-       println("Trying next SAS: $sas_counter")
+       println("Next Variable is $pose_counter")
+       println("Next SAS is $sas_counter")
 
    end
 

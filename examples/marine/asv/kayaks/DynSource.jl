@@ -91,15 +91,14 @@ for i in priors
 end
 
 # visualization tools for debugging
-writeGraphPdf(fg, engine="dot")
-wipeBuildNewTree!(fg, drawpdf=true, show=true)
-
+writeGraphPdf(fg,viewerapp="", engine="neato", filepath = "/tmp/test.pdf")
 
 getSolverParams(fg).drawtree = true
+getSolverParams(fg).limititers=200
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg,recordcliqs=[:l1; :l2])
+tree, smt, hist = solveTree!(fg)
 
 
 
