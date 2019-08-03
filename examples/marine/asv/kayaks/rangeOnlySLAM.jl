@@ -7,8 +7,8 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"expDataUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
 
-# expID = "dock"; datawindow = collect(400:700);
-expID = "drift"; datawindow = collect(1550:1750);
+expID = "dock"; datawindow = collect(410:450);
+# expID = "drift"; datawindow = collect(1550:1750);
 
 allpaths = getPaths(expID,"range", trialID = 1);
 igt = loadGT(datawindow,expID,allpaths);
@@ -56,7 +56,7 @@ for i in window
     end
 end
 
-rangewindow = window[1]:40:window[end]
+rangewindow = window[1]:5:window[end]
 for i in rangewindow
     sym = Symbol("x$i")
     ppR = Point2Point2Range(AliasingScalarSampler(mfin[:,1,i],exp.(mfin[:,2,i]),SNRfloor=0.8))
@@ -73,82 +73,63 @@ drawTree(tree,filepath = "/tmp/test.pdf")
 # tree, smt = batchSolve!(fg,maxparallel=100)
 # fg2 = deepcopy(fg)
 # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
+plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
 
-plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1])
-
-#PLOTTING ------------
+#RangeOnly PLOTTING ------------
 plk= [];
-pkde = [];
+push!(plk,plotBeaconGT(igt));
+plotBeaconContours!(plk,fg);
 
-if exptype ==1 #plot gt
-    igt = [17.0499;1.7832];
-
-    push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon Ground Truth";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt)));
-
-    lkde = getVertKDE(fg, beacon)
-    L1 = rand(lkde,1000);
-    L1err = L1;
-    L1err = sqrt.((L1[1,:] .- igt[1]).^2 + (L1[2,:] .- igt[2]).^2);
-    totalerr = sum(L1err)/length(L1err);
-
-else
-    push!(plk,layer(x=igt[:,1],y=igt[:,2], label=String["Beacon Ground Truth";],Geom.path,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt)));
+for var in rangewindow
+    mysym = Symbol("x$var")
+    push!(plk, plotPoint(getVal(fg,mysym), colorIn = colorant"orange"))
 end
 
-onetime = false;
-plotbeacon = true;
-for var in window       #Plot only for range factors
-    sym = Symbol("x$var")
-    global onetime
-    for mysym in ls(fg,sym)
-        if occursin(r"l1",string(mysym))
-            if var > 130 && onetime       #Plot one or more approxConv
-                L1ac = approxConv(fg,mysym,:l1)
-                # K1 = plotKDEContour(kde!(L1ac),xlbl="X (m)", ylbl="Y (m)",levels=3,layers=true)
-                # push!(plk,K1...)
-                push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-                # push!(pkde,plotKDE(kde!(L1ac),layers=true)...)
-                onetime = false
-                # push!(plk,Gadfly.Theme(key_position = :none));
-                # push!(plk, Guide.xlabel("X (m)"), Guide.ylabel("Y (m)"))
+# all forward convolves
+LL = BallTreeDensity[];
+IncrementalInference.proposalbeliefs!(fg, :l1, map(x->getFactor(fg,x),ls(fg, :l1)), LL, Dict{Int, Vector{BallTreeDensity}}())
 
-                X1 = getKDEMean(getVertKDE(fg,sym))
-                push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"magenta",point_size=1.5pt,highlight_width=0pt)))
-            end
-            X1 = getKDEMean(getVertKDE(fg,sym))
-            push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"red",point_size=1.5pt,highlight_width=0pt)))
-        end
-    end
+# for i = 1:length(LL)
+    # L1ac = rand(LL[i],100)
+    # push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=400, ybincount=400)))
+# end
+
+# product of new forward convolves
+ll  = IncrementalInference.predictbelief(fg, :l1, ls(fg,:l1))
+L1ac = ll[1];
+push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=200, ybincount=200)))
+# L1est = manikde(ll, Point2().manifolds)
+
+plotKDEMeans!(plk,fg);
+push!(plk,plotPath(dposData,colorIn=colorant"blue"));
+push!(plk,plotPath(posData));
+if expID == "dock"
+    push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
+elseif expID == "drift"
+    push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
+end
+savefile = "/tmp/test.pdf"
+Gadfly.plot(plk...) |> PDF(savefile)
+
+plk= [];
+push!(plk,plotBeaconGT(igt));
+plotBeaconContours!(plk,fg);
+
+for var in rangewindow
+    mysym = Symbol("x$var")
+    push!(plk, plotPoint(getVal(fg,mysym), colorIn = colorant"orange"))
 end
 
-#Ground Truth Trajectory
-push!(plk, layer(x=posData[:,1],y=posData[:,2], Geom.path,Theme(default_color=colorant"green",point_size = 1.5pt,highlight_width = 0pt)))
+L1ac = predictbelief(fg, :l1,ls(fg, :l1))
+push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=400, ybincount=400)))
 
-#KDE Mean Vehicle Locations
-for var in window
-    sym = Symbol("x$var")
-    X1 = getKDEMean(getVertKDE(fg,sym))
-    push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point,Theme(default_color=colorant"blue",point_size=1pt,highlight_width=0pt)))
+plotKDEMeans!(plk,fg);
+push!(plk,plotPath(posData));
+push!(plk,plotPath(dposData,colorIn=colorant"blue"));
+if expID == "dock"
+    push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
+elseif expID == "drift"
+    push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
 end
-
-if plotbeacon #Beacon Final solve
-    # L1v = getVariable(fg, beacon)
-    # lkde = getVertKDE(fg, beacon)
-    # L1 = rand(lkde,1000);
-    # push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-    K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
-    push!(plk,K1...)
-    push!(plk,Gadfly.Theme(key_position = :none));
-end
-
-# push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-150, ymax=30,fixed=true))
-push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=-25,fixed=true))
-
-plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
-
-# pkdeplot = Gadfly.plot(pkde...); pkdeplot |> PDF("/tmp/test.pdf")
-
-# Plot KDE for specific matched filtered range
-# mykde = kde!(rangesin[:,260]);
-# K1 = plotKDE(mykde); K1 |> PDF("/tmp/testkde.pdf")
-# getKDEMax(mykde)
+savefile = scriptHeader*"predBel.pdf"
+Gadfly.plot(plk...) |> PDF(savefile)
