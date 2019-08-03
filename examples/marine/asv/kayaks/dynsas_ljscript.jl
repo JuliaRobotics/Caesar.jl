@@ -111,6 +111,11 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                getSolverParams(fg).showtree = false
                getSolverParams(fg).limititers = 500
 
+               lstpose = Symbol("x$(pose_counter)");
+               tmpInit = approxConv(fg,Symbol("x$(pose_counter-1)x$(pose_counter)f1"),lstpose);
+               XXkde = manikde!(tmpInit,getManifolds(fg,lstpose));
+               setValKDE!(fg,lstpose,XXkde);
+
                if sas_counter > 1
                    tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
                else
