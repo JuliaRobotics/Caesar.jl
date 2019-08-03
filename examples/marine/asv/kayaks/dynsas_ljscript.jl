@@ -111,6 +111,19 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                getSolverParams(fg).showtree = false
                getSolverParams(fg).limititers = 500
 
+                   # # debug pose chain weirdness
+                   # saveDFG(fg,scriptHeader * "fg_sas$(sas_counter)_weirdness")
+                   # if sas_counter == 2
+                   #   return fg
+                   # end
+
+               # HACK init last pose
+               lstpose = sortVarNested(ls(fg, r"x"))[end]
+               sndlst = setdiff(sortVarNested(ls(fg, r"x")), [lstpose;])[end]
+               pts = approxConv(fg, Symbol(string(sndlst, lstpose, "f1")), lstpose)
+               XX = manikde!(pts, getManifolds(fg, lstpose))
+               setValKDE!(fg, lstpose, XX)
+
                if sas_counter > 1
                    tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
                else
@@ -176,3 +189,13 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
    println("This Solve was saved under: "*scriptHeader)
    return fg
 end
+
+
+
+
+#
+main("drift", 1550,1600,5,49)
+
+fg = main("drift", 1550,1580,5,49)
+
+main("drift", 1550,1580,2,49)
