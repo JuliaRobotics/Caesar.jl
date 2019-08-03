@@ -14,7 +14,7 @@ function getPaths(expID::String , expType::String ; currloc::String="local" , tr
         expstr = expType
     elseif expType == "pointsas"
         expstr = expType
-    elseif exptType == "dynsource"
+    elseif expType == "dynsource"
         expstr = expType
     end
 
