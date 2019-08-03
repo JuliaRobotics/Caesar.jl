@@ -39,7 +39,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
 
         if i == window[1]
             pp = PriorPoint2(MvNormal(posData[i,:], rtkCov))
-            addFactor!(fg, [sym;], pp, autoinit=false)
+            addFactor!(fg, [sym;], pp, autoinit=true)
 
             dx = dposData[i+1,1] - dposData[i,1];
             dy = dposData[i+1,2] - dposData[i,2];
@@ -67,6 +67,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
 
     getSolverParams(fg).drawtree = false
     getSolverParams(fg).showtree = false
+    getSolverParams(fg).limititers=200
 
     # tree, smt = batchSolve!(fg,maxparallel=100)
 
