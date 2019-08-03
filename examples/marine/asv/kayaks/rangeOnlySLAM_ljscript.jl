@@ -67,7 +67,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
 
     getSolverParams(fg).drawtree = false
     getSolverParams(fg).showtree = false
-    getSolverParams(fg).limititers=200
+    getSolverParams(fg).limititers=500
 
     # tree, smt = batchSolve!(fg,maxparallel=100)
 
