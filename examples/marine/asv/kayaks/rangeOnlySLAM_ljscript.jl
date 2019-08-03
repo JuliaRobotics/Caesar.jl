@@ -124,16 +124,22 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
 
     plk= [];
     push!(plk,plotBeaconGT(igt));
-    push!(plk,plotBeaconMax(fg));
-    push!(plk,plotBeaconMean(fg));
+    # push!(plk,plotBeaconMax(fg));
+    # push!(plk,plotBeaconMean(fg));
+    L1pd = predictbelief(fg, :l1,ls(fg, :l1))
+    L1ac = L1pd[1];
+
+    L1 = getKDEMax(kde!(L1ac))
+    push!(plk,layer(x=[L1[1];],y=[L1[2];], label=String["Beacon Max";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"darkorange",highlight_width = 0pt)));
+
+    L1 = getKDEMean(kde!(L1ac))
+    push!(plk,layer(x=[L1[1];],y=[L1[2];], label=String["Beacon Mean";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"orangered",highlight_width = 0pt)))
 
     for var in rangewindow
         mysym = Symbol("x$var")
         push!(plk, plotPoint(getVal(fg,mysym), colorIn = colorant"orange"))
     end
 
-    L1pd = predictbelief(fg, :l1,ls(fg, :l1))
-    L1ac = L1pd[1];
     push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
 
     K1 = plotKDEContour(kde!(L1ac),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
