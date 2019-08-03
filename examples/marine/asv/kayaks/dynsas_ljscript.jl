@@ -129,9 +129,9 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                    for mysym in poses[sas_counter]
                        xData = getKDEMax(getVertKDE(fg,mysym))
                        push!(plk, plotPoint(xData,colorIn=colorant"orange"))
+                       L1p = approxConv(fg,[beacon;mysym],:l1);
+                       push!(plk,layer(x=L1p[1,:],y=L1p[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
                    end
-                   L1p = approxConv(fg,[beacon;poses[sas_counter]],:l1);
-                   push!(plk,layer(x=L1p[1,:],y=L1p[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
                    Gadfly.plot(plk...) |> PDF(scriptHeader*"debug$sas_counter.pdf");
                end
 
