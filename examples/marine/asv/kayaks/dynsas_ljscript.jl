@@ -110,11 +110,11 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                getSolverParams(fg).showtree = false
                getSolverParams(fg).limititers=500
 
-               if sas_counter > 1
-                   tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
-               else
+               # if sas_counter > 1
+                   # tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
+               # else
                    tree, smt, hist = solveTree!(fg, maxparallel=400)
-               end
+               # end
 
                writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
                drawTree(tree, filepath=scriptHeader*"bt.pdf")
