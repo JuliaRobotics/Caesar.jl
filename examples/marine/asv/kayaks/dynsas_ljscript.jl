@@ -12,7 +12,7 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
 include(joinpath(@__DIR__,"expDataUtils.jl"))
 
-function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::Int; saswindow::Int=8, trialID::Int=1, debug::Bool=false)
+function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::Int; saswindow::Int=8, trialID::Int=1, debug::Bool=false, dataloc::String="lj")
     ## Default parameters
     println("Start Script\n")
 
@@ -22,7 +22,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
     totalposes = dataend-datastart;
     datawindow = collect(datastart:dataend);
-    allpaths = getPaths(expID,"dynsas", currloc = "lj", trialID = trialID);
+    allpaths = getPaths(expID,"dynsas", currloc = dataloc, trialID = trialID);
     scriptHeader = joinpath(allpaths[3],expID*"_fgap$(fgap)_gpsgap$(gps_gap)_swind$(saswindow)_f$(datastart)t$(dataend)_")
 
     poses = Dict{Int,Array}();

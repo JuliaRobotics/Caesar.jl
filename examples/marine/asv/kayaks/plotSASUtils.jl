@@ -10,7 +10,7 @@ function plotSASDefault(fg, expID::String, posData::Array, iGTtemp::Array, dposD
     push!(pltemp,plotBeaconMean(fg));
     push!(pltemp,plotBeaconHist(fg));
     push!(pltemp,Gadfly.Theme(key_position = :none));
-    plotPriors(pltemp,fg);
+    plotPriors!(pltemp,fg);
     plotKDEMaxs!(pltemp,fg);
     push!(pltemp,plotPath(posData));
     push!(pltemp,plotPath(dposData,colorIn=colorant"steelblue1"));
