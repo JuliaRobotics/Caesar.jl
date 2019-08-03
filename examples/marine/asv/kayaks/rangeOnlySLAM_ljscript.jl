@@ -1,7 +1,7 @@
 using Caesar, DelimitedFiles, JLD
 using IncrementalInference
-using KernelDensityEstimatePlotting
 using Gadfly, Cairo, Fontconfig
+using KernelDensityEstimatePlotting
 
 include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
@@ -112,7 +112,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     plotKDEMeans!(plk,fg);
     push!(plk,plotPath(posData));
     push!(plk,plotPath(dposData,colorIn=colorant"blue"));
-    plotBeaconContours!(plk,fg);
+    # plotBeaconContours!(plk,fg);
 
     if expID == "dock"
         push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-140, ymax=30,fixed=true))
@@ -126,7 +126,7 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     push!(plk,plotBeaconGT(igt));
     push!(plk,plotBeaconMax(fg));
     push!(plk,plotBeaconMean(fg));
-    
+
     for var in rangewindow
         mysym = Symbol("x$var")
         push!(plk, plotPoint(getVal(fg,mysym), colorIn = colorant"orange"))
@@ -134,7 +134,11 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
 
     L1pd = predictbelief(fg, :l1,ls(fg, :l1))
     L1ac = L1pd[1];
-    push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=400, ybincount=400)))
+    push!(plk,layer(x=L1ac[1,:],y=L1ac[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
+
+    K1 = plotKDEContour(kde!(L1ac),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
+    push!(plk,K1...)
+    push!(plk,Gadfly.Theme(key_position = :none));
 
     plotKDEMeans!(plk,fg);
     push!(plk,plotPath(posData));
@@ -147,4 +151,27 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     end
     savefile = scriptHeader*"predBel.pdf"
     Gadfly.plot(plk...) |> PDF(savefile)
+
+    if expID == "dock"
+        l1fit = getKDEMean(getVertKDE(fg,:l1))
+        meanerror = sqrt((igt[1]-l1fit[1])^2+(igt[2]-l1fit[2])^2)
+
+        l1max = getKDEMax(getVertKDE(fg,:l1))
+        maxerror = sqrt((igt[1]-l1max[1])^2+(igt[2]-l1max[2])^2)
+
+        mykde = getVertKDE(fg,:l1)
+        mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
+        kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
+    elseif expID == "drift"
+        l1fit = getKDEMean(getVertKDE(fg,:l1))
+        meanerror = sqrt((mean(igt[:,1])-l1fit[1])^2+(mean(igt[:,2])-l1fit[2])^2)
+
+        l1max = getKDEMax(getVertKDE(fg,:l1))
+        maxerror = sqrt((mean(igt[:,1])-l1max[1])^2+(mean(igt[:,2])-l1max[2])^2)
+
+        mykde = getVertKDE(fg,:l1)
+        mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
+        kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
+    end
+    writedlm(scripheader*"/stats.txt", [meanerror maxerror kld], ",")
 end
