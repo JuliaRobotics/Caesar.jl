@@ -1,17 +1,13 @@
-# using Distributed
-# addprocs(5)
-
-using Caesar, RoME, Profile
+using Caesar, RoME, IncrementalInference
 using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting
 using KernelDensityEstimate
-using IncrementalInference
 using DocStringExtensions
 using DelimitedFiles, JLD
 
 include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
 
-expnum = 2;
+expnum = 1;
 if expnum == 1
     topdir = joinpath(ENV["HOME"],"data","kayaks","07_18")
     trialstr = "07_18_parsed_set1";
@@ -26,12 +22,13 @@ end
 cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml");
 chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
 cfgd=loadConfigFile(cfgFile)
+cfgd["range_snr_floor"]=0.9
 iload = load(ijldname)
 nrange = iload["nrange"]
 irange = iload["irange"];
 itemp = readdlm(datadir*"/inav.csv",',',Float64,'\n', skipstart=1);
 
-wstart = 160; wlen = 16;
+wstart = 300; wlen = 16;
 dataframes = collect(nrange[wstart]:nrange[wstart]+wlen);
 
 irangenew = irange[wstart] : 5 : irange[wstart+wlen]
@@ -71,8 +68,8 @@ for i=1:nsasfac
     addVariable!(fg, beacons[i], DynPoint2(ut=1_000_000+(i-1)*saswindow) )
 
     if i>1
-        dpμ = [1.0;1;1;1];
-        dpσ = Matrix(Diagonal([2.0;2;2;2].^2))
+        dpμ = [1.0*saswindow/4;1*saswindow/4;0;0];
+        dpσ = Matrix(Diagonal([2.0;2;0.2;0.2].^2))
         vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
         addFactor!(fg, [beacons[i-1];beacons[i]], vp, autoinit=false)
     end
@@ -109,14 +106,12 @@ tree, smt, hist = solveTree!(fg)
 # plk = plotBeaconSolve(fg)
 plk=[];
 push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"green" )))
-push!(plk, Coord.cartesian(xmin=-40, xmax=100, ymin=-50, ymax=50,fixed=true))
+push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.point, Geom.path, Theme(default_color=colorant"blue")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"green" )))
+push!(plk, Coord.cartesian(xmin=50, xmax=150, ymin=-150, ymax=-50,fixed=true))
 
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
 
 
-
-# Some Plotting
 plk= [];
 
 for sym in ls(fg) #plotting all syms labeled
@@ -124,12 +119,12 @@ for sym in ls(fg) #plotting all syms labeled
     push!(plk, layer(x=[X1[1];],y=[X1[2];],label=String["$sym";], Geom.point,Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
 end
 
-push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"green" )))
+push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"red" )))
 
 L1 = getVal(getVariable(fg, :l1))
 push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
 
-push!(plk, Coord.cartesian(xmin=40, xmax=100, ymin=-120, ymax=-50,fixed=true))
+# push!(plk, Coord.cartesian(xmin=40, xmax=100, ymin=-120, ymax=-50,fixed=true))
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf");
 
 

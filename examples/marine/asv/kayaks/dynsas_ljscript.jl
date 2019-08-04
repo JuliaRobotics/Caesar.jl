@@ -1,10 +1,6 @@
-# using Distributed
-# addprocs(5)
-
-using Caesar, RoME
+using Caesar, RoME, IncrementalInference
 using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting, Cairo, Fontconfig
 using KernelDensityEstimate
-using IncrementalInference
 using DocStringExtensions
 using DelimitedFiles, JLD, DistributedFactorGraphs
 
@@ -111,18 +107,10 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                getSolverParams(fg).showtree = false
                getSolverParams(fg).limititers = 500
 
-                   # # debug pose chain weirdness
-                   # saveDFG(fg,scriptHeader * "fg_sas$(sas_counter)_weirdness")
-                   # if sas_counter == 2
-                   #   return fg
-                   # end
-
-               # HACK init last pose
-               lstpose = sortVarNested(ls(fg, r"x"))[end]
-               sndlst = setdiff(sortVarNested(ls(fg, r"x")), [lstpose;])[end]
-               pts = approxConv(fg, Symbol(string(sndlst, lstpose, "f1")), lstpose)
-               XX = manikde!(pts, getManifolds(fg, lstpose))
-               setValKDE!(fg, lstpose, XX)
+               lstpose = Symbol("x$(pose_counter)");
+               tmpInit = approxConv(fg,Symbol("x$(pose_counter-1)x$(pose_counter)f1"),lstpose);
+               XXkde = manikde!(tmpInit,getManifolds(fg,lstpose));
+               setValKDE!(fg,lstpose,XXkde);
 
                if sas_counter > 1
                    tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
@@ -173,7 +161,9 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                jldname2 = scriptHeader * "solve_$(sas_counter).jld"
                JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld)
 
-               saveDFG(fg,scriptHeader * "fg$(sas_counter)")
+               # saveDFG(fg,scriptHeader * "fg$(sas_counter)")
+
+               writedlm(scriptHeader*"stats.txt", [meanerror maxerror kld], ",")
 
                sas_counter +=1
                sas_gap_counter = 0
