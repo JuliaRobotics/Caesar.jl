@@ -68,8 +68,8 @@ for i=1:nsasfac
     addVariable!(fg, beacons[i], DynPoint2(ut=1_000_000+(i-1)*saswindow) )
 
     if i>1
-        dpμ = [1.0*saswindow/4;1*saswindow/4;1;1];
-        dpσ = Matrix(Diagonal([2.0;2;0;0].^2))
+        dpμ = [1.0*saswindow/4;1*saswindow/4;0;0];
+        dpσ = Matrix(Diagonal([2.0;2;0.2;0.2].^2))
         vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
         addFactor!(fg, [beacons[i-1];beacons[i]], vp, autoinit=false)
     end
