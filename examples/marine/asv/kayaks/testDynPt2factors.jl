@@ -92,9 +92,10 @@ wipeBuildNewTree!(fg, drawpdf=true, show=false)
 
 getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
+getSolverParams(fg).limititers=200
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=[:x3; :l1])
+tree, smt, hist = solveTree!(fg)
 
 drawTree(tree, filepath="/media/data1/data/kayaks/testbt.pdf")
 
