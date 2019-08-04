@@ -1,17 +1,13 @@
-# using Distributed
-# addprocs(5)
-
-using Caesar, RoME, Profile
+using Caesar, RoME, IncrementalInference
 using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting
 using KernelDensityEstimate
-using IncrementalInference
 using DocStringExtensions
 using DelimitedFiles, JLD
 
 include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
 
-expnum = 2;
+expnum = 1;
 if expnum == 1
     topdir = joinpath(ENV["HOME"],"data","kayaks","07_18")
     trialstr = "07_18_parsed_set1";
@@ -26,6 +22,7 @@ end
 cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml");
 chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
 cfgd=loadConfigFile(cfgFile)
+cfgd["range_snr_floor"]=0.9
 iload = load(ijldname)
 nrange = iload["nrange"]
 irange = iload["irange"];
@@ -115,8 +112,6 @@ push!(plk, Coord.cartesian(xmin=-40, xmax=100, ymin=-50, ymax=50,fixed=true))
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
 
 
-
-# Some Plotting
 plk= [];
 
 for sym in ls(fg) #plotting all syms labeled
@@ -124,12 +119,12 @@ for sym in ls(fg) #plotting all syms labeled
     push!(plk, layer(x=[X1[1];],y=[X1[2];],label=String["$sym";], Geom.point,Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
 end
 
-push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"green" )))
+push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"red" )))
 
 L1 = getVal(getVariable(fg, :l1))
 push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
 
-push!(plk, Coord.cartesian(xmin=40, xmax=100, ymin=-120, ymax=-50,fixed=true))
+# push!(plk, Coord.cartesian(xmin=40, xmax=100, ymin=-120, ymax=-50,fixed=true))
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf");
 
 
