@@ -28,7 +28,7 @@ nrange = iload["nrange"]
 irange = iload["irange"];
 itemp = readdlm(datadir*"/inav.csv",',',Float64,'\n', skipstart=1);
 
-wstart = 160; wlen = 16;
+wstart = 300; wlen = 16;
 dataframes = collect(nrange[wstart]:nrange[wstart]+wlen);
 
 irangenew = irange[wstart] : 5 : irange[wstart+wlen]
@@ -106,8 +106,8 @@ tree, smt, hist = solveTree!(fg)
 # plk = plotBeaconSolve(fg)
 plk=[];
 push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"green" )))
-push!(plk, Coord.cartesian(xmin=-40, xmax=100, ymin=-50, ymax=50,fixed=true))
+push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.point, Geom.path, Theme(default_color=colorant"blue")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"green" )))
+push!(plk, Coord.cartesian(xmin=50, xmax=150, ymin=-150, ymax=-50,fixed=true))
 
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
 
