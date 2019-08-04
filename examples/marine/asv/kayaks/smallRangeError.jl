@@ -36,12 +36,12 @@ for sym in poses
   addVariable!(fg, sym, Point2)
 end
 
-priors = [1,8] # [1,9]
+priors = [1,8]
 rtkCov = Matrix(Diagonal([0.1;0.1].^2))
 #Priors
 for i in priors
     pp = PriorPoint2(MvNormal(posData[i,:], rtkCov))
-    addFactor!(fg, [Symbol("x$i");], pp, autoinit=false)
+    addFactor!(fg, [Symbol("x$i");], pp, autoinit=true)
 end
 
 vps = 1:wlen-1
@@ -50,7 +50,7 @@ for i in vps
     dx = dposData[i+1,1] - dposData[i,1];
     dy = dposData[i+1,2] - dposData[i,2];
     p2p2 = Point2Point2(MvNormal([dx;dy],dpσ))
-    addFactor!(fg, [Symbol("x$i");Symbol("x$(i+1)")], p2p2, autoinit=false)
+    addFactor!(fg, [Symbol("x$i");Symbol("x$(i+1)")], p2p2, autoinit=true)
 end
 
 beacon = :l1
@@ -65,50 +65,16 @@ for i in rangewindow
 end
 
 writeGraphPdf(fg, engine="neato")
-# wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
-getSolverParams(fg).drawtree = true
+wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
+# getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
 
+## solve the factor graph , recordcliqs=[:x1; :l1; :x8]
+tree, smt, hist = solveTree!(fg)
 
-## solve the factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
-
-
-
-
-
-
-
-
-
-plk= [];
-
-for sym in poses #plotting all syms labeled
-    X1 = getKDEMean(getVertKDE(fg,sym))
-    push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Geom.label, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
-    K1 = plotKDEContour(getVertKDE(fg,sym),xlbl="", ylbl="",levels=2,layers=true);
-    push!(plk,K1...)
-    push!(plk,Gadfly.Theme(key_position = :none));
-end
-push!(plk, Coord.cartesian(xmin=20, xmax=50, ymin=-60, ymax=-30,fixed=true))
-plkplot = Gadfly.plot(plk...)
-
-
-
-
-
-
-
-
-
-
-
-drawTree(tree, imgs=true)
-treeProductUp(fg, tree, :x4, :x4)
-
-using FunctionalStateMachine
-using IncrementalInference
-csmAnimate(fg,tree,[:x1; :l1; :x8])
+# using FunctionalStateMachine
+# using IncrementalInference
+# csmAnimate(fg,tree,[:x1; :l1; :x8])
 
 # Debugging here
 
@@ -145,19 +111,21 @@ plk= [];
 
 for sym in poses #plotting all syms labeled
     X1 = getKDEMean(getVertKDE(fg,sym))
-    push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
-    # push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Geom.label, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
+    push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Geom.label, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
     K1 = plotKDEContour(getVertKDE(fg,sym),xlbl="", ylbl="",levels=2,layers=true);
     push!(plk,K1...)
     push!(plk,Gadfly.Theme(key_position = :none));
 end
+push!(plk, Coord.cartesian(xmin=20, xmax=60, ymin=-60, ymax=-30,fixed=true))
+plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf");
 
-igt = [17.0499;1.7832];
-
-push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon Ground Truth";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt)));
-
-X1 = approxConv(fg,:x4l1f1,:l1,N=200)
-push!(plk,layer(x=X1[1,:],y=X1[2,:],Geom.histogram2d(xbincount=400, ybincount=400)))
+#
+# igt = [17.0499;1.7832];
+#
+# push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon Ground Truth";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red",highlight_width = 0pt)));
+#
+# X1 = approxConv(fg,:x4l1f1,:l1,N=200)
+# push!(plk,layer(x=X1[1,:],y=X1[2,:],Geom.histogram2d(xbincount=400, ybincount=400)))
 # K1 = plotKDEContour(kde!(X1),xlbl="X (m)", ylbl="Y (m)",levels=4,layers=true);
 # push!(plk,K1...)
 # push!(plk,Gadfly.Theme(key_position = :none));
@@ -168,11 +136,8 @@ push!(plk,layer(x=X1[1,:],y=X1[2,:],Geom.histogram2d(xbincount=400, ybincount=40
 # K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=6,layers=true);
 # push!(plk,K1...)
 # push!(plk,Gadfly.Theme(key_position = :none));
-push!(plk, Coord.cartesian(xmin=-40, xmax=120, ymin=-120, ymax=25,fixed=true))
-push!(plk, Guide.xlabel("X (m)"),Guide.ylabel("Y (m)"))
+# push!(plk, Guide.xlabel("X (m)"),Guide.ylabel("Y (m)"))
 # push!(plk, Coord.cartesian(xmin=35, xmax=45, ymin=-50, ymax=-35,fixed=true))
-plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf");
-Gadfly.set_default_plot_size(35cm,25cm)
 
 
 
@@ -198,3 +163,20 @@ plotKDE(fg, ls(fg,r"x"), dims=[1;2])
 
 stuff = IncrementalInference.localproduct(fg, :x1)
 pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
+
+
+
+
+
+## plotting for dehann
+# plk= [];
+#
+# for sym in poses #plotting all syms labeled
+#     X1 = getKDEMean(getVertKDE(fg,sym))
+#     push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Geom.label, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
+#     K1 = plotKDEContour(getVertKDE(fg,sym),xlbl="", ylbl="",levels=2,layers=true);
+#     push!(plk,K1...)
+#     push!(plk,Gadfly.Theme(key_position = :none));
+# end
+# push!(plk, Coord.cartesian(xmin=20, xmax=50, ymin=-60, ymax=-30,fixed=true))
+# plkplot = Gadfly.plot(plk...)
