@@ -30,7 +30,7 @@ function plotPriors!(plHolderIn,fg)
         for myfac in ls(fg,mysym)
             if occursin(r"^x\df",string(myfac))
                 xData = getKDEMax(getVertKDE(fg,mysym))
-                push!(plHolderIn,plotPoint(xData,colorIn=colorant"green2",order=2))
+                push!(plHolderIn,plotPoint(xData,colorIn=colorant"green2",orderIn=2))
             end
         end
     end
