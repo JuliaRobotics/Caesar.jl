@@ -1,6 +1,3 @@
-using Distributed
-addprocs(5)
-
 using Caesar, RoME, IncrementalInference
 using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting, Cairo, Fontconfig
 using KernelDensityEstimate
