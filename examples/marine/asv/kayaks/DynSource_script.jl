@@ -7,7 +7,7 @@ using DelimitedFiles, JLD
 include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
 
-expnum = 1;
+expnum = 2;
 if expnum == 1
     topdir = joinpath(ENV["HOME"],"data","kayaks","07_18")
     trialstr = "07_18_parsed_set1";
@@ -29,10 +29,15 @@ nrange = iload["nrange"]
 irange = iload["irange"];
 itemp = readdlm(datadir*"/inav.csv",',',Float64,'\n', skipstart=1);
 
-wstart = 80; wlen = 25;
+wstart = 190; wlen = 25;
 dataframes = collect(nrange[wstart]:nrange[wstart]+wlen);
 
-irangenew = irange[wstart] : 5 : irange[wstart+wlen]
+saswindow = 5;
+sasstart = 1;
+nsasfac = 5;
+sasdataframes = [zeros(Int,saswindow) for _ in 1:nsasfac];
+sasposes = [];
+irangenew = irange[wstart] : 5 : irange[wstart+nsasfac]
 igt = [itemp[irangenew,2] itemp[irangenew,4]];
 
 poses = [Symbol("x$i") for i in 1:wlen]
@@ -43,13 +48,7 @@ navchecked, errorind = sanitycheck_nav(posData)
 # cumulativeDrift!(dposData,[0.0;0],[0.1,0.1])
 
 # Check the trajectory
-posPl = Gadfly.plot(layer(x=posData[:,1],y=posData[:,2], Geom.point, Theme(default_color=colorant"green")),layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"red" ))); posPl |> PDF("/tmp/test.pdf");
-
-saswindow = 5;
-sasstart = 1;
-nsasfac = 5;
-sasdataframes = [zeros(Int,saswindow) for _ in 1:nsasfac];
-sasposes = [];
+posPl = Gadfly.plot(layer(x=posData[:,1],y=posData[:,2], Geom.point, Geom.path, Theme(default_color=colorant"green",highlight_width = 0pt)),layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"red" ,highlight_width = 0pt))); posPl |> PDF("/tmp/test.pdf");
 
 for i=1:nsasfac
     framestart = nrange[wstart]+sasstart-1+(i-1)*saswindow;
@@ -66,6 +65,7 @@ for i in 1:wlen
 end
 
 beacons = [Symbol("l$j") for j in 1:nsasfac]
+
 for i=1:nsasfac
     addVariable!(fg, beacons[i], DynPoint2(ut=1_000_000+(i-1)*saswindow) )
 
@@ -80,6 +80,11 @@ for i=1:nsasfac
     sas2d = prepareSAS2DFactor(saswindow, waveformData, rangemodel=:Correlator,
                                cfgd=cfgd, chirpFile=chirpFile)
     addFactor!(fg, [beacons[i];sasposes[i]], sas2d, autoinit=false)
+    @show currfac = ls(fg,beacons[i])[1]
+
+    tmpInit = approxConv(fg,currfac,beacons[i]);
+    XXkde = manikde!(tmpInit,getManifolds(fg,beacons[i]));
+    setValKDE!(fg,beacons[i],XXkde);
 end
 
 # visualization tools for debugging
@@ -90,7 +95,6 @@ getSolverParams(fg).limititers=500
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg)
 tree, smt, hist = solveTree!(fg)
 
 # Some Debuggging
@@ -104,13 +108,13 @@ for sym in ls(fg) #plotting all syms labeled
     push!(plk, layer(x=[X1[1];],y=[X1[2];],label=String["$sym";], Geom.point,Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
 end
 # push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.point, Geom.path, Theme(default_color=colorant"blue")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"green" )))
 
 K1 = plotKDEContour(kde!(getVal(fg,:l1)[1:2,:]),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
 push!(plk,K1...)
 push!(plk,Gadfly.Theme(key_position = :none));
-# push!(plk, Coord.cartesian(xmin=30, xmax=150, ymin=-170, ymax=-50,fixed=true))
 
+push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.point, Geom.path, Theme(default_color=colorant"blue")), layer(x=igt[:,1],y=igt[:,2], Geom.point, Geom.path, Theme(default_color=colorant"green" )))
+push!(plk, Coord.cartesian(xmin=0, xmax=100, ymin=-50, ymax=20,fixed=true))
 plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf")
 
 
