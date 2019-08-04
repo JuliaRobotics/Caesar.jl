@@ -20,6 +20,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
     datawindow = collect(datastart:dataend);
     allpaths = getPaths(expID,"dynsas", currloc = dataloc, trialID = trialID);
     scriptHeader = joinpath(allpaths[3],expID*"_fgap$(fgap)_gpsgap$(gps_gap)_swind$(saswindow)_f$(datastart)t$(dataend)_")
+    savefgHeader = joinpath(allpaths[3]*"_fg",expID*"_fgap$(fgap)_gpsgap$(gps_gap)_swind$(saswindow)_f$(datastart)t$(dataend)_")
 
     poses = Dict{Int,Array}();
     nav = Dict{Int,Array}();
@@ -170,7 +171,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                jldname2 = scriptHeader * "solve_$(sas_counter).jld"
                JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev)
 
-               saveDFG(fg,scriptHeader * "fg$(sas_counter)")
+               saveDFG(fg,savefgHeader * "fg$(sas_counter)")
 
                writedlm(scriptHeader*"stats.txt", [meanerror maxerror kld ev], ",")
 
