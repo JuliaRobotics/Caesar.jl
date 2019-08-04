@@ -19,6 +19,7 @@ allpaths = getPaths(expID,"range", trialID = 1);
 igt = loadGT(datawindow,expID,allpaths);
 mfin = loadRanges(datawindow,allpaths)
 posData = loadNav(datawindow,allpaths)
+dposData = deepcopy(posData)
 
 dposData = deepcopy(posData)
 cumulativeDrift!(dposData,[0.0;0],[0.2,0.2])
@@ -84,7 +85,7 @@ drawTree(tree,filepath = "/tmp/test.pdf")
 # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
 plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
 
-plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1], savedir="/tmp/caesar/test.pdf")
+plotSASDefault(fg,expID, posData,igt,dposData, datadir=allpaths[1], savedir="/tmp/caesar/test.pdf")
 run(`evince /tmp/caesar/test.pdf`)
 
 
@@ -121,7 +122,7 @@ if expID == "dock"
 elseif expID == "drift"
     push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
 end
-savefile = "/tmp/test.pdf"
+savefile = "/tmp/caesar/test.pdf"
 Gadfly.plot(plk...) |> PDF(savefile)
 
 plk= [];
