@@ -81,7 +81,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
            ydotf = dposData[pose_counter+1,2] - dposData[pose_counter,2];
            # dpμ = [xdotp;ydotp;xdotf-xdotp;ydotf-ydotp];
            dpμ = [xdotp;ydotp;0;0];
-           dpσ = Matrix(Diagonal([0.2;0.2;0.2;0.2].^2))
+           dpσ = Matrix(Diagonal([0.2;0.2;0.1;0.1].^2))
            vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
            addFactor!(fg, [Symbol("x$(pose_counter-1)");current_symbol], vp, autoinit=true)
            # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
@@ -169,16 +169,23 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                    dxt2 = (dposData[tmpi,1].-posData[tmpi,1]).^2;
                    dyt2 = (dposData[tmpi,2].-posData[tmpi,2]).^2;
                    evi += sum(sqrt.(dxt2+dyt2));
+
+                   if tmpi > 1
+                       dv = (rv[3,:].-(posData[tmpi,1]-posData[tmpi-1,1])).^2;
+                       dw = (rv[4,:].-(posData[tmpi,2]-posData[tmpi-1,2])).^2;
+                       es += sum(sqrt.(dv+dw));
+                   end
                end
                ev = ev./pose_counter;
                evi = evi./pose_counter;
+               es = es./(pose_counter-1);
 
                jldname2 = scriptHeader * "solve_$(sas_counter).jld"
-               JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev,"evi",ev)
+               JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev,"evi",ev, "es", es)
 
                saveDFG(fg,savefgHeader * "fg$(sas_counter)")
 
-               writedlm(scriptHeader*"stats$(sas_counter).txt", [meanerror maxerror kld evi ev], ",")
+               writedlm(scriptHeader*"stats$(sas_counter).txt", [pose_counter meanerror maxerror kld evi ev es], ",")
 
                sas_counter +=1
                sas_gap_counter = 0
