@@ -30,7 +30,7 @@ function plotPriors!(plHolderIn,fg)
         for myfac in ls(fg,mysym)
             if occursin(r"^x\df",string(myfac))
                 xData = getKDEMax(getVertKDE(fg,mysym))
-                push!(plHolderIn,plotPoint(xData,colorIn=colorant"green2"))
+                push!(plHolderIn,plotPoint(xData,colorIn=colorant"green2",orderIn=2))
             end
         end
     end
@@ -79,12 +79,12 @@ function plotKDEMeans!(plHolderIn,fg;regx::Regex=r"x")
     end
 end
 
-function plotPoint(pointIn::Array; colorIn = colorant"blue")
-    return layer(x=[pointIn[1];],y=[pointIn[2];],Geom.point,Theme(default_color=colorIn,point_size = 1.25pt,highlight_width = 0pt))
+function plotPoint(pointIn::Array; colorIn = colorant"blue", orderIn::Int=0)
+    return layer(x=[pointIn[1];],y=[pointIn[2];],Geom.point,order=orderIn, Theme(default_color=colorIn,point_size = 1pt,highlight_width = 0pt))
 end
 
 function plotPoints(pointsIn::Array;colorIn::String="blue")
-        return layer(x=pointsIn[:,1],y=pointsIn[:,2],Geom.point,Theme(default_color=colorant"blue",point_size = 1.25pt,highlight_width = 0pt))
+        return layer(x=pointsIn[:,1],y=pointsIn[:,2],Geom.point,Theme(default_color=colorant"blue",point_size = 1pt,highlight_width = 0pt))
 end
 
 function plotPath(pathIn::Array; colorIn = colorant"green")
