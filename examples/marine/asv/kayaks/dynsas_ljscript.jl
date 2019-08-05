@@ -161,6 +161,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
                ev = 0;
                evi = 0;
+               es = 0;
                for tmpi = 1:pose_counter
                    rv = getVal(fg,Symbol("x$tmpi"));
                    dxt = (rv[1,:].-posData[tmpi,1]).^2;
