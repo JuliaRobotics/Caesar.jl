@@ -126,6 +126,7 @@ getParent
 getSofttype
 getTreeAllFrontalSyms
 getTreeCliqSolveOrderUp
+getTreeCliqsSolverHistories
 getVal
 getVariable
 getVariableDim
