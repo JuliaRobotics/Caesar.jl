@@ -128,10 +128,10 @@ for sym in ls(fg) #plotting all landmarks labeled
     if occursin(r"l",string(sym))
         X1 = getKDEMax(getVertKDE(fg,sym))
         push!(plk, layer(x=[X1[1];],y=[X1[2];],label=String["$sym";], Geom.point,Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
+        L1pd = predictbelief(fg,sym,ls(fg, sym))
+        push!(plk,layer(x=L1pd[1,:],y=L1pd[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
     end
 end
-L1 = getVal(fg,:l1)
-push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
 
 # K1 = plotKDEContour(kde!(getVal(fg,:l1)[1:2,:]),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
 # push!(plk,K1...)

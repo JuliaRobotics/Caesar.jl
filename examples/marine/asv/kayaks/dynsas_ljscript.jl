@@ -160,20 +160,25 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                end
 
                ev = 0;
+               evi = 0;
                for tmpi = 1:pose_counter
                    rv = getVal(fg,Symbol("x$tmpi"));
                    dxt = (rv[1,:].-posData[tmpi,1]).^2;
                    dyt = (rv[2,:].-posData[tmpi,2]).^2;
                    ev += sum(sqrt.(dxt+dyt));
+                   dxt2 = (dposData[tmpi,1].-posData[tmpi,1]).^2;
+                   dyt2 = (dposData[tmpi,2].-posData[tmpi,2]).^2;
+                   evi += sum(sqrt.(dxt2+dyt2));
                end
                ev = ev./pose_counter;
+               evi = evi./pose_counter;
 
                jldname2 = scriptHeader * "solve_$(sas_counter).jld"
-               JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev)
+               JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev,"evi",ev)
 
                saveDFG(fg,savefgHeader * "fg$(sas_counter)")
 
-               writedlm(scriptHeader*"stats.txt", [meanerror maxerror kld ev], ",")
+               writedlm(scriptHeader*"stats$(sas_counter).txt", [meanerror maxerror kld evi ev], ",")
 
                sas_counter +=1
                sas_gap_counter = 0
