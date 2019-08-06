@@ -81,7 +81,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
            ydotf = dposData[pose_counter+1,2] - dposData[pose_counter,2];
            # dpμ = [xdotp;ydotp;xdotf-xdotp;ydotf-ydotp];
            dpμ = [xdotp;ydotp;0;0];
-           dpσ = Matrix(Diagonal([0.2;0.2;0.1;0.1].^2))
+           dpσ = Matrix(Diagonal([0.2;0.2;0.2;0.2].^2))
            vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
            addFactor!(fg, [Symbol("x$(pose_counter-1)");current_symbol], vp, autoinit=true)
            # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
