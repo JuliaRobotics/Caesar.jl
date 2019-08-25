@@ -56,11 +56,13 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
         end
     end
 
+    rangecounter = 0;
     rangewindow = window[1]:rangegap:window[end]
     for i in rangewindow
         sym = Symbol("x$i")
         ppR = Point2Point2Range(AliasingScalarSampler(mfin[:,1,i],exp.(mfin[:,2,i]),SNRfloor=0.8))
         addFactor!(fg, [sym;beacon], ppR, autoinit=false)
+        rangecounter += 1;
     end
 
     # writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
@@ -72,6 +74,8 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     # tree, smt = batchSolve!(fg,maxparallel=100)
 
     tree, smt, hist = solveTree!(fg, maxparallel=400)
+    println("Ended Script with $(rangecounter) range factors \n")
+
     # tree, smt, hist = solveTree!(fg, maxparallel=400)
     # drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
