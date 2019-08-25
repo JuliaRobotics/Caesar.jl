@@ -113,7 +113,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                getSolverParams(fg).drawtree = false
                getSolverParams(fg).showtree = false
                getSolverParams(fg).qfl = 3*sas_gap+5;
-               getSolverParams(fg).fixedlag = true
+               getSolverParams(fg).isfixedlag = true
                getSolverParams(fg).limititers = 500
 
                lstpose = Symbol("x$(pose_counter)");
