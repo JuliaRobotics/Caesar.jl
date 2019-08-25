@@ -19,6 +19,7 @@ elseif expnum==2
     datadir = joinpath(topdir,trialstr);
     ijldname = datadir * "/exp1" * ".jld"
 end
+
 cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml");
 chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
 cfgd=loadConfigFile(cfgFile)
