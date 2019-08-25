@@ -1,5 +1,5 @@
 using Caesar, RoME, IncrementalInference
-using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting, Cairo, Fontconfig
+using Gadfly, KernelDensityEstimatePlotting, Cairo, Fontconfig
 using KernelDensityEstimate
 using DocStringExtensions
 using DelimitedFiles, JLD, DistributedFactorGraphs
@@ -122,7 +122,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
                drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
-               plotSASDefault(fg,expID, posData,igt,dposData,datadir=allpaths[1],savedir=scriptHeader*"$sas_counter.pdf")
+               plotSASDefault(fg,expID, posData,igt,dposData,savedir=scriptHeader*"$sas_counter.pdf")
 
                if debug
                    plk = [];
@@ -181,10 +181,10 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                evi = evi./pose_counter;
                es = es./(pose_counter-1);
 
-               jldname2 = scriptHeader * "solve_$(sas_counter).jld"
-               JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev,"evi",ev, "es", es)
+               # jldname2 = scriptHeader * "solve_$(sas_counter).jld"
+               # JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev,"evi",ev, "es", es)
 
-               saveDFG(fg,savefgHeader * "fg$(sas_counter)")
+               # saveDFG(fg,savefgHeader * "fg$(sas_counter)")
 
                writedlm(scriptHeader*"stats$(sas_counter).txt", [pose_counter meanerror maxerror kld evi ev es], ",")
 

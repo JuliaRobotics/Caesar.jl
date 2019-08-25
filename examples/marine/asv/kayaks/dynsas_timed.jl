@@ -8,8 +8,8 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
 include(joinpath(@__DIR__,"expDataUtils.jl"))
 
-function redirIO()
-    txtio = open("/media/data1/data/kayaks/log"* expID *".txt","w")
+function redirIO(exptag::String)
+    txtio = open("/media/data1/data/kayaks/log"* expID *exptag*".txt","w")
     redirect_stdout(txtio)
     return txtio
 end
