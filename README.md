@@ -32,9 +32,13 @@ Click on the badges to follow web url links:
 | [RoMEPlotting.jl][rp-url] | ![][rp-stable] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] |
 | [~~CloudGraphs.jl~~][cloudgraphs-url] | ![][cg-stable] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] |
 
+# Get Involved and Code of Conduct
+
+This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the slack channel, Julia Discourse, or Github issues to get in touch.
+
 # Contributors
 
-We are grateful for many, many contributions within the Julia package ecosystem -- see the [`Manifest.toml` ](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Manifest.toml) and [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of contributions.
+We are grateful for many, many contributions within the Julia package ecosystem -- see the `Manifest.toml` and [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of contributions.
 
 Consider citing our work:
 
