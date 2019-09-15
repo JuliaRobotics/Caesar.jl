@@ -56,6 +56,9 @@ approxCliqMarginalUp!
 approxConv
 areCliqChildrenNeedDownMsg
 areCliqVariablesAllMarginalized
+assignTreeHistory!
+asyncTreeInferUp!
+attemptTreeSimilarClique
 batchSolve!
 blockCliqUntilChildrenHaveUpStatus
 buildSubgraphFromLabels
@@ -123,11 +126,16 @@ getParent
 getSofttype
 getTreeAllFrontalSyms
 getTreeCliqSolveOrderUp
+getTreeCliqsSolverHistories
 getVal
 getVariable
+getVariableDim
+getVariableInferredDim
+getVariableInferredDimFraction
 getVertKDE
 getUpMsgs
 getDwnMsgs
+hasCliq
 hasOrphans
 inferOverTree!
 inferOverTreeR!
@@ -189,5 +197,8 @@ writeGraphPdf
 resetVariableAllInitializations!
 showFactor
 showVariable
+solveCliq!
 solveTree!
 ```
+
+<!-- lsfPriors -->

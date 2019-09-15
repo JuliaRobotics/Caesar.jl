@@ -4,6 +4,10 @@
 
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
+# TEMP NOTICE
+
+2019/07 -- **COMPLETING MAJOR REFACTOR WHICH MIGHT BREAK LATEST DEV CODE AND EVEN LATEST TAGS, BUT SHOULD STABILIZE SOON WITH MUCH IMPROVED USER EXPERIENCE**. We are targeting IncrementalInference.jl (IIF) v0.8.x as new and improved with most of the transitions sandboxed in the IIF v0.7.x cycle -- IIF v0.7.x does work but has a few lock step updates with DistributedFactorGraphs.jl v0.2.x as some functionality is being transferred.  IIF is upstream to both RoME.jl, Caesar.jl, and Arena.jl.  Please open issues for comments or help.
+
 # Weblink Info
 
 Click on the badges to follow web url links:
@@ -28,9 +32,13 @@ Click on the badges to follow web url links:
 | [RoMEPlotting.jl][rp-url] | ![][rp-stable] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] |
 | [~~CloudGraphs.jl~~][cloudgraphs-url] | ![][cg-stable] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] |
 
+# Get Involved and Code of Conduct
+
+This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the slack channel, Julia Discourse, or Github issues to get in touch.
+
 # Contributors
 
-We are grateful for many, many contributions within the Julia package ecosystem -- see the [`Manifest.toml` ](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Manifest.toml) and [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of contributions.
+We are grateful for many, many contributions within the Julia package ecosystem -- see the `Manifest.toml` and [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of contributions.
 
 Consider citing our work:
 
@@ -68,7 +76,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [iif-build-img]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=master
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
-[iff-stable]: https://img.shields.io/badge/2019Q2-v0.7.x-green.svg
+[iff-stable]: https://img.shields.io/badge/2019Q3-v0.7.x-green.svg
 
 [kde-cov-img]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl/coverage.svg?branch=master
 [kde-cov-url]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl?branch=master
@@ -103,7 +111,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
 [dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2019Q2-v0.2.x-green.svg
+[dfg-stable]: https://img.shields.io/badge/2019Q3-v0.2.x-green.svg
 
 [amp-cov-img]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl/coverage.svg?branch=master
 [amp-cov-url]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl?branch=master
@@ -131,4 +139,4 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [rp-cov-url]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl?branch=master
 [rp-build-img]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl.svg?branch=master
 [rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
-[rp-stable]: https://img.shields.io/badge/2019Q2-v0.1.x-green.svg
+[rp-stable]: https://img.shields.io/badge/2019Q3-v0.1.x-green.svg
