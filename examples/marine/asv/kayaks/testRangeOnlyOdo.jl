@@ -1,4 +1,4 @@
-using Revise
+# using Revise
 
 using Caesar
 using KernelDensityEstimatePlotting
@@ -73,10 +73,13 @@ getSolverParams(fg).dbg = true
 
 
 ensureAllInitialized!(fg)
-tree, smt, hist = solveTree!(fg,maxparallel=200, recordcliqs=[:x19;:x169;:x166;:x134;:x171])
+tree, smt, hist = solveTree!(fg, maxparallel=200, recordcliqs=[:x19;:x169;:x166;:x134;:x171])
+
 
 fetchCliqTaskHistoryAll!(smt, hist)
 drawTree(tree, show=true)
+
+
 
 #Plotting
 
@@ -149,7 +152,7 @@ getCliq(tree, :x169)
 
 
 # fldr = "2019-09-01T12:25:09.297"
-fldr = "2019-09-02T12:29:03.747"
+fldr = "2019-09-08T22:16:41.83"
 # fg31_au = loadDFG("/tmp/caesar/"*fldr*"/cliqSubFgs/cliq31/fg_afterupsolve", Main)
 # fg31_bu = loadDFG("/tmp/caesar/"*fldr*"/cliqSubFgs/cliq31/fg_beforeupsolve", Main)
 
@@ -178,7 +181,7 @@ writeGraphPdf(sfg31bd, show=true)
 
 tree31s, smt31s, hist31s = solveTree!(sfg31bd)
 
-drawTree(tree31s, show=true, imgs=true)
+drawTree(tree, show=true, imgs=false)
 
 
 plotKDE(sfg31bd, ls(sfg31bd), levels=1)
@@ -204,5 +207,60 @@ setdiff!(lie, [:x169])
 fct = getFactor(sfg31bd, :x168x169f1)
 @show getFactorType(fct)
 getData(fct).fncargvID
+
+
+
+fct = getFactor(fg, :x168x169f1)
+getData(fct).fncargvID
+
+
+
+
+ste = 12
+csfg31bd = hist[31][ste][4].cliqSubFg
+plotKDE(csfg31bd, [:x168;:x169;:x170], levels=1)
+
+
+csmfg31bd = hist[31][ste][4].dfg
+plotKDE(csmfg31bd, [:x168;:x169;:x170], levels=1)
+
+
+
+getData(getFactor(csmfg31bd, :x168x169f1)).fncargvID
+getData(getFactor(csfg31bd, :x168x169f1)).fncargvID
+
+
+stuff = sandboxStateMachineStep(hist[31], 10)
+
+
+
+writeGraphPdf(csfg21bd, show=true)
+
+
+
+
+
+getCliq(tree, :x170)
+
+# what happened in the root
+
+printCliqHistorySummary(hist, tree, :x170)
+
+ste = 9
+csfg1bd = hist[1][ste][4].cliqSubFg
+plotKDE(csfg31bd, [:x168;:x169;:x170], levels=3)
+
+
+plotKDE(getCliqDownMsgsAfterDownSolve(fg, getCliq(tree,:x170))[:x170], levels=3)
+plotKDE(getCliqDownMsgsAfterDownSolve(fg, getCliq(tree,:x19))[:x170], levels=3)
+
+
+
+plotTreeProductDown(fg, tree, :x169, :x169)
+
+
+
+
+
 
 #
