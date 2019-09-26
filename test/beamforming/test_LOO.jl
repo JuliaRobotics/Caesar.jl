@@ -66,7 +66,7 @@ myCBF = zeros(Complex{Float64}, getCBFFilter2Dsize(cfg));
 lm = zeros(2);
 dataTempHolder = zeros(Complex{Float64},nPhones-1,nFFT_czt)
 delaysHolder = FFTfreqs;
-@time constructCBFFilter2D!(cfg, arrayLIE, myCBF, lm, dataTempHolder,delaysHolder)
+@time constructCBFFilter2D!(cfg, arrayLIE, myCBF, lm, dataTempHolder)
 
 # MF and CZT
 w = exp(-2im*pi*(fCeil-fFloor)/(nFFT_czt*fSampling))
@@ -104,7 +104,7 @@ dy = arrayLIE[1,2] - beacongt[2];
 azi = atan(dy,dx);
 cfgLIE = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones-1,[azi;],soundSpeed,FFTfreqs)
 myCBFLIE = zeros(Complex{Float64}, getCBFFilter2Dsize(cfgLIE));
-@time constructCBFFilter2D!(cfgLIE, arrayLIE, myCBFLIE, lm, dataTempHolder,delaysHolder)
+@time constructCBFFilter2D!(cfgLIE, arrayLIE, myCBFLIE, lm, dataTempHolder)
 
 #Try Correlation
 cztDataHolder = zeros(Complex{Float64},size(cztDataLIE));
@@ -169,7 +169,7 @@ dataOutHolder = zeros(Complex{Float64}, nFFT_czt);
 for aziInd in 1:length(azimuths)
     cfgLIE = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones-1,[azimuths[aziInd];],soundSpeed,FFTfreqs)
     myCBFLIE = zeros(Complex{Float64}, getCBFFilter2Dsize(cfgLIE));
-    constructCBFFilter2D!(cfgLIE, arrayLIE, myCBFLIE, lm, dataTempHolder,delaysHolder)
+    constructCBFFilter2D!(cfgLIE, arrayLIE, myCBFLIE, lm, dataTempHolder)
     cztDataHolder = zeros(Complex{Float64},size(cztDataLIE));
     liebf!(dataOutRes, cztDataLIE, myCBFLIE, 1, cztDataHolder, normalize=true)
 
