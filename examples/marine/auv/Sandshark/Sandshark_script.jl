@@ -22,7 +22,7 @@ include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[50:2:70]
+epochs = timestamps[50:3:500]
 lastepoch = 0
 for ep in epochs
   global lastepoch
@@ -56,135 +56,70 @@ addVariable!(fg, :l1, Point2)
 # Pinger location is (0.6; -16)
 addFactor!(fg, [:l1], PriorPose2( MvNormal([0.6; -16], Matrix(Diagonal([0.1; 0.1].^2)) ) ), autoinit=true)
 
-index = 0
-for ep in epochs
-    global index
-    curvar = Symbol("x$index")
-    addVariable!(fg, curvar, Pose2)
+# init tree for simpler code later down
+tree = wipeBuildNewTree!(fg)
 
-    # xi -> l1 - nonparametric factor
-    # addFactor!(fg, [curvar; :l1], ppbrDict[ep]) #  #Hierdie lyk soos die nagmerri, autoinit=true
+## and some settings
 
-    if ep != epochs[1]
-      # Odo factor x(i-1) -> xi
-      addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep], autoinit=true)
-    else
-      # Prior to the first pose location (a "GPS" prior)
-      initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
-      println("Adding a prior at $curvar, $initLoc")
-      addFactor!(fg, [curvar], PriorPose2( MvNormal(initLoc, Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=true)
-    end
-    # Heading partial prior
-    addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=true)
-    index+=1
-end
-
-
-# Just adding the first one...
-addFactor!(fg, [:x0; :l1], ppbrDict[epochs[1]], autoinit=true)
-
-addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=true)
-
-addFactor!(fg, [:x10; :l1], ppbrDict[epochs[11]], autoinit=true)
+# enable fixed lag operation
+getSolverParams(fg).isfixedlag = true
+getSolverParams(fg).qfl = 20
 
 # first solve and initialization
 getSolverParams(fg).drawtree = true
 # getSolverParams(fg).showtree = false
 
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+
+
+index = 0
+
+for STEP in 40:10:50
+    global tree
+    for ep in epochs[(STEP+1):(STEP+10)]
+      global index
+      curvar = Symbol("x$index")
+      addVariable!(fg, curvar, Pose2)
+
+      # xi -> l1 - nonparametric factor
+      if index % 5 == 0
+          addFactor!(fg, [curvar; :l1], ppbrDict[ep], autoinit=true)
+      end
+
+      if ep != epochs[1]
+        # Odo factor x(i-1) -> xi
+        addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep], autoinit=true)
+      else
+        # Prior to the first pose location (a "GPS" prior)
+        initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
+        println("Adding a prior at $curvar, $initLoc")
+        addFactor!(fg, [curvar], PriorPose2( MvNormal(initLoc, Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=true)
+      end
+      # Heading partial prior
+      addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=true)
+      index+=1
+    end
+    tree, smt, hist = solveTree!(fg, tree)
+    pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
+    pla |> PDF(joinpath(getSolverParams(fg).logpath, "sandshark-beacon_$STEP.pdf"))
+end
+
+
+
+
+
 
 # drawGraph(fg)
 
 drawPosesLandms(fg)
 
 
-# csmAnimate(fg, tree, getTreeAllFrontalSyms(fg, tree), frames=1000)
-# Base.rm("/tmp/caesar/csmCompound/out.ogv")
-# run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/csm_%d.png -c:v libtheora -vf fps=25 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`)
-# run(`totem /tmp/caesar/csmCompound/out.ogv`)
-
-
-addFactor!(fg, [:x13; :l1], ppbrDict[epochs[14]], autoinit=true)
-
-addFactor!(fg, [:x15; :l1], ppbrDict[epochs[16]], autoinit=true)
-
-addFactor!(fg, [:x17; :l1], ppbrDict[epochs[18]], autoinit=true)
-addFactor!(fg, [:x18; :l1], ppbrDict[epochs[19]], autoinit=true)
-addFactor!(fg, [:x19; :l1], ppbrDict[epochs[20]], autoinit=true)
-addFactor!(fg, [:x20; :l1], ppbrDict[epochs[21]], autoinit=true)
-# addFactor!(fg, [:x21; :l1], ppbrDict[epochs[22]]) # breaks it, autoinit=true!
-addFactor!(fg, [:x22; :l1], ppbrDict[epochs[23]], autoinit=true)
-addFactor!(fg, [:x23; :l1], ppbrDict[epochs[24]], autoinit=true)
-addFactor!(fg, [:x24; :l1], ppbrDict[epochs[25]], autoinit=true)
-addFactor!(fg, [:x25; :l1], ppbrDict[epochs[26]], autoinit=true)
-
-
-plotKDE(ppbrDict[epochs[22]].bearing)
-plotKDE(ppbrDict[epochs[22]].range)
-
-plotKDE(ppbrDict[epochs[23]].bearing)
-plotKDE(ppbrDict[epochs[23]].range)
-
-
-plotKDE([ppbrDict[epochs[21]].bearing; ppbrDict[epochs[22]].bearing; ppbrDict[epochs[23]].bearing], c=["red";"black";"green"])
-plotKDE([ppbrDict[epochs[21]].range; ppbrDict[epochs[22]].range; ppbrDict[epochs[23]].range], c=["red";"black";"green"])
-
-
-writeGraphPdf(fg, engine="dot")
-
-tree, smt, hist = solveTree!(fg, tree)
-
-drawPosesLandms(fg)
-
-ls(fg, :l1)
-drawTree(tree, imgs=true)
-
-# IIF.wipeBuildNewTree!(fg, drawpdf=true)
-# run(`evince bt.pdf`)
-# run(`evince /tmp/caesar/bt.pdf`)
-
-# And I'll redefine anywhere
-# Anywhere I RoME
-# Where I lay my head is home
-# Carved upon my stone
-# My body lies, but still I RoME :D
-endDogLeg = [interp_x[epochs[end]]; interp_y[epochs[end]]]
-estDogLeg = [get2DPoseMeans(fg)[1][end]; get2DPoseMeans(fg)[2][end]]
-endDogLeg - estDogLeg
-
-drawPosesLandms(fg)
-
-
-
-ls(fg, :x25)
-
-#To Boldly Believe... The Good, the Bad, and the Unbeliefable
-X25 = getKDE(getVariable(fg, :x25))
-
-# i
-pts, = predictbelief(fg, :x21, [:x20x21f1; :x21l1f1])
-plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
-
-
-pts, = predictbelief(fg, :x25, :)
-plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
-plotKDE([kde!(pts);X25], dims=[3], levels=1, c=["red";"green"])
-
-
-# Solvery! Roll dice for solvery check
-# writeGraphPdf(fg)
-# ensureAllInitialized!(fg)
-t = string(now())
-savejld(fg, file="presolve_$t.jld")
-IIF.batchSolve!(fg) #, N=100
-savejld(fg, file="postsolve_$t.jld")
 
 # pl = drawPoses(fg, spscale=2.75) # Just for odo plot
 # Roll again for inspiration check
 ## PLOT BEAM PATTERNS
-Gadfly.push_theme(:default)
-pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
+# Gadfly.push_theme(:default)
+
 Gadfly.draw(PDF("sandshark-beacon_$t.pdf", 12cm, 15cm), pla)
 Gadfly.draw(PNG("sandshark-beacon_$t.png", 12cm, 15cm), pla)
 

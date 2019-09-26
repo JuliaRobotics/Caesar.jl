@@ -13,7 +13,7 @@ function loaddircsvs(datadir)
     for file in files
       # println(joinpath(root, file)) # path to files
       data = readdlm(joinpath(root, file),',')
-      datadict[parse(Int,split(file,'.')[1])/1000000] = data
+      datadict[parse(Int,split(file,'.')[1])/1] = data
     end
   end
   return datadict
@@ -29,7 +29,7 @@ navdata = Dict{Int, Vector{Float64}}()
 navfile = readdlm(joinpath(datadir, "nav_data.csv"))
 for row in navfile
     s = split(row, ",")
-    id = round(Int, 1000*parse(Float64, s[1]))
+    id = round(Int, 1e9*parse(Float64, s[1]))
     # round(Int, 1000 * parse(s[1])) = 1531153292381
     navdata[id] = parse.(Float64,s)
 end
@@ -43,13 +43,19 @@ lbldata = Dict{Int,  Vector{Float64}}()
 lblfile = readdlm(joinpath(datadir, "lbl.csv"))
 for row in lblfile
     s = split(row, ",")
-    id = round(Int, 1000*parse(Float64, s[1]))
+    id = round(Int, 1e9*parse(Float64, s[1]))
     if s[2] != "NaN"
         lbldata[id] = parse.(Float64, s)
     end
 end
 lblkeys = sort(collect(keys(lbldata)))
 
+
+
+# function heading2yaw(heading)
+# heading = map( x->deg2rad(navdata[x][4]), navkeys )
+# wrapheading = TU.wrapRad.(heading)
+# end
 
 # GET Y = north,  X = East,  Heading along +Y clockwise [0,360)]
 # east = Float64[]
@@ -68,16 +74,16 @@ for id in navkeys
   # push!(heading, getindex(navdata[id],4))
   # push!(yaw, TU.wrapRad(-deg2rad(getindex(navdata[id],4))))
 
-  push!(X, getindex(navdata[id],8) )
-  push!(Y, -getindex(navdata[id],7) )
-  push!(yaw, TU.wrapRad(-deg2rad(getindex(navdata[id],4))) )  # rotation about +Z
+  push!(X, getindex(navdata[id],7) ) # 8
+  push!(Y, getindex(navdata[id],8) ) # 7
+  push!(yaw, TU.wrapRad(pi/2-deg2rad(getindex(navdata[id],4))) )  # rotation about +Z
 end
 
 lblX = Float64[]
 lblY = Float64[]
 for id in lblkeys
-    push!(lblX, getindex(lbldata[id],3) )
-    push!(lblY, -getindex(lbldata[id],2) )
+    push!(lblX, getindex(lbldata[id],2) )
+    push!(lblY, getindex(lbldata[id],3) )
 end
 
 # Build interpolators for x, y, yaw
@@ -89,3 +95,14 @@ interp_yaw = LinearInterpolation(navkeys, yaw)
 ppbrDict = Dict{Int, Pose2Point2BearingRange}()
 odoDict = Dict{Int, Pose2Pose2}()
 NAV = Dict{Int, Vector{Float64}}()
+
+
+
+
+
+## what what
+
+# Gadfly.plot(y=180/pi.*yaw, Geom.path)
+
+
+#
