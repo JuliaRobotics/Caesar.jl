@@ -1,8 +1,9 @@
-# using Distributed
+
+using Distributed
 # addprocs(8)
 
 using Caesar
-# @everywhere using Caesar
+@everywhere using Caesar
 using DelimitedFiles, JLD
 using IncrementalInference
 using KernelDensityEstimatePlotting, RoMEPlotting
@@ -149,11 +150,8 @@ stuff = getCliqChildMsgsUp(tree, getCliq(tree, :l1), BallTreeDensity)
 
 stuff = IIF.getUpMsgs(getCliq(tree, :l1))
 
+
 plotKDE(fg, :l1)
-
-
-
-
 
 
 #PLOTTING ------------

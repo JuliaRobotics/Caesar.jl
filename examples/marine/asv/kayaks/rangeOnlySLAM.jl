@@ -83,13 +83,14 @@ drawTree(tree,filepath = "/tmp/test.pdf")
 # tree, smt = batchSolve!(fg,maxparallel=100)
 # fg2 = deepcopy(fg)
 # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
-plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
 
+# plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
 plotSASDefault(fg,expID, posData,igt,dposData, datadir=allpaths[1], savedir="/tmp/caesar/test.pdf")
 run(`evince /tmp/caesar/test.pdf`)
 
 
 #PLOTTING ------------
+
 plk= [];
 push!(plk,plotBeaconGT(igt));
 plotBeaconContours!(plk,fg);

@@ -8,6 +8,12 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
 include(joinpath(@__DIR__,"expDataUtils.jl"))
 
+function redirIO(exptag::String)
+    txtio = open("/media/data1/data/kayaks/log"* expID *exptag*".txt","w")
+    redirect_stdout(txtio)
+    return txtio
+end
+
 function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::Int; saswindow::Int=8, trialID::Int=1, debug::Bool=false, dataloc::String="lj")
     ## Default parameters
     println("Start Script\n")
@@ -106,6 +112,8 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
                getSolverParams(fg).drawtree = false
                getSolverParams(fg).showtree = false
+               getSolverParams(fg).qfl = 3*sas_gap+5;
+               getSolverParams(fg).isfixedlag = true
                getSolverParams(fg).limititers = 500
 
                lstpose = Symbol("x$(pose_counter)");
@@ -113,80 +121,81 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                XXkde = manikde!(tmpInit,getManifolds(fg,lstpose));
                setValKDE!(fg,lstpose,XXkde);
 
+               println("Solving at SAS-F: $(sas_counter), Pos: $(pose_counter) \n");
                if sas_counter > 1
-                   tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
+                   @time tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
                else
-                   tree, smt, hist = solveTree!(fg, maxparallel=400)
+                   @time tree, smt, hist = solveTree!(fg, maxparallel=400)
                end
 
-               writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
-               drawTree(tree, filepath=scriptHeader*"bt.pdf")
+               # writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
+               # drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
-               plotSASDefault(fg,expID, posData,igt,dposData,savedir=scriptHeader*"$sas_counter.pdf")
-
-               if debug
-                   plk = [];
-                   push!(plk,plotBeaconGT(igt));
-                   plotBeaconContours!(plk,fg);
-                   for mysym in poses[sas_counter]
-                       xData = getKDEMax(getVertKDE(fg,mysym))
-                       push!(plk, plotPoint(xData,colorIn=colorant"orange"))
-                   end
-                   L1p = approxConv(fg,ls(fg,:l1)[end],:l1);
-                   push!(plk,layer(x=L1p[1,:],y=L1p[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-                   Gadfly.plot(plk...) |> PDF(scriptHeader*"debug$sas_counter.pdf");
-               end
-
-               if expID == "dock"
-                   l1fit = getKDEMean(getVertKDE(fg,:l1))
-                   meanerror = sqrt((igt[1]-l1fit[1])^2+(igt[2]-l1fit[2])^2)
-
-                   l1max = getKDEMax(getVertKDE(fg,:l1))
-                   maxerror = sqrt((igt[1]-l1max[1])^2+(igt[2]-l1max[2])^2)
-
-                   mykde = getVertKDE(fg,:l1)
-                   mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
-                   kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
-               elseif expID == "drift"
-                   l1fit = getKDEMean(getVertKDE(fg,:l1))
-                   meanerror = sqrt((mean(igt[:,1])-l1fit[1])^2+(mean(igt[:,2])-l1fit[2])^2)
-
-                   l1max = getKDEMax(getVertKDE(fg,:l1))
-                   maxerror = sqrt((mean(igt[:,1])-l1max[1])^2+(mean(igt[:,2])-l1max[2])^2)
-
-                   mykde = getVertKDE(fg,:l1)
-                   mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
-                   kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
-               end
-
-               ev = 0;
-               evi = 0;
-               es = 0;
-               for tmpi = 1:pose_counter
-                   rv = getVal(fg,Symbol("x$tmpi"));
-                   dxt = (rv[1,:].-posData[tmpi,1]).^2;
-                   dyt = (rv[2,:].-posData[tmpi,2]).^2;
-                   ev += sum(sqrt.(dxt+dyt));
-                   dxt2 = (dposData[tmpi,1].-posData[tmpi,1]).^2;
-                   dyt2 = (dposData[tmpi,2].-posData[tmpi,2]).^2;
-                   evi += sum(sqrt.(dxt2+dyt2));
-
-                   if tmpi > 1
-                       dv = (rv[3,:].-(posData[tmpi,1]-posData[tmpi-1,1])).^2;
-                       dw = (rv[4,:].-(posData[tmpi,2]-posData[tmpi-1,2])).^2;
-                       es += sum(sqrt.(dv+dw));
-                   end
-               end
-               ev = ev./pose_counter;
-               evi = evi./pose_counter;
-               es = es./(pose_counter-1);
-
-               # jldname2 = scriptHeader * "solve_$(sas_counter).jld"
-               # JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev,"evi",ev, "es", es)
-
-               # saveDFG(fg,savefgHeader * "fg$(sas_counter)")
-
-               writedlm(scriptHeader*"stats$(sas_counter).txt", [pose_counter meanerror maxerror kld evi ev es], ",")
+               # plotSASDefault(fg,expID, posData,igt,dposData,savedir=scriptHeader*"$sas_counter.pdf")
+               #
+               # if debug
+               #     plk = [];
+               #     push!(plk,plotBeaconGT(igt));
+               #     plotBeaconContours!(plk,fg);
+               #     for mysym in poses[sas_counter]
+               #         xData = getKDEMax(getVertKDE(fg,mysym))
+               #         push!(plk, plotPoint(xData,colorIn=colorant"orange"))
+               #     end
+               #     L1p = approxConv(fg,ls(fg,:l1)[end],:l1);
+               #     push!(plk,layer(x=L1p[1,:],y=L1p[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
+               #     Gadfly.plot(plk...) |> PDF(scriptHeader*"debug$sas_counter.pdf");
+               # end
+               #
+               # if expID == "dock"
+               #     l1fit = getKDEMean(getVertKDE(fg,:l1))
+               #     meanerror = sqrt((igt[1]-l1fit[1])^2+(igt[2]-l1fit[2])^2)
+               #
+               #     l1max = getKDEMax(getVertKDE(fg,:l1))
+               #     maxerror = sqrt((igt[1]-l1max[1])^2+(igt[2]-l1max[2])^2)
+               #
+               #     mykde = getVertKDE(fg,:l1)
+               #     mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
+               #     kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
+               # elseif expID == "drift"
+               #     l1fit = getKDEMean(getVertKDE(fg,:l1))
+               #     meanerror = sqrt((mean(igt[:,1])-l1fit[1])^2+(mean(igt[:,2])-l1fit[2])^2)
+               #
+               #     l1max = getKDEMax(getVertKDE(fg,:l1))
+               #     maxerror = sqrt((mean(igt[:,1])-l1max[1])^2+(mean(igt[:,2])-l1max[2])^2)
+               #
+               #     mykde = getVertKDE(fg,:l1)
+               #     mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
+               #     kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
+               # end
+               #
+               # ev = 0;
+               # evi = 0;
+               # es = 0;
+               # for tmpi = 1:pose_counter
+               #     rv = getVal(fg,Symbol("x$tmpi"));
+               #     dxt = (rv[1,:].-posData[tmpi,1]).^2;
+               #     dyt = (rv[2,:].-posData[tmpi,2]).^2;
+               #     ev += sum(sqrt.(dxt+dyt));
+               #     dxt2 = (dposData[tmpi,1].-posData[tmpi,1]).^2;
+               #     dyt2 = (dposData[tmpi,2].-posData[tmpi,2]).^2;
+               #     evi += sum(sqrt.(dxt2+dyt2));
+               #
+               #     if tmpi > 1
+               #         dv = (rv[3,:].-(posData[tmpi,1]-posData[tmpi-1,1])).^2;
+               #         dw = (rv[4,:].-(posData[tmpi,2]-posData[tmpi-1,2])).^2;
+               #         es += sum(sqrt.(dv+dw));
+               #     end
+               # end
+               # ev = ev./pose_counter;
+               # evi = evi./pose_counter;
+               # es = es./(pose_counter-1);
+               #
+               # # jldname2 = scriptHeader * "solve_$(sas_counter).jld"
+               # # JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev,"evi",ev, "es", es)
+               #
+               # # saveDFG(fg,savefgHeader * "fg$(sas_counter)")
+               #
+               # writedlm(scriptHeader*"stats$(sas_counter).txt", [pose_counter meanerror maxerror kld evi ev es], ",")
 
                sas_counter +=1
                sas_gap_counter = 0
@@ -202,19 +211,3 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
    println("This Solve was saved under: "*scriptHeader)
    return fg
 end
-
-
-
-
-# main("drift", 1550,1580,2,49)
-#
-# fg = main("drift", 1550,1580,5,49)
-#
-# main("drift", 1550,1600,5,49)
-#
-# fg = main("drift", 1550,1800,5,49)
-#
-
-# fg = main("dock", 410,700,22,120)
-
-# fg = main("dock", 410,700,40,120)
