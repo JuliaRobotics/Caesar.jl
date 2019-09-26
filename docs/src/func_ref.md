@@ -85,7 +85,7 @@ doCliqAutoInitUp!
 doCliqUpSolve!
 downGibbsCliqueDensity
 downMsgPassingRecursive
-drawCliqSubgraphUp
+drawCliqSubgraphUpMocking
 dwnMsg
 encodefg
 fifoFreeze!
@@ -187,7 +187,7 @@ transferUpdateSubGraph!
 treeProductDwn
 treeProductUp
 unfreezeVariablesAll!
-unmarginalizeVariablesAll!
+dontMarginalizeVariablesAll!
 updateFGBT!
 updateTreeCliquesAsMarginalizedFromVars!
 upGibbsCliqueDensity
