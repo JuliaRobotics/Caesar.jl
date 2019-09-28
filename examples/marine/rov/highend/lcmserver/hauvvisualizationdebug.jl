@@ -185,7 +185,7 @@ plotKDE(fgnew, :x2, dims=[6;3], title="$(veeEuler(wTx2))")
 
 visualizeallposes!(vis, fgnew)
 
-pp, parr, par, = localProduct(fgnew, :x2, api=localapi)
+pp, parr, par, lb, infdim = localProduct(fgnew, :x2)
 plotKDE(pp, dims=[6;3], title="$(veeEuler(wTx2))")
 # plotLocalProduct(fgnew, :x2, dims=[6;3], api=localapi)
 

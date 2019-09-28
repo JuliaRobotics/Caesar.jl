@@ -1,3 +1,4 @@
+using DistributedFactorGraphs
 
 mutable struct SASDebug
   beams::Vector{Vector{Float64}}
@@ -190,10 +191,6 @@ function (sas2d::SASBearing2D)(
   res[1]
 end
 
-
-
-
-
 function reset!(dbg::SASDebug)
   dbg.beams = [Float64[];]
   dbg.azi_smpls = Float64[]
@@ -209,37 +206,109 @@ end
 
 
 mutable struct PackedSASBearing2D <: IncrementalInference.PackedInferenceType
+    rangemodel::String
     totalPhones::Int
     wavedataRawV::Vector{Float64}
     wavedataRawV_dim::Int
-    cfg_json::String
+    cfgJson::String
+    cfgTotal::String
+    cfgLIE::String
+    waveformsInReal::Vector{Float64}
+    waveformsInIm::Vector{Float64}
     PackedSASBearing2D() = new()
-    PackedSASBearing2D(tp::Int, wd::Array{Float64,2}, cf::Dict) = new(tp, wd[:], size(wd,1), JSON.json(cf) )
+    PackedSASBearing2D(rangemodel::String, tp::Int, wavedataRawV::Vector{Float64}, wavedataRawV_dim::Int, cfgJson::String, cfgTotal::String, cfgLIE::String, waveformsInReal::Vector{Float64}, waveformsInIm::Vector{Float64}) = new(rangemodel, tp, wavedataRawV, wavedataRawV_dim, cfgJson, cfgTotal, cfgLIE, waveformsInReal, waveformsInIm)
+    PackedSASBearing2D(rangemodel::String, tp::Int, wd::Array{Float64,2}, cf::Dict, cfgTotal::String, cfgLIE::String, waveformsInReal::Vector{Float64}, waveformsInIm::Vector{Float64}) = new(rangemodel, tp, wd[:], size(wd,1), JSON2.write(cf), cfgTotal, cfgLIE, waveformsInReal, waveformsInIm)
 end
 
-function convert(::Type{PackedSASBearing2D}, d::SASBearing2D)
-  PackedSASBearing2D(size(d.waveformsRaw,2), d.waveformsRaw, d.cfg)
+# Note: Need this otherwise it uses a default converter and causes type conversion issues.
+# Safest to just do it here to guarantee it's done.
+import Base.convert
+
+function convert(::Type{PackedSASBearing2D}, d::SASBearing2D)::PackedSASBearing2D
+  # range model is vector, packing it cleanly
+  rangeString = ""
+  if typeof(d.rangemodel) == Vector{AliasingScalarSampler}
+    rangeString = JSON.json(map(rm -> string(rm), d.rangemodel))
+  else
+    error("Can't pack range model of type $(typeof(d.rangemodel)) yet.")
+  end
+
+  cfgTotalJson = JSON2.write(d.cfgTotal)
+  cfgLIEJson = JSON2.write(d.cfgLIE)
+  waveformsInReal = map(r -> real(r), d.waveformsIn[:])
+  waveformsInIm = map(r -> imag(r), d.waveformsIn[:])
+  totalPhones = size(d.waveformsRaw,2)
+  pPacked = PackedSASBearing2D(rangeString, totalPhones, d.waveformsRaw, d.cfg, cfgTotalJson, cfgLIEJson, waveformsInReal, waveformsInIm)
+  return pPacked
 end
 
-function convert(::Type{SASBearing2D}, d::PackedSASBearing2D)
-  prepareSAS2DFactor(d.totalPhones, reshape(d.wavedataRawV,d.wavedataRawV_dim,:), cfgd=JSON.parse(d.cfg_json))
+function convert(::Type{SASBearing2D}, d::PackedSASBearing2D)::SASBearing2D
+  rangePacked = JSON2.read(d.rangemodel)
+  rangeModel = map(r -> extractdistribution(r), rangePacked)
+  cfgJson = JSON2.read(d.cfgJson, Dict)
+  cfgTotal = JSON2.read(d.cfgTotal, CBFFilterConfig)
+  cfgLIE = JSON2.read(d.cfgLIE, CBFFilterConfig)
+  waveformsIn = map(i -> Complex{Float64}(d.waveformsInReal[i], d.waveformsInIm[i]), 1:(length(d.waveformsInReal)))
+  waveformsIn = reshape(waveformsIn, Int(length(waveformsIn)/d.totalPhones), :)
+
+  sas2d = SASBearing2D()
+  sas2d.rangemodel = rangeModel
+  sas2d.cfg = cfgJson
+  sas2d.cfgTotal = cfgTotal
+  sas2d.cfgLIE = cfgLIE
+  sas2d.waveformsIn = waveformsIn
+  sas2d.debugging = false
+  sas2d.waveformsRaw = reshape(d.wavedataRawV, d.wavedataRawV_dim, :)
+  prepareSASMemory(sas2d)
+
+  return sas2d
 end
+
+import Base.compare
 
 function compare(a::SASBearing2D, b::SASBearing2D)
   TP = true
-  TP = TP && compare(a.cfgTotal, b.cfgTotal)               # CBFFilterConfig
-  TP = TP && compare(a.cfgLIE, b.cfgLIE)                   # CBFFilterConfig
-  TP = TP && a.filterCBFTotal == b.filterCBFTotal   # Array{Complex{Float64}}
-  TP = TP && a.CBFLIE == b.CBFLIE       # Array{Complex{Float64}}
-  TP = TP && a.waveformsIn == b.waveformsIn         # Array{Complex{Float64}}
-  TP = TP && a.BFOut == b.BFOut                     # Array{Complex{Float64}}
-  TP = TP && a.BFOutLIE == b.BFOutLIE               # Array{Complex{Float64}}
-  TP = TP && a.phaseshiftLOO == b.phaseshiftLOO     # Array{Complex{Float64}}
-  TP = TP && a.hackazi[1] == b.hackazi[1]           # Tuple{Vector{Int}, Vector{Float64}}
-  TP = TP && a.hackazi[2] == b.hackazi[2]
-  TP = TP && a.rangemodel.σ == b.rangemodel.σ       # Distributions.Rayleigh
-  TP = TP && compare(a.dbg, b.dbg)                       # SASDebug
-  TP = TP && a.cfg == b.cfg                         # Dict
-  TP = TP && a.waveformsRaw == b.waveformsRaw       # Array{Float64,2}
-  TP
+  TP &= compare(a.cfgTotal, b.cfgTotal)               # CBFFilterConfig
+  @debug "cfgTotal: $(compare(a.cfgTotal, b.cfgTotal))"
+  TP &= compare(a.cfgLIE, b.cfgLIE)                   # CBFFilterConfig
+  @debug "cfgLIE: $(compare(a.cfgLIE, b.cfgLIE))"
+  TP &= a.waveformsIn == b.waveformsIn         # Array{Complex{Float64}}
+  @debug "waveformsIn: $(a.waveformsIn == b.waveformsIn)"
+
+  # Rangemodel
+  # Utility dist formula
+  calcArrayDist = (a,b, percAcceptable=1) -> begin
+    sum(a) == 0 && sum(b) == 0 && return false
+    sum(a) == 0 && return false
+    sum(abs.(a-b))/sum(abs.(a)) * 100.0 < percAcceptable && return true
+    return false
+  end
+  TP &= typeof(a.rangemodel) == typeof(b.rangemodel)
+  @debug "typeof(rangemodel): $((typeof(a.rangemodel) == typeof(b.rangemodel)))"
+  if typeof(a.rangemodel) == typeof(b.rangemodel) == Array{AliasingScalarSampler,1}
+    TP &= length(a.rangemodel) == length(b.rangemodel)
+    @debug "rangemodel (length): $(length(a.rangemodel) == length(b.rangemodel))"
+
+    if length(a.rangemodel) == length(b.rangemodel)
+      for i in 1:length(a.rangemodel)
+        # Domain
+        TP &= calcArrayDist(a.rangemodel[i].domain, b.rangemodel[i].domain)
+        @debug "rangemodel (model[$i].domain): $(calcArrayDist(a.rangemodel[i].domain, b.rangemodel[i].domain))"
+        # Weights
+        TP &= calcArrayDist(a.rangemodel[i].weights, b.rangemodel[i].weights)
+        @debug "rangemodel (model[$i].weights): $(calcArrayDist(a.rangemodel[i].weights, b.rangemodel[i].weights))"
+      end
+    end
+  elseif typeof(a.rangemodel) == typeof(b.rangemodel) == Rayleigh
+    TP &= a.rangemodel == b.rangemodel
+    @debug "rangemodel (Raleigh): $(a.rangemodel == b.rangemodel)"
+  end
+
+  TP &= a.cfg == b.cfg                         # Dict
+  @debug "cfg: $(a.cfg == b.cfg)"
+  TP &= a.waveformsRaw == b.waveformsRaw       # Array{Float64,2}
+  @debug "waveformsRaw: $(a.waveformsRaw == b.waveformsRaw)"
+  TP &= a.debugging == b.debugging                       # SASDebug
+  @debug "debugging: $(a.debugging == b.debugging)"
+  return TP
 end

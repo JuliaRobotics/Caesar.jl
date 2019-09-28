@@ -56,6 +56,7 @@ approxCliqMarginalUp!
 approxConv
 areCliqChildrenNeedDownMsg
 areCliqVariablesAllMarginalized
+assignTreeHistory!
 asyncTreeInferUp!
 attemptTreeSimilarClique
 batchSolve!
@@ -85,7 +86,7 @@ doCliqAutoInitUp!
 doCliqUpSolve!
 downGibbsCliqueDensity
 downMsgPassingRecursive
-drawCliqSubgraphUp
+drawCliqSubgraphUpMocking
 dwnMsg
 encodefg
 fifoFreeze!
@@ -107,7 +108,7 @@ getCliqAllVarSyms
 getCliqAssocMat
 getCliqChildMsgsUp
 getCliqFrontalVarIds
-getCliqInitVarOrderUp
+getCliqVarInitOrderUp
 getCliqMat
 getCliqOrderUpSolve
 getCliqSeparatorVarIds
@@ -126,6 +127,7 @@ getParent
 getSofttype
 getTreeAllFrontalSyms
 getTreeCliqSolveOrderUp
+getTreeCliqsSolverHistories
 getVal
 getVariable
 getVariableDim
@@ -191,7 +193,7 @@ transferUpdateSubGraph!
 treeProductDwn
 treeProductUp
 unfreezeVariablesAll!
-unmarginalizeVariablesAll!
+dontMarginalizeVariablesAll!
 updateFGBT!
 updateTreeCliquesAsMarginalizedFromVars!
 upGibbsCliqueDensity
