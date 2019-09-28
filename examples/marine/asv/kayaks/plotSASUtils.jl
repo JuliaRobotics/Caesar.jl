@@ -23,6 +23,7 @@ function plotSASDefault(fg, expID::String, posData::Array, iGTtemp::Array, dposD
     end
     # push!(pltemp,Gadfly.Guide.xlabel("X (m)"),Gadfly.Guide.ylabel("Y (m)"));
     pltempplot = Gadfly.plot(pltemp...); pltempplot |> PDF(savedir)
+    return pltempplot
 end
 
 function plotPriors!(plHolderIn,fg)

@@ -163,3 +163,20 @@ plotKDE(fg, ls(fg,r"x"), dims=[1;2])
 
 stuff = IncrementalInference.localproduct(fg, :x1)
 pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
+
+
+
+
+
+## plotting for dehann
+# plk= [];
+#
+# for sym in poses #plotting all syms labeled
+#     X1 = getKDEMean(getVertKDE(fg,sym))
+#     push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Geom.label, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
+#     K1 = plotKDEContour(getVertKDE(fg,sym),xlbl="", ylbl="",levels=2,layers=true);
+#     push!(plk,K1...)
+#     push!(plk,Gadfly.Theme(key_position = :none));
+# end
+# push!(plk, Coord.cartesian(xmin=20, xmax=50, ymin=-60, ymax=-30,fixed=true))
+# plkplot = Gadfly.plot(plk...)

@@ -1,6 +1,10 @@
-using Caesar, RoME, IncrementalInference
-using Gadfly, KernelDensityEstimatePlotting, Cairo, Fontconfig
+# using Distributed
+# addprocs(5)
+
+using Caesar, RoME
+using RoMEPlotting, Gadfly, KernelDensityEstimatePlotting, Cairo, Fontconfig
 using KernelDensityEstimate
+using IncrementalInference
 using DocStringExtensions
 using DelimitedFiles, JLD, DistributedFactorGraphs
 
@@ -8,7 +12,7 @@ include(joinpath(@__DIR__,"slamUtils.jl"))
 include(joinpath(@__DIR__,"plotSASUtils.jl"))
 include(joinpath(@__DIR__,"expDataUtils.jl"))
 
-function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::Int; saswindow::Int=8, trialID::Int=1, debug::Bool=false, dataloc::String="lj")
+function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::Int; saswindow::Int=8, trialID::Int=1)
     ## Default parameters
     println("Start Script\n")
 
@@ -18,9 +22,8 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
     totalposes = dataend-datastart;
     datawindow = collect(datastart:dataend);
-    allpaths = getPaths(expID,"dynsas", currloc = dataloc, trialID = trialID);
+    allpaths = getPaths(expID,"dynsas", currloc = "local", trialID = trialID);
     scriptHeader = joinpath(allpaths[3],expID*"_fgap$(fgap)_gpsgap$(gps_gap)_swind$(saswindow)_f$(datastart)t$(dataend)_")
-    savefgHeader = joinpath(allpaths[3]*"_fg",expID*"_fgap$(fgap)_gpsgap$(gps_gap)_swind$(saswindow)_f$(datastart)t$(dataend)_")
 
     poses = Dict{Int,Array}();
     nav = Dict{Int,Array}();
@@ -41,8 +44,8 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
     # posPl = Gadfly.plot(layer(x=posData[:,1],y=posData[:,2], Geom.path, Theme(default_color=colorant"green")), layer(x=dposData[:,1],y=dposData[:,2],Geom.path)); posPl |> PDF(scriptHeader*"posGT.pdf")
 
-    chirpFile = joinpath("/media","data1","data","kayaks","chirp250.txt");
-    cfgFile = joinpath("/media","data1","data","kayaks","SAS2D.yaml")
+    chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
+    cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml")
     cfgd=loadConfigFile(cfgFile)
 
     fg = initfg();
@@ -69,21 +72,20 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
             dpσ = Matrix(Diagonal([0.1;0.1;0.2;0.2].^2))
 
             pp = DynPoint2VelocityPrior(MvNormal(dpμ,dpσ))
-            addFactor!(fg, [current_symbol;], pp, autoinit=true)
+            addFactor!(fg, [current_symbol;], pp, autoinit=false)
             # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
        end
 
        #odo factors
        if pose_counter > 1
-           xdotp = dposData[pose_counter,1] - dposData[pose_counter-1,1];
-           ydotp = dposData[pose_counter,2] - dposData[pose_counter-1,2];
+           xdotp = dposData[pose_counter-1,1] - dposData[pose_counter,1];
+           ydotp = dposData[pose_counter-1,2] - dposData[pose_counter,2];
            xdotf = dposData[pose_counter+1,1] - dposData[pose_counter,1];
            ydotf = dposData[pose_counter+1,2] - dposData[pose_counter,2];
-           # dpμ = [xdotp;ydotp;xdotf-xdotp;ydotf-ydotp];
-           dpμ = [xdotp;ydotp;0;0];
+           dpμ = [xdotp;ydotp;xdotf-xdotp;xdotf-xdotp];
            dpσ = Matrix(Diagonal([0.2;0.2;0.2;0.2].^2))
            vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
-           addFactor!(fg, [Symbol("x$(pose_counter-1)");current_symbol], vp, autoinit=true)
+           addFactor!(fg, [Symbol("x$(pose_counter-1)");current_symbol], vp, autoinit=false)
            # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
        end
 
@@ -106,36 +108,17 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
                getSolverParams(fg).drawtree = false
                getSolverParams(fg).showtree = false
-               getSolverParams(fg).limititers = 500
-
-               lstpose = Symbol("x$(pose_counter)");
-               tmpInit = approxConv(fg,Symbol("x$(pose_counter-1)x$(pose_counter)f1"),lstpose);
-               XXkde = manikde!(tmpInit,getManifolds(fg,lstpose));
-               setValKDE!(fg,lstpose,XXkde);
 
                if sas_counter > 1
-                   tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
+                   tree, smt, hist = solveTree!(fg,tree)
                else
-                   tree, smt, hist = solveTree!(fg, maxparallel=400)
+                   tree, smt, hist = solveTree!(fg)
                end
 
                writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")
                drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
-               plotSASDefault(fg,expID, posData,igt,dposData,savedir=scriptHeader*"$sas_counter.pdf")
-
-               if debug
-                   plk = [];
-                   push!(plk,plotBeaconGT(igt));
-                   plotBeaconContours!(plk,fg);
-                   for mysym in poses[sas_counter]
-                       xData = getKDEMax(getVertKDE(fg,mysym))
-                       push!(plk, plotPoint(xData,colorIn=colorant"orange"))
-                   end
-                   L1p = approxConv(fg,ls(fg,:l1)[end],:l1);
-                   push!(plk,layer(x=L1p[1,:],y=L1p[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-                   Gadfly.plot(plk...) |> PDF(scriptHeader*"debug$sas_counter.pdf");
-               end
+               plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"$sas_counter.pdf")
 
                if expID == "dock"
                    l1fit = getKDEMean(getVertKDE(fg,:l1))
@@ -159,34 +142,10 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                    kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
                end
 
-               ev = 0;
-               evi = 0;
-               es = 0;
-               for tmpi = 1:pose_counter
-                   rv = getVal(fg,Symbol("x$tmpi"));
-                   dxt = (rv[1,:].-posData[tmpi,1]).^2;
-                   dyt = (rv[2,:].-posData[tmpi,2]).^2;
-                   ev += sum(sqrt.(dxt+dyt));
-                   dxt2 = (dposData[tmpi,1].-posData[tmpi,1]).^2;
-                   dyt2 = (dposData[tmpi,2].-posData[tmpi,2]).^2;
-                   evi += sum(sqrt.(dxt2+dyt2));
+               jldname2 = scriptHeader * "solve_$(sas_counter).jld"
+               JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld)
 
-                   if tmpi > 1
-                       dv = (rv[3,:].-(posData[tmpi,1]-posData[tmpi-1,1])).^2;
-                       dw = (rv[4,:].-(posData[tmpi,2]-posData[tmpi-1,2])).^2;
-                       es += sum(sqrt.(dv+dw));
-                   end
-               end
-               ev = ev./pose_counter;
-               evi = evi./pose_counter;
-               es = es./(pose_counter-1);
-
-               # jldname2 = scriptHeader * "solve_$(sas_counter).jld"
-               # JLD.save(jldname2,"beacon",getVal(fg,:l1),"posData",posData,"dposData", dposData,"gps_gap", gps_gap, "poses",poses,"sasframes", allsasframes, "l1fit",l1fit, "meanerror",meanerror,"l1max",l1max,"maxerror",maxerror,"kld",kld,"ev",ev,"evi",ev, "es", es)
-
-               # saveDFG(fg,savefgHeader * "fg$(sas_counter)")
-
-               writedlm(scriptHeader*"stats$(sas_counter).txt", [pose_counter meanerror maxerror kld evi ev es], ",")
+               saveDFG(fg,scriptHeader * "fg$(sas_counter)")
 
                sas_counter +=1
                sas_gap_counter = 0
@@ -194,27 +153,12 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
        end
        pose_counter+=1
 
-       println("Next Variable is $pose_counter")
-       println("Next SAS is $sas_counter")
+       println("Trying next Variable: $pose_counter")
+       println("Trying next SAS: $sas_counter")
 
    end
 
-   println("This Solve was saved under: "*scriptHeader)
    return fg
 end
 
-
-
-
-# main("drift", 1550,1580,2,49)
-#
-# fg = main("drift", 1550,1580,5,49)
-#
-# main("drift", 1550,1600,5,49)
-#
-# fg = main("drift", 1550,1800,5,49)
-#
-
-# fg = main("dock", 410,700,22,120)
-
-# fg = main("dock", 410,700,40,120)
+fg = main("drift",1550,1580,1,19,trialID=1)

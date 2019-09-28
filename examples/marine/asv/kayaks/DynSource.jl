@@ -19,6 +19,7 @@ elseif expnum==2
     datadir = joinpath(topdir,trialstr);
     ijldname = datadir * "/exp1" * ".jld"
 end
+
 cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml");
 chirpFile = joinpath(ENV["HOME"],"data","sas","chirp250.txt");
 cfgd=loadConfigFile(cfgFile)
@@ -68,7 +69,8 @@ for i=1:nsasfac
     addVariable!(fg, beacons[i], DynPoint2(ut=1_000_000+(i-1)*saswindow) )
 
     if i>1
-        dpμ = [1.0*saswindow/4;1*saswindow/4;0;0];
+        # dpμ = [1.0*saswindow/4;1*saswindow/4;0;0];
+        dpμ = [0;0;0;0];
         dpσ = Matrix(Diagonal([2.0;2;0.2;0.2].^2))
         vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
         addFactor!(fg, [beacons[i-1];beacons[i]], vp, autoinit=false)

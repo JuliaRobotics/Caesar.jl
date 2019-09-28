@@ -1,4 +1,9 @@
-using Caesar, DelimitedFiles, JLD
+using Distributed
+addprocs(8)
+
+using Caesar
+# @everywhere using Caesar
+using DelimitedFiles, JLD
 using IncrementalInference
 using KernelDensityEstimatePlotting
 using Gadfly, Cairo, Fontconfig
@@ -14,6 +19,7 @@ allpaths = getPaths(expID,"range", trialID = 1);
 igt = loadGT(datawindow,expID,allpaths);
 mfin = loadRanges(datawindow,allpaths)
 posData = loadNav(datawindow,allpaths)
+dposData = deepcopy(posData)
 
 dposData = deepcopy(posData)
 cumulativeDrift!(dposData,[0.0;0],[0.2,0.2])
@@ -67,22 +73,20 @@ writeGraphPdf(fg,viewerapp="", engine="neato", filepath = "/tmp/test.pdf")
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = false
+getSolverParams(fg).async = true
+getSolverParams(fg).multiproc = true
+getSolverParams(fg).downsolve = true
+
 
 tree, smt, hist = solveTree!(fg, maxparallel=100)
 drawTree(tree,filepath = "/tmp/test.pdf")
 # tree, smt = batchSolve!(fg,maxparallel=100)
 # fg2 = deepcopy(fg)
 # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
-plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
 
-
-# assignTreeHistory!(tree, hist)
-# csmAnimate(fg, tree, [:x12;:x6;:x8;:x7], frames=1000)
-# assignTreeHistory!(tree, hist)
-# csmAnimate(fg, tree, [:x12;:x6;:x8;:x7], frames=1000)
-# Base.rm("/tmp/caesar/csmCompound/out.ogv")
-# run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/csm_%d.png -c:v libtheora -vf fps=25 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`)
-# run(`totem /tmp/caesar/csmCompound/out.ogv`)
+# plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
+plotSASDefault(fg,expID, posData,igt,dposData, datadir=allpaths[1], savedir="/tmp/caesar/test.pdf")
+run(`evince /tmp/caesar/test.pdf`)
 
 
 #PLOTTING ------------
@@ -119,7 +123,7 @@ if expID == "dock"
 elseif expID == "drift"
     push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
 end
-savefile = "/tmp/test.pdf"
+savefile = "/tmp/caesar/test.pdf"
 Gadfly.plot(plk...) |> PDF(savefile)
 
 plk= [];

@@ -34,6 +34,7 @@ nrange = iload["nrange"]
 irange = iload["irange"];
 itemp = readdlm(datadir*"/inav.csv",',',Float64,'\n', skipstart=1);
 
+# total length defined here
 saswindow = 6;
 nsasfac = 15;
 

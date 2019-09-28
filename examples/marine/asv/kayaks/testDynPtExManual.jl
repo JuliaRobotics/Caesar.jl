@@ -67,7 +67,7 @@ for i in vps
     dpσ = Matrix(Diagonal([0.1;0.1;0.1;0.1].^2))
     vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
     addFactor!(fg, [poses[i];poses[i+1]], vp, autoinit=false)
-    manualinit!(fg,poses[i],kde!(rand(MvNormal(dpμ,dpσ),100)))
+    # manualinit!(fg,poses[i],kde!(rand(MvNormal(dpμ,dpσ),100)))
 end
 
 # IncrementalInference.doautoinit!(fg,[getVariable(fg,poses[5])])
@@ -81,7 +81,7 @@ getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg)
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
 
 
@@ -129,3 +129,15 @@ plotKDE(fg, ls(fg,r"x"), dims=[1;2])
 
 stuff = IncrementalInference.localproduct(fg, :x1)
 pl = plotKDE(stuff[1], dims=[1;2], levels=3, c=["blue"])
+
+
+
+
+## debugging
+
+printCliqHistorySummary(tree,:x7)
+
+writeGraphPdf(fg, show=true)
+
+
+#
