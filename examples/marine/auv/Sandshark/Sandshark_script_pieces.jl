@@ -14,7 +14,9 @@ using DataFrames
 using ProgressMeter
 using DelimitedFiles
 
+
 @everywhere setForceEvalDirect!(true)
+
 
 # const TU = TransformUtils
 
@@ -23,6 +25,8 @@ Gadfly.set_default_plot_size(35cm,25cm)
 include(joinpath(@__DIR__,"Plotting.jl"))
 include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
+
+odonoise = Matrix(Diagonal(10*[0.1;0.1;0.005].^2))
 
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
@@ -39,9 +43,10 @@ for ep in epochs
     wXj = TU.SE2([interp_x(ep);interp_y(ep);interp_yaw(ep)])
     iDXj = se2vee(wXi\wXj)
     NAV[ep] = iDXj
+    # NAV[ep][1:2] .*= 0.7
     # println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
 
-    odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], Matrix(Diagonal([0.1;0.1;0.005].^2))))
+    odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], odonoise) )
   end
   rangepts = rangedata[ep][:]
   rangeprob = kde!(rangepts)
@@ -105,7 +110,7 @@ fg1 = initfg()
 # Add a central beacon with a prior
 addVariable!(fg1, :l1, Point2)
 # Pinger location is (0.6; -16)
-addFactor!(fg1, [:l1], PriorPose2( MvNormal([0.6; -16], Matrix(Diagonal([0.1; 0.1].^2)) ) ), autoinit=true)
+addFactor!(fg1, [:l1], PriorPose2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) ), autoinit=true) # [0.6; -16]
 
 # init tree for simpler code later down
 tree1 = wipeBuildNewTree!(fg1)
@@ -127,7 +132,7 @@ index1 = Int[0;]
 index2 = Int[0;]
 storeLast = Dict{Symbol,BallTreeDensity}()
 
-for STEP in 0:10:20
+for STEP in 0:10:80
     global fg1, tree1
     global index1, index2
     global storeLast
@@ -160,7 +165,6 @@ end
 
 
 
-
 ## debugging a plotting
 
 
@@ -185,20 +189,131 @@ plotKDE(manikde!(pts, Point2().manifolds))
 
 
 dfg = fg1
-fctsym = :x20l1f1
+fctsym = :x70l1f1
 fct = getFactorType(dfg, fctsym)
+
+
 
 #
 
 
-function plotFactor(dfg::G, fctsym::Symbol, fct::Pose2Point2Bearing; hdl=[]) where G <: AbstractDFG
+
+
+fctsym
+
+
+
+function solveFactorMeasurement(dfg::AbstractDFG,
+                                fctsym::Symbol  )
+  #
+
+
 
 end
 
 
-function plotFactor(dfg::G, fctsym::Sybmol, fct::Pose2Point2BearingRange) where G <: AbstractDFG
+fcto = getFactor(dfg, fctsym)
+varsyms = fcto._variableOrderSymbols
+vars = map(x->getPoints(getKDE(dfg,x)), varsyms)
+fcttype = getFactorType(fcto)
+zDim = getData(fcto).fnc.zDim
+
+N = size(vars[1])[2]
+res = zeros(zDim)
+ud = FactorMetadata()
+meas = (zeros(zDim, N),)
+
+idx = 1
+
+function makemeas(i, dm, meas)
+  meas[1][:,i] = meas[1][:,i] + dm
+  return meas
+end
+
+
+
+ggo = (i, dm) -> fcttype(res,ud,i,makemeas(i, dm, meas),vars...)
+
+
+ggo(1, [0.0;0.0])
+
+
+using Optim
+
+
+optimize((x) -> ggo(1,x), [0.0; 0.0])
+
+Gadfly.plot(z=(x,y)->ggo(1,[x;y]), xmin=[-pi],xmax=[pi],ymin=[-100.0],ymax=[100.0], Geom.contour)
+
+
+# idea is to find predicted parameters for noise model
+
+
+#
+
+
+
+
+
+import RoMEPlotting: plotFactor
+
+function plotFactor(dfg::AbstractDFG, fctsym::Symbol, fct::Pose2Point2Bearing; hdl=[])
+  #
+
+  # variables
+  vars = ls(dfg, fctsym)
+
+  # the pose
+  pose = intersect(vars, ls(dfg, Pose2))[1]
+  poin = intersect(vars, ls(dfg, Point2))[1]
+
+  # convolve the yaw angle with bearing rotation model
+  pX = marginal(getKDE(dfg, pose), [3])
+  pts = approxConvCircular(pX, fct.bearing)
+
+  # draw plots
+  measest = manikde!(pts, Sphere1)
+
+  # inverse solve for predicted bearing
+  dx = getPoints(getKDE(dfg, poin))[1,:] - getPoints(getKDE(dfg, pose))[1,:]
+  dy = getPoints(getKDE(dfg, poin))[2,:] - getPoints(getKDE(dfg, pose))[2,:]
+  pred = reshape(atan.(dy,dx), 1,:)
+
+  ppX = manikde!(pred, Sphere1)
+
+  plcl = plotKDECircular( [measest; ppX], logpdf=true, legend=["Meas. Est.";"Predicted"] )
+
+  # plot pose and point by itself
+  posepl1 = plotKDE(dfg, pose, dims=[1;2], c=["green"])
+  posepl2 = plotKDECircular(marginal(getKDE(dfg, pose), [3]))
+  landmpl = plotKDE(dfg, poin, c=["red"])
+
+  tfg = initfg()
+  addVariable!(tfg, pose, Pose2)
+  addVariable!(tfg, poin, Point2)
+  addFactor!(tfg, [pose;poin], fct, autoinit=false)
+  manualinit!(tfg, pose, getKDE(dfg,pose))
+  manualinit!(tfg, poin, getKDE(dfg,poin))
+  plt = drawPosesLandms(tfg, point_size=5pt)
+
+  # plot handles
+  push!(hdl, landmpl)
+  push!(hdl, posepl1)
+  push!(hdl, posepl2)
+  push!(hdl, plcl)
+  push!(hdl, plt)
+
+  hstack(vstack(landmpl,posepl1, posepl2), vstack(plcl, plt))
+end
+
+
+
 
 hdl = []
+
+function plotFactor(dfg::AbstractDFG, fctsym::Sybmol, fct::Pose2Point2BearingRange; hdl = [])
+  #
+
 
 # variables
 vars = ls(dfg, fctsym)
@@ -233,7 +348,10 @@ plhist
 
 ## development
 
-fct = Pose2Point2Bearing(fct.bearing)
+br = Pose2Point2Bearing(fct.bearing)
+
+plotFactor(dfg, :x70l1f1, br)
+
 
 
 pr = Pose2Point2Range(fct.range)
@@ -257,11 +375,26 @@ vstack(poseyaw, bearpl)
 
 end
 
+"""
+    $SIGNATURES
 
-function approxConv_debug(dfg::G) where G <: AbstractDFG
+Build an approximate density `[Y|X,DX,.]=[X|Y,DX][DX|.]` as proposed by the conditional convolution.
 
+Notes
+- Assume both are on circular manifold, `manikde!(pts, (:Circular,))`
+"""
+function approxConvCircular(pX::BallTreeDensity, pDX::BallTreeDensity)
+  #
 
+  # building basic factor graph
+  tfg = initfg()
+  addVariable!(tfg, :s1, Sphere1)
+  addVariable!(tfg, :s2, Sphere1)
+  addFactor!(tfg, [:s1;:s2], Sphere1Sphere1(pDX), autoinit=false)
+  manualinit!(tfg,:s1, pX)
 
+  # solve for outgoing proposal value
+  approxConv(tfg,:s1s2f1,:s2)
 end
 
 

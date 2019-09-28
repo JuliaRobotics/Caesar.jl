@@ -74,8 +74,8 @@ for id in navkeys
   # push!(heading, getindex(navdata[id],4))
   # push!(yaw, TU.wrapRad(-deg2rad(getindex(navdata[id],4))))
 
-  push!(X, getindex(navdata[id],7) ) # 8
-  push!(Y, getindex(navdata[id],8) ) # 7
+  push!(X, 0.7*getindex(navdata[id],7) ) # 8
+  push!(Y, 0.7*getindex(navdata[id],8) ) # 7
   push!(yaw, TU.wrapRad(pi/2-deg2rad(getindex(navdata[id],4))) )  # rotation about +Z
 end
 

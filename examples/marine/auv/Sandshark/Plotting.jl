@@ -89,7 +89,7 @@ function drawPosesLandmarksAndOdo(fg::G,
     # Make X/Y range same so no distorted
     # push!(PLL, Coord.Cartesian(xmin=-160.0,xmax=10.0,ymin=-135.0,ymax=35.0))
     pla = Gadfly.plot([PLL...;pllandmarks.layers; ]...,
-        Guide.manual_color_key("Legend", ["Particle Filter Est.", "LBL Path", "Non-Gaussian SLAM"], ["red", "green", "light blue"]),
+        Guide.manual_color_key("Legend", ["Dead reckoning", "LBL Path", "Non-Gaussian SLAM"], ["gray80", "green", "light blue"]),
         Guide.title(gTitle))
     return pla
 end
