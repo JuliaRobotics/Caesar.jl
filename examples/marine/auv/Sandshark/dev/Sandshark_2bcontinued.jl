@@ -12,6 +12,8 @@ using ProgressMeter
 
 const TU = TransformUtils
 
+Gadfly.set_default_plot_size(35cm,25cm)
+
 include(joinpath(Pkg.dir("Caesar"), "examples", "marine", "auv", "Sandshark","Plotting.jl"))
 
 # datadir = joinpath(ENV["HOME"],"data","sandshark","sample_wombat_2018_09_07","processed","extracted")
@@ -101,11 +103,11 @@ interp_y = LinearInterpolation(navkeys, Y)
 interp_yaw = LinearInterpolation(navkeys, yaw)
 
 ## Caching factors
-ppbrDict = Dict{Int, Pose2Point2BearingRange}()
+ppbrDict = Dict{Int, Pose2Point2Range}()
 odoDict = Dict{Int, Pose2Pose2}()
 NAV = Dict{Int, Vector{Float64}}()
 # Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[25:2:300]
+epochs = timestamps[50:2:100]
 lastepoch = 0
 for ep in epochs
   if lastepoch != 0
@@ -121,12 +123,12 @@ for ep in epochs
     odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], diagm([0.1;0.1;0.005].^2)))
   end
   rangepts = rangedata[ep][:]
-  rangeprob = kde!(rangepts / 0.66)
-  azipts = azidata[ep][:,1]
-  aziprob = kde!(azipts)
+  rangeprob = kde!(rangepts)
+  # azipts = azidata[ep][:,1]
+  # aziprob = kde!(azipts)
 
   # prep the factor functions
-  ppbrDict[ep] = Pose2Point2BearingRange(aziprob, rangeprob)
+  ppbrDict[ep] = Pose2Point2Range(rangeprob)
   lastepoch = ep
 end
 
@@ -136,6 +138,7 @@ end
 ## Step: Building the factor graph
 fg = initfg()
 l1Uncertainty = 0.1
+nonParamStep = 1 # Number of poses between nonparametric acoustic factors
 # Add a central beacon with a prior
 addVariable!(fg, :l1, Point2)
 addFactor!(fg, [:l1], IIF.Prior( MvNormal([0.6; -16], l1Uncertainty^2*eye(2)) ))
@@ -145,8 +148,11 @@ for ep in epochs
     addVariable!(fg, curvar, Pose2)
 
     # xi -> l1 - nonparametric factor
-    info(" - Adding $curvar->l1 factor...")
-    addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+    if (index+1) % nonParamStep == 0
+        info(" - Adding $curvar->l1 factor...")
+        # addFactor!(fg, [curvar; (index < length(epochs)/2 ? :l1 : :l2)], ppbrDict[ep])
+        addFactor!(fg, [curvar; :l1], ppbrDict[ep])
+    end
 
     if ep != epochs[1]
       # Odo factor x(i-1) -> xi
@@ -163,14 +169,6 @@ for ep in epochs
     addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
     index+=1
 end
-
-
-# HANDCRANK
-ppbr = ppbrDict[epochs[end]]
-info("Est = $(getKDEMax(ppbr.range))")
-xp = interp_x[epochs[end]]-0.6
-yp = interp_y[epochs[end]]+16
-info("Exp = $(sqrt(xp^2 + yp^2))")
 
 # writeGraphPdf(fg, engine="dot")
 
