@@ -107,7 +107,7 @@ getCliqAllVarSyms
 getCliqAssocMat
 getCliqChildMsgsUp
 getCliqFrontalVarIds
-getCliqInitVarOrderUp
+getCliqVarInitOrderUp
 getCliqMat
 getCliqOrderUpSolve
 getCliqSeparatorVarIds

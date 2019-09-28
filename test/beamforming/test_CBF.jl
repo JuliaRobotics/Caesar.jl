@@ -1,5 +1,5 @@
 
-using Caesar, DelimitedFiles
+using Caesar, DelimitedFiles, Profile
 using Gadfly, Cairo, Fontconfig
 
 fFloor = 250;
@@ -22,8 +22,8 @@ winstart = 1600;
 rawWaveData = zeros(8000,nPhones);
 arrayElemPos = zeros(nPhones,2);
 for ele in winstart:winstart+nPhones-1
-    dataFile = joinpath(ENV["HOME"],"data", "sas", "sample_data","waveform$(ele).csv");
-    posFile = joinpath(ENV["HOME"],"data", "sas", "sample_data","nav$(ele).csv");
+    dataFile = joinpath(ENV["HOME"],"data", "sas", "08_20_sample","waveform$(ele).csv");
+    posFile = joinpath(ENV["HOME"],"data", "sas", "08_20_sample","nav$(ele).csv");
     tempRead = readdlm(dataFile,',',Float64,'\n') #first element only
     rawWaveData[:,ele-winstart+1] = adjoint(tempRead[1,:]);
     tempRead = readdlm(posFile,',',Float64,'\n');
@@ -37,10 +37,12 @@ FFTfreqs = collect(LinRange(fFloor,fCeil,nFFT_czt))
 cfg = CBFFilterConfig(fFloor,fCeil,nFFT_czt,nPhones,azimuths,soundSpeed,FFTfreqs)
 myCBF = zeros(Complex{Float64}, getCBFFilter2Dsize(cfg));
 lm = zeros(2,1);
-dataTempHolder = zeros(Complex{Float64},nPhones,nFFT_czt)
-delaysHolder = FFTfreqs;
+dataHolder = zeros(Complex{Float64},nPhones,nFFT_czt)
+delaysHolder = zeros(Complex{Float64},nFFT_czt);
 
-@time constructCBFFilter2D!(cfg, arrayElemPos, myCBF, lm, dataTempHolder,delaysHolder)
+@time dataHolder[1,:] = FFTfreqs
+
+@time constructCBFFilter2D!(cfg, arrayElemPos, myCBF, lm, dataHolder)
 
 # MF and CZT
 w = exp(-2im*pi*(fCeil-fFloor)/(nFFT_czt*fSampling))
