@@ -69,7 +69,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [r-cov-url]: https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2019Q2-v0.4.x-green.svg
+[r-stable]: https://img.shields.io/badge/2019Q3-v0.4.x-green.svg
 
 [iif-cov-img]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl/coverage.svg?branch=master
 [iif-cov-url]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl?branch=master
@@ -111,14 +111,14 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
 [dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2019Q3-v0.2.x-green.svg
+[dfg-stable]: https://img.shields.io/badge/2019Q3-v0.4.x-green.svg
 
 [amp-cov-img]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl/coverage.svg?branch=master
 [amp-cov-url]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl?branch=master
 [amp-build-img]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl.svg?branch=master
 [amp-build-url]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
-[amp-stable]: https://img.shields.io/badge/2019Q2-v0.1.x-green.svg
+[amp-stable]: https://img.shields.io/badge/2019Q3-v0.1.x-green.svg
 
 [fsm-cov-img]: https://codecov.io/github/JuliaRobotics/FunctionalStateMachine.jl/coverage.svg?branch=master
 [fsm-cov-url]: https://codecov.io/github/JuliaRobotics/FunctionalStateMachine.jl?branch=master
