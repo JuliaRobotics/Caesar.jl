@@ -11,34 +11,55 @@ using RobotOS
 # standard types
 @rosimport geometry_msgs.msg: Point, Pose2D
 # bespoke types
-@rosimport caesar_ros.srv: AddNode, AddFactor
+@rosimport caesar_ros.srv: AddVariable, AddPrior3D, AddFactorZPR, AddFactorXYH
 
 # generate the types and load
 rostypegen()
 using .geometry_msgs.msg
 using .caesar_ros.srv
 
-
-
 ### Load Caesar mmisam stuff
 
 using RoME
-
+using DocStringExtensions
 
 
 # yes globals are very bad for performance and memory, but this is a PoC
 global fg = initfg()
 
+"""
+    $SIGNATURES
 
-# service callbacks
-function add_node(req::AddNodeRequest)
+Service callback for adding a variable to the factor graph.
+
+Notes
+- See https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/134
+"""
+function add_variable(req::AddVariableRequest)
     global fg
 
-    reply = AddNodeResponse()
-    @show req
+    reply = AddVariableResponse("failed to add variable; incorrect type-- must be Pose2 Pose3")  # reply.status
 
-    # addVariable!(fg, name, softtype)
+    sts = Symbol(req.type)
+    # if wrong, fail gracefully
+    sts == :Pose2 || sts == :Pose3 ? nothing : (return reply)
 
+    softtype = getfield(Main, sts)
+    ret = addVariable!(fg, Symbol(req.id), softtype)
+    reply.status = string(thing)
+
+    # not sure how to get serialized verions
+    return reply
+end
+
+
+function add_factor_xyh(req::AddFactorXYHRequest)
+    reply = AddFactorXYHResponse()
+    return reply
+end
+
+function add_factor_zpr(req::AddFactorZPRRequest)
+    reply = AddFactorZPRResponse()
     return reply
 end
 
@@ -46,9 +67,7 @@ function add_factor(req::AddFactorRequest)
     global fg
 
     reply = AddFactorResponse()
-
     # addFactor!(fg, [from; to], factor)
-
     return reply
 end
 
@@ -71,7 +90,10 @@ function main()
     pub = Publisher{Point}("pts", queue_size=10)
     sub = Subscriber{Pose2D}("pose", callback, (pub,), queue_size=10)
 
-    add_node_srv = Service("AddNode",caesar_ros.srv.AddNode, add_node)
+    add_variable_srv = Service("AddVariable",caesar_ros.srv.AddVariable, add_variable)
+
+    add_factor_zpr_srv = Service("AddFactorZPR",caesar_ros.srv.AddFactorZPR, add_factor_zpr )
+    add_factor_xyh_srv = Service("AddFactorXYH",caesar_ros.srv.AddFactorXYH, add_factor_xyh )
 
     loop(pub)
 
