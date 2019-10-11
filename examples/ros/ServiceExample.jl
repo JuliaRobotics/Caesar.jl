@@ -1,5 +1,7 @@
 # example of ros service in julia
 
+### Get ROS started
+
 # $ export PYTHON=/usr/bin/python2.7
 @assert ENV["PYTHON"]=="/usr/bin/python2.7"
 # ]build PyCall
@@ -15,16 +17,38 @@ using RobotOS
 rostypegen()
 using .geometry_msgs.msg
 using .caesar_ros.srv
+
+
+
+### Load Caesar mmisam stuff
+
+using RoME
+
+
+
+# yes globals are very bad for performance and memory, but this is a PoC
+global fg = initfg()
+
+
 # service callbacks
 function add_node(req::AddNodeRequest)
+    global fg
 
     reply = AddNodeResponse()
+    @show req
+
+    # addVariable!(fg, name, softtype)
+
     return reply
 end
 
 function add_factor(req::AddFactorRequest)
+    global fg
 
     reply = AddFactorResponse()
+
+    # addFactor!(fg, [from; to], factor)
+
     return reply
 end
 
@@ -46,15 +70,15 @@ function main()
     init_node("rosjl_example")
     pub = Publisher{Point}("pts", queue_size=10)
     sub = Subscriber{Pose2D}("pose", callback, (pub,), queue_size=10)
+
+    add_node_srv = Service("AddNode",caesar_ros.srv.AddNode, add_node)
+
     loop(pub)
 
-    add_node_srv = Service('AddNode',caesar_ros.srv.AddNode, addnode)
 
 end
 
-if ! isinteractive()
-    main()
-end
+main()
 
 
 
