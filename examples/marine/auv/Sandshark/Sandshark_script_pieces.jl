@@ -30,41 +30,61 @@ odonoise = Matrix(Diagonal(10*[0.1;0.1;0.005].^2))
 
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[50:3:300]
 
-lastepoch = 0
-for ep in epochs
-  global lastepoch
-  if lastepoch != 0
-    # @show interp_yaw(ep)
-    deltaAng = interp_yaw(ep) - interp_yaw(lastepoch)
+function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw)
+  #
+  ## Caching factors
+  ppbrDict = Dict{Int, Pose2Point2BearingRange}()
+  odoDict = Dict{Int, Pose2Pose2}()
+  NAV = Dict{Int, Vector{Float64}}()
 
-    wXi = TU.SE2([interp_x(lastepoch);interp_y(lastepoch);interp_yaw(lastepoch)])
-    wXj = TU.SE2([interp_x(ep);interp_y(ep);interp_yaw(ep)])
-    iDXj = se2vee(wXi\wXj)
-    NAV[ep] = iDXj
-    # NAV[ep][1:2] .*= 0.7
-    # println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
+  epochs = timestamps[50:3:300]
+  lastepoch = 0
+  for ep in epochs
+    @show ep
+    if lastepoch != 0
+      # @show interp_yaw(ep)
+      deltaAng = interp_yaw(ep) - interp_yaw(lastepoch)
 
-    odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], odonoise) )
+      wXi = TU.SE2([interp_x(lastepoch);interp_y(lastepoch);interp_yaw(lastepoch)])
+      wXj = TU.SE2([interp_x(ep);interp_y(ep);interp_yaw(ep)])
+      iDXj = se2vee(wXi\wXj)
+      NAV[ep] = iDXj
+      # NAV[ep][1:2] .*= 0.7
+      # println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
+
+      odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], odonoise) )
+    end
+    rangepts = rangedata[ep][:]
+    rangeprob = kde!(rangepts)
+    azipts = azidata[ep][:,1]
+
+    azipts = collect(azidata[ep][:,1:1]')
+    aziptsw = TU.wrapRad.(azipts)
+
+    aziprobl = kde!(azipts)
+    npts = rand(aziprobl, 200)
+    aziprob = manikde!(npts, Sphere1)
+
+    # alternative range probability
+    rawmf = readdlm("/home/dehann/data/sandshark/full_wombat_2018_07_09/extracted/matchedfilter/raw/$(ep).csv",',')
+    range_bss = AliasingScalarSampler(rawmf[:,1], exp.(rawmf[:,2]), SNRfloor=0.6)
+
+    # prep the factor functions
+    ppbrDict[ep] = Pose2Point2BearingRange(aziprob, range_bss) # rangeprob
+    lastepoch = ep
   end
-  rangepts = rangedata[ep][:]
-  rangeprob = kde!(rangepts)
-  azipts = azidata[ep][:,1]
-  aziprob = kde!(azipts)
-
-  # alternative range probability
-  rawmf = readdlm("/home/dehann/data/sandshark/full_wombat_2018_07_09/extracted/matchedfilter/raw/$(ep).csv",',')
-  range_bss = AliasingScalarSampler(rawmf[:,1], exp.(rawmf[:,2]), SNRfloor=0.6)
-
-  # prep the factor functions
-  ppbrDict[ep] = Pose2Point2BearingRange(aziprob, range_bss) # rangeprob
-  lastepoch = ep
+  return epochs, odoDict, ppbrDict, NAV
 end
 
+epochs, odoDict, ppbrDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw)
 
 
-function runEpochs!(fgl, STEP::Int, index::Vector{Int})
+
+
+
+
+function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int})
     for ep in epochs[(STEP+1):(STEP+10)]
       curvar = Symbol("x$(index[1])")
       addVariable!(fgl, curvar, Pose2)
@@ -132,12 +152,12 @@ index1 = Int[0;]
 index2 = Int[0;]
 storeLast = Dict{Symbol,BallTreeDensity}()
 
-for STEP in 0:10:80
+for STEP in 0:10:20
     global fg1, tree1
     global index1, index2
     global storeLast
 
-    runEpochs!(fg1, STEP, index1)
+    runEpochs!(fg1, epochs, STEP, index1)
     poses = sortVarNested(ls(fg1, r"x"))
 
     if STEP-10 >= 0
@@ -168,246 +188,20 @@ end
 ## debugging a plotting
 
 
-## plot forward convolves
-
-fcts = setdiff(ls(fg1, :l1), lsfPriors(fg1))
-
-
-pts = approxConv(fg1, fcts[1], :l1)
-
-pts, infd = predictbelief(fg1,:l1,fcts)
-
-pl1 = Gadfly.plot(x=pts[1,:],y=pts[2,:],Geom.hexbin)
-
-union!(PL.layers, pl1.layers)
-
-PL
-
-plotKDE(manikde!(pts, Point2().manifolds))
-
-
 
 
 dfg = fg1
-fctsym = :x70l1f1
-fct = getFactorType(dfg, fctsym)
 
+fctsym = ls(dfg, Pose2Point2BearingRange)[1]
+# fcss = lsf(dfg, Pose2Pose2)
 
 
-#
+plotFactor(dfg, :x20x21f1)
+plotFactor(dfg, :x20l1f1)
 
 
-
-
-fctsym
-
-
-
-function solveFactorMeasurement(dfg::AbstractDFG,
-                                fctsym::Symbol  )
-  #
-
-
-
-end
-
-
-fcto = getFactor(dfg, fctsym)
-varsyms = fcto._variableOrderSymbols
-vars = map(x->getPoints(getKDE(dfg,x)), varsyms)
-fcttype = getFactorType(fcto)
-zDim = getData(fcto).fnc.zDim
-
-N = size(vars[1])[2]
-res = zeros(zDim)
-ud = FactorMetadata()
-meas = (zeros(zDim, N),)
-
-idx = 1
-
-function makemeas(i, dm, meas)
-  meas[1][:,i] = meas[1][:,i] + dm
-  return meas
-end
-
-
-
-ggo = (i, dm) -> fcttype(res,ud,i,makemeas(i, dm, meas),vars...)
-
-
-ggo(1, [0.0;0.0])
-
-
-using Optim
-
-
-optimize((x) -> ggo(1,x), [0.0; 0.0])
-
-Gadfly.plot(z=(x,y)->ggo(1,[x;y]), xmin=[-pi],xmax=[pi],ymin=[-100.0],ymax=[100.0], Geom.contour)
-
-
-# idea is to find predicted parameters for noise model
-
-
-#
-
-
-
-
-
-import RoMEPlotting: plotFactor
-
-function plotFactor(dfg::AbstractDFG, fctsym::Symbol, fct::Pose2Point2Bearing; hdl=[])
-  #
-
-  # variables
-  vars = ls(dfg, fctsym)
-
-  # the pose
-  pose = intersect(vars, ls(dfg, Pose2))[1]
-  poin = intersect(vars, ls(dfg, Point2))[1]
-
-  # convolve the yaw angle with bearing rotation model
-  pX = marginal(getKDE(dfg, pose), [3])
-  pts = approxConvCircular(pX, fct.bearing)
-
-  # draw plots
-  measest = manikde!(pts, Sphere1)
-
-  # inverse solve for predicted bearing
-  dx = getPoints(getKDE(dfg, poin))[1,:] - getPoints(getKDE(dfg, pose))[1,:]
-  dy = getPoints(getKDE(dfg, poin))[2,:] - getPoints(getKDE(dfg, pose))[2,:]
-  pred = reshape(atan.(dy,dx), 1,:)
-
-  ppX = manikde!(pred, Sphere1)
-
-  plcl = plotKDECircular( [measest; ppX], logpdf=true, legend=["Meas. Est.";"Predicted"] )
-
-  # plot pose and point by itself
-  posepl1 = plotKDE(dfg, pose, dims=[1;2], c=["green"])
-  posepl2 = plotKDECircular(marginal(getKDE(dfg, pose), [3]))
-  landmpl = plotKDE(dfg, poin, c=["red"])
-
-  tfg = initfg()
-  addVariable!(tfg, pose, Pose2)
-  addVariable!(tfg, poin, Point2)
-  addFactor!(tfg, [pose;poin], fct, autoinit=false)
-  manualinit!(tfg, pose, getKDE(dfg,pose))
-  manualinit!(tfg, poin, getKDE(dfg,poin))
-  plt = drawPosesLandms(tfg, point_size=5pt)
-
-  # plot handles
-  push!(hdl, landmpl)
-  push!(hdl, posepl1)
-  push!(hdl, posepl2)
-  push!(hdl, plcl)
-  push!(hdl, plt)
-
-  hstack(vstack(landmpl,posepl1, posepl2), vstack(plcl, plt))
-end
-
-
-
-
-hdl = []
-
-function plotFactor(dfg::AbstractDFG, fctsym::Sybmol, fct::Pose2Point2BearingRange; hdl = [])
-  #
-
-
-# variables
-vars = ls(dfg, fctsym)
-
-# the pose
-pose = intersect(vars, ls(dfg, Pose2))[1]
-poin = intersect(vars, ls(dfg, Point2))[1]
-
-# plot current pose & point
-pl_poin = plotKDE(dfg, poin, levels=5, c=["red";])
-pl_pose = plotPose(dfg, pose, c=["black"])
-
-
-
-# project landmark
-
-# do range model separately too
-pr = Pose2Point2Range(fct.range)
-
-plotFactor(dfg, fctsym, pr, hdl=hdl)
-
-
-
-
-hdl
-
-end
-
-
-plhist
-
-
-## development
-
-br = Pose2Point2Bearing(fct.bearing)
-
-plotFactor(dfg, :x70l1f1, br)
-
-
-
-pr = Pose2Point2Range(fct.range)
-
-function plotFactor(dfg::G, fctsym::Symbol, fct::Pose2Point2Bearing) where {G <: AbstractDFG}
-
-hdl = []
-
-# variables
-vars = ls(dfg, fctsym)
-
-# the pose
-pose = intersect(vars, ls(dfg, Pose2))[1]
-poin = intersect(vars, ls(dfg, Point2))[1]
-
-poseyaw = plotKDECircular(marginal(getKDE(dfg, pose), [3]), title="yaw angle")
-bearpl = plotKDECircular(fct.bearing, title="bearing body frame")
-
-vstack(poseyaw, bearpl)
-
-
-end
-
-"""
-    $SIGNATURES
-
-Build an approximate density `[Y|X,DX,.]=[X|Y,DX][DX|.]` as proposed by the conditional convolution.
-
-Notes
-- Assume both are on circular manifold, `manikde!(pts, (:Circular,))`
-"""
-function approxConvCircular(pX::BallTreeDensity, pDX::BallTreeDensity)
-  #
-
-  # building basic factor graph
-  tfg = initfg()
-  addVariable!(tfg, :s1, Sphere1)
-  addVariable!(tfg, :s2, Sphere1)
-  addFactor!(tfg, [:s1;:s2], Sphere1Sphere1(pDX), autoinit=false)
-  manualinit!(tfg,:s1, pX)
-
-  # solve for outgoing proposal value
-  approxConv(tfg,:s1s2f1,:s2)
-end
-
-
-# """
-#     $SIGNATURES
-#
-# Solve for the measurement values, leaving all variables in tact.
-# """
-# function inverseEvaluateFactor(dfg::G, fct::F) where {G <: AbstractDFG, F <: DFGFactor}
-#
-#
-# end
-
+reportFactors(dfg, Pose2Pose2, ls(dfg, Pose2Pose2)[1:2])
+reportFactors(dfg, Pose2Point2BearingRange)
 
 
 
@@ -422,19 +216,16 @@ PL = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblX, lblY)
 plotSandsharkFromDFG(fg1, scale=1.5)
 
 
+
+
+
 ## slightly random
 
-
 drawGraph(fg1)
-
 plotLocalProduct(fg1, :x55)
-
 sortVarNested(ls(fg1, r"x"))
-
 pp, parr, partials, lb, infdim = IIF.localProduct(fg1, :x55)
-
 plotKDE([pp;parr], levels=1, legend=["prod"; string.(lb[1:3])], dims=[1;2])
-
 plotPose(fg1, :x59)
 
 
@@ -451,126 +242,18 @@ pll = layerBeamPatternRose(ppbrDict[ep].bearing, wRr=wRr, wTRr=theta[1:2], scale
 
 
 
-ROT = Float64[]
 
-
-for (tim, data) in azidata
-  global ROT
-  ROT = [ROT; data[:,1]]
-end
-
-
-
-
-Gadfly.plot(x=ROT, Geom.histogram)
-
-
-st = sort(collect(keys(azidata)))[150]
-
-Gadfly.plot(x=azidata[st][:,1], Geom.histogram)
-
-
-
-Gadfly.plot(x=getPoints(PX)[:], Geom.histogram)
-
-
-
-mask = rand(Categorical(0.001*ones(1000)),100)
-pts = collect(azidata[st][mask,1:1]')
-PX = manikde!( pts, (:Circular,))
-AMP.plotKDECircular([PX;], rVo=[10.0; 0.0; 0.0])
-
-
-
-Gadfly.plot(
-  layerBeamPatternRose( PX, wTRr= , wRr=wRr )
-)
-
-
-
-
-
-
-
-
-## Plot just dead reckoning
-
-
-ep = epochs[1]
-initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
 
 
 #
 
 
 
-XX= Float64[]
-YY = Float64[]
-TH = Float64[]
-
-PL = []
-
-for i in 1:2:80
-  @show ep = epochs[i]
-
-  push!(XX, interp_x(ep))
-  push!(YY, interp_y(ep))
-  push!(TH, interp_yaw(ep)) # bad at wrap boundary
-
-  mask = rand(Categorical(0.001*ones(1000)),100)
-  pts = collect(azidata[ep][mask,1:1]')
-  PX = manikde!( TU.wrapRad.(deepcopy(pts)), (:Circular,))
-  # PX = manikde!( pts, (:Euclid,))
-
-  pl = plotSandsharkFromDFG(dfg)
-  # pll = AMP.plotKDECircular([PX;], rVo=[XX[end]; YY[end]; TH[end]], radix=1.2, scale=0.3)
-  # push!(PL, pll)
-  # his1 = Gadfly.plot(x=azidata[ep][:,1], Geom.histogram)
-  # his2 = Gadfly.plot(x=pts, Geom.histogram)
-  # vstack(his1, his2, pll) |> PDF("/tmp/caesar/random/debug/$ep.pdf")
-end
-
-pl = Gadfly.plot(
-  Gadfly.layer(x=XX, y=YY, Geom.path),
-  Gadfly.layer(x=[0.6;], y=[-16.0;], Geom.point, Theme(default_color=colorant"red")),
-)
-
-for pll in PL
-  union!(pl.layers, pll.layers)
-end
-
-pl
-
-
-
-
-## plot raw data in loop
-
-
-i = 0
-for t in timestamps
-  @show t
-  global i += 1
-  pl1 = Gadfly.plot(x=azidata[t][:,1], y=azidata[t][:,2], Geom.point)
-  pl2 = Gadfly.plot(x=)
-   # |> PNG("/tmp/plots/$i.png")
-
-end
-
-
-
-
 
 ## plot all beam patterns from factor graph
 
-dfg = fg1
 
 plotSandsharkFromDFG(dfg)
-
-ls(dfg, Point2)
-ls(dfg, Pose2)
-
-ls(dfg, Pose2Pose2)
 
 
 
@@ -597,4 +280,42 @@ pts = rand(fct_range, 1000)
 
 
 
+## plot forward convolves
+
+fcts = setdiff(ls(fg1, :l1), lsfPriors(fg1))
+
+
+pts = approxConv(fg1, fcts[1], :l1)
+
+pts, infd = predictbelief(fg1,:l1,fcts)
+
+pl1 = Gadfly.plot(x=pts[1,:],y=pts[2,:],Geom.hexbin)
+
+union!(PL.layers, pl1.layers)
+
+PL
+
+plotKDE(manikde!(pts, Point2().manifolds))
+
+
+
+
+
 #
+
+
+
+
+
+
+
+
+# pts = collect(azidata[1531153769000000000][:,1:1]')
+#
+# ptsw = TU.wrapRad.(pts)
+#
+# pc = manikde!(pts, Sphere1)
+# pl = manikde!(pts, ContinuousScalar)
+# plw = manikde!(ptsw, ContinuousScalar)
+#
+# plotKDE([pl;plw])

@@ -91,10 +91,7 @@ interp_x = LinearInterpolation(navkeys, X)
 interp_y = LinearInterpolation(navkeys, Y)
 interp_yaw = LinearInterpolation(navkeys, yaw)
 
-## Caching factors
-ppbrDict = Dict{Int, Pose2Point2BearingRange}()
-odoDict = Dict{Int, Pose2Pose2}()
-NAV = Dict{Int, Vector{Float64}}()
+
 
 
 
