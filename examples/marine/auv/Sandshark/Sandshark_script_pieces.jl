@@ -18,7 +18,6 @@ using DelimitedFiles
 @everywhere setForceEvalDirect!(true)
 
 
-# const TU = TransformUtils
 
 Gadfly.set_default_plot_size(35cm,25cm)
 
@@ -26,71 +25,35 @@ include(joinpath(@__DIR__,"Plotting.jl"))
 include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 
-odonoise = Matrix(Diagonal(10*[0.1;0.1;0.005].^2))
-
-
-# Step: Selecting a subset for processing and build up a cache of the factors.
-
-function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw)
-  #
-  ## Caching factors
-  ppbrDict = Dict{Int, Pose2Point2BearingRange}()
-  odoDict = Dict{Int, Pose2Pose2}()
-  NAV = Dict{Int, Vector{Float64}}()
-
-  epochs = timestamps[50:3:300]
-  lastepoch = 0
-  for ep in epochs
-    @show ep
-    if lastepoch != 0
-      # @show interp_yaw(ep)
-      deltaAng = interp_yaw(ep) - interp_yaw(lastepoch)
-
-      wXi = TU.SE2([interp_x(lastepoch);interp_y(lastepoch);interp_yaw(lastepoch)])
-      wXj = TU.SE2([interp_x(ep);interp_y(ep);interp_yaw(ep)])
-      iDXj = se2vee(wXi\wXj)
-      NAV[ep] = iDXj
-      # NAV[ep][1:2] .*= 0.7
-      # println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
-
-      odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], odonoise) )
-    end
-    rangepts = rangedata[ep][:]
-    rangeprob = kde!(rangepts)
-    azipts = azidata[ep][:,1]
-
-    azipts = collect(azidata[ep][:,1:1]')
-    aziptsw = TU.wrapRad.(azipts)
-
-    aziprobl = kde!(azipts)
-    npts = rand(aziprobl, 200)
-    aziprob = manikde!(npts, Sphere1)
-
-    # alternative range probability
-    rawmf = readdlm("/home/dehann/data/sandshark/full_wombat_2018_07_09/extracted/matchedfilter/raw/$(ep).csv",',')
-    range_bss = AliasingScalarSampler(rawmf[:,1], exp.(rawmf[:,2]), SNRfloor=0.6)
-
-    # prep the factor functions
-    ppbrDict[ep] = Pose2Point2BearingRange(aziprob, range_bss) # rangeprob
-    lastepoch = ep
-  end
-  return epochs, odoDict, ppbrDict, NAV
-end
-
-epochs, odoDict, ppbrDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw)
+odonoise = Matrix(Diagonal((10*[0.1;0.1;0.005]).^2))
 
 
 
+epochs, odoDict, ppbrDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TEND=600)
 
 
 
-function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int})
+# Build interpolators for x, y from LBL data
+itpl_lblx = LinearInterpolation(lblkeys, lblX)
+itpl_lbly = LinearInterpolation(lblkeys, lblY)
+
+# quick look at initial location
+itpl_lblx[epochs[1]]
+itpl_lbly[epochs[1]]
+interp_yaw[epochs[1]]
+
+0
+
+function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
+
+    metadata = open( joinpath(getSolverParams(fg1).logpath, "metadata.txt"), "a")
+
     for ep in epochs[(STEP+1):(STEP+10)]
       curvar = Symbol("x$(index[1])")
       addVariable!(fgl, curvar, Pose2)
 
       # xi -> l1 - nonparametric factor
-      if index[1] % 5 == 0
+      if index[1] % acousticRate == 0
           addFactor!(fgl, [curvar; :l1], ppbrDict[ep], autoinit=true)
       end
 
@@ -99,14 +62,21 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int})
         addFactor!(fgl, [Symbol("x$(index[1]-1)"); curvar], odoDict[ep], autoinit=true)
       else
         # Prior to the first pose location (a "GPS" prior)
-        initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
+        # initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
+        initLoc = [itpl_lblx(ep);itpl_lbly(ep);interp_yaw(ep)]
         println("Adding a prior at $curvar, $initLoc")
         addFactor!(fgl, [curvar], PriorPose2( MvNormal(initLoc, Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=true)
       end
       # Heading partial prior
-      addFactor!(fgl, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=true)
+      # addFactor!(fgl, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=true)
+
+      # write out some metadata to help with debugging
+      println(metadata, "$(index[1]), $ep, $curvar")
+
       index[1] += 1
     end
+    close(metadata)
+
     nothing
 end
 
@@ -167,13 +137,16 @@ for STEP in 0:10:20
         addFactor!(fg1, [poses[end-10];], PriorPose2(storeLast[poses[end-10]]))
     end
 
-    saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_before.pdf"))
+    saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_before"))
     @time tree1, smt, hist = solveTree!(fg1, tree1)
-    saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_after.pdf"))
+    saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_after"))
 
-    pla = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblX, lblY)
+    pla = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
     plb = plotSandsharkFromDFG(fg1)
     hstack(pla,plb) |> PDF(joinpath(getSolverParams(fg1).logpath, "sandshark-beacon_$STEP.pdf"))
+
+    reportFactors(fg1, Pose2Point2BearingRange, filepath=joinpath(getSolverParams(fg1).logpath, "acoustics_$STEP.pdf"), show=false)
+    reportFactors(fg1, Pose2Pose2, filepath=joinpath(getSolverParams(fg1).logpath, "odo_$STEP.pdf"), show=false)
 
     poses = sortVarNested(ls(fg1, r"x"))
     storeLast[poses[end]] = getKDE(fg1, poses[end])
@@ -182,12 +155,78 @@ end
 
 
 
+# sum(timestamps .< 1531153363000000000) # 348
+
+
+
+plotLocalProduct(fg1, :x27, show=true)
+
+
+
+plotKDE(ppbrDict[epochs[1]].bearing)
+
+
 
 
 
 ## debugging a plotting
 
 
+dfg = fg1
+
+
+
+
+
+drawGraph(dfg)
+
+
+plotLocalProduct(dfg, :l1)
+plotLocalProduct(dfg, :x100)
+
+getSolverParams(dfg).dbg = true
+
+tree, smt, hist = solveTree!(dfg, recordcliqs=ls(dfg))
+
+
+plotSandsharkFromDFG(dfg)
+drawPosesLandmarksAndOdo(dfg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
+
+# fg1_ = deepcopy(fg1)
+
+
+
+0
+
+
+
+
+
+
+
+## compare raw beam former data with factors
+
+
+plotRawBeamFormer(fg1, ppbrDict, NAV, interp_x, interp_y, interp_yaw, show=true, all=true)
+
+
+
+## load previous factor graph to compare
+_fg = initfg()
+loadDFG(joinpath(getSolverParams(fg1).logpath, "graphs", "fg_0_after.pdf"), Main, _fg)
+
+
+
+drawGraph(_fg)
+
+plotPose(_fg, :x0)
+getFactorType)
+
+
+
+
+
+## report on factors
 
 
 dfg = fg1
@@ -210,7 +249,7 @@ reportFactors(dfg, Pose2Point2BearingRange)
 
 ## overview
 
-PL = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblX, lblY)
+PL = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
 
 
 plotSandsharkFromDFG(fg1, scale=1.5)

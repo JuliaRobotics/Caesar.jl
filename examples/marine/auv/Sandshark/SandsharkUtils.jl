@@ -93,13 +93,75 @@ interp_yaw = LinearInterpolation(navkeys, yaw)
 
 
 
+function poorMansDeconv_BF(XX = collect(range(-pi,pi,length=1000)),
+                           YY = ppbrDict[epochs[1]].bearing(XX)      )
+  #
+  YY1 = YY.^4
+  YY1 ./= maximum(YY1)
+  YY2 = YY1.^4
+  YY2 ./= maximum(YY2)
+  # Gadfly.plot(x=XX, y=YY2, Geom.line)
+  bss = AliasingScalarSampler(XX, YY2)
+  pts = reshape(rand(bss, 200), 1, :)
+  pc = manikde!(pts, Sphere1)
+  # plotKDECircular(pc)
+
+  return pc
+end
 
 
 
+# Step: Selecting a subset for processing and build up a cache of the factors.
 
-## what what
+function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise; TSTART=356, TEND=1200)
+  #
+  ## Caching factors
+  ppbrDict = Dict{Int, Pose2Point2BearingRange}()
+  odoDict = Dict{Int, Pose2Pose2}()
+  NAV = Dict{Int, Vector{Float64}}()
 
-# Gadfly.plot(y=180/pi.*yaw, Geom.path)
+  XX = collect(range(-pi,pi,length=1000))
 
+  epochs = timestamps[TSTART:4:TEND]
+  lastepoch = 0
+  @showprogress "preparing data" for ep in epochs
+    # @show ep
+    if lastepoch != 0
+      # @show interp_yaw(ep)
+      deltaAng = interp_yaw(ep) - interp_yaw(lastepoch)
 
+      wXi = TU.SE2([interp_x(lastepoch);interp_y(lastepoch);interp_yaw(lastepoch)])
+      wXj = TU.SE2([interp_x(ep);interp_y(ep);interp_yaw(ep)])
+      iDXj = se2vee(wXi\wXj)
+      NAV[ep] = iDXj
+      # NAV[ep][1:2] .*= 0.7
+      # println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
+
+      odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], odonoise) )
+    end
+    rangepts = rangedata[ep][:]
+    rangeprob = kde!(rangepts)
+
+    # azipts = azidata[ep][:,1]
+    azipts = collect(azidata[ep][:,1:1]')
+    aziptsw = TU.wrapRad.(azipts)
+
+    # direct
+    aziprobl = kde!(azipts)
+    # npts = rand(aziprobl, 200)
+    # aziprob = manikde!(npts, Sphere1)
+
+    # with deconv
+    aziprob = poorMansDeconv_BF(XX, aziprobl(XX))
+
+    # alternative range probability
+    rawmf = readdlm("/home/dehann/data/sandshark/full_wombat_2018_07_09/extracted/matchedfilter/raw/$(ep).csv",',')
+    range_bss = AliasingScalarSampler(rawmf[:,1], exp.(rawmf[:,2]), SNRfloor=0.6)
+
+    # prep the factor functions
+    ppbrDict[ep] = Pose2Point2BearingRange(aziprob, range_bss) # rangeprob
+    lastepoch = ep
+  end
+  return epochs, odoDict, ppbrDict, NAV
+end
 #

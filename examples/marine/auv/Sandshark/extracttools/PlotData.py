@@ -26,7 +26,6 @@ for filename in sorted(glob.glob(angle_csv+"*.csv")):
     # azims = angle_particles[:,0]
     # incls = angle_particles[:,1]
     # sc.set_offsets(angle_particles)
-
     ax.cla()
     [n,X, V]=ax.hist(angle_particles[:,0],bins=50,normed=True)
     fig.canvas.draw_idle()
