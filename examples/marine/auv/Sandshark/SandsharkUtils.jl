@@ -111,12 +111,15 @@ end
 
 
 
+
 # Step: Selecting a subset for processing and build up a cache of the factors.
 
 function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise; TSTART=356, TEND=1200)
   #
   ## Caching factors
   ppbrDict = Dict{Int, Pose2Point2BearingRange}()
+  ppbDict = Dict{Int, Pose2Point2Bearing}()
+  pprDict = Dict{Int, Pose2Point2Range}()
   odoDict = Dict{Int, Pose2Pose2}()
   NAV = Dict{Int, Vector{Float64}}()
 
@@ -156,12 +159,19 @@ function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw
 
     # alternative range probability
     rawmf = readdlm("/home/dehann/data/sandshark/full_wombat_2018_07_09/extracted/matchedfilter/raw/$(ep).csv",',')
-    range_bss = AliasingScalarSampler(rawmf[:,1], exp.(rawmf[:,2]), SNRfloor=0.6)
+    dvmf = exp.(rawmf[:,2])
+    dvmf .= dvmf.^4
+    dvmf ./= cumsum(dvmf)[end]
+    dvmf .= dvmf.^2
+    dvmf ./= cumsum(dvmf)[end]
+    range_bss = AliasingScalarSampler(rawmf[:,1], dvmf, SNRfloor=0.6) # exp.(rawmf[:,2])
 
     # prep the factor functions
     ppbrDict[ep] = Pose2Point2BearingRange(aziprob, range_bss) # rangeprob
+    ppbDict[ep] = Pose2Point2Bearing(aziprob) # rangeprob
+    pprDict[ep] = Pose2Point2Range(range_bss) # rangeprob
     lastepoch = ep
   end
-  return epochs, odoDict, ppbrDict, NAV
+  return epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV
 end
 #

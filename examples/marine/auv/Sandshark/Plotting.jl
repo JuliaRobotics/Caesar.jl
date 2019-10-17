@@ -26,14 +26,14 @@ function plotSandsharkFromDFG(dfg::G; radix::Float64=1.8, scale::Float64=0.4) wh
   # bearing range factors
   brf = ls(dfg, Pose2Point2BearingRange)
   #variables and poses connected to br factors
-  brvars = union(map(x->ls(dfg, x), brf)...)
+  brvars = 0 < length(brf) ? union(map(x->ls(dfg, x), brf)...) : Symbol[]
   brposes = setdiff(brvars, ls(dfg, r"l"))
   brposes .= sortVarNested(brposes)
 
   # get body frame beam estimate
   brfacts = Dict{Symbol, BallTreeDensity}()
 
-  PL =  drawPosesLandms(dfg, spscale=2.5, contour=false)
+  PL =  drawPosesLandms(dfg, spscale=2.5, contour=false, meanmax=:mean)
 
   # TODO: not matched properly
   for i in 1:length(brposes)

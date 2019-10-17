@@ -25,13 +25,15 @@ include(joinpath(@__DIR__,"Plotting.jl"))
 include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 
-odonoise = Matrix(Diagonal((10*[0.1;0.1;0.005]).^2))
+odonoise = Matrix(Diagonal((20*[0.1;0.1;0.005]).^2))
 
 
 
-epochs, odoDict, ppbrDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TEND=600)
+epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TEND=600)
 
-
+# Gadfly.plot(y=pprDict[epochs[1]].Z.weights.values, Geom.path) # Gadfly.plot(x=rand(pprDict[epochs[1]].Z, 100), Geom.histogram)
+# using StatsBase
+# fieldnames(StatsBase.ProbabilityWeights)
 
 # Build interpolators for x, y from LBL data
 itpl_lblx = LinearInterpolation(lblkeys, lblX)
@@ -42,10 +44,17 @@ itpl_lblx[epochs[1]]
 itpl_lbly[epochs[1]]
 interp_yaw[epochs[1]]
 
+
+DeltaX = itpl_lblx[epochs[1]] - interp_x[epochs[1]]
+DeltaY = itpl_lbly[epochs[1]] - interp_y[epochs[1]]
+
+
 0
 
-function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
+global anicounter = 0
 
+function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
+    global anicounter
     metadata = open( joinpath(getSolverParams(fg1).logpath, "metadata.txt"), "a")
 
     for ep in epochs[(STEP+1):(STEP+10)]
@@ -54,7 +63,9 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
 
       # xi -> l1 - nonparametric factor
       if index[1] % acousticRate == 0
-          addFactor!(fgl, [curvar; :l1], ppbrDict[ep], autoinit=true)
+          # addFactor!(fgl, [curvar; :l1], ppbrDict[ep], autoinit=true)
+          addFactor!(fgl, [curvar; :l1], pprDict[ep], autoinit=false)
+          # addFactor!(fgl, [curvar; :l1], ppbDict[ep], autoinit=false)
       end
 
       if ep != epochs[1]
@@ -68,10 +79,63 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
         addFactor!(fgl, [curvar], PriorPose2( MvNormal(initLoc, Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=true)
       end
       # Heading partial prior
-      # addFactor!(fgl, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=true)
+      addFactor!(fgl, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(5))), autoinit=true)
 
       # write out some metadata to help with debugging
       println(metadata, "$(index[1]), $ep, $curvar")
+
+      ensureAllInitialized!(fgl)
+
+      # visualizations
+      plre = drawPoses(fgl,drawhist=false,contour=false,spscale=1.0)
+      plre.coord = Coord.Cartesian(xmin=0, xmax=100, ymin=-120, ymax=-70)
+      # add confidence contour on last
+      pcf = plotKDE(getKDE(fgl, curvar),dims=[1;2],levels=1,c=["gray70"] )
+      union!(plre.layers, pcf.layers)
+      # export
+      plre |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "fg_$curvar.png") )
+
+      tfg = initfg()
+      addVariable!(tfg, :l1, Point2)
+      manualinit!(tfg,:l1,getKDE(fgl,:l1))
+      addVariable!(tfg, curvar, Pose2)
+      manualinit!(tfg,curvar,getKDE(fgl,curvar))
+      addFactor!(tfg, [curvar;:l1], pprDict[ep])
+
+      hdl = []
+      plotFactor(tfg, ls(tfg, :l1)[1], hdl=hdl)
+      hdl[7].coord = Coord.Cartesian(xmin=-150.0, xmax=200.0, ymin=-250.0, ymax=100.0)
+      hdl[7] |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "range_$curvar.png") )
+
+      # circular illustration
+      cpts = reshape(rand(Normal(interp_yaw(ep), deg2rad(5)),100),1,:)
+      cbm = manikde!(cpts, Sphere1)
+
+      opts = index[1] > 0 ? approxConv(fgl, intersect(ls(fgl, Pose2Pose2),ls(fgl, curvar))[1], curvar) : 2*randn(3,100)
+      cbo = manikde!(opts[3:3,:], Sphere1)
+      plcb = plotKDECircular([cbm; cbo], legend=["mag";"odo"], c=["orange";"blue"])
+      plcb.coord = Coord.Cartesian(xmin=-2.5, xmax=2.5, ymin=-2.5, ymax=2.5)
+      plcb |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "circ_$curvar.png") )
+
+      # animate dead reckoning
+      if ep != epochs[1]
+        aniT = LinearInterpolation([0.0;1.0], [epochs[index[1]];epochs[index[1]+1]]) # ep
+        for atim in 0:0.1:1
+          @show atim, aniT(atim)
+          mask = epochs[1] .< navkeys .< aniT(atim)
+          if sum(mask) > 2
+            pldo = Gadfly.plot(x=[X[mask];interp_x[aniT(atim)]].+DeltaX, y=[Y[mask];interp_y[aniT(atim)]].+DeltaY, Geom.path(), Theme(default_color=colorant"gray80"))
+            pldo |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "animation", "deadreck_$(aniT(atim)).png") )
+            union!(pldo.layers, plre.layers)
+            pldo.coord = Coord.Cartesian(xmin=0, xmax=100, ymin=-120, ymax=-70)
+            hstack(pldo, vstack(plcb, hdl[7])) |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "animation",   "combined_$(anicounter).png") )
+            anicounter += 1
+          end
+        end
+      end
+
+      # combined plot
+      hstack(plre, vstack(plcb, hdl[7])) |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "combined_$curvar.png") )
 
       index[1] += 1
     end
@@ -95,6 +159,9 @@ end
 
 
 
+
+global anicounter = 0
+
 ## Step: Building the factor graph
 fg1 = initfg()
 # Add a central beacon with a prior
@@ -116,36 +183,43 @@ getSolverParams(fg1).drawtree = true
 # getSolverParams(fg).showtree = false
 
 mkpath(joinpath(getSolverParams(fg1).logpath, "graphs"))
+mkpath(joinpath(getSolverParams(fg1).logpath, "reckoning"))
+mkpath(joinpath(getSolverParams(fg1).logpath, "reckoning", "animation"))
 
 
 index1 = Int[0;]
 index2 = Int[0;]
 storeLast = Dict{Symbol,BallTreeDensity}()
 
-for STEP in 0:10:20
+laglength = 20
+
+for STEP in 0:10:10
     global fg1, tree1
     global index1, index2
     global storeLast
 
-    runEpochs!(fg1, epochs, STEP, index1)
+    runEpochs!(fg1, epochs, STEP, index1, acousticRate=3)
     poses = sortVarNested(ls(fg1, r"x"))
 
-    if STEP-10 >= 0
-        @show poses[1], poses[end], poses[end-10]
-        @show dellist = poses[1:(end-10-1)]
-        deleteEpochs!(fg1, dellist)
-        addFactor!(fg1, [poses[end-10];], PriorPose2(storeLast[poses[end-10]]))
+    if STEP-laglength >= 0
+        @show poses[1], poses[end], poses[end-laglength]
+        @show dellist = poses[1:(end-laglength-1)]
+        if length(dellist) > 0
+          deleteEpochs!(fg1, dellist)
+          addFactor!(fg1, [poses[end-laglength];], PriorPose2(storeLast[poses[end-laglength]]))
+        end
     end
 
+    drawGraph(fg1, filepath=joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_.pdf"))
     saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_before"))
-    @time tree1, smt, hist = solveTree!(fg1, tree1)
+    @time tree1, smt, hist = solveTree!(fg1, tree1, maxparallel=200)
     saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_after"))
 
     pla = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
     plb = plotSandsharkFromDFG(fg1)
     hstack(pla,plb) |> PDF(joinpath(getSolverParams(fg1).logpath, "sandshark-beacon_$STEP.pdf"))
 
-    reportFactors(fg1, Pose2Point2BearingRange, filepath=joinpath(getSolverParams(fg1).logpath, "acoustics_$STEP.pdf"), show=false)
+    reportFactors(fg1, Pose2Point2Range, filepath=joinpath(getSolverParams(fg1).logpath, "acoustics_$STEP.pdf"), show=false)
     reportFactors(fg1, Pose2Pose2, filepath=joinpath(getSolverParams(fg1).logpath, "odo_$STEP.pdf"), show=false)
 
     poses = sortVarNested(ls(fg1, r"x"))
@@ -155,9 +229,29 @@ end
 
 
 
+
+
+fcts = ls(fg1, :l1)
+PTS = map(x->approxConv(fg1, x, :l1), fcts)
+
+PP = map(x->manikde!(x, Point2), PTS)
+
+pp = *(PP...)
+
+plotKDE([pp; PP...], levels=2)
+
+
 # sum(timestamps .< 1531153363000000000) # 348
 
+ls(fg1, :l1)
 
+##
+fctsym = :x150l1f1
+
+reportFactors(fg1, Pose2Point2Range, ls(fg1, Pose2Point2Range) )
+reportFactors(fg1, Pose2Pose2, ls(fg1, Pose2Pose2) )
+
+##
 
 plotLocalProduct(fg1, :x27, show=true)
 
