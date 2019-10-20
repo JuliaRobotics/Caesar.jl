@@ -29,7 +29,7 @@ odonoise = Matrix(Diagonal((20*[0.1;0.1;0.005]).^2))
 
 
 
-epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TEND=600)
+epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TEND=1200)
 
 # Gadfly.plot(y=pprDict[epochs[1]].Z.weights.values, Geom.path) # Gadfly.plot(x=rand(pprDict[epochs[1]].Z, 100), Geom.histogram)
 # using StatsBase
@@ -87,7 +87,7 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
       ensureAllInitialized!(fgl)
 
       # visualizations
-      plre = drawPoses(fgl,drawhist=false,contour=false,spscale=1.0)
+      plre = drawPoses(fgl,drawhist=false,contour=false,spscale=1.0, lbls=false, meanmax=:mean)
       plre.coord = Coord.Cartesian(xmin=0, xmax=100, ymin=-120, ymax=-70)
       # add confidence contour on last
       pcf = plotKDE(getKDE(fgl, curvar),dims=[1;2],levels=1,c=["gray70"] )
@@ -193,7 +193,9 @@ storeLast = Dict{Symbol,BallTreeDensity}()
 
 laglength = 20
 
-for STEP in 0:10:10
+length(epochs)
+
+for STEP in 0:10:200
     global fg1, tree1
     global index1, index2
     global storeLast
