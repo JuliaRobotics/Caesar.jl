@@ -68,7 +68,7 @@ buildCliqSubgraphUp
 childCliqs
 cliqGibbs
 cliqHistFilterTransitions
-cliqInitSolveUp!
+cliqInitSolveUpByStateMachine!
 compareAllVariables
 compareFactorGraphs
 compareSimilarFactors
@@ -186,9 +186,11 @@ setUpMsg!
 setValKDE!
 setVariableInitialized!
 setVariableInferDim!
+showFactor
 showVariable
+solveCliq!
 solveCliqWithStateMachine!
-subgraphFromVerts
+solveTree!
 transferUpdateSubGraph!
 treeProductDwn
 treeProductUp
@@ -201,10 +203,6 @@ upMsg
 wipeBuildNewTree!
 writeGraphPdf
 resetVariableAllInitializations!
-showFactor
-showVariable
-solveCliq!
-solveTree!
 ```
 
 <!-- lsfPriors -->

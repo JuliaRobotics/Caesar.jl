@@ -92,7 +92,6 @@ DynPose2VelocityPrior
 VelPose2VelPose2
 DynPose2Pose2
 Pose3Pose3
-InertialPose3
 PriorPose3ZRP
 PartialPriorRollPitchZ
 PartialPose3XYYaw
