@@ -65,11 +65,11 @@ Service callback for adding a binary XYH partial factor.
 """
 function add_factor_xyh(req::AddFactorXYHRequest )
     @info("received add_factor_xyh request", req)
-    @show id0=Symbol(req.id0)
-    @show id1=Symbol(req.id1)
+    id0=Symbol(req.id0)
+    id1=Symbol(req.id1)
     global fg
-    @show vars = ls(fg)
-    @show reply = AddFactorXYHResponse()
+    vars = ls(fg)
+    reply = AddFactorXYHResponse()
     if (in(id0, vars) & in(id1, vars))
         mu_xy = [req.x, req.y]
         Sigma = reshape(req.covariance,3,3)
