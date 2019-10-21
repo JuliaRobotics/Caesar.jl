@@ -1,12 +1,16 @@
 using Documenter, Caesar
+
 import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
-import IncrementalInference: initfg
+import IncrementalInference: initfg, downGibbsCliqueDensity
 
 using KernelDensityEstimatePlotting
 # import KernelDensityEstimatePlotting: plotKDE
 using RoMEPlotting
 
+# until namespaces are properly figured out
+using DistributedFactorGraphs
+import DistributedFactorGraphs: showFactor
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
