@@ -10,7 +10,7 @@ using RoMEPlotting
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
-    format = :html,
+    format = Documenter.HTML(),
     sitename = "Caesar.jl",
     pages = Any[
         "Home" => "index.md",
