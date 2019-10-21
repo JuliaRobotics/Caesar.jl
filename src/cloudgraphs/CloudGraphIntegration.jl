@@ -43,7 +43,7 @@ export
 
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Run Neo4j Cypher queries on the cloudGraph database, and return Tuple with the
 unparsed (results, loadresponse).
@@ -70,7 +70,7 @@ end
 executeQuery(cg::CloudGraph, query::AS) where {AS <:AbstractString} = executeQuery(cg.neo4j.connection, query)
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Get cloud vertex from Neo4j using CloudGraphs.jl as identified by `session`, `robot`, `user`, and vertex label `vsym::Symbol`.
 """
@@ -143,7 +143,7 @@ function getCloudNeighbors(cgl::CloudGraph, cv::CloudVertex; needdata=false, ret
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 List neighbors to node in cgl::CloudGraph by returning Dict{Sym}=(exvid, neoid, Symbol[labels]), and can take
 any of the three as input node identifier. Not specifying an identifier will result in all Variable nodes
@@ -357,7 +357,7 @@ function removeGenericMarginals!(conn)
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Get all Neo4j node IDs in current session.
 """
@@ -400,7 +400,7 @@ end
 
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Build query to fetch sub graph and neighboring nodes.  For example:
 FAILS IN SOME CASES
@@ -466,7 +466,7 @@ end
 # @show qu
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Return array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.
 """
@@ -497,7 +497,7 @@ function getLblExVertexNeoIDs(
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Return array of tuples with ExVertex IDs and Neo4j IDs for vertices with label in session.
 """
@@ -532,7 +532,7 @@ function getExVertexNeoIDs(
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Return array of tuples with ExVertex IDs and Neo4j IDs for all poses.
 """
@@ -606,7 +606,7 @@ function insertnodefromcv!(fgl::G, cvert::CloudGraphs.CloudVertex) where G <: Ab
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Copy all variable and factor nodes from DB into fgl as listed in IDs vector.
 """
@@ -624,7 +624,7 @@ function copyAllNodes!(fgl::G,
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Copy nodes into `fgl` from DB as listed in the `IDs` vector.
 """
@@ -653,7 +653,7 @@ function copyGraphNodesEdges!(fgl::G,
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Copy sub graph portion defined by, and including a depth of neighbors, from the lbls vector.
 """
@@ -674,7 +674,7 @@ end
 
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Fetch a full copy of the DB factor graph under fgl.sessionname.
 """
@@ -689,7 +689,7 @@ function fullLocalGraphCopy!(fgl::G;
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Set all Neo4j nodes in this session ready = 1, warning function does not support new GraffSDK data storage formats.
 """
@@ -729,7 +729,7 @@ function setBackendWorkingSet!(
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Obtain Neo4j global database address and login credientials from STDIN, then insert and return in the addrdict colletion.
 """
@@ -750,7 +750,7 @@ function askneo4jcredentials!(;addrdict=Dict{AbstractString,AbstractString}() )
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Obtain Mongo database address and login credientials from STDIN, then insert and return in the addrdict colletion.
 """
@@ -781,7 +781,7 @@ end
 
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Obtain database addresses and login credientials from STDIN, as well as a few case dependent options.
 """
@@ -843,7 +843,7 @@ end
 
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Connect to databases via network according to addrdict, or ask user for credentials and return
 active cloudGraph object, as well as addrdict.
@@ -875,7 +875,7 @@ function standardcloudgraphsetup(;addrdict=nothing,
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Walk through vertex bigDataElements and return the last matching description.
 """
@@ -890,7 +890,7 @@ function getBigDataElement(vertex::CloudVertex, description::AbstractString)
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Return true if vertex has bigDataElements with matching description.
 """
@@ -904,7 +904,7 @@ function hasBigDataElement(vertex::CloudVertex, description::AbstractString)
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Append big data element into current blob store and update associated global
 vertex information.
@@ -921,7 +921,7 @@ function appendvertbigdata!(cloudGraph::CloudGraph,
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Append big data element into current blob store and update associated global
 vertex information.
@@ -959,7 +959,7 @@ end
 
 
 """
-    $TYPEDSIGNATURES
+    $(SIGNATURES)
 
 Fetch and insert list of CloudVertices into FactorGraph object, up to neighbor depth.
 """
