@@ -33,6 +33,8 @@ ROS integration is a priority for this project and will accompany the so-called 
 
 > **Voice** Please add your voice of support or suggestions on [ROS integration here](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
 
+> **WIP** Please see work on an initial PoC (still using PyCall) via our [wiki developer docs here](https://github.com/JuliaRobotics/Caesar.jl/wiki/ROS-PoC).
+
 ### How does JSON-Schema work?
 
 Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).

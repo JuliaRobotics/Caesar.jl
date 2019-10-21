@@ -19,7 +19,6 @@ ContinuousMultivariate
 
 The current variables types are:
 ```@docs
-Polar
 Point2
 Pose2
 DynPoint2
