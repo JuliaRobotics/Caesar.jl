@@ -30,7 +30,6 @@ using
   ImageMagick,
   ImageCore,
   DocStringExtensions,
-  CloudGraphs, # TODO: will be movedd to DFG
   Neo4j, # TODO: will be movedd to DFG
   Mongoc, # TODO: will be movedd to DFG
   Unmarshal,
