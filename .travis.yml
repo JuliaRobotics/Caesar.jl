@@ -17,10 +17,6 @@ addons:
     packages:
     - hdf5-tools
 
-matrix:
-  allow_failures:
-    - julia: nightly
-
 # script:
 #   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #   - julia --check-bounds=yes -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.test("Caesar"; coverage=true)'
@@ -33,6 +29,7 @@ jobs:
   include:
     - stage: "Documentation"
       julia: 1.2
+      env: BUILDINGDOCS=true
       os: linux
       script:
         - julia -e 'import Pkg; Pkg.add("Documenter")'
@@ -43,3 +40,9 @@ jobs:
         - julia --project=docs/ docs/make.jl
       name: "HTML"
       after_success: skip
+
+
+matrix:
+  allow_failures:
+    - julia: nightly
+    - env: BUILDINGDOCS=true
