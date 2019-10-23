@@ -120,3 +120,7 @@ where a new tree is constructed internally.  In order to recycle computations fr
 tree, smt, hist = solveTree!(fg, tree)
 ```
 which will replace the `tree` object pointer to the new tree object after solution.
+
+### Clique State Machine
+
+The mmisam solver is based on a state machine design to handle the inter and intra clique operations during a variety of situations.  Use of the clique state machine (CSM) makes debugging, development, verification, and modification of the algorithm real easy.  Contact us for any support regarding support modifications to the default algorithm.
