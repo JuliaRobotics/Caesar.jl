@@ -40,12 +40,9 @@ jobs:
         - julia --project=docs/ docs/make.jl
       name: "HTML"
       after_success: skip
-
+      fast_finish: true
 
 matrix:
   allow_failures:
     - julia: nightly
     - env: BUILDINGDOCS=true
-
-jobs:
-  fast_finish: true
