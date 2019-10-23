@@ -46,3 +46,6 @@ matrix:
   allow_failures:
     - julia: nightly
     - env: BUILDINGDOCS=true
+
+jobs:
+  fast_finish: true
