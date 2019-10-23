@@ -20,7 +20,7 @@ fg = initfg()
 # add variables and factors
 # ...
 
-## build the tere
+## build the tree
 tree = wipeBuildNewTree!(fg)
 ```
 
@@ -51,6 +51,18 @@ Then in Julia you should be able to do:
 import IncrementalInference: generateTexTree
 
 generateTexTree(tree)
+```
+
+### Visualizing Clique Adjacency Matrix
+
+It is also possible to see the upward message passing variable/factor association matrix for each clique, requiring the Gadfly.jl package:
+```julia
+using Gadfly
+
+spyCliqMat(tree, :x1) # provided by IncrementalInference
+
+#or embedded in graphviz
+drawTree(tree, imgs=true, show=true
 ```
 
 ## Variable Ordering
@@ -93,9 +105,9 @@ sorted = sortDFG(unsorted)  # deprecated name sortVarNested(unsorted)
 
 Factors:
 ```julia
+unsorted = lsf(fg)
 unsorted = ls(fg, Pose2Point2BearingRange)
 ```
-
 
 ## Interfacing with 'mmisam' Solver
 
