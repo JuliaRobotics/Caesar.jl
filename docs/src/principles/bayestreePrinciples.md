@@ -36,10 +36,17 @@ IncrementalInference.jl includes functions for visualizing the Bayes tree, and u
 drawTree(tree, show=true) # , filepath="/tmp/caesar/mytree.pdf"
 ```
 
-### Latex Tikz
+### Latex Tikz (Optional)
 
 **EXPERIMENTAL**, requiring special import.
 
+First make sure the following packages are installed on your system:
+```
+$ sudo apt-get install texlive-pictures dot2tex
+$ pip install dot2tex
+```
+
+Then in Julia you should be able to do:
 ```julia
 import IncrementalInference: generateTexTree
 
@@ -62,7 +69,7 @@ resetFactorGraphNewTree!(fg)
 
 These steps are combined in a wrapper function:
 ```julia
-# resetBuildTreeFromOrder!(fg, vo)
+resetBuildTreeFromOrder!(fg, vo)
 ```
 
 ### Manipulating the Variable Ordering
