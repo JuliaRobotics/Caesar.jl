@@ -45,7 +45,7 @@ end
 
 At this point it would be good to see what the factor graph actually looks like:
 ```julia
-writeGraphPdf(fg)
+drawGraph(fg)
 ```
 You should see the program `evince` open with this visual:
 
@@ -56,13 +56,13 @@ You should see the program `evince` open with this visual:
 Let's run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this `fg` object:
 ```julia
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
-batchSolve!(fg)
-
-# For those interested, the internal batch solve steps currently involve:
-# tree = wipeBuildNewTree!(fg)
-# inferOverTree!(fg, tree)
+tree, smt, hist = solveTree!(fg)
 ```
-This will take a couple of seconds (including first time compiling for all Julia processes).
+This will take a couple of seconds (including first time compiling for all Julia processes).  If you wanted to see the Bayes tree operations during solving, set the following parameters before calling the solver:
+```julia
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
+```
 
 ## Some Visualization Plot
 
@@ -76,7 +76,7 @@ using RoMEPlotting
 pl = drawPoses(fg)
 
 # For scripting use-cases you can export the image
-Gadfly.draw(Gadfly.PDF("/tmp/test.pdf", 20cm, 10cm),pl)  # or PNG(...)
+pl |> Gadfly.PDF("/tmp/test.pdf") # or PNG(...)
 ```
 ![test](https://user-images.githubusercontent.com/6412556/42294545-c6c80f70-7faf-11e8-8167-017889cee932.png)
 
@@ -110,7 +110,7 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x6; :l1], p2br2)
 
 # solve
-batchSolve!(fg)
+tree, smt, hist = solveTree!(fg, tree)
 
 # redraw
 pl = drawPosesLandms(fg)
