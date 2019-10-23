@@ -63,7 +63,7 @@ vo = getEliminationOrder(fg)
 tree = buildTreeFromOrdering!(fg, vo)
 ```
 The temporary elimination values in `fg` can be reset with (currently rather aggressive):
-``julia
+```julia
 resetFactorGraphNewTree!(fg)
 ```
 
