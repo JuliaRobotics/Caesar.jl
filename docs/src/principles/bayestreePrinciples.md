@@ -55,11 +55,13 @@ The variable ordering is described as a `::Vector{Symbol}`.
 vo = getEliminationOrder(fg)
 tree = buildTreeFromOrdering!(fg, vo)
 ```
+The temporary elimination values in `fg` can be reset with (currently rather aggressive):
+``julia
+resetFactorGraphNewTree!(fg)
+```
 
 These steps are combined in a wrapper function:
 ```julia
-resetFactorGraphNewTree!(fg)
-# or
 # resetBuildTreeFromOrder!(fg, vo)
 ```
 
@@ -86,3 +88,16 @@ Factors:
 ```julia
 unsorted = ls(fg, Pose2Point2BearingRange)
 ```
+
+
+## Interfacing with 'mmisam' Solver
+
+The regular solver used in IIF is:
+```julia
+tree, smt, hist = solveTree!(fg)
+```
+where a new tree is constructed internally.  In order to recycle computations from a previous tree, the following interface can be used:
+```julia
+tree, smt, hist = solveTree!(fg, tree)
+```
+which will replace the `tree` object pointer to the new tree object after solution.
