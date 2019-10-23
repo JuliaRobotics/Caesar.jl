@@ -1,0 +1,88 @@
+# Principle: Bayes tree prototyping
+
+This page describes how to visualize, study, test, and compare Bayes (Junction) tree concepts with special regard for variable ordering.
+
+**Under construction**
+
+## What is a Bayes (Junction) tree
+
+REQUEST Tonio
+
+## Constructing a Tree
+
+Trees and factor graphs are separated in the implementation, allowing the user to construct multiple different trees from one factor graph except for a few temporary values in the factor graph.
+
+```julia
+using IncrementalInference # RoME or Caesar will work too
+
+## construct a distributed factor graph object
+fg = initfg()
+# add variables and factors
+# ...
+
+## build the tere
+tree = wipeBuildNewTree!(fg)
+```
+
+The temporary values are `wiped` from the distributed factor graph object `fg<:AbstractDFG` and a new tree is constructed.  This `wipeBuildNewTree!` call can be repeated as many times the user desires and results should be consistent for the same factor graph structure (regardless of numerical values contained within).
+
+## Visualizing
+
+IncrementalInference.jl includes functions for visualizing the Bayes tree, and uses outside packages such as GraphViz (standard) and Latex tools (experimental, optional) to do so.  
+
+### GraphViz
+
+```julia
+drawTree(tree, show=true) # , filepath="/tmp/caesar/mytree.pdf"
+```
+
+### Latex Tikz
+
+**EXPERIMENTAL**, requiring special import.
+
+```julia
+import IncrementalInference: generateTexTree
+
+generateTexTree(tree)
+```
+
+## Variable Ordering
+
+### Getting the AMD Variable Ordering
+
+The variable ordering is described as a `::Vector{Symbol}`.
+```julia
+vo = getEliminationOrder(fg)
+tree = buildTreeFromOrdering!(fg, vo)
+```
+
+These steps are combined in a wrapper function:
+```julia
+resetFactorGraphNewTree!(fg)
+# or
+# resetBuildTreeFromOrder!(fg, vo)
+```
+
+### Manipulating the Variable Ordering
+
+```julia
+vo = [:x1; :l3; :x2; ...]
+```
+
+> **Note** that a list of variables or factors can be obtained through the `ls` and related functions:
+
+Variables:
+```julia
+unsorted = ls(fg)
+unsorted = ls(fg, Pose2) # by variable type
+unsorted = ls(fg, r"x")  # by regex
+unsorted = intersect(ls(fg, r"x"), ls(fg, Pose2))  # by regex
+
+# sorting
+sorted = sortDFG(unsorted)  # deprecated name sortVarNested(unsorted)
+```
+
+Factors:
+```julia
+unsorted = ls(fg, Pose2Point2BearingRange)
+```
