@@ -65,7 +65,7 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
       if index[1] % acousticRate == 0
           # addFactor!(fgl, [curvar; :l1], ppbrDict[ep], autoinit=true)
           addFactor!(fgl, [curvar; :l1], pprDict[ep], autoinit=false)
-          # addFactor!(fgl, [curvar; :l1], ppbDict[ep], autoinit=false)
+          addFactor!(fgl, [curvar; :l1], ppbDict[ep], autoinit=false)
       end
 
       if ep != epochs[1]
