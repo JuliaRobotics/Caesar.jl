@@ -2,7 +2,7 @@
 
 This page describes how to visualize, study, test, and compare Bayes (Junction) tree concepts with special regard for variable ordering.
 
-**Under construction**
+**docs under construction**
 
 ## What is a Bayes (Junction) tree
 
@@ -119,7 +119,13 @@ where a new tree is constructed internally.  In order to recycle computations fr
 ```julia
 tree, smt, hist = solveTree!(fg, tree)
 ```
-which will replace the `tree` object pointer to the new tree object after solution.
+which will replace the `tree` object pointer to the new tree object after solution.  The following parmaters (set before calling `solveTree!`) will show the solution progress on the tree visualization:
+```julia
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
+```
+The color legend is currently recorded in an [issue thread here](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/349).
+
 
 ### Clique State Machine
 
