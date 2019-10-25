@@ -2,7 +2,7 @@
 
 This page describes how to visualize, study, test, and compare Bayes (Junction) tree concepts with special regard for variable ordering.
 
-**docs under construction**
+**NOTE: docs under construction**
 
 ## What is a Bayes (Junction) tree
 
@@ -62,7 +62,7 @@ using Gadfly
 spyCliqMat(tree, :x1) # provided by IncrementalInference
 
 #or embedded in graphviz
-drawTree(tree, imgs=true, show=true
+drawTree(tree, imgs=true, show=true)
 ```
 
 ## Variable Ordering
@@ -129,4 +129,4 @@ The color legend is currently recorded in an [issue thread here](https://github.
 
 ### Clique State Machine
 
-The mmisam solver is based on a state machine design to handle the inter and intra clique operations during a variety of situations.  Use of the clique state machine (CSM) makes debugging, development, verification, and modification of the algorithm real easy.  Contact us for any support regarding support modifications to the default algorithm.
+The mmisam solver is based on a state machine design to handle the inter and intra clique operations during a variety of situations.  Use of the clique state machine (CSM) makes debugging, development, verification, and modification of the algorithm real easy.  Contact us for any support regarding modifications to the default algorithm.
