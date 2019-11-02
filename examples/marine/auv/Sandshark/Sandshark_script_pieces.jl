@@ -29,7 +29,7 @@ odonoise = Matrix(Diagonal((20*[0.1;0.1;0.005]).^2))
 
 
 
-epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TEND=1200)
+epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TEND=800)
 
 # Gadfly.plot(y=pprDict[epochs[1]].Z.weights.values, Geom.path) # Gadfly.plot(x=rand(pprDict[epochs[1]].Z, 100), Geom.histogram)
 # using StatsBase
@@ -64,7 +64,7 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
       # xi -> l1 - nonparametric factor
       if index[1] % acousticRate == 0
           # addFactor!(fgl, [curvar; :l1], ppbrDict[ep], autoinit=true)
-          addFactor!(fgl, [curvar; :l1], pprDict[ep], autoinit=false)
+          # addFactor!(fgl, [curvar; :l1], pprDict[ep], autoinit=false)
           addFactor!(fgl, [curvar; :l1], ppbDict[ep], autoinit=false)
       end
 
@@ -195,7 +195,7 @@ laglength = 20
 
 length(epochs)
 
-for STEP in 0:10:200
+for STEP in 0:10:50
     global fg1, tree1
     global index1, index2
     global storeLast
