@@ -8,7 +8,7 @@ This page describes a Julia language interface, followed by a CaesarZMQ interfac
 
 Consider the following vehicle odometry prediction (probabilistic) operation, where odometry measurement Z is an independent stochastic process from prior belief on pose X0
 ```math
-P(X_1 | X_0, Z) \approx p(Z | X_0, X_1) p(X_0),
+p(X_1 | X_0, Z) \approx p(Z | X_0, X_1) p(X_0),
 ```
 and recognize this process as a convolution operation where the prior belief on X0 is spread to a less certain prediction of pose X1.
 
@@ -16,7 +16,7 @@ Note that this operation is precisely the same as a prediction step in filtering
 
 The convolution computation described above is a core operation required for solving the [Chapman-Kolmogorov transit equations](http://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/).
 
-The following section illustrates a single convolution operation by using a few high level and some low level function calls.  An additional tutorial exists where [a related example](http://www.juliarobotics.org/Caesar.jl/latest/examples/basic_continuousscalar.md) in one dimension is performed as a complete factor graph solution/estimation problem.
+The following section illustrates a single convolution operation by using a few high level and some low level function calls.  An additional tutorial exists where [a related example](https://www.juliarobotics.org/Caesar.jl/latest/examples/basic_continuousscalar/) in one dimension is performed as a complete factor graph solution/estimation problem.
 
 ### Illustrated Calculation in Julia
 
@@ -67,14 +67,14 @@ pts = approxConv(fg, :x0x1f1, :x1)
 
 The `approxConv` function call reads as a operation on `fg` which won't influence any values of parameter list (common Julia exclamation mark convention) and must use the first factor `:x0x1f1` to resolve a convolution on target variable `:x1`.  Implicitly, this result is based on the current estimate contained in `:x0`.  The value of `pts` is a `:;Array{Float64,2}` where the rows represent the different dimensions (1-D in this case) and the columns are each of the different samples drawn from the intermediate posterior (i.e. convolution result).  
 
-IIF currently uses kernel density estimation to convert discrete samples into a smooth function estimate -- more details can be found on the function [approximation principles page here](http://www.juliarobotics.org/Caesar.jl/latest/principles/functionApprox.md).  The sample set can be converted into an on-manifold functional object as follows:
+IIF currently uses kernel density estimation to convert discrete samples into a smooth function estimate -- more details can be found on the function [approximation principles page here](http://www.juliarobotics.org/Caesar.jl/latest/principles/functionApprox/).  The sample set can be converted into an on-manifold functional object as follows:
 
 ```julia
 # create kde object by referencing back the existing memory location pts
 hatX1 = manikde!(pts, ContinuousScalar)
 ```
 
-The functional object `X1` is now ready for other operations such as function evaluation or product computations discussed on [another principles page](http://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities.md).  The `ContinuousScalar` manifold is just the real line in Euclidean space, internally denoted as single element tuple `(:Euclid,)`.
+The functional object `X1` is now ready for other operations such as function evaluation or product computations discussed on [another principles page](http://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/).  The `ContinuousScalar` manifold is just the real line in Euclidean space, internally denoted as single element tuple `(:Euclid,)`.
 
 ## A Handy ZMQ interface to Generic Convolutions
 
