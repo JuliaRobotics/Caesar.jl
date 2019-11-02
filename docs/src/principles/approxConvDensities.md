@@ -1,0 +1,83 @@
+# Principle: Approximate Convolutions
+
+This example illustrates a central concept of approximating the convolution of belief density functions.  Convolutions are required to compute (estimate) the probabilistic chain rule with conditional probability density functions.  One easy illustration is robotics where an odometry chain of poses has a continuous increase---or spreading---of the confidence/uncertainty of a next pose.  This tutorial will demonstrate that process.
+
+## Convolutions of Infinite Objects (Functionals)
+
+Consider the following vehicle odometry prediction (probabilistic) operation, where odometry measurement Z is an independent stochastic process from prior belief on pose X0
+```math
+P(X_1 | X_0, Z) \approx p(Z | X_0, X_1) p(X_0),
+```
+and recognize this process as a convolution operation where the prior belief on X0 is spread to a less certain prediction of pose X1.
+
+Note that this operation is precisely the same as a prediction step in filtering applications, where the state transition model---usually annotated as `d/dt x = f(x, z)`---is here presented by the conditional belief `p(Z | X_0, X_1)`.
+
+The convolution computation described above is a core operation required for solving the [Chapman-Kolmogorov transit equations](http://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/).
+
+The following section illustrates a single convolution operation by using a few high level and some low level function calls.  An additional tutorial exists where [a related example](http://www.juliarobotics.org/Caesar.jl/latest/examples/basic_continuousscalar.md) in one dimension is performed as a complete factor graph solution/estimation problem.
+
+### Illustrated Calculation in Julia
+
+The [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl) package provides a generic interface for estimating the convolution of full functional objects given some user specified residual or cost function.  The residual/cost function is then used, with the help of non-linear gradient decent, to project/resolve a set of particles for any one variable associated with a any factor.  In the binary variable factor case, such as the odometry tutorial, either pose X2 will be resolved from X1 using the user supplied likelihood residual function, or visa versa for X1 from X2.  
+
+> Note in a factor graph sense, the flow of time is captured in the structure of the graph and a requirement of the IncrementalInference system is that factors can be resolved towards any variable, given current estimates on all other variables connected to that factor.  Furthermore, this forwards or backwards resolving/convolution through a factor should adhere to the Kolmogorov Criterion of reversibility to ensure that detailed balance is maintained in the overall marginal posterior solutions.
+
+The IncrementalInference (IIF) package provides a few generic conditional likelihood functions such as `LinearConditional` or `MixtureLinearConditional` which we will use in this illustration.  
+
+> Note that the [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) package provides many more factors that are useful to robotics applications.  For a listing of current factors see [this docs page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs.md), details on developing [your own factors on this page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/adding_variables_factors.md).  One of the clear design objectives of the IIF package was to allow easier user extension of arbitrary residual functions that allows for vast capacity to represent non-Gaussian stochastic processes.
+
+Consider a robot traveling in one dimension, progressing along the x-axis at varying speed.  Lets assume pose locations are determined by a constant delta-time rule of say one pose every second, named `X0`, `X1`, `X2`, and so on.
+
+> Note the bread-crum discretization of the trajectory history by means of poses can later be used to allow estimation of previously unknown mapping parameters simultaneous to the ongoing localization problem.
+
+Lets a few basic factor graph operations to develop the desired convolutions:
+```julia
+using IncrementalInference
+
+# empty factor graph container
+fg = initfg()
+
+# add two variables of interest
+addVariable!(fg, :x0, ContinuousScalar)
+addVariable!(fg, :x1, ContinuousScalar)
+
+# gauge the solution by adding the first prior information that represents all history up to the current starting position for the robot
+pr = Prior(Normal(0.0, 0.1))
+addFactor!(fg, [:x0], pr)
+
+# numerically initialize variable :x0 -- this avoids repeat computations later (specific to this tutorial)
+doautoinit!(fg, :x0)
+
+# lastly add the odometry conditional likelihood function between the two variables of interest
+odo = LinearConditional(Rayleigh(...))
+addFactor!(fg, [:x0;:x1], odo)  # note the list is order sensitive
+```
+
+The code block above (not solved yet) describes a algebraic setup exactly equivalent to the convolution equation presented at the top of this page.  
+
+> IIF does not require the distribution functions to only be parametric, such as Normal, Rayleigh, mixture models, but also allows intensity based values or kernel density estimates.  Parametric types are just used here for ease of illustration.
+
+To perform an stochastic approximate convolution with the odometry conditional, one can simply call a low level function used the mmisam solver:
+
+```julia
+pts = approxConv(fg, :x0x1f1, :x1)
+```
+
+The `approxConv` function call reads as a operation on `fg` which won't influence any values of parameter list (common Julia exclamation mark convention) and must use the first factor `:x0x1f1` to resolve a convolution on target variable `:x1`.  Implicitly, this result is based on the current estimate contained in `:x0`.  The value of `pts` is a `:;Array{Float64,2}` where the rows represent the different dimensions (1-D in this case) and the columns are each of the different samples drawn from the intermediate posterior (i.e. convolution result).  
+
+IIF currently uses kernel density estimation to convert discrete samples into a smooth function estimate -- more details can be found on the function [approximation principles page here](http://www.juliarobotics.org/Caesar.jl/latest/principles/functionApprox.md).  The sample set can be converted into an on-manifold functional object as follows:
+
+```julia
+# create kde object by referencing back the existing memory location pts
+hatX1 = manikde!(pts, ContinuousScalar)
+```
+
+The functional object `X1` is now ready for other operations such as function evaluation or product computations discussed on [another principles page](http://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities.md).  The `ContinuousScalar` manifold is just the real line in Euclidean space, internally denoted as single element tuple `(:Euclid,)`.
+
+## A Handy ZMQ interface to Generic Convolutions
+
+> **NOTE** WIP on expanding ZMQ interface:
+
+In addition, `ZmqCaesar` offers a `ZMQ` interface to the factor graph solution for multilanguage support.  This example is a small subset that shows how to use the `ZMQ` infrastructure, but avoids the larger factor graph related calls.
+
+...

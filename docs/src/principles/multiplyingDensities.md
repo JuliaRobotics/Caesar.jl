@@ -6,7 +6,7 @@ In addition, `ZmqCaesar` offers a `ZMQ` interface to the factor graph solution f
 
 ## Products of Infinite Objects (Functionals)
 
-Consider multiplying multiple belief density functions together, for example 
+Consider multiplying multiple belief density functions together, for example
 ```math
 f = f_1 \times f_2 \times f_3
 ```
@@ -14,7 +14,7 @@ which is a core operation required for solving the [Chapman-Kolmogorov transit e
 
 ### Direct Julia Calculation
 
-The [ApproxManifoldProducts.jl](http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl) package (under development) is meant to unify many on-manifold product operations, and can be called directly in Julia:
+The [ApproxManifoldProducts.jl](http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl) package (experimental) is meant to unify many on-manifold product operations, and can be called directly in Julia:
 ```julia
 using ApproxManifoldProducts
 
