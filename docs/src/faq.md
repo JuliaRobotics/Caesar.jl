@@ -8,12 +8,6 @@ See [JuliaCon2018 highlights video](https://www.youtube.com/watch?v=baR02tlea5Y)
 ### Is Caesar.jl limited to Julia? No.
 The Caesar.jl project is expressly focused on making this algorithmic code available to [C/Fortran](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/)/[C++](https://juliacomputing.com/blog/2017/12/01/cxx-and-cxxwrap-intro.html)/C#/[Python](https://github.com/JuliaPy/PyCall.jl)/[Java](https://github.com/JuliaInterop/JavaCall.jl)/JS.  Julia itself offers [many additional interops](https://github.com/JuliaInterop).  ZMQ and HTTP/WebSockets are the standardized interfaces of choice, please see [details at the multi-language section](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/)).  Consider opening issues or getting in touch for more information.
 
-### Can Julia be Embedded into C/C++
-Yes, see [the Julia embedding documentation page](https://docs.julialang.org/en/v1/manual/embedding/index.html).
-
-### Current Julia version, v1.0.x
-Caesar.jl and packages are currently [targeting Julia v1.0.x](https://julialang.org/downloads/) (2019Q1).  See [progress for Julia v1.1.x here](https://github.com/JuliaRobotics/Caesar.jl/issues/299).
-
 ### Just-In-Time Compiling (i.e. why are first runs slow?)
 Julia uses just-in-time compilation ([unless already pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
  which takes additional time the first time a new function is called. Additional calls to a function is fast from the second call onwards since the static function is now cached and ready for use.
@@ -24,6 +18,12 @@ Packages are already compiled to static objects (`.ji` files), but can also be c
 
 > **Note** [recent developments announced on discourse.](https://discourse.julialang.org/t/ann-packagecompiler-with-incremental-system-images/20489).  Also see new brute force sysimg work at [Fezzik.jl](https://github.com/TsurHerman/Fezzik).
 
+### Can Julia be Embedded into C/C++
+Yes, see [the Julia embedding documentation page](https://docs.julialang.org/en/v1/manual/embedding/index.html).
+
+### Why ZMQ Middleware Layer (multilang)?
+
+[Zero Message Queue (ZMQ)](https://zeromq.org/) is a widely used data transport layer used to build various other multiprocess middleware with wide support among other programming languages.
 
 ### ROS Integration
 
@@ -39,6 +39,8 @@ ROS integration is a priority for this project and will accompany the so-called 
 
 Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).
 
+### Current Julia version, v1.2.x
+Caesar.jl and packages are currently [targeting Julia v1.2.x](https://julialang.org/downloads/) (4Q2019).
 
 ## Solver FAQ (mm-iSAM)
 
