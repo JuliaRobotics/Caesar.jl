@@ -14,13 +14,13 @@ Consider a common example, two dimensional target tracking, where a projectile t
 
 Assume a constant velocity model from which the estimate will be updated through the measurement model described in the next section.  A constant velocity model is taken as (cartesian)
 ```math
-\frac{dx}{dt} = 0 + \eta_x
+\frac{dx}{dt} = 0 + \eta_x\\
 \frac{dy}{dt} = 0 + \eta_y
 ```
 
 or polar coordinates
 ```math
-\frac{d\rho}{dt} = 0 + \eta_{\rho}
+\frac{d\rho}{dt} = 0 + \eta_{\rho}\\
 \frac{d\theta}{dt} = 0 + \eta_{\theta}.
 ```
 
