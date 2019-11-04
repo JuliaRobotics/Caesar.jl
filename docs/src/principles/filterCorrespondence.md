@@ -67,7 +67,3 @@ Direct state observations can be added to the factor graph as prior factors dire
 Consider a multi-sensory system along with data transmission delays, variable sampling rates, etc.;  when designing a filtering system to track one or multiple targets, it quickly becomes difficult to augment state vectors with the required state and measurement histories.  In contrast, the factor graph as a language allows for heterogeneous data streams to be combined in a common inference framework, and is [discussed further in the building distributed factor graphs section](http://www.juliarobotics.org/Caesar.jl/latest/concepts/building_graphs/).  
 
 > TODO: Multi-modal (belief) vs. multi-hypothesis.
-
-## Conclusion
-
-WIP
