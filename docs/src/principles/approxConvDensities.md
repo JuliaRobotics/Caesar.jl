@@ -10,9 +10,15 @@ Consider the following vehicle odometry prediction (probabilistic) operation, wh
 ```math
 p(X_1 | X_0, Z) \approx p(Z | X_0, X_1) p(X_0),
 ```
-and recognize this process as a convolution operation where the prior belief on X0 is spread to a less certain prediction of pose X1.
+and recognize this process as a convolution operation where the prior belief on X0 is spread to a less certain prediction of pose X1.  The figure below shows an example convolution of green and red densities with result in black below:
 
-Note that this operation is precisely the same as a prediction step in filtering applications, where the state transition model---usually annotated as `d/dt x = f(x, z)`---is here presented by the conditional belief `p(Z | X_0, X_1)`.
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/61175404-3b4f9d80-a59e-11e9-85db-ca6bbdb73ffd.png" width="480" border="0" />
+</p>
+```
+
+Note that this operation is precisely the same as a [prediction step in filtering applications](https://www.juliarobotics.org/Caesar.jl/latest/principles/filterCorrespondence/), where the state transition model---usually annotated as `d/dt x = f(x, z)`---is here presented by the conditional belief `p(Z | X_0, X_1)`.
 
 The convolution computation described above is a core operation required for solving the [Chapman-Kolmogorov transit equations](http://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/).
 
@@ -22,15 +28,21 @@ The following section illustrates a single convolution operation by using a few 
 
 The [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl) package provides a generic interface for estimating the convolution of full functional objects given some user specified residual or cost function.  The residual/cost function is then used, with the help of non-linear gradient decent, to project/resolve a set of particles for any one variable associated with a any factor.  In the binary variable factor case, such as the odometry tutorial, either pose X2 will be resolved from X1 using the user supplied likelihood residual function, or visa versa for X1 from X2.  
 
-> Note in a factor graph sense, the flow of time is captured in the structure of the graph and a requirement of the IncrementalInference system is that factors can be resolved towards any variable, given current estimates on all other variables connected to that factor.  Furthermore, this forwards or backwards resolving/convolution through a factor should adhere to the Kolmogorov Criterion of reversibility to ensure that detailed balance is maintained in the overall marginal posterior solutions.
+!!! note
+
+    Note in a factor graph sense, the flow of time is captured in the structure of the graph and a requirement of the IncrementalInference system is that factors can be resolved towards any variable, given current estimates on all other variables connected to that factor.  Furthermore, this forwards or backwards resolving/convolution through a factor should adhere to the Kolmogorov Criterion of reversibility to ensure that detailed balance is maintained in the overall marginal posterior solutions.
 
 The IncrementalInference (IIF) package provides a few generic conditional likelihood functions such as `LinearConditional` or `MixtureLinearConditional` which we will use in this illustration.  
 
-> Note that the [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) package provides many more factors that are useful to robotics applications.  For a listing of current factors see [this docs page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs.md), details on developing [your own factors on this page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/adding_variables_factors.md).  One of the clear design objectives of the IIF package was to allow easier user extension of arbitrary residual functions that allows for vast capacity to represent non-Gaussian stochastic processes.
+!!! note
+
+    Note that the [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) package provides many more factors that are useful to robotics applications.  For a listing of current factors see [this docs page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs.md), details on developing [your own factors on this page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/adding_variables_factors.md).  One of the clear design objectives of the IIF package was to allow easier user extension of arbitrary residual functions that allows for vast capacity to represent non-Gaussian stochastic processes.
 
 Consider a robot traveling in one dimension, progressing along the x-axis at varying speed.  Lets assume pose locations are determined by a constant delta-time rule of say one pose every second, named `X0`, `X1`, `X2`, and so on.
 
-> Note the bread-crum discretization of the trajectory history by means of poses can later be used to allow estimation of previously unknown mapping parameters simultaneous to the ongoing localization problem.
+!!! note
+
+    Note the bread-crum discretization of the trajectory history by means of poses can later be used to allow estimation of previously unknown mapping parameters simultaneous to the ongoing localization problem.
 
 Lets a few basic factor graph operations to develop the desired convolutions:
 ```julia
@@ -57,7 +69,9 @@ addFactor!(fg, [:x0;:x1], odo)  # note the list is order sensitive
 
 The code block above (not solved yet) describes a algebraic setup exactly equivalent to the convolution equation presented at the top of this page.  
 
-> IIF does not require the distribution functions to only be parametric, such as Normal, Rayleigh, mixture models, but also allows intensity based values or kernel density estimates.  Parametric types are just used here for ease of illustration.
+!!! note
+
+    IIF does not require the distribution functions to only be parametric, such as Normal, Rayleigh, mixture models, but also allows intensity based values or kernel density estimates.  Parametric types are just used here for ease of illustration.
 
 To perform an stochastic approximate convolution with the odometry conditional, one can simply call a low level function used the mmisam solver:
 
@@ -95,4 +109,4 @@ where `z_i` is the innovation of any smooth twice differentiable residual functi
 
 The choice between root finding or minimization is a performance consideration only.  Minimization of the residual squared will always work but certain situations allow direct root finding to be used.  If the residual function is guaranteed to cross zero---i.e. `z*=0`---the root finding approach can be used.  Each measurement function has a certain number of dimensions -- e.g. ranges or bearings are dimension one, and an inter Pose2 rigid transform (delta x, y, theta) is dimension 3.  If the variable being resolved has larger dimension than the measurement residual, then the minimization approach must be used.
 
-The method of solving the target variable is to fix all other variable values and resolve, sample by sample, the particle estimates of the target.  The Julia programming language has good support for functional programming and is used extensively in the IIF implementation to utilize user defined functions to resolve any variable, including the null-hypothesis and multi-hypothesis generalizations. 
+The method of solving the target variable is to fix all other variable values and resolve, sample by sample, the particle estimates of the target.  The Julia programming language has good support for functional programming and is used extensively in the IIF implementation to utilize user defined functions to resolve any variable, including the null-hypothesis and multi-hypothesis generalizations.

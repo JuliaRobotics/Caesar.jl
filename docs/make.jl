@@ -43,6 +43,7 @@ makedocs(
         "Principles" => [
             "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
             "Generic Convolutions" => "principles/approxConvDensities.md",
+            "Filters vs. Graphs" => "principles/filterCorrespondence.md",
         ],
         "How to Expand?" => [
             "Custom Variables and Factors" => "concepts/adding_variables_factors.md",
