@@ -42,6 +42,8 @@ makedocs(
         ],
         "Principles" => [
             "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
+            "Generic Convolutions" => "principles/approxConvDensities.md",
+            "Filters vs. Graphs" => "principles/filterCorrespondence.md",
             "Bayes tree prototyping" => "principles/bayestreePrinciples.md",
         ],
         "How to Expand?" => [
