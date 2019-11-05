@@ -62,8 +62,16 @@ Direct state observations can be added to the factor graph as prior factors dire
 \delta_j(\theta_j, \eta_j) = y_j - h_j(\theta_j, \eta_j).
 ```
 
+An illustration of both predictions (binary likelihood process model) and direct observations (measurements) is presented:
+
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/68166954-e45e4180-ff5b-11e9-91cb-0741d90a0c02.png" width="480" border="0" />
+</p>
+```
+
 ## Target Tracking (Beyond Filtering)
 
 Consider a multi-sensory system along with data transmission delays, variable sampling rates, etc.;  when designing a filtering system to track one or multiple targets, it quickly becomes difficult to augment state vectors with the required state and measurement histories.  In contrast, the factor graph as a language allows for heterogeneous data streams to be combined in a common inference framework, and is [discussed further in the building distributed factor graphs section](http://www.juliarobotics.org/Caesar.jl/latest/concepts/building_graphs/).  
 
-> TODO: Multi-modal (belief) vs. multi-hypothesis.
+> TODO: Multi-modal (belief) vs. multi-hypothesis -- see thesis work on multimodal solutions in the mean time.
