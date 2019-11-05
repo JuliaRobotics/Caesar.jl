@@ -46,7 +46,7 @@ Filter prediction steps are synonymous with a binary factor (conditional likelih
 
 The measurement update is a product operation of infinite functional objects (probability densities)
 ```math
-p(X_k | Z_a, Z_b) \approx p(X_k | X_{k-1}, Z_a) \times p(X_k | Z_b),
+p(X_k | X_{k-1}, Z_a, Z_b) \approx p(X_k | X_{k-1}, Z_a) \times p(X_k | Z_b),
 ```
 
 where `Z_.` represents conditional information for two beliefs on the same variable.  The product of the two functional estimates (beliefs) are multiplied by a stochastic algorithm described in more detail [on the multiplying functions page](https://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/).
