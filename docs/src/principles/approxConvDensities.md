@@ -8,7 +8,7 @@ This page describes a Julia language interface, followed by a CaesarZMQ interfac
 
 Consider the following vehicle odometry prediction (probabilistic) operation, where odometry measurement Z is an independent stochastic process from prior belief on pose X0
 ```math
-p(X_1 | X_0, Z) \approx p(Z | X_0, X_1) p(X_0),
+p(X_1 | X_0, Z) \propto p(Z | X_0, X_1) p(X_0),
 ```
 and recognize this process as a convolution operation where the prior belief on X0 is spread to a less certain prediction of pose X1.  The figure below shows an example convolution of green and red densities with result in black below:
 
