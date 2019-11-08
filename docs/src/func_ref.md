@@ -145,6 +145,7 @@ makeCsmMovie
 manualinit!
 parentCliq
 packFromLocalPotentials!
+predictVariableByFactor
 prepBatchTree!
 prepCliqInitMsgsDown!
 printCliqHistorySummary
