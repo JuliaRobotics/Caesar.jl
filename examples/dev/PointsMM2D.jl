@@ -10,7 +10,41 @@ using RoMEPlotting
 Gadfly.set_default_plot_size(35cm,25cm)
 using Amphitheatre
 
+function getCoordCartesianFromKDERange(dfg::AbstractDFG, varsym::Symbol; digits::Int=-2, extend::Float64=0.5)
+    ax = round.(getKDERange(getKDE(dfg, varsym), extend=extend), digits=digits)
+    if size(ax, 1) == 1
+      return Coord.Cartesian(xmin=ax[1,1], xmax=ax[1,2])
+    elseif size(ax, 1) == 2
+      return Coord.Cartesian(xmin=ax[1,1], xmax=ax[1,2],ymin=ax[2,1], ymax=ax[2,2])
+    else
+      error("only do 1D or 2D")
+    end
+end
 
+
+function addMaptoPlot!(pl)
+    # plot the design coordinates
+    map_coords = Array{Array{Float64,1},1}[[[0.0, 0.0], [0.0, 330.0], [40.0, 330.0], [40.0, 310.0], [20.0, 310.0], [20.0, 150.0], [130.0, 150.0], [130.0, 140.0], [20.0, 140.0], [20.0, 20.0], [250.0, 20.0], [250.0, 60.0], [260.0, 60.0], [260.0, 20.0], [290.0, 20.0], [290.0, 60.0], [300.0, 60.0], [300.0, 20.0], [430.0, 20.0], [430.0, 110.0], [300.0, 110.0], [300.0, 100.0], [290.0, 100.0], [290.0, 190.0], [280.0, 190.0], [280.0, 200.0], [320.0, 200.0], [320.0, 190.0], [300.0, 190.0], [300.0, 120.0], [430.0, 120.0], [430.0, 190.0], [410.0, 190.0], [410.0, 200.0], [430.0, 200.0], [430.0, 310.0], [390.0, 310.0], [390.0, 330.0], [450.0, 330.0], [450.0, 0.0], [0.0, 0.0]], [[90.0, 310.0], [90.0, 330.0], [170.0, 330.0], [170.0, 310.0], [90.0, 310.0]], [[230.0, 310.0], [340.0, 310.0], [340.0, 330.0], [210.0, 330.0], [210.0, 310.0], [220.0, 310.0], [220.0, 200.0], [210.0, 200.0], [210.0, 190.0], [240.0, 190.0], [240.0, 200.0], [230.0, 200.0], [230.0, 310.0]]]
+
+    for m_coord in map_coords
+        Xpp = map(p->p[1] + 150, m_coord)
+        Ypp = map(p->-p[2] +330 + 650, m_coord)
+
+        push!(pl.layers, Gadfly.layer(x=Xpp,y=Ypp,Geom.path(), Theme(line_width=1pt))[1])
+    end
+
+    # plot the real map variation
+    built_coords = Array{Array{Float64,1},1}[[[230.0, 310.0], [340.0, 310.0], [340.0, 330.0], [210.0, 330.0], [210.0, 310.0], [220.0, 310.0], [220.0, 200.0], [210.0, 200.0], [210.0, 190.0], [240.0, 190.0], [240.0, 200.0], [230.0, 200.0], [230.0, 310.0]]]
+
+    for b_coord in built_coords
+        Xpp = map(p->p[1] + 150+30, b_coord)
+        Ypp = map(p->-p[2] +330 + 650+20, b_coord)
+
+        push!(pl.layers, Gadfly.layer(x=Xpp,y=Ypp,Geom.path(), Theme(line_width=1pt, default_color=colorant"red"))[1])
+    end
+
+    return pl
+end
 
 ## First add the designed landmark positions
 function addLandmarkTrueWithPrior!(dfg::AbstractDFG,
@@ -27,8 +61,8 @@ function addLandmarkTrueWithPrior!(dfg::AbstractDFG,
 end
 
 
-macro skipline(skip, operation)
-  :($skip ? nothing : $operation)
+macro doline(skip, operation)
+  :($skip ? $operation : nothing)
 end
 
 
@@ -61,14 +95,14 @@ ground = Dict{Symbol, Vector{Float64}}(
 ## Add all variables as design truth (for use as multihypos later)
 # Ground truth for landmarks (designed)
 landmarks_real = Dict(
-    :l1=>[370,780],
-    :l2=>[380,780],
-    :l3=>[380,670],
-    :l4=>[370,670],
-    :l5=>[190,670],
+    :l1=>[360+30,780+20],
+    :l2=>[370+30,780+20],
+    :l3=>[370+30,670+20],
+    :l4=>[360+30,670+20],
+    :l5=>[360+30,790+20],
+    :l8=>[190,670],
     :l6=>[170,670],
     :l7=>[170,830],
-    :l8=>[370,790],
     :l9=>[280,830],
     :l10=>[440,790],
     :l11=>[430,790],
@@ -80,10 +114,10 @@ landmarks_design = Dict(
     :l2=>[370,780],
     :l3=>[370,670],
     :l4=>[360,670],
-    :l5=>[190,670],
+    :l5=>[360,790],
+    :l8=>[190,670],
     :l6=>[170,670],
     :l7=>[170,830],
-    :l8=>[360,790],
     :l9=>[280,830],
     :l10=>[440,790],
     :l11=>[430,790],
@@ -99,7 +133,7 @@ br_σb = 0.03
 br_σρ = 0.3
 pMeas, pDesg = 0.7, 0.3
 
-SKL = false
+SKL = true
 
 ## Start the factor graph construction
 fg = LightDFG{SolverParams}(params=SolverParams())
@@ -113,31 +147,31 @@ addFactor!(fg, [:x0],  PriorPose2( MvNormal(x0_prior[1], Matrix(Diagonal(x0_prio
     br_calc = calcPosePointBearingRange(ground[:x0], landmarks_real[:l1])
     # x0l1_br = [[deg2rad(27.65), 0.02], [118.53, 0.2]]#(tagψ, σtagψ), Normal(tagrange, σtagrange)
     x0l1_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
-    @skipline SKL addVariable!(fg, :l1, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l1_0, landmarks_design[:l1])
-    @skipline SKL addFactor!(fg, [:x0, :l1, :l1_0], Pose2Point2BearingRange(Normal(x0l1_br[1]...), Normal(x0l1_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l1, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l1_0, landmarks_design[:l1])
+    @doline SKL addFactor!(fg, [:x0, :l1, :l1_0], Pose2Point2BearingRange(Normal(x0l1_br[1]...), Normal(x0l1_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
 
     br_calc = calcPosePointBearingRange(ground[:x0], landmarks_real[:l2])
     x0l2_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x0l2_br = [[deg2rad(25.56), 0.02], [127.48, 0.2]]
-    @skipline SKL addVariable!(fg, :l2, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l2_0, landmarks_design[:l2])
-    @skipline SKL addFactor!(fg, [:x0, :l2, :l2_0], Pose2Point2BearingRange(Normal(x0l2_br[1]...), Normal(x0l2_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l2, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l2_0, landmarks_design[:l2])
+    @doline SKL addFactor!(fg, [:x0, :l2, :l2_0], Pose2Point2BearingRange(Normal(x0l2_br[1]...), Normal(x0l2_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
     br_calc = calcPosePointBearingRange(ground[:x0], landmarks_real[:l3])
     x0l3_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x0l3_br = [[deg2rad(-25.56), 0.02], [127.48, 0.2]]
-    @skipline SKL addVariable!(fg, :l3, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l3_0, landmarks_design[:l3])
-    @skipline SKL addFactor!(fg, [:x0, :l3, :l3_0], Pose2Point2BearingRange(Normal(x0l3_br[1]...), Normal(x0l3_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l3, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l3_0, landmarks_design[:l3])
+    @doline SKL addFactor!(fg, [:x0, :l3, :l3_0], Pose2Point2BearingRange(Normal(x0l3_br[1]...), Normal(x0l3_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
     br_calc = calcPosePointBearingRange(ground[:x0], landmarks_real[:l4])
     x0l4_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x0l4_br = [[deg2rad(-27.65), 0.02], [118.53, 0.2]]
-    @skipline SKL addVariable!(fg, :l4, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l4_0, landmarks_design[:l4])
-    @skipline SKL addFactor!(fg, [:x0, :l4, :l4_0], Pose2Point2BearingRange(Normal(x0l4_br[1]...), Normal(x0l4_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l4, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l4_0, landmarks_design[:l4])
+    @doline SKL addFactor!(fg, [:x0, :l4, :l4_0], Pose2Point2BearingRange(Normal(x0l4_br[1]...), Normal(x0l4_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
 ## test for multimodality
 # dfgplot(fg)
@@ -148,8 +182,38 @@ getSolverParams(fg).showtree=true
 # getSolverParams(fg).dbg=true
 # getSolverParams(fg).async=false
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg));
-drawPosesLandms(fg, drawhist=true)
+pl = drawPosesLandms(fg, drawhist=true, contour=false)
+addMaptoPlot!(pl)
+pl.coord = Coord.Cartesian(xmin=100, xmax=450, ymin=600, ymax=850)
+pl
+# pl |> PDF("/home/dehann/Downloads/test.pdf")
 
+# plot l1
+pl1 = drawLandms(fg, to=1, drawhist=true, contour=false)
+addMaptoPlot!(pl1)
+pl1.coord = getCoordCartesianFromKDERange(fg, :l1, digits=0)
+pl1
+
+# plot l2
+pl2 = drawLandms(fg, from=2,to=2, drawhist=true, contour=false)
+addMaptoPlot!(pl2)
+pl2.coord = getCoordCartesianFromKDERange(fg, :l2, digits=0)
+pl2
+
+# plot l3
+pl3 = drawLandms(fg, from=3,to=3, drawhist=true, contour=false)
+addMaptoPlot!(pl3)
+pl3.coord = getCoordCartesianFromKDERange(fg, :l3, digits=0)
+pl3
+
+# plot l4
+pl4 = drawLandms(fg, from=4,to=4, drawhist=true, contour=false)
+addMaptoPlot!(pl4)
+pl4.coord = getCoordCartesianFromKDERange(fg, :l4, digits=0)
+pl4
+
+pl = vstack(hstack(pl1,pl2), hstack(pl3,pl4))
+pl |> PDF("/home/dehann/Downloads/stack.pdf")
 
 
 # x1
@@ -165,16 +229,16 @@ addFactor!(fg, [:x1, :x2], Pose2Pose2(MvNormal(x1x2_pp[1], Matrix(Diagonal(x1x2_
     br_calc = calcPosePointBearingRange(ground[:x2], landmarks_real[:l5])
     x2l5_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x2l5_br = [[deg2rad(-143.75+180), 0.1], [92.65, 1]]
-    @skipline SKL addVariable!(fg, :l5, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l5_0, landmarks_design[:l5])
-    @skipline SKL addFactor!(fg, [:x2, :l5, :l5_0], Pose2Point2BearingRange(Normal(x2l5_br[1]...), Normal(x2l5_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l5, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l5_0, landmarks_design[:l5])
+    @doline SKL addFactor!(fg, [:x2, :l5, :l5_0], Pose2Point2BearingRange(Normal(x2l5_br[1]...), Normal(x2l5_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
     br_calc = calcPosePointBearingRange(ground[:x2], landmarks_real[:l6])
     x2l6_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x2l6_br = [[deg2rad(-149.93+180), 0.1], [109.77, 1]]
-    @skipline SKL addVariable!(fg, :l6, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l6_0, landmarks_design[:l6])
-    @skipline SKL addFactor!(fg, [:x2, :l6, :l6_0], Pose2Point2BearingRange(Normal(x2l6_br[1]...), Normal(x2l6_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l6, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l6_0, landmarks_design[:l6])
+    @doline SKL addFactor!(fg, [:x2, :l6, :l6_0], Pose2Point2BearingRange(Normal(x2l6_br[1]...), Normal(x2l6_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
 # ensureAllInitialized!(fg)
 # x3:
@@ -185,9 +249,9 @@ addFactor!(fg, [:x2, :x3], Pose2Pose2(MvNormal(x2x3_pp[1], Matrix(Diagonal(x2x3_
     br_calc = calcPosePointBearingRange(ground[:x3], landmarks_real[:l7])
     x3l7_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x3l7_br = [[deg2rad(132.4-90), 0.1], [141.32, 1]]
-    @skipline SKL addVariable!(fg, :l7, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l7_0, landmarks_design[:l7])
-    @skipline SKL addFactor!(fg, [:x3, :l7, :l7_0], Pose2Point2BearingRange(Normal(x3l7_br[1]...), Normal(x3l7_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l7, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l7_0, landmarks_design[:l7])
+    @doline SKL addFactor!(fg, [:x3, :l7, :l7_0], Pose2Point2BearingRange(Normal(x3l7_br[1]...), Normal(x3l7_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
 # ensureAllInitialized!(fg)
 # x4 drive + 80
@@ -204,38 +268,75 @@ addFactor!(fg, [:x4, :x5], Pose2Pose2(MvNormal(x4x5_pp[1], Matrix(Diagonal(x4x5_
     br_calc = calcPosePointBearingRange(ground[:x5], landmarks_real[:l8])
     x5l8_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x5l8_br = [[deg2rad(-15.26), 0.1], [57.01, 1]]
-    @skipline SKL addVariable!(fg, :l8, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l8_0, landmarks_design[:l8])
-    @skipline SKL addFactor!(fg, [:x5, :l8, :l8_0], Pose2Point2BearingRange(Normal(x5l8_br[1]...), Normal(x5l8_br[2]...)), autoinit=autoinit, multihypo=[1.0;0.5;0.5])
+    @doline SKL addVariable!(fg, :l8, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l8_0, landmarks_design[:l8])
+    @doline SKL addFactor!(fg, [:x5, :l8, :l8_0], Pose2Point2BearingRange(Normal(x5l8_br[1]...), Normal(x5l8_br[2]...)), autoinit=autoinit, multihypo=[1.0;0.5;0.5])
 
     br_calc = calcPosePointBearingRange(ground[:x5], landmarks_real[:l10])
     x5l10_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x5l10_br = [[deg2rad(-6.84), 0.1], [105.84, 1]]
-    @skipline SKL addVariable!(fg, :l10, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l10_0, landmarks_design[:l10])
-    @skipline SKL addFactor!(fg, [:x5, :l10, :l10_0], Pose2Point2BearingRange(Normal(x5l10_br[1]...), Normal(x5l10_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l10, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l10_0, landmarks_design[:l10])
+    @doline SKL addFactor!(fg, [:x5, :l10, :l10_0], Pose2Point2BearingRange(Normal(x5l10_br[1]...), Normal(x5l10_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
     br_calc = calcPosePointBearingRange(ground[:x5], landmarks_real[:l11])
     x5l11_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x5l11_br = [[deg2rad(-7.43), 0.1], [113.59, 1]]
-    @skipline SKL addVariable!(fg, :l11, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l11_0, landmarks_design[:l11])
-    @skipline SKL addFactor!(fg, [:x5, :l11, :l11_0], Pose2Point2BearingRange(Normal(x5l11_br[1]...), Normal(x5l11_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l11, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l11_0, landmarks_design[:l11])
+    @doline SKL addFactor!(fg, [:x5, :l11, :l11_0], Pose2Point2BearingRange(Normal(x5l11_br[1]...), Normal(x5l11_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
 
 #
 # drawGraph(fg)
 # ensureAllInitialized!(fg)
 # drawPosesLandms(fg)
-getSolverParams(fg).drawtree=true
-getSolverParams(fg).showtree=true
+# getSolverParams(fg).drawtree=true
+# getSolverParams(fg).showtree=true
 tree, smt, hist = solveTree!(fg);
 
-drawPosesLandms(fg, drawhist=true, contour=false)
-drawLandms(fg, drawhist=true, contour=false, from=1, to=4)
-reportFactors(fg, Pose2Pose2)
+pl = drawPosesLandms(fg, drawhist=true, contour=false)
+addMaptoPlot!(pl)
+pl.coord = Coord.Cartesian(xmin=100, xmax=500, ymin=600, ymax=900)
+pl
+pl |> PDF("/home/dehann/Downloads/explore1.pdf")
+
+
+
+pl5 = drawLandms(fg, from=5,to=5, drawhist=true, contour=false)
+addMaptoPlot!(pl5)
+pl5.coord = getCoordCartesianFromKDERange(fg, :l5, digits=0)
+pl5
+
+
+# reportFactors(fg, Pose2Pose2)
 #
 
+# drawLandms(fg, to=1, drawhist=true, contour=false)
+
+# plot the bimodal wall
+plotVariable2D(fg, :l1, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l2, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l3, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l4, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l8, refs=[landmarks_design, landmarks_real])
+# plot unimodals
+plotVariable2D(fg, :l5, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l6, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l7, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l9, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l10, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l11, refs=[landmarks_design, landmarks_real])
+plotVariable2D(fg, :l12, refs=[landmarks_design, landmarks_real])
+
+plotLocalProduct(fg, :l1, levels=10)
+plotLocalProduct(fg, :l2, levels=10)
+plotLocalProduct(fg, :l3, levels=10)
+plotLocalProduct(fg, :l4, levels=10)
+
+plotLocalProduct(fg, :x6, levels=10)
+
+reportFactors(fg, Pose2Pose2)
 
 # ensureAllInitialized!(fg)
 # x6
@@ -247,13 +348,13 @@ addFactor!(fg, [:x5, :x6], Pose2Pose2(MvNormal(x5x6_pp[1], Matrix(Diagonal(x5x6_
     x6l3_br  = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x6l3_br = [[deg2rad(-64.29+90), 0.1], [145.07, 1]]
     # addVariable!(fg, :l3, Point2)
-    @skipline SKL addFactor!(fg, [:x6, :l3, :l3_0], Pose2Point2BearingRange(Normal(x6l3_br[1]...), Normal(x6l3_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addFactor!(fg, [:x6, :l3, :l3_0], Pose2Point2BearingRange(Normal(x6l3_br[1]...), Normal(x6l3_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
     br_calc = calcPosePointBearingRange(ground[:x6], landmarks_real[:l4])
     x6l4_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x6l4_br = [[deg2rad(-67.83+90), 0.1], [141.01, 1]]
     # addVariable!(fg, :l4, Point2)
-    @skipline SKL addFactor!(fg, [:x6, :l4, :l4_0], Pose2Point2BearingRange(Normal(x6l4_br[1]...), Normal(x6l4_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addFactor!(fg, [:x6, :l4, :l4_0], Pose2Point2BearingRange(Normal(x6l4_br[1]...), Normal(x6l4_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
 
 ## debug check solve here
@@ -263,9 +364,12 @@ addFactor!(fg, [:x5, :x6], Pose2Pose2(MvNormal(x5x6_pp[1], Matrix(Diagonal(x5x6_
 # drawPosesLandms(fg)
 # getSolverParams(fg).drawtree=true
 # getSolverParams(fg).showtree=true
-# tree, smt, hist = solveTree!(fg);
-tree, smt, hist = solveTree!(fg, tree);
-drawPosesLandms(fg)
+tree, smt, hist = solveTree!(fg);
+# tree, smt, hist = solveTree!(fg, tree);
+pl = drawPosesLandms(fg, drawhist=true, contour=false)
+addMaptoPlot!(pl)
+pl |> PDF("/home/dehann/Downloads/explore2.pdf")
+
 
 ## end debugging block
 
@@ -279,14 +383,14 @@ addFactor!(fg, [:x6, :x7], Pose2Pose2(MvNormal(x6x7_pp[1], Matrix(Diagonal(x6x7_
     x7l7_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x7l7_br = [[deg2rad(137-180), 0.1], [147.89, 1]]
     pp_x7l7_br = Pose2Point2BearingRange(Normal(x7l7_br[1]...), Normal(x7l7_br[2]...))
-    @skipline SKL addFactor!(fg, [:x7; :l7; :l7_0], pp_x7l7_br, autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addFactor!(fg, [:x7; :l7; :l7_0], pp_x7l7_br, autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
     br_calc = calcPosePointBearingRange(ground[:x7], landmarks_real[:l9])
     x7l9_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x7l9_br = [[deg2rad(144.46-180), 0.1], [42.04, 1]]
-    @skipline SKL addVariable!(fg, :l9, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l9_0, landmarks_design[:l9])
-    @skipline SKL addFactor!(fg, [:x7, :l9, :l9_0], Pose2Point2BearingRange(Normal(x7l9_br[1]...), Normal(x7l9_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l9, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l9_0, landmarks_design[:l9])
+    @doline SKL addFactor!(fg, [:x7, :l9, :l9_0], Pose2Point2BearingRange(Normal(x7l9_br[1]...), Normal(x7l9_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
 
 # drawGraph(fg)
@@ -303,9 +407,9 @@ addFactor!(fg, [:x7, :x8], Pose2Pose2(MvNormal(x7x8_pp[1], Matrix(Diagonal(x7x8_
     br_calc = calcPosePointBearingRange(ground[:x8], landmarks_real[:l12])
     x8l12_br = [[br_calc[1], br_σb], [br_calc[2], br_σρ]]
     # x8l12_br = [[deg2rad(53.53-90), 0.1], [133.32, 1]]
-    @skipline SKL addVariable!(fg, :l12, Point2)
-    @skipline SKL addLandmarkTrueWithPrior!(fg, :l12_0, landmarks_design[:l12])
-    @skipline SKL addFactor!(fg, [:x8, :l12, :l12_0], Pose2Point2BearingRange(Normal(x8l12_br[1]...), Normal(x8l12_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
+    @doline SKL addVariable!(fg, :l12, Point2)
+    @doline SKL addLandmarkTrueWithPrior!(fg, :l12_0, landmarks_design[:l12])
+    @doline SKL addFactor!(fg, [:x8, :l12, :l12_0], Pose2Point2BearingRange(Normal(x8l12_br[1]...), Normal(x8l12_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
 
 
@@ -322,16 +426,16 @@ tree, smt, hist = solveTree!(fg);
 
 ## show the delta
 
-pl = drawPosesLandms(fg)
-pl |> PDF("/tmp/caesar/random/mapped4.pdf")
+pl = drawPosesLandms(fg, drawhist=true, contour=false)
+addMaptoPlot!(pl)
+pl |> PDF("/home/dehann/Downloads/mapped.pdf")
 
-pl = drawLandms(fg, drawhist=true, to=4)
-pl |> PDF("/tmp/caesar/random/badwall4.pdf")
+pl = drawLandms(fg, drawhist=true, to=5)
+addMaptoPlot!(pl)
+pl.coord = Coord.Cartesian(xmin=100, xmax=450, ymin=600, ymax=850)
+pl
+pl |> PDF("/home/dehann/Downloads/badwall.pdf")
 
-
-pts = getVariable(fg, :l8) |> getKDE |> getPoints
-pl = Gadfly.plot(x=pts[1,:],y=pts[2,:],Geom.hexbin)
-pl |> PDF("/tmp/caesar/random/bad_l8.pdf")
 
 
 ##
@@ -380,29 +484,6 @@ p = DFGPlotProps(  (var=colorant"seagreen", fac=colorant"cyan3"),
                             true)
 dfgplot(fg,p)
 
-
-
-
-
-#
-
-plotKDE(fg, :l3)
-
-landmarks_design[:l3]
-landmarks_real[:l3]
-
-
-
-##
-
-
-# ## Round out poses for convenience (getting ground truth)
-# for sy in syms
-#     trivial_poses[sy][1:2] .= round.(trivial_poses[sy][1:2])
-#     trivial_poses[sy][3] = round.(trivial_poses[sy][3], digits=1)
-#     println(sy, "=>", trivial_poses[sy])
-# end
-0
 
 
 ## DRAW THE MAP
