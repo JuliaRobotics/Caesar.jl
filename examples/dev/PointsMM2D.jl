@@ -314,6 +314,8 @@ plotVariable2D(fg, :l8, refs=[landmarks_design, landmarks_real])
 
 reportFactors(fg, Pose2Pose2)
 
+# plotLocalProduct(fg, :x4, levels=5)
+
 # ensureAllInitialized!(fg)
 # x6
 x5x6_pp = [[0,0,deg2rad(-90)], [pp_σx, pp_σy, pp_σψ]]
@@ -400,7 +402,7 @@ pl = drawPosesLandms(fg, drawhist=true, contour=false)
 addMaptoPlot!(pl)
 # pl |> PDF(ENV["HOME"]*"/Downloads/mapped.pdf")
 
-pl = drawLandms(fg, drawhist=true, to=5)
+pl = drawLandms(fg, drawhist=true, to=5, contour=false)
 addMaptoPlot!(pl)
 pl.coord = Coord.Cartesian(xmin=100, xmax=450, ymin=600, ymax=850)
 pl
@@ -413,11 +415,17 @@ drawGraph(fg)
 
 
 
-
+0
 ## =============================================================================
 ## Deeper look at various other aspects.
 
-
+# pl = plotVariable2D(fg, :l10)
+#
+# pl = drawLandms(fg, from=10, to=11, contour=false, drawhist=true)
+# addMaptoPlot!(pl)
+#
+# pl.coord = getCoordCartesianFromKDERange(fg, :l10, digits=0, extend=10.0)
+# pl
 
 
 # ## quick check
