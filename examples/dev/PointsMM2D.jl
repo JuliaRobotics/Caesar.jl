@@ -8,7 +8,7 @@ using RoME
 @everywhere using RoME
 using RoMEPlotting
 Gadfly.set_default_plot_size(35cm,25cm)
-using Amphitheatre
+
 
 function getCoordCartesianFromKDERange(dfg::AbstractDFG, varsym::Symbol; digits::Int=-2, extend::Float64=0.5)
     ax = round.(getKDERange(getKDE(dfg, varsym), extend=extend), digits=digits)
@@ -20,6 +20,7 @@ function getCoordCartesianFromKDERange(dfg::AbstractDFG, varsym::Symbol; digits:
       error("only do 1D or 2D")
     end
 end
+# import KernelDensityEstimate: getCoordCartesianFromKDERange
 
 
 function addMaptoPlot!(pl)
@@ -65,20 +66,6 @@ macro doline(skip, operation)
   :($skip ? $operation : nothing)
 end
 
-
-# fg = LightDFG{NoSolverParams}()
-# addVariable!(fg, DFGVariable(:x1))
-# dfgplot(fg)
-
-# ground truth [x,y,θ]
-# ground = [[260, 720, deg2rad(0)],
-#           [260, 720, deg2rad(-90)],
-#           [260, 720, deg2rad(180)],
-#           [260, 720, deg2rad(90)],
-#           [310, 800, deg2rad(0)],
-#           [310, 800, deg2rad(-90)],
-#           [310, 800, deg2rad(180)],
-#           [310, 800, deg2rad(90)]]
 
 ground = Dict{Symbol, Vector{Float64}}(
   :x0=>[260.0, 720.0, 0.0],
@@ -181,12 +168,12 @@ getSolverParams(fg).drawtree=true
 getSolverParams(fg).showtree=true
 # getSolverParams(fg).dbg=true
 # getSolverParams(fg).async=false
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg));
+tree, smt, hist = solveTree!(fg);
 pl = drawPosesLandms(fg, drawhist=true, contour=false)
 addMaptoPlot!(pl)
 pl.coord = Coord.Cartesian(xmin=100, xmax=450, ymin=600, ymax=850)
 pl
-# pl |> PDF("/home/dehann/Downloads/test.pdf")
+# pl |> PDF(ENV["HOME"]*"/Downloads/test.pdf")
 
 # plot l1
 pl1 = drawLandms(fg, to=1, drawhist=true, contour=false)
@@ -213,7 +200,7 @@ pl4.coord = getCoordCartesianFromKDERange(fg, :l4, digits=0)
 pl4
 
 pl = vstack(hstack(pl1,pl2), hstack(pl3,pl4))
-pl |> PDF("/home/dehann/Downloads/stack.pdf")
+# pl |> PDF(ENV["HOME"]*"/Downloads/stack.pdf")
 
 
 # x1
@@ -288,7 +275,7 @@ addFactor!(fg, [:x4, :x5], Pose2Pose2(MvNormal(x4x5_pp[1], Matrix(Diagonal(x4x5_
 
 
 #
-# drawGraph(fg)
+drawGraph(fg)
 # ensureAllInitialized!(fg)
 # drawPosesLandms(fg)
 # getSolverParams(fg).drawtree=true
@@ -299,7 +286,7 @@ pl = drawPosesLandms(fg, drawhist=true, contour=false)
 addMaptoPlot!(pl)
 pl.coord = Coord.Cartesian(xmin=100, xmax=500, ymin=600, ymax=900)
 pl
-pl |> PDF("/home/dehann/Downloads/explore1.pdf")
+# pl |> PDF(ENV["HOME"]*"/Downloads/explore1.pdf")
 
 
 
@@ -319,22 +306,11 @@ plotVariable2D(fg, :l1, refs=[landmarks_design, landmarks_real])
 plotVariable2D(fg, :l2, refs=[landmarks_design, landmarks_real])
 plotVariable2D(fg, :l3, refs=[landmarks_design, landmarks_real])
 plotVariable2D(fg, :l4, refs=[landmarks_design, landmarks_real])
-plotVariable2D(fg, :l8, refs=[landmarks_design, landmarks_real])
-# plot unimodals
 plotVariable2D(fg, :l5, refs=[landmarks_design, landmarks_real])
+# plot unimodals
 plotVariable2D(fg, :l6, refs=[landmarks_design, landmarks_real])
 plotVariable2D(fg, :l7, refs=[landmarks_design, landmarks_real])
-plotVariable2D(fg, :l9, refs=[landmarks_design, landmarks_real])
-plotVariable2D(fg, :l10, refs=[landmarks_design, landmarks_real])
-plotVariable2D(fg, :l11, refs=[landmarks_design, landmarks_real])
-plotVariable2D(fg, :l12, refs=[landmarks_design, landmarks_real])
-
-plotLocalProduct(fg, :l1, levels=10)
-plotLocalProduct(fg, :l2, levels=10)
-plotLocalProduct(fg, :l3, levels=10)
-plotLocalProduct(fg, :l4, levels=10)
-
-plotLocalProduct(fg, :x6, levels=10)
+plotVariable2D(fg, :l8, refs=[landmarks_design, landmarks_real])
 
 reportFactors(fg, Pose2Pose2)
 
@@ -368,10 +344,8 @@ tree, smt, hist = solveTree!(fg);
 # tree, smt, hist = solveTree!(fg, tree);
 pl = drawPosesLandms(fg, drawhist=true, contour=false)
 addMaptoPlot!(pl)
-pl |> PDF("/home/dehann/Downloads/explore2.pdf")
+# pl |> PDF(ENV["HOME"]*"/Downloads/explore2.pdf")
 
-
-## end debugging block
 
 
 # x7
@@ -417,158 +391,137 @@ addFactor!(fg, [:x7, :x8], Pose2Pose2(MvNormal(x7x8_pp[1], Matrix(Diagonal(x7x8_
 
 
 
-
 # getSolverParams(fg).async = false
 # tree, smt, hist = solveTree!(fg, tree);
 tree, smt, hist = solveTree!(fg);
 
 
-
-## show the delta
-
 pl = drawPosesLandms(fg, drawhist=true, contour=false)
 addMaptoPlot!(pl)
-pl |> PDF("/home/dehann/Downloads/mapped.pdf")
+# pl |> PDF(ENV["HOME"]*"/Downloads/mapped.pdf")
 
 pl = drawLandms(fg, drawhist=true, to=5)
 addMaptoPlot!(pl)
 pl.coord = Coord.Cartesian(xmin=100, xmax=450, ymin=600, ymax=850)
 pl
-pl |> PDF("/home/dehann/Downloads/badwall.pdf")
+# pl |> PDF(ENV["HOME"]*"/Downloads/badwall.pdf")
 
 
+drawGraph(fg)
+
+# reportFactors(fg, Pose2Pose2);
+
+
+
+
+## =============================================================================
+## Deeper look at various other aspects.
+
+
+
+
+# ## quick check
+#
+# pl = drawLandms(fg, from=4, to=4, drawhist=true, contour=false)
+# plotKDE(fg, :l4, levels=20)
+# plotKDE(fg, :l4_0, levels=20)
+# plotKDE(fg, [:l4;:l4_0])
 
 ##
 
+#
+# ## 3D VIS ==================
+#
+# using Amphitheatre
+#
+# fgmax = deepcopy(fg)
+# fgmax.robotId = "Max"
+#
+# fgvis = BasicFactorGraphPose(fg, meanmax=:mean)
+# fgvismax = BasicFactorGraphPose(fgmax, meanmax=:max)
+#
+# visdatasets = AbstractAmphitheatre[fgvis]
+# push!(visdatasets, fgvismax)
+# vis, vistask = visualize(visdatasets, start_browser=true)
+#
+# stopAmphiVis!()
+# vistask = Amphitheatre.restartVisualize(vis, visdatasets)
+#
+# ## END VIS 3D
 
-syms = sortDFG(ls(fg, r"x"))
-ppes = Base.map((x)->getVariablePPE(fg,x), syms)
-trivial_poses = Dict(syms .=> ppes)
 
-# syms = sortDFG(ls(fg, r"l\d*_"))
+
+
+
+# plotVariable2D(fg, :l9, refs=[landmarks_design, landmarks_real])
+# plotVariable2D(fg, :l10, refs=[landmarks_design, landmarks_real])
+# plotVariable2D(fg, :l11, refs=[landmarks_design, landmarks_real])
+# plotVariable2D(fg, :l12, refs=[landmarks_design, landmarks_real])
+#
+# plotLocalProduct(fg, :l3, levels=10)
+# plotLocalProduct(fg, :l4, levels=10)
+#
+# # plotLocalProduct(fg, :x6, levels=10)
+#
+#
+#
+# syms = sortDFG(ls(fg, r"x"))
 # ppes = Base.map((x)->getVariablePPE(fg,x), syms)
-# design_landms = Dict(syms .=> ppes)
+# trivial_poses = Dict(syms .=> ppes)
 #
-# syms = sortDFG(setdiff(ls(fg, r"l\d*"),ls(fg, r"l\d*_")) )
-# ppes = Base.map((x)->getVariablePPE(fg,x), syms)
-# design_mapped = Dict(syms .=> ppes)
+# # syms = sortDFG(ls(fg, r"l\d*_"))
+# # ppes = Base.map((x)->getVariablePPE(fg,x), syms)
+# # design_landms = Dict(syms .=> ppes)
+# #
+# # syms = sortDFG(setdiff(ls(fg, r"l\d*"),ls(fg, r"l\d*_")) )
+# # ppes = Base.map((x)->getVariablePPE(fg,x), syms)
+# # design_mapped = Dict(syms .=> ppes)
+# #
 #
-
-
-
-## 3D VIS ==================
-
-fgmax = deepcopy(fg)
-fgmax.robotId = "Max"
-
-fgvis = BasicFactorGraphPose(fg, meanmax=:mean)
-fgvismax = BasicFactorGraphPose(fgmax, meanmax=:max)
-
-visdatasets = AbstractAmphitheatre[fgvis]
-push!(visdatasets, fgvismax)
-vis, vistask = visualize(visdatasets, start_browser=true)
-
-stopAmphiVis!()
-vistask = Amphitheatre.restartVisualize(vis, visdatasets)
-
-## END VIS 3D
-
-
-
-
-##
-p = DFGPlotProps(  (var=colorant"seagreen", fac=colorant"cyan3"),
-                            (var=1.0, fac=0.3),
-                            (var=:box, fac=:elipse),
-                            spring_layout,#spectral_layout
-                            true)
-dfgplot(fg,p)
-
-
-
-## DRAW THE MAP
-
-
-
-
-
-## END DRAW
-
-
-# getVariableSummary(var::DFGVariable, softt::Pose2) = getPPE(var, softt)
 #
-# getVariableSummary(var::DFGVariable) = getVariableSummary(var::DFGVariable, getSofttype(var))
 #
-# function getVariableSummary(dfg::AbstractDFG, sym::Symbol)
 #
-# var = getVariableSummary(getVariable(dfg, sym))
+# ##
+# p = DFGPlotProps(  (var=colorant"seagreen", fac=colorant"cyan3"),
+#                             (var=1.0, fac=0.3),
+#                             (var=:box, fac=:elipse),
+#                             spring_layout,#spectral_layout
+#                             true)
+# dfgplot(fg,p)
 #
-# end
-
-
-
-##
-
-# using RoMEPlotting
-
-plotPose(fg, [:x0])
-plotPose(fg, [:x1])
-plotPose(fg, [:x2])
-plotPose(fg, [:x3])
-plotPose(fg, [:x0,:x1,:x2,:x3], levels=1)
-
-## ##
-# x?
-# x_x?_pp = [[0,0,deg2rad(-90)], [0.1, 0.1, 0.01]]
-# x?l__br = [[deg2rad(_), 0.1], [_, 1]]
-# x?l__br = [[deg2rad(_), 0.1], [_, 1]]
-
-
-##
-
-plotLocalProduct(fg, :x0)
-plotLocalProduct(fg, :x1)
-plotLocalProduct(fg, :x2)
-
-plotLocalProduct(fg, :l7, levels=3)
-
-
-plotLocalProduct(fg, :l1_0)
-plotLocalProduct(fg, :l2_0)
-plotLocalProduct(fg, :l3_0)
-plotLocalProduct(fg, :l4_0)
-
-plotLocalProduct(fg, :l4)
-
-ls(fg, :l7)
-
-##
-
-##
-
-drawPosesLandms(fg)
-
-reportFactors(fg, Pose2Point2BearingRange);
-reportFactors(fg, Pose2Pose2);
-
-
-plotPose(fg, :x7)
-plotKDE(fg, [:l7;:l7_1])
-
-## batch resolve
-
-tree, smt, hist = solveTree!(fg);
-
-##
-
-
-
-
-
-
-
-
-
+#
+#
+# ##
+#
+# # using RoMEPlotting
+#
+# plotPose(fg, [:x0])
+# plotPose(fg, [:x1])
+# plotPose(fg, [:x2])
+# plotPose(fg, [:x3])
+# plotPose(fg, [:x0,:x1,:x2,:x3], levels=1)
+#
+#
+# ##
+#
+# plotLocalProduct(fg, :x0)
+# plotLocalProduct(fg, :x1)
+# plotLocalProduct(fg, :x2)
+#
+# plotLocalProduct(fg, :l7, levels=3)
+#
+#
+# plotLocalProduct(fg, :l1_0)
+# plotLocalProduct(fg, :l2_0)
+# plotLocalProduct(fg, :l3_0)
+# plotLocalProduct(fg, :l4_0)
+#
+# plotLocalProduct(fg, :l4)
+#
+# ls(fg, :l7)
+#
+#
+# drawPosesLandms(fg)
 
 
 # ensureAllInitialized!(fg)
@@ -578,57 +531,6 @@ tree, smt, hist = solveTree!(fg);
 # else
 #     addVariable!(fg, :l7_1, Point2)
 # end
-
-
-
-## debug multimodality
-
-# check fake BR factor
-tfg = initfg()
-addVariable!(tfg, :x0, Pose2)
-addVariable!(tfg, :l1, Point2)
-manualinit!(tfg, :x0, getKDE(fg, :x0))
-manualinit!(tfg, :l1, getKDE(fg, :l1))
-pp = Pose2Point2BearingRange(Normal(x0l1_br[1]...), Normal(x0l1_br[2]...))
-addFactor!(tfg, [:x0;:l1],pp)
-plotFactor(tfg, :x0l1f1)
-
-
-plotLocalProduct(fg, :x0)
-
-ls(fg, :l1)
-
-pl = plotLocalProduct(fg, :l1, levels=3)
-plotLocalProduct(fg, :l1_0)
-plotLocalProduct(fg, :l1, levels=10)
-plotLocalProduct(fg, :l2_0)
-plotLocalProduct(fg, :l2)
-plotLocalProduct(fg, :l3_0)
-plotLocalProduct(fg, :l3)
-plotLocalProduct(fg, :l4_0)
-plotLocalProduct(fg, :l4)
-
-landmarks_design[:l1]
-landmarks_real[:l1]
-
-pts = approxConv(fg, :x0l1l1_0f1, :l1)
-
-pts = approxConv(fg, :x0l1l1_0f1, :l1_0)
-
-
-pl2 = Gadfly.plot(x=pts[1,:],y=pts[2,:], Geom.hexbin)
-union!(pl2.layers, pl.layers)
-pl2
-pl |> PDF("/tmp/caesar/random/test.pdf")
-
-
-pts = approxConv(fg, :l1_0f1, :l1_0)
-
-
-drawLandms(fg, drawhist=true)
-
-pts = getPoints(getKDE(fg, :l1))
-plotKDE(fg, :l1, levels=25)
 
 
 ##
