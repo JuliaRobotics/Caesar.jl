@@ -24,6 +24,9 @@ function runHexagonalExample(fg::G, totalIterations::Int, iterationsPerSolve::In
     # Add the first pose :x0
     addVariable!(fg, :x0, Pose2)
 
+    # dummy tree used later for incremental updates
+    tree = wipeBuildNewTree!(fg)
+
     # Add at a fixed location PriorPose2 to pin :x0 to a starting location
     addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))
 
@@ -52,10 +55,9 @@ function runHexagonalExample(fg::G, totalIterations::Int, iterationsPerSolve::In
                 @info "Quasi fixed-lag is enabled (a feature currently in testing)!"
                 fifoFreeze!(fg)
             end
-            tBuild = @timed tree = wipeBuildNewTree!(fg)
-            tInfer = @timed inferOverTree!(fg, tree, N=100)
+            tInfer = @timed tree, smt, hist = solveTree!(fg, tree)
             graphSize = length([ls(fg)[1]..., ls(fg)[2]...])
-            push!(solveTimes, (graphSize, tBuild[2], tInfer[2]))
+            push!(solveTimes, (graphSize, tInfer[2], tInfer[2]))
         end
     end
     return solveTimes
