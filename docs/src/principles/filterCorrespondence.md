@@ -1,4 +1,6 @@
-# Correspondence with Filtering?
+# Build your own Bayes Filter
+
+## Correspondence with Filtering?
 
 A frequent discussion point is the correspondence between Kalman/particle/log-flow filtering strategies and factor graph formulations.  This section aims to shed light on the relationship, and to show that factor graph interpretations are a powerful generalization of existing filtering techniques.  The discussion follows a *build-your-own-filter* style and combines the [Approximate Convolution](https://www.juliarobotics.org/Caesar.jl/latest/principles/approxConvDensities/) and [Multiplying Densities](https://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/) pages as the required **prediction** and **update** cycle steps, respectively.  Using the steps described here, the user will be able to build fully-functional---i.e. non-Gaussian---(Bayes) filters.  
 
