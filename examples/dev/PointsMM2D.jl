@@ -474,15 +474,15 @@ drawGraph(fg)
 #
 #
 # syms = sortDFG(ls(fg, r"x"))
-# ppes = Base.map((x)->getVariablePPE(fg,x), syms)
+# ppes = Base.map((x)->calcVariablePPE(fg,x), syms)
 # trivial_poses = Dict(syms .=> ppes)
 #
 # # syms = sortDFG(ls(fg, r"l\d*_"))
-# # ppes = Base.map((x)->getVariablePPE(fg,x), syms)
+# # ppes = Base.map((x)->calcVariablePPE(fg,x), syms)
 # # design_landms = Dict(syms .=> ppes)
 # #
 # # syms = sortDFG(setdiff(ls(fg, r"l\d*"),ls(fg, r"l\d*_")) )
-# # ppes = Base.map((x)->getVariablePPE(fg,x), syms)
+# # ppes = Base.map((x)->calcVariablePPE(fg,x), syms)
 # # design_mapped = Dict(syms .=> ppes)
 # #
 #
