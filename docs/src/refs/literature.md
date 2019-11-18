@@ -44,6 +44,8 @@ Newly created page to list related references and additional literature pertaini
 
 [2.10]  Muandet, Krikamol, et al. ["Kernel mean embedding of distributions: A review and beyond."](https://www.nowpublishers.com/article/DownloadSummary/MAL-060) Foundations and Trends® in Machine Learning 10.1-2 (2017): 1-141.
 
+[2.11]  Hsiao, M. and Kaess, M., 2019, May. MH-iSAM2: Multi-hypothesis iSAM using Bayes Tree and Hypo-tree. In 2019 International Conference on Robotics and Automation (ICRA) (pp. 1274-1280). IEEE.
+
 ### Additional References
 
 [3.1]  Duits, Remco, Erik J. Bekkers, and Alexey Mashtakov. ["Fourier Transform on the Homogeneous Space of 3D Positions and Orientations for Exact Solutions to Linear Parabolic and (Hypo-) Elliptic PDEs."](https://www.preprints.org/manuscript/201811.0027/download/final_file) arXiv preprint arXiv:1811.00363 (2018).
