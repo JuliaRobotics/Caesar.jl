@@ -52,7 +52,7 @@ addVariable!(fg, :x0, ContinuousScalar)
 addFactor!(fg, [:x0], Prior(Normal(-3.0,1.0)))
 addFactor!(fg, [:x0], Prior(Normal(+3.0,1.0)))
 
-batchSolve!(fg)
+solveTree!(fg)
 
 # plot the results
 using KernelDensityEstimatePlotting
