@@ -6,7 +6,15 @@ This page describes how to visualize, study, test, and compare Bayes (Junction) 
 
 ## What is a Bayes (Junction) tree
 
-REQUEST Tonio
+The Bayes tree data structure is a rooted and directed Junction tree (maximal elimination clique tree). It allows for exact inference to be carried out by leveraging and exposing the variables' conditional independence and, very interestingly, can be directly associated with the sparsity pattern exhibited by a system's factorized upper triangular square root information matrix (see picture below).
+
+![graph and matrix analagos](link/to/picture/from/gist)
+
+Following this matrix-graph parallel, the picture also shows what the associated matrix interpretation is for a factor graph (~first order expansion in the form of a measurement Jacobian) and its corresponding Markov random field (sparsity pattern corresponding to the information matrix).
+
+The procedure for obtaining the Bayes (Junction) tree is outlined in the figure shown below (factor graph to chrodal Bayes net via bipartite elimination game, and chordal Bayes net to Bayes tree via maximum cardinality search algorithm).
+
+![add the fg2net2tree outline](link/to/picture/from/gist)
 
 ## Constructing a Tree
 
@@ -52,6 +60,9 @@ import IncrementalInference: generateTexTree
 
 generateTexTree(tree)
 ```
+An example Bayes (Junction) tree representation obtained through `generateTexTree(tree)` for the sample factor graph shown above can be seen in the following image.
+
+![add the fg2net2tree outline](link/to/picture/from/gist)
 
 ### Visualizing Clique Adjacency Matrix
 
