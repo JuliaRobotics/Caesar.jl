@@ -98,7 +98,8 @@ A slightly expanded plotting function will draw both poses and landmarks (and cu
 ```julia
 drawPosesLandms(fg)
 ```
-![test](https://user-images.githubusercontent.com/6412556/42296689-c39e6f1c-7fc6-11e8-9a3a-6d5d2f1b5a49.png)
+
+![test](https://user-images.githubusercontent.com/6412556/69353457-6cd82400-0c76-11ea-905c-8f435faa6b11.png)
 
 ## One type of Loop-Closure
 
