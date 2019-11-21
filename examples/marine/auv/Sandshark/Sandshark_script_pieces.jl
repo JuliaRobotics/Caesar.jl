@@ -57,15 +57,22 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
     global anicounter
     metadata = open( joinpath(getSolverParams(fg1).logpath, "metadata.txt"), "a")
 
+    curvar = Symbol("x$(index[1])")
+    # # point where real-time estimate pivots from SLAM to deadreckoning
+    # if STEP > 0
+    #   pivotPoseEpoch = epochs[STEP]
+    #   @show pivotPoseSym = Symbol("x$(index[1]-1)")
+    #   @show pivotPoseEst = calcVariablePPE(fgl, pivotPoseEst).suggested
+    # end
+
     for ep in epochs[(STEP+1):(STEP+10)]
-      curvar = Symbol("x$(index[1])")
       addVariable!(fgl, curvar, Pose2)
 
       # xi -> l1 - nonparametric factor
       if index[1] % acousticRate == 0
           # addFactor!(fgl, [curvar; :l1], ppbrDict[ep], autoinit=true)
-          # addFactor!(fgl, [curvar; :l1], pprDict[ep], autoinit=false)
-          addFactor!(fgl, [curvar; :l1], ppbDict[ep], autoinit=false)
+          addFactor!(fgl, [curvar; :l1], pprDict[ep], autoinit=false)
+          # addFactor!(fgl, [curvar; :l1], ppbDict[ep], autoinit=false)
       end
 
       if ep != epochs[1]
@@ -134,6 +141,22 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
         end
       end
 
+      # # animate the estimated location
+      # if ep != epochs[1]
+      #   aniT = LinearInterpolation([0.0;1.0], [epochs[index[1]];epochs[index[1]+1]]) # ep
+      #   for atim in 0:0.1:1
+      #       @show atim, aniT(atim)
+      #       rtmask = pivotPoseEpoch .< navkeys .< aniT(atim)
+      #       if sum(mask) > 2
+      #           # get newest deadreckoning segment
+      #           xRT=[X[rtmask];interp_x[aniT(atim)]].-interp_x[pivotPoseEpoch].+pivotPoseEst[1]) yRT=[Y[rtmask];interp_y[aniT(atim)]].-interp_y[pivotPoseEpoch].+pivotPoseEst[2])
+      #           # plot pivot deadreckoning
+      #           pldo = Gadfly.plot(x=xRT, y=yRT, Geom.path(), Theme(default_color=colorant"red"))
+      #           pldo |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "animation", "rt_segment_$(aniT(atim)).png") )
+      #       end
+      #   end
+      # end
+
       # combined plot
       hstack(plre, vstack(plcb, hdl[7])) |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "combined_$curvar.png") )
 
@@ -166,8 +189,10 @@ global anicounter = 0
 fg1 = initfg()
 # Add a central beacon with a prior
 addVariable!(fg1, :l1, Point2)
-# Pinger location is (0.6; -16)
-addFactor!(fg1, [:l1], PriorPose2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) ), autoinit=true) # [0.6; -16]
+
+# Pinger location is [17; 1.8]
+beaconprior = PriorPose2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) )
+addFactor!(fg1, [:l1], beaconprior, autoinit=true)
 
 # init tree for simpler code later down
 tree1 = wipeBuildNewTree!(fg1)
@@ -230,6 +255,34 @@ for STEP in 0:10:50
 end
 
 
+
+##### END OF RUN, ANALYSIS BELOW================================================
+
+
+
+## debug weird results before IIF v0.8.0
+
+ls(fg1)
+drawGraph(fg1)
+
+getFactorType(fg1, ls(fg1, :x0)[2])
+
+
+drawTree(tree1, show=true)
+plotLocalProduct(fg1, :l1)
+plotTreeProductDown(fg1,tree1,:l1)
+
+
+plotLocalProduct(fg1, :x0)
+
+
+solveTree!(fg1)
+
+getFactorType(fg1, ls(fg1, :l1)[2])
+
+reportFactors(fg1, Pose2Point2Bearing)
+
+## debug weird
 
 
 
