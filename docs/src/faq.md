@@ -2,17 +2,11 @@
 
 ### Why Julia
 The [JuliaLang](https://julialang.org/) and ([JuliaPro](https://juliacomputing.com/)) is an open-source Just-In-Time (JIT) & optionally precompiled, strongly-typed, and high-performance programming language.
-The algorithmic code is implemented in Julia for many reasons, such as agile development, high level syntax, performance, type safety, parallel computing, dynamic development, cross compilable (with gcc and clang) and foundational cross-platform ([LLVM](http:///www.llvm.org)) technologies.  
+The algorithmic code is implemented in Julia for many reasons, such as agile development, high level syntax, performance, type safety, multiple dispatch replacement for [object oriented](https://invenia.github.io/blog/2019/10/30/julialang-features-part-1/), parallel computing, dynamic development, cross compilable (with gcc and clang) and foundational cross-platform ([LLVM](http:///www.llvm.org)) technologies.  
 See [JuliaCon2018 highlights video](https://www.youtube.com/watch?v=baR02tlea5Y).  Julia can be thought of as either {C+, Mex (done right), or as a modern Fortran replacement}.  
 
 ### Is Caesar.jl limited to Julia? No.
-The Caesar.jl project is expressly focused on making this algorithmic code available to [C/Fortran](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/)/[C++](https://juliacomputing.com/blog/2017/12/01/cxx-and-cxxwrap-intro.html)/C#/[Python](https://github.com/JuliaPy/PyCall.jl)/[Java](https://github.com/JuliaInterop/JavaCall.jl)/JS.  Julia itself offers [many additional interops](https://github.com/JuliaInterop).  ZMQ and HTTP/WebSockets are the standardized interfaces of choice, please see [details at the multi-language section](../concepts/multilang/)).  Consider opening issues or getting in touch for more information.
-
-### Can Julia be Embedded into C/C++
-Yes, see [the Julia embedding documentation page](https://docs.julialang.org/en/v1/manual/embedding/index.html).
-
-### Current Julia version, v1.0.x
-Caesar.jl and packages are currently [targeting Julia v1.0.x](https://julialang.org/downloads/) (2019Q1).  See [progress for Julia v1.1.x here](https://github.com/JuliaRobotics/Caesar.jl/issues/299).
+The Caesar.jl project is expressly focused on making this algorithmic code available to [C/Fortran](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/)/[C++](https://juliacomputing.com/blog/2017/12/01/cxx-and-cxxwrap-intro.html)/C#/[Python](https://github.com/JuliaPy/PyCall.jl)/[Java](https://github.com/JuliaInterop/JavaCall.jl)/JS.  Julia itself offers [many additional interops](https://github.com/JuliaInterop).  ZMQ and HTTP/WebSockets are the standardized interfaces of choice, please see [details at the multi-language section](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/)).  Consider opening issues or getting in touch for more information.
 
 ### Just-In-Time Compiling (i.e. why are first runs slow?)
 Julia uses just-in-time compilation ([unless already pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
@@ -24,19 +18,29 @@ Packages are already compiled to static objects (`.ji` files), but can also be c
 
 > **Note** [recent developments announced on discourse.](https://discourse.julialang.org/t/ann-packagecompiler-with-incremental-system-images/20489).  Also see new brute force sysimg work at [Fezzik.jl](https://github.com/TsurHerman/Fezzik).
 
+### Can Julia be Embedded into C/C++
+Yes, see [the Julia embedding documentation page](https://docs.julialang.org/en/v1/manual/embedding/index.html).
+
+### Why ZMQ Middleware Layer (multilang)?
+
+[Zero Message Queue (ZMQ)](https://zeromq.org/) is a widely used data transport layer used to build various other multiprocess middleware with wide support among other programming languages.
 
 ### ROS Integration
 
 ROS integration is a priority for this project and will accompany the so-called ['prime time'](https://github.com/JuliaRobotics/RoME.jl/issues/147) release of the code.  ROS and ZMQ interfaces are closely related.
 
-> **Note** the present focus (2018Q3-2019Q2) is to stabilize the [ZMQ interface](../concepts/multilang).
+> **Note** the present focus (2018Q3-2019Q2) is to stabilize the [ZMQ interface](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#ZMQ-Messaging-Interface-1).
 
 > **Voice** Please add your voice of support or suggestions on [ROS integration here](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
+
+> **WIP** Please see work on an initial PoC (still using PyCall) via our [wiki developer docs here](https://github.com/JuliaRobotics/Caesar.jl/wiki/ROS-PoC).
 
 ### How does JSON-Schema work?
 
 Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).
 
+### Current Julia version, v1.2.x
+Caesar.jl and packages are currently [targeting Julia v1.2.x](https://julialang.org/downloads/) (4Q2019).
 
 ## Solver FAQ (mm-iSAM)
 

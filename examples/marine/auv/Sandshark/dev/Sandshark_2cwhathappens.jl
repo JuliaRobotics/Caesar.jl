@@ -180,4 +180,4 @@ ensureAllInitialized!(fg)
 batchSolve!(fg)
 
 # drawPosesLandms(fg)
-drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY, "Multi-modal ISAM (bearing+range measurement every $nonParamStep poses, l1 uncertainty $l1Uncertainty)")
+drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, lblkeys, X, Y, lblX, lblY, "Multi-modal ISAM (bearing+range measurement every $nonParamStep poses, l1 uncertainty $l1Uncertainty)")

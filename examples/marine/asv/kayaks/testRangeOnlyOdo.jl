@@ -230,7 +230,7 @@ getData(getFactor(csmfg31bd, :x168x169f1)).fncargvID
 getData(getFactor(csfg31bd, :x168x169f1)).fncargvID
 
 
-stuff = sandboxStateMachineStep(hist[31], 10)
+stuff = sandboxCliqResolveStep(hist[31], 10)
 
 
 

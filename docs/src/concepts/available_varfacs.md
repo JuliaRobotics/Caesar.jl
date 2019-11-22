@@ -19,7 +19,6 @@ ContinuousMultivariate
 
 The current variables types are:
 ```@docs
-Polar
 Point2
 Pose2
 DynPoint2
@@ -92,7 +91,6 @@ DynPose2VelocityPrior
 VelPose2VelPose2
 DynPose2Pose2
 Pose3Pose3
-InertialPose3
 PriorPose3ZRP
 PartialPriorRollPitchZ
 PartialPose3XYYaw

@@ -19,7 +19,7 @@ A couple of important points:
 
 ## Getting Started
 We suggest the following design pattern for developing and building new factors:
-1. You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see [Building and Solving Graphs](building_graphs/#Factors-Available-in-Caesar-1) if you want to review what is currently available
+1. You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see [Building and Solving Graphs](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/) if you want to review what is currently available
 1. [OPTIONAL] Create a GitHub repository to store the new types (new types in the Julia Main scope is perfectly okay!)
 1. Create your new variable types
 1. Create your new factor types
@@ -195,7 +195,7 @@ An example of these tests can be seen for the trivial case shown in the example 
 
 As above, as long as you bring your factors into the workspace, you should be able to use them in your experimental setup.
 
-You can validate this with the existence check code in [Building and Solving Graphs](building_graphs.md).
+You can validate this with the existence check code in [Building and Solving Graphs](https://www.juliarobotics.org/Caesar.jl/latest/concepts/building_graphs/).
 
 > Note: This has been made available as `IncrementalInference.getCurrentWorkspaceVariables()` and `IncrementalInference.getCurrentWorkspaceFactors()`in IncrementalInference v0.4.4.
 

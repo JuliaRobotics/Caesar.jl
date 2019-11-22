@@ -18,7 +18,6 @@ using DelimitedFiles
 @everywhere setForceEvalDirect!(true)
 
 
-# const TU = TransformUtils
 
 Gadfly.set_default_plot_size(35cm,25cm)
 
@@ -26,52 +25,54 @@ include(joinpath(@__DIR__,"Plotting.jl"))
 include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 
-odonoise = Matrix(Diagonal(10*[0.1;0.1;0.005].^2))
-
-
-# Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[50:3:300]
-
-lastepoch = 0
-for ep in epochs
-  global lastepoch
-  if lastepoch != 0
-    # @show interp_yaw(ep)
-    deltaAng = interp_yaw(ep) - interp_yaw(lastepoch)
-
-    wXi = TU.SE2([interp_x(lastepoch);interp_y(lastepoch);interp_yaw(lastepoch)])
-    wXj = TU.SE2([interp_x(ep);interp_y(ep);interp_yaw(ep)])
-    iDXj = se2vee(wXi\wXj)
-    NAV[ep] = iDXj
-    # NAV[ep][1:2] .*= 0.7
-    # println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
-
-    odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], odonoise) )
-  end
-  rangepts = rangedata[ep][:]
-  rangeprob = kde!(rangepts)
-  azipts = azidata[ep][:,1]
-  aziprob = kde!(azipts)
-
-  # alternative range probability
-  rawmf = readdlm("/home/dehann/data/sandshark/full_wombat_2018_07_09/extracted/matchedfilter/raw/$(ep).csv",',')
-  range_bss = AliasingScalarSampler(rawmf[:,1], exp.(rawmf[:,2]), SNRfloor=0.6)
-
-  # prep the factor functions
-  ppbrDict[ep] = Pose2Point2BearingRange(aziprob, range_bss) # rangeprob
-  lastepoch = ep
-end
+odonoise = Matrix(Diagonal((20*[0.1;0.1;0.005]).^2))
 
 
 
-function runEpochs!(fgl, STEP::Int, index::Vector{Int})
+epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TEND=800)
+
+# Gadfly.plot(y=pprDict[epochs[1]].Z.weights.values, Geom.path) # Gadfly.plot(x=rand(pprDict[epochs[1]].Z, 100), Geom.histogram)
+# using StatsBase
+# fieldnames(StatsBase.ProbabilityWeights)
+
+# Build interpolators for x, y from LBL data
+itpl_lblx = LinearInterpolation(lblkeys, lblX)
+itpl_lbly = LinearInterpolation(lblkeys, lblY)
+
+# quick look at initial location
+itpl_lblx[epochs[1]]
+itpl_lbly[epochs[1]]
+interp_yaw[epochs[1]]
+
+
+DeltaX = itpl_lblx[epochs[1]] - interp_x[epochs[1]]
+DeltaY = itpl_lbly[epochs[1]] - interp_y[epochs[1]]
+
+
+0
+
+global anicounter = 0
+
+function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
+    global anicounter
+    metadata = open( joinpath(getSolverParams(fg1).logpath, "metadata.txt"), "a")
+
+    curvar = Symbol("x$(index[1])")
+    # # point where real-time estimate pivots from SLAM to deadreckoning
+    # if STEP > 0
+    #   pivotPoseEpoch = epochs[STEP]
+    #   @show pivotPoseSym = Symbol("x$(index[1]-1)")
+    #   @show pivotPoseEst = calcVariablePPE(fgl, pivotPoseEst).suggested
+    # end
+
     for ep in epochs[(STEP+1):(STEP+10)]
-      curvar = Symbol("x$(index[1])")
       addVariable!(fgl, curvar, Pose2)
 
       # xi -> l1 - nonparametric factor
-      if index[1] % 5 == 0
-          addFactor!(fgl, [curvar; :l1], ppbrDict[ep], autoinit=true)
+      if index[1] % acousticRate == 0
+          # addFactor!(fgl, [curvar; :l1], ppbrDict[ep], autoinit=true)
+          addFactor!(fgl, [curvar; :l1], pprDict[ep], autoinit=false)
+          # addFactor!(fgl, [curvar; :l1], ppbDict[ep], autoinit=false)
       end
 
       if ep != epochs[1]
@@ -79,14 +80,90 @@ function runEpochs!(fgl, STEP::Int, index::Vector{Int})
         addFactor!(fgl, [Symbol("x$(index[1]-1)"); curvar], odoDict[ep], autoinit=true)
       else
         # Prior to the first pose location (a "GPS" prior)
-        initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
+        # initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
+        initLoc = [itpl_lblx(ep);itpl_lbly(ep);interp_yaw(ep)]
         println("Adding a prior at $curvar, $initLoc")
         addFactor!(fgl, [curvar], PriorPose2( MvNormal(initLoc, Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=true)
       end
       # Heading partial prior
-      addFactor!(fgl, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=true)
+      addFactor!(fgl, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(5))), autoinit=true)
+
+      # write out some metadata to help with debugging
+      println(metadata, "$(index[1]), $ep, $curvar")
+
+      ensureAllInitialized!(fgl)
+
+      # visualizations
+      plre = drawPoses(fgl,drawhist=false,contour=false,spscale=1.0, lbls=false, meanmax=:mean)
+      plre.coord = Coord.Cartesian(xmin=0, xmax=100, ymin=-120, ymax=-70)
+      # add confidence contour on last
+      pcf = plotKDE(getKDE(fgl, curvar),dims=[1;2],levels=1,c=["gray70"] )
+      union!(plre.layers, pcf.layers)
+      # export
+      plre |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "fg_$curvar.png") )
+
+      tfg = initfg()
+      addVariable!(tfg, :l1, Point2)
+      manualinit!(tfg,:l1,getKDE(fgl,:l1))
+      addVariable!(tfg, curvar, Pose2)
+      manualinit!(tfg,curvar,getKDE(fgl,curvar))
+      addFactor!(tfg, [curvar;:l1], pprDict[ep])
+
+      hdl = []
+      plotFactor(tfg, ls(tfg, :l1)[1], hdl=hdl)
+      hdl[7].coord = Coord.Cartesian(xmin=-150.0, xmax=200.0, ymin=-250.0, ymax=100.0)
+      hdl[7] |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "range_$curvar.png") )
+
+      # circular illustration
+      cpts = reshape(rand(Normal(interp_yaw(ep), deg2rad(5)),100),1,:)
+      cbm = manikde!(cpts, Sphere1)
+
+      opts = index[1] > 0 ? approxConv(fgl, intersect(ls(fgl, Pose2Pose2),ls(fgl, curvar))[1], curvar) : 2*randn(3,100)
+      cbo = manikde!(opts[3:3,:], Sphere1)
+      plcb = plotKDECircular([cbm; cbo], legend=["mag";"odo"], c=["orange";"blue"])
+      plcb.coord = Coord.Cartesian(xmin=-2.5, xmax=2.5, ymin=-2.5, ymax=2.5)
+      plcb |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "circ_$curvar.png") )
+
+      # animate dead reckoning
+      if ep != epochs[1]
+        aniT = LinearInterpolation([0.0;1.0], [epochs[index[1]];epochs[index[1]+1]]) # ep
+        for atim in 0:0.1:1
+          @show atim, aniT(atim)
+          mask = epochs[1] .< navkeys .< aniT(atim)
+          if sum(mask) > 2
+            pldo = Gadfly.plot(x=[X[mask];interp_x[aniT(atim)]].+DeltaX, y=[Y[mask];interp_y[aniT(atim)]].+DeltaY, Geom.path(), Theme(default_color=colorant"gray80"))
+            pldo |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "animation", "deadreck_$(aniT(atim)).png") )
+            union!(pldo.layers, plre.layers)
+            pldo.coord = Coord.Cartesian(xmin=0, xmax=100, ymin=-120, ymax=-70)
+            hstack(pldo, vstack(plcb, hdl[7])) |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "animation",   "combined_$(anicounter).png") )
+            anicounter += 1
+          end
+        end
+      end
+
+      # # animate the estimated location
+      # if ep != epochs[1]
+      #   aniT = LinearInterpolation([0.0;1.0], [epochs[index[1]];epochs[index[1]+1]]) # ep
+      #   for atim in 0:0.1:1
+      #       @show atim, aniT(atim)
+      #       rtmask = pivotPoseEpoch .< navkeys .< aniT(atim)
+      #       if sum(mask) > 2
+      #           # get newest deadreckoning segment
+      #           xRT=[X[rtmask];interp_x[aniT(atim)]].-interp_x[pivotPoseEpoch].+pivotPoseEst[1]) yRT=[Y[rtmask];interp_y[aniT(atim)]].-interp_y[pivotPoseEpoch].+pivotPoseEst[2])
+      #           # plot pivot deadreckoning
+      #           pldo = Gadfly.plot(x=xRT, y=yRT, Geom.path(), Theme(default_color=colorant"red"))
+      #           pldo |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "animation", "rt_segment_$(aniT(atim)).png") )
+      #       end
+      #   end
+      # end
+
+      # combined plot
+      hstack(plre, vstack(plcb, hdl[7])) |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "combined_$curvar.png") )
+
       index[1] += 1
     end
+    close(metadata)
+
     nothing
 end
 
@@ -105,12 +182,17 @@ end
 
 
 
+
+global anicounter = 0
+
 ## Step: Building the factor graph
 fg1 = initfg()
 # Add a central beacon with a prior
 addVariable!(fg1, :l1, Point2)
-# Pinger location is (0.6; -16)
-addFactor!(fg1, [:l1], PriorPose2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) ), autoinit=true) # [0.6; -16]
+
+# Pinger location is [17; 1.8]
+beaconprior = PriorPose2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) )
+addFactor!(fg1, [:l1], beaconprior, autoinit=true)
 
 # init tree for simpler code later down
 tree1 = wipeBuildNewTree!(fg1)
@@ -126,34 +208,46 @@ getSolverParams(fg1).drawtree = true
 # getSolverParams(fg).showtree = false
 
 mkpath(joinpath(getSolverParams(fg1).logpath, "graphs"))
+mkpath(joinpath(getSolverParams(fg1).logpath, "reckoning"))
+mkpath(joinpath(getSolverParams(fg1).logpath, "reckoning", "animation"))
 
 
 index1 = Int[0;]
 index2 = Int[0;]
 storeLast = Dict{Symbol,BallTreeDensity}()
 
-for STEP in 0:10:80
+laglength = 20
+
+length(epochs)
+
+for STEP in 0:10:50
     global fg1, tree1
     global index1, index2
     global storeLast
 
-    runEpochs!(fg1, STEP, index1)
+    runEpochs!(fg1, epochs, STEP, index1, acousticRate=3)
     poses = sortVarNested(ls(fg1, r"x"))
 
-    if STEP-10 >= 0
-        @show poses[1], poses[end], poses[end-10]
-        @show dellist = poses[1:(end-10-1)]
-        deleteEpochs!(fg1, dellist)
-        addFactor!(fg1, [poses[end-10];], PriorPose2(storeLast[poses[end-10]]))
+    if STEP-laglength >= 0
+        @show poses[1], poses[end], poses[end-laglength]
+        @show dellist = poses[1:(end-laglength-1)]
+        if length(dellist) > 0
+          deleteEpochs!(fg1, dellist)
+          addFactor!(fg1, [poses[end-laglength];], PriorPose2(storeLast[poses[end-laglength]]))
+        end
     end
 
-    saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_before.pdf"))
-    @time tree1, smt, hist = solveTree!(fg1, tree1)
-    saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_after.pdf"))
+    drawGraph(fg1, filepath=joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_.pdf"))
+    saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_before"))
+    @time tree1, smt, hist = solveTree!(fg1, tree1, maxparallel=200)
+    saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_after"))
 
-    pla = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblX, lblY)
+    pla = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
     plb = plotSandsharkFromDFG(fg1)
     hstack(pla,plb) |> PDF(joinpath(getSolverParams(fg1).logpath, "sandshark-beacon_$STEP.pdf"))
+
+    reportFactors(fg1, Pose2Point2Range, filepath=joinpath(getSolverParams(fg1).logpath, "acoustics_$STEP.pdf"), show=false)
+    reportFactors(fg1, Pose2Pose2, filepath=joinpath(getSolverParams(fg1).logpath, "odo_$STEP.pdf"), show=false)
 
     poses = sortVarNested(ls(fg1, r"x"))
     storeLast[poses[end]] = getKDE(fg1, poses[end])
@@ -162,252 +256,140 @@ end
 
 
 
+##### END OF RUN, ANALYSIS BELOW================================================
+
+
+
+## debug weird results before IIF v0.8.0
+
+ls(fg1)
+drawGraph(fg1)
+
+getFactorType(fg1, ls(fg1, :x0)[2])
+
+
+drawTree(tree1, show=true)
+plotLocalProduct(fg1, :l1)
+plotTreeProductDown(fg1,tree1,:l1)
+
+
+plotLocalProduct(fg1, :x0)
+
+
+solveTree!(fg1)
+
+getFactorType(fg1, ls(fg1, :l1)[2])
+
+reportFactors(fg1, Pose2Point2Bearing)
+
+## debug weird
+
+
+
+fcts = ls(fg1, :l1)
+PTS = map(x->approxConv(fg1, x, :l1), fcts)
+
+PP = map(x->manikde!(x, Point2), PTS)
+
+pp = *(PP...)
+
+plotKDE([pp; PP...], levels=2)
+
+
+# sum(timestamps .< 1531153363000000000) # 348
+
+ls(fg1, :l1)
+
+##
+fctsym = :x150l1f1
+
+reportFactors(fg1, Pose2Point2Range, ls(fg1, Pose2Point2Range) )
+reportFactors(fg1, Pose2Pose2, ls(fg1, Pose2Pose2) )
+
+##
+
+plotLocalProduct(fg1, :x27, show=true)
+
+
+
+plotKDE(ppbrDict[epochs[1]].bearing)
+
+
 
 
 
 ## debugging a plotting
 
 
-## plot forward convolves
-
-fcts = setdiff(ls(fg1, :l1), lsfPriors(fg1))
+dfg = fg1
 
 
-pts = approxConv(fg1, fcts[1], :l1)
-
-pts, infd = predictbelief(fg1,:l1,fcts)
-
-pl1 = Gadfly.plot(x=pts[1,:],y=pts[2,:],Geom.hexbin)
-
-union!(PL.layers, pl1.layers)
-
-PL
-
-plotKDE(manikde!(pts, Point2().manifolds))
 
 
+
+drawGraph(dfg)
+
+
+plotLocalProduct(dfg, :l1)
+plotLocalProduct(dfg, :x100)
+
+getSolverParams(dfg).dbg = true
+
+tree, smt, hist = solveTree!(dfg, recordcliqs=ls(dfg))
+
+
+plotSandsharkFromDFG(dfg)
+drawPosesLandmarksAndOdo(dfg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
+
+# fg1_ = deepcopy(fg1)
+
+
+
+0
+
+
+
+
+
+
+
+## compare raw beam former data with factors
+
+
+plotRawBeamFormer(fg1, ppbrDict, NAV, interp_x, interp_y, interp_yaw, show=true, all=true)
+
+
+
+## load previous factor graph to compare
+_fg = initfg()
+loadDFG(joinpath(getSolverParams(fg1).logpath, "graphs", "fg_0_after.pdf"), Main, _fg)
+
+
+
+drawGraph(_fg)
+
+plotPose(_fg, :x0)
+getFactorType)
+
+
+
+
+
+## report on factors
 
 
 dfg = fg1
-fctsym = :x70l1f1
-fct = getFactorType(dfg, fctsym)
 
+fctsym = ls(dfg, Pose2Point2BearingRange)[1]
+# fcss = lsf(dfg, Pose2Pose2)
 
 
-#
+plotFactor(dfg, :x20x21f1)
+plotFactor(dfg, :x20l1f1)
 
 
-
-
-fctsym
-
-
-
-function solveFactorMeasurement(dfg::AbstractDFG,
-                                fctsym::Symbol  )
-  #
-
-
-
-end
-
-
-fcto = getFactor(dfg, fctsym)
-varsyms = fcto._variableOrderSymbols
-vars = map(x->getPoints(getKDE(dfg,x)), varsyms)
-fcttype = getFactorType(fcto)
-zDim = getData(fcto).fnc.zDim
-
-N = size(vars[1])[2]
-res = zeros(zDim)
-ud = FactorMetadata()
-meas = (zeros(zDim, N),)
-
-idx = 1
-
-function makemeas(i, dm, meas)
-  meas[1][:,i] = meas[1][:,i] + dm
-  return meas
-end
-
-
-
-ggo = (i, dm) -> fcttype(res,ud,i,makemeas(i, dm, meas),vars...)
-
-
-ggo(1, [0.0;0.0])
-
-
-using Optim
-
-
-optimize((x) -> ggo(1,x), [0.0; 0.0])
-
-Gadfly.plot(z=(x,y)->ggo(1,[x;y]), xmin=[-pi],xmax=[pi],ymin=[-100.0],ymax=[100.0], Geom.contour)
-
-
-# idea is to find predicted parameters for noise model
-
-
-#
-
-
-
-
-
-import RoMEPlotting: plotFactor
-
-function plotFactor(dfg::AbstractDFG, fctsym::Symbol, fct::Pose2Point2Bearing; hdl=[])
-  #
-
-  # variables
-  vars = ls(dfg, fctsym)
-
-  # the pose
-  pose = intersect(vars, ls(dfg, Pose2))[1]
-  poin = intersect(vars, ls(dfg, Point2))[1]
-
-  # convolve the yaw angle with bearing rotation model
-  pX = marginal(getKDE(dfg, pose), [3])
-  pts = approxConvCircular(pX, fct.bearing)
-
-  # draw plots
-  measest = manikde!(pts, Sphere1)
-
-  # inverse solve for predicted bearing
-  dx = getPoints(getKDE(dfg, poin))[1,:] - getPoints(getKDE(dfg, pose))[1,:]
-  dy = getPoints(getKDE(dfg, poin))[2,:] - getPoints(getKDE(dfg, pose))[2,:]
-  pred = reshape(atan.(dy,dx), 1,:)
-
-  ppX = manikde!(pred, Sphere1)
-
-  plcl = plotKDECircular( [measest; ppX], logpdf=true, legend=["Meas. Est.";"Predicted"] )
-
-  # plot pose and point by itself
-  posepl1 = plotKDE(dfg, pose, dims=[1;2], c=["green"])
-  posepl2 = plotKDECircular(marginal(getKDE(dfg, pose), [3]))
-  landmpl = plotKDE(dfg, poin, c=["red"])
-
-  tfg = initfg()
-  addVariable!(tfg, pose, Pose2)
-  addVariable!(tfg, poin, Point2)
-  addFactor!(tfg, [pose;poin], fct, autoinit=false)
-  manualinit!(tfg, pose, getKDE(dfg,pose))
-  manualinit!(tfg, poin, getKDE(dfg,poin))
-  plt = drawPosesLandms(tfg, point_size=5pt)
-
-  # plot handles
-  push!(hdl, landmpl)
-  push!(hdl, posepl1)
-  push!(hdl, posepl2)
-  push!(hdl, plcl)
-  push!(hdl, plt)
-
-  hstack(vstack(landmpl,posepl1, posepl2), vstack(plcl, plt))
-end
-
-
-
-
-hdl = []
-
-function plotFactor(dfg::AbstractDFG, fctsym::Sybmol, fct::Pose2Point2BearingRange; hdl = [])
-  #
-
-
-# variables
-vars = ls(dfg, fctsym)
-
-# the pose
-pose = intersect(vars, ls(dfg, Pose2))[1]
-poin = intersect(vars, ls(dfg, Point2))[1]
-
-# plot current pose & point
-pl_poin = plotKDE(dfg, poin, levels=5, c=["red";])
-pl_pose = plotPose(dfg, pose, c=["black"])
-
-
-
-# project landmark
-
-# do range model separately too
-pr = Pose2Point2Range(fct.range)
-
-plotFactor(dfg, fctsym, pr, hdl=hdl)
-
-
-
-
-hdl
-
-end
-
-
-plhist
-
-
-## development
-
-br = Pose2Point2Bearing(fct.bearing)
-
-plotFactor(dfg, :x70l1f1, br)
-
-
-
-pr = Pose2Point2Range(fct.range)
-
-function plotFactor(dfg::G, fctsym::Symbol, fct::Pose2Point2Bearing) where {G <: AbstractDFG}
-
-hdl = []
-
-# variables
-vars = ls(dfg, fctsym)
-
-# the pose
-pose = intersect(vars, ls(dfg, Pose2))[1]
-poin = intersect(vars, ls(dfg, Point2))[1]
-
-poseyaw = plotKDECircular(marginal(getKDE(dfg, pose), [3]), title="yaw angle")
-bearpl = plotKDECircular(fct.bearing, title="bearing body frame")
-
-vstack(poseyaw, bearpl)
-
-
-end
-
-"""
-    $SIGNATURES
-
-Build an approximate density `[Y|X,DX,.]=[X|Y,DX][DX|.]` as proposed by the conditional convolution.
-
-Notes
-- Assume both are on circular manifold, `manikde!(pts, (:Circular,))`
-"""
-function approxConvCircular(pX::BallTreeDensity, pDX::BallTreeDensity)
-  #
-
-  # building basic factor graph
-  tfg = initfg()
-  addVariable!(tfg, :s1, Sphere1)
-  addVariable!(tfg, :s2, Sphere1)
-  addFactor!(tfg, [:s1;:s2], Sphere1Sphere1(pDX), autoinit=false)
-  manualinit!(tfg,:s1, pX)
-
-  # solve for outgoing proposal value
-  approxConv(tfg,:s1s2f1,:s2)
-end
-
-
-# """
-#     $SIGNATURES
-#
-# Solve for the measurement values, leaving all variables in tact.
-# """
-# function inverseEvaluateFactor(dfg::G, fct::F) where {G <: AbstractDFG, F <: DFGFactor}
-#
-#
-# end
-
+reportFactors(dfg, Pose2Pose2, ls(dfg, Pose2Pose2)[1:2])
+reportFactors(dfg, Pose2Point2BearingRange)
 
 
 
@@ -416,25 +398,22 @@ end
 
 ## overview
 
-PL = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblX, lblY)
+PL = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
 
 
 plotSandsharkFromDFG(fg1, scale=1.5)
 
 
+
+
+
 ## slightly random
 
-
 drawGraph(fg1)
-
 plotLocalProduct(fg1, :x55)
-
 sortVarNested(ls(fg1, r"x"))
-
 pp, parr, partials, lb, infdim = IIF.localProduct(fg1, :x55)
-
 plotKDE([pp;parr], levels=1, legend=["prod"; string.(lb[1:3])], dims=[1;2])
-
 plotPose(fg1, :x59)
 
 
@@ -451,126 +430,18 @@ pll = layerBeamPatternRose(ppbrDict[ep].bearing, wRr=wRr, wTRr=theta[1:2], scale
 
 
 
-ROT = Float64[]
 
-
-for (tim, data) in azidata
-  global ROT
-  ROT = [ROT; data[:,1]]
-end
-
-
-
-
-Gadfly.plot(x=ROT, Geom.histogram)
-
-
-st = sort(collect(keys(azidata)))[150]
-
-Gadfly.plot(x=azidata[st][:,1], Geom.histogram)
-
-
-
-Gadfly.plot(x=getPoints(PX)[:], Geom.histogram)
-
-
-
-mask = rand(Categorical(0.001*ones(1000)),100)
-pts = collect(azidata[st][mask,1:1]')
-PX = manikde!( pts, (:Circular,))
-AMP.plotKDECircular([PX;], rVo=[10.0; 0.0; 0.0])
-
-
-
-Gadfly.plot(
-  layerBeamPatternRose( PX, wTRr= , wRr=wRr )
-)
-
-
-
-
-
-
-
-
-## Plot just dead reckoning
-
-
-ep = epochs[1]
-initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
 
 
 #
 
 
 
-XX= Float64[]
-YY = Float64[]
-TH = Float64[]
-
-PL = []
-
-for i in 1:2:80
-  @show ep = epochs[i]
-
-  push!(XX, interp_x(ep))
-  push!(YY, interp_y(ep))
-  push!(TH, interp_yaw(ep)) # bad at wrap boundary
-
-  mask = rand(Categorical(0.001*ones(1000)),100)
-  pts = collect(azidata[ep][mask,1:1]')
-  PX = manikde!( TU.wrapRad.(deepcopy(pts)), (:Circular,))
-  # PX = manikde!( pts, (:Euclid,))
-
-  pl = plotSandsharkFromDFG(dfg)
-  # pll = AMP.plotKDECircular([PX;], rVo=[XX[end]; YY[end]; TH[end]], radix=1.2, scale=0.3)
-  # push!(PL, pll)
-  # his1 = Gadfly.plot(x=azidata[ep][:,1], Geom.histogram)
-  # his2 = Gadfly.plot(x=pts, Geom.histogram)
-  # vstack(his1, his2, pll) |> PDF("/tmp/caesar/random/debug/$ep.pdf")
-end
-
-pl = Gadfly.plot(
-  Gadfly.layer(x=XX, y=YY, Geom.path),
-  Gadfly.layer(x=[0.6;], y=[-16.0;], Geom.point, Theme(default_color=colorant"red")),
-)
-
-for pll in PL
-  union!(pl.layers, pll.layers)
-end
-
-pl
-
-
-
-
-## plot raw data in loop
-
-
-i = 0
-for t in timestamps
-  @show t
-  global i += 1
-  pl1 = Gadfly.plot(x=azidata[t][:,1], y=azidata[t][:,2], Geom.point)
-  pl2 = Gadfly.plot(x=)
-   # |> PNG("/tmp/plots/$i.png")
-
-end
-
-
-
-
 
 ## plot all beam patterns from factor graph
 
-dfg = fg1
 
 plotSandsharkFromDFG(dfg)
-
-ls(dfg, Point2)
-ls(dfg, Pose2)
-
-ls(dfg, Pose2Pose2)
 
 
 
@@ -597,4 +468,42 @@ pts = rand(fct_range, 1000)
 
 
 
+## plot forward convolves
+
+fcts = setdiff(ls(fg1, :l1), lsfPriors(fg1))
+
+
+pts = approxConv(fg1, fcts[1], :l1)
+
+pts, infd = predictbelief(fg1,:l1,fcts)
+
+pl1 = Gadfly.plot(x=pts[1,:],y=pts[2,:],Geom.hexbin)
+
+union!(PL.layers, pl1.layers)
+
+PL
+
+plotKDE(manikde!(pts, Point2().manifolds))
+
+
+
+
+
 #
+
+
+
+
+
+
+
+
+# pts = collect(azidata[1531153769000000000][:,1:1]')
+#
+# ptsw = TU.wrapRad.(pts)
+#
+# pc = manikde!(pts, Sphere1)
+# pl = manikde!(pts, ContinuousScalar)
+# plw = manikde!(ptsw, ContinuousScalar)
+#
+# plotKDE([pl;plw])

@@ -114,7 +114,7 @@ The ranging measurement standard deviation of `2.0` or `3.0` is taken, assuming 
 Again, any distribution could have been used.
 The factor graph should look as follows:
 ```julia
-writeGraphPdf(fg) # show the factor graph
+drawGraph(fg) # show the factor graph
 ```
 
 ![rangesonlyfirstfg](https://user-images.githubusercontent.com/6412556/49518425-a1d44680-f86c-11e8-8548-c384bc6df2a6.png)
@@ -149,7 +149,7 @@ plotKDE(fg, :l100, dims=[1;2], levels=6)
 
 An alternative plotting interface can also be used, that shows a histogram of desired elements instead:
 ```julia
-drawLandms(fg, from=1, to=101)
+drawLandms(fg, from=1, to=101, contour=false, drawhist=true)
 ```
 
 ![testlall](https://user-images.githubusercontent.com/6412556/42423113-aec928d0-82c2-11e8-9852-c231d1e880fe.png)
@@ -205,7 +205,7 @@ vehicle_drives_to!(fg, :l101, GTp, GTl)
 vehicle_drives_to!(fg, :l102, GTp, GTl)
 
 # see the graph
-writeGraphPdf(fg, engine="neato")
+drawGraph(fg, engine="neato")
 ```
 
 > **NOTE** The distance traveled could be any combination of accrued direction and speeds, however, a straight line Gaussian error model is used to keep the visual presentation of this example as simple as possible.
@@ -214,7 +214,9 @@ The marginal posterior estimates are found by repeating inference over the facto
 
 ```julia
 # solve and show message passing on Bayes (Juntion) tree
-tree = batchSolve!(fg, drawpdf=true, show=true)
+getSolverParams(fg).drawtree=true
+getSolverParams(fg).showtree=true
+tree, smt, hist = solveTree!(fg)
 
 # draw all vehicle locations
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:2], dims=[1;2])

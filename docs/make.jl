@@ -1,16 +1,20 @@
 using Documenter, Caesar
+
 import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
-import IncrementalInference: initfg
+import IncrementalInference: initfg, downGibbsCliqueDensity
 
 using KernelDensityEstimatePlotting
 # import KernelDensityEstimatePlotting: plotKDE
 using RoMEPlotting
 
+# until namespaces are properly figured out
+using DistributedFactorGraphs
+import DistributedFactorGraphs: showFactor
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
-    format = :html,
+    format = Documenter.HTML(),
     sitename = "Caesar.jl",
     pages = Any[
         "Home" => "index.md",
@@ -38,6 +42,9 @@ makedocs(
         ],
         "Principles" => [
             "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
+            "Generic Convolutions" => "principles/approxConvDensities.md",
+            "Filters vs. Graphs" => "principles/filterCorrespondence.md",
+            "Bayes tree prototyping" => "principles/bayestreePrinciples.md",
         ],
         "How to Expand?" => [
             "Custom Variables and Factors" => "concepts/adding_variables_factors.md",

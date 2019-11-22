@@ -8,11 +8,11 @@ The complete code for this example can be found in the fixed-lag branch of RoME:
 
 ## Introduction
 
-Fixed-lag solving is enabled when creating the factor-graph. Users provide a window - the quasi fixed-lag constant (QFL) - which defines how many of the most-recent variables should be calculated. Any other variables are 'frozen'. The objective of this example is to explore providing a near-constant solve time for ever-growing graphs by only recalculating the most recent portion.
+Fixed-lag solving is enabled when creating the factor-graph. Users provide a window---the quasi fixed-lag constant (QFL)---which defines how many of the most-recent variables should be calculated. Any other variables are 'frozen.' The objective of this example is to explore providing a near-constant solve time for ever-growing graphs by only recalculating the most recent portion.
 
 ## Example Overview
 
-In the example, the basic Hexagonal 2D is grown to solve 200 variables. The original example is remains the same, i.e. a vehicle is driving around in a hexagon and seeing the same bearing+range landmark as it crosses the starting point. At every 20th variable, a solve is invoked. Rather than use `batchSolve()`, the solve is performed in parts (construction of Bayes tree, solving the graph) to get performance statistics as the graph grows.
+In the example, the basic Hexagonal 2D is grown to solve 200 variables. The original example remains the same, i.e., a vehicle is driving around in a hexagon and seeing the same bearing+range landmark as it crosses the starting point. At every 20th variable, a solve is invoked. Rather than use `batchSolve()`, the solve is performed in parts (construction of Bayes tree, solving the graph) to get performance statistics as the graph grows.
 
 ```julia
 numVariables = 200
@@ -23,6 +23,9 @@ lagLength = 30
 function runHexagonalExample(fg::G, totalIterations::Int, iterationsPerSolve::Int)::DataFrame where {G <: AbstractDFG}
     # Add the first pose :x0
     addVariable!(fg, :x0, Pose2)
+
+    # dummy tree used later for incremental updates
+    tree = wipeBuildNewTree!(fg)
 
     # Add at a fixed location PriorPose2 to pin :x0 to a starting location
     addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))
@@ -52,10 +55,9 @@ function runHexagonalExample(fg::G, totalIterations::Int, iterationsPerSolve::In
                 @info "Quasi fixed-lag is enabled (a feature currently in testing)!"
                 fifoFreeze!(fg)
             end
-            tBuild = @timed tree = wipeBuildNewTree!(fg)
-            tInfer = @timed inferOverTree!(fg, tree, N=100)
+            tInfer = @timed tree, smt, hist = solveTree!(fg, tree)
             graphSize = length([ls(fg)[1]..., ls(fg)[2]...])
-            push!(solveTimes, (graphSize, tBuild[2], tInfer[2]))
+            push!(solveTimes, (graphSize, tInfer[2], tInfer[2]))
         end
     end
     return solveTimes
