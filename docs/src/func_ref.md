@@ -114,6 +114,7 @@ getCliqVarSingletons
 getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
 getKDE
+getLogPath
 getManifolds
 getParent
 getTreeAllFrontalSyms
@@ -126,8 +127,7 @@ getVertKDE
 getUpMsgs
 getDwnMsgs
 hasCliq
-inferOverTree!
-inferOverTreeR!
+hasOrphans
 initfg
 initInferTreeUp!
 isCliqMarginalizedFromVars
@@ -136,15 +136,17 @@ isInitialized
 isMarginalized
 isTreeSolved
 isPartial
-landmarks
-loadjld
+isVariable
 localProduct
 ls
+lsf
+lsfPriors
 lsRear
 makeCsmMovie
 manualinit!
 parentCliq
 packFromLocalPotentials!
+predictVariableByFactor
 prepBatchTree!
 prepCliqInitMsgsDown!
 printCliqHistorySummary
@@ -185,5 +187,3 @@ wipeBuildNewTree!
 writeGraphPdf
 resetVariableAllInitializations!
 ```
-
-<!-- lsfPriors -->
