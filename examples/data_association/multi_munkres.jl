@@ -58,7 +58,7 @@ plotKDE(NEX2, dims=[1;2], levels=2, c=["red"])
 
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Return cost matrix with old elements as rows and new elements being assigned as columns.
 """
@@ -76,7 +76,7 @@ function assignmentCost(OLDl, NEXl, z::Vector{Float64})
 end
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Determine base cost for new landmarks.
 """

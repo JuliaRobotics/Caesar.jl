@@ -5,7 +5,7 @@
 ```
 
 ## Introduction
-Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).  Caesar attempts to address a number of issues that arise in prior SLAM solutions - solving under-defined systems, inference with non-Gaussian measurements, simplifying factor creation, and centralizing factor-graph persistence with databases and cloud infrastructure.  Caesar started as part of reseach work in navigation systems and direct the reader to the [literature reference page](refs/literature) for more information.
+Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).  Caesar attempts to address a number of issues that arise in prior SLAM solutions - solving under-defined systems, inference with non-Gaussian measurements, simplifying factor creation, and centralizing factor-graph persistence with databases and cloud infrastructure.  Caesar started as part of reseach work in navigation systems and direct the reader to the [literature reference page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more information.
 
 ## Focus Area
 
@@ -25,9 +25,9 @@ This project focuses on the open development and progression to a public, stable
 ### Caesar
 [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl) is the "umbrella" framework for other dedicated algorithmic/supporting packages that are implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)).
 
-> [FAQ: Why use Julia?](faq/#Why-Julia-1)
+> [FAQ: Why use Julia?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Why-Julia-1)
 
-> [FAQ: Interop with other languages](faq/#Is-Caesar.jl-limited-to-Julia?-No.)
+> [FAQ: Interop with other languages (not limited to Julia only)](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Is-Caesar.jl-limited-to-Julia?-No.-1)
 
 ### RoME.jl/IncrementalInference.jl/ApproxManifoldProducts.jl
 Critically, this package can operate in the conventional SLAM manner, using local memory (dictionaries), or alternatively distribute around a persisted `FactorGraph` through a graph database using [CloudGraphs.jl](https://github.com/GearsAD/CloudGraphs.jl.git), as [discussed in literature here](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) [1.3]. A variety of plotting, 3D visualization, serialization, LCM middleware, and analysis tools come standard. Please see internal packages, Robot Motion Estimate [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) and back-end solver [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl).
@@ -42,9 +42,9 @@ Caesar visualization (plotting of results, graphs, and data) is provided by 2D a
 * [Arena.jl](https://github.com/dehann/Arena.jl) package, which is a collection of 3D visualization tools.
 
 ## Multilanguage Interops: Caesar SDKs and APIs
-The Caesar framework is not limited to direct Julia use.  See the [multi-language page](concepts/multilang) for details.
+The Caesar framework is not limited to direct Julia use.  See the [multi-language page](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/) for details.
 
-> Also see [Frequently Asked Questions](faq) for more.
+> Also see [Frequently Asked Questions](https://www.juliarobotics.org/Caesar.jl/latest/faq/) for more.
 
 ## A Few Highlights
 
@@ -63,7 +63,7 @@ The Caesar framework has the following features:
 
 ## Origins in Fundamental Research
 
-See related works on [the literature page](refs/literature/).
+See related works on [the literature page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).
 
 ## Future Directions
 
