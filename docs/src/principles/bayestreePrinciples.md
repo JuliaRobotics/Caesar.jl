@@ -2,7 +2,10 @@
 
 This page describes how to visualize, study, test, and compare Bayes (Junction) tree concepts with special regard for variable ordering.
 
-**NOTE: docs under construction**
+## Why a Bayes (Juntion) tree
+
+The tree is algebraicly equivalent---but acyclic---structure to the factor graph.  Inference is easier on on acyclic graphs.  
+We can also exploit Smart Message Passing benefits (known from the full full conditional independence structure encoded in the tree), since the tree represents the "complete form" when marginalizing each variable one at a time (also known as elimination game, marginalization, also related to smart factors).  In loose terms, the Bayes (Junction) tree has implicit access to all Schur complements (if it parametric and linearized) of each variable to all others.
 
 ## What is a Bayes (Junction) tree
 
@@ -137,6 +140,12 @@ getSolverParams(fg).showtree = true
 ```
 The color legend is currently recorded in an [issue thread here](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/349).
 
+
+### Are cliques in the Bayes (Junction) tree densly connected?
+
+Yes and no. From the chordal Bayes net's perspective (obtained through the elimination game in order to build the clique tree), the nodes of the Bayes tree are indeed fully connected subgraphs (they are called cliques after all!). From the perspective of the subgraph of the original factor graph induced by the clique's variables, cliques need not be fully connected, since we are assuming the factor graph as sparse, and that no new information can be created out of nothing---hence each clique must be sparse.  That said, the potential exists for the inference within a clique to become densly connected (experience full "fill-in").  See the paper on square-root-SAM, where the connection between dense covariance matrix of a Kalman filter (EKF-SLAM) is actually related to the inverse square root (rectangular) matrix which structure equivalent to the clique subgraph adjacency matrix.  
+
+Also remember that the intermediate Bayes net (which has densly connected cliques) hides the underlying tree structure -- think of the Bayes net as looking at the tree from on top or below, thereby encoding the dense connectivity in the structure of the tree itself.  All information below any clique of the tree is encoded in the upward marginal belief messages at that point (i.e. the densly connected aspects pertained lower down in the tree).
 
 ### Clique State Machine
 
