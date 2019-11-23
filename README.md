@@ -4,10 +4,6 @@
 
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
-# UPGRADE NOTICE
-
-2019/07 -- We are targeting IncrementalInference.jl (IIF) v0.8.x as new and improved with most of the transitions sandboxed in the IIF v0.7.x cycle -- IIF v0.7.x does work but has a few lock step updates with DistributedFactorGraphs.jl v0.2.x as some functionality is being transferred.  IIF is upstream to both RoME.jl, Caesar.jl, and Arena.jl.  Please open issues for comments or help.
-
 # Weblink Info
 
 Click on the badges to follow web url links:
