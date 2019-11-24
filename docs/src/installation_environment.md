@@ -52,7 +52,7 @@ RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
 
 > **Note** currently requires `Arena#master` branch (2019Q2).
 
-## The "I want a Development Environment from Scratch" Install
+## New to Julia and want a full Development Install
 
 ### Local Installation of Julia
 
