@@ -19,7 +19,8 @@ P(\Theta | Z)  =  P(Z | \Theta) P(\Theta)
 where Theta represents all variables and Z represents all measurements or data, and
 
 ```math
-P(\Theta , Z) = P(Z | \Theta) P(\Theta) ``
+P(\Theta , Z) = P(Z | \Theta) P(\Theta)
+```
 
 or
 
