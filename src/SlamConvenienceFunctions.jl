@@ -25,7 +25,7 @@ function parseInit!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
     y0 = parse(Float64,sp2[2])
     th0 = parse(Float64,sp2[2])
   end
-  prevn = initFactorGraph!(slam.fg, ready=USEREADY)
+  prevn = initFactorGraph!(slam.fg, solvable=USESOLVABLE)
   println("init done")
   nothing
 end
@@ -44,7 +44,7 @@ function parseOdo!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   cov[2,1] = parse(Float64,sp2[7])
   cov[3,1] = parse(Float64,sp2[8])
   cov[3,2] = parse(Float64,sp2[10])
-  addOdoFG!(slam.fg, Symbol(n), DX, cov, ready=USEREADY)
+  addOdoFG!(slam.fg, Symbol(n), DX, cov, solvable=USESOLVABLE)
   return n
 end
 
@@ -60,10 +60,10 @@ function parseAddLandmBR!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString
   if !haskey(slam.fg.v, lmid)
     slam.lndmidx += 1
     lm = string(string('l',slam.lndmidx))
-    projNewLandm!(slam.fg, pose, lm, zbr, cov, ready=USEREADY)
+    projNewLandm!(slam.fg, pose, lm, zbr, cov, solvable=USESOLVABLE)
   else
     lm = string(getVert(slam.fg,lmid).label)
-    addBRFG!(slam.fg, pose, lm, zbr, cov, ready=USEREADY)
+    addBRFG!(slam.fg, pose, lm, zbr, cov, solvable=USESOLVABLE)
   end
   return lm
 end
@@ -82,7 +82,7 @@ function parseLandmBRMM!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString}
   # TODO --do the tests here
   lm1 = string(getVert(slam.fg,lm1id).label)
   lm2 = string(getVert(slam.fg,lm2id).label)
-  addMMBRFG!(slam.fg, pose, [lm1;lm2], zbr, cov, w=[w1;w2], ready=USEREADY)
+  addMMBRFG!(slam.fg, pose, [lm1;lm2], zbr, cov, w=[w1;w2], solvable=USESOLVABLE)
   # function addMMBRFG!(fg::G, pose::AbstractString,
   #                   lm::Array{AbstractString,1}, br::Array{Float64,1},
   #                   cov::Array{Float64,2}; w=[0.5;0.5]) where G <: AbstractDFG
@@ -99,7 +99,7 @@ function parseLandmBRAuto!(slam::SLAMWrapper, sp2::Array{SubString{AbstractStrin
   cov[2,1] = parse(Float64,sp2[6])
   lm = string("")
 
-  vlm, flm, slam.lndmidx = addAutoLandmBR!(slam.fg, pose, lmid, zbr, cov, slam.lndmidx, ready=USEREADY)
+  vlm, flm, slam.lndmidx = addAutoLandmBR!(slam.fg, pose, lmid, zbr, cov, slam.lndmidx, solvable=USESOLVABLE)
 
   println("parseLandmBRAuto! -- added $(vlm.label)")
 
@@ -166,7 +166,7 @@ end
 
 
 function parseSetReady!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
-  setDBAllReady!(slam.fg)
+  setAllDBSolvable!(slam.fg)
   nothing
 end
 

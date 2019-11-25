@@ -34,7 +34,7 @@ ls(fg,:x754)
 writeGraphPdf(fg)
 @async run(`evince fg.pdf`)
 
-setDBAllReady!(fg)
+setAllDBSolvable!(fg)
 
 
 # totally reset to frontend built state in DB
@@ -62,7 +62,7 @@ sortedvd[200050]
 
 
 loadtx = transaction(conn)
-query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) where n.ready=1 or f.ready=1 return distinct n, f"
+query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) where n.solvable=1 or f.solvable=1 return distinct n, f"
 cph = loadtx(query, submit=true)
 
 

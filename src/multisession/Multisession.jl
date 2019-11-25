@@ -185,7 +185,7 @@ function buildPrimeLandmarksAndFactors(
           fg = initfg(cloudgraph=cloudGraph, robotname=robotId, username=userId, sessionname=s)
           syms = [Symbol(commonLandmark);sym]
           @debug "    - Copying local symbols $syms..."
-          Caesar.subLocalGraphCopy!(fg, syms, neighbors=0, reqbackendset=false, reqready=false, includeMultisession=true)
+          Caesar.subLocalGraphCopy!(fg, syms, neighbors=0, reqbackendset=false, reqSolvable=false, includeMultisession=true)
 
           # Note: this shouldn't be necessary because the check is done in the landmark creation, but doing just in case here too.
           @show sessionLandType = getData(getVert(fg, syms[1], api=localapi)).softtype
