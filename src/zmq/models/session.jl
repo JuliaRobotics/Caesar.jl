@@ -5,7 +5,7 @@ export
     VariableRequest,
     FactorRequest,
     lsRequest,
-    SetReadyRequest
+    setSolvableRequest
 
 struct VariableRequest
     label::String
@@ -26,7 +26,7 @@ struct lsRequest
     factors::String
 end
 
-struct SetReadyRequest
+struct setSolvableRequest
     variables::Union{Vector{String}, Nothing}
-    isReady::Int
+    isSolvable::Int
 end

@@ -19,7 +19,7 @@ mutable struct SLAMWrapper{G}
   lndmidx::Int
 end
 
-USEREADY=0
+USESOLVABLE=0
 include("SlamConvenienceFunctions.jl")
 
 

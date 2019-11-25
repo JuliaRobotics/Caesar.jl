@@ -22,15 +22,15 @@ removeMultisessions!(cloudGraph, session=multisessions[3])
 
 addrdict["session"] = multisessions[1]
 resetconvertdb(addrdict=addrdict)
-setDBAllReady!(cloudGraph.neo4j.connection, addrdict["session"])
+setAllDBSolvable!(cloudGraph.neo4j.connection, addrdict["session"])
 convertdb(addrdict=addrdict, N=N)
 addrdict["session"] = multisessions[2]
 resetconvertdb(addrdict=addrdict)
-setDBAllReady!(cloudGraph.neo4j.connection, addrdict["session"])
+setAllDBSolvable!(cloudGraph.neo4j.connection, addrdict["session"])
 convertdb(addrdict=addrdict, N=N)
 addrdict["session"] = multisessions[3]
 resetconvertdb(addrdict=addrdict)
-setDBAllReady!(cloudGraph.neo4j.connection, addrdict["session"])
+setAllDBSolvable!(cloudGraph.neo4j.connection, addrdict["session"])
 convertdb(addrdict=addrdict, N=N)
 
 

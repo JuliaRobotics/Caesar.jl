@@ -47,7 +47,7 @@ writeGraphPdf(fg)
 # Okay now solve locally, or start MM-iSAMCloudSolve.jl
 fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
-setDBAllReady!(fg)
+setAllDBSolvable!(fg)
 setBackendWorkingSet!(conn, session)
 fullLocalGraphCopy!(fg)
 
