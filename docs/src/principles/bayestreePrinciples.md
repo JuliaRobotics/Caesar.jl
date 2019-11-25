@@ -138,8 +138,22 @@ which will replace the `tree` object pointer to the new tree object after soluti
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 ```
+
+#### Bayes Tree Legend (from IIF)
+
 The color legend is currently recorded in an [issue thread here](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/349).
 
+* Blank / white -- uninitialized,
+* Red -- CPU working on clique's Chapman-Kolmogorov inference (up or down),
+* Light red -- completed upsolve,
+* Tomato -- partial dimension upsolve but finished,
+* Green -- trying to initialize,
+* Brown -- initialized but not solved yet (likely child cliques that depend on downward autoinit msgs),
+* Purple -- blocking on autoinit for more parent/sibling derived down msgs,
+* Turquoise -- blocking for on parent for downsolve msgs,
+* Light blue -- completed downsolve,
+* Blue -- fully marginalized clique that will not be updated during upsolve (maybe downsolved),
+* Orange -- recycled clique upsolve solution from previous tree passed into solveTree!
 
 ### Are cliques in the Bayes (Junction) tree densly connected?
 
