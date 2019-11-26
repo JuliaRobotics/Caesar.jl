@@ -5,7 +5,7 @@ This page describes how to visualize, study, test, and compare Bayes (Junction) 
 ## Why a Bayes (Juntion) tree
 
 The tree is algebraicly equivalent---but acyclic---structure to the factor graph.  Inference is easier on on acyclic graphs.  
-We can also exploit Smart Message Passing benefits (known from the full full conditional independence structure encoded in the tree), since the tree represents the "complete form" when marginalizing each variable one at a time (also known as elimination game, marginalization, also related to smart factors).  In loose terms, the Bayes (Junction) tree has implicit access to all Schur complements (if it parametric and linearized) of each variable to all others.
+We can also exploit Smart Message Passing benefits (known from the full conditional independence structure encoded in the tree), since the tree represents the "complete form" when marginalizing each variable one at a time (also known as elimination game, marginalization, also related to smart factors).  In loose terms, the Bayes (Junction) tree has implicit access to all Schur complements (if it parametric and linearized) of each variable to all others.
 
 ## What is a Bayes (Junction) tree
 
