@@ -114,7 +114,7 @@ end
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
 
-function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise; TSTART=356, TEND=1200)
+function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise; TSTART=356, TEND=1200, SNRfloor::Float64=0.6, STRIDE::Int=4)
   #
   ## Caching factors
   ppbrDict = Dict{Int, Pose2Point2BearingRange}()
@@ -125,7 +125,7 @@ function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw
 
   XX = collect(range(-pi,pi,length=1000))
 
-  epochs = timestamps[TSTART:4:TEND]
+  epochs = timestamps[TSTART:STRIDE:TEND]
   lastepoch = 0
   @showprogress "preparing data" for ep in epochs
     # @show ep
@@ -164,7 +164,7 @@ function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw
     dvmf ./= cumsum(dvmf)[end]
     dvmf .= dvmf.^2
     dvmf ./= cumsum(dvmf)[end]
-    range_bss = AliasingScalarSampler(rawmf[:,1], dvmf, SNRfloor=0.6) # exp.(rawmf[:,2])
+    range_bss = AliasingScalarSampler(rawmf[:,1], dvmf, SNRfloor=SNRfloor) # exp.(rawmf[:,2])
 
     # prep the factor functions
     ppbrDict[ep] = Pose2Point2BearingRange(aziprob, range_bss) # rangeprob

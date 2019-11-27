@@ -191,7 +191,7 @@ fg1 = initfg()
 addVariable!(fg1, :l1, Point2)
 
 # Pinger location is [17; 1.8]
-beaconprior = PriorPose2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) )
+beaconprior = PriorPoint2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) )
 addFactor!(fg1, [:l1], beaconprior, autoinit=true)
 
 # init tree for simpler code later down
