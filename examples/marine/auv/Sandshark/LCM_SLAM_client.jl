@@ -3,11 +3,13 @@
 using Distributed
 addprocs(4)
 
+using DistributedFactorGraphs
 using Caesar, RoME
 @everywhere using Caesar, RoME
 using LCMCore, BotCoreLCMTypes
 using Dates
 
+nextPose(sym::Symbol) = Symbol(string("x",parse(Int,string(sym)[2:end])+1))
 
 ## middleware handler (callback) functions
 
@@ -22,10 +24,34 @@ function mag_hdlr(channel::String, msgdata::pose_t, magDict::Dict)
   nothing
 end
 
-function pose_hdlr(channel::String, msgdata::pose_t, fg::AbstractDFG, dashboard::Dict)
 
-  "accumulateDiscreteLocalFrame!" |> println
-  accumulateDiscreteLocalFrame!(dashboard[:rttMpp], msgdata.pos[1:3], dashboard[:Qc_odo], 1.0)
+function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict)
+  # "accumulateDiscreteLocalFrame! on all RTTs" |> println
+  for (vsym, rtt) in dashboard[:rttMpp]
+    accumulateDiscreteLocalFrame!(rtt, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0)
+  end
+
+  # check if a new pose and factor must be added?
+  odoT = unix2datetime(msgdata.utime*1e-6)
+  if (dashboard[:odoTime] + dashboard[:poseRate]) < odoT
+    @info "pose_hdlr, adding new pose at $odoT"
+    # update odo time
+    dashboard[:odoTime] = odoT
+
+    # get factor to next pose
+    nPose = nextPose(dashboard[:lastPose])
+    rttLast = dashboard[:rttMpp][dashboard[:lastPose]][2]
+    # add new variable and factor to the graph
+    duplicateToStandardFactorVariable(Pose2Pose2,rttLast,dfg,dashboard[:lastPose],nPose, solvable=0,autoinit=false)
+
+    # delete rtt unless used by real time prediction
+    if dashboard[:lastPose] != dashboard[:rttCurrent][1]
+      delete!(dashboard[:rttMpp], dashboard[:lastPose])
+    end
+
+    # update last pose to new pose
+    dashboard[:lastPose] = nPose
+  end
 
   nothing
 end
@@ -34,22 +60,53 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   addVariable!(dfg, :x0, Pose2)
 
   # Pinger location is [17; 1.8]
-  addVariable!(dfg, :l1, Point2)
+  addVariable!(dfg, :l1, Point2, solvable=0)
   beaconprior = PriorPoint2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) )
-  addFactor!(dfg, [:l1], beaconprior, autoinit=true)
+  addFactor!(dfg, [:l1], beaconprior, autoinit=true, solvable=0)
 
-  addVariable!(dfg, :deadreckon_x0, Pose2, solvable=0)
+  addVariable!(dfg, :deadreckon_0, Pose2, solvable=0)
   drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
-  addFactor!(dfg, [:x0; :deadreckon_x0], drec, solvable=0, autoinit=false)
+  addFactor!(dfg, [:x0; :deadreckon_0], drec, solvable=0, autoinit=false)
 
   # store current real time tether factor
-  dashboard[:rttMpp] = drec
-  dashboard[:rttVarSym] = :deadreckon_x0
+  dashboard[:rttMpp] = Dict{Symbol,MutablePose2Pose2Gaussian}(:x0 => drec)
+  dashboard[:rttCurrent] = (:x0, :deadreckon_0)
   # standard odo process noise levels
   dashboard[:Qc_odo] = Diagonal([0.01;0.01;0.01].^2) |> Matrix
 
+  dashboard[:odoTime] = unix2datetime(0)
+  dashboard[:poseRate] = Second(1)
+  dashboard[:lastPose] = :x0
+
   nothing
 end
+
+
+
+function manageSolveTree!(dfg::AbstractDFG)
+
+  @info "logpath=$(getLogPath(dfg))"
+  getSolverParams(dfg).drawtree = true
+
+  # allow async process
+  # getSolverParams(dfg).async = true
+
+  # prep with empty tree
+  tree = emptyBayesTree()
+
+  @async begin
+    while @show length(ls(dfg, :x0, solvable=1)) == 0
+      "waiting for prior on x0" |> println
+      sleep(1)
+    end
+    for i in 1:10
+      tree, smt, hist = solveTree!(dfg , tree)
+      sleep(3)
+      "end of solve cycle" |> println
+    end
+  end
+end
+
 
 function main()
 
@@ -61,6 +118,9 @@ function main()
   # fg object and initialization
   fg = initfg()
   initializeAUV_noprior(fg, dashboard)
+
+  # prepare the solver in the background
+  manageSolveTree!(fg)
 
   # middleware handlers
   lcm = LCM()
@@ -76,6 +136,7 @@ function main()
   @show lblKeys = keys(lblDict) |> collect |> sort
   @show magKeys = keys(magDict) |> collect |> sort
   initPose = [lblDict[lblKeys[1]];magDict[magKeys[1]]]
+  dashboard[:odoTime] = lblKeys[1]
 
   # add starting prior
   addFactor!(fg, [:x0;], PriorPose2(MvNormal(initPose,Matrix(Diagonal([0.1; 0.1; 0.1].^2)))), autoinit=false)
@@ -86,12 +147,8 @@ function main()
   # subscribe(lcm, "AUV_RANGE_CORRL",bytes)
   # subscribe(lcm, "AUV_BEARING_CORRL",bytes)
 
-  getSolverParams(fg).async = true
-  tree = wipeBuildNewTree!(fg)
-
-  # tree, smt, hist = solveTree!(fg, tree)
-
-  for i in 1:100
+  # run handler
+  for i in 1:1000
       handle(lcm)
   end
   close(lcm)
@@ -101,11 +158,26 @@ end
 
 
 
-
-
+## Do the actual run
 fg = main()
 
 
 
+
+
+## Debugging code below
+
+
+
+# drawGraph(fg)
+# getSolverParams(fg).dbg = true
+# tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+
+
+#
+# using RoMEPlotting
+# # drawPoses(fg)
+#
+# plotPose(fg, :x0)
 
 #
