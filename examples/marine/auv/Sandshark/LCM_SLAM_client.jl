@@ -40,7 +40,7 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
 
     # get factor to next pose
     nPose = nextPose(dashboard[:lastPose])
-    rttLast = dashboard[:rttMpp][dashboard[:lastPose]][2]
+    rttLast = dashboard[:rttMpp][dashboard[:lastPose]]
     # add new variable and factor to the graph
     duplicateToStandardFactorVariable(Pose2Pose2,rttLast,dfg,dashboard[:lastPose],nPose, solvable=0,autoinit=false)
 
@@ -51,6 +51,13 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
 
     # update last pose to new pose
     dashboard[:lastPose] = nPose
+
+    # create new rtt on new variable
+    nRtt = Symbol(string("deadreckon_",string(nPose)[2:end]))
+    addVariable!(dfg, nRtt, Pose2, solvable=0)
+    drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
+    addFactor!(dfg, [nPose; nRtt], drec, solvable=0, autoinit=false)
+    dashboard[:rttMpp][nPose] = drec
   end
 
   nothing
@@ -143,9 +150,9 @@ function main()
 
   @info "Start with the real-time tracking aspect..."
   subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard), pose_t)
-  # subscribe(lcm, "AUV_ODOMETRY_GYROBIAS",callback, pose_t)
-  # subscribe(lcm, "AUV_RANGE_CORRL",bytes)
-  # subscribe(lcm, "AUV_BEARING_CORRL",bytes)
+  # subscribe(lcm, "AUV_ODOMETRY_GYROBIAS", (c,d)->pose_hdlr(c,d,fg,dashboard), pose_t)
+  # subscribe(lcm, "AUV_RANGE_CORRL",  callback, raw_t)
+  # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
 
   # run handler
   for i in 1:1000
