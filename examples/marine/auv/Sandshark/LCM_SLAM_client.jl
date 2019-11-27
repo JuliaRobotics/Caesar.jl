@@ -9,7 +9,8 @@ using Caesar, RoME
 using LCMCore, BotCoreLCMTypes
 using Dates
 
-nextPose(sym::Symbol) = Symbol(string("x",parse(Int,string(sym)[2:end])+1))
+import RoME: nextPose
+
 
 ## middleware handler (callback) functions
 
@@ -103,6 +104,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
   getSolverParams(dfg).drawtree = true
   getSolverParams(dfg).qfl = 20
   getSolverParams(dfg).isfixedlag = true
+  getSolverParams(dfg).limitfixeddown = true
 
   # allow async process
   # getSolverParams(dfg).async = true
@@ -116,7 +118,8 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
       "waiting for prior on x0" |> println
       sleep(1)
     end
-    for i in 1:10
+    # keep solving
+    while true
       # add any newly solvables (atomic)
       while !isready(dashboard[:solvables])
         @show dashboard[:solvables].data
@@ -189,7 +192,7 @@ function main()
   # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
 
   # run handler
-  for i in 1:5000
+  for i in 1:10000
       handle(lcm)
   end
   close(lcm)
@@ -204,6 +207,7 @@ fg = main()
 
 
 drawGraph(fg)
+
 
 
 ## Debugging code below
