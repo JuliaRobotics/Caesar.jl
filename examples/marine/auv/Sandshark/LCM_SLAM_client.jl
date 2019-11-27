@@ -42,7 +42,12 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     nPose = nextPose(dashboard[:lastPose])
     rttLast = dashboard[:rttMpp][dashboard[:lastPose]]
     # add new variable and factor to the graph
-    duplicateToStandardFactorVariable(Pose2Pose2,rttLast,dfg,dashboard[:lastPose],nPose, solvable=0,autoinit=false)
+    fctsym = duplicateToStandardFactorVariable(Pose2Pose2,
+                                               rttLast,
+                                               dfg,dashboard[:lastPose],
+                                               nPose,
+                                               solvable=0,
+                                               autoinit=false  )
 
     # delete rtt unless used by real time prediction
     if dashboard[:lastPose] != dashboard[:rttCurrent][1]
@@ -58,6 +63,7 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
     addFactor!(dfg, [nPose; nRtt], drec, solvable=0, autoinit=false)
     dashboard[:rttMpp][nPose] = drec
+    put!(dashboard[:solvables], [nPose; fctsym])
   end
 
   nothing
@@ -85,15 +91,18 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   dashboard[:poseRate] = Second(1)
   dashboard[:lastPose] = :x0
 
+  dashboard[:solvables] = Channel{Vector{Symbol}}(100)
+
   nothing
 end
 
 
-
-function manageSolveTree!(dfg::AbstractDFG)
+function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
 
   @info "logpath=$(getLogPath(dfg))"
   getSolverParams(dfg).drawtree = true
+  getSolverParams(dfg).qfl = 20
+  getSolverParams(dfg).isfixedlag = true
 
   # allow async process
   # getSolverParams(dfg).async = true
@@ -101,14 +110,39 @@ function manageSolveTree!(dfg::AbstractDFG)
   # prep with empty tree
   tree = emptyBayesTree()
 
+  # needs to run asynchronously
   @async begin
     while @show length(ls(dfg, :x0, solvable=1)) == 0
       "waiting for prior on x0" |> println
       sleep(1)
     end
     for i in 1:10
-      tree, smt, hist = solveTree!(dfg , tree)
-      sleep(3)
+      # add any newly solvables (atomic)
+      while !isready(dashboard[:solvables])
+        @show dashboard[:solvables].data
+        sleep(0.5)
+      end
+
+      # adjust latest RTT after solve, latest solved
+      lastSolved = sortDFG(ls(dfg, r"x\d", solvable=1))[end]
+      dashboard[:rttCurrent] = (lastSolved, Symbol("deadreckon_"*string(lastSolved)[2:end]))
+
+      #add any new solvables
+      while isready(dashboard[:solvables])
+        @show tosolv = take!(dashboard[:solvables])
+        for sy in tosolv
+          # setSolvable!(dfg, sy, 1) # see DFG #221
+          # TODO temporary workaround
+          getfnc = occursin(r"f", string(sy)) ? getFactor : getVariable
+          getfnc(dfg, sy).solvable = 1
+        end
+      end
+
+      @info "Ensure all new variables initialized"
+      ensureAllInitialized!(dfg)
+
+      # do actual solve
+      tree, smt, hist = solveTree!(dfg, tree)
       "end of solve cycle" |> println
     end
   end
@@ -127,7 +161,7 @@ function main()
   initializeAUV_noprior(fg, dashboard)
 
   # prepare the solver in the background
-  manageSolveTree!(fg)
+  manageSolveTree!(fg, dashboard)
 
   # middleware handlers
   lcm = LCM()
@@ -155,7 +189,7 @@ function main()
   # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
 
   # run handler
-  for i in 1:1000
+  for i in 1:5000
       handle(lcm)
   end
   close(lcm)
@@ -169,7 +203,7 @@ end
 fg = main()
 
 
-
+drawGraph(fg)
 
 
 ## Debugging code below
