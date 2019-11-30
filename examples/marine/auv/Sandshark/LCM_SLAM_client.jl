@@ -14,19 +14,22 @@ import RoME: nextPose
 
 ## middleware handler (callback) functions
 
-function lbl_hdlr(channel::String, msgdata::pose_t, lblDict::Dict)
-  lblDict[unix2datetime(msgdata.utime*1e-6)] = msgdata.pos[1:2] |> deepcopy
+function lbl_hdlr(channel::String, msgdata::pose_t, dashboard::Dict, lblDict::Dict)
+  dashboard[:lastMsgTime] = unix2datetime(msgdata.utime*1e-6)
+  lblDict[dashboard[:lastMsgTime]] = (msgdata.pos[1:2] |> deepcopy)
   nothing
 end
 
-function mag_hdlr(channel::String, msgdata::pose_t, magDict::Dict)
+function mag_hdlr(channel::String, msgdata::pose_t, dashboard::Dict, magDict::Dict)
+  dashboard[:lastMsgTime] = unix2datetime(msgdata.utime*1e-6)
   ea = TU.convert(Euler, Quaternion(msgdata.orientation[1],msgdata.orientation[2:4]) )
-  magDict[unix2datetime(msgdata.utime*1e-6)] = ea.Y
+  magDict[dashboard[:lastMsgTime]] = ea.Y
   nothing
 end
 
 
 function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict)
+  dashboard[:lastMsgTime] = unix2datetime(msgdata.utime*1e-6)
   # "accumulateDiscreteLocalFrame! on all RTTs" |> println
   for (vsym, rtt) in dashboard[:rttMpp]
     accumulateDiscreteLocalFrame!(rtt, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0)
@@ -65,6 +68,7 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     addFactor!(dfg, [nPose; nRtt], drec, solvable=0, autoinit=false)
     dashboard[:rttMpp][nPose] = drec
     put!(dashboard[:solvables], [nPose; fctsym])
+    dashboard[:poseStride] += 1
   end
 
   nothing
@@ -94,6 +98,10 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
 
   dashboard[:solvables] = Channel{Vector{Symbol}}(100)
 
+  dashboard[:loopSolver] = true
+
+  dashboard[:poseStride] = 0
+
   nothing
 end
 
@@ -119,7 +127,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
       sleep(1)
     end
     # keep solving
-    while true
+    while dashboard[:loopSolver]
       # add any newly solvables (atomic)
       while !isready(dashboard[:solvables])
         @show dashboard[:solvables].data
@@ -144,15 +152,20 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
       @info "Ensure all new variables initialized"
       ensureAllInitialized!(dfg)
 
-      # do actual solve
-      tree, smt, hist = solveTree!(dfg, tree)
-      "end of solve cycle" |> println
+      if 10 <= dashboard[:poseStride]
+        # do actual solve
+        dashboard[:poseStride] = 0
+        tree, smt, hist = solveTree!(dfg, tree)
+        "end of solve cycle" |> println
+      else
+        sleep(0.2)
+      end
     end
   end
 end
 
 
-function main()
+function main(;lcm=LCM())
 
   # data containers
   dashboard = Dict{Symbol,Any}()
@@ -167,11 +180,11 @@ function main()
   manageSolveTree!(fg, dashboard)
 
   # middleware handlers
-  lcm = LCM()
+
 
   # start with LBL and magnetometer
-  subscribe(lcm, "AUV_LBL_INTERPOLATED", (c,d)->lbl_hdlr(c,d,lblDict), pose_t)
-  subscribe(lcm, "AUV_MAGNETOMETER",     (c,d)->mag_hdlr(c,d,magDict), pose_t)
+  subscribe(lcm, "AUV_LBL_INTERPOLATED", (c,d)->lbl_hdlr(c,d,dashboard,lblDict), pose_t)
+  subscribe(lcm, "AUV_MAGNETOMETER",     (c,d)->mag_hdlr(c,d,dashboard,magDict), pose_t)
 
   @info "get a starting position and mag orientation"
   while length(lblDict) == 0 || length(magDict) == 0
@@ -181,6 +194,7 @@ function main()
   @show magKeys = keys(magDict) |> collect |> sort
   initPose = [lblDict[lblKeys[1]];magDict[magKeys[1]]]
   dashboard[:odoTime] = lblKeys[1]
+  startT = lblKeys[1]
 
   # add starting prior
   addFactor!(fg, [:x0;], PriorPose2(MvNormal(initPose,Matrix(Diagonal([0.1; 0.1; 0.1].^2)))), autoinit=false)
@@ -192,18 +206,36 @@ function main()
   # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
 
   # run handler
+  offsetT = now() - startT
+  @show doDelay = lcm isa LCMLog
   for i in 1:10000
       handle(lcm)
+      # slow down in case of using an LCMLog object
+      if doDelay
+        if now() < dashboard[:lastMsgTime]+offsetT
+          sleep(0.001)
+        end
+      end
   end
+  # close UDP listening on LCM
   close(lcm)
 
+  # close out solver
+  dashboard[:loopSolver] = false
+
+  # return last factor graph as built and solved
   return fg
 end
 
 
 
 ## Do the actual run
+# fg = main( lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) )
 fg = main()
+
+
+
+
 
 
 drawGraph(fg)
