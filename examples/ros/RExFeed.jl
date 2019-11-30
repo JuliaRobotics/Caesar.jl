@@ -29,9 +29,10 @@ using DocStringExtensions
 # /radar_pointcloud_0    9104 msgs    : sensor_msgs/PointCloud2
 # /velodyne_points      20518 msgs    : sensor_msgs/PointCloud2
 
-function handleGPS(msg, fg){
+# function handleGPS(msg, fg)
+# end
 
-}
+
 
 """
     $SIGNATURES
@@ -54,7 +55,8 @@ function handleLidar!(msg, fg)
     println("Adding variable ", var_id, " on new lidar scan")
     addVariable!(fg, var_id, Pose2)
     # NOTE testing only; we need to either serialize the whole message, or to repack the point cloud using our own schema
-    appendvertbigdata!(fg, var_id, "sensor_msgs/PointCloud2", msg)
+
+    appendvertbigdata!(fg, var_id, "ROS/sensor_msgs/PointCloud2", (msg))
 end
 
 
