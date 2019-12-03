@@ -43,7 +43,7 @@ ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 [compat]
 ApproxManifoldProducts = "≥ 0.0.3"
 CloudGraphs = "≥ 0.1.1"
-Combinatorics = "≥ 0.7"
+Combinatorics = "0.7, 1"
 CoordinateTransformations = "≥ 0.5"
 DataStructures = "≥ 0.15"
 DistributedFactorGraphs = "≥ 0.5"
