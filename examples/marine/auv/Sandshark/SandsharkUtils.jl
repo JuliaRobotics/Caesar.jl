@@ -174,4 +174,107 @@ function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw
   end
   return epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV
 end
+
+
+function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
+  addVariable!(dfg, :x0, Pose2)
+
+  # Pinger location is [17; 1.8]
+  addVariable!(dfg, :l1, Point2, solvable=0)
+  beaconprior = PriorPoint2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) )
+  addFactor!(dfg, [:l1], beaconprior, autoinit=true, solvable=0)
+
+  addVariable!(dfg, :deadreckon_0, Pose2, solvable=0)
+  drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
+  addFactor!(dfg, [:x0; :deadreckon_0], drec, solvable=0, autoinit=false)
+
+  # store current real time tether factor
+  dashboard[:rttMpp] = Dict{Symbol,MutablePose2Pose2Gaussian}(:x0 => drec)
+  dashboard[:rttCurrent] = (:x0, :deadreckon_0)
+  # standard odo process noise levels
+  dashboard[:Qc_odo] = Diagonal([0.01;0.01;0.01].^2) |> Matrix
+
+  dashboard[:odoTime] = unix2datetime(0)
+  dashboard[:poseRate] = Second(1)
+  dashboard[:lastPose] = :x0
+
+  dashboard[:solvables] = Channel{Vector{Symbol}}(100)
+
+  dashboard[:loopSolver] = true
+
+  dashboard[:poseStride] = 0
+  dashboard[:canTakePoses] = 1
+
+  dashboard[:rangesBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}(10)
+  dashboard[:RANGESTRIDE] = 1 # add a range measurement every 3rd pose
+  dashboard[:rangeCount] = 0
+
+  dashboard[:SNRfloor] = 0.6
+
+  nothing
+end
+
+
+function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
+
+  @info "logpath=$(getLogPath(dfg))"
+  getSolverParams(dfg).drawtree = true
+  getSolverParams(dfg).qfl = 20
+  getSolverParams(dfg).isfixedlag = true
+  getSolverParams(dfg).limitfixeddown = true
+
+  # allow async process
+  # getSolverParams(dfg).async = true
+
+  # prep with empty tree
+  tree = emptyBayesTree()
+
+  # needs to run asynchronously
+  @async begin
+    while @show length(ls(dfg, :x0, solvable=1)) == 0
+      "waiting for prior on x0" |> println
+      sleep(1)
+    end
+    # keep solving
+    while dashboard[:loopSolver]
+      # add any newly solvables (atomic)
+      while !isready(dashboard[:solvables]) && dashboard[:loopSolver]
+        @show dashboard[:solvables].data
+        sleep(0.5)
+      end
+
+      # adjust latest RTT after solve, latest solved
+      lastSolved = sortDFG(ls(dfg, r"x\d", solvable=1))[end]
+      dashboard[:rttCurrent] = (lastSolved, Symbol("deadreckon_"*string(lastSolved)[2:end]))
+
+      #add any new solvables
+      while isready(dashboard[:solvables]) && dashboard[:loopSolver]
+        @show tosolv = take!(dashboard[:solvables])
+        for sy in tosolv
+          # setSolvable!(dfg, sy, 1) # see DFG #221
+          # TODO temporary workaround
+          getfnc = occursin(r"f", string(sy)) ? getFactor : getVariable
+          getfnc(dfg, sy).solvable = 1
+        end
+      end
+
+      @info "Ensure all new variables initialized"
+      ensureAllInitialized!(dfg)
+
+      if 10 <= dashboard[:poseStride]
+        # do actual solve
+        dashboard[:canTakePoses] = 0
+        dashboard[:poseStride] = 0
+        tree, smt, hist = solveTree!(dfg, tree)
+        # unblock LCMLog reader for next STRIDE segment
+        dashboard[:canTakePoses] = 1
+        "end of solve cycle" |> println
+      else
+        sleep(0.2)
+      end
+    end
+  end
+end
+
+
 #
