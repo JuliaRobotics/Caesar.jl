@@ -8,25 +8,70 @@ using Caesar, RoME
 @everywhere using Caesar, RoME
 using LCMCore, BotCoreLCMTypes
 using Dates
+using DataStructures
 
-import RoME: nextPose
+# import RoME: nextPose
+
+# Precompile large swath of the solver functions
+warmUpSolverJIT()
+warmUpSolverJIT() # twice to ensure larger footprint for multiprocess
+
 
 
 ## middleware handler (callback) functions
 
 function lbl_hdlr(channel::String, msgdata::pose_t, dashboard::Dict, lblDict::Dict)
-  dashboard[:lastMsgTime] = unix2datetime(msgdata.utime*1e-6)
+  msgtime = unix2datetime(msgdata.utime*1e-6)
+  dashboard[:lastMsgTime] = msgtime
   lblDict[dashboard[:lastMsgTime]] = (msgdata.pos[1:2] |> deepcopy)
   nothing
 end
 
 function mag_hdlr(channel::String, msgdata::pose_t, dashboard::Dict, magDict::Dict)
-  dashboard[:lastMsgTime] = unix2datetime(msgdata.utime*1e-6)
+  msgtime = unix2datetime(msgdata.utime*1e-6)
+  dashboard[:lastMsgTime] = msgtime
   ea = TU.convert(Euler, Quaternion(msgdata.orientation[1],msgdata.orientation[2:4]) )
   magDict[dashboard[:lastMsgTime]] = ea.Y
   nothing
 end
 
+function range_hdlr(channel::String, msgdata::raw_t, dfg::AbstractDFG, dashboard::Dict)
+  msgtime = unix2datetime(msgdata.utime*1e-6)
+  dashboard[:lastMsgTime] = msgtime
+
+  # undo pattern used in GenOdo.jl
+  data = Array{Float64,2}(undef, 0,0)
+  dashboard[:rangeCount] += 1
+  if dashboard[:rangeCount] % dashboard[:RANGESTRIDE] == 0
+    data = reshape(reinterpret(Float64, msgdata.data), :, 2)
+    # Tuple of msgtime, data, ifadded
+    push!( dashboard[:rangesBuffer], (msgtime, data, Bool[false;]) )
+    dashboard[:rangeCount] = 0
+  end
+
+  ## should a range message be added to the factor graph?
+  # should be at least one
+  if 0 < length(dashboard[:rangesBuffer])
+    # check latest pose against all ranges in buffer
+    lastPose = getLastPoses(dfg, number=1)[1]
+    lastT = timestamp(getVariable(dfg, lastPose))
+    @show rangeTimes = map(x->dashboard[:rangesBuffer][x][1], 1:length(dashboard[:rangesBuffer]))
+    @show rangeMask = Bool.(abs.(rangeTimes .- lastT) .< Millisecond(100))
+    # @show sum(rangeMask), dashboard[:rangeCount]
+    # @assert 0 <= sum(rangeMask) <= 1
+    # check if already added, add and set flag
+    if 0 < sum(rangeMask) # length(dashboard[:rangesBuffer][rangeIdx])
+      rangeIdx = collect(1:length(dashboard[:rangesBuffer]))[rangeMask][1]
+      @assert typeof(dashboard[:rangesBuffer]) == CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}
+      if !dashboard[:rangesBuffer][rangeIdx][3][1]
+        bera =     Pose2Point2Range(AliasingScalarSampler(dashboard[:rangesBuffer][rangeIdx][2][:,1],dashboard[:rangesBuffer][rangeIdx  ][  2][:,2], SNRfloor=dashboard[:SNRfloor]))
+        addFactor!(dfg, [lastPose; :l1], bera, solvable=0, autoinit=false)
+        dashboard[:rangesBuffer][rangeIdx][3][1] = true
+      end
+    end
+  end
+  nothing
+end
 
 function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict)
   dashboard[:lastMsgTime] = unix2datetime(msgdata.utime*1e-6)
@@ -52,7 +97,9 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
                                                nPose,
                                                solvable=0,
                                                autoinit=false  )
-
+    #
+    # set timestamp to msg times
+    setTimestamp!(getVariable(dfg, nPose), odoT)
     # delete rtt unless used by real time prediction
     if dashboard[:lastPose] != dashboard[:rttCurrent][1]
       delete!(dashboard[:rttMpp], dashboard[:lastPose])
@@ -69,6 +116,8 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     dashboard[:rttMpp][nPose] = drec
     put!(dashboard[:solvables], [nPose; fctsym])
     dashboard[:poseStride] += 1
+    # separate check for LCMLog handling
+    dashboard[:doDelay] && 10 <= dashboard[:poseStride] ? (dashboard[:canTakePoses] = 0) : nothing
   end
 
   nothing
@@ -101,6 +150,13 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   dashboard[:loopSolver] = true
 
   dashboard[:poseStride] = 0
+  dashboard[:canTakePoses] = 1
+
+  dashboard[:rangesBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}(10)
+  dashboard[:RANGESTRIDE] = 1 # add a range measurement every 3rd pose
+  dashboard[:rangeCount] = 0
+
+  dashboard[:SNRfloor] = 0.6
 
   nothing
 end
@@ -129,7 +185,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
     # keep solving
     while dashboard[:loopSolver]
       # add any newly solvables (atomic)
-      while !isready(dashboard[:solvables])
+      while !isready(dashboard[:solvables]) && dashboard[:loopSolver]
         @show dashboard[:solvables].data
         sleep(0.5)
       end
@@ -139,7 +195,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
       dashboard[:rttCurrent] = (lastSolved, Symbol("deadreckon_"*string(lastSolved)[2:end]))
 
       #add any new solvables
-      while isready(dashboard[:solvables])
+      while isready(dashboard[:solvables]) && dashboard[:loopSolver]
         @show tosolv = take!(dashboard[:solvables])
         for sy in tosolv
           # setSolvable!(dfg, sy, 1) # see DFG #221
@@ -154,8 +210,11 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
 
       if 10 <= dashboard[:poseStride]
         # do actual solve
+        dashboard[:canTakePoses] = 0
         dashboard[:poseStride] = 0
         tree, smt, hist = solveTree!(dfg, tree)
+        # unblock LCMLog reader for next STRIDE segment
+        dashboard[:canTakePoses] = 1
         "end of solve cycle" |> println
       else
         sleep(0.2)
@@ -165,7 +224,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
 end
 
 
-function main(;lcm=LCM())
+function main(;lcm=LCM(), logSpeed::Float64=1.0)
 
   # data containers
   dashboard = Dict{Symbol,Any}()
@@ -180,7 +239,6 @@ function main(;lcm=LCM())
   manageSolveTree!(fg, dashboard)
 
   # middleware handlers
-
 
   # start with LBL and magnetometer
   subscribe(lcm, "AUV_LBL_INTERPOLATED", (c,d)->lbl_hdlr(c,d,dashboard,lblDict), pose_t)
@@ -202,18 +260,26 @@ function main(;lcm=LCM())
   @info "Start with the real-time tracking aspect..."
   subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard), pose_t)
   # subscribe(lcm, "AUV_ODOMETRY_GYROBIAS", (c,d)->pose_hdlr(c,d,fg,dashboard), pose_t)
-  # subscribe(lcm, "AUV_RANGE_CORRL",  callback, raw_t)
+  subscribe(lcm, "AUV_RANGE_CORRL",      (c,d)->range_hdlr(c,d,fg,dashboard), raw_t)
   # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
 
   # run handler
   offsetT = now() - startT
-  @show doDelay = lcm isa LCMLog
-  for i in 1:10000
+  dashboard[:doDelay] = lcm isa LCMLog
+  for i in 1:2000
       handle(lcm)
       # slow down in case of using an LCMLog object
-      if doDelay
-        if now() < dashboard[:lastMsgTime]+offsetT
-          sleep(0.001)
+      if dashboard[:doDelay]
+        while dashboard[:canTakePoses] == 0
+          @info "delay for solver to catch up with new poses"
+          sleep(0.5)
+        end
+        dt = (dashboard[:lastMsgTime]-startT)
+        nMsgT = startT + typeof(dt)(round(Int, dt.value/logSpeed))
+        # @show now() < (nMsgT + offsetT), now(), (nMsgT + offsetT)
+        while now() < (nMsgT + offsetT)
+          # @info "delay"
+          sleep(0.01)
         end
       end
   end
@@ -224,24 +290,39 @@ function main(;lcm=LCM())
   dashboard[:loopSolver] = false
 
   # return last factor graph as built and solved
-  return fg
+  return fg, dashboard
 end
 
 
 
 ## Do the actual run
-# fg = main( lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) )
-fg = main()
+fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) )
+# fg = main()
 
 
 
 
+timestamp(getVariable(fg, :x0))
+setTimestamp!(getVariable(fg, :x0), now())
+timestamp(getVariable(fg, :x0))
 
 
 drawGraph(fg)
 
+allvar = ls(fg, r"x\d") |> sortDFG
+hasfc = setdiff(union(map(s->ls(fg, s), ls(fg, :l1))...), [:l1]) |> sortDFG
+hasnots = setdiff(allvar, hasfc)
 
 
+dashboard[:rangesBuffer][1][1]
+rT = dashboard[:rangesBuffer][2][1]
+
+pT = timestamp(getVariable(fg, :x1))
+
+abs(rT - pT)
+
+
+0
 ## Debugging code below
 
 

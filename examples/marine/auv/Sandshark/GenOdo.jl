@@ -185,7 +185,10 @@ for idx in 1:length(odoT)
     rmsg.utime = round(Int64, epT*1e-3)
     @show msg.utime, rmsg.utime
     # range data
-    rmsg.data = reinterpret(UInt8, ppbrDict[epT].range.weights.values) |> collect
+    data = zeros(length(ppbrDict[epT].range.domain),2)
+    data[:,1] = ppbrDict[epT].range.domain
+    data[:,2] = ppbrDict[epT].range.weights.values
+    rmsg.data = reinterpret(UInt8, vec(reshape(data,:,1))) |> collect
     rmsg.length = length(rmsg.data)
     bytes = encode(rmsg)
     publish(lcm, "AUV_RANGE_CORRL",bytes)
