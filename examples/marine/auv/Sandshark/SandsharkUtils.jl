@@ -188,13 +188,13 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   beaconprior = PriorPoint2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) )
   addFactor!(dfg, [:l1], beaconprior, autoinit=true, solvable=0)
 
-  addVariable!(dfg, :deadreckon_0, Pose2, solvable=0)
+  addVariable!(dfg, :drt_0, Pose2, solvable=0)
   drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
-  addFactor!(dfg, [:x0; :deadreckon_0], drec, solvable=0, autoinit=false)
+  addFactor!(dfg, [:x0; :drt_0], drec, solvable=0, autoinit=false)
 
   # store current real time tether factor
   dashboard[:rttMpp] = Dict{Symbol,MutablePose2Pose2Gaussian}(:x0 => drec)
-  dashboard[:rttCurrent] = (:x0, :deadreckon_0)
+  dashboard[:rttCurrent] = (:x0, :drt_0)
   # standard odo process noise levels
   dashboard[:Qc_odo] = Diagonal([0.01;0.01;0.01].^2) |> Matrix
 
@@ -251,7 +251,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
 
       # adjust latest RTT after solve, latest solved
       lastSolved = sortDFG(ls(dfg, r"x\d", solvable=1))[end]
-      dashboard[:rttCurrent] = (lastSolved, Symbol("deadreckon_"*string(lastSolved)[2:end]))
+      dashboard[:rttCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
 
       #add any new solvables
       while isready(dashboard[:solvables]) && dashboard[:loopSolver]

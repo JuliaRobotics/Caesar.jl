@@ -104,7 +104,7 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     dashboard[:lastPose] = nPose
 
     # create new rtt on new variable
-    nRtt = Symbol(string("deadreckon_",string(nPose)[2:end]))
+    nRtt = Symbol(string("drt_",string(nPose)[2:end]))
     addVariable!(dfg, nRtt, Pose2, solvable=0)
     drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
     addFactor!(dfg, [nPose; nRtt], drec, solvable=0, autoinit=false)

@@ -128,7 +128,7 @@ plb = plotSandsharkFromDFG(fg)
 
 
 
-map(x->setSolvable!(fg, x, 1), setdiff(ls(fg), ls(fg, r"deadreckon_\d")))
+map(x->setSolvable!(fg, x, 1), setdiff(ls(fg), ls(fg, r"drt_\d")))
 
 map(x->setSolvable!(fg, x, 1 ), [lsf(fg, Pose2Pose2);
 lsf(fg, Pose2Point2Range);
