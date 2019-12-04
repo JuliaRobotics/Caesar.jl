@@ -209,10 +209,9 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   dashboard[:poseStride] = 0
   dashboard[:canTakePoses] = 1
 
-  dashboard[:RANGESTRIDE] = 1 # add a range measurement every 3rd pose
+  dashboard[:RANGESTRIDE] = 4 # add a range measurement every 3rd pose
   dashboard[:rangesBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}(dashboard[:RANGESTRIDE]+4)
   dashboard[:rangeCount] = 0
-  dashboard[:rangeClkOffset] = Millisecond(0)
 
   dashboard[:SNRfloor] = 0.6
 
@@ -270,7 +269,10 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
         # do actual solve
         dashboard[:canTakePoses] = 0
         dashboard[:poseStride] = 0
+        getLastPoses(dfg, r"x\d", number=1)
+        !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_before_$(getLastPoses(dfg, r"x\d", number=1))"))
         tree, smt, hist = solveTree!(dfg, tree)
+        !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(getLastPoses(dfg, r"x\d", number=1))")) 
         # unblock LCMLog reader for next STRIDE segment
         dashboard[:canTakePoses] = 1
         "end of solve cycle" |> println

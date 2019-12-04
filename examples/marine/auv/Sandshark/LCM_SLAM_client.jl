@@ -20,6 +20,7 @@ warmUpSolverJIT() # twice to ensure larger footprint for multiprocess
 # bring required utilities and handlers into context
 include(joinpath(@__DIR__, "MsgHandlers.jl"))
 include(joinpath(@__DIR__, "SandsharkUtils.jl"))
+include(joinpath(@__DIR__, "Plotting.jl"))
 
 
 function main(;lcm=LCM(), logSpeed::Float64=1.0)
@@ -95,7 +96,8 @@ end
 
 
 ## Do the actual run
-fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) )
+# fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) )
+fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
 # fg = main()
 
 
@@ -105,54 +107,107 @@ fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sand
 drawGraph(fg)
 
 
+# pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
+
+plb = plotSandsharkFromDFG(fg)
 
 
 
+map(x->setSolvable!(fg, x, 1), setdiff(ls(fg), ls(fg, r"deadreckon_\d")))
 
-##
+map(x->setSolvable!(fg, x, 1 ), [lsf(fg, Pose2Pose2);
+lsf(fg, Pose2Point2Range);
+lsfPriors(fg)])
 
-# get sorted pose timestamps
-posesym = ls(fg, r"x\d") |> sortDFG
-# get sorted factor timestamps
-sortF = union( (x->ls(fg,x)).(posesym)... )
-fctsym = intersect(sortF, lsf(fg, Pose2Point2Range))
+getLogPath(fg)
 
-vartim = posesym .|> x->(timestamp(getVariable(fg, x)),x)
-rantim = fctsym .|> x->(timestamp(getFactor(fg,x)),x)
+ensureAllInitialized!(fg)
 
-
-findClosestTimestamp(vartim, rantim)
+tree, smt, hist = solveTree!(fg)
 
 
+reportFactors(fg, Pose2Point2Range)
 
-## compare variable factor timestamp descrepencies
+0
 
-ppr = ls(fg, Pose2Point2Range)
+## whats the deal with ranges
 
-vs_fsA = map(x->(x,intersect(ls(fg, x),ppr)...), posesym)
-mask = length.(vs_fsA) .== 2
+d1 = dashboard[:rangesBuffer][1][2]
 
-vs_fs = vs_fsA[mask]
-
-map(x->timestamp(getVariable(fg, x[1]))-timestamp(getFactor(fg, x[2])), vs_fs)
-
-
-
-##
+Gadfly.plot(x=d1[:,1], y=d1[:,2], Geom.line)
+Gadfly.plot(y=d1[:,1], Geom.line)
+Gadfly.plot(y=d1[:,2], Geom.line)
 
 
+Gadfly.plot(x=d1[:][1:2:end], Geom.histogram)
+Gadfly.plot(x=d1[:][2:2:end], Geom.histogram)
+
+
+## test data transcription to log
+
+msgdata = dashboard[:lastRangeMsg]
+
+msgdata.utime*1000
+
+ppbrDict[ep].range.domain
+
+
+reinterpret(Float64, msgdata.data)
+
+rda = reshape(, :, 2)
+
+
+# mock recode
+
+rmsg = raw_t()
+
+epT = ep
+rdata = zeros(length(ppbrDict[epT].range.domain),2)
+rdata[:,1] = ppbrDict[epT].range.domain
+rdata[:,2] = ppbrDict[epT].range.weights.values
+rmsg.data = reinterpret(UInt8, vec(reshape(rdata,:,1))) |> collect
+rmsg.length = length(rmsg.data)
+bytes = encode(rmsg)
 
 
 
+## Temporary development code below
 
 
-
-# variables and ranges
-lastvars = getLastPoses(fg, filterLabel=r"x\d", number=dashboard[:RANGESTRIDE]+5) |> sortDFG
-rantim = dashboard[:rangesBuffer] |> y->map(x->(x[1], x[3][1]),y)
-vartim = map(x->(timestamp(getVariable(fg, x)), x), lastvars)
-
-findClosestTimestamp(vartim, rantim)
+# # get sorted pose timestamps
+# posesym = ls(fg, r"x\d") |> sortDFG
+# # get sorted factor timestamps
+# sortF = union( (x->ls(fg,x)).(posesym)... )
+# fctsym = intersect(sortF, lsf(fg, Pose2Point2Range))
+#
+# vartim = posesym .|> x->(timestamp(getVariable(fg, x)),x)
+# rantim = fctsym .|> x->(timestamp(getFactor(fg,x)),x)
+#
+#
+# findClosestTimestamp(vartim, rantim)
+#
+#
+#
+# ## compare variable factor timestamp descrepencies
+#
+# ppr = ls(fg, Pose2Point2Range)
+#
+# vs_fsA = map(x->(x,intersect(ls(fg, x),ppr)...), posesym)
+# mask = length.(vs_fsA) .== 2
+#
+# vs_fs = vs_fsA[mask]
+#
+# map(x->timestamp(getVariable(fg, x[1]))-timestamp(getFactor(fg, x[2])), vs_fs)
+#
+#
+#
+#
+# # variables and ranges
+# lastvars = getLastPoses(fg, filterLabel=r"x\d", number=dashboard[:RANGESTRIDE]+5) |> sortDFG
+# rantim = dashboard[:rangesBuffer] |> y->map(x->(x[1], x[3][1]),y)
+# vartim = map(x->(timestamp(getVariable(fg, x)), x), lastvars)
+#
+# findClosestTimestamp(vartim, rantim)
 
 
 

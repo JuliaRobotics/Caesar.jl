@@ -21,7 +21,7 @@ include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 odonoise = Matrix(Diagonal((20*[0.1;0.1;0.005]).^2))
 
-epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TSTART=50, TEND=1200, SNRfloor=0.001, STRIDE=1)
+epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TSTART=50, TEND=500, SNRfloor=0.001, STRIDE=1)
 
 # Build interpolators for x, y from LBL data
 itpl_lblx = LinearInterpolation(lblkeys, lblX)
@@ -149,7 +149,7 @@ rmsg = raw_t()
 ppbrIdx = 1
 startT = round(odoT[1]*1e-6)*1e-3 |> unix2datetime
 offsetT = now() - startT
-for idx in 1:length(odoT)
+@showprogress "lcm publish loop" for idx in 1:length(odoT)
   global ppbrIdx
   # get next timestamp to combine msgs
   msgstamp = round(odoT[idx]*1e-6)*1e-3 |> unix2datetime
