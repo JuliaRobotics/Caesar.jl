@@ -39,6 +39,10 @@ ROS integration is a priority for this project and will accompany the so-called 
 
 Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).
 
+### What is supersolve?
+
+When multiple numerical values/solutions exists for the (or nearly) same factor graph -- then solutions, including a reference solution (ground truth) can just be stacked in that variable.  See and comment on [a few cases here](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/182#issuecomment-545979307).
+
 ### Current Julia version, v1.2.x
 Caesar.jl and packages are currently [targeting Julia v1.2.x](https://julialang.org/downloads/) (4Q2019).
 
