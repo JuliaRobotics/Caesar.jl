@@ -10,6 +10,9 @@ using LCMCore, BotCoreLCMTypes
 using Dates
 using DataStructures
 
+# mute LCM broadcasting beyond this computer
+run(`$(ENV["HOME"])/mutelcm.sh`)
+
 
 # Precompile large swath of the solver functions
 warmUpSolverJIT()

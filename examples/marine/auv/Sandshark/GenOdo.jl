@@ -12,16 +12,19 @@ using DataFrames
 using ProgressMeter
 using DelimitedFiles
 
-## load the original data
+
+# mute LCM broadcasting beyond this computer
+run(`$(ENV["HOME"])/mutelcm.sh`)
 
 
+## load the original ascii data
 include(joinpath(@__DIR__,"Plotting.jl"))
 include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 
 odonoise = Matrix(Diagonal((20*[0.1;0.1;0.005]).^2))
 
-epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TSTART=50, TEND=500, SNRfloor=0.001, STRIDE=1)
+epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TSTART=50, TEND=1200, SNRfloor=0.001, STRIDE=1)
 
 # Build interpolators for x, y from LBL data
 itpl_lblx = LinearInterpolation(lblkeys, lblX)
@@ -151,6 +154,13 @@ startT = round(odoT[1]*1e-6)*1e-3 |> unix2datetime
 offsetT = now() - startT
 @showprogress "lcm publish loop" for idx in 1:length(odoT)
   global ppbrIdx
+
+  # reset msg values for next round of pubs
+  msg.rotation_rate = zeros(3)
+  msg.vel = zeros(3)
+  msg.accel = zeros(3)
+  msg.orientation = [1,0,0,0.0]
+
   # get next timestamp to combine msgs
   msgstamp = round(odoT[idx]*1e-6)*1e-3 |> unix2datetime
   msgstamp += offsetT
@@ -159,13 +169,18 @@ offsetT = now() - startT
   end
   msg.utime = round(Int,odoT[idx]*1e-3)
   msg.pos = DX[1:3,idx]
-  msg.orientation = [1,0,0,0.0]
   bytes = encode(msg)
   publish(lcm, "AUV_ODOMETRY",bytes)
   # odo with gyro bias
   msg.pos = DXgyro[1:3,idx]
   bytes = encode(msg)
   publish(lcm, "AUV_ODOMETRY_GYROBIAS",bytes)
+  # publish the gyro bias separately
+  msg.pos = zeros(3)
+  msg.rotation_rate = zeros(3)
+  msg.rotation_rate[3] = gyrobias[idx]
+  bytes = encode(msg)
+  publish(lcm, "AUV__GYROBIAS",bytes)
   # publish ground truth
   msg.pos = [rsmpLX[idx]; rsmpLY[idx]; 0.0]
   bytes = encode(msg)
