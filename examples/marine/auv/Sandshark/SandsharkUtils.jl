@@ -1,5 +1,9 @@
 # utility functions needed for sandshark
 
+using DelimitedFiles
+using Interpolations
+using ProgressMeter
+
 
 datadir = joinpath(ENV["HOME"],"data","sandshark","full_wombat_2018_07_09","extracted")
 matcheddir = joinpath(datadir, "matchedfilter", "particles")
@@ -205,9 +209,10 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   dashboard[:poseStride] = 0
   dashboard[:canTakePoses] = 1
 
-  dashboard[:rangesBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}(10)
   dashboard[:RANGESTRIDE] = 1 # add a range measurement every 3rd pose
+  dashboard[:rangesBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}(dashboard[:RANGESTRIDE]+4)
   dashboard[:rangeCount] = 0
+  dashboard[:rangeClkOffset] = Millisecond(0)
 
   dashboard[:SNRfloor] = 0.6
 

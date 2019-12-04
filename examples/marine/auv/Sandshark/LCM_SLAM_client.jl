@@ -10,6 +10,7 @@ using LCMCore, BotCoreLCMTypes
 using Dates
 using DataStructures
 
+
 # Precompile large swath of the solver functions
 warmUpSolverJIT()
 warmUpSolverJIT() # twice to ensure larger footprint for multiprocess
@@ -44,11 +45,13 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   while length(lblDict) == 0 || length(magDict) == 0
     handle(lcm)
   end
-  @show lblKeys = keys(lblDict) |> collect |> sort
-  @show magKeys = keys(magDict) |> collect |> sort
+  lblKeys = keys(lblDict) |> collect |> sort
+  magKeys = keys(magDict) |> collect |> sort
   initPose = [lblDict[lblKeys[1]];magDict[magKeys[1]]]
   dashboard[:odoTime] = lblKeys[1]
-  startT = lblKeys[1]
+  @show startT = lblKeys[1]
+
+  setTimestamp!(getVariable(fg, :x0), lblKeys[1])
 
   # add starting prior
   addFactor!(fg, [:x0;], PriorPose2(MvNormal(initPose,Matrix(Diagonal([0.1; 0.1; 0.1].^2)))), autoinit=false)
@@ -62,7 +65,7 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   # run handler
   offsetT = now() - startT
   dashboard[:doDelay] = lcm isa LCMLog
-  for i in 1:2000
+  for i in 1:10000
       handle(lcm)
       # slow down in case of using an LCMLog object
       if dashboard[:doDelay]
@@ -98,28 +101,66 @@ fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sand
 
 
 
-timestamp(getVariable(fg, :x0))
-setTimestamp!(getVariable(fg, :x0), now())
-timestamp(getVariable(fg, :x0))
-
 
 drawGraph(fg)
 
-allvar = ls(fg, r"x\d") |> sortDFG
-hasfc = setdiff(union(map(s->ls(fg, s), ls(fg, :l1))...), [:l1]) |> sortDFG
-hasnots = setdiff(allvar, hasfc)
 
 
-dashboard[:rangesBuffer][1][1]
-rT = dashboard[:rangesBuffer][2][1]
-
-pT = timestamp(getVariable(fg, :x1))
-
-abs(rT - pT)
 
 
-0
+
+##
+
+# get sorted pose timestamps
+posesym = ls(fg, r"x\d") |> sortDFG
+# get sorted factor timestamps
+sortF = union( (x->ls(fg,x)).(posesym)... )
+fctsym = intersect(sortF, lsf(fg, Pose2Point2Range))
+
+vartim = posesym .|> x->(timestamp(getVariable(fg, x)),x)
+rantim = fctsym .|> x->(timestamp(getFactor(fg,x)),x)
+
+
+findClosestTimestamp(vartim, rantim)
+
+
+
+## compare variable factor timestamp descrepencies
+
+ppr = ls(fg, Pose2Point2Range)
+
+vs_fsA = map(x->(x,intersect(ls(fg, x),ppr)...), posesym)
+mask = length.(vs_fsA) .== 2
+
+vs_fs = vs_fsA[mask]
+
+map(x->timestamp(getVariable(fg, x[1]))-timestamp(getFactor(fg, x[2])), vs_fs)
+
+
+
+##
+
+
+
+
+
+
+
+
+# variables and ranges
+lastvars = getLastPoses(fg, filterLabel=r"x\d", number=dashboard[:RANGESTRIDE]+5) |> sortDFG
+rantim = dashboard[:rangesBuffer] |> y->map(x->(x[1], x[3][1]),y)
+vartim = map(x->(timestamp(getVariable(fg, x)), x), lastvars)
+
+findClosestTimestamp(vartim, rantim)
+
+
+
+# dashboard[:rangeClkOffset]
+
+
 ## Debugging code below
+
 
 
 

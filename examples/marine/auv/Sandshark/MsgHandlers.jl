@@ -18,11 +18,12 @@ function mag_hdlr(channel::String, msgdata::pose_t, dashboard::Dict, magDict::Di
   nothing
 end
 
+
 function range_hdlr(channel::String, msgdata::raw_t, dfg::AbstractDFG, dashboard::Dict)
   msgtime = unix2datetime(msgdata.utime*1e-6)
   dashboard[:lastMsgTime] = msgtime
 
-  # undo pattern used in GenOdo.jl
+  # add msg to buffer based on RANGESTRIDE
   data = Array{Float64,2}(undef, 0,0)
   dashboard[:rangeCount] += 1
   if dashboard[:rangeCount] % dashboard[:RANGESTRIDE] == 0
@@ -35,21 +36,32 @@ function range_hdlr(channel::String, msgdata::raw_t, dfg::AbstractDFG, dashboard
   ## should a range message be added to the factor graph?
   # should be at least one
   if 0 < length(dashboard[:rangesBuffer])
+      lastPose = getLastPoses(dfg, number=1)[1]
+      lastT = timestamp(getVariable(dfg, lastPose))
+    # TODO use findClosestTimestamp instead
+    rantim = map(x->(dashboard[:rangesBuffer][x][1],dashboard[:rangesBuffer][x][3][1]), 1:length(dashboard[:rangesBuffer]))
+    @show ind, mdt, corrs = findClosestTimestamp([(lastT, lastPose);], rantim)
+    # there should be only one correspondence
+    @assert corrs <= 1
     # check latest pose against all ranges in buffer
-    lastPose = getLastPoses(dfg, number=1)[1]
-    lastT = timestamp(getVariable(dfg, lastPose))
-    @show rangeTimes = map(x->dashboard[:rangesBuffer][x][1], 1:length(dashboard[:rangesBuffer]))
-    @show rangeMask = Bool.(abs.(rangeTimes .- lastT) .< Millisecond(100))
-    # @show sum(rangeMask), dashboard[:rangeCount]
-    # @assert 0 <= sum(rangeMask) <= 1
+    # @show rangeTimes = map(x->dashboard[:rangesBuffer][x][1], 1:length(dashboard[:rangesBuffer]))
+    # @show rangeMask = Bool.(abs.(rangeTimes .- lastT).-dashboard[:rangeClkOffset] .< Millisecond(100))
     # check if already added, add and set flag
-    if 0 < sum(rangeMask) # length(dashboard[:rangesBuffer][rangeIdx])
-      rangeIdx = collect(1:length(dashboard[:rangesBuffer]))[rangeMask][1]
-      @assert typeof(dashboard[:rangesBuffer]) == CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}
+    if corrs == 1 && mdt < Millisecond(100)
+    # if 0 < sum(rangeMask)
+      rangeIdx = ind[2]
+      # rangeIdx = collect(1:length(dashboard[:rangesBuffer]))[rangeMask][1]
+      # @assert typeof(dashboard[:rangesBuffer]) == CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}
       if !dashboard[:rangesBuffer][rangeIdx][3][1]
-        bera =     Pose2Point2Range(AliasingScalarSampler(dashboard[:rangesBuffer][rangeIdx][2][:,1],dashboard[:rangesBuffer][rangeIdx  ][  2][:,2], SNRfloor=dashboard[:SNRfloor]))
+        bera = Pose2Point2Range(AliasingScalarSampler(dashboard[:rangesBuffer][rangeIdx][2][:,1],dashboard[:rangesBuffer][rangeIdx][2][:,2], SNRfloor=dashboard[:SNRfloor]))
         addFactor!(dfg, [lastPose; :l1], bera, solvable=0, autoinit=false)
+        setTimestamp!(getFactor(dfg, lastPose*"l1f1"), msgtime)
         dashboard[:rangesBuffer][rangeIdx][3][1] = true
+        #update offset
+        @show deltaClk = lastT - dashboard[:rangesBuffer][rangeIdx][1]
+        # check that ranges are not lost owing to clock drift
+        @assert abs(deltaClk) < Millisecond(100)
+        # @show dashboard[:rangeClkOffset] = deltaClk
       end
     end
   end
@@ -65,7 +77,7 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
 
   # check if a new pose and factor must be added?
   odoT = unix2datetime(msgdata.utime*1e-6)
-  if (dashboard[:odoTime] + dashboard[:poseRate]) < odoT
+  if (dashboard[:odoTime] + dashboard[:poseRate]) <= odoT
     @info "pose_hdlr, adding new pose at $odoT"
     # update odo time
     dashboard[:odoTime] = odoT
