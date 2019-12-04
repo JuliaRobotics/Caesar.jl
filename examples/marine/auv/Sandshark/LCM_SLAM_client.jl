@@ -38,7 +38,7 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   initializeAUV_noprior(fg, dashboard)
 
   # prepare the solver in the background
-  manageSolveTree!(fg, dashboard)
+  manageSolveTree!(fg, dashboard, dbg=true)
 
   # middleware handlers
   # start with LBL and magnetometer
@@ -67,18 +67,25 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
 
   # run handler
+  holdTimeRTS = now()
   offsetT = now() - startT
   dashboard[:doDelay] = lcm isa LCMLog
-  for i in 1:10000
+  for i in 1:5000
       handle(lcm)
       # slow down in case of using an LCMLog object
       if dashboard[:doDelay]
+        # might be delaying the solver -- ie real time slack grows above zero
+        holdTimeRTS = now()
         while dashboard[:canTakePoses] == 0
-          @info "delay for solver to catch up with new poses"
+          @info "delay for solver to catch up with new poses, dashboard[:realTimeSlack]=$(dashboard[:realTimeSlack])"
           sleep(0.5)
         end
+        # real time slack update -- this is the compute overrun
+        dashboard[:realTimeSlack] += now()-holdTimeRTS
+
         dt = (dashboard[:lastMsgTime]-startT)
-        nMsgT = startT + typeof(dt)(round(Int, dt.value/logSpeed))
+        # TODO add real-time-slack time
+        nMsgT = startT + typeof(dt)(round(Int, dt.value/logSpeed)) + dashboard[:realTimeSlack]
         # @show now() < (nMsgT + offsetT), now(), (nMsgT + offsetT)
         while now() < (nMsgT + offsetT)
           # @info "delay"
@@ -98,13 +105,18 @@ end
 
 
 
-## Do the actual run
-# fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) )
-fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
+## Do the actual run -- on traffic
 # fg = main()
 
+## from file
+
+# fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) )
+fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
+# fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")) )
 
 
+
+##
 
 
 drawGraph(fg)
@@ -126,6 +138,7 @@ getLogPath(fg)
 
 ensureAllInitialized!(fg)
 
+getSolverParams(fg).async = true
 tree, smt, hist = solveTree!(fg)
 
 

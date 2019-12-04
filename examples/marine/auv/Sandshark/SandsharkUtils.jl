@@ -215,11 +215,13 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
 
   dashboard[:SNRfloor] = 0.6
 
+  dashboard[:realTimeSlack] = Millisecond(0)
+
   nothing
 end
 
 
-function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
+function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
 
   @info "logpath=$(getLogPath(dfg))"
   getSolverParams(dfg).drawtree = true
@@ -243,7 +245,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
     while dashboard[:loopSolver]
       # add any newly solvables (atomic)
       while !isready(dashboard[:solvables]) && dashboard[:loopSolver]
-        @show dashboard[:solvables].data
+        # @show dashboard[:solvables].data
         sleep(0.5)
       end
 
@@ -253,7 +255,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
 
       #add any new solvables
       while isready(dashboard[:solvables]) && dashboard[:loopSolver]
-        @show tosolv = take!(dashboard[:solvables])
+        tosolv = take!(dashboard[:solvables])
         for sy in tosolv
           # setSolvable!(dfg, sy, 1) # see DFG #221
           # TODO temporary workaround
@@ -265,14 +267,15 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict)
       @info "Ensure all new variables initialized"
       ensureAllInitialized!(dfg)
 
+      # solve only every 10th pose
       if 10 <= dashboard[:poseStride]
         # do actual solve
         dashboard[:canTakePoses] = 0
         dashboard[:poseStride] = 0
-        getLastPoses(dfg, r"x\d", number=1)
-        !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_before_$(getLastPoses(dfg, r"x\d", number=1))"))
+        lasp = getLastPoses(dfg, filterLabel=r"x\d", number=1)[1]
+        !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_before_$(lasp)"))
         tree, smt, hist = solveTree!(dfg, tree)
-        !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(getLastPoses(dfg, r"x\d", number=1))")) 
+        !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(lasp)"))
         # unblock LCMLog reader for next STRIDE segment
         dashboard[:canTakePoses] = 1
         "end of solve cycle" |> println

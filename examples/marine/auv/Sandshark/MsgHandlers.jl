@@ -22,6 +22,7 @@ end
 function range_hdlr(channel::String, msgdata::raw_t, dfg::AbstractDFG, dashboard::Dict)
   msgtime = unix2datetime(msgdata.utime*1e-6)
   dashboard[:lastMsgTime] = msgtime
+  # at some point there was a bug where range data was not in lcmlog as expected -- it was not understood, hence the assert
   @assert msgdata.length >= 130000
 
   # add msg to buffer based on RANGESTRIDE

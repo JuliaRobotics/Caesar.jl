@@ -177,8 +177,7 @@ offsetT = now() - startT
   publish(lcm, "AUV_ODOMETRY_GYROBIAS",bytes)
   # publish the gyro bias separately
   msg.pos = zeros(3)
-  msg.rotation_rate = zeros(3)
-  msg.rotation_rate[3] = gyrobias[idx]
+  msg.rotation_rate = [0;0;gyrobias[idx]]
   bytes = encode(msg)
   publish(lcm, "AUV__GYROBIAS",bytes)
   # publish ground truth
@@ -198,7 +197,7 @@ offsetT = now() - startT
   # @show msgstamp - (rmsgstamp + offsetT)
   if (rmsgstamp + offsetT) <= msgstamp
     rmsg.utime = round(Int64, epT*1e-3)
-    @show msg.utime, rmsg.utime
+    # @show msg.utime, rmsg.utime
     # range data
     data = zeros(length(ppbrDict[epT].range.domain),2)
     data[:,1] = ppbrDict[epT].range.domain
