@@ -138,7 +138,7 @@ lpn = wtv .|> x->parse(Int, string(x)[2:end])
 
 Gadfly.set_default_plot_size(45cm,25cm)
 
-Gadfly.plot(
+pl = Gadfly.plot(
   Gadfly.layer(x=ttt,y=(wth .|> Int)*0.333, Geom.line),
   Gadfly.layer(x=ttt,y=(wts .|> Int)*0.5.+1, Geom.line, Theme(default_color=colorant"red")),
   Gadfly.layer(x=ttt,y=(lpn.%10)*0.1.-1, Geom.line, Theme(default_color=colorant"magenta")),
@@ -146,8 +146,11 @@ Gadfly.plot(
   Gadfly.layer(x=ttt,y=wttn.-2, Geom.line, Theme(default_color=colorant"green")),
 )
 
-Gadfly.plot(y=wtt, Geom.line)
-Gadfly.plot(y=wttn, Geom.line)
+# Gadfly.plot(y=wtt, Geom.line)
+# Gadfly.plot(y=wttn, Geom.line)
+
+# pl |> PDF(joinpath(ENV["HOME"],"Downloads","test.pdf"))
+# pl |> PNG(joinpath(ENV["HOME"],"Downloads","test.png"))
 
 ##
 
