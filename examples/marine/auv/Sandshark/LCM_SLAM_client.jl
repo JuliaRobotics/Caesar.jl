@@ -158,6 +158,11 @@ pl = Gadfly.plot(
 drawGraph(fg)
 
 
+ts = getVariable(fg, :x74) |> timestamp
+
+findVariableNearTimestamp(fg, ts, r"x\d")
+
+
 # pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
 
 plb = plotSandsharkFromDFG(fg)
