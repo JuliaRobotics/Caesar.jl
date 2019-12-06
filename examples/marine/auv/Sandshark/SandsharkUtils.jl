@@ -5,6 +5,9 @@ using Interpolations
 using ProgressMeter
 
 
+@enum SolverStateMachine SSMReady SSMSolving SSMConsumingSolvables
+
+
 datadir = joinpath(ENV["HOME"],"data","sandshark","full_wombat_2018_07_09","extracted")
 matcheddir = joinpath(datadir, "matchedfilter", "particles")
 beamdir = joinpath(datadir, "beamformer", "particles")
@@ -207,7 +210,8 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   dashboard[:loopSolver] = true
 
   dashboard[:poseStride] = 0
-  dashboard[:canTakePoses] = 1
+  dashboard[:canTakePoses] = HSMReady
+  dashboard[:solveInProgress] = SSMReady
 
   dashboard[:RANGESTRIDE] = 4 # add a range measurement every 3rd pose
   dashboard[:rangesBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}(dashboard[:RANGESTRIDE]+4)
@@ -254,6 +258,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       dashboard[:rttCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
 
       #add any new solvables
+      dashboard[:solveInProgress] = SSMConsumingSolvables
       while isready(dashboard[:solvables]) && dashboard[:loopSolver]
         tosolv = take!(dashboard[:solvables])
         for sy in tosolv
@@ -270,14 +275,21 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       # solve only every 10th pose
       if 10 <= dashboard[:poseStride]
         # do actual solve
-        dashboard[:canTakePoses] = 0
-        dashboard[:poseStride] = 0
+        # dashboard[:canTakePoses] = 0
+        dashboard[:solveInProgress] = SSMSolving
+        # dashboard[:poseStride] = 0
         lasp = getLastPoses(dfg, filterLabel=r"x\d", number=1)[1]
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_before_$(lasp)"))
         tree, smt, hist = solveTree!(dfg, tree)
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(lasp)"))
         # unblock LCMLog reader for next STRIDE segment
-        dashboard[:canTakePoses] = 1
+        dashboard[:solveInProgress] = SSMReady
+        # de-escalate handler state machine
+        if dashboard[:canTakePoses] == HSMBlocking
+          dashboard[:canTakePoses] = HSMOverlapHandling
+        elseif dashboard[:canTakePoses] == HSMOverlapHandling
+          dashboard[:canTakePoses] = HSMHandling
+        end
         "end of solve cycle" |> println
       else
         sleep(0.2)

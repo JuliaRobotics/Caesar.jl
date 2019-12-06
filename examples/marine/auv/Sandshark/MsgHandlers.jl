@@ -78,12 +78,13 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
   # check if a new pose and factor must be added?
   odoT = unix2datetime(msgdata.utime*1e-6)
   if (dashboard[:odoTime] + dashboard[:poseRate]) <= odoT
-    @info "pose_hdlr, adding new pose at $odoT"
     # update odo time
     dashboard[:odoTime] = odoT
 
     # get factor to next pose
     nPose = nextPose(dashboard[:lastPose])
+    @info "pose_hdlr, adding new pose $nPose, at $odoT"
+
     rttLast = dashboard[:rttMpp][dashboard[:lastPose]]
     # add new variable and factor to the graph
     fctsym = duplicateToStandardFactorVariable(Pose2Pose2,
@@ -112,7 +113,15 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     put!(dashboard[:solvables], [nPose; fctsym])
     dashboard[:poseStride] += 1
     # separate check for LCMLog handling
-    dashboard[:doDelay] && 10 <= dashboard[:poseStride] ? (dashboard[:canTakePoses] = 0) : nothing
+    if dashboard[:doDelay] && 10 <= dashboard[:poseStride]
+      # how far to escalate -- :canTakePoses should be cleared by solver in manageSolveTree()
+      if dashboard[:canTakePoses] == HSMHandling
+        dashboard[:canTakePoses] = HSMOverlapHandling
+        dashboard[:poseStride] = 0
+      elseif dashboard[:canTakePoses] == HSMOverlapHandling
+        dashboard[:canTakePoses] = HSMBlocking
+      end
+    end
   end
 
   nothing

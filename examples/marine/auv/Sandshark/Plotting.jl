@@ -1,4 +1,5 @@
 
+using ProgressMeter
 using Gadfly, Fontconfig, Cairo
 using RoMEPlotting
 Gadfly.set_default_plot_size(35cm,25cm)
