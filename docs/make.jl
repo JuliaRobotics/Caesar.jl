@@ -45,6 +45,7 @@ makedocs(
             "Filters vs. Graphs" => "principles/filterCorrespondence.md",
             "Bayes (Junction) tree" => "principles/bayestreePrinciples.md",
             "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
+            "Advanced Bayes Tree Topics" => "principles/initializingOnBayesTree.md",
         ],
         "How to Expand?" => [
             "Custom Variables and Factors" => "concepts/adding_variables_factors.md",
