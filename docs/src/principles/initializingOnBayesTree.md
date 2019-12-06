@@ -44,7 +44,7 @@ In general, if a clique can not be initialized based on information from lower d
 
 !!! note
 
-    Cascading up and down solves are required if you do not use eliminated factor conditionals in parent cliques.
+    Question, are cascading up and down solves are required if you do not use eliminated factor conditionals in parent cliques.
 
 
 ### Gaussian-only special case
@@ -60,4 +60,4 @@ See node x1 to x3 in IncrementalInference issue 464. It does not branch or provi
 
 !!! note
 
-    What does the Jacobian in Gaussian only case mean with regard to a symbolic upsolve?
+    Question, what does the Jacobian in Gaussian only case mean with regard to a symbolic upsolve?
