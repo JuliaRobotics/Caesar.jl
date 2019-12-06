@@ -11,6 +11,13 @@ p(x,y,z) = p(x|y,z)p(y,z) = p(x,y|z)p(z) = p(x|y,z)p(y|z)p(z) \\
 p(x,y,z) = p(x|y,z)p(y)p(z) \, \text{iff y is independent of z,} \, also p(y|z)=p(y)
 ```
 
+## Are cliques in the Bayes (Junction) tree densly connected?
+
+Yes and no. From the chordal Bayes net's perspective (obtained through the elimination game in order to build the clique tree), the nodes of the Bayes tree are indeed fully connected subgraphs (they are called cliques after all!). From the perspective of the subgraph of the original factor graph induced by the clique's variables, cliques need not be fully connected, since we are assuming the factor graph as sparse, and that no new information can be created out of nothing---hence each clique must be sparse.  That said, the potential exists for the inference within a clique to become densly connected (experience full "fill-in").  See the paper on square-root-SAM, where the connection between dense covariance matrix of a Kalman filter (EKF-SLAM) is actually related to the inverse square root (rectangular) matrix which structure equivalent to the clique subgraph adjacency matrix.  
+
+Also remember that the intermediate Bayes net (which has densly connected cliques) hides the underlying tree structure -- think of the Bayes net as looking at the tree from on top or below, thereby encoding the dense connectivity in the structure of the tree itself.  All information below any clique of the tree is encoded in the upward marginal belief messages at that point (i.e. the densly connected aspects pertained lower down in the tree).
+
+
 ## LU/QR vs. Belief Propagation
 
 LU/QR is a special case (Parametric/Linear) of more general belief propagation.  The story though is more intricate, where QR/LU assume that product-factors can be formed through the chain rule -- using congruency -- it is not that straight forward with general beliefs.  In the general case we are almost forced to use belief propagation, which in turn implies special care is needed to describe the relationship between sparse factor graph fragments in cliques on the tree, and the more densely connected structure of the Bayes Net.
