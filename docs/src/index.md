@@ -11,15 +11,6 @@ Caesar is a modern robotic framework for localization and mapping, reducing the 
 
 This project focuses on the open development and progression to a public, stable, growing and usable inference library suited to various data-fusion / state-estimation aspects of robot and/or device navigation.
 
-!!! note
-
-    Please help improve this documentation--if something confuses you, chances
-    are you're not alone. It's easy to do as you read along: just click on the
-    "Edit on GitHub" link above, and then
-    [edit the files directly in your browser](https://help.github.com/articles/editing-files-in-another-user-s-repository/).
-    Your changes will be vetted by developers before becoming permanent, so don't
-    worry about whether you might say something wrong.
-
 ## The Caesar Framework
 
 ### Caesar
@@ -48,26 +39,22 @@ The Caesar framework is not limited to direct Julia use.  See the [multi-languag
 
 ## A Few Highlights
 
-> **Work In Progress**: (must be updated, 2019Q1)
+> **Updates to this list coming soon**
 
 The Caesar framework has the following features:
-* Factor-graph representation of pose and sensor data
+* Distributed Factor Graph representation of pose and sensor data
 * Localization using [Multi-modal iSAM](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/#Related-Literature-1)
   * Multi-core inference supporting `Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc`
 * Multi-modal and non-parametric representation of constraints
   * Gaussian distributions are but one of the many representations of measurement error
   * Simple, extensible framework for creation of new factor types
 * Multi-hypothesis representation in the factor-graph
-* Local in-memory solving on the device as well as database-driven centralized solving
+* Local in-memory solving on the device as well as database-driven centralized solving (micro-service architecture).
 * Fixed-lag, continuous operation as well as off-line batch solving
 
 ## Origins in Fundamental Research
 
-See related works on [the literature page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).
-
-## Future Directions
-
-Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion.
+See related works on [the literature page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion -- also consult the Caesar.jl Slack channel to follow/engage with community discussions.
 
 ## Next Steps
 For installation steps, examples/tutorials, and concepts please refer to the following pages:
@@ -82,17 +69,19 @@ Pages = [
 Depth = 3
 ```
 
-## Future
-This package is a work in progress. Please file issues here as needed to help resolve problems for everyone! We are tracking improvements and new endeavors in the Issues section of this repository.
+!!! note
 
-In the future, Caesar will likely interact more closely with repos such as:
-* [SensorFeatureTracking.jl](http://www.github.com/JuliaRobotics/SensorFeatureTracking.jl)
-* [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl)
-* [RecursiveFiltering.jl](http://www.github.com/JuliaRobotics/RecursiveFiltering.jl)
+    Please help improve this documentation--if something confuses you, chances
+    are you're not alone. It's easy to do as you read along: just click on the
+    "Edit on GitHub" link above, and then
+    [edit the files directly in your browser](https://help.github.com/articles/editing-files-in-another-user-s-repository/).
+    Your changes will be vetted by developers before becoming permanent, so don't
+    worry about whether you might say something wrong.
+
+Please file issues here as needed to help resolve problems for everyone! We are tracking improvements and new endeavors on [the Issues page](https://github.com/JuliaRobotics/Caesar.jl/issues) of this repository -- issues frequently are moved upstream into each of the indivisual library packages, while Caesar.jl frequently acts as a catchall to help get problems resolved.
 
 ## JuliaRobotics Code of Conduct
 The Caesar repository is part of the JuliaRobotics organization and adheres to the JuliaRobotics [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
-
 
 ## Contributors
 
@@ -102,7 +91,7 @@ Consider citing our work:
 
 ```
 @misc{caesarjl,
-  author = "Contributors",
+  author = "Contributors and Packages",
   title =  "Caesar.jl",
   year =   2019,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
