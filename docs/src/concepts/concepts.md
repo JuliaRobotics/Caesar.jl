@@ -28,7 +28,7 @@ or
 P(\Theta, Z) = P(\Theta | Z) P(Z).
 ```
 
-You'll notice the first looks like "Bayes rule" and we take `` P(MEAS) `` as a constant (the uncorrelated assumption).
+You'll notice the first looks like "Bayes rule" and we take `` P(Z) `` as a constant (the uncorrelated assumption).
 
 # Why/Where does non-Gaussian data come from?
 
