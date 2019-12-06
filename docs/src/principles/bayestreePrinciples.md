@@ -4,8 +4,7 @@ This page describes how to visualize, study, test, and compare Bayes (Junction) 
 
 ## Why a Bayes (Juntion) tree
 
-The tree is algebraicly equivalent---but acyclic---structure to the factor graph.  Inference is easier on on acyclic graphs.  
-We can also exploit Smart Message Passing benefits (known from the full conditional independence structure encoded in the tree), since the tree represents the "complete form" when marginalizing each variable one at a time (also known as elimination game, marginalization, also related to smart factors).  In loose terms, the Bayes (Junction) tree has implicit access to all Schur complements (if it parametric and linearized) of each variable to all others.
+The tree is algebraicly equivalent---but acyclic---structure to the factor graph:  i.) Inference is easier on on acyclic graphs; ii.) We can exploit Smart Message Passing benefits (known from the full conditional independence structure encoded in the tree), since the tree represents the "complete form" when marginalizing each variable one at a time (also known as elimination game, marginalization, also related to smart factors).  In loose terms, the Bayes (Junction) tree has implicit access to all Schur complements (if it parametric and linearized) of each variable to all others.  Please see [this page more information regarding advanced topics on the Bayes tree](https://www.juliarobotics.org/Caesar.jl/latest/principles/initializingOnBayesTree/).
 
 ## What is a Bayes (Junction) tree
 
@@ -65,7 +64,11 @@ generateTexTree(tree)
 ```
 An example Bayes (Junction) tree representation obtained through `generateTexTree(tree)` for the sample factor graph shown above can be seen in the following image.
 
-![add the fg2net2tree outline](https://user-images.githubusercontent.com/27132241/69210722-9e0c0380-0b53-11ea-9462-7964844b89b1.png)
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/27132241/69210722-9e0c0380-0b53-11ea-9462-7964844b89b1.png" width="200" border="0" />
+</p>
+```
 
 ### Visualizing Clique Adjacency Matrix
 
@@ -139,7 +142,19 @@ getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 ```
 
-#### Bayes Tree Legend (from IIF)
+## Clique State Machine
+
+The mmisam solver is based on a state machine design to handle the inter and intra clique operations during a variety of situations.  Use of the clique state machine (CSM) makes debugging, development, verification, and modification of the algorithm real easy.  Contact us for any support regarding modifications to the default algorithm.  For pre-docs on working with CSM, please see [IIF #443](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/443).
+
+### STATUS of a Clique
+
+CSM currently uses the following statusses for each of the cliques during the inference process.
+
+```julia
+[:initialized;:upsolved;:marginalized;:downsolved;:uprecycled]
+```
+
+### Bayes Tree Legend (from IIF)
 
 The color legend is currently recorded in an [issue thread here](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/349).
 
@@ -154,21 +169,3 @@ The color legend is currently recorded in an [issue thread here](https://github.
 * Light blue -- completed downsolve,
 * Blue -- fully marginalized clique that will not be updated during upsolve (maybe downsolved),
 * Orange -- recycled clique upsolve solution from previous tree passed into solveTree!
-
-### Are cliques in the Bayes (Junction) tree densly connected?
-
-Yes and no. From the chordal Bayes net's perspective (obtained through the elimination game in order to build the clique tree), the nodes of the Bayes tree are indeed fully connected subgraphs (they are called cliques after all!). From the perspective of the subgraph of the original factor graph induced by the clique's variables, cliques need not be fully connected, since we are assuming the factor graph as sparse, and that no new information can be created out of nothing---hence each clique must be sparse.  That said, the potential exists for the inference within a clique to become densly connected (experience full "fill-in").  See the paper on square-root-SAM, where the connection between dense covariance matrix of a Kalman filter (EKF-SLAM) is actually related to the inverse square root (rectangular) matrix which structure equivalent to the clique subgraph adjacency matrix.  
-
-Also remember that the intermediate Bayes net (which has densly connected cliques) hides the underlying tree structure -- think of the Bayes net as looking at the tree from on top or below, thereby encoding the dense connectivity in the structure of the tree itself.  All information below any clique of the tree is encoded in the upward marginal belief messages at that point (i.e. the densly connected aspects pertained lower down in the tree).
-
-### Clique State Machine
-
-The mmisam solver is based on a state machine design to handle the inter and intra clique operations during a variety of situations.  Use of the clique state machine (CSM) makes debugging, development, verification, and modification of the algorithm real easy.  Contact us for any support regarding modifications to the default algorithm.  For pre-docs on working with CSM, please see [IIF #443](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/443).
-
-#### STATUS of a Clique
-
-CSM currently uses the following statusses for each of the cliques during the inference process.
-
-```julia
-[:initialized;:upsolved;:marginalized;:downsolved;:uprecycled]
-```
