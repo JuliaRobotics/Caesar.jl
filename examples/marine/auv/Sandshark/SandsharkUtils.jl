@@ -5,7 +5,7 @@ using Interpolations
 using ProgressMeter
 
 
-@enum SolverStateMachine SSMReady SSMSolving SSMConsumingSolvables
+@enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
 
 
 datadir = joinpath(ENV["HOME"],"data","sandshark","full_wombat_2018_07_09","extracted")
@@ -258,8 +258,8 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       dashboard[:rttCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
 
       #add any new solvables
-      dashboard[:solveInProgress] = SSMConsumingSolvables
       while isready(dashboard[:solvables]) && dashboard[:loopSolver]
+        dashboard[:solveInProgress] = SSMConsumingSolvables
         tosolv = take!(dashboard[:solvables])
         for sy in tosolv
           # setSolvable!(dfg, sy, 1) # see DFG #221
@@ -272,24 +272,29 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       @info "Ensure all new variables initialized"
       ensureAllInitialized!(dfg)
 
+      dashboard[:solveInProgress] = SSMReady
+
       # solve only every 10th pose
       if 10 <= dashboard[:poseStride]
-        # do actual solve
-        # dashboard[:canTakePoses] = 0
+        # set up state machine flags to allow overlapping or block
         dashboard[:solveInProgress] = SSMSolving
-        # dashboard[:poseStride] = 0
+        dashboard[:poseStride] = 0
+
+        # do the actual solve (with debug saving)
         lasp = getLastPoses(dfg, filterLabel=r"x\d", number=1)[1]
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_before_$(lasp)"))
         tree, smt, hist = solveTree!(dfg, tree)
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(lasp)"))
+
         # unblock LCMLog reader for next STRIDE segment
         dashboard[:solveInProgress] = SSMReady
         # de-escalate handler state machine
-        if dashboard[:canTakePoses] == HSMBlocking
-          dashboard[:canTakePoses] = HSMOverlapHandling
-        elseif dashboard[:canTakePoses] == HSMOverlapHandling
-          dashboard[:canTakePoses] = HSMHandling
-        end
+        dashboard[:canTakePoses] = HSMHandling
+        # if dashboard[:canTakePoses] == HSMBlocking
+        #   dashboard[:canTakePoses] = HSMOverlapHandling
+        # elseif dashboard[:canTakePoses] == HSMOverlapHandling
+        #   dashboard[:canTakePoses] = HSMHandling
+        # end
         "end of solve cycle" |> println
       else
         sleep(0.2)

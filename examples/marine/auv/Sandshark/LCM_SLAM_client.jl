@@ -73,7 +73,7 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   @async begin
     while recordWTDSH[1]
       push!(WTDSH, (now(), getLastPoses(fg,filterLabel=r"x\d",number=1)[1],dashboard[:poseStride],dashboard[:canTakePoses],dashboard[:solveInProgress],dashboard[:realTimeSlack]))
-      sleep(0.01)
+      sleep(0.005)
     end
   end
 
@@ -82,28 +82,22 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   holdTimeRTS = now()
   offsetT = now() - startT
   dashboard[:doDelay] = lcm isa LCMLog
-  for i in 1:5000
+  for i in 1:15000
       handle(lcm)
       # slow down in case of using an LCMLog object
       if dashboard[:doDelay]
         # might be delaying the solver -- ie real time slack grows above zero
         holdTimeRTS = now()
-        # push!(WTDSH, (now(), getLastPoses(fg,filterLabel=r"x\d",number=1)[1],dashboard[:poseStride],dashboard[:canTakePoses],dashboard[:solveInProgress],dashboard[:realTimeSlack]))
         while dashboard[:canTakePoses] == HSMBlocking && dashboard[:solveInProgress] == SSMSolving
           @info "delay for solver, canTakePoses=$(dashboard[:canTakePoses]), solveInPrg.=$(dashboard[:solveInProgress]), RTS=$(dashboard[:realTimeSlack])"
-          # push!(WTDSH, (now(), getLastPoses(fg,filterLabel=r"x\d",number=1)[1],dashboard[:poseStride],dashboard[:canTakePoses],dashboard[:solveInProgress],dashboard[:realTimeSlack]))
           sleep(0.5)
         end
-        # push!(WTDSH, (now(), getLastPoses(fg,filterLabel=r"x\d",number=1)[1],dashboard[:poseStride],dashboard[:canTakePoses],dashboard[:solveInProgress],dashboard[:realTimeSlack]))
         # real time slack update -- this is the compute overrun
         dashboard[:realTimeSlack] += now()-holdTimeRTS
-
+        # playback speed
         dt = (dashboard[:lastMsgTime]-startT)
-        # TODO add real-time-slack time -- maybe refactor out as standard component in LCMCore...
         nMsgT = startT + typeof(dt)(round(Int, dt.value/logSpeed)) + dashboard[:realTimeSlack]
-        # @show now() < (nMsgT + offsetT), now(), (nMsgT + offsetT)
         while now() < (nMsgT + offsetT)
-          # @info "delay"
           sleep(0.01)
         end
       end
@@ -126,30 +120,35 @@ end
 
 ## from file
 # fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) )
-fg, dashboard, wtdsh = main(logSpeed=0.1, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
+fg, dashboard, wtdsh = main(logSpeed=0.2, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
 # fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")) )
 
 
 ttt = (x->datetime2unix(x[1])).(wtdsh)
+ttt .-= ttt[1]
 wtv = (x->x[2]).(wtdsh)
 wtr = (x->x[3]).(wtdsh)
 wth = (x->x[4]).(wtdsh)
 wts = (x->x[5]).(wtdsh)
-wtt = (x->x[6]).(wtdsh)
+wtt = (x->x[6].value).(wtdsh)
+wttn = wtt./wtt[end]
 
 lpn = wtv .|> x->parse(Int, string(x)[2:end])
 
 
+Gadfly.set_default_plot_size(45cm,25cm)
+
 Gadfly.plot(
-  Gadfly.layer(x=ttt,y=wth .|> Int, Geom.line),
-  Gadfly.layer(x=ttt,y=(wts .|> Int), Geom.line, Theme(default_color=colorant"red")),
-  Gadfly.layer(x=ttt,y=(lpn.%10)*0.1, Geom.line, Theme(default_color=colorant"magenta")),
-  Gadfly.layer(x=ttt,y=(wtr.%10)*0.1.-1, Geom.line, Theme(default_color=colorant"green"))
+  Gadfly.layer(x=ttt,y=(wth .|> Int)*0.333, Geom.line),
+  Gadfly.layer(x=ttt,y=(wts .|> Int)*0.5.+1, Geom.line, Theme(default_color=colorant"red")),
+  Gadfly.layer(x=ttt,y=(lpn.%10)*0.1.-1, Geom.line, Theme(default_color=colorant"magenta")),
+  # Gadfly.layer(x=ttt,y=(wtr.%10)*0.1.-2, Geom.line, Theme(default_color=colorant"green")),
+  Gadfly.layer(x=ttt,y=wttn.-2, Geom.line, Theme(default_color=colorant"green")),
 )
 
-Gadfly.plot(y=wtt .|> x->x.value, Geom.line)
+Gadfly.plot(y=wtt, Geom.line)
+Gadfly.plot(y=wttn, Geom.line)
 
-Gadfly.set_default_plot_size(45cm,25cm)
 ##
 
 

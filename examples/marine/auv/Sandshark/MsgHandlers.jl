@@ -89,7 +89,8 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     # add new variable and factor to the graph
     fctsym = duplicateToStandardFactorVariable(Pose2Pose2,
                                                rttLast,
-                                               dfg,dashboard[:lastPose],
+                                               dfg,
+                                               dashboard[:lastPose],
                                                nPose,
                                                solvable=0,
                                                autoinit=false  )
@@ -112,12 +113,17 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     dashboard[:rttMpp][nPose] = drec
     put!(dashboard[:solvables], [nPose; fctsym])
     dashboard[:poseStride] += 1
+
     # separate check for LCMLog handling
+    # if dashboard[:solveInProgress] == SSMSolving
+    #   dashboard[:canTakePoses] = HSMOverlapHandling
+    # elseif dashboard[:solveInProgress] == SSMReady || dashboard[:solveInProgress] == SSMConsumingSolvables
+    #   dashboard[:canTakePoses] = HSMHandling
+    # end
     if dashboard[:doDelay] && 10 <= dashboard[:poseStride]
-      # how far to escalate -- :canTakePoses should be cleared by solver in manageSolveTree()
+      # how far to escalate -- :canTakePoses is de-escalated by solver in manageSolveTree()
       if dashboard[:canTakePoses] == HSMHandling
         dashboard[:canTakePoses] = HSMOverlapHandling
-        dashboard[:poseStride] = 0
       elseif dashboard[:canTakePoses] == HSMOverlapHandling
         dashboard[:canTakePoses] = HSMBlocking
       end
