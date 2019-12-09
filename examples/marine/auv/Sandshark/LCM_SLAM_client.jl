@@ -44,7 +44,7 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   # middleware handlers
   # start with LBL and magnetometer
   subscribe(lcm, "AUV_LBL_INTERPOLATED", (c,d)->lbl_hdlr(c,d,dashboard,lblDict), pose_t)
-  subscribe(lcm, "AUV_MAGNETOMETER",     (c,d)->mag_hdlr(c,d,dashboard,magDict), pose_t)
+  subscribe(lcm, "AUV_MAGNETOMETER",     (c,d)->mag_hdlr(c,d,fg,dashboard,magDict), pose_t)
 
   @info "get a starting position and mag orientation"
   while length(lblDict) == 0 || length(magDict) == 0
@@ -82,7 +82,7 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   holdTimeRTS = now()
   offsetT = now() - startT
   dashboard[:doDelay] = lcm isa LCMLog
-  for i in 1:15000
+  for i in 1:3000
       handle(lcm)
       # slow down in case of using an LCMLog object
       if dashboard[:doDelay]
@@ -119,7 +119,7 @@ end
 # fg = main()
 
 ## from file
-# fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) )
+# fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) ) # bad ranges
 fg, dashboard, wtdsh = main(logSpeed=0.2, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
 # fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")) )
 
@@ -160,12 +160,34 @@ drawGraph(fg)
 
 ts = getVariable(fg, :x74) |> timestamp
 
-findVariableNearTimestamp(fg, ts, r"x\d")
+findVariableNearTimestamp(fg, ts, r"x\d") # tags=[:POSE;])
+
+
+
+
+TP = true
+
+
+stags = [:MAGNETOMETER;]
+
+
+hasTagsNeighbors(fg, :x1, stags)
+
 
 
 # pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
 
 plb = plotSandsharkFromDFG(fg)
+
+
+
+
+
+
+prf = filter(x->isPrior(fg,x), ls(fg, :x0))
+
+
+
 
 
 

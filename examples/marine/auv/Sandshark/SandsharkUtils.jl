@@ -221,6 +221,9 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
 
   dashboard[:realTimeSlack] = Millisecond(0)
 
+  dashboard[:magBuffer] = CircularBuffer{Tuple{DateTime, Float64, Vector{Bool}}}(20)
+  dashboard[:magNoise] = deg2rad(5)
+
   nothing
 end
 

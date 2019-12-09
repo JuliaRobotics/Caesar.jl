@@ -10,11 +10,34 @@ function lbl_hdlr(channel::String, msgdata::pose_t, dashboard::Dict, lblDict::Di
   nothing
 end
 
-function mag_hdlr(channel::String, msgdata::pose_t, dashboard::Dict, magDict::Dict)
+function mag_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict, magDict::Dict)
   msgtime = unix2datetime(msgdata.utime*1e-6)
   dashboard[:lastMsgTime] = msgtime
   ea = TU.convert(Euler, Quaternion(msgdata.orientation[1],msgdata.orientation[2:4]) )
-  magDict[dashboard[:lastMsgTime]] = ea.Y
+  # add first element only
+  if length(magDict) == 0
+    magDict[dashboard[:lastMsgTime]] = ea.Y
+  end
+
+  push!( dashboard[:magBuffer], (msgtime, ea.Y, Bool[false;]) )
+
+  # check if any mag can be added as prior to factor graph
+  for mag in dashboard[:magBuffer]
+    # might have been added in the past
+    mag[3][1] ? continue : nothing
+    corr = findVariableNearTimestamp(dfg, mag[1], r"x\d")  #tags=[:POSE;])
+    # is there a match and its real close in time (assume 50Hz max rate)
+    if 1 == length(corr) && abs(corr[1][2]) < Millisecond(10)
+      # double check that the variable does not already have a mag prior on it
+      if !hasTagsNeighbors(dfg, corr[1][1][1], [:MAGNETOMETER;])
+        # add the mag measurement as a prior
+        @show "add mag"
+        magPrior = PartialPriorYawPose2(Normal(mag[2], dashboard[:magNoise]))
+        addFactor!(dfg, corr[1][1][1:1], magPrior, autoinit=false, solvable=1, labels=[:MAGNETOMETER;])
+      end
+    end
+  end
+
   nothing
 end
 
