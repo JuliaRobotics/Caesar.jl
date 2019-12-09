@@ -52,7 +52,7 @@ end
 
 
 # set this part of graph to ready for solving
-setDBAllReady!(conn, fg.sessionname)
+setAllDBSolvable!(conn, fg.sessionname)
 
 println("Waiting for initial solve to occur")
 sleep(10)
@@ -82,7 +82,7 @@ addFactor!(fg,[v6;v7],Odo([60.0]',[2.0]',[1.0]))
 f3 = addFactor!(fg,[v7], Obsv2(doors, cov', [1.0]))
 
 # release the rest
-setDBAllReady!(conn, fg.sessionname)
+setAllDBSolvable!(conn, fg.sessionname)
 
 
 # Get neighbors

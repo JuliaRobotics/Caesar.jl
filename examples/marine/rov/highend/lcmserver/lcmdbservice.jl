@@ -128,8 +128,8 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata,
     push!( constrs, xyy )
 
     # may or may not add a new pose node, depending on message order
-    v,f = addposeFG!(slaml, constrs, saveusrid=odomsg[:node_2_id], ready=0 )
-    setDBAllReady!(slaml.fg)
+    v,f = addposeFG!(slaml, constrs, saveusrid=odomsg[:node_2_id], solvable=0 )
+    setAllDBSolvable!(slaml.fg)
 
   else
     # loop closure case

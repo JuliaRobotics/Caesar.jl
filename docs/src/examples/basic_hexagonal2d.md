@@ -45,7 +45,7 @@ end
 
 At this point it would be good to see what the factor graph actually looks like:
 ```julia
-writeGraphPdf(fg)
+drawGraph(fg)
 ```
 You should see the program `evince` open with this visual:
 
@@ -56,13 +56,13 @@ You should see the program `evince` open with this visual:
 Let's run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this `fg` object:
 ```julia
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
-batchSolve!(fg)
-
-# For those interested, the internal batch solve steps currently involve:
-# tree = wipeBuildNewTree!(fg)
-# inferOverTree!(fg, tree)
+tree, smt, hist = solveTree!(fg)
 ```
-This will take a couple of seconds (including first time compiling for all Julia processes).
+This will take a couple of seconds (including first time compiling for all Julia processes).  If you wanted to see the Bayes tree operations during solving, set the following parameters before calling the solver:
+```julia
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
+```
 
 ## Some Visualization Plot
 
@@ -76,13 +76,13 @@ using RoMEPlotting
 pl = drawPoses(fg)
 
 # For scripting use-cases you can export the image
-Gadfly.draw(Gadfly.PDF("/tmp/test.pdf", 20cm, 10cm),pl)  # or PNG(...)
+pl |> Gadfly.PDF("/tmp/test.pdf") # or PNG(...)
 ```
 ![test](https://user-images.githubusercontent.com/6412556/42294545-c6c80f70-7faf-11e8-8167-017889cee932.png)
 
 ## Adding Landmarks as Point2
 
-Suppose some sensor detected a feature of interest with an associated range and bearing measurement
+Suppose some sensor detected a feature of interest with an associated range and bearing measurement.
 The new variable and measurement can be included into the factor graph as follows:
 ```julia
 # Add landmarks with Bearing range measurements
@@ -93,24 +93,25 @@ addFactor!(fg, [:x0; :l1], p2br)
 # Initialize :l1 numerical values but do not rerun solver
 ensureAllInitialized!(fg)
 ```
-**NOTE** The default behavior for initialization of variable nodes implies the last variable noded added will not have any numerical values yet, please see [ContinuousScalar Tutorial](http://www.juliarobotics.org/Caesar.jl/latest/tutorialcontinuousscalar.html) for deeper discussion on automatic initialization (`autoinit`).
-A slightly expanded plotting function will draw both poses and landmarks (and currently assumes labels starting with `:x` and `:l` respectively) -- notice the new landmark bottom right:
+**NOTE** The default behavior for initialization of variable nodes implies the last variable node added will not have any numerical values yet, please see [ContinuousScalar Tutorial](http://www.juliarobotics.org/Caesar.jl/latest/tutorialcontinuousscalar.html) for deeper discussion on automatic initialization (`autoinit`).
+A slightly expanded plotting function will draw both poses and landmarks (and currently assumes labels starting with `:x` and `:l` respectively)---notice the new landmark bottom right:
 ```julia
 drawPosesLandms(fg)
 ```
-![test](https://user-images.githubusercontent.com/6412556/42296689-c39e6f1c-7fc6-11e8-9a3a-6d5d2f1b5a49.png)
+
+![test](https://user-images.githubusercontent.com/6412556/69353457-6cd82400-0c76-11ea-905c-8f435faa6b11.png)
 
 ## One type of Loop-Closure
 
 Loop-closures are a major part of SLAM based state estimation.
-One illustration is to take a second sighting of the same `:l1` landmark from the last pose `:x6`; followed by repeating the inference and re-plotting the result -- notice the tighter confidences over all variables:
+One illustration is to take a second sighting of the same `:l1` landmark from the last pose `:x6`; followed by repeating the inference and re-plotting the result---notice the tighter confidences over all variables:
 ```julia
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x6; :l1], p2br2)
 
 # solve
-batchSolve!(fg)
+tree, smt, hist = solveTree!(fg, tree)
 
 # redraw
 pl = drawPosesLandms(fg)
@@ -122,6 +123,6 @@ This concludes the Hexagonal 2D SLAM example.
 ## Interest: The Bayes (Junction) tree
 
 The Bayes (Junction) tree is used as an acyclic (has no loops) computational object, an exact algebraic refactorizating of factor graph, to perform the associated sum-product inference.
-The visual structure of the tree can extracted by modifying the command `tree = wipeBuildNewTree!(fg, drawpdf=true)` to produce representations such as this in `bt.pdf`.
+The visual structure of the tree can be extracted by modifying the command `tree = wipeBuildNewTree!(fg, drawpdf=true)` to produce representations such as this in `bt.pdf`.
 
 ![exbt2d](https://user-images.githubusercontent.com/6412556/42296896-b2893c78-7fc8-11e8-9291-1db02195c3c0.png)

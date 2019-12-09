@@ -76,7 +76,7 @@ savejld(fg, file="postsolve_$t.jld")
 # Roll again for inspiration check
 ## PLOT BEAM PATTERNS
 Gadfly.push_theme(:default)
-pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
+pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
 Gadfly.draw(PDF("sandshark-beacon_$t.pdf", 12cm, 15cm), pla)
 Gadfly.draw(PNG("sandshark-beacon_$t.png", 12cm, 15cm), pla)
 

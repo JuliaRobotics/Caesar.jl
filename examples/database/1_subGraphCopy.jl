@@ -17,7 +17,7 @@ fg = initfg(sessionname=addrdict["sessionId"], robotname=addrdict["robotId"], cl
 
 
 # 3.a Fetch a portion of the graph
-Caesar.subLocalGraphCopy!(fg, ["x1";"x3";], neighbors=1, reqbackendset=false, reqready=false)
+Caesar.subLocalGraphCopy!(fg, ["x1";"x3";], neighbors=1, reqbackendset=false, reqSolvable=false)
 
 # see what is going on
 Graphs.plot(fg.g)
@@ -28,7 +28,7 @@ Graphs.plot(fg.g)
 
 fg = initfg(sessionname=addrdict["sessionId"], robotname=addrdict["robotId"], cloudgraph=cg)
 # 3.b Or fetch the entire factor graph
-Caesar.fullLocalGraphCopy!(fg, reqbackendset=false, reqready=false)
+Caesar.fullLocalGraphCopy!(fg, reqbackendset=false, reqSolvable=false)
 
 
 

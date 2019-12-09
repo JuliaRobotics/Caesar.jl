@@ -58,7 +58,7 @@ findAddLandmFactorsByPose!(fg, :x0, f[1], N=N)
 
 
 # pbr = Pose2Point2BearingRange(Normal(br[1], cov[1,1]), Normal(br[2],  cov[2,2]))  #{Normal, Normal}
-# f = addFactor!(fg, [vps;vlm], pbr, ready=ready, autoinit=true ) #[vps;vlm],
+# f = addFactor!(fg, [vps;vlm], pbr, solvable=ready, autoinit=true ) #[vps;vlm],
 
 
 drive!(fg, 2, d, f, lmoccur, Podo, N=N)

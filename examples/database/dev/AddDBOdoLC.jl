@@ -24,9 +24,9 @@ fullLocalGraphCopy!(fg)
 v1a = getVert(fg, :l9)
 v1b = getVert(fg, :l16)
 
-f1 = addFactor!(fg,[v1a;v1b],Odo(zeros(2,1),0.1*eye(2),[1.0]),ready=0)
+f1 = addFactor!(fg,[v1a;v1b],Odo(zeros(2,1),0.1*eye(2),[1.0]),solvable=0)
 
-setDBAllReady!(conn)
+setAllDBSolvable!(conn)
 
 
 
@@ -39,9 +39,9 @@ v2b = getVert(fg, :x157)
 DX = zeros(3,1)
 DX[3] = pi
 pp = Pose2Pose2(DX, 0.1*eye(3), [1.0]) #[prev;v],
-f = addFactor!(fg, [v2a;v2b], pp, ready=0)
+f = addFactor!(fg, [v2a;v2b], pp, solvable=0)
 
-setDBAllReady!(conn)
+setAllDBSolvable!(conn)
 
 
 # DX = zeros(3)

@@ -1,16 +1,20 @@
 using Documenter, Caesar
+
 import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
-import IncrementalInference: initfg
+import IncrementalInference: initfg, downGibbsCliqueDensity
 
 using KernelDensityEstimatePlotting
 # import KernelDensityEstimatePlotting: plotKDE
 using RoMEPlotting
 
+# until namespaces are properly figured out
+using DistributedFactorGraphs
+import DistributedFactorGraphs: showFactor
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
-    format = :html,
+    format = Documenter.HTML(),
     sitename = "Caesar.jl",
     pages = Any[
         "Home" => "index.md",
@@ -23,7 +27,6 @@ makedocs(
             "Building Factor Graphs" => "concepts/building_graphs.md",
             "Available Variables/Factors" => "concepts/available_varfacs.md",
             "Interacting w/ Factor Graphs" => "concepts/interacting_fgs.md",
-            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
             "Multi-Language Support" => "concepts/multilang.md",
             "Arena Visualization" => "concepts/arena_visualizations.md",
             "Cloud Server/Database" => "concepts/database_interactions.md",
@@ -38,6 +41,11 @@ makedocs(
         ],
         "Principles" => [
             "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
+            "Generic Convolutions" => "principles/approxConvDensities.md",
+            "Filters vs. Graphs" => "principles/filterCorrespondence.md",
+            "Bayes (Junction) tree" => "principles/bayestreePrinciples.md",
+            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
+            "Advanced Bayes Tree Topics" => "principles/initializingOnBayesTree.md",
         ],
         "How to Expand?" => [
             "Custom Variables and Factors" => "concepts/adding_variables_factors.md",

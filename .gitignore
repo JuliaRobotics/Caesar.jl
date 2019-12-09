@@ -6,3 +6,4 @@ examples/lcmserver/rome/
 examples/tracking/simpleradar/exports/*
 docs/build
 results/*
+build

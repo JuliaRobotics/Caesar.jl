@@ -34,7 +34,7 @@ end
 ```
 
 ## Factors
-Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a [`IIF.Prior`](../concepts/available_varfacs/#IncrementalInference.Prior) belief is add to `x0` (using the [`addFactor`](../func_ref/#IncrementalInference.addFactor!) call) as a normal distribution centered around `[0,0,0]`.
+Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute (pre-resolved) GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a [`IIF.Prior`](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/#IncrementalInference.Prior) belief is add to `x0` (using the [`addFactor`](https://www.juliarobotics.org/Caesar.jl/latest/func_ref/#DistributedFactorGraphs.addFactor!) call) as a normal distribution centered around `[0,0,0]`.
 
 ### Priors
 ```julia
@@ -63,8 +63,8 @@ Computation will progress faster if poses and landmarks are very sparse.  To ext
 
 For completeness, one could also re-project the most meaningful measurements from sensor measurements between pose epochs as though measured from the pose epoch.  This approach essentially marginalizes the local dead reckoning drift errors into the local interpose re-projections, but helps keep the pose count low.
 
-In addition, see [fixed-lag discussion](../examples/interm_fixedlag_hexagonal.md) for limiting during inference the number of fluid variables manually to a user desired count.
+In addition, see [fixed-lag discussion](https://www.juliarobotics.org/Caesar.jl/latest/examples/examples/#Hexagonal-2D-1) for limiting during inference the number of fluid variables manually to a user desired count.
 
 ## Which Variables and Factors to use
 
-See the next page on [available variables and factors](concepts/available_varfacs.md)
+See the next page on [available variables and factors](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/)

@@ -100,14 +100,9 @@ for STEP in 40:10:50
       index+=1
     end
     tree, smt, hist = solveTree!(fg, tree)
-    pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblX, lblY)
+    pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
     pla |> PDF(joinpath(getSolverParams(fg).logpath, "sandshark-beacon_$STEP.pdf"))
 end
-
-
-
-
-
 
 # drawGraph(fg)
 

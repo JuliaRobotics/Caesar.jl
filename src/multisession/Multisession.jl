@@ -15,7 +15,7 @@ export
   updateLandmarkProducts
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 
 Return all binary pair combinations of sessions and return a Vector::Tuple{String, String}.
 
@@ -38,7 +38,7 @@ function stringPairs(strs::Vector{<:AbstractString} )::Vector{Tuple{String, Stri
 end
 
 """
-  $(TYPEDSIGNATURES)
+  $(SIGNATURES)
 
 Gets a vector of session IDs that are related to an environment.
 """
@@ -51,7 +51,7 @@ function getSessionsForEnvironment(
 end
 
 """
-  $(TYPEDSIGNATURES)
+  $(SIGNATURES)
 
 Get a dictionary (label => Neo4j node) of all prime nodes for a given set of sessions and an environment.
 """
@@ -67,7 +67,7 @@ function getEnvironmentPrimeLandmarkNodes(cloudGraph::CloudGraph, sessions::Vect
 end
 
 """
-  $(TYPEDSIGNATURES)
+  $(SIGNATURES)
 
 Gets all landmark IDs for a given session, excluding multisession.
 """
@@ -83,7 +83,7 @@ function getSessionLandmarks(
 end
 
 """
-  $(TYPEDSIGNATURES)
+  $(SIGNATURES)
 
 Very specific method to check if a prime factor exists between a session landmark and a prime node.
 Prime node is identified by NeoNode ID.
@@ -100,7 +100,7 @@ function _doesPrimeFactorExistByForSessionLandmark(
 end
 
 """
-  $(TYPEDSIGNATURES)
+  $(SIGNATURES)
 
 Returns the tuples of the prime landmark -> prime factor -> session landmark for all existing prime factors.
 Tuple elements: mid, mlabel, fid, flabel, lid, llabel
@@ -122,7 +122,7 @@ function getFederatedGraphElements(
 end
 
 """
-  $(TYPEDSIGNATURES)
+  $(SIGNATURES)
 
 McFlurry step.
 Builds the prime landmarks and prime factors for a given environment and sessions (if they don't exist).
@@ -185,7 +185,7 @@ function buildPrimeLandmarksAndFactors(
           fg = initfg(cloudgraph=cloudGraph, robotname=robotId, username=userId, sessionname=s)
           syms = [Symbol(commonLandmark);sym]
           @debug "    - Copying local symbols $syms..."
-          Caesar.subLocalGraphCopy!(fg, syms, neighbors=0, reqbackendset=false, reqready=false, includeMultisession=true)
+          Caesar.subLocalGraphCopy!(fg, syms, neighbors=0, reqbackendset=false, reqSolvable=false, includeMultisession=true)
 
           # Note: this shouldn't be necessary because the check is done in the landmark creation, but doing just in case here too.
           @show sessionLandType = getData(getVert(fg, syms[1], api=localapi)).softtype
@@ -214,7 +214,7 @@ function buildPrimeLandmarksAndFactors(
 end
 
 """
-  $(TYPEDSIGNATURES)
+  $(SIGNATURES)
 
 Create a Caesar FactorGraph that contains all landmarks and factors in a multisession
 federated solve.
@@ -266,7 +266,7 @@ function getMultiSessionFg(
 end
 
 """
-$(TYPEDSIGNATURES)
+$(SIGNATURES)
 
 Updates the specified list of landmarks using local products.
 Returns a symbol dictionary of the provided landmarks and a tuple of (new KDE, KDE propsals),

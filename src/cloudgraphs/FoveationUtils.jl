@@ -8,7 +8,7 @@ export
 
 
   """
-      $(TYPEDSIGNATURES)
+      $(SIGNATURES)
 
   Find vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.
   """
@@ -41,7 +41,7 @@ export
   end
 
   """
-      $(TYPEDSIGNATURES)
+      $(SIGNATURES)
 
   Find vertices near the point specified and return dictionary of symbol to Neo4j ID pairs.
   """
@@ -80,7 +80,7 @@ export
 
 
 """
-    $(TYPEDSIGNATURES)
+    $(SIGNATURES)
 """
 function foveateQueryToPoint(cg::CloudGraph,
         sessions::Vector{T},
