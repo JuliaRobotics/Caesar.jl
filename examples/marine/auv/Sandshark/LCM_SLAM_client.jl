@@ -43,7 +43,7 @@ function HSMCanContinue(dashboard::Dict)::Bool
 end
 
 
-function main(;lcm=LCM(), logSpeed::Float64=1.0)
+function main(;lcm=LCM(), logSpeed::Float64=1.0, iters::Int=10000)
 
   # data containers
   dashboard = Dict{Symbol,Any}()
@@ -98,7 +98,7 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   holdTimeRTS = now()
   offsetT = now() - startT
   dashboard[:doDelay] = lcm isa LCMLog
-  for i in 1:10000
+  for i in 1:iters
       handle(lcm)
       # slow down in case of using an LCMLog object
       if dashboard[:doDelay]
@@ -137,10 +137,8 @@ end
 
 ## from file
 # fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) ) # bad ranges
-fg, dashboard, wtdsh, ST = main(logSpeed=0.2, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
+fg, dashboard, wtdsh, ST = main(logSpeed=0.2, iters=25000, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
 # fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")) )
-
-
 
 
 
@@ -153,7 +151,8 @@ plb = plotSandsharkFromDFG(fg)
 # pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
 
 
-plotFrontendTiming(wtdsh)
+plc = plotFrontendTiming(wtdsh)
+
 
 # Look at range factors separately
 reportFactors(fg, Pose2Point2Range)
@@ -196,6 +195,14 @@ dontMarginalizeVariablesAll!(fg)
 
 tree, smt, hist = solveTree!(fg)
 
+
+
+### DEV, disengage older variables and factors via solvable=0
+
+
+
+
+tree, smt, hist = solveTree!(fg)
 
 
 

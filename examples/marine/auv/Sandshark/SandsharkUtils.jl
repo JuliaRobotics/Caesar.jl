@@ -234,7 +234,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
 
   @info "logpath=$(getLogPath(dfg))"
   getSolverParams(dfg).drawtree = true
-  getSolverParams(dfg).qfl = 20
+  getSolverParams(dfg).qfl = 30
   getSolverParams(dfg).isfixedlag = true
   getSolverParams(dfg).limitfixeddown = true
 
@@ -281,6 +281,9 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       # solve only every 10th pose
       if 0 < length(dashboard[:poseSolveToken].data)
       # if 10 <= dashboard[:poseStride]
+        @info "reduce problem size by disengaging older parts of factor graph"
+        setSolvableOldPoses!(dfg, youngest=getSolverParams(dfg).qfl+10, oldest=100, solvable=0)
+
         # set up state machine flags to allow overlapping or block
         dashboard[:solveInProgress] = SSMSolving
         # dashboard[:poseStride] = 0
