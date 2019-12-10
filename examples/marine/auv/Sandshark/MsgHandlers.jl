@@ -137,12 +137,6 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     put!(dashboard[:solvables], [nPose; fctsym])
     dashboard[:poseStride] += 1
 
-    # separate check for LCMLog handling
-    # if dashboard[:solveInProgress] == SSMSolving
-    #   dashboard[:canTakePoses] = HSMOverlapHandling
-    # elseif dashboard[:solveInProgress] == SSMReady || dashboard[:solveInProgress] == SSMConsumingSolvables
-    #   dashboard[:canTakePoses] = HSMHandling
-    # end
     if dashboard[:doDelay] && 10 <= dashboard[:poseStride]
       # how far to escalate -- :canTakePoses is de-escalated by solver in manageSolveTree()
       if dashboard[:canTakePoses] == HSMHandling
@@ -150,6 +144,9 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
       elseif dashboard[:canTakePoses] == HSMOverlapHandling
         dashboard[:canTakePoses] = HSMBlocking
       end
+      @info "new solve token $nPose"
+      put!(dashboard[:poseSolveToken], nPose)
+      dashboard[:poseStride] = 0
     end
   end
 

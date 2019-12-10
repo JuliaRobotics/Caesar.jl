@@ -26,6 +26,22 @@ include(joinpath(@__DIR__, "MsgHandlers.jl"))
 include(joinpath(@__DIR__, "SandsharkUtils.jl"))
 include(joinpath(@__DIR__, "Plotting.jl"))
 
+# list all cases in which message handling can continue
+# return true if MSG handler can continue
+function HSMCanContinue(dashboard::Dict)::Bool
+  if dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMSolving ||
+     dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMSolving ||
+     dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMReady ||
+     dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMSolving ||
+     dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMConsumingSolvables ||
+     dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMConsumingSolvables ||
+     dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMConsumingSolvables
+    #
+    return true
+  end
+  return false
+end
+
 
 function main(;lcm=LCM(), logSpeed::Float64=1.0)
 
@@ -39,7 +55,7 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   initializeAUV_noprior(fg, dashboard)
 
   # prepare the solver in the background
-  manageSolveTree!(fg, dashboard, dbg=true)
+  ST = manageSolveTree!(fg, dashboard, dbg=true)
 
   # middleware handlers
   # start with LBL and magnetometer
@@ -69,10 +85,10 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
 
 
   recordWTDSH = [true;]
-  WTDSH = Vector{Tuple{DateTime, Symbol, Int, HandlerStateMachine, SolverStateMachine, Millisecond}}()
+  WTDSH = Vector{Tuple{DateTime, Symbol, Int, HandlerStateMachine, SolverStateMachine, Millisecond, Int}}()
   @async begin
     while recordWTDSH[1]
-      push!(WTDSH, (now(), getLastPoses(fg,filterLabel=r"x\d",number=1)[1],dashboard[:poseStride],dashboard[:canTakePoses],dashboard[:solveInProgress],dashboard[:realTimeSlack]))
+      push!(WTDSH, (now(), getLastPoses(fg,filterLabel=r"x\d",number=1)[1],dashboard[:poseStride],dashboard[:canTakePoses],dashboard[:solveInProgress],dashboard[:realTimeSlack],length(dashboard[:poseSolveToken].data) ))
       sleep(0.005)
     end
   end
@@ -82,13 +98,14 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   holdTimeRTS = now()
   offsetT = now() - startT
   dashboard[:doDelay] = lcm isa LCMLog
-  for i in 1:3000
+  for i in 1:10000
       handle(lcm)
       # slow down in case of using an LCMLog object
       if dashboard[:doDelay]
         # might be delaying the solver -- ie real time slack grows above zero
         holdTimeRTS = now()
-        while dashboard[:canTakePoses] == HSMBlocking && dashboard[:solveInProgress] == SSMSolving
+        while 1 < length(dashboard[:poseSolveToken].data)  # !HSMCanContinue(dashboard)
+            # while dashboard[:canTakePoses] == HSMBlocking && dashboard[:solveInProgress] == SSMSolving
           @info "delay for solver, canTakePoses=$(dashboard[:canTakePoses]), solveInPrg.=$(dashboard[:solveInProgress]), RTS=$(dashboard[:realTimeSlack])"
           sleep(0.5)
         end
@@ -110,7 +127,7 @@ function main(;lcm=LCM(), logSpeed::Float64=1.0)
   dashboard[:loopSolver] = false
 
   # return last factor graph as built and solved
-  return fg, dashboard, WTDSH
+  return fg, dashboard, WTDSH, ST
 end
 
 
@@ -120,193 +137,66 @@ end
 
 ## from file
 # fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) ) # bad ranges
-fg, dashboard, wtdsh = main(logSpeed=0.2, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
+fg, dashboard, wtdsh, ST = main(logSpeed=0.2, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
 # fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")) )
 
 
-ttt = (x->datetime2unix(x[1])).(wtdsh)
-ttt .-= ttt[1]
-wtv = (x->x[2]).(wtdsh)
-wtr = (x->x[3]).(wtdsh)
-wth = (x->x[4]).(wtdsh)
-wts = (x->x[5]).(wtdsh)
-wtt = (x->x[6].value).(wtdsh)
-wttn = wtt./wtt[end]
-
-lpn = wtv .|> x->parse(Int, string(x)[2:end])
 
 
-Gadfly.set_default_plot_size(45cm,25cm)
 
-pl = Gadfly.plot(
-  Gadfly.layer(x=ttt,y=(wth .|> Int)*0.333, Geom.line),
-  Gadfly.layer(x=ttt,y=(wts .|> Int)*0.5.+1, Geom.line, Theme(default_color=colorant"red")),
-  Gadfly.layer(x=ttt,y=(lpn.%10)*0.1.-1, Geom.line, Theme(default_color=colorant"magenta")),
-  # Gadfly.layer(x=ttt,y=(wtr.%10)*0.1.-2, Geom.line, Theme(default_color=colorant"green")),
-  Gadfly.layer(x=ttt,y=wttn.-2, Geom.line, Theme(default_color=colorant"green")),
-)
 
-# Gadfly.plot(y=wtt, Geom.line)
-# Gadfly.plot(y=wttn, Geom.line)
 
-# pl |> PDF(joinpath(ENV["HOME"],"Downloads","test.pdf"))
-# pl |> PNG(joinpath(ENV["HOME"],"Downloads","test.png"))
+##  Draw trajectory & Analyze solve run
 
-##
 
+plb = plotSandsharkFromDFG(fg)
+# pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
+
+
+plotFrontendTiming(wtdsh)
+
+# Look at range factors separately
+reportFactors(fg, Pose2Point2Range)
+reportFactors(fg, Pose2Pose2)
+
+## draw fg
 
 drawGraph(fg)
 
 
-ts = getVariable(fg, :x74) |> timestamp
+plotPose(fg, :x29)
 
-findVariableNearTimestamp(fg, ts, r"x\d") # tags=[:POSE;])
+## Do separate solve
 
+# Check how long not solvable tail is?
 
-
-
-TP = true
-
-
-stags = [:MAGNETOMETER;]
+map(x->(x,isSolvable(getVariable(fg,x))), getLastPoses(fg, filterLabel=r"x\d", number=15))
 
 
-hasTagsNeighbors(fg, :x1, stags)
-
-
-
-# pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
-
-plb = plotSandsharkFromDFG(fg)
-
-
-
-
-
-
-prf = filter(x->isPrior(fg,x), ls(fg, :x0))
-
-
-
-
-
+# set all to solvable=1
 
 map(x->setSolvable!(fg, x, 1), setdiff(ls(fg), ls(fg, r"drt_\d")))
-
-map(x->setSolvable!(fg, x, 1 ), [lsf(fg, Pose2Pose2);
-lsf(fg, Pose2Point2Range);
-lsfPriors(fg)])
-
-getLogPath(fg)
+map(x->setSolvable!(fg, x, 1 ),[lsf(fg, Pose2Pose2);
+                                lsf(fg, Pose2Point2Range);
+                                lsfPriors(fg)] )
+#
 
 ensureAllInitialized!(fg)
 
-getSolverParams(fg).async = true
+# getSolverParams(fg).async = true
 tree, smt, hist = solveTree!(fg)
 
 
-reportFactors(fg, Pose2Point2Range)
-
-0
-
-## whats the deal with ranges
-
-d1 = dashboard[:rangesBuffer][1][2]
-
-Gadfly.plot(x=d1[:,1], y=d1[:,2], Geom.line)
-Gadfly.plot(y=d1[:,1], Geom.line)
-Gadfly.plot(y=d1[:,2], Geom.line)
-
-
-Gadfly.plot(x=d1[:][1:2:end], Geom.histogram)
-Gadfly.plot(x=d1[:][2:2:end], Geom.histogram)
-
-
-## test data transcription to log
-
-msgdata = dashboard[:lastRangeMsg]
-
-msgdata.utime*1000
-
-ppbrDict[ep].range.domain
-
-
-reinterpret(Float64, msgdata.data)
-
-rda = reshape(, :, 2)
-
-
-# mock recode
-
-rmsg = raw_t()
-
-epT = ep
-rdata = zeros(length(ppbrDict[epT].range.domain),2)
-rdata[:,1] = ppbrDict[epT].range.domain
-rdata[:,2] = ppbrDict[epT].range.weights.values
-rmsg.data = reinterpret(UInt8, vec(reshape(rdata,:,1))) |> collect
-rmsg.length = length(rmsg.data)
-bytes = encode(rmsg)
 
 
 
-## Temporary development code below
+## BATCH SOLVE
 
+dontMarginalizeVariablesAll!(fg)
 
-# # get sorted pose timestamps
-# posesym = ls(fg, r"x\d") |> sortDFG
-# # get sorted factor timestamps
-# sortF = union( (x->ls(fg,x)).(posesym)... )
-# fctsym = intersect(sortF, lsf(fg, Pose2Point2Range))
-#
-# vartim = posesym .|> x->(timestamp(getVariable(fg, x)),x)
-# rantim = fctsym .|> x->(timestamp(getFactor(fg,x)),x)
-#
-#
-# findClosestTimestamp(vartim, rantim)
-#
-#
-#
-# ## compare variable factor timestamp descrepencies
-#
-# ppr = ls(fg, Pose2Point2Range)
-#
-# vs_fsA = map(x->(x,intersect(ls(fg, x),ppr)...), posesym)
-# mask = length.(vs_fsA) .== 2
-#
-# vs_fs = vs_fsA[mask]
-#
-# map(x->timestamp(getVariable(fg, x[1]))-timestamp(getFactor(fg, x[2])), vs_fs)
-#
-#
-#
-#
-# # variables and ranges
-# lastvars = getLastPoses(fg, filterLabel=r"x\d", number=dashboard[:RANGESTRIDE]+5) |> sortDFG
-# rantim = dashboard[:rangesBuffer] |> y->map(x->(x[1], x[3][1]),y)
-# vartim = map(x->(timestamp(getVariable(fg, x)), x), lastvars)
-#
-# findClosestTimestamp(vartim, rantim)
+tree, smt, hist = solveTree!(fg)
 
 
 
-# dashboard[:rangeClkOffset]
-
-
-## Debugging code below
-
-
-
-
-# drawGraph(fg)
-# getSolverParams(fg).dbg = true
-# tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
-
-
-#
-# using RoMEPlotting
-# # drawPoses(fg)
-#
-# plotPose(fg, :x0)
 
 #

@@ -213,6 +213,8 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   dashboard[:canTakePoses] = HSMReady
   dashboard[:solveInProgress] = SSMReady
 
+  dashboard[:poseSolveToken] = Channel{Symbol}(3)
+
   dashboard[:RANGESTRIDE] = 4 # add a range measurement every 3rd pose
   dashboard[:rangesBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}(dashboard[:RANGESTRIDE]+4)
   dashboard[:rangeCount] = 0
@@ -243,7 +245,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
   tree = emptyBayesTree()
 
   # needs to run asynchronously
-  @async begin
+  ST = @async begin
     while @show length(ls(dfg, :x0, solvable=1)) == 0
       "waiting for prior on x0" |> println
       sleep(1)
@@ -252,7 +254,6 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
     while dashboard[:loopSolver]
       # add any newly solvables (atomic)
       while !isready(dashboard[:solvables]) && dashboard[:loopSolver]
-        # @show dashboard[:solvables].data
         sleep(0.5)
       end
 
@@ -263,7 +264,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       #add any new solvables
       while isready(dashboard[:solvables]) && dashboard[:loopSolver]
         dashboard[:solveInProgress] = SSMConsumingSolvables
-        tosolv = take!(dashboard[:solvables])
+        @show tosolv = take!(dashboard[:solvables])
         for sy in tosolv
           # setSolvable!(dfg, sy, 1) # see DFG #221
           # TODO temporary workaround
@@ -278,10 +279,11 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       dashboard[:solveInProgress] = SSMReady
 
       # solve only every 10th pose
-      if 10 <= dashboard[:poseStride]
+      if 0 < length(dashboard[:poseSolveToken].data)
+      # if 10 <= dashboard[:poseStride]
         # set up state machine flags to allow overlapping or block
         dashboard[:solveInProgress] = SSMSolving
-        dashboard[:poseStride] = 0
+        # dashboard[:poseStride] = 0
 
         # do the actual solve (with debug saving)
         lasp = getLastPoses(dfg, filterLabel=r"x\d", number=1)[1]
@@ -293,17 +295,17 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
         dashboard[:solveInProgress] = SSMReady
         # de-escalate handler state machine
         dashboard[:canTakePoses] = HSMHandling
-        # if dashboard[:canTakePoses] == HSMBlocking
-        #   dashboard[:canTakePoses] = HSMOverlapHandling
-        # elseif dashboard[:canTakePoses] == HSMOverlapHandling
-        #   dashboard[:canTakePoses] = HSMHandling
-        # end
-        "end of solve cycle" |> println
+
+        # remove a token to allow progress to continue
+        gotToken = take!(dashboard[:poseSolveToken])
+        "end of solve cycle, token=$gotToken" |> println
       else
+        "sleep a solve cycle" |> println
         sleep(0.2)
       end
     end
   end
+  return ST
 end
 
 
