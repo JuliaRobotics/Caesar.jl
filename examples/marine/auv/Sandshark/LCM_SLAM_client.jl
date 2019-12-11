@@ -236,9 +236,9 @@ saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 
 
 
-# Look at range factors separately
-plr = reportFactors(fg, Pose2Point2Range)
-# plp = reportFactors(fg, Pose2Pose2)
+## Look at factors separately
+reportFactors(fg, Pose2Point2Range, show=false)
+# reportFactors(fg, Pose2Pose2)
 
 
 ## BATCH SOLVE
