@@ -3,10 +3,32 @@
 
 ## middleware handler (callback) functions
 
-function lbl_hdlr(channel::String, msgdata::pose_t, dashboard::Dict, lblDict::Dict)
+function lbl_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict, lblDict::Dict)
   msgtime = unix2datetime(msgdata.utime*1e-6)
   dashboard[:lastMsgTime] = msgtime
-  lblDict[dashboard[:lastMsgTime]] = (msgdata.pos[1:2] |> deepcopy)
+
+  # TODO -- use buffer instead (legacy)
+  if length(lblDict) == 0
+    lblDict[dashboard[:lastMsgTime]] = (msgdata.pos[1:2] |> deepcopy)
+  end
+
+  # add to the ciruclar buffer
+  push!( dashboard[:lblBuffer], (msgtime, (msgdata.pos[1:2] |> deepcopy), Bool[false;]) )
+
+
+  # check if any lbl can be added as prior to factor graph
+  for lbl in dashboard[:lblBuffer]
+    # might have been added in the past
+    lbl[3][1] ? continue : nothing
+    # find nearest in time
+    corr = findVariableNearTimestamp(dfg, lbl[1], r"x\d")  #tags=[:POSE;])
+    # is there a match and its real close in time (assume 50Hz max rate)
+    if 1 == length(corr) && abs(corr[1][2]) < Millisecond(10)
+      # set the reference data in that variable
+      setVariableRefence!(dfg, corr[1][1][1], reshape(lbl[2],:,1), refKey=:lbl)
+      lbl[3][1] = true
+    end
+  end
   nothing
 end
 
@@ -14,7 +36,9 @@ function mag_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard:
   msgtime = unix2datetime(msgdata.utime*1e-6)
   dashboard[:lastMsgTime] = msgtime
   ea = TU.convert(Euler, Quaternion(msgdata.orientation[1],msgdata.orientation[2:4]) )
+
   # add first element only
+  # TODO use buffer instead (legacy)
   if length(magDict) == 0
     magDict[dashboard[:lastMsgTime]] = ea.Y
   end
@@ -34,6 +58,8 @@ function mag_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard:
         @show "add mag"
         magPrior = PartialPriorYawPose2(Normal(mag[2], dashboard[:magNoise]))
         addFactor!(dfg, corr[1][1][1:1], magPrior, autoinit=false, solvable=1, labels=[:MAGNETOMETER;])
+        # set flag that this has already been added to the factor graph
+        mag[3][1] = true
       end
     end
   end
@@ -116,7 +142,8 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
                                                dashboard[:lastPose],
                                                nPose,
                                                solvable=0,
-                                               autoinit=false  )
+                                               autoinit=false,
+                                               cov=dashboard[:odoCov]  )
     #
     # set timestamp to msg times
     setTimestamp!(getVariable(dfg, nPose), odoT)

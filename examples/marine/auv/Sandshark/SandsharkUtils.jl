@@ -199,7 +199,7 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   dashboard[:rttMpp] = Dict{Symbol,MutablePose2Pose2Gaussian}(:x0 => drec)
   dashboard[:rttCurrent] = (:x0, :drt_0)
   # standard odo process noise levels
-  dashboard[:Qc_odo] = Diagonal([0.01;0.01;0.01].^2) |> Matrix
+  dashboard[:Qc_odo] = Diagonal([0.01;0.01;0.001].^2) |> Matrix
 
   dashboard[:odoTime] = unix2datetime(0)
   dashboard[:poseRate] = Second(1)
@@ -225,6 +225,10 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
 
   dashboard[:magBuffer] = CircularBuffer{Tuple{DateTime, Float64, Vector{Bool}}}(20)
   dashboard[:magNoise] = deg2rad(5)
+
+  dashboard[:lblBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,1}, Vector{Bool}}}(dashboard[:RANGESTRIDE]+4)
+
+  dashboard[:odoCov] = Matrix{Float64}(Diagonal([0.5;0.3;0.2].^2))
 
   nothing
 end
