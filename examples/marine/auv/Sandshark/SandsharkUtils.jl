@@ -185,7 +185,8 @@ end
 
 function initializeAUV_noprior(dfg::AbstractDFG,
                                dashboard::Dict;
-                               stride_range::Int=4)
+                               stride_range::Int=4,
+                               magStdDeg::Float64=5.0)
   #
   addVariable!(dfg, :x0, Pose2)
 
@@ -228,7 +229,7 @@ function initializeAUV_noprior(dfg::AbstractDFG,
   dashboard[:realTimeSlack] = Millisecond(0)
 
   dashboard[:magBuffer] = CircularBuffer{Tuple{DateTime, Float64, Vector{Bool}}}(20)
-  dashboard[:magNoise] = deg2rad(5)
+  dashboard[:magNoise] = deg2rad(magStdDeg)
 
   dashboard[:lblBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,1}, Vector{Bool}}}(dashboard[:RANGESTRIDE]+4)
 

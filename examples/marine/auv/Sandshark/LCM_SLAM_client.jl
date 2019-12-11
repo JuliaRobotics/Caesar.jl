@@ -38,6 +38,10 @@ function parse_commandline()
             help = "Every how many poses to try add a range measurement"
             arg_type = Int
             default = 4
+        "--magStdDeg"
+            help = "Magnetometer standard deviation"
+            arg_type = Float64
+            default = 5.0
         "--iters", "-i"
             help = "LCM messages to handle"
             arg_type = Int
@@ -99,6 +103,10 @@ function main(;parsed_args=parse_commandline(),
   # scale the odometry noise
   dashboard[:odoCov] .*= parsed_args["kappa_odo"]
 
+  # store dead reckon tether values in a file.
+  Base.mkpath(getLogPath(fg))
+  DRTLog = open(joinLogPath(fg,"DRT.csv"),"w")
+
   # prepare the solver in the background
   ST = manageSolveTree!(fg, dashboard, dbg=dbg)
 
@@ -120,10 +128,10 @@ function main(;parsed_args=parse_commandline(),
   setTimestamp!(getVariable(fg, :x0), lblKeys[1])
 
   # add starting prior
-  addFactor!(fg, [:x0;], PriorPose2(MvNormal(initPose,Matrix(Diagonal([0.1; 0.1; 0.1].^2)))), autoinit=false)
+  addFactor!(fg, [:x0;], PriorPose2(MvNormal(initPose,Matrix(Diagonal([0.5; 0.5; 1.0].^2)))), autoinit=false)
 
   @info "Start with the real-time tracking aspect..."
-  subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard), pose_t)
+  subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard, DRTLog), pose_t)
   # subscribe(lcm, "AUV_ODOMETRY_GYROBIAS", (c,d)->pose_hdlr(c,d,fg,dashboard), pose_t)
   subscribe(lcm, "AUV_RANGE_CORRL",      (c,d)->range_hdlr(c,d,fg,dashboard), raw_t)
   # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
@@ -151,8 +159,9 @@ function main(;parsed_args=parse_commandline(),
         holdTimeRTS = now()
         while 1 < length(dashboard[:poseSolveToken].data)  # !HSMCanContinue(dashboard)
             # while dashboard[:canTakePoses] == HSMBlocking && dashboard[:solveInProgress] == SSMSolving
+          flush(DRTLog)
           @info "delay for solver, canTakePoses=$(dashboard[:canTakePoses]), solveInPrg.=$(dashboard[:solveInProgress]), RTS=$(dashboard[:realTimeSlack])"
-          sleep(0.5)
+          sleep(0.2)
         end
         # real time slack update -- this is the compute overrun
         dashboard[:realTimeSlack] += now()-holdTimeRTS
@@ -160,6 +169,7 @@ function main(;parsed_args=parse_commandline(),
         dt = (dashboard[:lastMsgTime]-startT)
         nMsgT = startT + typeof(dt)(round(Int, dt.value/logSpeed)) + dashboard[:realTimeSlack]
         while now() < (nMsgT + offsetT)
+          flush(DRTLog)
           sleep(0.01)
         end
       end
@@ -167,6 +177,7 @@ function main(;parsed_args=parse_commandline(),
 
   # close UDP listening on LCM other file handles
   close(lcm)
+  close(DFTLog)
 
   # close out solver and other loops
   dashboard[:loopSolver] = false

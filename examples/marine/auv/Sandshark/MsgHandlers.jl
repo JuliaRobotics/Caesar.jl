@@ -117,15 +117,22 @@ function range_hdlr(channel::String, msgdata::raw_t, dfg::AbstractDFG, dashboard
   nothing
 end
 
-function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict)
+function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict, drtlog)
   dashboard[:lastMsgTime] = unix2datetime(msgdata.utime*1e-6)
   # "accumulateDiscreteLocalFrame! on all RTTs" |> println
   for (vsym, rtt) in dashboard[:rttMpp]
     accumulateDiscreteLocalFrame!(rtt, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0)
   end
 
-  # check if a new pose and factor must be added?
+  # get message time
   odoT = unix2datetime(msgdata.utime*1e-6)
+
+  # write the latest DRT solution to file
+  drtFnc = string(dashboard[:rttCurrent][1], dashboard[:rttCurrent][2], "f1") |> Symbol
+  val = accumulateFactorMeans(dfg, [drtFnc;])
+  println(drtlog, "$odoT, $(val[1]),$(val[2]),$(val[3])")
+
+  # check if a new pose and factor must be added?
   if (dashboard[:odoTime] + dashboard[:poseRate]) <= odoT
     # update odo time
     dashboard[:odoTime] = odoT
