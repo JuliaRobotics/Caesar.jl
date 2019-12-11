@@ -183,7 +183,10 @@ function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw
 end
 
 
-function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
+function initializeAUV_noprior(dfg::AbstractDFG,
+                               dashboard::Dict;
+                               stride_range::Int=4)
+  #
   addVariable!(dfg, :x0, Pose2)
 
   # Pinger location is [17; 1.8]
@@ -199,6 +202,7 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
   dashboard[:rttMpp] = Dict{Symbol,MutablePose2Pose2Gaussian}(:x0 => drec)
   dashboard[:rttCurrent] = (:x0, :drt_0)
   # standard odo process noise levels
+  # TODO, debug and refine cont2disc
   dashboard[:Qc_odo] = Diagonal([0.01;0.01;0.001].^2) |> Matrix
 
   dashboard[:odoTime] = unix2datetime(0)
@@ -215,7 +219,7 @@ function initializeAUV_noprior(dfg::AbstractDFG, dashboard::Dict)
 
   dashboard[:poseSolveToken] = Channel{Symbol}(3)
 
-  dashboard[:RANGESTRIDE] = 4 # add a range measurement every 3rd pose
+  dashboard[:RANGESTRIDE] = stride_range # add a range measurement every xth pose
   dashboard[:rangesBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}(dashboard[:RANGESTRIDE]+4)
   dashboard[:rangeCount] = 0
 

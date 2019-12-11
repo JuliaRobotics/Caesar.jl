@@ -34,6 +34,10 @@ function parse_commandline()
             help = "Scale the odoemtry covariance"
             arg_type = Float64
             default = 1.0
+        "--stride_range"
+            help = "Every how many poses to try add a range measurement"
+            arg_type = Int
+            default = 4
         "--iters", "-i"
             help = "LCM messages to handle"
             arg_type = Int
@@ -90,7 +94,7 @@ function main(;parsed_args=parse_commandline(),
 
   # fg object and initialization
   fg = initfg()
-  initializeAUV_noprior(fg, dashboard)
+  initializeAUV_noprior(fg, dashboard, stride_range=parsed_args["stride_range"])
 
   # scale the odometry noise
   dashboard[:odoCov] .*= parsed_args["kappa_odo"]
