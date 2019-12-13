@@ -1,7 +1,7 @@
 # AUV msg slam client model
 
 using Distributed
-addprocs(4)
+addprocs(8)
 
 using DistributedFactorGraphs
 using Caesar, RoME
@@ -69,19 +69,19 @@ include(joinpath(@__DIR__, "Plotting.jl"))
 
 # list all cases in which message handling can continue
 # return true if MSG handler can continue
-function HSMCanContinue(dashboard::Dict)::Bool
-  if dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMSolving ||
-     dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMSolving ||
-     dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMReady ||
-     dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMSolving ||
-     dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMConsumingSolvables ||
-     dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMConsumingSolvables ||
-     dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMConsumingSolvables
-    #
-    return true
-  end
-  return false
-end
+# function HSMCanContinue(dashboard::Dict)::Bool
+#   if dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMSolving ||
+#      dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMSolving ||
+#      dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMReady ||
+#      dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMSolving ||
+#      dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMConsumingSolvables ||
+#      dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMConsumingSolvables ||
+#      dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMConsumingSolvables
+#     #
+#     return true
+#   end
+#   return false
+# end
 
 
 function main(;parsed_args=parse_commandline(),
@@ -177,7 +177,7 @@ function main(;parsed_args=parse_commandline(),
 
   # close UDP listening on LCM other file handles
   close(lcm)
-  close(DFTLog)
+  close(DRTLog)
 
   # close out solver and other loops
   dashboard[:loopSolver] = false
