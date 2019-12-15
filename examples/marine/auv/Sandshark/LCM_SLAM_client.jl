@@ -45,7 +45,7 @@ function parse_commandline()
         "--iters", "-i"
             help = "LCM messages to handle"
             arg_type = Int
-            default = 5000
+            default = 15000
         "--speed", "-s"
             help = "Target playback speed for LCMLog"
             arg_type = Float64
@@ -233,6 +233,9 @@ ensureAllInitialized!(fg)
 
 # Check how long not solvable tail is?
 # map(x->(x,isSolvable(getVariable(fg,x))), getLastPoses(fg, filterLabel=r"x\d", number=15))
+
+# after all initialized
+plb = plotSandsharkFromDFG(fg)
 
 
 ## add reference layer
