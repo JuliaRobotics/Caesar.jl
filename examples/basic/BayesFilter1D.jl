@@ -19,7 +19,7 @@ using IncrementalInference
 
 
 
-function forwardConvolve(x0::Array{Float64,2}, model)
+function forwardConvolve(X0::Array{Float64,2}, model)
 
   fg = initfg()
 
