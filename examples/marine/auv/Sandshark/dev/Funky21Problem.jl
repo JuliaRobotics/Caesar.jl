@@ -198,7 +198,7 @@ plotTreeProduct(fg, tree, :x25)
 #   @show cliq.attributes["data"].directFrtlMsgIDs
 #   @show cliq.attributes["data"].directPriorMsgIDs
 #   sp = Gadfly.spy(mat)
-#   push!(sp.guides, Gadfly.Guide.title("$(cliq.attributes["label"]) || $(cliq.attributes["data"].frontalIDs) :$(cliq.attributes["data"].conditIDs)"))
+#   push!(sp.guides, Gadfly.Guide.title("$(cliq.attributes["label"]) || $(cliq.attributes["data"].frontalIDs) :$(cliq.attributes["data"].separatorIDs)"))
 #   push!(sp.guides, Gadfly.Guide.xlabel("fmcmcs $(cliq.attributes["data"].itervarIDs)"))
 #   push!(sp.guides, Gadfly.Guide.ylabel("lcl=$(numlcl) || msg=$(size(IIF.getCliqMsgMat(cliq),1))" ))
 #   return sp
