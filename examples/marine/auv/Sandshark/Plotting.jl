@@ -30,9 +30,10 @@ end
 
 
 function plotSandsharkFromDFG(dfg::AbstractDFG;
-                              radix::Float64=1.8, 
+                              radix::Float64=1.8,
                               scale::Float64=0.4,
-                              spscale::Float64=1.0)
+                              spscale::Float64=1.0,
+                              drawTriads::Bool=true  )
   # bearing range factors
   brf = ls(dfg, Pose2Point2BearingRange)
   #variables and poses connected to br factors
@@ -43,7 +44,7 @@ function plotSandsharkFromDFG(dfg::AbstractDFG;
   # get body frame beam estimate
   brfacts = Dict{Symbol, BallTreeDensity}()
 
-  PL =  drawPosesLandms(dfg, spscale=spscale, contour=false, meanmax=:mean)
+  PL =  drawPosesLandms(dfg, spscale=spscale, contour=false, meanmax=:mean, drawTriads=drawTriads)
 
   # TODO: not matched properly
   for i in 1:length(brposes)
@@ -177,12 +178,12 @@ function plotFrontendTiming(wtdsh)
   # Gadfly.set_default_plot_size(45cm,25cm)
 
   pl = Gadfly.plot(
-    Gadfly.layer(x=ttt,y=(wth .|> Int)*0.333, Geom.line),
-    Gadfly.layer(x=ttt,y=(wtl .|> Int)*0.5, Geom.line, Theme(default_color=colorant"khaki4")),
     Gadfly.layer(x=ttt,y=(wts .|> Int)*0.5.+1, Geom.line, Theme(default_color=colorant"red")),
-    Gadfly.layer(x=ttt,y=(lpn.%10)*0.1.-1, Geom.line, Theme(default_color=colorant"magenta")),
+    Gadfly.layer(x=ttt,y=(wtl .|> Int)*0.5, Geom.line, Theme(default_color=colorant"khaki4")),
+    Gadfly.layer(x=ttt,y=(wth .|> Int)*0.333.-1, Geom.line),
+    Gadfly.layer(x=ttt,y=(lpn.%10)*0.1.-2, Geom.line, Theme(default_color=colorant"magenta")),
     # Gadfly.layer(x=ttt,y=(wtr.%10)*0.1.-2, Geom.line, Theme(default_color=colorant"green")),
-    Gadfly.layer(x=ttt,y=wttn.-2, Geom.line, Theme(default_color=colorant"green")),
+    Gadfly.layer(x=ttt,y=wttn.-3, Geom.line, Theme(default_color=colorant"green")),
   )
 end
 # Gadfly.plot(y=wtt, Geom.line)

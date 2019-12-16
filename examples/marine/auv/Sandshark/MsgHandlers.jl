@@ -3,7 +3,7 @@
 
 ## middleware handler (callback) functions
 
-function lbl_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict, lblDict::Dict)
+function lbl_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict, lblDict::Dict, lbllog)
   msgtime = unix2datetime(msgdata.utime*1e-6)
   dashboard[:lastMsgTime] = msgtime
 
@@ -15,6 +15,8 @@ function lbl_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard:
   # add to the ciruclar buffer
   push!( dashboard[:lblBuffer], (msgtime, (msgdata.pos[1:2] |> deepcopy), Bool[false;]) )
 
+  # also record in log for later printing
+  println(lbllog, "$msgtime, $(msgdata.pos[1]),$(msgdata.pos[2])")
 
   # check if any lbl can be added as prior to factor graph
   for lbl in dashboard[:lblBuffer]

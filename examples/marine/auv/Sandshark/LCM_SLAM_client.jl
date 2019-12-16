@@ -10,6 +10,7 @@ using LCMCore, BotCoreLCMTypes
 using Dates
 using DataStructures
 using Logging
+using JSON2
 
 using ArgParse
 
@@ -103,16 +104,25 @@ function main(;parsed_args=parse_commandline(),
   # scale the odometry noise
   dashboard[:odoCov] .*= parsed_args["kappa_odo"]
 
-  # store dead reckon tether values in a file.
+  # store args, dead reckon tether, and lbl values in files.
   Base.mkpath(getLogPath(fg))
+  # write the arguments to file
+  argsfile = open(joinLogPath(fg,"args.txt"),"w")
+  println(argsfile, ARGS)
+  println(argsfile, parsed_args)
+  close(argsfile)
+  argsfile = open(joinLogPath(fg,"args.json"),"w")
+  JSON2.write(argsfile, parsed_args)
+  close(argsfile)
   DRTLog = open(joinLogPath(fg,"DRT.csv"),"w")
+  LBLLog = open(joinLogPath(fg,"LBL.csv"),"w")
 
   # prepare the solver in the background
   ST = manageSolveTree!(fg, dashboard, dbg=dbg)
 
   # middleware handlers
   # start with LBL and magnetometer
-  subscribe(lcm, "AUV_LBL_INTERPOLATED", (c,d)->lbl_hdlr(c,d,fg,dashboard,lblDict), pose_t)
+  subscribe(lcm, "AUV_LBL_INTERPOLATED", (c,d)->lbl_hdlr(c,d,fg,dashboard,lblDict,LBLLog), pose_t)
   subscribe(lcm, "AUV_MAGNETOMETER",     (c,d)->mag_hdlr(c,d,fg,dashboard,magDict), pose_t)
 
   @info "get a starting position and mag orientation"
@@ -178,6 +188,7 @@ function main(;parsed_args=parse_commandline(),
   # close UDP listening on LCM other file handles
   close(lcm)
   close(DRTLog)
+  close(LBLLog)
 
   # close out solver and other loops
   dashboard[:loopSolver] = false
@@ -208,7 +219,7 @@ drawGraph(fg, filepath=joinpath(getLogPath(fg),"fg.pdf"), show=false)
 ##  Draw trajectory & Analyze solve run
 
 
-plb = plotSandsharkFromDFG(fg)
+plb = plotSandsharkFromDFG(fg, drawTriads=false)
 plb |> PDF(joinpath(getLogPath(fg),"traj.pdf"))
 # pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
 
@@ -235,7 +246,7 @@ ensureAllInitialized!(fg)
 # map(x->(x,isSolvable(getVariable(fg,x))), getLastPoses(fg, filterLabel=r"x\d", number=15))
 
 # after all initialized
-plb = plotSandsharkFromDFG(fg)
+plb = plotSandsharkFromDFG(fg, drawTriads=false)
 
 
 ## add reference layer
@@ -244,12 +255,25 @@ XX = (x->(getVal(solverData(getVariable(fg, x), :lbl))[1])).(posesyms)
 YY = (x->(getVal(solverData(getVariable(fg, x), :lbl))[2])).(posesyms)
 pl = Gadfly.layer(x=XX, y=YY, Geom.path, Theme(default_color=colorant"magenta"))
 union!(plb.layers, pl)
-plb |> PDF(joinpath(getLogPath(fg),"traj_ref.pdf"))
+plb |> PDF(joinLogPath(fg,"traj_ref.pdf"))
 
 
 
 
 saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
+
+
+
+## plot the DEAD RECKON THREAD
+
+drt_data = readdlm(joinLogPath(fg, "DRT.csv"), ',')
+
+XX = Float64.(drt_data[:,2])
+YY = Float64.(drt_data[:,3])
+
+pl = Gadfly.layer(x=XX, y=YY, Geom.path, Theme(default_color=colorant"green"))
+union!(plb.layers, pl)
+plb |> PDF(joinLogPath(fg,"traj_ref_drt.pdf"))
 
 
 
