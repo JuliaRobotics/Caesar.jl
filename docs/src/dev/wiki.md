@@ -11,7 +11,7 @@ PR PR PR
 
 ## Standardizing the API, verbNoun Definitions:
 
-https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Standard-Definitions-of-API-via-verbs-and-set-theory
+The API derives from a set of [standard definitions for `verb`s and `Noun`s, please see the developer wiki regarding these definitions](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Standard-Definitions-of-API-via-verbs-and-set-theory).
 
 ## Developer Wiki
 
