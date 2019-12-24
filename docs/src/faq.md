@@ -5,7 +5,7 @@ The [JuliaLang](https://julialang.org/) and ([JuliaPro](https://juliacomputing.c
 The algorithmic code is implemented in Julia for many reasons, such as agile development, high level syntax, performance, type safety, multiple dispatch replacement for [object oriented](https://invenia.github.io/blog/2019/10/30/julialang-features-part-1/), parallel computing, dynamic development, cross compilable (with gcc and clang) and foundational cross-platform ([LLVM](http:///www.llvm.org)) technologies.  
 See [JuliaCon2018 highlights video](https://www.youtube.com/watch?v=baR02tlea5Y).  Julia can be thought of as either {C+, Mex (done right), or as a modern Fortran replacement}.  
 
-### Is Caesar.jl limited to Julia? No.
+### Can Caesar.jl be used in other languages beyond Julia? Yes.
 The Caesar.jl project is expressly focused on making this algorithmic code available to [C/Fortran](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/)/[C++](https://juliacomputing.com/blog/2017/12/01/cxx-and-cxxwrap-intro.html)/C#/[Python](https://github.com/JuliaPy/PyCall.jl)/[Java](https://github.com/JuliaInterop/JavaCall.jl)/JS.  Julia itself offers [many additional interops](https://github.com/JuliaInterop).  ZMQ and HTTP/WebSockets are the standardized interfaces of choice, please see [details at the multi-language section](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/)).  Consider opening issues or getting in touch for more information.
 
 ### Just-In-Time Compiling (i.e. why are first runs slow?)
@@ -35,16 +35,16 @@ ROS integration is a priority for this project and will accompany the so-called 
 
 > **WIP** Please see work on an initial PoC (still using PyCall) via our [wiki developer docs here](https://github.com/JuliaRobotics/Caesar.jl/wiki/ROS-PoC).
 
-### How does JSON-Schema work?
-
-Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).
-
 ### What is supersolve?
 
 When multiple numerical values/solutions exists for the (or nearly) same factor graph -- then solutions, including a reference solution (ground truth) can just be stacked in that variable.  See and comment on [a few cases here](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/182#issuecomment-545979307).
 
 ### Current Julia version, v1.2.x
 Caesar.jl and packages are currently [targeting Julia v1.2.x](https://julialang.org/downloads/) (4Q2019).
+
+### How does JSON-Schema work?
+
+Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).
 
 ### How to get Julia memory allocation points?
 
