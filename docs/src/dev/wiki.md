@@ -1,3 +1,13 @@
+# Developers Documentation
+
+## Standardizing the API, verbNoun Definitions:
+
+The API derives from a set of [standard definitions for `verb`s and `Noun`s, please see the developer wiki regarding these definitions](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Standard-Definitions-of-API-via-verbs-and-set-theory).
+
+## Design Wiki, Data and Architecture
+
+More developer zone material will be added here in the future, but for the time being check out the [Caesar Wiki](https://github.com/JuliaRobotics/Caesar.jl/wiki/Data-Design-for-Caesar-RoME-IIF).
+
 ## Developer's Poem
 
 ```
@@ -8,11 +18,3 @@ Happy travy,
 Sleepy travy, 
 PR PR PR 
 ```
-
-## Standardizing the API, verbNoun Definitions:
-
-The API derives from a set of [standard definitions for `verb`s and `Noun`s, please see the developer wiki regarding these definitions](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Standard-Definitions-of-API-via-verbs-and-set-theory).
-
-## Developer Wiki
-
-More developer zone material will be added here in the future, but for the time being check out the [Caesar Wiki](https://github.com/JuliaRobotics/Caesar.jl/wiki/Data-Design-for-Caesar-RoME-IIF).
