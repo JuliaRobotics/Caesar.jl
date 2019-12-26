@@ -8,6 +8,14 @@ The API derives from a set of [standard definitions for `verb`s and `Noun`s, ple
 
 More developer zone material will be added here in the future, but for the time being check out the [Caesar Wiki](https://github.com/JuliaRobotics/Caesar.jl/wiki/Data-Design-for-Caesar-RoME-IIF).
 
+## Parametric Solve Whiteboard
+
+https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Parametric-Solve-Whiteboard
+
+## Early PoC work on Tree based Initialization
+
+https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Tree-Based-Initialization
+
 ## Developer's Poem
 
 ```
