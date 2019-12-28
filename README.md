@@ -4,6 +4,10 @@
 
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
+# NOTICE
+
+DOCUMENTATION IS CURRENTLY BEING MOVED TO A DIFFERENT LOCATION THAN PREVIOUS DEFAULT, SHOULD BE REACHABLE AGAIN SOON (27 Dec 2019): juliarobotics.org
+
 # Weblink Info
 
 Click on the badges to follow web url links:
