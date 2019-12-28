@@ -3,7 +3,11 @@
 ### Why Julia
 The [JuliaLang](https://julialang.org/) and ([JuliaPro](https://juliacomputing.com/)) is an open-source Just-In-Time (JIT) & optionally precompiled, strongly-typed, and high-performance programming language.
 The algorithmic code is implemented in Julia for many reasons, such as agile development, high level syntax, performance, type safety, multiple dispatch replacement for [object oriented](https://invenia.github.io/blog/2019/10/30/julialang-features-part-1/), parallel computing, dynamic development, cross compilable (with gcc and clang) and foundational cross-platform ([LLVM](http:///www.llvm.org)) technologies.  
-See [JuliaCon2018 highlights video](https://www.youtube.com/watch?v=baR02tlea5Y).  Julia can be thought of as either {C+, Mex (done right), or as a modern Fortran replacement}.  
+See [JuliaCon2018 highlights video](https://www.youtube.com/watch?v=baR02tlea5Y).  Julia can be thought of as either {C+, Mex (done right), or as a modern Fortran replacement}.
+
+### Factor Graphs: why not just filter? 
+
+Why can't I just filter, or what is the connection with FGs? See [the "Principles" section](https://juliarobotics.org/Caesar.jl/latest/principles/filterCorrespondence/) in the documentation. 
 
 ### Can Caesar.jl be used in other languages beyond Julia? Yes.
 The Caesar.jl project is expressly focused on making this algorithmic code available to [C/Fortran](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/)/[C++](https://juliacomputing.com/blog/2017/12/01/cxx-and-cxxwrap-intro.html)/C#/[Python](https://github.com/JuliaPy/PyCall.jl)/[Java](https://github.com/JuliaInterop/JavaCall.jl)/JS.  Julia itself offers [many additional interops](https://github.com/JuliaInterop).  ZMQ and HTTP/WebSockets are the standardized interfaces of choice, please see [details at the multi-language section](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/)).  Consider opening issues or getting in touch for more information.
