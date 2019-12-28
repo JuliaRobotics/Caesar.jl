@@ -54,6 +54,15 @@ The Caesar framework has the following features:
 
 See related works on [the literature page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion -- also consult the Caesar.jl Slack channel to follow/engage with community discussions.
 
+!!! note
+
+    Please help improve this documentation--if something confuses you, chances
+    are you're not alone. It's easy to do as you read along: just click on the
+    "Edit on GitHub" link above, and then
+    [edit the files directly in your browser](https://help.github.com/articles/editing-files-in-another-user-s-repository/).
+    Your changes will be vetted by developers before becoming permanent, so don't
+    worry about whether you might say something wrong.
+
 ## Next Steps
 For installation steps, examples/tutorials, and concepts please refer to the following pages:
 
@@ -66,15 +75,6 @@ Pages = [
 ]
 Depth = 3
 ```
-
-!!! note
-
-    Please help improve this documentation--if something confuses you, chances
-    are you're not alone. It's easy to do as you read along: just click on the
-    "Edit on GitHub" link above, and then
-    [edit the files directly in your browser](https://help.github.com/articles/editing-files-in-another-user-s-repository/).
-    Your changes will be vetted by developers before becoming permanent, so don't
-    worry about whether you might say something wrong.
 
 Please file issues here as needed to help resolve problems for everyone! We are tracking improvements and new endeavors on [the Issues page](https://github.com/JuliaRobotics/Caesar.jl/issues) of this repository -- issues frequently are moved upstream into each of the indivisual library packages, while Caesar.jl frequently acts as a catchall to help get problems resolved.
 
