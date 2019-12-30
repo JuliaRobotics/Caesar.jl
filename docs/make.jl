@@ -40,12 +40,12 @@ makedocs(
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
         ],
         "Principles" => [
-            "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
-            "Generic Convolutions" => "principles/approxConvDensities.md",
             "Filters vs. Graphs" => "principles/filterCorrespondence.md",
+            "Generic Convolutions" => "principles/approxConvDensities.md",
+            "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
             "Bayes (Junction) tree" => "principles/bayestreePrinciples.md",
-            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
             "Advanced Bayes Tree Topics" => "principles/initializingOnBayesTree.md",
+            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
         ],
         "How to Expand?" => [
             "Custom Variables and Factors" => "concepts/adding_variables_factors.md",
