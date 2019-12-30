@@ -237,8 +237,8 @@ end
 parsed_args=parse_commandline()
 
 # ## Uncomment for different defaults in Juno
-parsed_args["iters"] = 30000
-parsed_args["speed"] = 1.0
+# parsed_args["iters"] = 30000
+# parsed_args["speed"] = 1.0
 # parsed_args["recordTrees"] = false
 
 
@@ -259,7 +259,6 @@ drawGraph(fg, filepath=joinpath(getLogPath(fg),"fg.pdf"), show=false)
 
 
 ##  Draw trajectory & Analyze solve run
-
 
 plb = plotSandsharkFromDFG(fg, drawTriads=false)
 plb |> PDF(joinpath(getLogPath(fg),"traj.pdf"))
