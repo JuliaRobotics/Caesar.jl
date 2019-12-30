@@ -4,10 +4,6 @@
 
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
-# NOTICE
-
-DOCUMENTATION IS CURRENTLY BEING MOVED TO A DIFFERENT LOCATION THAN PREVIOUS DEFAULT, SHOULD BE REACHABLE AGAIN SOON (27 Dec 2019): juliarobotics.org
-
 # Weblink Info
 
 Click on the badges to follow web url links:
@@ -75,6 +71,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [iif-cov-img]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl/coverage.svg?branch=master
 [iif-cov-url]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl?branch=master
 [iif-build-img]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=master
+[iif-build-v08]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.8
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
 [iff-stable]: https://img.shields.io/badge/2019Q4-v0.8.x-green.svg
