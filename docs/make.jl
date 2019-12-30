@@ -10,7 +10,7 @@ using RoMEPlotting
 
 # until namespaces are properly figured out
 using DistributedFactorGraphs
-import DistributedFactorGraphs: showFactor
+import DistributedFactorGraphs: showFactor, showVariable
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
