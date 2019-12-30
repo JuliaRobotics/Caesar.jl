@@ -54,6 +54,6 @@ Newly created page to list related references and additional literature pertaini
 
 [4.1]  Van Trees, H.L., 2004. Optimum array processing: Part IV of detection, estimation, and modulation theory. John Wiley & Sons.
 
-[4.2a]  Dowling, D.R., 2013. Acoustic Blind Deconvolution and Unconventional Nonlinear Beamforming in Shallow Ocean Environments. MICHIGAN UNIV ANN ARBOR DEPT OF MECHANICAL ENGINEERING.
+[4.2a]  Dowling, D.R., 2013. [Acoustic Blind Deconvolution and Unconventional Nonlinear Beamforming in Shallow Ocean Environments](https://apps.dtic.mil/dtic/tr/fulltext/u2/a598859.pdf). MICHIGAN UNIV ANN ARBOR DEPT OF MECHANICAL ENGINEERING.
 
-[4.2b]  Hossein Abadi, S., 2013. Blind deconvolution in multipath environments and extensions to remote source localization.
+[4.2b]  Hossein Abadi, S., 2013. Blind deconvolution in multipath environments and extensions to remote source localization, [paper](https://asa.scitation.org/doi/pdf/10.1121/1.3688502?class=pdf), [thesis](https://deepblue.lib.umich.edu/bitstream/handle/2027.42/102443/shimah_1.pdf?sequence=1&isAllowed=y).
