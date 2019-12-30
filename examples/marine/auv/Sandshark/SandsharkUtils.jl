@@ -1,5 +1,36 @@
 # utility functions needed for sandshark
 
+using DelimitedFiles
+using Interpolations
+using ProgressMeter
+
+
+
+# Accumulate delta X values using FGOS
+# TODO, refactor into RoME
+function devAccumulateOdoPose2(DX::Array{Float64,2},
+                               X0::Vector{Float64}=zeros(3);
+                               P0=1e-3*Matrix(LinearAlgebra.I, 3,3),
+                               Qc=1e-6*Matrix(LinearAlgebra.I, 3,3),
+                               dt::Float64=1.0  )
+  #
+  # entries are rows with columns dx,dy,dtheta
+  @assert size(DX,2) == 3
+  mpp = MutablePose2Pose2Gaussian(MvNormal(X0, P0) )
+  nXYT = zeros(size(DX,1), 3)
+  for i in 1:size(DX,1)
+    RoME.accumulateDiscreteLocalFrame!(mpp,DX[i, :],Qc,dt)
+    nXYT[i,:] .= mpp.Zij.μ
+  end
+
+  return nXYT
+end
+
+
+
+
+@enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
+
 
 datadir = joinpath(ENV["HOME"],"data","sandshark","full_wombat_2018_07_09","extracted")
 matcheddir = joinpath(datadir, "matchedfilter", "particles")
@@ -114,7 +145,7 @@ end
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
 
-function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise; TSTART=356, TEND=1200)
+function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise; TSTART=356, TEND=1200, SNRfloor::Float64=0.6, STRIDE::Int=4)
   #
   ## Caching factors
   ppbrDict = Dict{Int, Pose2Point2BearingRange}()
@@ -125,7 +156,7 @@ function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw
 
   XX = collect(range(-pi,pi,length=1000))
 
-  epochs = timestamps[TSTART:4:TEND]
+  epochs = timestamps[TSTART:STRIDE:TEND]
   lastepoch = 0
   @showprogress "preparing data" for ep in epochs
     # @show ep
@@ -164,7 +195,7 @@ function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw
     dvmf ./= cumsum(dvmf)[end]
     dvmf .= dvmf.^2
     dvmf ./= cumsum(dvmf)[end]
-    range_bss = AliasingScalarSampler(rawmf[:,1], dvmf, SNRfloor=0.6) # exp.(rawmf[:,2])
+    range_bss = AliasingScalarSampler(rawmf[:,1], dvmf, SNRfloor=SNRfloor) # exp.(rawmf[:,2])
 
     # prep the factor functions
     ppbrDict[ep] = Pose2Point2BearingRange(aziprob, range_bss) # rangeprob
@@ -174,4 +205,158 @@ function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw
   end
   return epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV
 end
+
+
+function initializeAUV_noprior(dfg::AbstractDFG,
+                               dashboard::Dict;
+                               stride_range::Int=4,
+                               magStdDeg::Float64=5.0,
+                               stride_solve::Int=10 )
+  #
+  addVariable!(dfg, :x0, Pose2)
+
+  # Pinger location is [17; 1.8]
+  addVariable!(dfg, :l1, Point2, solvable=0)
+  beaconprior = PriorPoint2( MvNormal([17; 1.8], Matrix(Diagonal([0.1; 0.1].^2)) ) )
+  addFactor!(dfg, [:l1], beaconprior, autoinit=true, solvable=0)
+
+  addVariable!(dfg, :drt_0, Pose2, solvable=0)
+  drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
+  addFactor!(dfg, [:x0; :drt_0], drec, solvable=0, autoinit=false)
+
+  # reference odo solution
+  addVariable!(dfg, :drt_ref, Pose2, solvable=0)
+  drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
+  addFactor!(dfg, [:x0; :drt_ref], drec, solvable=0, autoinit=false)
+  dashboard[:drtOdoRef] = (:x0, :drt_ref, drec)
+
+  # store current real time tether factor
+  dashboard[:drtMpp] = Dict{Symbol,MutablePose2Pose2Gaussian}(:x0 => drec)
+  dashboard[:drtCurrent] = (:x0, :drt_0)
+  # standard odo process noise levels
+  # TODO, debug and refine cont2disc
+  dashboard[:Qc_odo] = Diagonal([0.01;0.01;0.001].^2) |> Matrix
+
+  dashboard[:odoTime] = unix2datetime(0)
+  dashboard[:poseRate] = Second(1)
+  dashboard[:lastPose] = :x0
+
+  dashboard[:solvables] = Channel{Vector{Symbol}}(100)
+
+  dashboard[:loopSolver] = true
+
+  dashboard[:SOLVESTRIDE] = stride_solve # add a range measurement every xth pose
+  dashboard[:poseStride] = 0
+  dashboard[:canTakePoses] = HSMReady
+  dashboard[:solveInProgress] = SSMReady
+
+  dashboard[:poseSolveToken] = Channel{Symbol}(3)
+
+  dashboard[:RANGESTRIDE] = stride_range # add a range measurement every xth pose
+  dashboard[:rangesBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,2}, Vector{Bool}}}(dashboard[:RANGESTRIDE]+4)
+  dashboard[:rangeCount] = 0
+
+  dashboard[:SNRfloor] = 0.6
+
+  dashboard[:realTimeSlack] = Millisecond(0)
+
+  dashboard[:magBuffer] = CircularBuffer{Tuple{DateTime, Float64, Vector{Bool}}}(20)
+  dashboard[:magNoise] = deg2rad(magStdDeg)
+
+  dashboard[:lblBuffer] = CircularBuffer{Tuple{DateTime, Array{Float64,1}, Vector{Bool}}}(dashboard[:RANGESTRIDE]+4)
+
+  dashboard[:odoCov] = Matrix{Float64}(Diagonal([0.5;0.3;0.2].^2))
+
+  nothing
+end
+
+
+function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
+
+  @info "logpath=$(getLogPath(dfg))"
+  getSolverParams(dfg).drawtree = true
+  getSolverParams(dfg).qfl = 3*dashboard[:SOLVESTRIDE]
+  getSolverParams(dfg).isfixedlag = true
+  getSolverParams(dfg).limitfixeddown = true
+
+  # allow async process
+  # getSolverParams(dfg).async = true
+
+  # prep with empty tree
+  tree = emptyBayesTree()
+
+  # needs to run asynchronously
+  ST = @async begin
+    while @show length(ls(dfg, :x0, solvable=1)) == 0
+      "waiting for prior on x0" |> println
+      sleep(1)
+    end
+    # keep solving
+    while dashboard[:loopSolver]
+      # add any newly solvables (atomic)
+      while !isready(dashboard[:solvables]) && dashboard[:loopSolver]
+        sleep(0.5)
+      end
+
+      # adjust latest RTT after solve, latest solved
+      lastSolved = sortDFG(ls(dfg, r"x\d", solvable=1))[end]
+      dashboard[:drtCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
+
+      #add any new solvables
+      while isready(dashboard[:solvables]) && dashboard[:loopSolver]
+        dashboard[:solveInProgress] = SSMConsumingSolvables
+        @show tosolv = take!(dashboard[:solvables])
+        for sy in tosolv
+          # setSolvable!(dfg, sy, 1) # see DFG #221
+          # TODO temporary workaround
+          getfnc = occursin(r"f", string(sy)) ? getFactor : getVariable
+          getfnc(dfg, sy).solvable = 1
+        end
+      end
+
+      @info "Ensure all new variables initialized"
+      ensureAllInitialized!(dfg)
+
+      dashboard[:solveInProgress] = SSMReady
+
+      # solve only every 10th pose
+      if 0 < length(dashboard[:poseSolveToken].data)
+      # if 10 <= dashboard[:poseStride]
+        @info "reduce problem size by disengaging older parts of factor graph"
+        setSolvableOldPoses!(dfg, youngest=getSolverParams(dfg).qfl+dashboard[:SOLVESTRIDE], oldest=100, solvable=0)
+
+        # set up state machine flags to allow overlapping or block
+        dashboard[:solveInProgress] = SSMSolving
+        # dashboard[:poseStride] = 0
+
+        # do the actual solve (with debug saving)
+        lasp = getLastPoses(dfg, filterLabel=r"x\d", number=1)[1]
+        !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_before_$(lasp)"))
+        tree, smt, hist = solveTree!(dfg, tree)
+        !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(lasp)"))
+
+        # unblock LCMLog reader for next STRIDE segment
+        dashboard[:solveInProgress] = SSMReady
+        # de-escalate handler state machine
+        dashboard[:canTakePoses] = HSMHandling
+
+        # remove a token to allow progress to continue
+        gotToken = take!(dashboard[:poseSolveToken])
+        "end of solve cycle, token=$gotToken" |> println
+      else
+        "sleep a solve cycle" |> println
+        sleep(0.2)
+      end
+    end
+  end
+  return ST
+end
+
+
+
+
+
+
+
+
 #

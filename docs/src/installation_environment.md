@@ -13,46 +13,7 @@ sudo apt-get install hdf5-tools
 sudo apt-get install graphviz imagemagick
 ```
 
-## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
-
-Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).
-
-## The "I Know Julia" Installation (TL;DR)
-
-### Install Inference Tools
-
-Add Caesar to your Julia packages, you can install the metadata registered package 'Caesar' in Julia 1.0 with:
-```julia
-julia> ] # to enable package manager
-(v1.0) pkg> add Caesar
-```
-
-Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
-```julia
-# the multimodal incremental smoothing and mapping solver
-(v1.0) pkg> test IncrementalInference
-...
-# robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
-(v1.0) pkg> test RoME
-...
-# umbrella framework with interaction tools and more -- allows stand alone and server based solving
-(v1.0) pkg> test Caesar
-...
-```
-
-### Install Visualization Tools
-
-RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
-```julia
-(v1.0) pkg> add RoMEPlotting
-
-# separately
-(v1.0) pkg> add Arena#master
-```
-
-> **Note** currently requires `Arena#master` branch (2019Q2).
-
-## The "I want a Development Environment from Scratch" Install
+## New to Julia and want a full Development Install
 
 ### Local Installation of Julia
 
@@ -155,6 +116,19 @@ Pkg.develop(PackageSpec(url="https://github.com/JuliaRobotics/Caesar.jl.git"))
 Unless you change the default environment variable `JULIA_PKG_DIR`, all packages (git repos) are cloned/installed to `~/.julia`.
 You can work with the packages as regular git repositories there.
 
+
+### Install Visualization Tools
+
+RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
+```julia
+(v1.0) pkg> add RoMEPlotting
+
+# separately
+(v1.0) pkg> add Arena#master
+```
+
+> **Note** currently requires `Arena#master` branch (2019Q2).
+
 ## Install Visualization Utils (e.g. Arena.jl)
 
 Visualizations were removed from Caesar and moved to a new package [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) instead.
@@ -193,6 +167,33 @@ julia> ] # to get package manager
 Alternatively, the `dev` command --- i.e. `(v1.0) pkg> dev RoMEPlotting` --- will clone the RoMEPlotting.jl git repository to your local `.julia/dev/RoMEPlotting` folder.
 
 > Last updated February 2019
+
+## The "I Know Julia" Installation (TL;DR)
+
+### Install Inference Tools
+
+Add Caesar to your Julia packages, you can install the metadata registered package 'Caesar' in Julia 1.0 with:
+```julia
+julia> ] # to enable package manager
+(v1.0) pkg> add Caesar
+```
+
+Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
+```julia
+# the multimodal incremental smoothing and mapping solver
+(v1.0) pkg> test IncrementalInference
+...
+# robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
+(v1.0) pkg> test RoME
+...
+# umbrella framework with interaction tools and more -- allows stand alone and server based solving
+(v1.0) pkg> test Caesar
+...
+```
+
+## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
+
+Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).
 
 ## Contributing, Issues, or Comments
 

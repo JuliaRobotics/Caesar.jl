@@ -4,10 +4,6 @@
 
 A modern robotic toolkit for localization and mapping -- reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).
 
-# UPGRADE NOTICE
-
-2019/07 -- We are targeting IncrementalInference.jl (IIF) v0.8.x as new and improved with most of the transitions sandboxed in the IIF v0.7.x cycle -- IIF v0.7.x does work but has a few lock step updates with DistributedFactorGraphs.jl v0.2.x as some functionality is being transferred.  IIF is upstream to both RoME.jl, Caesar.jl, and Arena.jl.  Please open issues for comments or help.
-
 # Weblink Info
 
 Click on the badges to follow web url links:
@@ -68,12 +64,14 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [r-cov-img]: https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master
 [r-cov-url]: https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
+[r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.5
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2019Q3-v0.4.x-green.svg
+[r-stable]: https://img.shields.io/badge/2019Q4-v0.5.x-green.svg
 
 [iif-cov-img]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl/coverage.svg?branch=master
 [iif-cov-url]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl?branch=master
 [iif-build-img]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=master
+[iif-build-v08]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.8
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
 [iff-stable]: https://img.shields.io/badge/2019Q4-v0.8.x-green.svg

@@ -13,6 +13,7 @@ using Reexport
 @reexport using Distributions
 
 using
+  Pkg,
   DelimitedFiles,
   Distributed,
   Statistics,

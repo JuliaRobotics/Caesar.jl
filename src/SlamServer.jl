@@ -4,7 +4,7 @@
 nprocs() > 1 ? thxl = 2 : nothing
 
 
-USEREADY=1
+USESOLVABLE=1
 include("SlamConvenienceFunctions.jl")
 
 

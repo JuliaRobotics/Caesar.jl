@@ -20,7 +20,7 @@ include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 
 # Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[50:2:70]
+epochs = timestamps[50:2:100]
 lastepoch = 0
 for ep in epochs
   global lastepoch
@@ -77,39 +77,12 @@ for ep in epochs
     index+=1
 end
 
-
-sortVarNested(ls(fg, r"x"))
-
 # Just adding the first one...
 addFactor!(fg, [:x0; :l1], ppbrDict[epochs[1]], autoinit=false)
 
 addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=false)
 
 addFactor!(fg, [:x10; :l1], ppbrDict[epochs[11]], autoinit=false)
-# 50 - 70
-
-writeGraphPdf(fg, show=true)
-
-
-getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
-getSolverParams(fg).multiproc = false
-getSolverParams(fg).downsolve = false
-getSolverParams(fg).async = true
-
-
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
-assignTreeHistory!(tree,hist)
-
-printCliqHistorySummary(tree, :x9)
-
-# makeCsmMovie(fg, tree)
-
-
-
-stuff = sandboxCliqResolveStep(tree,:l1,8)
-
-
 
 addFactor!(fg, [:x13; :l1], ppbrDict[epochs[14]], autoinit=false)
 
@@ -126,15 +99,11 @@ addFactor!(fg, [:x24; :l1], ppbrDict[epochs[25]], autoinit=false)
 addFactor!(fg, [:x25; :l1], ppbrDict[epochs[26]], autoinit=false)
 
 
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
-
-using RoMEPlotting
-
-drawPosesLandms(fg)
-
-drawTree(tree)
 
 
 plotKDE(ppbrDict[epochs[26]].bearing)
@@ -229,7 +198,7 @@ plotTreeProduct(fg, tree, :x25)
 #   @show cliq.attributes["data"].directFrtlMsgIDs
 #   @show cliq.attributes["data"].directPriorMsgIDs
 #   sp = Gadfly.spy(mat)
-#   push!(sp.guides, Gadfly.Guide.title("$(cliq.attributes["label"]) || $(cliq.attributes["data"].frontalIDs) :$(cliq.attributes["data"].conditIDs)"))
+#   push!(sp.guides, Gadfly.Guide.title("$(cliq.attributes["label"]) || $(cliq.attributes["data"].frontalIDs) :$(cliq.attributes["data"].separatorIDs)"))
 #   push!(sp.guides, Gadfly.Guide.xlabel("fmcmcs $(cliq.attributes["data"].itervarIDs)"))
 #   push!(sp.guides, Gadfly.Guide.ylabel("lcl=$(numlcl) || msg=$(size(IIF.getCliqMsgMat(cliq),1))" ))
 #   return sp

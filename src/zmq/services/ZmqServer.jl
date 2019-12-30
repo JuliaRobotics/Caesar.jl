@@ -26,7 +26,7 @@ global sessionverbs = [
     :getNode;
     :getVariable;
     :getFactor;
-    :setReady;
+    :setSolvable;
     :batchSolve;
     # per variable
     :setVarKDE; # needed for workaround on bad autoinit -- sorry

@@ -2,7 +2,9 @@
 
 This page describes how to visualize, study, test, and compare Bayes (Junction) tree concepts with special regard for variable ordering.
 
-**NOTE: docs under construction**
+## Why a Bayes (Juntion) tree
+
+The tree is algebraicly equivalent---but acyclic---structure to the factor graph:  i.) Inference is easier on on acyclic graphs; ii.) We can exploit Smart Message Passing benefits (known from the full conditional independence structure encoded in the tree), since the tree represents the "complete form" when marginalizing each variable one at a time (also known as elimination game, marginalization, also related to smart factors).  In loose terms, the Bayes (Junction) tree has implicit access to all Schur complements (if it parametric and linearized) of each variable to all others.  Please see [this page more information regarding advanced topics on the Bayes tree](https://www.juliarobotics.org/Caesar.jl/latest/principles/initializingOnBayesTree/).
 
 ## What is a Bayes (Junction) tree
 
@@ -62,7 +64,11 @@ generateTexTree(tree)
 ```
 An example Bayes (Junction) tree representation obtained through `generateTexTree(tree)` for the sample factor graph shown above can be seen in the following image.
 
-![add the fg2net2tree outline](https://user-images.githubusercontent.com/27132241/69210722-9e0c0380-0b53-11ea-9462-7964844b89b1.png)
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/27132241/69210722-9e0c0380-0b53-11ea-9462-7964844b89b1.png" width="200" border="0" />
+</p>
+```
 
 ### Visualizing Clique Adjacency Matrix
 
@@ -135,9 +141,31 @@ which will replace the `tree` object pointer to the new tree object after soluti
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 ```
-The color legend is currently recorded in an [issue thread here](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/349).
 
-
-### Clique State Machine
+## Clique State Machine
 
 The mmisam solver is based on a state machine design to handle the inter and intra clique operations during a variety of situations.  Use of the clique state machine (CSM) makes debugging, development, verification, and modification of the algorithm real easy.  Contact us for any support regarding modifications to the default algorithm.  For pre-docs on working with CSM, please see [IIF #443](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/443).
+
+### STATUS of a Clique
+
+CSM currently uses the following statusses for each of the cliques during the inference process.
+
+```julia
+[:initialized;:upsolved;:marginalized;:downsolved;:uprecycled]
+```
+
+### Bayes Tree Legend (from IIF)
+
+The color legend is currently recorded in an [issue thread here](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/349).
+
+* Blank / white -- uninitialized,
+* Red -- CPU working on clique's Chapman-Kolmogorov inference (up or down),
+* Light red -- completed upsolve,
+* Tomato -- partial dimension upsolve but finished,
+* Green -- trying to initialize,
+* Brown -- initialized but not solved yet (likely child cliques that depend on downward autoinit msgs),
+* Purple -- blocking on autoinit for more parent/sibling derived down msgs,
+* Turquoise -- blocking for on parent for downsolve msgs,
+* Light blue -- completed downsolve,
+* Blue -- fully marginalized clique that will not be updated during upsolve (maybe downsolved),
+* Orange -- recycled clique upsolve solution from previous tree passed into solveTree!

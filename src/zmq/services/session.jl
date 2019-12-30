@@ -6,7 +6,7 @@ export
   addFactorBearingRangeNormal,
   ls,
   getVert,
-  setReady,
+  setSolvable,
   batchSolve,
   # per variable
   setVarKDE, # needed for workaround on bad autoinit
@@ -33,7 +33,7 @@ function addVariable(configDict, fg, requestDict)::Dict{String, Any}
 
   @info "Adding variable of type '$(varRequest.variableType)' with id '$(varRequest.label)'..."
 
-  vnext = addVariable!(fg, varLabel, varType, N=(varRequest.N==nothing ? 100 : varRequest.N), ready=0, labels=Symbol.([varRequest.labels; "VARIABLE"]))
+  vnext = addVariable!(fg, varLabel, varType, N=(varRequest.N==nothing ? 100 : varRequest.N), solvable=0, labels=Symbol.([varRequest.labels; "VARIABLE"]))
   return Dict{String, Any}("status" => "OK", "id" => vnext.label)
 end
 
@@ -118,32 +118,32 @@ function getFactor(configDict, fg, requestDict)::Dict{String, Any}
     return JSON.parse(JSON.json(factor))
 end
 
-function setReady(configDict, fg, requestDict)::Dict{String, Any}
+function setSolvable(configDict, fg, requestDict)::Dict{String, Any}
     if !haskey(requestDict, "payload")
-        error("Request must contain a ReadyRequest in a field called 'payload'")
+        error("Request must contain a solvableRequest in a field called 'payload'")
     end
-    readyRequest = requestDict["payload"]
+    solvableRequest = requestDict["payload"]
     # Validation of payload
-    if !(typeof(readyRequest["isReady"]) <: Int)
-        error("SetReady request must set to ready to either 0 or 1.")
+    if !(typeof(solvableRequest["isSolvable"]) <: Int)
+        error("setsolvable request must set to solvable to either 0 or 1.")
     end
-    if !(readyRequest["isReady"] in [0, 1])
-        error("SetReady request must set to ready to either 0 or 1.")
+    if !(solvableRequest["isSolvable"] in [0, 1])
+        error("setsolvable request must set to solvable to either 0 or 1.")
     end
 
     # Action
-    if readyRequest["variables"]!=nothing
-        error("setReady does not support a request list yet.")
+    if solvableRequest["variables"]!=nothing
+        error("setSolvable does not support a request list yet.")
         #TODO: Fix to use getVariable/getFactor for requestDict["variables"]...
     end
     # Do specific variables
     for varLabel in DistributedFactorGraphs.ls(fg)
         v = DistributedFactorGraphs.getVariable(fg, varLabel)
-        v.ready = readyRequest["isReady"]
+        v.solvable = solvableRequest["isSolvable"]
     end
     for varLabel in DistributedFactorGraphs.lsf(fg)
         v = DistributedFactorGraphs.getFactor(fg, varLabel)
-        v.ready = readyRequest["isReady"]
+        v.solvable = solvableRequest["isSolvable"]
     end
 
     # Generate return payload

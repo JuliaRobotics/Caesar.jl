@@ -28,7 +28,7 @@ elements in Neo4j database.
 function getnewvertdict(conn, session::AbstractString, robot::AbstractString, user::AbstractString)
 
   loadtx = transaction(conn)
-  query = "match (n:$(session):$robot:$user)-[:DEPENDENCE]-(f:NEWDATA:$(session):$robot:$user:FACTOR) where n.ready=1 or f.ready=1 return distinct n, f"
+  query = "match (n:$(session):$robot:$user)-[:DEPENDENCE]-(f:NEWDATA:$(session):$robot:$user:FACTOR) where n.solvable=1 or f.solvable=1 return distinct n, f"
   cph = loadtx(query, submit=true)
   # loadresult = commit(loadtx)
   # @show cph.results[1]
@@ -78,7 +78,7 @@ function parseMergeVertAttr!(v::Graphs.ExVertex, elem)
     elseif k == :mongo_keys
       mongos = JSON.parse(va["val"])
       v.attributes[string(k)] = va["val"]
-    elseif k == :ready
+  elseif k == :solvable
       v.attributes[string(k)] = typeof(va["val"]) == Int ? va["val"] : parse(Int,va["val"])
     else
       @warn "setting $(k) to $(typeof(va["val"]))"
@@ -280,7 +280,6 @@ function populatenewvariablenodes!(fgl::G, newvertdict::SortedDict; N::Int=100) 
       uidl = elem[:frtend]["uid"]+1 # TODO -- remove +1 and allow :x0, :l0
       nlbsym = Symbol(string('x', uidl))
       initvals = 0.1*randn(3,N) # TODO -- fix init to proper values
-      # v = addVariable!(fgl, nlbsym, , 0.01*eye(3), N=N, ready=0, uid=uidl,api=localapi)
       push!(labels,"POSE")
     elseif elem[:frtend]["t"] == "L"
       @warn "using hack counter for LANDMARKS uid +200000"
@@ -292,7 +291,7 @@ function populatenewvariablenodes!(fgl::G, newvertdict::SortedDict; N::Int=100) 
     if !haskey(fgl.IDs, nlbsym) && nlbsym != Symbol()
       # @show nlbsym, size(initvals)
       # TODO remove initstdev, deprecated
-      v = addVariable!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, ready=0, uid=uidl,api=localapi)
+      v = addVariable!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, solvable=0, uid=uidl,api=localapi)
       mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, uidl, v, labels=labels)
       println()
     end
@@ -310,12 +309,12 @@ function populatenewfactornodes!(fgl::G, newvertdict::SortedDict, maxfuid::Int) 
   for (neoNodeId,elem) in newvertdict
     if elem[:frtend]["t"] == "F"
       # @show neoNodeId
-      if !haskey(elem,:ready)
-        # missing ready field
+      if !haskey(elem,:solvable)
+        # missing solvable field
         continue
       end
-      if Int(elem[:ready]["val"]) != 1
-        @warn "ready/val field not equal to 1"
+      if Int(elem[:solvable]["val"]) != 1
+        @warn "solvable/val field not equal to 1"
         continue
       end
       # verts relating to this factor
@@ -338,7 +337,7 @@ function populatenewfactornodes!(fgl::G, newvertdict::SortedDict, maxfuid::Int) 
       # the factor type
       usrfnc = !haskey(elem,:mongo_keys) ? recoverConstraintType(fgl.cg, elem[:frtend]) : recoverConstraintType(fgl.cg, elem[:frtend], mongokeys=JSON.parse(elem[:mongo_keys]["val"]) )
       fuid += 1
-      vert = addFactor!(fgl, verts, usrfnc, ready=0, api=localapi, uid=fuid, autoinit=true)
+      vert = addFactor!(fgl, verts, usrfnc, solvable=0, api=localapi, uid=fuid, autoinit=true)
       println("at populatenewfactornodes!, btwn="*elem[:frtend]["btwn"])
       mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(fgl.sessionname)"])
 
@@ -373,7 +372,7 @@ end
     $(SIGNATURES)
 
 match (n:\$(session))
-remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width
+remove n.backendset, n.solvable, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width
 set n :NEWDATA
 return n
 """
@@ -381,7 +380,7 @@ function resetentireremotesession(conn, session::AbstractString, robot::Abstract
   loadtx = transaction(conn)
   query = segment == "" ? "match (n:$(session):$robot:$user) " : "match (n:$(session):$robot:$user:$(segment)) "
   query = query*"where exists(n.frtend)
-           remove n.backendset, n.ready, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width, n.MAP_est
+           remove n.backendset, n.solvable, n.data, n.bigData, n.label, n.packedType, n.exVertexId, n.shape, n.width, n.MAP_est
            set n :NEWDATA"
   cph = loadtx(query, submit=true)
   loadresult = commit(loadtx)

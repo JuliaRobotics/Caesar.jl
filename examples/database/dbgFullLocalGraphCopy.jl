@@ -23,7 +23,7 @@ include(joinpath(dirname(@__FILE__),"blandauthremote.jl"))
 fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 
 
-# setDBAllReady!(fg)
+# setAllDBSolvable!(fg)
 setBackendWorkingSet!(session)
 
 fullLocalGraphCopy!(fg)

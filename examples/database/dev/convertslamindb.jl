@@ -17,7 +17,7 @@ session = addrdict["session"]
 segment = ""
 @show clearslamindbdata = addrdict["clearslamindb"]=="yes"
 
-info("remember to set n.ready=1")
+info("remember to set n.solvable=1")
 if !clearslamindbdata
   println("converting front end data")
   fg = initfg(sessionname=session, cloudgraph=cloudGraph)
@@ -46,5 +46,5 @@ println("Done.")
 #
 # conn = fg.cg.neo4j.connection
 # loadtx = transaction(conn)
-# query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) where n.ready=1 or f.ready=1 return distinct n, f"
+# query = "match (n:$(session))-[:DEPENDENCE]-(f:NEWDATA:$(session):FACTOR) where n.solvable=1 or f.solvable=1 return distinct n, f"
 # cph = loadtx(query, submit=true)

@@ -2,160 +2,72 @@
 # add more julia processes
 # nprocs() < 7 ? addprocs(7-nprocs()) : nothing
 
-using Caesar, RoME #, KernelDensityEstimate, IncrementalInference
-using Interpolations
+using KernelDensityEstimate, IncrementalInference
 using Distributions
-using DelimitedFiles
-
-using RoMEPlotting
-using Gadfly, DataFrames
-using ProgressMeter
 
 const TU = TransformUtils
-
-Gadfly.set_default_plot_size(35cm,25cm)
-
-include(joinpath(@__DIR__,"Plotting.jl"))
-include(joinpath(@__DIR__,"SandsharkUtils.jl"))
-
-
-# Step: Selecting a subset for processing and build up a cache of the factors.
-epochs = timestamps[50:2:100]
-lastepoch = 0
-for ep in epochs
-  global lastepoch
-  if lastepoch != 0
-    # @show interp_yaw(ep)
-    deltaAng = interp_yaw(ep) - interp_yaw(lastepoch)
-
-    wXi = TU.SE2([interp_x(lastepoch);interp_y(lastepoch);interp_yaw(lastepoch)])
-    wXj = TU.SE2([interp_x(ep);interp_y(ep);interp_yaw(ep)])
-    iDXj = se2vee(wXi\wXj)
-    NAV[ep] = iDXj
-    # println("$(iDXj[1]), $(iDXj[2]), $(iDXj[3])")
-
-    odoDict[ep] = Pose2Pose2(MvNormal(NAV[ep], Matrix(Diagonal([0.1;0.1;0.005].^2))))
-  end
-  rangepts = rangedata[ep][:]
-  rangeprob = kde!(rangepts)
-  azipts = azidata[ep][:,1]
-  aziprob = kde!(azipts)
-
-  # prep the factor functions
-  ppbrDict[ep] = Pose2Point2BearingRange(aziprob, rangeprob)
-  lastepoch = ep
-end
-
 
 ## Step: Building the factor graph
 fg = initfg()
 # Add a central beacon with a prior
-addVariable!(fg, :l1, Point2)
+addVariable!(fg, :l1, ContinuousScalar)
 # Pinger location is (0.6; -16)
-addFactor!(fg, [:l1], PriorPose2( MvNormal([0.6; -16], Matrix(Diagonal([0.1; 0.1].^2)) ) ), autoinit=false)
+addFactor!(fg, [:l1], IIF.Prior( Normal(0.6, 0.1) ))
 
-index = 0
+epochs = 50:2:100
+
+index=0
 for ep in epochs
-    global index
     curvar = Symbol("x$index")
-    addVariable!(fg, curvar, Pose2)
-
-    # xi -> l1 - nonparametric factor
-    # addFactor!(fg, [curvar; :l1], ppbrDict[ep], autoinit=false)
+    addVariable!(fg, curvar, ContinuousScalar)
 
     if ep != epochs[1]
       # Odo factor x(i-1) -> xi
-      addFactor!(fg, [Symbol("x$(index-1)"); curvar], odoDict[ep], autoinit=false)
+      addFactor!(fg, [Symbol("x$(index-1)"); curvar], LinearConditional(Normal(1, 0.1)))
     else
       # Prior to the first pose location (a "GPS" prior)
-      initLoc = [interp_x(ep);interp_y(ep);interp_yaw(ep)]
-      println("Adding a prior at $curvar, $initLoc")
-      addFactor!(fg, [curvar], PriorPose2( MvNormal(initLoc, Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=false)
+      addFactor!(fg, [curvar], IIF.Prior(Normal(5,5) ))
     end
     # Heading partial prior
-    # addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=false)
+    # addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))))
     index+=1
 end
 
 # Just adding the first one...
-addFactor!(fg, [:x0; :l1], ppbrDict[epochs[1]], autoinit=false)
+addFactor!(fg, [:x0; :l1], LinearConditional(Normal(1.0, 0.1)))
 
-addFactor!(fg, [:x5; :l1], ppbrDict[epochs[6]], autoinit=false)
+addFactor!(fg, [:x5; :l1], LinearConditional(Normal(1.0, 0.1)))
 
-addFactor!(fg, [:x10; :l1], ppbrDict[epochs[11]], autoinit=false)
+addFactor!(fg, [:x10; :l1], LinearConditional(Normal(1.0, 0.1)))
 
-addFactor!(fg, [:x13; :l1], ppbrDict[epochs[14]], autoinit=false)
+addFactor!(fg, [:x13; :l1], LinearConditional(Normal(1.0, 0.1)))
 
-addFactor!(fg, [:x15; :l1], ppbrDict[epochs[16]], autoinit=false)
+addFactor!(fg, [:x15; :l1], LinearConditional(Normal(1.0, 0.1)))
 
-addFactor!(fg, [:x17; :l1], ppbrDict[epochs[18]], autoinit=false)
-addFactor!(fg, [:x18; :l1], ppbrDict[epochs[19]], autoinit=false)
-addFactor!(fg, [:x19; :l1], ppbrDict[epochs[20]], autoinit=false)
-addFactor!(fg, [:x20; :l1], ppbrDict[epochs[21]], autoinit=false)
-addFactor!(fg, [:x21; :l1], ppbrDict[epochs[22]] , autoinit=false) # breaks it, autoinit=false!
-addFactor!(fg, [:x22; :l1], ppbrDict[epochs[23]], autoinit=false)
-addFactor!(fg, [:x23; :l1], ppbrDict[epochs[24]], autoinit=false)
-addFactor!(fg, [:x24; :l1], ppbrDict[epochs[25]], autoinit=false)
-addFactor!(fg, [:x25; :l1], ppbrDict[epochs[26]], autoinit=false)
+addFactor!(fg, [:x17; :l1], LinearConditional(Normal(1.0, 0.1)))
+addFactor!(fg, [:x18; :l1], LinearConditional(Normal(1.0, 0.1)))
+addFactor!(fg, [:x19; :l1], LinearConditional(Normal(1.0, 0.1)))
+addFactor!(fg, [:x20; :l1], LinearConditional(Normal(1.0, 0.1)))
+addFactor!(fg, [:x21; :l1], LinearConditional(Normal(1.0, 0.1))) # breaks it!
+addFactor!(fg, [:x22; :l1], LinearConditional(Normal(1.0, 0.1)))
+addFactor!(fg, [:x23; :l1], LinearConditional(Normal(1.0, 0.1)))
+addFactor!(fg, [:x24; :l1], LinearConditional(Normal(1.0, 0.1)))
+addFactor!(fg, [:x25; :l1], LinearConditional(Normal(1.0, 0.1)))
 
-
-getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
-
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
-
-
-
-plotKDE(ppbrDict[epochs[26]].bearing)
-plotKDE(ppbrDict[epochs[26]].range)
-
-plotKDE(ppbrDict[epochs[23]].bearing)
+plotPose(fg, [:x21])
+plotKDE(fg, [:x20, :x21, :x22, :x23, :x24])
+# plotKDE(ppbrDict[epochs[26]].range)
+#
+# plotKDE(ppbrDict[epochs[23]].bearing)
 plotKDE(ppbrDict[epochs[23]].range)
-
-
-plotKDE([ppbrDict[epochs[21]].bearing; ppbrDict[epochs[22]].bearing; ppbrDict[epochs[23]].bearing], c=["red";"black";"green"])
-plotKDE([ppbrDict[epochs[21]].range; ppbrDict[epochs[22]].range; ppbrDict[epochs[23]].range], c=["red";"black";"green"])
-
 
 writeGraphPdf(fg, engine="dot")
 
-tree, smt, hist = solveTree!(fg) #, tree) # for incremental solution
+ensureAllInitialized!(fg)
+batchSolve!(fg)
 
 drawPosesLandms(fg)
 
-
-# IIF.wipeBuildNewTree!(fg, drawpdf=true)
-# run(`evince bt.pdf`)
-# run(`evince /tmp/caesar/bt.pdf`)
-
-
-endDogLeg = [interp_x[epochs[end]]; interp_y[epochs[end]]]
-estDogLeg = [get2DPoseMeans(fg)[1][end]; get2DPoseMeans(fg)[2][end]]
-endDogLeg - estDogLeg
-
-drawPosesLandms(fg)
-
-
-
-ls(fg, :x25)
-
-#To Boldly Believe... The Good, the Bad, and the Unbeliefable
-X25 = getVertKDE(fg, :x25)
-
-# i
-pts, = predictbelief(fg, :x21, [:x20x21f1; :x21l1f1])
-plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
-
-
-pts, = predictbelief(fg, :x25, :)
-plotKDE([kde!(pts);X25], dims=[1;2], levels=1, c=["red";"green"])
-plotKDE([kde!(pts);X25], dims=[3], levels=1, c=["red";"green"])
-
-
-# Solvery! Roll dice for solvery check
-# writeGraphPdf(fg)
-# ensureAllInitialized!(fg)
-t = string(now())
 savejld(fg, file="presolve_$t.jld")
 IIF.batchSolve!(fg) #, N=100
 savejld(fg, file="postsolve_$t.jld")
@@ -198,7 +110,7 @@ plotTreeProduct(fg, tree, :x25)
 #   @show cliq.attributes["data"].directFrtlMsgIDs
 #   @show cliq.attributes["data"].directPriorMsgIDs
 #   sp = Gadfly.spy(mat)
-#   push!(sp.guides, Gadfly.Guide.title("$(cliq.attributes["label"]) || $(cliq.attributes["data"].frontalIDs) :$(cliq.attributes["data"].conditIDs)"))
+#   push!(sp.guides, Gadfly.Guide.title("$(cliq.attributes["label"]) || $(cliq.attributes["data"].frontalIDs) :$(cliq.attributes["data"].separatorIDs)"))
 #   push!(sp.guides, Gadfly.Guide.xlabel("fmcmcs $(cliq.attributes["data"].itervarIDs)"))
 #   push!(sp.guides, Gadfly.Guide.ylabel("lcl=$(numlcl) || msg=$(size(IIF.getCliqMsgMat(cliq),1))" ))
 #   return sp
@@ -215,47 +127,25 @@ tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
 import IncrementalInference: getCliqMat
 
-sym = :x25
-# get clique sym is in
+sym = :x21
 whichCliq(tree, sym).attributes["label"]
 spyCliqMat(tree, sym)
 
-# get all variables in clique
-syms = union(getCliqSymbols(tree, sym)...)
-varnum = findfirst(syms, sym)
-whichpot = getData(whichCliq(tree, sym)).cliqAssocMat[:,varnum]
-
-# get factor ids
-fids = getData(whichCliq(tree, sym)).potentials[whichpot]
-
-# get all factors in clique
-fsyms = Symbol[]
-for factor in getVert.(fg, fids)
-  push!(fsyms, Symbol(factor.label))
-end
-
-# get KDEs for the factors
-pp = kde!.(approxConv.(fg, fsyms, sym))
-
-# plot the actual KDE
-plotKDE(pp, dims=[1;2], levels=2)
-
-plotKDE(pp, dims=[1;2], levels=2, legend=string.(fsyms))
-
-
-# Colors should not appear more than once
-# in  at base/<missing>
-# in #plotKDE#13 at KernelDensityEstimatePlotting/src/KernelDensityEstimatePlotting.jl:299
-# in Gadfly.Guide.ManualColorKey at Gadfly/src/guide.jl:501
-
-ls(fg, :x25)
-
-
-getData(fg, :x25f1, nt=:fnc).fnc.usrfnc!
+syms = union(getCliqSymbols(tree, :x21)...)
+findfirst(syms, :x21)
 
 
 
-getData(whichCliq(tree, sym))
+
+getData(whichCliq(tree, :x21))
+
+
+
+
+
+
+
+
 
 
 
@@ -329,7 +219,7 @@ Gadfly.plot(layers...)
 #
 #
 # addVariable!(fg, :l1, Point2)
-# addFactor!(fg, [:x0; :l1], ppbrDict[epoch_slice[1]], autoinit=false)
+# addFactor!(fg, [:x0; :l1], ppbrDict[epoch_slice[1]])
 #
 # ls(fg, :l1)
 # pts = IIF.approxConv(fg, :x0l1f1, :l1)

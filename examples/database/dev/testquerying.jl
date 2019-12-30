@@ -11,13 +11,13 @@ addrdict["clearslamindb"] = "n"
 sessionname = addrdict["session"]
 backendset=0
 reqbackendset = false
-ready=1
+solvable=1
 
 cloudGraph, addrdict = standardcloudgraphsetup(addrdict=addrdict)
 conn = cloudGraph.neo4j.connection
 
 sn = length(sessionname) > 0 ? ":"*sessionname : ""
-query = "match (n$(sn):POSE) where n.ready=$(ready) and exists(n.exVertexId)"
+query = "match (n$(sn):POSE) where n.solvable=$(solvable) and exists(n.exVertexId)"
 query = reqbackendset ? query*" and n.backendset=$(backendset)" : query
 query = query*" return n.exVertexId, id(n)"
 # query = query*" return n"

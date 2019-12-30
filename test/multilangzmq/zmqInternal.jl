@@ -58,9 +58,9 @@ jResponse = JSON.parse(sendCmd(config, fg, lsCmd))
 # TODO: Test the content of this response.
 #@test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\",\"x0x1f1\"],\"id\":\"x0\"},{\"factors\":[\"x0x1f1\",\"x1x2f1\"],\"id\":\"x1\"},{\"factors\":[\"x1x2f1\",\"x2x3f1\"],\"id\":\"x2\"},{\"factors\":[\"x2x3f1\",\"x3x4f1\"],\"id\":\"x3\"},{\"factors\":[\"x3x4f1\",\"x4x5f1\"],\"id\":\"x4\"},{\"factors\":[\"x4x5f1\",\"x5x6f1\"],\"id\":\"x5\"},{\"factors\":[\"x5x6f1\"],\"id\":\"x6\"}]}"
 
-# Set all variables ready
-setReadyCmd = Dict{String, Any}("request" => "setReady", "payload" => JSON.parse(JSON.json(SetReadyRequest(nothing, 1))))
-@test sendCmd(config, fg, setReadyCmd) == "{\"status\":\"OK\"}"
+# Set all variables solvable
+setSolvableCmd = Dict{String, Any}("request" => "setSolvable", "payload" => JSON.parse(JSON.json(setSolvableRequest(nothing, 1))))
+@test sendCmd(config, fg, setSolvableCmd) == "{\"status\":\"OK\"}"
 
 # Call batch solve
 batchSolveCmd = Dict{String, Any}("request" => "batchSolve")
