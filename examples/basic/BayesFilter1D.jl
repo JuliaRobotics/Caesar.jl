@@ -1,9 +1,9 @@
 #
 
-# what is the task
+# Task
 # move linear at constant velocity along x axis, 10m/s, starting from 0
 
-# keep the state separate like a filter, but using FG operations.
+# Track the state separate like a filter by using underlying Factor Graph operations instead.
 # the next example will keep the data in the same factor, and achieve objective more efficiently.
 
 using IncrementalInference
@@ -66,18 +66,19 @@ z4 = Normal(8,2.0) # odo
 statemodel = LinearConditional( z4 )
 X2_ = forwardConvolve(X1, statemodel)
 
-# WHAT?????
 
-
-# measure
-
+# measure (product)
+z5 = Normal(20.8,2.0)
+measX2 = manikde!(reshape(rand(z5,100),1,:), ContinuousScalar)
+posterioriX2 = predX2 * measX2
+X2 = getPoints(posterioriX2)
 
 
 # predict
+# ...
 
 
 # measure
-
 
 
 # predict
