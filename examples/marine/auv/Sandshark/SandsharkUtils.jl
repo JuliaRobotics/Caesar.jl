@@ -5,6 +5,30 @@ using Interpolations
 using ProgressMeter
 
 
+
+# Accumulate delta X values using FGOS
+# TODO, refactor into RoME
+function devAccumulateOdoPose2(DX::Array{Float64,2},
+                               X0::Vector{Float64}=zeros(3);
+                               P0=1e-3*Matrix(LinearAlgebra.I, 3,3),
+                               Qc=1e-6*Matrix(LinearAlgebra.I, 3,3),
+                               dt::Float64=1.0  )
+  #
+  # entries are rows with columns dx,dy,dtheta
+  @assert size(DX,2) == 3
+  mpp = MutablePose2Pose2Gaussian(MvNormal(X0, P0) )
+  nXYT = zeros(size(DX,1), 3)
+  for i in 1:size(DX,1)
+    RoME.accumulateDiscreteLocalFrame!(mpp,DX[i, :],Qc,dt)
+    nXYT[i,:] .= mpp.Zij.μ
+  end
+
+  return nXYT
+end
+
+
+
+
 @enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
 
 
@@ -186,7 +210,8 @@ end
 function initializeAUV_noprior(dfg::AbstractDFG,
                                dashboard::Dict;
                                stride_range::Int=4,
-                               magStdDeg::Float64=5.0)
+                               magStdDeg::Float64=5.0,
+                               stride_solve::Int=10 )
   #
   addVariable!(dfg, :x0, Pose2)
 
@@ -199,9 +224,15 @@ function initializeAUV_noprior(dfg::AbstractDFG,
   drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
   addFactor!(dfg, [:x0; :drt_0], drec, solvable=0, autoinit=false)
 
+  # reference odo solution
+  addVariable!(dfg, :drt_ref, Pose2, solvable=0)
+  drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
+  addFactor!(dfg, [:x0; :drt_ref], drec, solvable=0, autoinit=false)
+  dashboard[:drtOdoRef] = (:x0, :drt_ref, drec)
+
   # store current real time tether factor
-  dashboard[:rttMpp] = Dict{Symbol,MutablePose2Pose2Gaussian}(:x0 => drec)
-  dashboard[:rttCurrent] = (:x0, :drt_0)
+  dashboard[:drtMpp] = Dict{Symbol,MutablePose2Pose2Gaussian}(:x0 => drec)
+  dashboard[:drtCurrent] = (:x0, :drt_0)
   # standard odo process noise levels
   # TODO, debug and refine cont2disc
   dashboard[:Qc_odo] = Diagonal([0.01;0.01;0.001].^2) |> Matrix
@@ -214,6 +245,7 @@ function initializeAUV_noprior(dfg::AbstractDFG,
 
   dashboard[:loopSolver] = true
 
+  dashboard[:SOLVESTRIDE] = stride_solve # add a range measurement every xth pose
   dashboard[:poseStride] = 0
   dashboard[:canTakePoses] = HSMReady
   dashboard[:solveInProgress] = SSMReady
@@ -243,7 +275,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
 
   @info "logpath=$(getLogPath(dfg))"
   getSolverParams(dfg).drawtree = true
-  getSolverParams(dfg).qfl = 30
+  getSolverParams(dfg).qfl = 3*dashboard[:SOLVESTRIDE]
   getSolverParams(dfg).isfixedlag = true
   getSolverParams(dfg).limitfixeddown = true
 
@@ -268,7 +300,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
 
       # adjust latest RTT after solve, latest solved
       lastSolved = sortDFG(ls(dfg, r"x\d", solvable=1))[end]
-      dashboard[:rttCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
+      dashboard[:drtCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
 
       #add any new solvables
       while isready(dashboard[:solvables]) && dashboard[:loopSolver]
@@ -291,7 +323,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       if 0 < length(dashboard[:poseSolveToken].data)
       # if 10 <= dashboard[:poseStride]
         @info "reduce problem size by disengaging older parts of factor graph"
-        setSolvableOldPoses!(dfg, youngest=getSolverParams(dfg).qfl+10, oldest=100, solvable=0)
+        setSolvableOldPoses!(dfg, youngest=getSolverParams(dfg).qfl+dashboard[:SOLVESTRIDE], oldest=100, solvable=0)
 
         # set up state machine flags to allow overlapping or block
         dashboard[:solveInProgress] = SSMSolving
