@@ -3,7 +3,7 @@
 
 ## middleware handler (callback) functions
 
-function lbl_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict, lblDict::Dict)
+function lbl_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict, lblDict::Dict, lbllog)
   msgtime = unix2datetime(msgdata.utime*1e-6)
   dashboard[:lastMsgTime] = msgtime
 
@@ -15,6 +15,8 @@ function lbl_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard:
   # add to the ciruclar buffer
   push!( dashboard[:lblBuffer], (msgtime, (msgdata.pos[1:2] |> deepcopy), Bool[false;]) )
 
+  # also record in log for later printing
+  println(lbllog, "$msgtime, $(msgdata.pos[1]),$(msgdata.pos[2])")
 
   # check if any lbl can be added as prior to factor graph
   for lbl in dashboard[:lblBuffer]
@@ -89,7 +91,7 @@ function range_hdlr(channel::String, msgdata::raw_t, dfg::AbstractDFG, dashboard
   # should be at least one
   if 0 < length(dashboard[:rangesBuffer])
     lastPose = getLastPoses(dfg, number=1)[1]
-    lastT = timestamp(getVariable(dfg, lastPose))
+    lastT = getTimestamp(getVariable(dfg, lastPose))
     # check latest pose against all ranges in buffer
     rantim = map(x->(dashboard[:rangesBuffer][x][1],dashboard[:rangesBuffer][x][3][1]), 1:length(dashboard[:rangesBuffer]))
     @show ind, mdt, corrs = findClosestTimestamp([(lastT, lastPose);], rantim)
@@ -117,20 +119,30 @@ function range_hdlr(channel::String, msgdata::raw_t, dfg::AbstractDFG, dashboard
   nothing
 end
 
-function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard::Dict, drtlog)
-  dashboard[:lastMsgTime] = unix2datetime(msgdata.utime*1e-6)
+function pose_hdlr(channel::String,
+                   msgdata::pose_t,
+                   dfg::AbstractDFG,
+                   dashboard::Dict,
+                   drtlog,
+                   drolog,
+                   dirodolog,
+                   rawodolog )
+  #
+  odoT = unix2datetime(msgdata.utime*1e-6)
+  dashboard[:lastMsgTime] = odoT # unix2datetime(msgdata.utime*1e-6)
   # "accumulateDiscreteLocalFrame! on all RTTs" |> println
-  for (vsym, rtt) in dashboard[:rttMpp]
-    accumulateDiscreteLocalFrame!(rtt, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0)
+  for (vsym, drt) in dashboard[:drtMpp]
+    accumulateDiscreteLocalFrame!(drt, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0, Phik=SE2(msgdata.pos[1:3]))
   end
 
   # get message time
-  odoT = unix2datetime(msgdata.utime*1e-6)
 
   # write the latest DRT solution to file
-  drtFnc = string(dashboard[:rttCurrent][1], dashboard[:rttCurrent][2], "f1") |> Symbol
+  drtFnc = string(dashboard[:drtCurrent][1], dashboard[:drtCurrent][2], "f1") |> Symbol
   val = accumulateFactorMeans(dfg, [drtFnc;])
-  println(drtlog, "$odoT, $(val[1]),$(val[2]),$(val[3])")
+  println(drtlog, "$odoT, $(dashboard[:drtCurrent][1]), $(val[1]), $(val[2]), $(val[3]), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3])")
+  drval = accumulateFactorMeans(dfg, [:x0drt_0f1;])
+  println(drolog, "$odoT, $(dashboard[:lastPose]), $(drval[1]), $(drval[2]), $(drval[3])")
 
   # check if a new pose and factor must be added?
   if (dashboard[:odoTime] + dashboard[:poseRate]) <= odoT
@@ -139,12 +151,12 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
 
     # get factor to next pose
     nPose = nextPose(dashboard[:lastPose])
-    @info "pose_hdlr, adding new pose $nPose, at $odoT"
+    @info "pose_hdlr, adding new pose $nPose, at $odoT.  DRTs $(collect(keys(dashboard[:drtMpp])))"
 
-    rttLast = dashboard[:rttMpp][dashboard[:lastPose]]
+    drtLast = dashboard[:drtMpp][dashboard[:lastPose]]
     # add new variable and factor to the graph
     fctsym = duplicateToStandardFactorVariable(Pose2Pose2,
-                                               rttLast,
+                                               drtLast,
                                                dfg,
                                                dashboard[:lastPose],
                                                nPose,
@@ -154,20 +166,20 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     #
     # set timestamp to msg times
     setTimestamp!(getVariable(dfg, nPose), odoT)
-    # delete rtt unless used by real time prediction
-    if dashboard[:lastPose] != dashboard[:rttCurrent][1]
-      delete!(dashboard[:rttMpp], dashboard[:lastPose])
+    # delete drt unless used by real time prediction
+    if dashboard[:lastPose] != dashboard[:drtCurrent][1] && dashboard[:lastPose] != :x0
+      delete!(dashboard[:drtMpp], dashboard[:lastPose])
     end
 
     # update last pose to new pose
     dashboard[:lastPose] = nPose
 
-    # create new rtt on new variable
-    nRtt = Symbol(string("drt_",string(nPose)[2:end]))
-    addVariable!(dfg, nRtt, Pose2, solvable=0)
+    # create new drt on new variable
+    nDrt = Symbol(string("drt_",string(nPose)[2:end]))
+    addVariable!(dfg, nDrt, Pose2, solvable=0)
     drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
-    addFactor!(dfg, [nPose; nRtt], drec, solvable=0, autoinit=false)
-    dashboard[:rttMpp][nPose] = drec
+    addFactor!(dfg, [nPose; nDrt], drec, solvable=0, autoinit=false)
+    dashboard[:drtMpp][nPose] = drec
     put!(dashboard[:solvables], [nPose; fctsym])
     dashboard[:poseStride] += 1
 
@@ -184,7 +196,43 @@ function pose_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard
     end
   end
 
+
+  ## Separate odometry check
+  # mutable pose2pose2 factor holding odometry only reference
+  mpp = dashboard[:drtOdoRef][3]
+  # accumulate odo
+  accumulateDiscreteLocalFrame!(mpp, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0,   Phik=SE2(msgdata.pos[1:3]))
+  # write result to file
+  drval = accumulateFactorMeans(dfg, [:x0drt_reff1;])
+  println(dirodolog, "$odoT, $(dashboard[:lastPose]), $(drval[1]), $(drval[2]), $(drval[3])")
+  println(rawodolog, "$odoT, $(dashboard[:lastPose]), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3])")
+
   nothing
 end
+
+# special repeat handler function to test odometry accumulation through the factor graph.
+function odo_ensure_hdlr(channel::String,
+                         msgdata::pose_t,
+                         dfg::AbstractDFG,
+                         dashboard::Dict,
+                         dirodolog )
+  #
+
+    msgtime = unix2datetime(msgdata.utime*1e-6)
+
+    # mutable pose2pose2 factor holding odometry only reference
+    mpp = dashboard[:drtOdoRef][3]
+
+    # accumulate odo
+    accumulateDiscreteLocalFrame!(mpp, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0,   Phik=SE2(msgdata.pos[1:3]))
+
+    # write result to file
+    drval = accumulateFactorMeans(dfg, [:x0drt_reff1;])
+    println(dirodolog, "$msgtime, $(dashboard[:lastPose]), $(drval[1]), $(drval[2]), $(drval[3])")
+
+
+  nothing
+end
+
 
 #

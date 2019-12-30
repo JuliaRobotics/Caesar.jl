@@ -24,7 +24,7 @@ include(joinpath(@__DIR__,"SandsharkUtils.jl"))
 
 odonoise = Matrix(Diagonal((20*[0.1;0.1;0.005]).^2))
 
-epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TSTART=50, TEND=1200, SNRfloor=0.001, STRIDE=1)
+epochs, odoDict, ppbrDict, ppbDict, pprDict, NAV = doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw, odonoise, TSTART=50, TEND=200, SNRfloor=0.001, STRIDE=1)
 
 # Build interpolators for x, y from LBL data
 itpl_lblx = LinearInterpolation(lblkeys, lblX)
@@ -78,18 +78,13 @@ DX[3, 0.6 .< abs.(DX[2,:])] .= 0.0
 
 ## Back to jump free dead reckoning
 
-mpp = MutablePose2Pose2Gaussian(MvNormal([rsmpX[1];rsmpY[1];rsmpT[1]], 1e-3*Matrix(LinearAlgebra.I, 3,3)))
-dt = 1.0
-nXYT = zeros(3,size(DX,2))
-Qc = 1e-6*Matrix(LinearAlgebra.I, 3,3)
-for i in 1:size(DX,2)
-  RoME.accumulateDiscreteLocalFrame!(mpp,DX[:,i],Qc,dt)
-  nXYT[:,i] .= mpp.Zij.μ
-end
 
+nXYT = devAccumulateOdoPose2(DX' |> collect, [rsmpX[1];rsmpY[1];rsmpT[1]] )' |> collect
 
 # Gadfly.plot(x=nXYT[1,:], y=nXYT[2,:], Geom.path()) # |> PDF("/tmp/caesar/random/test.pdf");
 # Gadfly.plot(x=odoT, y=nXYT[3,:], Geom.path())
+# # test new plotting function
+# plotTrajectoryArrayPose2(nXYT)
 
 
 # Gadfly.plot(
@@ -167,6 +162,7 @@ offsetT = now() - startT
   while now() < msgstamp
     sleep(0.001)
   end
+  # delta odometry
   msg.utime = round(Int,odoT[idx]*1e-3)
   msg.pos = DX[1:3,idx]
   bytes = encode(msg)

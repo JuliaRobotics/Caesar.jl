@@ -1,7 +1,7 @@
 # AUV msg slam client model
 
 using Distributed
-addprocs(4)
+addprocs(8)
 
 using DistributedFactorGraphs
 using Caesar, RoME
@@ -10,6 +10,8 @@ using LCMCore, BotCoreLCMTypes
 using Dates
 using DataStructures
 using Logging
+using JSON2
+using DSP
 
 using ArgParse
 
@@ -31,7 +33,7 @@ function parse_commandline()
 
     @add_arg_table s begin
         "--kappa_odo"
-            help = "Scale the odoemtry covariance"
+            help = "Scale the odometry covariance"
             arg_type = Float64
             default = 1.0
         "--stride_range"
@@ -45,14 +47,18 @@ function parse_commandline()
         "--iters", "-i"
             help = "LCM messages to handle"
             arg_type = Int
-            default = 5000
+            default = 15000
         "--speed", "-s"
             help = "Target playback speed for LCMLog"
             arg_type = Float64
-            default = 1.0
+            default = 0.2
         "--dbg"
             help = "debug flag"
             action = :store_true
+        "--recordTrees"
+            help = "Store copies of the Bayes tree for later animation, sets the rate in sleep(1/rate)"
+            arg_type = Float64
+            default = -1.0
         # "arg1"
         #     help = "a positional argument"
         #     required = true
@@ -69,19 +75,19 @@ include(joinpath(@__DIR__, "Plotting.jl"))
 
 # list all cases in which message handling can continue
 # return true if MSG handler can continue
-function HSMCanContinue(dashboard::Dict)::Bool
-  if dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMSolving ||
-     dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMSolving ||
-     dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMReady ||
-     dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMSolving ||
-     dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMConsumingSolvables ||
-     dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMConsumingSolvables ||
-     dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMConsumingSolvables
-    #
-    return true
-  end
-  return false
-end
+# function HSMCanContinue(dashboard::Dict)::Bool
+#   if dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMSolving ||
+#      dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMSolving ||
+#      dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMReady ||
+#      dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMSolving ||
+#      dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMConsumingSolvables ||
+#      dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMConsumingSolvables ||
+#      dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMConsumingSolvables
+#     #
+#     return true
+#   end
+#   return false
+# end
 
 
 function main(;parsed_args=parse_commandline(),
@@ -103,16 +109,28 @@ function main(;parsed_args=parse_commandline(),
   # scale the odometry noise
   dashboard[:odoCov] .*= parsed_args["kappa_odo"]
 
-  # store dead reckon tether values in a file.
+  # store args, dead reckon tether, and lbl values in files.
   Base.mkpath(getLogPath(fg))
+  # write the arguments to file
+  argsfile = open(joinLogPath(fg,"args.txt"),"w")
+  println(argsfile, ARGS)
+  println(argsfile, parsed_args)
+  close(argsfile)
+  argsfile = open(joinLogPath(fg,"args.json"),"w")
+  JSON2.write(argsfile, parsed_args)
+  close(argsfile)
   DRTLog = open(joinLogPath(fg,"DRT.csv"),"w")
+  LBLLog = open(joinLogPath(fg,"LBL.csv"),"w")
+  Odolog = open(joinLogPath(fg,"ODO.csv"),"w")
+  dirodolog = open(joinLogPath(fg,"DIRODO.csv"),"w")
+  rawodolog = open(joinLogPath(fg,"RAWODO.csv"),"w")
 
   # prepare the solver in the background
   ST = manageSolveTree!(fg, dashboard, dbg=dbg)
 
   # middleware handlers
   # start with LBL and magnetometer
-  subscribe(lcm, "AUV_LBL_INTERPOLATED", (c,d)->lbl_hdlr(c,d,fg,dashboard,lblDict), pose_t)
+  subscribe(lcm, "AUV_LBL_INTERPOLATED", (c,d)->lbl_hdlr(c,d,fg,dashboard,lblDict,LBLLog), pose_t)
   subscribe(lcm, "AUV_MAGNETOMETER",     (c,d)->mag_hdlr(c,d,fg,dashboard,magDict), pose_t)
 
   @info "get a starting position and mag orientation"
@@ -131,20 +149,40 @@ function main(;parsed_args=parse_commandline(),
   addFactor!(fg, [:x0;], PriorPose2(MvNormal(initPose,Matrix(Diagonal([0.5; 0.5; 1.0].^2)))), autoinit=false)
 
   @info "Start with the real-time tracking aspect..."
-  subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard, DRTLog), pose_t)
+  subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard, DRTLog, Odolog, dirodolog, rawodolog), pose_t)
   # subscribe(lcm, "AUV_ODOMETRY_GYROBIAS", (c,d)->pose_hdlr(c,d,fg,dashboard), pose_t)
   subscribe(lcm, "AUV_RANGE_CORRL",      (c,d)->range_hdlr(c,d,fg,dashboard), raw_t)
   # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
 
+  # repeat single native odometry
+  # subscribe(lcm, "AUV_ODOMETRY",         (c,d)->odo_ensure_hdlr(c,d,fg,dashboard,dirodolog), pose_t)
+
 
   recordWTDSH = [true;]
   WTDSH = Vector{Tuple{DateTime, Symbol, Int, HandlerStateMachine, SolverStateMachine, Millisecond, Int}}()
-  @async begin
+  dashboard[:taskSignals] = @async begin
     while recordWTDSH[1]
       push!(WTDSH, (now(), getLastPoses(fg,filterLabel=r"x\d",number=1)[1],dashboard[:poseStride],dashboard[:canTakePoses],dashboard[:solveInProgress],dashboard[:realTimeSlack],length(dashboard[:poseSolveToken].data) ))
       sleep(0.005)
     end
   end
+  # record trees for later reconstruction into an animation
+  dashboard[:taskRecTrees] = @async begin
+    Base.mkpath(joinLogPath(fg, "trees"))
+    treepath = joinLogPath(fg, "bt.pdf")
+    counter = 0
+    tcfid = open(joinLogPath(fg, "trees/timestamps.log"),"w")
+    while 0 < parsed_args["recordTrees"]
+      if ispath(treepath)
+        counter += 1
+        println(tcfid, "$(dashboard[:lastMsgTime]), $(dashboard[:lastPose]), $counter")
+        Base.cp(treepath, joinLogPath(fg, "trees/bt_$(counter).pdf") )
+      end
+      sleep(1.0/parsed_args["recordTrees"])
+    end
+    close(tcfid)
+  end
+
 
   # run handler
   dashboard[:canTakePoses] = HSMHandling
@@ -175,13 +213,19 @@ function main(;parsed_args=parse_commandline(),
       end
   end
 
-  # close UDP listening on LCM other file handles
-  close(lcm)
-  close(DFTLog)
 
   # close out solver and other loops
-  dashboard[:loopSolver] = false
+  parsed_args["recordTrees"] = -1.0
   recordWTDSH[1] = false
+  dashboard[:loopSolver] = false
+
+  # close UDP listening on LCM other file handles
+  close(lcm)
+  close(DRTLog)
+  close(LBLLog)
+  close(Odolog)
+  close(dirodolog)
+  close(rawodolog)
 
   # return last factor graph as built and solved
   return fg, dashboard, WTDSH, ST
@@ -189,26 +233,35 @@ end
 
 
 
-## Do the actual run -- on traffic
+# user intentions
+parsed_args=parse_commandline()
+
+# ## Uncomment for different defaults in Juno
+parsed_args["iters"] = 30000
+parsed_args["speed"] = 1.0
+# parsed_args["recordTrees"] = false
+
+
+## Do the actual run -- on live UDP traffic
 # fg = main()
 
-# logSpeed=0.2, iters=50000,
+## Do run on LCM data from file
+lcmlogfile = joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")
+# lcmlogfile = joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")
+fg, dashboard, wtdsh, ST = main(parsed_args=parsed_args, lcm=LCMLog(lcmlogfile) )
 
-## from file
-# fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) ) # bad ranges
-fg, dashboard, wtdsh, ST = main(lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")) )
-# fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")) )
 
 
 
 ## draw fg
 drawGraph(fg, filepath=joinpath(getLogPath(fg),"fg.pdf"), show=false)
+# drawGraph(fg)
 
 
 ##  Draw trajectory & Analyze solve run
 
 
-plb = plotSandsharkFromDFG(fg)
+plb = plotSandsharkFromDFG(fg, drawTriads=false)
 plb |> PDF(joinpath(getLogPath(fg),"traj.pdf"))
 # pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
 
@@ -234,6 +287,9 @@ ensureAllInitialized!(fg)
 # Check how long not solvable tail is?
 # map(x->(x,isSolvable(getVariable(fg,x))), getLastPoses(fg, filterLabel=r"x\d", number=15))
 
+# after all initialized
+plb = plotSandsharkFromDFG(fg, drawTriads=false, lbls=false)
+
 
 ## add reference layer
 posesyms = ls(fg, r"x\d") |> sortDFG
@@ -241,7 +297,7 @@ XX = (x->(getVal(solverData(getVariable(fg, x), :lbl))[1])).(posesyms)
 YY = (x->(getVal(solverData(getVariable(fg, x), :lbl))[2])).(posesyms)
 pl = Gadfly.layer(x=XX, y=YY, Geom.path, Theme(default_color=colorant"magenta"))
 union!(plb.layers, pl)
-plb |> PDF(joinpath(getLogPath(fg),"traj_ref.pdf"))
+plb |> PDF(joinLogPath(fg,"traj_ref.pdf"))
 
 
 
@@ -250,10 +306,84 @@ saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 
 
 
+## plot the DEAD RECKON THREAD
+
+
+
+drt_data = readdlm(joinLogPath(fg, "DRT.csv"), ',')
+
+XX = Float64.(drt_data[:,3])
+YY = Float64.(drt_data[:,4])
+
+# remove those near zero
+mask = 40.0 .< (XX.^2 + YY.^2)
+
+# filter the signals for hard jumps between drt transitions
+responsetype = Lowpass(20.0; fs=50)
+designmethod = FIRWindow(hanning(32))
+
+XXf = XX[mask] #filt(digitalfilter(responsetype, designmethod), XX[mask])
+YYf = YY[mask] #filt(digitalfilter(responsetype, designmethod), YY[mask])
+
+pl = Gadfly.layer(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"green"))
+union!(plb.layers, pl)
+plb |> PDF(joinLogPath(fg,"traj_ref_drt.pdf"))
+
+
+
+
+
+
+odo_data = readdlm(joinLogPath(fg, "ODO.csv"), ',')
+
+XX = Float64.(odo_data[:,3])
+YY = Float64.(odo_data[:,4])
+
+# remove those near zero
+mask = 40.0 .< (XX.^2 + YY.^2)
+
+XXf = XX #[mask]
+YYf = YY #[mask]
+
+pl = Gadfly.layer(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"black"))
+union!(plb.layers, pl)
+plb |> PDF(joinLogPath(fg,"traj_ref_drt_odo.pdf"))
+
+
+
+
+
+
+
+
+odo_data = readdlm(joinLogPath(fg, "RAWODO.csv"), ',')
+
+DX = Float64.(odo_data[:,3:5])
+
+nXYT = devAccumulateOdoPose2(DX, getFactorType(getFactor(fg, :x0f1)).Z.μ)
+
+# remove those near zero for better visualization
+mask = 40.0 .< (nXYT[:,1].^2 + nXYT[:,2].^2)
+
+XXf = nXYT[:,1][mask]
+YYf = nXYT[:,2][mask]
+
+# pl = Gadfly.plot(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"black"))
+pl = plotTrajectoryArrayPose2(nXYT)
+pl |> PDF(joinLogPath(fg,"dirodo.pdf"))
+
+pl = Gadfly.layer(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"black"))
+union!(plb.layers, pl)
+plb |> PDF(joinLogPath(fg,"traj_ref_drt_dirodo.pdf"))
+
+
+
+
+
 
 ## Look at factors separately
 reportFactors(fg, Pose2Point2Range, show=false)
-# reportFactors(fg, Pose2Pose2)
+# reportFactors(fg, Pose2Pose2, show=false)
 
 
 ## BATCH SOLVE
@@ -270,3 +400,11 @@ reportFactors(fg, Pose2Point2Range, show=false)
 
 
 #
+# fg, dashboard = main(logSpeed=0.25, lcm=LCMLog(joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcmlog-2019-11-26.01")) ) # bad ranges
+
+# find . -type f -name '*.pdf' -print0 |
+#   while IFS= read -r -d '' file
+#     do convert -verbose -density 500 -quality 100 "${file}" "png/${file%.*}.png"
+#   done
+
+# ls nobytes/ | sed 's/bt_//g' | sed 's/.pdf//g' | xargs -L1
