@@ -311,8 +311,8 @@ saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 
 drt_data = readdlm(joinLogPath(fg, "DRT.csv"), ',')
 
-XX = Float64.(drt_data[:,3])
-YY = Float64.(drt_data[:,4])
+XX = Float64.(drt_data[:,4])
+YY = Float64.(drt_data[:,5])
 
 # remove those near zero
 mask = 40.0 .< (XX.^2 + YY.^2)
@@ -323,6 +323,9 @@ designmethod = FIRWindow(hanning(32))
 
 XXf = XX[mask] #filt(digitalfilter(responsetype, designmethod), XX[mask])
 YYf = YY[mask] #filt(digitalfilter(responsetype, designmethod), YY[mask])
+
+pl = Gadfly.plot(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"green"))
+pl |> PDF(joinLogPath(fg,"drt.pdf"))
 
 pl = Gadfly.layer(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"green"))
 union!(plb.layers, pl)

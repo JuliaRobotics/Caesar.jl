@@ -140,7 +140,7 @@ function pose_hdlr(channel::String,
   # write the latest DRT solution to file
   drtFnc = string(dashboard[:drtCurrent][1], dashboard[:drtCurrent][2], "f1") |> Symbol
   val = accumulateFactorMeans(dfg, [drtFnc;])
-  println(drtlog, "$odoT, $(dashboard[:drtCurrent][1]), $(val[1]), $(val[2]), $(val[3]), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3])")
+  println(drtlog, "$odoT, $(dashboard[:drtCurrent][1]), $(dashboard[:lastPose]), $(val[1]), $(val[2]), $(val[3]), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3])")
   drval = accumulateFactorMeans(dfg, [:x0drt_0f1;])
   println(drolog, "$odoT, $(dashboard[:lastPose]), $(drval[1]), $(drval[2]), $(drval[3])")
 
@@ -151,7 +151,7 @@ function pose_hdlr(channel::String,
 
     # get factor to next pose
     nPose = nextPose(dashboard[:lastPose])
-    @info "pose_hdlr, adding new pose $nPose, at $odoT.  DRTs $(collect(keys(dashboard[:drtMpp])))"
+    @info "pose_hdlr, adding new pose $nPose, at $odoT.  DRTs $(collect(keys(dashboard[:drtMpp]))), drtCurrent=$(dashboard[:drtCurrent])"
 
     drtLast = dashboard[:drtMpp][dashboard[:lastPose]]
     # add new variable and factor to the graph
@@ -167,7 +167,10 @@ function pose_hdlr(channel::String,
     # set timestamp to msg times
     setTimestamp!(getVariable(dfg, nPose), odoT)
     # delete drt unless used by real time prediction
-    if dashboard[:lastPose] != dashboard[:drtCurrent][1] && dashboard[:lastPose] != :x0
+    # TODO assuming stride ends on a 0
+    poseStrideTail = sortDFG(ls(dfg, r"x\d0", solvable=0))
+    poseStrideTail = 3 < length(poseStrideTail) ? poseStrideTail[end-3:end] : poseStrideTail
+    if dashboard[:lastPose] != :x0 && !(dashboard[:lastPose] in poseStrideTail) # dashboard[:drtCurrent][1]
       delete!(dashboard[:drtMpp], dashboard[:lastPose])
     end
 
