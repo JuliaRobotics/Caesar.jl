@@ -22,6 +22,19 @@ Note that this operation is precisely the same as a [prediction step in filterin
 
 The convolution computation described above is a core operation required for solving the [Chapman-Kolmogorov transit equations](http://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/).
 
+## Underlying Mathematical Operations
+
+In order to compute generic convolutions, the mmisam algorithm uses non-linear gradient descent to resolve estimates of the target variable based on the values of other dependent variables.  The conditional likelihood (multidimensional factor) is based on a residual function:
+```math
+z_i = \delta_i (\theta_i)
+```
+
+where `z_i` is the innovation of any smooth twice differentiable residual function delta.  The residual function depends on specific variables collected as theta_i.  The IIF code supports both root finding or minimization trust-region operations, which are each provided by [NLsolve.jl](https://github.com/JuliaNLSolvers/NLsolve.jl) or [Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl) packages respectively.
+
+The choice between root finding or minimization is a performance consideration only.  Minimization of the residual squared will always work but certain situations allow direct root finding to be used.  If the residual function is guaranteed to cross zero---i.e. `z*=0`---the root finding approach can be used.  Each measurement function has a certain number of dimensions -- e.g. ranges or bearings are dimension one, and an inter Pose2 rigid transform (delta x, y, theta) is dimension 3.  If the variable being resolved has larger dimension than the measurement residual, then the minimization approach must be used.
+
+The method of solving the target variable is to fix all other variable values and resolve, sample by sample, the particle estimates of the target.  The Julia programming language has good support for functional programming and is used extensively in the IIF implementation to utilize user defined functions to resolve any variable, including the null-hypothesis and multi-hypothesis generalizations.
+
 The following section illustrates a single convolution operation by using a few high level and some low level function calls.  An additional tutorial exists where [a related example](https://www.juliarobotics.org/Caesar.jl/latest/examples/basic_continuousscalar/) in one dimension is performed as a complete factor graph solution/estimation problem.
 
 ### Illustrated Calculation in Julia
@@ -97,16 +110,3 @@ The functional object `X1` is now ready for other operations such as function ev
 In addition, `ZmqCaesar` offers a `ZMQ` interface to the factor graph solution for multilanguage support.  This example is a small subset that shows how to use the `ZMQ` infrastructure, but avoids the larger factor graph related calls.
 
 ...
-
-## Underlying Mathematical Operations
-
-In order to compute generic convolutions, the mmisam algorithm uses non-linear gradient descent to resolve estimates of the target variable based on the values of other dependent variables.  The conditional likelihood (multidimensional factor) is based on a residual function:
-```math
-z_i = \delta_i (\theta_i)
-```
-
-where `z_i` is the innovation of any smooth twice differentiable residual function delta.  The residual function depends on specific variables collected as theta_i.  The IIF code supports both root finding or minimization trust-region operations, which are each provided by [NLsolve.jl](https://github.com/JuliaNLSolvers/NLsolve.jl) or [Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl) packages respectively.
-
-The choice between root finding or minimization is a performance consideration only.  Minimization of the residual squared will always work but certain situations allow direct root finding to be used.  If the residual function is guaranteed to cross zero---i.e. `z*=0`---the root finding approach can be used.  Each measurement function has a certain number of dimensions -- e.g. ranges or bearings are dimension one, and an inter Pose2 rigid transform (delta x, y, theta) is dimension 3.  If the variable being resolved has larger dimension than the measurement residual, then the minimization approach must be used.
-
-The method of solving the target variable is to fix all other variable values and resolve, sample by sample, the particle estimates of the target.  The Julia programming language has good support for functional programming and is used extensively in the IIF implementation to utilize user defined functions to resolve any variable, including the null-hypothesis and multi-hypothesis generalizations.
