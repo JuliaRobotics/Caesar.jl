@@ -6,11 +6,15 @@ A frequent discussion point is the correspondence between Kalman/particle/log-fl
 
 !!! note
 
-    A [very simple 1D predict correct Bayesian filtering example (using underlying convolution and product operations of the mmisam algorithm)](https://github.com/JuliaRobotics/Caesar.jl/blob/master/examples/basic/BayesFilter1D.jl) can be used as a rough template to familiarize yourself on the correspondence between filters and newer *graph-based* operations.
+    A [simple 1D predict correct Bayesian filtering example (using underlying convolution and product operations of the mmisam algorithm)](https://github.com/JuliaRobotics/Caesar.jl/blob/master/examples/basic/BayesFilter1D.jl) can be used as a rough template to familiarize yourself on the correspondence between filters and newer *graph-based* operations.
 
-Other major topics are:  How out-marginalization works under a factor graph inference formulation, which is discussed separately as part of the [Bayes tree description page](https://www.juliarobotics.org/Caesar.jl/latest/principles/bayestreePrinciples/).  Second, see [FAQ on why do we even care about non-Gaussian](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Why/Where-does-non-Gaussian-data-come-from?-1) signal processing.  The steps described on this page are accessible via several [multi-language interfaces (middleware)](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#).
+This page tries to highlight some of the reasons why using a factor graph approach (w/ Bayes/junction tree inference) in a incremental/fixed-lag/federated sense---e.g. simultaneous localization and mapping (SLAM) approach---has merit.  The described steps form part of the core operations used by the [multimodal incremental smoothing and mapping (mmisam)](https://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/) algorithm.
 
-The conclusion at the end of the page tries to summarize why using a factor graph approach (w/ Bayes/junction tree inference) in a incremental/fixed-lag/federated sense---i.e. simultaneous localization and mapping (SLAM)---has merit.  The described steps forms part of the core operations used by the [multimodal incremental smoothing and mapping (mmisam)](https://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/) algorithm.
+Further topics on factor graph (and Bayes/junction tree) inference formulation, including how out-marginalization works is discussed separately as part of the [Bayes tree description page](https://www.juliarobotics.org/Caesar.jl/latest/principles/bayestreePrinciples/).  It is worth reiterating [the section on why do we even care about non-Gaussian](https://juliarobotics.org/Caesar.jl/latest/concepts/concepts/#Why/Where-does-non-Gaussian-data-come-from?-1) signal processing.
+
+!!! note
+
+    The steps described on this page are accessible via several [multi-language interfaces (middleware)](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#).
 
 ## The Target Tracking Problem (Conventional Filtering)
 
