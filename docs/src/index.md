@@ -91,7 +91,7 @@ Consider citing our work:
 @misc{caesarjl,
   author = "Contributors and Packages",
   title =  "Caesar.jl",
-  year =   2019,
+  year =   2020,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
