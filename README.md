@@ -8,9 +8,9 @@ A modern robotic toolkit for localization and mapping -- reducing the barrier of
 
 Click on the badges to follow web url links:
 
-| Dev Build Status | Documentation | **New:** Slack |
-|:----------------:|:-------------:|:-----:|
-[![Build Status][build-img]][build-url] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
+| Stable | Dev | Documentation | **New:** Slack |
+|:------:|:----------------:|:-------------:|:-----:|
+| [![Build Status][build-tag]][build-url] | [![Build Status][build-img]][build-url] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
 # Bleeding-edge Development Status
 
@@ -55,6 +55,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
 [build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
+[build-tag]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.4
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
 [caesar-stable]: https://img.shields.io/badge/2019Q2-v0.4.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
