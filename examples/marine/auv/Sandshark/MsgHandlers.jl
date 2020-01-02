@@ -140,7 +140,7 @@ function pose_hdlr(channel::String,
   # write the latest DRT solution to file
   drtFnc = string(dashboard[:drtCurrent][1], dashboard[:drtCurrent][2], "f1") |> Symbol
   val = accumulateFactorMeans(dfg, [drtFnc;])
-  println(drtlog, "$odoT, $(dashboard[:drtCurrent][1]), $(dashboard[:lastPose]), $(val[1]), $(val[2]), $(val[3]), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3])")
+  println(drtlog, "$odoT, $(drtFnc), $(dashboard[:lastPose]), $(val[1]), $(val[2]), $(val[3]), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3]), $(collect(keys(dashboard[:drtMpp])))")
   drval = accumulateFactorMeans(dfg, [:x0drt_0f1;])
   println(drolog, "$odoT, $(dashboard[:lastPose]), $(drval[1]), $(drval[2]), $(drval[3])")
 
@@ -168,7 +168,7 @@ function pose_hdlr(channel::String,
     setTimestamp!(getVariable(dfg, nPose), odoT)
     # delete drt unless used by real time prediction
     # TODO assuming stride ends on a 0
-    poseStrideTail = sortDFG(ls(dfg, r"x\d0", solvable=0))
+    poseStrideTail = sortDFG(ls(dfg, r"x\d9", solvable=0))
     poseStrideTail = 3 < length(poseStrideTail) ? poseStrideTail[end-3:end] : poseStrideTail
     if dashboard[:lastPose] != :x0 && !(dashboard[:lastPose] in poseStrideTail) # dashboard[:drtCurrent][1]
       delete!(dashboard[:drtMpp], dashboard[:lastPose])

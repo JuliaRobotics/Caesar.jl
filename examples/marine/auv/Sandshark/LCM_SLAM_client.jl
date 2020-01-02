@@ -147,6 +147,8 @@ function main(;parsed_args=parse_commandline(),
 
   # add starting prior
   addFactor!(fg, [:x0;], PriorPose2(MvNormal(initPose,Matrix(Diagonal([0.5; 0.5; 1.0].^2)))), autoinit=false)
+  setSolvable!(fg, :x0, 1)
+  doautoinit!(fg,:x0)
 
   @info "Start with the real-time tracking aspect..."
   subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard, DRTLog, Odolog, dirodolog, rawodolog), pose_t)
@@ -237,7 +239,8 @@ end
 parsed_args=parse_commandline()
 
 # ## Uncomment for different defaults in Juno
-# parsed_args["iters"] = 30000
+# parsed_args["iters"] = 8000
+# parsed_args["kappa_odo"] = 0.1
 # parsed_args["speed"] = 1.0
 # parsed_args["recordTrees"] = false
 
@@ -324,7 +327,7 @@ designmethod = FIRWindow(hanning(32))
 XXf = XX[mask] #filt(digitalfilter(responsetype, designmethod), XX[mask])
 YYf = YY[mask] #filt(digitalfilter(responsetype, designmethod), YY[mask])
 
-pl = Gadfly.plot(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"green"))
+pl = Gadfly.plot(x=XXf[1:10:end], y=YYf[1:10:end], Geom.point, Theme(default_color=colorant"green"))
 pl |> PDF(joinLogPath(fg,"drt.pdf"))
 
 pl = Gadfly.layer(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"green"))
@@ -391,7 +394,6 @@ reportFactors(fg, Pose2Point2Range, show=false)
 ## BATCH SOLVE
 
 # dontMarginalizeVariablesAll!(fg)
-
 # tree, smt, hist = solveTree!(fg)
 
 

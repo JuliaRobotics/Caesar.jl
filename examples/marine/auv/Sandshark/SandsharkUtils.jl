@@ -298,10 +298,6 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
         sleep(0.5)
       end
 
-      # adjust latest RTT after solve, latest solved
-      lastSolved = sortDFG(ls(dfg, r"x\d", solvable=1))[end]
-      dashboard[:drtCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
-
       #add any new solvables
       while isready(dashboard[:solvables]) && dashboard[:loopSolver]
         dashboard[:solveInProgress] = SSMConsumingSolvables
@@ -339,6 +335,10 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
         dashboard[:solveInProgress] = SSMReady
         # de-escalate handler state machine
         dashboard[:canTakePoses] = HSMHandling
+
+        # adjust latest RTT after solve, latest solved
+        lastSolved = sortDFG(ls(dfg, r"x\d9", solvable=1))[end]
+        dashboard[:drtCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
 
         # remove a token to allow progress to continue
         gotToken = take!(dashboard[:poseSolveToken])
