@@ -10,12 +10,10 @@ Consider the following vehicle odometry prediction (probabilistic) operation, wh
 ```math
 p(X_1 | X_0, Z) \propto p(Z | X_0, X_1) p(X_0),
 ```
-and recognize this process as a convolution operation where the prior belief on X0 is spread to a less certain prediction of pose X1.  The figure below shows an example convolution of green and red densities with result in black below:
+and recognize this process as a convolution operation where the prior belief on X0 is spread to a less certain prediction of pose X1.  The figure below shows an example quasi-deterministic convolution of green densitty with the red density, which results in the black density below:
 
 ```@raw html
-<p align="center">
-<img src="https://user-images.githubusercontent.com/6412556/61175404-3b4f9d80-a59e-11e9-85db-ca6bbdb73ffd.png" width="480" border="0" />
-</p>
+<a href="https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/61175404-3b4f9d80-a59e-11e9-85db-ca6bbdb73ffd.png" alt="Bayes/Junction tree example" width="480" border="0" /></a>
 ```
 
 Note that this operation is precisely the same as a [prediction step in filtering applications](https://www.juliarobotics.org/Caesar.jl/latest/principles/filterCorrespondence/), where the state transition model---usually annotated as `d/dt x = f(x, z)`---is here presented by the conditional belief `p(Z | X_0, X_1)`.
@@ -36,6 +34,31 @@ The choice between root finding or minimization is a performance consideration o
 The method of solving the target variable is to fix all other variable values and resolve, sample by sample, the particle estimates of the target.  The Julia programming language has good support for functional programming and is used extensively in the IIF implementation to utilize user defined functions to resolve any variable, including the null-hypothesis and multi-hypothesis generalizations.
 
 The following section illustrates a single convolution operation by using a few high level and some low level function calls.  An additional tutorial exists where [a related example](https://www.juliarobotics.org/Caesar.jl/latest/examples/basic_continuousscalar/) in one dimension is performed as a complete factor graph solution/estimation problem.
+
+#### Previous Text (to be merged here)
+
+Proposal distributions are computed by means of (analytical or numerical -- i.e. "algebraic") factor which defines a residual function:
+```math
+\delta : S \times \Eta \rightarrow \mathcal{R}
+```
+where ``S \times \Eta`` is the domain such that ``\theta_i \in S, \, \eta \sim P(\Eta)``, and ``P(\cdot)`` is a probability.
+
+A trust-region, nonlinear gradient decent method is used to enforce the residual function ``\delta (\theta_S)`` in a leave-one-out-Gibbs strategy for all the factors and variables in each clique.  Each time a factor residual is enforced for another particle along with a sample from the stochastic noise term.  Solutions are found either through root finding on "full dimension" equations ([source code here](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/62afec6300c899d567be29b06f8d9b0919b31878/src/SolverUtilities.jl#L128)):
+```math
+\text{solve}_{\theta_i} ~ s.t. \, 0 = \delta(\theta_{S}; \eta)
+```
+Or minimization of "low dimension" equations ([source code here](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/62afec6300c899d567be29b06f8d9b0919b31878/src/SolverUtilities.jl#L72)) that might not have any roots in ``\theta_i``:
+```math
+\text{argmin}_{\theta_i} ~ [\delta(\theta_{S}; \eta)]^2
+```
+
+> Gradient decent methods are obtained from the Julia Package community, namely [NLsolve.jl](https://github.com/JuliaNLSolvers/NLsolve.jl) and [Optim.jl](https://github.com/JuliaNLSolvers/Optim.jl).
+
+The factor noise term can be any samplable belief (a.k.a. [`IIF.SamplableBelief`](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/2b9f1c3d03e796bc24fbcc622329769dadd94288/src/DefaultNodeTypes.jl#L3)), either through algebraic modeling, or (**critically**) directly from the sensor measurement that is driven by the underlying physics process.  Parametric factors ([Distributions.jl](https://github.com/JuliaStats/Distributions.jl)) or direct physical measurement noise can be used via `AliasingScalarSampler` or `KernelDensityEstimate`.
+
+!!! note
+
+    Also see [[1.2], Chap. 5, Approximate Convolutions](https://juliarobotics.org/Caesar.jl/latest/refs/literature/#Direct-References-1) for more details.
 
 ### Illustrated Calculation in Julia
 
