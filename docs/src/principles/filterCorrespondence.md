@@ -57,13 +57,7 @@ p(X_k | X_{k-1}, Z_a, Z_b) \approx p(X_k | X_{k-1}, Z_a) \times p(X_k | Z_b),
 
 where `Z_.` represents conditional information for two beliefs on the same variable.  The product of the two functional estimates (beliefs) are multiplied by a stochastic algorithm described in more detail [on the multiplying functions page](https://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/).
 
-Direct or indirect measurements of the state variables are should be modeled with the most sensible function `y = h(\theta, \eta)` -- i.e. linear or non-linear functions that approximate the underlying stochastics and physics of the process at hand.  
-
-!!! note
-
-    Mmisam allows for parametric, non-parametric, or intensity noise models which can be incorporated into any differentiable residual function.
-
-Direct state observations can be added to the factor graph as prior factors directly on the variables. 
+Direct or indirect measurements of the state variables are should be modeled with the most sensible function `y = h(\theta, \eta)` -- i.e. linear or non-linear functions that approximate the underlying stochastics and physics of the process at hand.  Direct state observations can be added to the factor graph as prior factors directly on the variables. 
 ```math
 \delta_j(\theta_j, \eta_j) = y_j - h_j(\theta_j, \eta_j).
 ```
@@ -80,7 +74,7 @@ Alternatively measurement models can be used to project belief through a measure
 
 ```@raw html
 <p align="center">
-<img src="https://user-images.githubusercontent.com/6412556/71651780-316e5200-2d18-11ea-811a-6586c76ae354.png" width="480" border="0" />
+<img src="https://user-images.githubusercontent.com/6412556/71652397-105c3000-2d1d-11ea-92bc-282ddbe3eabc.png" width="480" border="0" />
 </p>
 ```
 
@@ -93,3 +87,7 @@ Consider a multi-sensory system along with data transmission delays, variable sa
     Factor graphs are constructed along with the evolution of time which allows the mmisam inference algorithm to resolve variable marginal estimates both forward and backwards in time.  Conventional filtering only allows for forward-backward "smoothing" as two separate processes.  When inferring over a factor graph, all variables and factors are considered simultaneously according the topological connectivity irrespective of when and where which measurements were made or communicated -- as long as the factor graph (probabilistic model) captures the stochastics of the situation with sufficient accuracy.  
 
 > TODO: Multi-modal (belief) vs. multi-hypothesis -- see thesis work on multimodal solutions in the mean time.
+
+!!! note
+
+    Mmisam allows for parametric, non-parametric, or intensity noise models which can be incorporated into any differentiable residual function.
