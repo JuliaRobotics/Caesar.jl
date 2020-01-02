@@ -10,11 +10,11 @@ A frequent discussion point is the correspondence between Kalman/particle/log-fl
 
 This page tries to highlight some of the reasons why using a factor graph approach (w/ Bayes/junction tree inference) in a incremental/fixed-lag/federated sense---e.g. simultaneous localization and mapping (SLAM) approach---has merit.  The described steps form part of the core operations used by the [multimodal incremental smoothing and mapping (mmisam)](https://www.juliarobotics.org/Caesar.jl/latest/concepts/mmisam_alg/) algorithm.
 
-Further topics on factor graph (and Bayes/junction tree) inference formulation, including how out-marginalization works is discussed separately as part of the [Bayes tree description page](https://www.juliarobotics.org/Caesar.jl/latest/principles/bayestreePrinciples/).  It is worth reiterating [the section on why do we even care about non-Gaussian](https://juliarobotics.org/Caesar.jl/latest/concepts/concepts/#Why/Where-does-non-Gaussian-data-come-from?-1) signal processing.
+Further topics on factor graph (and Bayes/junction tree) inference formulation, including how out-marginalization works is discussed separately as part of the [Bayes tree description page](https://www.juliarobotics.org/Caesar.jl/latest/principles/bayestreePrinciples/).  It is also worth reiterating [the section on why do we even care about non-Gaussian](https://juliarobotics.org/Caesar.jl/latest/concepts/concepts/#Why/Where-does-non-Gaussian-data-come-from?-1) signal processing.
 
 !!! note
 
-    The steps described on this page are accessible via several [multi-language interfaces (middleware)](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#).
+    Coming soon, the steps described on this page will be fully accessible via [multi-language interfaces (middleware)](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#) -- some of these interfaces already exist.
 
 ## The Target Tracking Problem (Conventional Filtering)
 
@@ -46,11 +46,7 @@ After integration (assume zeroth order) the associated residual function can be 
 \delta_i (\theta_{k}, \theta_{k-1}, \frac{d \theta_k}{dt}; \Delta t) = \theta_{k} - (\theta_{k-1} + \frac{d \theta_k}{dt} \Delta t)
 ```
 
-Filter prediction steps are synonymous with a binary factor (conditional likelihood) between two variables where a prior estimate from one variable is projected (by means of a convolution) to the next variable.  The [convolutional principle page](https://www.juliarobotics.org/Caesar.jl/latest/principles/approxConvDensities/) describes a more detailed example on how a convolution can be computed.
-
-!!! note
-
-    Factor graphs are constructed along with the evolution of time which allows the mmisam inference algorithm to resolve variable marginal estimates both forward and backwards in time.  Conventional filtering only allows for forward-backward "smoothing" as two separate processes.  When inferring over a factor graph, all variables are factors are considered simultaneously according the topological connectivity irrespective of when and where which measurements were made or communicated -- as long as the factor graph (probabilistic model) captures the stochastics of the situation with sufficient accuracy.   
+Filter prediction steps are synonymous with a binary factor (conditional likelihood) between two variables where a prior estimate from one variable is projected (by means of a convolution) to the next variable.  The [convolutional principle page](https://www.juliarobotics.org/Caesar.jl/latest/principles/approxConvDensities/) describes a more detailed example on how a convolution can be computed. 
 
 ### Measurement Step using a Factor Graph
 
@@ -80,7 +76,11 @@ An illustration of both predictions (binary likelihood process model) and direct
 </p>
 ```
 
-## Target Tracking (Beyond Filtering)
+!!! note
+
+    Factor graphs are constructed along with the evolution of time which allows the mmisam inference algorithm to resolve variable marginal estimates both forward and backwards in time.  Conventional filtering only allows for forward-backward "smoothing" as two separate processes.  When inferring over a factor graph, all variables and factors are considered simultaneously according the topological connectivity irrespective of when and where which measurements were made or communicated -- as long as the factor graph (probabilistic model) captures the stochastics of the situation with sufficient accuracy.  
+
+## Beyond Filtering
 
 Consider a multi-sensory system along with data transmission delays, variable sampling rates, etc.;  when designing a filtering system to track one or multiple targets, it quickly becomes difficult to augment state vectors with the required state and measurement histories.  In contrast, the factor graph as a language allows for heterogeneous data streams to be combined in a common inference framework, and is [discussed further in the building distributed factor graphs section](http://www.juliarobotics.org/Caesar.jl/latest/concepts/building_graphs/).  
 
