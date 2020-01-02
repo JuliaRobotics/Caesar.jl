@@ -82,6 +82,7 @@ Alternatively measurement models can be used to project belief through a measure
 <p align="center">
 <img src="https://user-images.githubusercontent.com/6412556/71651780-316e5200-2d18-11ea-811a-6586c76ae354.png" width="480" border="0" />
 </p>
+```
 
 ## Beyond Filtering
 
