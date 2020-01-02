@@ -63,7 +63,7 @@ Direct or indirect measurements of the state variables are should be modeled wit
 
     Mmisam allows for parametric, non-parametric, or intensity noise models which can be incorporated into any differentiable residual function.
 
-Direct state observations can be added to the factor graph as prior factors directly on the variables.  Alternatively measurement models can be used to project belief through a measurement function:
+Direct state observations can be added to the factor graph as prior factors directly on the variables. 
 ```math
 \delta_j(\theta_j, \eta_j) = y_j - h_j(\theta_j, \eta_j).
 ```
@@ -76,12 +76,19 @@ An illustration of both predictions (binary likelihood process model) and direct
 </p>
 ```
 
-!!! note
+Alternatively measurement models can be used to project belief through a measurement function, and should be recognized as a standard representation for a [Hidden Markov Model (HMM)](https://en.wikipedia.org/wiki/Hidden_Markov_model):
 
-    Factor graphs are constructed along with the evolution of time which allows the mmisam inference algorithm to resolve variable marginal estimates both forward and backwards in time.  Conventional filtering only allows for forward-backward "smoothing" as two separate processes.  When inferring over a factor graph, all variables and factors are considered simultaneously according the topological connectivity irrespective of when and where which measurements were made or communicated -- as long as the factor graph (probabilistic model) captures the stochastics of the situation with sufficient accuracy.  
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/71651780-316e5200-2d18-11ea-811a-6586c76ae354.png" width="480" border="0" />
+</p>
 
 ## Beyond Filtering
 
-Consider a multi-sensory system along with data transmission delays, variable sampling rates, etc.;  when designing a filtering system to track one or multiple targets, it quickly becomes difficult to augment state vectors with the required state and measurement histories.  In contrast, the factor graph as a language allows for heterogeneous data streams to be combined in a common inference framework, and is [discussed further in the building distributed factor graphs section](http://www.juliarobotics.org/Caesar.jl/latest/concepts/building_graphs/).  
+Consider a multi-sensory system along with data transmission delays, variable sampling rates, etc.;  when designing a filtering system to track one or multiple targets, it quickly becomes difficult to augment state vectors with the required state and measurement histories.  In contrast, the factor graph as a language allows for heterogeneous data streams to be combined in a common inference framework, and is [discussed further in the building distributed factor graphs section](http://www.juliarobotics.org/Caesar.jl/latest/concepts/building_graphs/).
+
+!!! note
+
+    Factor graphs are constructed along with the evolution of time which allows the mmisam inference algorithm to resolve variable marginal estimates both forward and backwards in time.  Conventional filtering only allows for forward-backward "smoothing" as two separate processes.  When inferring over a factor graph, all variables and factors are considered simultaneously according the topological connectivity irrespective of when and where which measurements were made or communicated -- as long as the factor graph (probabilistic model) captures the stochastics of the situation with sufficient accuracy.  
 
 > TODO: Multi-modal (belief) vs. multi-hypothesis -- see thesis work on multimodal solutions in the mean time.
