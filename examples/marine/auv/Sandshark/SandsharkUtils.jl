@@ -337,8 +337,11 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
         dashboard[:canTakePoses] = HSMHandling
 
         # adjust latest RTT after solve, latest solved
-        lastSolved = sortDFG(ls(dfg, r"x\d9", solvable=1))[end]
-        dashboard[:drtCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
+        lastList = sortDFG(ls(dfg, r"x\d9+", solvable=1))
+        if 0 < length(lastList)
+          lastSolved = lastList[end]
+          dashboard[:drtCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
+        end
 
         # remove a token to allow progress to continue
         gotToken = take!(dashboard[:poseSolveToken])
