@@ -57,7 +57,7 @@ p(X_k | X_{k-1}, Z_a, Z_b) \approx p(X_k | X_{k-1}, Z_a) \times p(X_k | Z_b),
 
 where `Z_.` represents conditional information for two beliefs on the same variable.  The product of the two functional estimates (beliefs) are multiplied by a stochastic algorithm described in more detail [on the multiplying functions page](https://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/).
 
-Direct or indirect measurements of the state variables are should be modeled with the most sensible function `y = h(\theta, \eta)` -- i.e. linear or non-linear functions that approximate the underlying stochastics and physics of the process at hand.  Direct state observations can be added to the factor graph as prior factors directly on the variables. 
+Direct state observations can be added to the factor graph as prior factors directly on the variables. 
 ```math
 \delta_j(\theta_j, \eta_j) = y_j - h_j(\theta_j, \eta_j).
 ```
@@ -70,7 +70,7 @@ An illustration of both predictions (binary likelihood process model) and direct
 </p>
 ```
 
-Alternatively measurement models can be used to project belief through a measurement function, and should be recognized as a standard representation for a [Hidden Markov Model (HMM)](https://en.wikipedia.org/wiki/Hidden_Markov_model):
+Alternatively, indirect measurements of the state variables are should be modeled with the most sensible function `y = h(\theta, \eta)` -- i.e. linear or non-linear functions that approximate the underlying stochastics and physics of the process at hand.  The measurement models can be used to project belief through a measurement function, and should be recognized as a standard representation for a [Hidden Markov Model (HMM)](https://en.wikipedia.org/wiki/Hidden_Markov_model):
 
 ```@raw html
 <p align="center">
