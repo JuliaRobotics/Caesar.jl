@@ -135,8 +135,8 @@ function pose_hdlr(channel::String,
   for (vsym, drt) in dashboard[:drtMpp]
     symFct = intersect(ls(dfg, MutablePose2Pose2Gaussian), ls(dfg,vsym))[1]
     drtFct = getFactorType(dfg, symFct)
-    accumulateDiscreteLocalFrame!(drt, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0, Phik=SE2(msgdata.pos[1:3]))
-    println(alltht, "$odoT, $(length(dashboard[:drtMpp])), $vsym, $(symFct), $(msgdata.pos[1:3]), $(drtFct.Zij.μ)")
+    accumulateDiscreteLocalFrame!(drtFct, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0, Phik=SE2(msgdata.pos[1:3])) # drt
+    println(alltht, "$odoT, $(length(dashboard[:drtMpp])), $vsym, $(symFct), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3]), $(drtFct.Zij.μ[1]), $(drtFct.Zij.μ[2]), $(drtFct.Zij.μ[3])")
   end
 
   # get message time
@@ -158,7 +158,11 @@ function pose_hdlr(channel::String,
     nPose = nextPose(dashboard[:lastPose])
     @info "pose_hdlr, adding new pose $nPose, at $odoT.  DRTs $(collect(keys(dashboard[:drtMpp]))), drtCurrent=$(dashboard[:drtCurrent])"
 
-    drtLast = dashboard[:drtMpp][dashboard[:lastPose]]
+    # get drt from last pose
+    lastPoseDrt = intersect(ls(dfg, dashboard[:lastPose]), ls(dfg, MutablePose2Pose2Gaussian))[1]
+    drtLast = getFactorType(dfg, lastPoseDrt)
+    # drtLast = dashboard[:drtMpp][dashboard[:lastPose]]
+
     # add new variable and factor to the graph
     fctsym = duplicateToStandardFactorVariable(Pose2Pose2,
                                                drtLast,

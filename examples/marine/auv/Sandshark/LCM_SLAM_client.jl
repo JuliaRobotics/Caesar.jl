@@ -124,7 +124,7 @@ function main(;parsed_args=parse_commandline(),
   Odolog = open(joinLogPath(fg,"ODO.csv"),"w")
   dirodolog = open(joinLogPath(fg,"DIRODO.csv"),"w")
   rawodolog = open(joinLogPath(fg,"RAWODO.csv"),"w")
-  alltht = open(joinLogPath(fg,"ALLTHT.csv"),"w")
+  allthtlog = open(joinLogPath(fg,"ALLTHT.csv"),"w")
 
   # prepare the solver in the background
   ST = manageSolveTree!(fg, dashboard, dbg=dbg)
@@ -152,7 +152,7 @@ function main(;parsed_args=parse_commandline(),
   doautoinit!(fg,:x0)
 
   @info "Start with the real-time tracking aspect..."
-  subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard, DRTLog, Odolog, dirodolog, rawodolog, alltht), pose_t)
+  subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard, DRTLog, Odolog, dirodolog, rawodolog, allthtlog), pose_t)
   # subscribe(lcm, "AUV_ODOMETRY_GYROBIAS", (c,d)->pose_hdlr(c,d,fg,dashboard), pose_t)
   subscribe(lcm, "AUV_RANGE_CORRL",      (c,d)->range_hdlr(c,d,fg,dashboard), raw_t)
   # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
@@ -229,6 +229,7 @@ function main(;parsed_args=parse_commandline(),
   close(Odolog)
   close(dirodolog)
   close(rawodolog)
+  close(allthtlog)
 
   # return last factor graph as built and solved
   return fg, dashboard, WTDSH, ST
