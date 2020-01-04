@@ -30,8 +30,11 @@ map(x->setSolvable!(fg, x, 1 ),[lsf(fg, Pose2Pose2);
 #
 ensureAllInitialized!(fg)
 
+saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
+
 # Check how long not solvable tail is?
 # map(x->(x,isSolvable(getVariable(fg,x))), getLastPoses(fg, filterLabel=r"x\d", number=15))
+
 
 # after all initialized
 plb = plotSandsharkFromDFG(fg, drawTriads=false, lbls=false)
@@ -48,7 +51,6 @@ plb |> PDF(joinLogPath(fg,"traj_ref.pdf"))
 
 
 
-saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 
 
 
@@ -65,16 +67,22 @@ YY = Float64.(drt_data[:,5])
 mask = 40.0 .< (XX.^2 + YY.^2)
 
 # filter the signals for hard jumps between drt transitions
-responsetype = Lowpass(20.0; fs=50)
-designmethod = FIRWindow(hanning(32))
+responsetype = Lowpass(1.0; fs=50)
+designmethod = FIRWindow(hanning(64))
 
-XXf = XX[mask] #filt(digitalfilter(responsetype, designmethod), XX[mask])
-YYf = YY[mask] #filt(digitalfilter(responsetype, designmethod), YY[mask])
+XXm = XX[mask]
+YYm = YY[mask]
+XXf = filt(digitalfilter(responsetype, designmethod), XX[mask])
+YYf = filt(digitalfilter(responsetype, designmethod), YY[mask])
 
-pl = Gadfly.plot(x=XXf[1:10:end], y=YYf[1:10:end], Geom.point, Theme(default_color=colorant"green"))
+pl = Gadfly.plot(x=XXm[1:10:end], y=YYm[1:10:end], Geom.point, Theme(default_color=colorant"khaki"))
 pl |> PDF(joinLogPath(fg,"drt.pdf"))
+pl = Gadfly.plot(x=XXf[1:10:end], y=YYf[1:10:end], Geom.point, Theme(default_color=colorant"green"))
+pl |> PDF(joinLogPath(fg,"drtf.pdf"))
 
 pl = Gadfly.layer(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"green"))
+union!(plb.layers, pl)
+pl = Gadfly.layer(x=XXm, y=YYm, Geom.path, Theme(default_color=colorant"khaki"))
 union!(plb.layers, pl)
 plb |> PDF(joinLogPath(fg,"traj_ref_drt.pdf"))
 

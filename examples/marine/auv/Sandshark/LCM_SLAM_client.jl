@@ -47,7 +47,7 @@ function parse_commandline()
         "--iters", "-i"
             help = "LCM messages to handle"
             arg_type = Int
-            default = 8000
+            default = 10000
         "--speed", "-s"
             help = "Target playback speed for LCMLog"
             arg_type = Float64
@@ -241,7 +241,7 @@ end
 parsed_args=parse_commandline()
 
 # ## Uncomment for different defaults in Juno
-# parsed_args["iters"] = 8000
+# parsed_args["iters"] = 40000
 # parsed_args["kappa_odo"] = 0.1
 # parsed_args["speed"] = 1.0
 # parsed_args["recordTrees"] = false
