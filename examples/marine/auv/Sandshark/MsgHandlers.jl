@@ -133,10 +133,11 @@ function pose_hdlr(channel::String,
   dashboard[:lastMsgTime] = odoT # unix2datetime(msgdata.utime*1e-6)
   # "accumulateDiscreteLocalFrame! on all RTTs" |> println
   for (vsym, drt) in dashboard[:drtMpp]
-    symFct = intersect(ls(dfg, MutablePose2Pose2Gaussian), ls(dfg,vsym))[1]
-    drtFct = getFactorType(dfg, symFct)
-    accumulateDiscreteLocalFrame!(drtFct, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0, Phik=SE2(msgdata.pos[1:3])) # drt
-    println(alltht, "$odoT, $(length(dashboard[:drtMpp])), $vsym, $(symFct), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3]), $(drtFct.Zij.μ[1]), $(drtFct.Zij.μ[2]), $(drtFct.Zij.μ[3])")
+    for symFct in intersect(ls(dfg, MutablePose2Pose2Gaussian), ls(dfg,vsym))
+      drtFct = getFactorType(dfg, symFct)
+      accumulateDiscreteLocalFrame!(drtFct, msgdata.pos[1:3], dashboard[:Qc_odo], 1.0, Phik=SE2(msgdata.pos[1:3])) # drt
+      println(alltht, "$odoT, $(length(dashboard[:drtMpp])), $vsym, $(symFct), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3]), $(drtFct.Zij.μ[1]), $(drtFct.Zij.μ[2]), $(drtFct.Zij.μ[3])")
+    end
   end
 
   # get message time

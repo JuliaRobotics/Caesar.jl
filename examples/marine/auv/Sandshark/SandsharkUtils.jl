@@ -223,6 +223,7 @@ function initializeAUV_noprior(dfg::AbstractDFG,
   addVariable!(dfg, :drt_0, Pose2, solvable=0)
   drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
   addFactor!(dfg, [:x0; :drt_0], drec, solvable=0, autoinit=false)
+  # NOTE have not added to dashboard[:drtMpp] yet
 
   # reference odo solution
   addVariable!(dfg, :drt_ref, Pose2, solvable=0)
