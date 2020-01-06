@@ -55,6 +55,12 @@ function parse_commandline()
         "--dbg"
             help = "debug flag"
             action = :store_true
+        "--odoGyroBias"
+            help = "Use gyro biased channel for odometry"
+            action = :store_true
+        "--reportPoses"
+            help = "Generate report on interpose pose factors"
+            action = :store_true
         "--recordTrees"
             help = "Store copies of the Bayes tree for later animation, sets the rate in sleep(1/rate)"
             arg_type = Float64
@@ -125,9 +131,11 @@ function main(;parsed_args=parse_commandline(),
   dirodolog = open(joinLogPath(fg,"DIRODO.csv"),"w")
   rawodolog = open(joinLogPath(fg,"RAWODO.csv"),"w")
   allthtlog = open(joinLogPath(fg,"ALLTHT.csv"),"w")
+  posetiminglog = open(joinLogPath(fg,"timing_pose.csv"),"w")
+  solvetiminglog = open(joinLogPath(fg,"timing_solve.csv"),"w")
 
   # prepare the solver in the background
-  ST = manageSolveTree!(fg, dashboard, dbg=dbg)
+  ST = manageSolveTree!(fg, dashboard, dbg=dbg, timinglog=solvetiminglog)
 
   # middleware handlers
   # start with LBL and magnetometer
@@ -152,7 +160,8 @@ function main(;parsed_args=parse_commandline(),
   doautoinit!(fg,:x0)
 
   @info "Start with the real-time tracking aspect..."
-  subscribe(lcm, "AUV_ODOMETRY",         (c,d)->pose_hdlr(c,d,fg,dashboard, DRTLog, Odolog, dirodolog, rawodolog, allthtlog), pose_t)
+  odoChannel = parsed_args["odoGyroBias"] ? "AUV_ODOMETRY_GYROBIAS" : "AUV_ODOMETRY"
+  subscribe(lcm, odoChannel,             (c,d)->pose_hdlr(c,d,fg,dashboard, posetiminglog, DRTLog, Odolog, dirodolog, rawodolog, allthtlog), pose_t)
   # subscribe(lcm, "AUV_ODOMETRY_GYROBIAS", (c,d)->pose_hdlr(c,d,fg,dashboard), pose_t)
   subscribe(lcm, "AUV_RANGE_CORRL",      (c,d)->range_hdlr(c,d,fg,dashboard), raw_t)
   # subscribe(lcm, "AUV_BEARING_CORRL",callback, raw_t)
@@ -202,6 +211,7 @@ function main(;parsed_args=parse_commandline(),
             # while dashboard[:canTakePoses] == HSMBlocking && dashboard[:solveInProgress] == SSMSolving
           flush(DRTLog)
           @info "delay for solver, canTakePoses=$(dashboard[:canTakePoses]), tokens=$(dashboard[:poseSolveToken].data), RTS=$(dashboard[:realTimeSlack])"
+          # map(x->flush(x.stream), [DRTLog;LBLLog;Odolog;dirodolog;rawodolog;allthtlog;posetiminglog,solvetiminglog])
           sleep(0.2)
         end
         # real time slack update -- this is the compute overrun
@@ -230,6 +240,8 @@ function main(;parsed_args=parse_commandline(),
   close(dirodolog)
   close(rawodolog)
   close(allthtlog)
+  close(posetiminglog)
+  close(solvetiminglog)
 
   # return last factor graph as built and solved
   return fg, dashboard, WTDSH, ST
@@ -251,8 +263,8 @@ parsed_args=parse_commandline()
 # fg = main()
 
 ## Do run on LCM data from file
-lcmlogfile = joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")
-# lcmlogfile = joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")
+# lcmlogfile = joinpath(ENV["HOME"],"data","sandshark","lcmlog","lcm-sandshark-med.log")
+lcmlogfile = joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")
 fg, dashboard, wtdsh, ST = main(parsed_args=parsed_args, lcm=LCMLog(lcmlogfile) )
 
 

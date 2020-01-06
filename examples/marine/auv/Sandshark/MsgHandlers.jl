@@ -123,12 +123,14 @@ function pose_hdlr(channel::String,
                    msgdata::pose_t,
                    dfg::AbstractDFG,
                    dashboard::Dict,
+                   timinglog,
                    drtlog,
                    drolog,
                    dirodolog,
                    rawodolog,
                    alltht )
   #
+  t0 = time_ns()
   odoT = unix2datetime(msgdata.utime*1e-6)
   dashboard[:lastMsgTime] = odoT # unix2datetime(msgdata.utime*1e-6)
   # "accumulateDiscreteLocalFrame! on all RTTs" |> println
@@ -139,6 +141,7 @@ function pose_hdlr(channel::String,
       println(alltht, "$odoT, $(length(dashboard[:drtMpp])), $vsym, $(symFct), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3]), $(drtFct.Zij.μ[1]), $(drtFct.Zij.μ[2]), $(drtFct.Zij.μ[3])")
     end
   end
+  dt_acc = (time_ns()-t0)/1e9
 
   # get message time
 
@@ -149,6 +152,7 @@ function pose_hdlr(channel::String,
   println(drtlog, "$odoT, $(drtFnc), $(dashboard[:lastPose]), $(val[1]), $(val[2]), $(val[3]), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3]), $(collect(keys(dashboard[:drtMpp]))), $(drtFncMu)")
   drval = accumulateFactorMeans(dfg, [:x0drt_0f1;])
   println(drolog, "$odoT, $(dashboard[:lastPose]), $(drval[1]), $(drval[2]), $(drval[3])")
+  dt_drt = (time_ns()-t0)/1e9
 
   # check if a new pose and factor must be added?
   if (dashboard[:odoTime] + dashboard[:poseRate]) <= odoT
@@ -212,7 +216,7 @@ function pose_hdlr(channel::String,
       dashboard[:poseStride] = 0
     end
   end
-
+  dt_pose = (time_ns()-t0)/1e9
 
   ## Separate odometry check
   # mutable pose2pose2 factor holding odometry only reference
@@ -223,6 +227,9 @@ function pose_hdlr(channel::String,
   drval = accumulateFactorMeans(dfg, [:x0drt_reff1;])
   println(dirodolog, "$odoT, $(dashboard[:lastPose]), $(drval[1]), $(drval[2]), $(drval[3])")
   println(rawodolog, "$odoT, $(dashboard[:lastPose]), $(msgdata.pos[1]), $(msgdata.pos[2]), $(msgdata.pos[3])")
+
+  dt_total = (time_ns()-t0)/1e9
+  println(timinglog, "$odoT, $(dashboard[:lastPose]), $t0, $dt_acc, $dt_drt, $dt_pose, $dt_total")
 
   nothing
 end

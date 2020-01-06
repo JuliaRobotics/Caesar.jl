@@ -139,12 +139,13 @@ plb |> PDF(joinLogPath(fg,"traj_ref_drt_dirodo.pdf"))
 
 
 
-
-
 ## Look at factors separately
 reportFactors(fg, Pose2Point2Range, show=false)
 
-# reportFactors(fg, Pose2Pose2, show=false)
+
+if parsed_args["reportPoses"]
+  reportFactors(fg, Pose2Pose2, show=false)
+end
 
 
 ## BATCH SOLVE

@@ -272,7 +272,7 @@ function initializeAUV_noprior(dfg::AbstractDFG,
 end
 
 
-function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
+function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false, timinglog=Base.stdout)
 
   @info "logpath=$(getLogPath(dfg))"
   getSolverParams(dfg).drawtree = true
@@ -292,12 +292,16 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       "waiting for prior on x0" |> println
       sleep(1)
     end
+    solvecycle = 0
     # keep solving
     while dashboard[:loopSolver]
+      t0 = time_ns()
+      solvecycle += 1
       # add any newly solvables (atomic)
       while !isready(dashboard[:solvables]) && dashboard[:loopSolver]
-        sleep(0.5)
+        sleep(0.2)
       end
+      dt_wait = (time_ns()-t0)/1e9
 
       #add any new solvables
       while isready(dashboard[:solvables]) && dashboard[:loopSolver]
@@ -310,9 +314,14 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
           getfnc(dfg, sy).solvable = 1
         end
       end
+      dt_solvable = (time_ns()-t0)/1e9
 
       @info "Ensure all new variables initialized"
       ensureAllInitialized!(dfg)
+      dt_init = (time_ns()-t0)/1e9
+      dt_disengage = 0.0
+      dt_save1 = 0.0
+      dt_solve = 0.0
 
       dashboard[:solveInProgress] = SSMReady
 
@@ -321,6 +330,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
       # if 10 <= dashboard[:poseStride]
         @info "reduce problem size by disengaging older parts of factor graph"
         setSolvableOldPoses!(dfg, youngest=getSolverParams(dfg).qfl+dashboard[:SOLVESTRIDE], oldest=100, solvable=0)
+        dt_disengage = (time_ns()-t0)/1e9
 
         # set up state machine flags to allow overlapping or block
         dashboard[:solveInProgress] = SSMSolving
@@ -329,7 +339,9 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
         # do the actual solve (with debug saving)
         lasp = getLastPoses(dfg, filterLabel=r"x\d", number=1)[1]
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_before_$(lasp)"))
+        dt_save1 = (time_ns()-t0)/1e9
         tree, smt, hist = solveTree!(dfg, tree)
+        dt_solve = (time_ns()-t0)/1e9
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(lasp)"))
 
         # unblock LCMLog reader for next STRIDE segment
@@ -337,7 +349,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
         # de-escalate handler state machine
         dashboard[:canTakePoses] = HSMHandling
 
-        # adjust latest RTT after solve, latest solved
+        # adjust latest RTT after solve, latest solved -- hard coded pose stride 10
         lastList = sortDFG(ls(dfg, r"x\d+9\b|x9\b", solvable=1))
         if 0 < length(lastList)
           lastSolved = lastList[end]
@@ -351,6 +363,10 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false)
         "sleep a solve cycle" |> println
         sleep(0.2)
       end
+      dt_finish = (time_ns() - t0)/1e9
+
+      # store timing results
+      println(timinglog, "$solvecycle, $t0, $dt_wait, $dt_solvable, $dt_init, $dt_disengage, $dt_save1, $dt_solve, $(tree.buildTime), $dt_finish")
     end
   end
   return ST
