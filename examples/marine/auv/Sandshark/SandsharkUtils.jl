@@ -272,13 +272,13 @@ function initializeAUV_noprior(dfg::AbstractDFG,
 end
 
 
-function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false, timinglog=Base.stdout)
+function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false, timinglog=Base.stdout, limitfixeddown::Bool=true)
 
   @info "logpath=$(getLogPath(dfg))"
   getSolverParams(dfg).drawtree = true
   getSolverParams(dfg).qfl = 3*dashboard[:SOLVESTRIDE]
   getSolverParams(dfg).isfixedlag = true
-  getSolverParams(dfg).limitfixeddown = true
+  getSolverParams(dfg).limitfixeddown = limitfixeddown
 
   # allow async process
   # getSolverParams(dfg).async = true

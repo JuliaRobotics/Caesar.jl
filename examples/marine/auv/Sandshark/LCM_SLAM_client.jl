@@ -61,6 +61,9 @@ function parse_commandline()
         "--reportPoses"
             help = "Generate report on interpose pose factors"
             action = :store_true
+        "--limitfixeddown"
+            help = "Limit numerical computations for recycled and marginalized cliques during down solve."
+            action = :store_true
         "--recordTrees"
             help = "Store copies of the Bayes tree for later animation, sets the rate in sleep(1/rate)"
             arg_type = Float64
@@ -135,7 +138,7 @@ function main(;parsed_args=parse_commandline(),
   solvetiminglog = open(joinLogPath(fg,"timing_solve.csv"),"w")
 
   # prepare the solver in the background
-  ST = manageSolveTree!(fg, dashboard, dbg=dbg, timinglog=solvetiminglog)
+  ST = manageSolveTree!(fg, dashboard, dbg=dbg, timinglog=solvetiminglog, limitfixeddown=parsed_args["limitfixeddown"])
 
   # middleware handlers
   # start with LBL and magnetometer
