@@ -1,11 +1,11 @@
-```@raw html
+hi ```@raw html
 <p align="center">
 <img src="https://user-images.githubusercontent.com/6412556/47298402-ace95500-d5e5-11e8-8607-593525445d14.png" width="480" border="0" />
 </p>
 ```
 
 ## Introduction
-Caesar is a modern robotic framework for localization and mapping, reducing the barrier of entry for Simultaneous Localization and Mapping (SLAM).  Caesar attempts to address a number of issues that arise in prior SLAM solutions - solving under-defined systems, inference with non-Gaussian measurements, simplifying factor creation, and centralizing factor-graph persistence with databases and cloud infrastructure.  Caesar started as part of reseach work in navigation systems and direct the reader to the [literature reference page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more information.
+Caesar is an open-source robotic software stack for combining heterogeneous and ambiguous data streams, and predominantly focuses on geometric/spatial estimation tasks related to simultaneous localization and mapping (SLAM).  This software is highly extensible and is well suited to a variety of estimation/filtering-type tasks aswell.  Caesar addresses numerous issues that arise in prior SLAM solutions - solving under-defined systems, inference with non-Gaussian measurements, standard features for natively handling ambiguous data association and multi-hypotheses, simplifying factor creation, and centralized (or peer-to-peer distributed) factor-graph persistence with databases and cloud infrastructure.  Caesar started as part of reseach work in navigation systems, see the [literature reference page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more information.
 
 ## Focus Area
 
@@ -13,7 +13,7 @@ This project focuses on the open development and progression to a public, stable
 
 ## The Caesar Framework
 
-[Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl) is the "umbrella" framework for other dedicated algorithmic/supporting packages that are implemented in [Julia](http://www.julialang.org/) (and [JuliaPro](http://www.juliacomputing.com)).  A few packages are wrapped C libraries, which [can be incorporated with zero overhead](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/), such as [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl).
+The [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl) package is the "umbrella" framework for other dedicated algorithmic packages.  While many of the packages are implemented in [Julia](http://www.julialang.org/) ([JuliaPro](http://www.juliacomputing.com)), a few dependencies are wrapped C libraries.  C [can be incorporated with zero overhead](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/), such as was done with [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl).
 
 > [FAQ: Why use Julia?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Why-Julia-1)
 
