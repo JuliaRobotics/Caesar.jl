@@ -84,11 +84,9 @@ julia-language
 latex-completions
 ```
 
->**Note** Some situations have required the user separately installing the `Atom.jl` Julia package via command line (if Juno does not automatically install Atom.jl for you).  Atom.jl can then be installed with Julia's package manager and `add Atom`:
-```julia
-] # activate Pkg manager
-(v1.0) pkg> add Atom
-```
+!!! note
+
+    Some situations have required the user separately installing the `Atom.jl` Julia package via command line (if Juno does not automatically install Atom.jl for you).  Atom.jl can then be installed with Julia's package manager and `add Atom` — see below.
 
 There are a variety of useful packages in Atom, such as `minimap` and `minimap-git`.
 
@@ -127,11 +125,13 @@ RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
 (v1.0) pkg> add Arena#master
 ```
 
-> **Note** currently requires `Arena#master` branch (2019Q2).
+!!! note
+
+    Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
 
 ## Install Visualization Utils (e.g. Arena.jl)
 
-Visualizations were removed from Caesar and moved to a new package [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) instead.
+3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
 Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
 
 Arena.jl can be installed with the following steps:
@@ -155,18 +155,18 @@ sudo apt-get install libcairo2
 sudo apt-get install libpango1.0-0  # or libpango1.0-1
 ```
 
-The [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) package must be installed up to latest master branch (development branch) owing to an upstream [issue with Pango fonts on Julia 1.0](https://github.com/GiovineItalia/Gadfly.jl/issues/1206) with [Gadfly.jl](https://github.com/GiovineItalia/Gadfly.jl) plotting.  Once this issue is resolved, the next RoMEPlotting stable version can be tagged and be available as a standard stable release.
+!!! note
+
+    As of 1Q2020 it is likely that most systems won’t require a system install of libpango or even libcairo.
 
 Please install the latest RoMEPlotting using Package manager as follows:
 ```
-$ julia # latest v1.0.x
+$ julia
 julia> ] # to get package manager
-(v1.0) pkg> add RoMEPlotting#master
+(v1.2) pkg> add RoMEPlotting
 ```
 
-Alternatively, the `dev` command --- i.e. `(v1.0) pkg> dev RoMEPlotting` --- will clone the RoMEPlotting.jl git repository to your local `.julia/dev/RoMEPlotting` folder.
-
-> Last updated February 2019
+Alternatively, the `dev` command --- i.e. `(v1.2) pkg> dev RoMEPlotting` --- will clone the RoMEPlotting.jl git repository to your local `.julia/dev/RoMEPlotting` folder.
 
 ## The "I Know Julia" Installation (TL;DR)
 
@@ -181,13 +181,13 @@ julia> ] # to enable package manager
 Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
 ```julia
 # the multimodal incremental smoothing and mapping solver
-(v1.0) pkg> test IncrementalInference
+(v1.2) pkg> test IncrementalInference
 ...
 # robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
-(v1.0) pkg> test RoME
+(v1.2) pkg> test RoME
 ...
 # umbrella framework with interaction tools and more -- allows stand alone and server based solving
-(v1.0) pkg> test Caesar
+(v1.2) pkg> test Caesar
 ...
 ```
 
