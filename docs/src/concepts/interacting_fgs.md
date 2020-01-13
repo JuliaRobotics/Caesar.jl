@@ -1,4 +1,4 @@
-## Querying the FactorGraph
+# Querying the FactorGraph
 
 There are a variety of functions to query the factor graph, please refer to [Function Reference](../func_ref.md) for details.
 
@@ -12,15 +12,31 @@ ls(fg, :x0)
 # TODO: Provide an overview of getVal, getVert, getBW, getVertKDE, etc.
 ```
 
-## Solving Graphs
+A factor graph object can be visualized using:
+```julia
+drawGraph(fg, show=true)
+```
+
+By setting `show=true`, the application `evince` will be called to show the `fg.pdf` file that was created using *GraphViz*.  A `GraphPlot.jl` visualization engine is also available.
+
+# Solving Graphs
+
 When you have built the graph, you can call the solver to perform inference with the following:
 
 ```julia
 # Perform inference
-batchSolve!(fg)
+tree, smt, hist = solveTree!(fg)
+```
+
+The returned Bayes (Junction) `tree` object is described in more detail on [a dedicated documentation page](https://juliarobotics.org/Caesar.jl/latest/principles/bayestreePrinciples/), while `smt` and `hist` return values most closely relate to development and debug outputs which can be ignored during general use.  Should an error occur during, the exception information is easily accessible in the `smt` object (as well as file logs which default to `/tmp/caesar/`).
+
+One of the major features of the multimodal-iSAM (mmisam) algorithm (implemented by [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl)) is reducing computational load by recycling and marginalizing different (usually older) parts of the factor graph.  In order to utilize the benefits of recycing, the previous Bayes (Junction) tree should also be provided as input (see fixed-lag examples for more details):
+```julia
+tree, smt, hist = solveTree!(fg, tree)
 ```
 
 ## Peeking at Results
+
 Once you have solved the graph, you can review the full marginal with:
 
 ```julia
@@ -32,27 +48,8 @@ X0([0.01, 0, 0])
 For finding the MAP value in the density functions, you can use `getKDEMax` or `getKDEMean`. Here we are asking for the MAP values for all the variables in the factor graph:
 
 ```julia
-verts = ls(fg)
-map(v -> println("$v : $(getKDEMax(getVertKDE(fg, v)))"), verts[1]);
+varsyms = ls(fg)
+map(v -> println("$v : $(getKDEMax(getKDE(fg, v)))"), varsyms[1]);
 ```
 
 > Also see built-in function `printgraphmax(fg)` which performs a similar function.
-
-## Plotting
-Once the graph has been built, a simple plot of the values can be produced with RoMEPlotting.jl. For example:
-
-```julia
-using RoMEPlotting
-
-drawPoses(fg)
-# If you have landmarks, you can instead call
-# drawPosesLandms(fg)
-
-# Draw the KDE for x0
-plotKDE(fg, :x0)
-# Draw the KDE's for x0 and x1
-plotKDE(fg, [:x0, :x1])
-```
-
-## Next Steps
-Although the above graph demonstrates the fundamental operations, it's not particularly useful. Take a look at [Hexagonal Example](../examples/basic_hexagonal2d.md) for a complete example that builds on these operations.

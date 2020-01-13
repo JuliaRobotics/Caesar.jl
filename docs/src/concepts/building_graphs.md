@@ -1,4 +1,5 @@
 # Building and Solving Graphs
+
 Irrespective of your application - real-time robotics, batch processing of survey data, or really complex multi-hypothesis modeling - you're going to need to add factors and variables to a graph. This section discusses how to do that in Caesar.
 
 The following sections discuss the steps required to construct a graph and solve it:
@@ -7,7 +8,35 @@ The following sections discuss the steps required to construct a graph and solve
 * Solving the Graph
 * Informing the Solver About Ready Data
 
+## What are Variables and Factors
+
+Factor graphs are bipartite, i.e. variables and factors.  In practice we use "nodes" to represent both variables and factors with edges between.  In future, we will remove the wording "node" from anything Factor Graph usage/abstraction related (only vars and factors).  Nodes and edges will be used as terminology for actually storing the data on some graph storage/process foundation technology.
+
+Even more meta -- factors are "variables" that have already been observed and are now stochastically "fixed".  Waving hands over the fact that a factors encode both the algebraic model AND the observed measurement values.
+
+Variables in the factor graph have not been observed, but we want to back them out from the observed values and algebra relating them all.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the algebra already connecting them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):
+
+```math
+P(\Theta | Z)  =  P(Z | \Theta) P(\Theta)
+```
+
+where Theta represents all variables and Z represents all measurements or data, and
+
+```math
+P(\Theta , Z) = P(Z | \Theta) P(\Theta)
+```
+
+or
+
+```math
+P(\Theta, Z) = P(\Theta | Z) P(Z).
+```
+
+You'll notice the first looks like "Bayes rule" and we take `` P(Z) `` as a constant (the uncorrelated assumption).
+
 ## Initializing a Factor Graph
+
+The first step is to model the data (using the most appropriate *factors*) among *variables* of interest.  To start model, first create a *distributed factor graph object*:
 
 ```julia
 using Caesar, RoME, Distributions
@@ -16,13 +45,9 @@ using Caesar, RoME, Distributions
 fg = initfg()
 ```
 
-## Adding to the Graph
-Factor graphs are made of two constituent parts:
-* Variables
-* Factors
-
 ## Variables
-Variables (a.k.a. poses in localization terminology) are created in the same way  shown above for the landmark. Variables contain a label, a data type (e.g. in 2D `RoME.Point2` or `RoME.Pose2`). Note that variables are solved - i.e. they are the product, what you wish to calculate when the solver runs - so you don't provide any measurements when creating them.
+
+Variables (a.k.a. poses or states in navigation lingo) are created with the `addVariable!` fucntion call.
 
 ```julia
 # Add the first pose :x0
@@ -33,7 +58,10 @@ for i in 1:10
 end
 ```
 
+Variables contain a label, a data type (e.g. in 2D `RoME.Point2` or `RoME.Pose2`). Note that variables are solved - i.e. they are the product, what you wish to calculate when the solver runs - so you don't provide any measurements when creating them.
+
 ## Factors
+
 Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute (pre-resolved) GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a [`IIF.Prior`](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/#IncrementalInference.Prior) belief is add to `x0` (using the [`addFactor`](https://www.juliarobotics.org/Caesar.jl/latest/func_ref/#DistributedFactorGraphs.addFactor!) call) as a normal distribution centered around `[0,0,0]`.
 
 ### Priors

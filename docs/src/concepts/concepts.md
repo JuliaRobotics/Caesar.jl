@@ -4,32 +4,6 @@ A factor graph is a bipartite representation where variables (denoted by larger 
 
 ![factorgraphexample](https://user-images.githubusercontent.com/6412556/41196136-e5b05f98-6c07-11e8-8f26-7318e5085cc0.png).
 
-## What are Variables and Factors
-
-Factor graphs are bipartite, i.e. variables and factors.  In practice we use "nodes" to represent both variables and factors with edges between.  In future, we will remove the wording "node" from anything Factor Graph usage/abstraction related (only vars and factors).  Nodes and edges will be used as terminology for actually storing the data on some graph storage/process foundation technology.
-
-Even more meta -- factors are "variables" that have already been observed and are now stochastically "fixed".  Waving hands over the fact that a factors encode both the algebraic model AND the observed measurement values.
-
-Variables in the factor graph have not been observed, but we want to back them out from the observed values and algebra relating them all.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the algebra already connecting them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):
-
-```math
-P(\Theta | Z)  =  P(Z | \Theta) P(\Theta)
-```
-
-where Theta represents all variables and Z represents all measurements or data, and
-
-```math
-P(\Theta , Z) = P(Z | \Theta) P(\Theta)
-```
-
-or
-
-```math
-P(\Theta, Z) = P(\Theta | Z) P(Z).
-```
-
-You'll notice the first looks like "Bayes rule" and we take `` P(Z) `` as a constant (the uncorrelated assumption).
-
 # Why/Where does non-Gaussian data come from?
 
 Gaussian error models in measurement or data cues will only be Gaussian (normally distributed) if all physics/decisions/systematic-errors/calibration/etc. has a correct algebraic model in every single circumstance.  Caesar.jl and mm-iSAM is heavily focussed on state-estimation from a plethora of heterogenous data.  Four major categories of non-Gaussian errors have thus far been considered:
