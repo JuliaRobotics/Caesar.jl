@@ -1,4 +1,4 @@
-# Getting Started
+# Welcome
 
 Caesar.jl is one of the packages within the [JuliaRobotics](http://www.juliarobotics.org) community, and adheres to the [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 
