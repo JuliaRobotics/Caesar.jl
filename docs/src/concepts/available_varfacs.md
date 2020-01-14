@@ -1,5 +1,5 @@
+# Variables in Caesar.jl
 
-## Variables in Caesar.jl
 You can check for the latest variable types by running the following in your terminal:
 
 ```julia
@@ -33,11 +33,12 @@ Pose3
 InertialPose3
 ```
 
-> **Note** Please open an issue with [JuliaRobotics/RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) for specific requests, problems, or suggestions.  Contributions are also welcome.
+!!! note
 
-> **Note** There might be more variable types in Caesar/RoME/IIF not yet documented here.
+    Please open an issue with [JuliaRobotics/RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) for specific requests, problems, or suggestions.  Contributions are also welcome.  There might be more variable types in Caesar/RoME/IIF not yet documented here.
 
-## Factors in Caesar.jl
+# Factors in Caesar.jl
+
 You can check for the latest factor types by running the following in your terminal:
 
 ```julia
@@ -51,20 +52,6 @@ println.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));
 ```
 
 ### Priors (Absolute Data)
-Existing prior (unary) factors in Caesar.jl/RoME.jl/IIF.jl include:
-
-```@docs
-PriorPolar
-PriorPoint2
-PriorPose2
-```
-
-### Prior 3D (unary) factors
-
-```@docs
-PriorPoint3
-PriorPose3
-```
 
 Defaults in IncrementalInference.jl:
 ```@docs
@@ -73,7 +60,23 @@ PartialPrior
 MixturePrior
 ```
 
+Some of the most common priors (unary factors) in Caesar.jl/RoME.jl include:
+```@docs
+PriorPolar
+PriorPoint2
+PriorPose2
+PriorPoint3
+PriorPose3
+```
+
 ### Conditional Likelihoods (Relative Data)
+
+Defaults in IncrementalInference.jl:
+```@docs
+LinearConditional
+MixtureLinearConditional
+```
+
 Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:
 ```@docs
 PolarPolar
@@ -97,11 +100,6 @@ PartialPose3XYYaw
 Pose3Pose3XYYaw
 ```
 
-Defaults in IncrementalInference.jl:
-```@docs
-LinearConditional
-MixtureLinearConditional
-```
+# Extending Caesar with New Variables and Factors
 
-## Extending Caesar with New Variables and Factors
 A question that frequently arises is how to design custom variables and factors to solve a specific type of graph. One strength of Caesar is the ability to incorporate new variables and factors at will. Please refer to [Adding Factors](adding_variables_factors.md) for more information on creating your own factors.

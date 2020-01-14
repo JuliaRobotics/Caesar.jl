@@ -30,7 +30,9 @@ tar -xvf julia-1.2.0-linux-x86_64.tar.gz
 cd /usr/bin
 sudo ln -s ~/julia-software/julia-1.2.0/bin/julia julia
 ```
->**Note** Feel free to modify this setup as you see fit.
+!!! note
+
+    Feel free to modify this setup as you see fit.
 
 This should allow any terminal or process on the computer to run the Julia REPL by type `julia` and testing with:
 
