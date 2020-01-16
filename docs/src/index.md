@@ -40,8 +40,6 @@ The Caesar framework is not limited to direct Julia use.  See the [multi-languag
 
 ## A Few Highlights
 
-> **Updates to this list coming soon**
-
 The Caesar framework has the following features:
 * Distributed Factor Graph representation of pose and sensor data
 * Localization using [Multi-modal iSAM](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/#Related-Literature-1)
@@ -58,7 +56,6 @@ The Caesar framework has the following features:
 See related works on [the literature page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion -- also consult the Caesar.jl Slack channel to follow/engage with community discussions.
 
 !!! note
-
     Please help improve this documentation--if something confuses you, chances
     are you're not alone. It's easy to do as you read along: just click on the
     "Edit on GitHub" link above, and then
@@ -86,7 +83,7 @@ The Caesar repository is part of the JuliaRobotics organization and adheres to t
 
 ## Contributors
 
-We are grateful for many, many contributions within the Julia package ecosystem -- see the `REQUIRE` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, DrakeVisualizer, Graphs, CloudGraphs` and others for a far reaching list of contributions.
+We are grateful for many, many contributions within the Julia package ecosystem -- see the `Project.toml` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, Graphs, MeshCat` and others for a far reaching list of contributions.
 
 Consider citing our work:
 
