@@ -5,7 +5,7 @@ addprocs(8)
 
 using DistributedFactorGraphs
 using Caesar, RoME
-@everywhere using Caesar, RoME
+@everywhere using Caesar, RoME, DistributedFactorGraphs
 using LCMCore, BotCoreLCMTypes
 using Dates
 using DataStructures
@@ -55,6 +55,9 @@ function parse_commandline()
         "--dbg"
             help = "debug flag"
             action = :store_true
+        "--savePlotting"
+            help = "Store factor graph after each pose"
+            action = :store_true
         "--odoGyroBias"
             help = "Use gyro biased channel for odometry"
             action = :store_true
@@ -103,7 +106,8 @@ function main(;parsed_args=parse_commandline(),
                lcm=LCM(),
                logSpeed::Float64=parsed_args["speed"],
                iters::Int=parsed_args["iters"],
-               dbg::Bool=parsed_args["dbg"] )
+               dbg::Bool=parsed_args["dbg"],
+               savePlotting::Bool=parsed_args["savePlotting"]  )
   #
 
   # data containers
@@ -112,11 +116,13 @@ function main(;parsed_args=parse_commandline(),
   magDict = Dict{DateTime,Float64}()
 
   # fg object and initialization
-  fg = initfg()
+  fg = LightDFG{SolverParams}(params=SolverParams())
+  # fg = initfg()
   initializeAUV_noprior(fg, dashboard, stride_range=parsed_args["stride_range"])
 
   # scale the odometry noise
   dashboard[:odoCov] .*= parsed_args["kappa_odo"]
+  dashboard[:savePlotting] = savePlotting
 
   # store args, dead reckon tether, and lbl values in files.
   Base.mkpath(getLogPath(fg))

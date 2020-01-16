@@ -268,6 +268,8 @@ function initializeAUV_noprior(dfg::AbstractDFG,
 
   dashboard[:odoCov] = Matrix{Float64}(Diagonal([0.5;0.3;0.2].^2))
 
+  dashboard[:savePlotting] = false
+
   nothing
 end
 

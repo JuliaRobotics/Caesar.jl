@@ -63,18 +63,19 @@ drt_data = readdlm(joinLogPath(fg, "DRT.csv"), ',')
 XX = Float64.(drt_data[:,4])
 YY = Float64.(drt_data[:,5])
 
-# remove those near zero
-mask = 40.0 .< (XX.^2 + YY.^2)
-
 # filter the signals for hard jumps between drt transitions
 responsetype = Lowpass(1.0; fs=50)
 designmethod = FIRWindow(hanning(64))
 
+# remove those near zero
+mask = 40.0 .< (XX.^2 + YY.^2)
+
 XXm = XX[mask]
 YYm = YY[mask]
-XXf = filt(digitalfilter(responsetype, designmethod), XX[mask])
-YYf = filt(digitalfilter(responsetype, designmethod), YY[mask])
+XXf = filt(digitalfilter(responsetype, designmethod), XXm)
+YYf = filt(digitalfilter(responsetype, designmethod), YYm)
 
+# plot DRT
 pl = Gadfly.plot(x=XXm[1:10:end], y=YYm[1:10:end], Geom.point, Theme(default_color=colorant"khaki"))
 pl |> PDF(joinLogPath(fg,"drt.pdf"))
 pl = Gadfly.plot(x=XXf[1:10:end], y=YYf[1:10:end], Geom.point, Theme(default_color=colorant"green"))

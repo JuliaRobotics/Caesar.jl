@@ -215,6 +215,12 @@ function pose_hdlr(channel::String,
       put!(dashboard[:poseSolveToken], nPose)
       dashboard[:poseStride] = 0
     end
+
+    # also store current factor graph if part of plotting request
+    if dashboard[:savePlotting]
+      dfg_ = deepcopy(dfg)
+      @spawn saveDFG(dfg_, joinpath(getLogPath(dfg_), "fg_$nPose"))
+    end
   end
   dt_pose = (time_ns()-t0)/1e9
 

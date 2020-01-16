@@ -1,17 +1,22 @@
 # plot factor graph using Makie for belief space representation
 
-using Caesar, RoME
-using Makie
-using KernelDensityEstimate
-using DistributedFactorGraphs
-using DocStringExtensions
-using ProgressMeter
+using Distributed
 
+using Caesar, RoME, DistributedFactorGraphs
+@everywhere using Caesar, RoME, DistributedFactorGraphs
+@everywhere using KernelDensityEstimate
+@everywhere using ProgressMeter
+
+@everywhere import RoME: Point2, Point3
+using Makie
+using DocStringExtensions
+
+import DistributedFactorGraphs: getEstimates
 
 """
     $SIGNATURES
 
-Get the cartesoam range over which the factor graph variables span.
+Get the cartesian range over which the factor graph variables span.
 
 Notes:
 - Optional `regexFilter` can be used to subselect, according to label, which variable IDs to use.
@@ -61,7 +66,7 @@ end
 
 Notes:
 - Uses `Makie.contour` as backend
-- `fadeClamp` limits intensity to `fadeFloor` outside the `fade` window, assuming `sortVars`.
+- Disable with `fadeFloor=0`, must be ∈ [0,1].
 
 DevNotes
 - TODO, allow `tags` as filter too.
@@ -84,18 +89,22 @@ function plotVariableBeliefs(dfg::AbstractDFG,
                              sortVars::Bool=false,
                              varStride::Int=1,
                              fade::Int=0,
-                             fadeFloor::Float64=0.3,
-                             fadeClamp::Bool=true,
-                             tail::Int=-1  )
+                             fadeFloor::Real=0.3,
+                             # fadeClamp::Bool=true,
+                             tail::Int=-1,
+                             digits::Int=-1,
+                             extend::Real=0.2  )
   #
-  dfgran = getRangeCartesian(dfg, regexFilter, digits=-1)
+  dfgran = getRangeCartesian(dfg, regexFilter, digits=digits, extend=extend)
 
   x = LinRange(dfgran[1,1], dfgran[1,2], N)
   y = LinRange(dfgran[2,1], dfgran[2,2], N)
   Z = zeros(N,N)
   zz = zeros(N,N)
-  xy = zeros(2,N)
-  xy[2,:] .= y
+  xy = zeros(Threads.nthreads(), 2,N)
+  for i in 1:Threads.nthreads()
+    xy[i,2,:] .= y
+  end
 
   # get the variables for plotting, while applying available filters
   vsyms = getVariableIds(dfg, regexFilter)
@@ -111,16 +120,19 @@ function plotVariableBeliefs(dfg::AbstractDFG,
   @showprogress "Evaluating symbols" for vsym in vsyms
     count += 1
     XY = marginal(getVariable(dfg, vsym) |> getKDE, [1;2])
-    for i in 1:N
-      xy[1,:] .= x[i]
-      zz[i,:] = XY(xy)
+    Threads.@threads for i in 1:N
+      xy[Threads.threadid(), 1,:] .= x[i]
+      zz[i,:] = XY(xy[Threads.threadid(), :,:])
     end
+    # normalize all beliefs to same scope
     zz ./= maximum(zz)
-    zz .*= maximum([count/len, 0 < fade ? fadeFloor : 1.0])
+    # do the requested fading
+    zz .*= maximum( [(fade-(len-count))/fade; 0.0]) * (1-fadeFloor) + fadeFloor
+
+    # Accumulate and clamp max value of accumulated beliefs
     Z .+= zz
-    if count < len-fade
+    if count < len-fade && 0 < fadeFloor
       # i.e. count still in fade tail, must now do fade clamping
-      @info "clamping, $count, $len, $fade"
       Z[Z .> fadeFloor] .= fadeFloor
     else
       Z[Z .> 1] .= 1
@@ -139,20 +151,32 @@ end
 
 
 
-fg = loadCanonicalFG_Hexagonal()
-pl = plotVariableBeliefs(fg, r"x\d") # using optional Regex filter
-pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=3) # using optional Regex filter
-pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=2, tail=4) # using optional Regex filter
-
-
+# fg = loadCanonicalFG_Hexagonal()
+# pl = plotVariableBeliefs(fg, r"x\d") # using optional Regex filter
+# pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=3) # using optional Regex filter
+# pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=2, tail=4) # using optional Regex filter
 
 
 
 0
 
+# targetResultsDir = "2020-01-08T17:57:25.612"
+# targetResultsDir = "2020-01-15T18:30:40.98"
+# fg = LightDFG{SolverParams}(params=SolverParams())
+# loadDFG("/tmp/caesar/$targetResultsDir/fg_final.tar.gz", Main, fg)
+# getSolverParams(fg).logpath = "/tmp/caesar/$targetResultsDir"
+# dontMarginalizeVariablesAll!(fg)
 
+# scene = plotVariableBeliefs(fg, r"x\d", sortVars=true, varStride=2, fade=20, digits=-2, fadeFloor=0.1)
 
+# mask = YYf .< -32
+# drt_data = readdlm(joinLogPath(fg, "DRT.csv"), ',')
+# ... from GenerateResults.jl
+# XXfm = XXf[mask]; YYfm = YYf[mask];
+# lines!(scene, XXfm, YYfm, color=:red)
 
+# xyt = getPPESuggestedAll(fg2, r"x\d")
+# lines!(scene, xyt[2][:,1], xyt[2][:,2], color=:black)
 
 
 
