@@ -31,14 +31,17 @@ cd /usr/bin
 sudo ln -s ~/julia-software/julia-1.2.0/bin/julia julia
 ```
 !!! note
-
     Feel free to modify this setup as you see fit.
 
 This should allow any terminal or process on the computer to run the Julia REPL by type `julia` and testing with:
 
+#### [Optional] Quick Test that Julia is Working 
+
+Run Julia in REPL (console) mode:
 ```julia
-println("hello world")
-# Should print "hello world"
+$ julia
+julia> println("hello world")
+"hello world"
 ```
 
 Maybe a script, or command:
@@ -56,10 +59,9 @@ user@...$ julia -e "println(\"...testing...\")"
 
 ```
 
-> **Note**: When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.
-For example, search for 'julialang workflow tips' or 'julialang performance tips'.
-
-> **Note** see [FAQ - Why are first runs slow?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Just-In-Time-Compiling-(i.e.-why-are-first-runs-slow?)-1), because of just of Just-In-Time/Pre compiling and caching.
+!!! note
+    When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.  For example, search for 'julialang workflow tips' or 'julialang performance tips'.
+    Also, see [FAQ - Why are first runs slow?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Just-In-Time-Compiling-(i.e.-why-are-first-runs-slow?)-1), which is due to Just-In-Time/Pre compiling and caching.
 
 ## Setup Juno IDE Environment
 
@@ -87,7 +89,6 @@ latex-completions
 ```
 
 !!! note
-
     Some situations have required the user separately installing the `Atom.jl` Julia package via command line (if Juno does not automatically install Atom.jl for you).  Atom.jl can then be installed with Julia's package manager and `add Atom` — see below.
 
 There are a variety of useful packages in Atom, such as `minimap` and `minimap-git`.
@@ -128,7 +129,6 @@ RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
 ```
 
 !!! note
-
     Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
 
 ## Install Visualization Utils (e.g. Arena.jl)
@@ -158,7 +158,6 @@ sudo apt-get install libpango1.0-0  # or libpango1.0-1
 ```
 
 !!! note
-
     As of 1Q2020 it is likely that most systems won’t require a system install of libpango or even libcairo.
 
 Please install the latest RoMEPlotting using Package manager as follows:
