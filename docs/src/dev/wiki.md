@@ -16,6 +16,10 @@ https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Parametric-Solve-W
 
 https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Tree-Based-Initialization
 
+## Variable Ordering Links
+
+Wiki for [variable ordering links](https://github.com/JuliaRobotics/Caesar.jl/wiki/Variable-Ordering-References).
+
 ## Developer's Poem
 
 ```
