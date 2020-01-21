@@ -1,5 +1,7 @@
 
 
+include(joinpath(@__DIR__, "Plotting.jl"))
+
 ## draw fg
 drawGraph(fg, filepath=joinpath(getLogPath(fg),"fg.pdf"), show=false)
 # drawGraph(fg)
@@ -40,6 +42,7 @@ saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 plb = plotSandsharkFromDFG(fg, drawTriads=false, lbls=false)
 
 
+
 ## add reference layer
 posesyms = ls(fg, r"x\d") |> sortDFG
 XX = (x->(getVal(solverData(getVariable(fg, x), :lbl))[1])).(posesyms)
@@ -75,15 +78,19 @@ YYm = YY[mask]
 XXf = filt(digitalfilter(responsetype, designmethod), XXm)
 YYf = filt(digitalfilter(responsetype, designmethod), YYm)
 
+mask = YYf .< -32
+XXfm = XXf[mask]
+YYfm = YYf[mask]
+
 # plot DRT
 pl = Gadfly.plot(x=XXm[1:10:end], y=YYm[1:10:end], Geom.point, Theme(default_color=colorant"khaki"))
 pl |> PDF(joinLogPath(fg,"drt.pdf"))
 pl = Gadfly.plot(x=XXf[1:10:end], y=YYf[1:10:end], Geom.point, Theme(default_color=colorant"green"))
 pl |> PDF(joinLogPath(fg,"drtf.pdf"))
 
-pl = Gadfly.layer(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"green"))
+pl = Gadfly.layer(x=XXfm, y=YYfm, Geom.path, Theme(default_color=colorant"green"))
 union!(plb.layers, pl)
-pl = Gadfly.layer(x=XXm, y=YYm, Geom.path, Theme(default_color=colorant"khaki"))
+pl = Gadfly.layer(x=XXm[mask], y=YYm[mask], Geom.path, Theme(default_color=colorant"khaki"))
 union!(plb.layers, pl)
 plb |> PDF(joinLogPath(fg,"traj_ref_drt.pdf"))
 
@@ -151,11 +158,14 @@ end
 
 ## BATCH SOLVE
 
-# dontMarginalizeVariablesAll!(fg)
-# tree, smt, hist = solveTree!(fg)
+dontMarginalizeVariablesAll!(fg)
+setSolvable!(getVariable(fg, :drt_ref), 0)
+tree, smt, hist = solveTree!(fg, maxparallel=1000)
 
+saveDFG(fg, joinpath(getLogPath(fg),"fg_batchsolve") )
 
-
+plb = plotSandsharkFromDFG(fg, drawTriads=false)
+plb |> PDF(joinpath(getLogPath(fg),"traj_batch.pdf"))
 
 ## Plot reference poses
 

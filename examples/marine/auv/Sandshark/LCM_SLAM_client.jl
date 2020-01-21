@@ -83,7 +83,6 @@ end
 # bring required utilities and handlers into context
 include(joinpath(@__DIR__, "MsgHandlers.jl"))
 include(joinpath(@__DIR__, "SandsharkUtils.jl"))
-include(joinpath(@__DIR__, "Plotting.jl"))
 
 # list all cases in which message handling can continue
 # return true if MSG handler can continue
@@ -281,5 +280,6 @@ fg, dashboard, wtdsh, ST = main(parsed_args=parsed_args, lcm=LCMLog(lcmlogfile) 
 # draw plots in getLogPath(fg)
 include(joinpath(@__DIR__, "GenerateResults.jl"))
 
+@show getLogPath(fg)
 
 #
