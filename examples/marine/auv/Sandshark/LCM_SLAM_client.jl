@@ -1,7 +1,7 @@
 # AUV msg slam client model
 
 using Distributed
-addprocs(8)
+# addprocs(8)
 
 using DistributedFactorGraphs
 using Caesar, RoME
