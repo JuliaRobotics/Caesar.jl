@@ -16,11 +16,11 @@ Newly created page to list related references and additional literature pertaini
 
 [1.6]  Doherty, K., Fourie, D., Leonard, J.: ["Multimodal Semantic SLAM with Probabilistic Data Association"](https://marinerobotics.mit.edu/sites/default/files/doherty_icra2019_revised.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
-[1.7]  Fourie, D., Vaz Teixeira, P., Leonard, J.: "Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities", IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019), under-review.
+[1.7]  Fourie, D., Vaz Teixeira, P., Leonard, J.: ["Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities"](https://marinerobotics.mit.edu/sites/default/files/fourie_iros19_manifolds.pdf), IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019),.
 
 [1.8]  Fourie, D., Leonard, J.: "Inertial Odometry with Retroactive Sensor Calibration", publication under review.
 
-[1.9]  Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. Submitted to ICRA.
+[1.9]  Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. IEEE, Intl. Conference on Robotics and Automation, ICRA (2019).
 
 ### Important References
 
