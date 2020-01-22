@@ -46,6 +46,8 @@ Newly created page to list related references and additional literature pertaini
 
 [2.11]  Hsiao, M. and Kaess, M., 2019, May. MH-iSAM2: Multi-hypothesis iSAM using Bayes Tree and Hypo-tree. In 2019 International Conference on Robotics and Automation (ICRA) (pp. 1274-1280). IEEE.
 
+[2.12]  Arnborg, S., Corneil, D.G. and Proskurowski, A., 1987. [Complexity of finding embeddings in a k-tree](https://epubs.siam.org/doi/pdf/10.1137/0608024). SIAM Journal on Algebraic Discrete Methods, 8(2), pp.277-284.
+
 ### Additional References
 
 [3.1]  Duits, Remco, Erik J. Bekkers, and Alexey Mashtakov. ["Fourier Transform on the Homogeneous Space of 3D Positions and Orientations for Exact Solutions to Linear Parabolic and (Hypo-) Elliptic PDEs."](https://www.preprints.org/manuscript/201811.0027/download/final_file) arXiv preprint arXiv:1811.00363 (2018).
