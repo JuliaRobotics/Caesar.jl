@@ -19,7 +19,8 @@ using ArgParse
 run(`$(ENV["HOME"])/mutelcm.sh`)
 
 
-@enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
+## moved to CommonUtils.jl
+# @enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
 
 
 function parse_commandline()
@@ -291,7 +292,8 @@ fg, dashboard, wtdsh, ST = main(parsed_args=parsed_args, lcm=LCMLog(lcmlogfile) 
 # close(fid)
 
 
-# In case any variables had not been solved yet
+## moved to CommonUtils.jl
+In case any variables had not been solved yet
 ensureAllInitialized!(fg)
 saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 

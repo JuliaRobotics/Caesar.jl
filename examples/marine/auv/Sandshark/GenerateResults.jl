@@ -5,9 +5,12 @@ using DelimitedFiles
 using DSP
 using Dates
 
+
+include(joinpath(@__DIR__, "CommonUtils.jl"))
+
 #DUPLICATE DEFINITION
-@enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
-@enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
+# @enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
+# @enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
 
 function parse_commandline()
     s = ArgParseSettings()
