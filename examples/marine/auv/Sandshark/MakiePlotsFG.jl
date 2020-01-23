@@ -67,6 +67,7 @@ end
 Notes:
 - Uses `Makie.contour` as backend
 - Disable with `fadeFloor=0`, must be ∈ [0,1].
+- `autoStride::Int` if at default `varStride==-1`, else ignore `autoStride`
 
 DevNotes
 - TODO, allow `tags` as filter too.
@@ -87,7 +88,8 @@ function plotVariableBeliefs(dfg::AbstractDFG,
                              N::Int=500,
                              minColorBase::Float64=-0.3,
                              sortVars::Bool=false,
-                             varStride::Int=1,
+                             varStride::Int=-1,
+                             autoStride::Int=300,
                              fade::Int=0,
                              fadeFloor::Real=0.3,
                              # fadeClamp::Bool=true,
@@ -111,6 +113,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
   vsyms = getVariableIds(dfg, regexFilter)
   # specialty feature
   sortVars ? (vsyms .= vsyms |> sortDFG) : nothing
+  varStride = varStride != -1 ? varStride : Int(floor(length(vsyms)/audoStride))+1
   sortVars && varStride != 1 ? (vsyms = vsyms[1:varStride:end]) : nothing
   sortVars && 0 < tail ? (vsyms = vsyms[end-tail:end]) : nothing
   !sortVars && varStride != 1 ? @warn("set sortVars=true to use varStride") : nothing

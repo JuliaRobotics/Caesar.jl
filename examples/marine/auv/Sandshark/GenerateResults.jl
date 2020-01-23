@@ -213,6 +213,8 @@ end
 include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 
 
+nvsyms = ls(fg, r"x\d") |> length
+
 # how to suppress window and simply export
 pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=10)
 
