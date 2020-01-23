@@ -95,6 +95,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
                              digits::Int=-1,
                              extend::Real=0.2  )
   #
+
   dfgran = getRangeCartesian(dfg, regexFilter, digits=digits, extend=extend)
 
   x = LinRange(dfgran[1,1], dfgran[1,2], N)
@@ -117,7 +118,12 @@ function plotVariableBeliefs(dfg::AbstractDFG,
   # walk through all variables and plotting accordingly
   len = length(vsyms)
   count = 0
-  @showprogress "Evaluating symbols" for vsym in vsyms
+
+  @showprogress "Evaluating symbols" for vsym in vsyms[1:end-10]
+    if !isInitialized(getVariable(dfg, vsym))
+      @warn "skipping belief plot of $vsym since not initialized"
+      continue
+    end
     count += 1
     XY = marginal(getVariable(dfg, vsym) |> getKDE, [1;2])
     Threads.@threads for i in 1:N
@@ -145,6 +151,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
 
   # finally use Makie to draw the figure
   Makie.contour(x, y, Z, levels = 0, linewidth = 0, fillrange = true)
+
 end
 
 
@@ -158,7 +165,7 @@ end
 
 
 
-0
+
 
 # targetResultsDir = "2020-01-08T17:57:25.612"
 # targetResultsDir = "2020-01-15T18:30:40.98"

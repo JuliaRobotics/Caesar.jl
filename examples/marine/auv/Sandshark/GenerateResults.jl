@@ -216,7 +216,8 @@ include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 # how to suppress window and simply export
 pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=10)
 
-save(joinLogPath(fg,"beliefs.png"), pl)
+
+Makie.save(joinLogPath(fg,"beliefs.png"), pl)
 
 
 0
