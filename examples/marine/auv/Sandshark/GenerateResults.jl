@@ -1,7 +1,8 @@
 
 using ArgParse
 using Caesar, RoME, DistributedFactorGraphs
-using JSON2
+using DelimitedFiles
+# using JSON2
 using Dates
 
 function parse_commandline()
@@ -25,6 +26,8 @@ end
 
 pargs = parse_commandline()
 
+pargs["reportDir"] = "/media/dehann/temp2/caesar/2020-01-23T10:57:18.068/fg_after_x64.tar.gz"
+
 
 include(joinpath(@__DIR__, "Plotting.jl"))
 
@@ -32,25 +35,25 @@ include(joinpath(@__DIR__, "Plotting.jl"))
 # @show splitpath(pargs["reportDir"])
 
 # load the factor graph needed
-if !isdefined(Main, :fg)
-  global fg
+fg = if !isdefined(Main, :fg)
   println("going to load fg")
   fg = LightDFG{SolverParams}(params=SolverParams())
   @show pathElem = splitpath(pargs["reportDir"])
   @show getSolverParams(fg).logpath = joinpath(pathElem[1:end-1]...)
   loadDFG(pargs["reportDir"], Main, fg)
+  fg
 end
 
-if !isdefined(Main, :wtdsh)
-  global wtdsh
+wtdsh = if !isdefined(Main, :wtdsh)
   # load wtdsh and dashboard
   @show wtFile = string(joinLogPath(fg, "dash.json"))
-  wtdsh = readdlm(joinLogPath(fg, "dash.csv"), ',')
+  readdlm(joinLogPath(fg, "dash.csv"), ',')
 end
 
 ## draw fg
 drawGraph(fg, filepath=joinpath(getLogPath(fg),"fg.pdf"), show=false)
 # drawGraph(fg)
+
 
 
 ##  Draw trajectory & Analyze solve run

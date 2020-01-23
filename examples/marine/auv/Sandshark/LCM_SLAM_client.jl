@@ -263,7 +263,7 @@ end
 parsed_args=parse_commandline()
 
 # ## Uncomment for different defaults in Juno
-# parsed_args["iters"] = 40000
+# parsed_args["iters"] = 15000
 # parsed_args["kappa_odo"] = 0.1
 # parsed_args["speed"] = 1.0
 # parsed_args["recordTrees"] = false
