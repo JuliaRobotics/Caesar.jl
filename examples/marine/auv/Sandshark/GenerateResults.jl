@@ -2,8 +2,12 @@
 using ArgParse
 using Caesar, RoME, DistributedFactorGraphs
 using DelimitedFiles
-# using JSON2
+using DSP
 using Dates
+
+#DUPLICATE DEFINITION
+@enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
+@enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -24,9 +28,14 @@ function parse_commandline()
     return parse_args(s)
 end
 
-pargs = parse_commandline()
+pargs = if !isdefined(Main, :parsed_args)
+  parse_commandline()
+else
+  parsed_args
+end
 
-pargs["reportDir"] = "/media/dehann/temp2/caesar/2020-01-23T10:57:18.068/fg_after_x64.tar.gz"
+# pargs["reportDir"] = "/media/dehann/temp2/caesar/2020-01-23T10:57:18.068/fg_after_x64.tar.gz"
+# pargs["reportDir"] = "/tmp/caesar/2020-01-23T13:36:12.392/fg_after_x381.tar.gz"
 
 
 include(joinpath(@__DIR__, "Plotting.jl"))
@@ -42,12 +51,22 @@ fg = if !isdefined(Main, :fg)
   @show getSolverParams(fg).logpath = joinpath(pathElem[1:end-1]...)
   loadDFG(pargs["reportDir"], Main, fg)
   fg
+else
+  fg
 end
 
 wtdsh = if !isdefined(Main, :wtdsh)
   # load wtdsh and dashboard
   @show wtFile = string(joinLogPath(fg, "dash.json"))
-  readdlm(joinLogPath(fg, "dash.csv"), ',')
+  wtdshA = readdlm(joinLogPath(fg, "dash.csv"), ',')
+  # make array of array
+  wtdsh = []
+  for i in 1:size(wtdshA,1)
+    push!(wtdsh, wtdshA[i,:])
+  end
+  wtdsh
+else
+  wtdsh
 end
 
 ## draw fg
@@ -78,10 +97,7 @@ map(x->setSolvable!(fg, x, 1), setdiff(ls(fg), ls(fg, r"drt_\d")))
 map(x->setSolvable!(fg, x, 1 ),[lsf(fg, Pose2Pose2);
                                 lsf(fg, Pose2Point2Range);
                                 lsfPriors(fg)] )
-#
-ensureAllInitialized!(fg)
 
-saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 
 # Check how long not solvable tail is?
 # map(x->(x,isSolvable(getVariable(fg,x))), getLastPoses(fg, filterLabel=r"x\d", number=15))
@@ -91,11 +107,12 @@ saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 plb = plotSandsharkFromDFG(fg, drawTriads=false, lbls=false)
 
 
-
 ## add reference layer
 posesyms = ls(fg, r"x\d") |> sortDFG
-XX = (x->(getVal(solverData(getVariable(fg, x), :lbl))[1])).(posesyms)
-YY = (x->(getVal(solverData(getVariable(fg, x), :lbl))[2])).(posesyms)
+filter!(x->isInitialized(fg, x), posesyms)
+filter!(x->solverData(getVariable(fg, x), :lbl) != nothing, posesyms)
+XX = (x->(solverData(getVariable(fg, x), :lbl).val[1,1])).(posesyms)
+YY = (x->(solverData(getVariable(fg, x), :lbl).val[2,1])).(posesyms)
 pl = Gadfly.layer(x=XX, y=YY, Geom.path, Theme(default_color=colorant"magenta"))
 union!(plb.layers, pl)
 plb |> PDF(joinLogPath(fg,"traj_ref.pdf"))

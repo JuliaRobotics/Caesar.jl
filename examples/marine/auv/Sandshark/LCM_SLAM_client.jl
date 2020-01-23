@@ -291,6 +291,10 @@ fg, dashboard, wtdsh, ST = main(parsed_args=parsed_args, lcm=LCMLog(lcmlogfile) 
 # close(fid)
 
 
+# In case any variables had not been solved yet
+ensureAllInitialized!(fg)
+saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
+
 
 # draw plots in getLogPath(fg)
 include(joinpath(@__DIR__, "GenerateResults.jl"))
