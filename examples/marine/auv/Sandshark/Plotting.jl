@@ -170,7 +170,7 @@ function plotFrontendTiming(wtdsh)
   wtr = (x->x[3]).(wtdsh)
   wth = (x->x[4]).(wtdsh)
   wts = (x->x[5]).(wtdsh)
-  wtt = (x->x[6].value).(wtdsh)
+  wtt = (x->x[6]).(wtdsh)
   wttn = wtt./wtt[end]
   wtl = (x->x[7]).(wtdsh)
 

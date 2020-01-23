@@ -1,6 +1,52 @@
 
+using ArgParse
+using Caesar, RoME, DistributedFactorGraphs
+using JSON2
+using Dates
+
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table s begin
+        # "--kappa_odo"
+        #     help = "Scale the odometry covariance"
+        #     arg_type = Float64
+        #     default = 1.0
+        # "--dbg"
+        #     help = "debug flag"
+        #     action = :store_true
+        "reportDir"
+            help = "which folder in which to produce results."
+            required = false
+    end
+
+    return parse_args(s)
+end
+
+pargs = parse_commandline()
+
 
 include(joinpath(@__DIR__, "Plotting.jl"))
+
+# @show pargs["reportDir"]
+# @show splitpath(pargs["reportDir"])
+
+# load the factor graph needed
+if !isdefined(Main, :fg)
+  global fg
+  println("going to load fg")
+  fg = LightDFG{SolverParams}(params=SolverParams())
+  @show pathElem = splitpath(pargs["reportDir"])
+  @show getSolverParams(fg).logpath = joinpath(pathElem[1:end-1]...)
+  loadDFG(pargs["reportDir"], Main, fg)
+end
+
+if !isdefined(Main, :wtdsh)
+  global wtdsh
+  # load wtdsh and dashboard
+  @show wtFile = string(joinLogPath(fg, "dash.json"))
+  wtdsh = readdlm(joinLogPath(fg, "dash.csv"), ',')
+end
 
 ## draw fg
 drawGraph(fg, filepath=joinpath(getLogPath(fg),"fg.pdf"), show=false)
@@ -156,16 +202,24 @@ if parsed_args["reportPoses"]
 end
 
 
-## BATCH SOLVE
 
-dontMarginalizeVariablesAll!(fg)
-setSolvable!(getVariable(fg, :drt_ref), 0)
-tree, smt, hist = solveTree!(fg, maxparallel=1000)
 
-saveDFG(fg, joinpath(getLogPath(fg),"fg_batchsolve") )
+## plot densities
 
-plb = plotSandsharkFromDFG(fg, drawTriads=false)
-plb |> PDF(joinpath(getLogPath(fg),"traj_batch.pdf"))
+
+include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
+
+
+# how to suppress window and simply export
+pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=10)
+
+save(joinLogPath(fg,"beliefs.png"), pl)
+
+
+0
+
+
+
 
 ## Plot reference poses
 

@@ -3,8 +3,7 @@
 using Distributed
 # addprocs(8)
 
-using DistributedFactorGraphs
-using Caesar, RoME
+using Caesar, RoME, DistributedFactorGraphs
 @everywhere using Caesar, RoME, DistributedFactorGraphs
 using LCMCore, BotCoreLCMTypes
 using Dates
@@ -12,6 +11,7 @@ using DataStructures
 using Logging
 using JSON2
 using DSP
+# using JLD2, FileIO
 
 using ArgParse
 
@@ -19,13 +19,7 @@ using ArgParse
 run(`$(ENV["HOME"])/mutelcm.sh`)
 
 
-# Precompile large swath of the solver functions
-warmUpSolverJIT()
-warmUpSolverJIT() # twice to ensure larger footprint for multiprocess
-
-
 @enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
-
 
 
 function parse_commandline()
@@ -54,6 +48,9 @@ function parse_commandline()
             default = 0.2
         "--dbg"
             help = "debug flag"
+            action = :store_true
+        "--warmupjit"
+            help = "Warm up JIT during startup"
             action = :store_true
         "--savePlotting"
             help = "Store factor graph after each pose"
@@ -181,9 +178,14 @@ function main(;parsed_args=parse_commandline(),
   recordWTDSH = [true;]
   WTDSH = Vector{Tuple{DateTime, Symbol, Int, HandlerStateMachine, SolverStateMachine, Millisecond, Int}}()
   dashboard[:taskSignals] = @async begin
-    while recordWTDSH[1]
-      push!(WTDSH, (now(), getLastPoses(fg,filterLabel=r"x\d",number=1)[1],dashboard[:poseStride],dashboard[:canTakePoses],dashboard[:solveInProgress],dashboard[:realTimeSlack],length(dashboard[:poseSolveToken].data) ))
-      sleep(0.005)
+    # mkpath(getLogPath(fg))
+    open(joinLogPath(fg, "dash.csv"), "w") do io
+      while recordWTDSH[1]
+        line = [now() getLastPoses(fg,filterLabel=r"x\d",number=1)[1] dashboard[:poseStride] dashboard[:canTakePoses] dashboard[:solveInProgress] dashboard[:realTimeSlack].value length(dashboard[:poseSolveToken].data)]
+        # push!(WTDSH, (line...))
+        writedlm(io, line, ',')
+        sleep(0.005)
+      end
     end
   end
   # record trees for later reconstruction into an animation
@@ -267,6 +269,14 @@ parsed_args=parse_commandline()
 # parsed_args["recordTrees"] = false
 
 
+# maybe warmup
+# Precompile large swath of the solver functions
+if parsed_args["warmupjit"]
+  warmUpSolverJIT()
+  warmUpSolverJIT() # twice to ensure larger footprint for multiprocess
+end
+
+
 ## Do the actual run -- on live UDP traffic
 # fg = main()
 
@@ -275,10 +285,30 @@ parsed_args=parse_commandline()
 lcmlogfile = joinpath(ENV["HOME"],"data","sandshark","lcmlog","sandshark-long.lcmlog")
 fg, dashboard, wtdsh, ST = main(parsed_args=parsed_args, lcm=LCMLog(lcmlogfile) )
 
+# @save joinLogPath(fg, "dash.jld2") wtdsh
+# fid = open(joinLogPath(fg, "dash.json"), "w").
+# JSON2.write(fid, wtdsh)
+# close(fid)
+
 
 
 # draw plots in getLogPath(fg)
 include(joinpath(@__DIR__, "GenerateResults.jl"))
+
+
+## BATCH SOLVE
+
+dontMarginalizeVariablesAll!(fg)
+setSolvable!(getVariable(fg, :drt_ref), 0)
+tree, smt, hist = solveTree!(fg, maxparallel=1000)
+
+saveDFG(fg, joinpath(getLogPath(fg),"fg_batchsolve") )
+
+plb = plotSandsharkFromDFG(fg, drawTriads=false)
+plb |> PDF(joinpath(getLogPath(fg),"traj_batch.pdf"))
+
+
+
 
 @show getLogPath(fg)
 
