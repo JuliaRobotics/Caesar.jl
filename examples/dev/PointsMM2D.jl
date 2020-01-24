@@ -1,5 +1,5 @@
 using Distributed
-addprocs(4)
+addprocs(2)
 # using Revise
 using GraphPlot
 using Colors
@@ -53,7 +53,7 @@ function addLandmarkTrueWithPrior!(dfg::AbstractDFG,
                                    vals::Vector{<: Real},
                                    lgt_cov::Array{Float64,2}=0.01*Matrix(LinearAlgebra.I, 2,2)  )
   #
-  if !hasVariable(dfg, key)
+  if !exists(dfg, key)
     addVariable!(dfg, key, Point2)
     pp = PriorPoint2(MvNormal(vals, lgt_cov))
     addFactor!(dfg, [key], pp)
@@ -117,6 +117,7 @@ pp_σx = 0.1
 pp_σy = 0.1
 pp_σψ = 0.01
 br_σb = 0.03
+# br_σb = 0.001
 br_σρ = 0.3
 pMeas, pDesg = 0.7, 0.3
 
@@ -128,6 +129,7 @@ fg = LightDFG{SolverParams}(params=SolverParams())
 ## develop the robotic factor graph elements
 # x0
 x0_prior = [ground[:x0],[0.1,0.1,0.01]] #fixed
+# x0_prior = [ground[:x0],[100.,100,1]] #fixed
 addVariable!(fg, :x0, Pose2)
 addFactor!(fg, [:x0],  PriorPose2( MvNormal(x0_prior[1], Matrix(Diagonal(x0_prior[2].^2))) ), autoinit=autoinit )
 
@@ -415,7 +417,6 @@ drawGraph(fg)
 
 
 
-0
 ## =============================================================================
 ## Deeper look at various other aspects.
 
