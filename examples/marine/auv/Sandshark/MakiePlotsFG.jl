@@ -113,7 +113,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
   vsyms = getVariableIds(dfg, regexFilter)
   # specialty feature
   sortVars ? (vsyms .= vsyms |> sortDFG) : nothing
-  varStride = varStride != -1 ? varStride : Int(floor(length(vsyms)/audoStride))+1
+  varStride = varStride != -1 ? varStride : Int(floor(length(vsyms)/autoStride))+1
   sortVars && varStride != 1 ? (vsyms = vsyms[1:varStride:end]) : nothing
   sortVars && 0 < tail ? (vsyms = vsyms[end-tail:end]) : nothing
   !sortVars && varStride != 1 ? @warn("set sortVars=true to use varStride") : nothing

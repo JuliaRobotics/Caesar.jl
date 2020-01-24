@@ -215,18 +215,6 @@ plb |> PDF(joinLogPath(fg,"traj_ref_drt_dirodo.pdf"))
 
 
 
-
-## Look at factors separately
-reportFactors(fg, Pose2Point2Range, show=false)
-
-
-if parsed_args["reportPoses"]
-  reportFactors(fg, Pose2Pose2, show=false)
-end
-
-
-
-
 ## plot densities
 
 
@@ -240,6 +228,25 @@ pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=10)
 
 
 Makie.save(joinLogPath(fg,"beliefs.png"), pl)
+
+
+
+
+
+
+
+## Look at factor reports separately
+reportFactors(fg, Pose2Point2Range, show=false)
+
+
+if parsed_args["reportPoses"]
+  reportFactors(fg, Pose2Pose2, show=false)
+end
+
+
+
+
+
 
 
 0
