@@ -224,10 +224,10 @@ include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 nvsyms = ls(fg, r"x\d") |> length
 
 # how to suppress window and simply export
-pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=10)
+pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=15, fadeFloor=0.2)
 
 
-Makie.save(joinLogPath(fg,"beliefs.png"), pl)
+Makie.save(joinLogPath(fg,"fgBeliefs.png"), pl)
 
 
 
