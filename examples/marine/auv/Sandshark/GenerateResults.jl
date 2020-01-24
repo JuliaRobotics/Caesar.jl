@@ -4,6 +4,7 @@ using Caesar, RoME, DistributedFactorGraphs
 using DelimitedFiles
 using DSP
 using Dates
+using Glob
 
 
 include(joinpath(@__DIR__, "CommonUtils.jl"))
@@ -20,9 +21,9 @@ function parse_commandline()
         #     help = "Scale the odometry covariance"
         #     arg_type = Float64
         #     default = 1.0
-        # "--dbg"
-        #     help = "debug flag"
-        #     action = :store_true
+        "--plotSeriesBeliefs"
+            help = "Glob fg_* archives and draw belief frames"
+            action = :store_true
         "reportDir"
             help = "which folder in which to produce results."
             required = false
@@ -226,10 +227,26 @@ nvsyms = ls(fg, r"x\d") |> length
 # how to suppress window and simply export
 pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=15, fadeFloor=0.2)
 
-
 Makie.save(joinLogPath(fg,"fgBeliefs.png"), pl)
 
 
+# plot a series of frames
+if pargs["plotSeriesBeliefs"]
+  files = glob("fg_x*.tar.gz", getLogPath(fg))
+  indiv = splitpath.(files) .|> x->x[end]
+  Base.mkpath(joinLogPath(fg, "frames"))
+  global frame = 0
+  for ind in indiv
+    global frame += 1
+    println("frame $frame of $(length(indiv))")
+    fname = split(ind, '.')[1]
+    fgl = LightDFG{SolverParams}(params=SolverParams())
+    loadDFG(joinLogPath(fg, ind), Main, fgl)
+    nvars = minimum( [15; length(ls(fgl, r"x\d"))] )
+    pl = plotVariableBeliefs(fgl, r"x\d", sortVars=true, fade=nvars, fadeFloor=0.2)
+    Makie.save(joinLogPath(fg,"frames/$fname.png"), pl)
+  end
+end
 
 
 
