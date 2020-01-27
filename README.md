@@ -83,7 +83,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [iif-build-v08]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.8
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
-[iif-stable]: https://img.shields.io/badge/2019Q4-v0.8.x-green.svg
+[iif-stable]: https://img.shields.io/badge/2020Q1-v0.8.x-green.svg
 [iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
 [iif-releases]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
 
@@ -125,7 +125,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
 [dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2019Q4-v0.5.x-green.svg
+[dfg-stable]: https://img.shields.io/badge/2020Q1-v0.5.x-green.svg
 [dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones
 [dfg-releases]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
 
