@@ -19,16 +19,16 @@ Changes to the code is currrently tracked via Github's integrated Milestone/Issu
 
 | **Major Dependencies**  |  **Stable**     |  **Dev (master)**   |  **Test Coverage**  |  **Milestones**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
-| Caesar.jl | ![][caesar-stable] | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] | [![][mst-shield]][caesar-milestones] |
-| [RoME.jl][rome-url] | ![][r-stable] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] | [![][mst-shield]][r-milestones] |
-| [IncrementalInference.jl][iif-url] | ![][iif-stable] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
-| [ApproxManifoldProducts.jl][amp-url] | ![][amp-stable] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
-| [KernelDensityEstimate.jl][kde-url] | ![][kde-stable] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
-| [TransformUtils.jl][tf-url] | ![][tf-stable] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
-| [FunctionalStateMachine.jl][fsm-url] | ![][fsm-stable] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
-| [DistributedFactorGraphs.jl][dfg-url] | ![][dfg-stable] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
-| [RoMEPlotting.jl][rp-url] | ![][rp-stable] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
-| [~~Graphs.jl~~][graphs-url] | ![][gjl-stable] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] | n/a |
+| Caesar.jl | [![][caesar-stable]][caesar-releases] | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] | [![][mst-shield]][caesar-milestones] |
+| [RoME.jl][rome-url] | [![][r-stable]][r-releases] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] | [![][mst-shield]][r-milestones] |
+| [IncrementalInference.jl][iif-url] | [![][iif-stable]][iif-releases] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
+| [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
+| [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
+| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
+| [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
+| [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
+| [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
+| [~~Graphs.jl~~][graphs-url] | [![][gjl-stable]][gjl-releases] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] | n/a |
 | [~~CloudGraphs.jl~~][cloudgraphs-url] | ![][cg-stable] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] | n/a |
 
 # Get Involved and Code of Conduct
@@ -65,6 +65,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://caesarjl.slack.com
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
+[caesar-releases]: https://github.com/JuliaRobotics/Caesar.jl/releases
 
 [rome-url]: http://www.github.com/JuliaRobotics/RoME.jl
 [r-cov-img]: https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master
@@ -74,6 +75,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
 [r-stable]: https://img.shields.io/badge/2019Q4-v0.5.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
+[r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
 [iif-cov-img]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl/coverage.svg?branch=master
 [iif-cov-url]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl?branch=master
@@ -83,6 +85,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
 [iif-stable]: https://img.shields.io/badge/2019Q4-v0.8.x-green.svg
 [iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
+[iif-releases]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
 
 [kde-cov-img]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl/coverage.svg?branch=master
 [kde-cov-url]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl?branch=master
@@ -91,6 +94,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [kde-url]: http://www.github.com/JuliaRobotics/KernelDensityEstimate.jl
 [kde-stable]: https://img.shields.io/badge/2019Q1-v0.5.x-green.svg
 [kde-milestones]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/milestones
+[kde-releases]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/releases
 
 [tf-cov-img]: https://codecov.io/github/dehann/TransformUtils.jl/coverage.svg?branch=master
 [tf-cov-url]: https://codecov.io/github/dehann/TransformUtils.jl?branch=master
@@ -99,6 +103,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [tf-url]: http://www.github.com/dehann/TransformUtils.jl
 [tf-stable]: https://img.shields.io/badge/2018Q4-v0.2.x-green.svg
 [tf-milestones]: https://github.com/JuliaRobotics/TransformUtils.jl/milestones
+[tf-releases]: https://github.com/JuliaRobotics/TransformUtils.jl/releases
 
 <!-- | [DrakeVisualizer.jl][dvis-url] | [![Build Status][dvis-build-img]][dvis-build-url] | [![codecov.io][dvis-cov-img]][dvis-cov-url] |
 [dvis-cov-img]: https://codecov.io/github/rdeits/DrakeVisualizer.jl/coverage.svg?branch=master
@@ -113,6 +118,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [graphs-build-url]: https://travis-ci.org/JuliaAttic/Graphs.jl
 [graphs-url]: http://www.github.com/JuliaAttic/Graphs.jl
 [gjl-stable]: https://img.shields.io/badge/2019Q2-v0.10.x-green.svg
+[gjl-releases]: https://github.com/JuliaAttic/Graphs.jl/releases
 
 [dfg-cov-img]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl/coverage.svg?branch=master
 [dfg-cov-url]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl?branch=master
@@ -121,6 +127,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-stable]: https://img.shields.io/badge/2019Q4-v0.5.x-green.svg
 [dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones
+[dfg-releases]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
 
 [amp-cov-img]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl/coverage.svg?branch=master
 [amp-cov-url]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl?branch=master
@@ -129,6 +136,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-stable]: https://img.shields.io/badge/2019Q3-v0.1.x-green.svg
 [amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
+[amp-releases]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/releases
 
 [fsm-cov-img]: https://codecov.io/github/JuliaRobotics/FunctionalStateMachine.jl/coverage.svg?branch=master
 [fsm-cov-url]: https://codecov.io/github/JuliaRobotics/FunctionalStateMachine.jl?branch=master
@@ -137,6 +145,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [fsm-url]: http://www.github.com/JuliaRobotics/FunctionalStateMachine.jl
 [fsm-stable]: https://img.shields.io/badge/2019Q2-v0.1.x-green.svg
 [fsm-milestones]: https://github.com/JuliaRobotics/FunctionalStateMachine.jl/milestones
+[fsm-releases]: https://github.com/JuliaRobotics/FunctionalStateMachine.jl/releases
 
 [cloudgraphs-cov-img]: https://codecov.io/github/GearsAD/CloudGraphs.jl/coverage.svg?branch=master
 [cloudgraphs-cov-url]: https://codecov.io/github/GearsAD/CloudGraphs.jl?branch=master
@@ -152,3 +161,4 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
 [rp-stable]: https://img.shields.io/badge/2019Q3-v0.1.x-green.svg
 [rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones
+[rp-releases]: https://github.com/JuliaRobotics/RoMEPlotting.jl/releases
