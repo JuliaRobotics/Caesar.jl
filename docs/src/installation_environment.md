@@ -91,9 +91,7 @@ latex-completions
 !!! note
     Some situations have required the user separately installing the `Atom.jl` Julia package via command line (if Juno does not automatically install Atom.jl for you).  Atom.jl can then be installed with Julia's package manager and `add Atom` — see below.
 
-There are a variety of useful packages in Atom, such as `minimap` and `minimap-git`.
-
-To install the Julia packages related to [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl)---which are independent of the Atom packages installed above---please follow instructions below.
+There are a variety of useful packages in Atom, such as `minimap` and `minimap-git`.  Julia packages are independent of the Atom packages and installed via the Julia `Pkg` Package.
 
 ## Julia Packages
 
@@ -102,10 +100,10 @@ To install a Julia package, simply open a `julia` REPL (equally the julia REPL i
 
 ```julia
 ] # activate Pkg manager
-(v1.0) pkg> add Caesar
+(v1.2) pkg> add Caesar
 ```
 
-These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaLang/METADATA.jl](http://www.github.com/JuliaLang/METADATA.jl).
+These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaRegistries/General](http://github.com/JuliaRegistries/General).
 Unregistered latest packages can also be installed with using only the `Pkg.develop` function:
 
 ```julia
@@ -122,10 +120,10 @@ You can work with the packages as regular git repositories there.
 
 RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
 ```julia
-(v1.0) pkg> add RoMEPlotting
+(v1.2) pkg> add RoMEPlotting
 
 # separately
-(v1.0) pkg> add Arena#master
+(v1.2) pkg> add Arena#master
 ```
 
 !!! note
