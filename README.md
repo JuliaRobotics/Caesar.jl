@@ -37,7 +37,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 
 # Contributors
 
-We are grateful for many, many contributions within the Julia package ecosystem -- see the `Manifest.toml` and [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of contributions.
+We are grateful for many, many contributions within the Julia package ecosystem -- see the [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of upstream packages and contributions.
 
 Consider citing our work:
 
@@ -45,12 +45,12 @@ Consider citing our work:
 @misc{caesarjl,
   author = "Contributors and Packages",
   title =  "Caesar.jl",
-  year =   2019,
+  year =   2020,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
 
-Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently conducted by @dehann who can be contacted for more details.
+Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently done by @dehann who can be contacted for more details.
 
 [docs-shield]: https://img.shields.io/badge/docs-latest-blue.svg
 [caesar-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
