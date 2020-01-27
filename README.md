@@ -15,7 +15,7 @@ Click on the badges to follow web url links:
 
 # Bleeding-edge Development Status
 
-Changes to the code is currrently tracked via Github's integrated Milestone/Issues/PR system.
+Code changes are currently tracked via Github's integrated Milestone/Issues/PR system.
 
 | **Major Dependencies**  |  **Stable**     |  **Dev (master)**   |  **Test Coverage**  |  **Milestones**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
@@ -24,12 +24,12 @@ Changes to the code is currrently tracked via Github's integrated Milestone/Issu
 | [IncrementalInference.jl][iif-url] | [![][iif-stable]][iif-releases] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
-| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
 | [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
 | [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
+| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
 | [~~Graphs.jl~~][graphs-url] | [![][gjl-stable]][gjl-releases] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] | n/a |
-| [~~CloudGraphs.jl~~][cloudgraphs-url] | ![][cg-stable] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] | n/a |
+| [~~CloudGraphs.jl~~][cloudgraphs-url] | ![][cg-stable] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] | [![][mst-shield2]][dfg-milestones] |
 
 # Get Involved and Code of Conduct
 
@@ -55,6 +55,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [docs-shield]: https://img.shields.io/badge/docs-latest-blue.svg
 [caesar-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
 [mst-shield]: https://img.shields.io/badge/-milestones-blueviolet
+[mst-shield]: https://img.shields.io/badge/-milestones-lightgrey
 
 [cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
