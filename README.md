@@ -54,7 +54,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 
 [docs-shield]: https://img.shields.io/badge/docs-latest-blue.svg
 [caesar-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
-[mst-shield]: https://img.shields.io/badge/-milestones-9cf
+[mst-shield]: https://img.shields.io/badge/-milestones-blueviolet
 
 [cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
