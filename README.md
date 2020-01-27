@@ -8,7 +8,7 @@ A modern robotic toolkit for localization and mapping -- reducing the barrier of
 
 Click on the badges to follow web url links:
 
-| Stable | Dev | Documentation | **New:** Slack |
+| Stable | Dev | Documentation | Public Slack |
 |:------:|:----------------:|:-------------:|:-----:|
 | [![Build Status][build-tag]][build-url] | [![Build Status][build-img]][build-url] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
