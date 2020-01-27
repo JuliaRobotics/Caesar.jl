@@ -4,6 +4,10 @@
 
 The API derives from a set of [standard definitions for `verb`s and `Noun`s, please see the developer wiki regarding these definitions](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Standard-Definitions-of-API-via-verbs-and-set-theory).
 
+### Read DistributedFactorGraphs.jl Docs
+
+These are [more hardy developer docs](https://juliarobotics.org/DistributedFactorGraphs.jl/latest/), such as the lower level data management API etc.
+
 ## Design Wiki, Data and Architecture
 
 More developer zone material will be added here in the future, but for the time being check out the [Caesar Wiki](https://github.com/JuliaRobotics/Caesar.jl/wiki/Data-Design-for-Caesar-RoME-IIF).
