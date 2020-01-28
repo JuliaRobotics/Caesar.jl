@@ -27,16 +27,17 @@ DevNotes
 function getRangeCartesian(dfg::AbstractDFG,
                            regexFilter::Union{Nothing, Regex}=nothing;
                            extend::Float64=0.2,
-                           digits::Int=6  )
+                           digits::Int=6,
+                           xmin::Real=99999999,
+                           xmax::Real=-99999999,
+                           ymin::Real=99999999,
+                           ymax::Real=-99999999  )
   #
   # which variables to consider
   vsyms = getVariableIds(dfg, regexFilter)
 
   # find the cartesian range over all the vsyms variables
-  xmin = 99999999
-  xmax = -99999999
-  ymin = 99999999
-  ymax = -99999999
+
   for vsym in vsyms
     lran = getKDERange(getVariable(dfg, vsym) |> getKDE)
     xmin = lran[1,1] < xmin ? lran[1,1] : xmin
@@ -85,6 +86,7 @@ getRangeCartesian,
 """
 function plotVariableBeliefs(dfg::AbstractDFG,
                              regexFilter::Union{Nothing, Regex}=nothing;
+                             vsyms::Vector{Symbol}=getVariableIds(dfg, regexFilter),
                              N::Int=500,
                              minColorBase::Float64=-0.3,
                              sortVars::Bool=false,
@@ -95,10 +97,15 @@ function plotVariableBeliefs(dfg::AbstractDFG,
                              # fadeClamp::Bool=true,
                              tail::Int=-1,
                              digits::Int=-1,
-                             extend::Real=0.2  )
+                             extend::Real=0.2,
+                             xmin::Real=99999999,
+                             xmax::Real=-99999999,
+                             ymin::Real=99999999,
+                             ymax::Real=-99999999  )
   #
-
-  dfgran = getRangeCartesian(dfg, regexFilter, digits=digits, extend=extend)
+  # get range over which to plot
+  dfgran = getRangeCartesian(dfg, regexFilter, digits=digits, extend=extend,
+                              xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
   x = LinRange(dfgran[1,1], dfgran[1,2], N)
   y = LinRange(dfgran[2,1], dfgran[2,2], N)
@@ -109,8 +116,8 @@ function plotVariableBeliefs(dfg::AbstractDFG,
     xy[i,2,:] .= y
   end
 
-  # get the variables for plotting, while applying available filters
-  vsyms = getVariableIds(dfg, regexFilter)
+  # vsyms are variables for plotting, while applying available filters
+
   # specialty feature
   sortVars ? (vsyms .= vsyms |> sortDFG) : nothing
   varStride = varStride != -1 ? varStride : Int(floor(length(vsyms)/autoStride))+1
@@ -158,6 +165,51 @@ function plotVariableBeliefs(dfg::AbstractDFG,
 end
 
 
+
+
+
+
+function addLinesBelief!(fg, pl)
+  ## This is a little excessive, but doesnt really matter
+  # set all main variables and factors solvable
+  setSolvable!(fg, :l1, 1)
+  drtf = lsf(fg, r"drt")
+  drts = ls(fg, r"drt")
+  # set all necessary variables solvable
+  map(v->setSolvable!(fg, v, 1), ls(fg, r"x\d"))
+  vsyms = ls(fg, r"x\d", solvable=1) |> sortDFG
+  # set all necessary factors solvable
+  fcSo = union(map(v->setdiff(ls(fg, v), drtf), vsyms)...)
+  map(v->setSolvable!(fg, v, 1), fcSo)
+  # disallow factors connected to not solvables
+  filter!(x->isSolved(fg, x), vsyms)
+  vsyNo = setdiff(ls(fg, r"x\d",solvable=0), vsyms)
+  fcNo = union(map(v->ls(fg, v), vsyNo)...)
+  map(v->setSolvable!(fg, v, 0), fcNo)
+
+  # time mask the syms
+  asyms = ls(fg, r"x\d") |> sortDFG
+  atims = getTimestamp.(map(x->getVariable(fg, x),asyms))
+  tmask = atims .< getTimestamp(getVariable(fg, asyms[end]))
+
+  # now draw vsyms
+  # pl = plotVariableBeliefs(fg, r"x\d", vsyms=vsyms, sortVars=true, fade=15, fadeFloor=0.2)
+
+  # overlay lines
+  XYTv = map(x->getVariablePPE(getVariable(fg, x)).suggested, vsyms)
+  XYT = hcat((v->v[1]).(XYTv), (v->v[2]).(XYTv), (v->v[3]).(XYTv))
+
+  drttm = TTm .< getTimestamp(getVariable(fg, asyms[end]))
+  XXmm, YYmm = XXm[drttm], YYm[drttm]
+  # draw slam PPE suggested solution
+  try
+    lines!(pl, XYT[:,1], XYT[:,2], color=:black)
+    lines!(pl, XXmm, YYmm, color=:red)
+  catch ex
+    @error ex 
+  end
+  pl
+end
 
 
 

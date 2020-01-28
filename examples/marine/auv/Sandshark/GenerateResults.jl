@@ -1,4 +1,6 @@
 
+# using Revise
+
 using ArgParse
 using Caesar, RoME, DistributedFactorGraphs
 using DelimitedFiles
@@ -22,7 +24,20 @@ function parse_commandline()
         #     arg_type = Float64
         #     default = 1.0
         "--plotSeriesBeliefs"
-            help = "Glob fg_* archives and draw belief frames"
+            help = "Glob fg_* archives and draw belief frames as many as is requested, default 0 is for all"
+            arg_type = Int
+            default = 0
+        "--reportPoses"
+            help = "Generate report on interpose pose factors"
+            action = :store_true
+        "--reportRanges"
+            help = "Generate report on range factors"
+            action = :store_true
+        "--drawAllRanges"
+            help = "Draw ranges as separate images"
+            action = :store_true
+        "--skip"
+            help = "Skip existing images"
             action = :store_true
         "reportDir"
             help = "which folder in which to produce results."
@@ -38,9 +53,13 @@ else
   parsed_args
 end
 
-# pargs["reportDir"] = "/media/dehann/temp2/caesar/2020-01-23T10:57:18.068/fg_after_x64.tar.gz"
 # pargs["reportDir"] = "/tmp/caesar/2020-01-23T13:36:12.392/fg_after_x381.tar.gz"
+# pargs["reportDir"] = "/media/dehann/temp2/caesar/2020-01-26T20:36:57.456/fg_after_x321.tar.gz"
+# pargs["reportDir"] = "/tmp/caesar/2020-01-27T01:46:52.871/fg_after_x1181.tar.gz"
 
+if !haskey(pargs, "reportDir") && isdefined(Main, :fg)
+  pargs["reportDir"] = getLogPath(fg)
+end
 
 include(joinpath(@__DIR__, "Plotting.jl"))
 
@@ -73,10 +92,11 @@ else
   wtdsh
 end
 
+
+
 ## draw fg
 drawGraph(fg, filepath=joinpath(getLogPath(fg),"fg.pdf"), show=false)
 # drawGraph(fg)
-
 
 
 ##  Draw trajectory & Analyze solve run
@@ -130,27 +150,36 @@ plb |> PDF(joinLogPath(fg,"traj_ref.pdf"))
 ## plot the DEAD RECKON THREAD
 
 
+function loadResultsDRT(fg)
+  drt_data = readdlm(joinLogPath(fg, "DRT.csv"), ',')
 
-drt_data = readdlm(joinLogPath(fg, "DRT.csv"), ',')
+  DRTT = DateTime.(drt_data[:,1])
+  XX = Float64.(drt_data[:,4])
+  YY = Float64.(drt_data[:,5])
 
-XX = Float64.(drt_data[:,4])
-YY = Float64.(drt_data[:,5])
+  # filter the signals for hard jumps between drt transitions
+  responsetype = Lowpass(1.0; fs=50)
+  designmethod = FIRWindow(hanning(64))
 
-# filter the signals for hard jumps between drt transitions
-responsetype = Lowpass(1.0; fs=50)
-designmethod = FIRWindow(hanning(64))
+  # remove those near zero
+  mask = 40.0 .< (XX.^2 + YY.^2)
 
-# remove those near zero
-mask = 40.0 .< (XX.^2 + YY.^2)
+  TTm = DRTT[mask]
+  XXm = XX[mask]
+  YYm = YY[mask]
+  XXf = filt(digitalfilter(responsetype, designmethod), XXm)
+  YYf = filt(digitalfilter(responsetype, designmethod), YYm)
 
-XXm = XX[mask]
-YYm = YY[mask]
-XXf = filt(digitalfilter(responsetype, designmethod), XXm)
-YYf = filt(digitalfilter(responsetype, designmethod), YYm)
+  return drt_data, TTm, XXm, YYm, XXf, YYf
+end
+
+drt_data, TTm, XXm, YYm, XXf, YYf = loadResultsDRT(fg)
 
 mask = YYf .< -32
 XXfm = XXf[mask]
 YYfm = YYf[mask]
+# only start does not match
+TTmm = sum(mask)<length(TTm) ? TTm[end-sum(mask)+1:end] : TTm
 
 # plot DRT
 pl = Gadfly.plot(x=XXm[1:10:end], y=YYm[1:10:end], Geom.point, Theme(default_color=colorant"khaki"))
@@ -222,7 +251,7 @@ plb |> PDF(joinLogPath(fg,"traj_ref_drt_dirodo.pdf"))
 include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 
 
-nvsyms = ls(fg, r"x\d") |> length
+# nvsyms = ls(fg, r"x\d") |> length
 
 # how to suppress window and simply export
 pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=15, fadeFloor=0.2)
@@ -230,22 +259,52 @@ pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=15, fadeFloor=0.2)
 Makie.save(joinLogPath(fg,"fgBeliefs.png"), pl)
 
 
+# pargs["plotSeriesBeliefs"] = 3
+0
+
 # plot a series of frames
-if pargs["plotSeriesBeliefs"]
-  files = glob("fg_x*.tar.gz", getLogPath(fg))
-  indiv = splitpath.(files) .|> x->x[end]
-  Base.mkpath(joinLogPath(fg, "frames"))
-  global frame = 0
-  for ind in indiv
-    global frame += 1
-    println("frame $frame of $(length(indiv))")
-    fname = split(ind, '.')[1]
-    fgl = LightDFG{SolverParams}(params=SolverParams())
-    loadDFG(joinLogPath(fg, ind), Main, fgl)
-    nvars = minimum( [15; length(ls(fgl, r"x\d"))] )
-    pl = plotVariableBeliefs(fgl, r"x\d", sortVars=true, fade=nvars, fadeFloor=0.2)
-    Makie.save(joinLogPath(fg,"frames/$fname.png"), pl)
+if 0 <= pargs["plotSeriesBeliefs"]
+
+files = glob("fg_x*.tar.gz", getLogPath(fg))
+indiv = splitpath.(files) .|> x->x[end]
+# reduce the number of frames, if requested
+indiv = pargs["plotSeriesBeliefs"] == 0 ? indiv : indiv[1:pargs["plotSeriesBeliefs"]]
+# get range from last file in glob
+fgl = LightDFG{SolverParams}(params=SolverParams())
+loadDFG(joinLogPath(fg, indiv[end]), Main, fgl)
+drt_data, TTm, XXm, YYm, XXf, YYf = loadResultsDRT(fg)
+minmax = getRangeCartesian(fgl,r"x\d",digits=-1)
+xmin=minmax[1,1]-10;xmax=minmax[1,2]+10;ymin=minmax[2,1]-10;ymax=minmax[2,2]+10;
+Base.mkpath(joinLogPath(fg, "frames"))
+Base.mkpath(joinLogPath(fg, "lines"))
+global frame = 0
+for ind in indiv
+  global frame += 1
+  println("frame $frame of $(length(indiv))")
+  fname = split(ind, '.')[1]
+  if pargs["skip"] && isfile(joinLogPath(fg,"frames/$fname.png")) && isfile(joinLogPath(fg,"lines/$fname.png"))
+    @info "skip $fname since its already there"
+    continue
   end
+  fgl = LightDFG{SolverParams}(params=SolverParams())
+  loadDFG(joinLogPath(fg, ind), Main, fgl)
+  nvars = length(ls(fgl, r"x\d"))
+  # if nvars < 15
+  #   continue
+  # end
+  try
+    pl = plotVariableBeliefs(fgl, r"x\d", sortVars=true, fade=minimum([15; nvars]), fadeFloor=0.2,
+                              xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+    Makie.save(joinLogPath(fg,"frames/$fname.png"), pl)
+
+    # draw lines
+    addLinesBelief!(fgl, pl)
+    Makie.save(joinLogPath(fg,"lines/$fname.png"), pl)
+  catch ex
+    @error ex
+  end
+end
+
 end
 
 
@@ -253,7 +312,9 @@ end
 
 
 ## Look at factor reports separately
-reportFactors(fg, Pose2Point2Range, show=false)
+if parsed_args["reportRanges"]
+  reportFactors(fg, Pose2Point2Range, show=false)
+end
 
 
 if parsed_args["reportPoses"]
@@ -266,10 +327,54 @@ end
 
 
 
+
 0
 
 
 
+## Develop ranges alongside
+
+if pargs["drawAllRanges"]
+
+  mkpath(joinLogPath(fg, "ranges"))
+
+  files = glob("fg_x*.tar.gz", getLogPath(fg))
+  indiv = splitpath.(files) .|> x->x[end]
+
+  # vsym = ls(fg, r"x\d") |> sortDFG
+
+  PP2 = ls(fg, r"x\d")
+  fcPP2R = ls(fg, Pose2Point2Range)
+
+  # j=10
+  for ind in indiv
+    fname = split(ind, '.')[1]
+    fgl = LightDFG{SolverParams}(params=SolverParams())
+    loadDFG(joinLogPath(fg, ind), Main, fgl)
+    vsym = ls(fgl, r"x\d") |> sortDFG
+    filter!(x->isSolved(fgl, x), vsym)
+    j = length(vsym)
+    if j < 10
+      continue
+    end
+  # for j in 10:length(vsym)
+    for i in 1:10
+      global latestPP2R = intersect(union(map(v->ls(fgl,v),vsym[j-i:j])...), fcPP2R)
+      0 < length(latestPP2R) ? break : nothing
+    end
+    if length(latestPP2R) == 0
+      continue
+    end
+    rangePose = intersect(ls(fgl, latestPP2R[1]), PP2)[1]
+    hdl = []
+    plotFactor(fgl, latestPP2R[1], hdl=hdl)
+    hdl[4].coord = Coord.Cartesian(xmin=50, xmax=300)
+    hdl[4] |> PNG(joinLogPath(fg, "ranges/$rangePose.png"))
+  end
+
+end
+
+0
 
 ## Plot reference poses
 

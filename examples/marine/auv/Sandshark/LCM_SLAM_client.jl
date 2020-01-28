@@ -62,6 +62,9 @@ function parse_commandline()
         "--reportPoses"
             help = "Generate report on interpose pose factors"
             action = :store_true
+        "--reportRanges"
+            help = "Generate report on range factors"
+            action = :store_true
         "--limitfixeddown"
             help = "Limit numerical computations for recycled and marginalized cliques during down solve."
             action = :store_true
@@ -69,6 +72,10 @@ function parse_commandline()
             help = "Store copies of the Bayes tree for later animation, sets the rate in sleep(1/rate)"
             arg_type = Float64
             default = -1.0
+        "--plotSeriesBeliefs"
+            help = "Glob fg_* archives and draw belief frames as many as is requested, default 0 is for all"
+            arg_type = Int
+            default = 0
         # "arg1"
         #     help = "a positional argument"
         #     required = true
