@@ -39,6 +39,9 @@ function parse_commandline()
         "--skip"
             help = "Skip existing images"
             action = :store_true
+        "--drawFG"
+            help = "Draw factor graph to PDF"
+            action = :store_true
         "reportDir"
             help = "which folder in which to produce results."
             required = false
@@ -95,8 +98,9 @@ end
 
 
 ## draw fg
-drawGraph(fg, filepath=joinpath(getLogPath(fg),"fg.pdf"), show=false)
-# drawGraph(fg)
+if pargs["drawFG"]
+  drawGraph(fg, filepath=joinpath(getLogPath(fg),"fg.pdf"), show=false, engine="sfdp")
+end
 
 
 ##  Draw trajectory & Analyze solve run
