@@ -254,8 +254,11 @@ include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 # nvsyms = ls(fg, r"x\d") |> length
 
 # how to suppress window and simply export
-pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=15, fadeFloor=0.2)
+pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=15, fadeFloor=0.2, resolution=(1920,1080))
+# pl |> typeof |> fieldnames
 
+
+Base.rm(joinLogPath(fg,"fgBeliefs.png"), force=true)
 Makie.save(joinLogPath(fg,"fgBeliefs.png"), pl)
 
 
@@ -294,11 +297,15 @@ for ind in indiv
   # end
   try
     pl = plotVariableBeliefs(fgl, r"x\d", sortVars=true, fade=minimum([15; nvars]), fadeFloor=0.2,
-                              xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+                              xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,
+                              resolution=(1920, 1080) )
+    #
+    Base.rm(joinLogPath(fg,"frames/$fname.png"), force=true)
     Makie.save(joinLogPath(fg,"frames/$fname.png"), pl)
 
     # draw lines
     addLinesBelief!(fgl, pl)
+    Base.rm(joinLogPath(fg,"lines/$fname.png"), force=true)
     Makie.save(joinLogPath(fg,"lines/$fname.png"), pl)
   catch ex
     @error ex

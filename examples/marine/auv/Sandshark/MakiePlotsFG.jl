@@ -98,6 +98,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
                              tail::Int=-1,
                              digits::Int=-1,
                              extend::Real=0.2,
+                             resolution::Union{Nothing, Tuple{Int, Int}}=nothing,
                              xmin::Real=99999999,
                              xmax::Real=-99999999,
                              ymin::Real=99999999,
@@ -160,8 +161,8 @@ function plotVariableBeliefs(dfg::AbstractDFG,
   Z[1,1] += minColorBase
 
   # finally use Makie to draw the figure
-  Makie.contour(x, y, Z, levels = 0, linewidth = 0, fillrange = true)
-
+  scene = resolution == nothing ? Scene() : Scene(resolution=resolution)
+  Makie.contour!(scene, x, y, Z, levels = 0, linewidth = 0, fillrange = true)
 end
 
 
@@ -206,7 +207,7 @@ function addLinesBelief!(fg, pl)
     lines!(pl, XYT[:,1], XYT[:,2], color=:black)
     lines!(pl, XXmm, YYmm, color=:red)
   catch ex
-    @error ex 
+    @error ex
   end
   pl
 end
