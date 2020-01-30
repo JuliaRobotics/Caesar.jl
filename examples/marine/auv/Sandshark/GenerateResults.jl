@@ -314,6 +314,7 @@ for ind in indiv
   catch ex
     @error ex
   end
+  GC.gc()
 end
 
 end
