@@ -87,12 +87,14 @@ getRangeCartesian,
 function plotVariableBeliefs(dfg::AbstractDFG,
                              regexFilter::Union{Nothing, Regex}=nothing;
                              vsyms::Vector{Symbol}=getVariableIds(dfg, regexFilter),
+                             extras::Vector{Symbol}=Symbol[],
                              N::Int=500,
                              minColorBase::Float64=-0.3,
                              sortVars::Bool=false,
                              varStride::Int=-1,
                              autoStride::Int=300,
                              fade::Int=0,
+                             fadeExtras::Bool=false,
                              fadeFloor::Real=0.3,
                              # fadeClamp::Bool=true,
                              tail::Int=-1,
@@ -121,6 +123,11 @@ function plotVariableBeliefs(dfg::AbstractDFG,
 
   # specialty feature
   sortVars ? (vsyms .= vsyms |> sortDFG) : nothing
+  # add additional variables that dont fit regex (AFTER SORTING)
+  fadeExtras ? reverse!(vsyms) : nothing
+  # add extras to front or back depending on fading request
+  union!(vsyms, extras)
+  fadeExtras ? reverse!(vsyms) : nothing
   varStride = varStride != -1 ? varStride : Int(floor(length(vsyms)/autoStride))+1
   sortVars && varStride != 1 ? (vsyms = vsyms[1:varStride:end]) : nothing
   sortVars && 0 < tail ? (vsyms = vsyms[end-tail:end]) : nothing
@@ -130,7 +137,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
   len = length(vsyms)
   count = 0
 
-  @showprogress "Evaluating symbols" for vsym in vsyms[1:end-10]
+  @showprogress "Evaluating symbols" for vsym in vsyms[1:end]
     if !isInitialized(getVariable(dfg, vsym))
       @warn "skipping belief plot of $vsym since not initialized"
       continue
@@ -144,7 +151,13 @@ function plotVariableBeliefs(dfg::AbstractDFG,
     # normalize all beliefs to same scope
     zz ./= maximum(zz)
     # do the requested fading
-    zz .*= maximum( [(fade-(len-count))/fade; 0.0]) * (1-fadeFloor) + fadeFloor
+    fadeval = maximum( [(fade-(len-count))/fade; 0.0]) * (1-fadeFloor) + fadeFloor
+    zz .*= fadeval
+
+    if isnan(maximum(zz)) || isnan(minimum(zz))
+      @warn "skipping $vsym"
+      continue
+    end
 
     # Accumulate and clamp max value of accumulated beliefs
     Z .+= zz
