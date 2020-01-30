@@ -324,12 +324,12 @@ end
 
 
 ## Look at factor reports separately
-if parsed_args["reportRanges"]
+if pargs["reportRanges"]
   reportFactors(fg, Pose2Point2Range, show=false)
 end
 
 
-if parsed_args["reportPoses"]
+if pargs["reportPoses"]
   reportFactors(fg, Pose2Pose2, show=false)
 end
 

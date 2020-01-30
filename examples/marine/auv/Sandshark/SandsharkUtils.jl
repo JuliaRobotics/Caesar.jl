@@ -186,7 +186,7 @@ function initializeAUV_noprior(dfg::AbstractDFG,
                                dashboard::Dict;
                                stride_range::Int=4,
                                magStdDeg::Float64=5.0,
-                               stride_solve::Int=10 )
+                               stride_solve::Int=30 )
   #
   addVariable!(dfg, :x0, Pose2)
 
@@ -253,7 +253,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false, ti
 
   @info "logpath=$(getLogPath(dfg))"
   getSolverParams(dfg).drawtree = true
-  getSolverParams(dfg).qfl = 3*dashboard[:SOLVESTRIDE]
+  getSolverParams(dfg).qfl = dashboard[:SOLVESTRIDE]
   getSolverParams(dfg).isfixedlag = true
   getSolverParams(dfg).limitfixeddown = limitfixeddown
 
@@ -306,7 +306,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false, ti
       if 0 < length(dashboard[:poseSolveToken].data)
       # if 10 <= dashboard[:poseStride]
         @info "reduce problem size by disengaging older parts of factor graph"
-        setSolvableOldPoses!(dfg, youngest=getSolverParams(dfg).qfl+dashboard[:SOLVESTRIDE], oldest=100, solvable=0)
+        setSolvableOldPoses!(dfg, youngest=getSolverParams(dfg).qfl+round(Int,dashboard[:SOLVESTRIDE]/2), oldest=100, solvable=0)
         dt_disengage = (time_ns()-t0)/1e9
 
         # set up state machine flags to allow overlapping or block

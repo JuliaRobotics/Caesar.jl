@@ -35,6 +35,10 @@ function parse_commandline()
             help = "Every how many poses to try add a range measurement"
             arg_type = Int
             default = 4
+        "--fixedlag"
+            help = "FIFO fixed-lag solve length"
+            arg_type = Int
+            default = 30
         "--magStdDeg"
             help = "Magnetometer standard deviation"
             arg_type = Float64
@@ -49,6 +53,9 @@ function parse_commandline()
             default = 0.2
         "--dbg"
             help = "debug flag"
+            action = :store_true
+        "--genResults"
+            help = "Generate output results"
             action = :store_true
         "--warmupjit"
             help = "Warm up JIT during startup"
@@ -122,7 +129,7 @@ function main(;parsed_args=parse_commandline(),
   # fg object and initialization
   fg = LightDFG{SolverParams}(params=SolverParams())
   # fg = initfg()
-  initializeAUV_noprior(fg, dashboard, stride_range=parsed_args["stride_range"])
+  initializeAUV_noprior(fg, dashboard, stride_range=parsed_args["stride_range"], stride_solve=parsed_args["fixedlag"])
 
   # scale the odometry noise
   dashboard[:odoCov] .*= parsed_args["kappa_odo"]
@@ -306,7 +313,9 @@ saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 
 
 # draw plots in getLogPath(fg)
-include(joinpath(@__DIR__, "GenerateResults.jl"))
+if parsed_args["genResults"]
+  include(joinpath(@__DIR__, "GenerateResults.jl"))
+end
 
 
 ## BATCH SOLVE
