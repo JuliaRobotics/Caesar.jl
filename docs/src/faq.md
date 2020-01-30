@@ -16,6 +16,25 @@ The Caesar.jl project is expressly focused on making this algorithmic code avail
 Julia uses just-in-time compilation ([unless already pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
  which takes additional time the first time a new function is called. Additional calls to a function is fast from the second call onwards since the static function is now cached and ready for use.
 
+### Variable Scope in For loop error
+Julia wants you to be specific about `global` variables, and variables packed in a development script at top level are created as globals.  Globals can be accessed using the `global varname` at the start of the context, e.g.:
+```julia
+fg = ...
+tree, smt, hist = solveTree!(fg)
+...
+# and then a loop here:
+for i 2:100
+   global tree, fg
+   # add variables and stuff
+   ...
+   # want to solve again
+   tree, smt, hist = solveTree!(fg, tree)
+   ...
+   # more stuff
+end
+```
+One could also use [`let`, see Stack overflow](https://stackoverflow.com/questions/51930537/scope-of-variables-in-julia) or [the Julia docs page on scoping](https://docs.julialang.org/en/v1/manual/variables-and-scoping/index.html).
+
 ### Static, Shared Object `.so` Compilation
 
 Packages are already compiled to static objects (`.ji` files), but can also be compiled to more common `.so` files.  See [this AOT vs JIT compiling blog post](https://juliacomputing.com/blog/2016/02/09/static-julia.html) for a deeper discussion.  Also see [this Julia Binaries Blog](https://medium.com/@sdanisch/compiling-julia-binaries-ddd6d4e0caf4).
