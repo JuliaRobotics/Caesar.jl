@@ -1,4 +1,4 @@
-# Getting Started
+# Welcome
 
 Caesar.jl is one of the packages within the [JuliaRobotics](http://www.juliarobotics.org) community, and adheres to the [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 
@@ -30,13 +30,18 @@ tar -xvf julia-1.2.0-linux-x86_64.tar.gz
 cd /usr/bin
 sudo ln -s ~/julia-software/julia-1.2.0/bin/julia julia
 ```
->**Note** Feel free to modify this setup as you see fit.
+!!! note
+    Feel free to modify this setup as you see fit.
 
 This should allow any terminal or process on the computer to run the Julia REPL by type `julia` and testing with:
 
+#### [Optional] Quick Test that Julia is Working 
+
+Run Julia in REPL (console) mode:
 ```julia
-println("hello world")
-# Should print "hello world"
+$ julia
+julia> println("hello world")
+"hello world"
 ```
 
 Maybe a script, or command:
@@ -54,10 +59,9 @@ user@...$ julia -e "println(\"...testing...\")"
 
 ```
 
-> **Note**: When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.
-For example, search for 'julialang workflow tips' or 'julialang performance tips'.
-
-> **Note** see [FAQ - Why are first runs slow?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Just-In-Time-Compiling-(i.e.-why-are-first-runs-slow?)-1), because of just of Just-In-Time/Pre compiling and caching.
+!!! note
+    When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.  For example, search for 'julialang workflow tips' or 'julialang performance tips'.
+    Also, see [FAQ - Why are first runs slow?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Just-In-Time-Compiling-(i.e.-why-are-first-runs-slow?)-1), which is due to Just-In-Time/Pre compiling and caching.
 
 ## Setup Juno IDE Environment
 
@@ -84,15 +88,10 @@ julia-language
 latex-completions
 ```
 
->**Note** Some situations have required the user separately installing the `Atom.jl` Julia package via command line (if Juno does not automatically install Atom.jl for you).  Atom.jl can then be installed with Julia's package manager and `add Atom`:
-```julia
-] # activate Pkg manager
-(v1.0) pkg> add Atom
-```
+!!! note
+    Some situations have required the user separately installing the `Atom.jl` Julia package via command line (if Juno does not automatically install Atom.jl for you).  Atom.jl can then be installed with Julia's package manager and `add Atom` — see below.
 
-There are a variety of useful packages in Atom, such as `minimap` and `minimap-git`.
-
-To install the Julia packages related to [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl)---which are independent of the Atom packages installed above---please follow instructions below.
+There are a variety of useful packages in Atom, such as `minimap` and `minimap-git`.  Julia packages are independent of the Atom packages and installed via the Julia `Pkg` Package.
 
 ## Julia Packages
 
@@ -101,10 +100,10 @@ To install a Julia package, simply open a `julia` REPL (equally the julia REPL i
 
 ```julia
 ] # activate Pkg manager
-(v1.0) pkg> add Caesar
+(v1.2) pkg> add Caesar
 ```
 
-These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaLang/METADATA.jl](http://www.github.com/JuliaLang/METADATA.jl).
+These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaRegistries/General](http://github.com/JuliaRegistries/General).
 Unregistered latest packages can also be installed with using only the `Pkg.develop` function:
 
 ```julia
@@ -121,17 +120,18 @@ You can work with the packages as regular git repositories there.
 
 RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
 ```julia
-(v1.0) pkg> add RoMEPlotting
+(v1.2) pkg> add RoMEPlotting
 
 # separately
-(v1.0) pkg> add Arena#master
+(v1.2) pkg> add Arena#master
 ```
 
-> **Note** currently requires `Arena#master` branch (2019Q2).
+!!! note
+    Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
 
 ## Install Visualization Utils (e.g. Arena.jl)
 
-Visualizations were removed from Caesar and moved to a new package [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) instead.
+3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
 Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
 
 Arena.jl can be installed with the following steps:
@@ -155,18 +155,17 @@ sudo apt-get install libcairo2
 sudo apt-get install libpango1.0-0  # or libpango1.0-1
 ```
 
-The [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) package must be installed up to latest master branch (development branch) owing to an upstream [issue with Pango fonts on Julia 1.0](https://github.com/GiovineItalia/Gadfly.jl/issues/1206) with [Gadfly.jl](https://github.com/GiovineItalia/Gadfly.jl) plotting.  Once this issue is resolved, the next RoMEPlotting stable version can be tagged and be available as a standard stable release.
+!!! note
+    As of 1Q2020 it is likely that most systems won’t require a system install of libpango or even libcairo.
 
 Please install the latest RoMEPlotting using Package manager as follows:
 ```
-$ julia # latest v1.0.x
+$ julia
 julia> ] # to get package manager
-(v1.0) pkg> add RoMEPlotting#master
+(v1.2) pkg> add RoMEPlotting
 ```
 
-Alternatively, the `dev` command --- i.e. `(v1.0) pkg> dev RoMEPlotting` --- will clone the RoMEPlotting.jl git repository to your local `.julia/dev/RoMEPlotting` folder.
-
-> Last updated February 2019
+Alternatively, the `dev` command --- i.e. `(v1.2) pkg> dev RoMEPlotting` --- will clone the RoMEPlotting.jl git repository to your local `.julia/dev/RoMEPlotting` folder.
 
 ## The "I Know Julia" Installation (TL;DR)
 
@@ -181,13 +180,13 @@ julia> ] # to enable package manager
 Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
 ```julia
 # the multimodal incremental smoothing and mapping solver
-(v1.0) pkg> test IncrementalInference
+(v1.2) pkg> test IncrementalInference
 ...
 # robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
-(v1.0) pkg> test RoME
+(v1.2) pkg> test RoME
 ...
 # umbrella framework with interaction tools and more -- allows stand alone and server based solving
-(v1.0) pkg> test Caesar
+(v1.2) pkg> test Caesar
 ...
 ```
 

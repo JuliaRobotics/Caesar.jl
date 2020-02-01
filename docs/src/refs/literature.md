@@ -16,11 +16,11 @@ Newly created page to list related references and additional literature pertaini
 
 [1.6]  Doherty, K., Fourie, D., Leonard, J.: ["Multimodal Semantic SLAM with Probabilistic Data Association"](https://marinerobotics.mit.edu/sites/default/files/doherty_icra2019_revised.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
-[1.7]  Fourie, D., Vaz Teixeira, P., Leonard, J.: "Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities", IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019), under-review.
+[1.7]  Fourie, D., Vaz Teixeira, P., Leonard, J.: ["Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities"](https://marinerobotics.mit.edu/sites/default/files/fourie_iros19_manifolds.pdf), IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019),.
 
 [1.8]  Fourie, D., Leonard, J.: "Inertial Odometry with Retroactive Sensor Calibration", publication under review.
 
-[1.9]  Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. Submitted to ICRA.
+[1.9]  Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. IEEE, Intl. Conference on Robotics and Automation, ICRA (2019).
 
 ### Important References
 
@@ -46,7 +46,16 @@ Newly created page to list related references and additional literature pertaini
 
 [2.11]  Hsiao, M. and Kaess, M., 2019, May. MH-iSAM2: Multi-hypothesis iSAM using Bayes Tree and Hypo-tree. In 2019 International Conference on Robotics and Automation (ICRA) (pp. 1274-1280). IEEE.
 
+[2.12]  Arnborg, S., Corneil, D.G. and Proskurowski, A., 1987. [Complexity of finding embeddings in a k-tree](https://epubs.siam.org/doi/pdf/10.1137/0608024). SIAM Journal on Algebraic Discrete Methods, 8(2), pp.277-284.
+
 ### Additional References
 
 [3.1]  Duits, Remco, Erik J. Bekkers, and Alexey Mashtakov. ["Fourier Transform on the Homogeneous Space of 3D Positions and Orientations for Exact Solutions to Linear Parabolic and (Hypo-) Elliptic PDEs."](https://www.preprints.org/manuscript/201811.0027/download/final_file) arXiv preprint arXiv:1811.00363 (2018).
 
+### Signal Processing (Beamforming and Channel Deconvolution)
+
+[4.1]  Van Trees, H.L., 2004. Optimum array processing: Part IV of detection, estimation, and modulation theory. John Wiley & Sons.
+
+[4.2a]  Dowling, D.R., 2013. [Acoustic Blind Deconvolution and Unconventional Nonlinear Beamforming in Shallow Ocean Environments](https://apps.dtic.mil/dtic/tr/fulltext/u2/a598859.pdf). MICHIGAN UNIV ANN ARBOR DEPT OF MECHANICAL ENGINEERING.
+
+[4.2b]  Hossein Abadi, S., 2013. Blind deconvolution in multipath environments and extensions to remote source localization, [paper](https://asa.scitation.org/doi/pdf/10.1121/1.3688502?class=pdf), [thesis](https://deepblue.lib.umich.edu/bitstream/handle/2027.42/102443/shimah_1.pdf?sequence=1&isAllowed=y).

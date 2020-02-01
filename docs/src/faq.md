@@ -25,6 +25,25 @@ Packages are already compiled to static objects (`.ji` files), but can also be c
 ### Can Julia be Embedded into C/C++
 Yes, see [the Julia embedding documentation page](https://docs.julialang.org/en/v1/manual/embedding/index.html).
 
+### Variable Scope in For loop Error
+Julia wants you to be specific about `global` variables, and variables packed in a development script at top level are created as globals.  Globals can be accessed using the `global varname` at the start of the context, e.g.:
+```julia
+fg = ...
+tree, smt, hist = solveTree!(fg)
+...
+# and then a loop here:
+for i 2:100
+   global tree, fg
+   # add variables and stuff
+   ...
+   # want to solve again
+   tree, smt, hist = solveTree!(fg, tree)
+   ...
+   # more stuff
+end
+```
+One could also use [`let`, see Stack overflow](https://stackoverflow.com/questions/51930537/scope-of-variables-in-julia) or [the Julia docs page on scoping](https://docs.julialang.org/en/v1/manual/variables-and-scoping/index.html).  Also note it is good practice to use local scope (i.e. inside a function) variables for performance reasons.
+
 ### Why ZMQ Middleware Layer (multilang)?
 
 [Zero Message Queue (ZMQ)](https://zeromq.org/) is a widely used data transport layer used to build various other multiprocess middleware with wide support among other programming languages.

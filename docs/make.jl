@@ -17,35 +17,36 @@ makedocs(
     format = Documenter.HTML(),
     sitename = "Caesar.jl",
     pages = Any[
-        "Home" => "index.md",
-        "Getting Started" => [
+        "Introduction" => "index.md",
+        "Welcome" => [
             "Installation" => "installation_environment.md",
             "FAQ" => "faq.md",
         ],
-        "Initial Concepts" => [
-            "Caesar Concepts" => "concepts/concepts.md",
+        "Getting Started" => [
+            "Initial Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
-            "Available Variables/Factors" => "concepts/available_varfacs.md",
             "Interacting w/ Factor Graphs" => "concepts/interacting_fgs.md",
+            "Available Variables/Factors" => "concepts/available_varfacs.md",
+            "Plotting (2D)" => "concepts/2d_plotting.md",
+            "Visualization (3D)" => "concepts/arena_visualizations.md",
             "Multi-Language Support" => "concepts/multilang.md",
-            "Arena Visualization" => "concepts/arena_visualizations.md",
             "Cloud Server/Database" => "concepts/database_interactions.md",
-            "Multi/Cross Session Solving" => "concepts/multisession.md",
+            "Multi-session/agent Solving" => "concepts/multisession.md",
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
             "ContinuousScalar as 1D Example" => "examples/basic_continuousscalar.md",
-            "Under-defined Trilateration SLAM 2D" => "examples/basic_slamedonut.md",
+            "Under-defined Trilateration, 2D" => "examples/basic_slamedonut.md",
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
         ],
         "Principles" => [
-            "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
-            "Generic Convolutions" => "principles/approxConvDensities.md",
             "Filters vs. Graphs" => "principles/filterCorrespondence.md",
+            "Generic Convolutions" => "principles/approxConvDensities.md",
+            "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
             "Bayes (Junction) tree" => "principles/bayestreePrinciples.md",
-            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
             "Advanced Bayes Tree Topics" => "principles/initializingOnBayesTree.md",
+            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
         ],
         "How to Expand?" => [
             "Custom Variables and Factors" => "concepts/adding_variables_factors.md",
@@ -53,7 +54,7 @@ makedocs(
             "Creating DynPose Factor" => "examples/interm_dynpose.md"
         ],
         "Developer Zone" => [
-            "Wiki Pointer" => "dev/wiki.md"
+            "Wiki Pointers" => "dev/wiki.md"
         ],
         "Literature" => [
             "References" => "refs/literature.md"
