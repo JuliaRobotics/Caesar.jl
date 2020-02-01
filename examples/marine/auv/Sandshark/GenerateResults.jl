@@ -272,10 +272,14 @@ Makie.save(joinLogPath(fg,"fgBeliefs.png"), pl)
 # plot a series of frames
 if 0 <= pargs["plotSeriesBeliefs"]
 
-files = glob("fg_x*.tar.gz", getLogPath(fg))
+pattern = "fg_x"
+ext = ".tar.gz"
+files = glob("$(pattern)*$ext", getLogPath(fg))
 indiv = splitpath.(files) .|> x->x[end]
+presort = (x->x[length(pattern)+1:end-length(ext)]).(indiv)
+sorted = parse.(Int, presort) |> sortperm
 # reduce the number of frames, if requested
-indiv = pargs["plotSeriesBeliefs"] == 0 ? indiv : indiv[1:pargs["plotSeriesBeliefs"]]
+indiv = pargs["plotSeriesBeliefs"] == 0 ? indiv[sorted] : indiv[sorted[1:pargs["plotSeriesBeliefs"]]]
 # get range from last file in glob
 fgl = LightDFG{SolverParams}(params=SolverParams())
 loadDFG(joinLogPath(fg, indiv[end]), Main, fgl)
