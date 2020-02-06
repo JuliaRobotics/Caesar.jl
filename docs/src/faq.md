@@ -73,3 +73,6 @@ Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [
 
 See [discourse discussion](https://discourse.julialang.org/t/way-to-show-where-memory-allocations-occur/2161/3).
 
+### Increase Linux Open File Limit?
+
+If you see the error "Open Files Limit", please [follow these intructions on your local system](https://easyengine.io/tutorials/linux/increase-open-files-limit/).  This is likely to happen when debug code and a large number of files are stored in the general solution specific logpath.
