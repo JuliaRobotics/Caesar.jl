@@ -162,17 +162,27 @@ end
     $SIGNATURES
 
 Plot the timing for Sandshark AUV frontend timing analysis.
+
 """
 function plotFrontendTiming(wtdsh)
-  ttt = (x->datetime2unix(x[1])).(wtdsh)
+  @show wtdsh[1]
+  # line = [  now()
+            # getLastPoses(fg,filterLabel=r"x\d",number=1)[1]
+            # dashboard[:poseStride]
+            # dashboard[:canTakePoses]
+            # dashboard[:solveInProgress]
+            # dashboard[:realTimeSlack].value
+            # length(dashboard[:poseSolveToken].data) ]
+  #
+  ttt = (x->datetime2unix(DateTime(x[1]))).(wtdsh)
   ttt .-= ttt[1]
-  wtv = (x->x[2]).(wtdsh)
-  wtr = (x->x[3]).(wtdsh)
-  wth = (x->x[4]).(wtdsh)
-  wts = (x->x[5]).(wtdsh)
-  wtt = (x->x[6].value).(wtdsh)
+  wtv = (x->string(x[2])).(wtdsh)
+  wtr = (x->parse(Int,string(x[3]))).(wtdsh)
+  wth = (x->getfield(Main,Symbol(string(x[4])))).(wtdsh)
+  wts = (x->getfield(Main,Symbol(string(x[5])))).(wtdsh)
+  wtt = (x->parse(Float64,string(x[6]))).(wtdsh)
   wttn = wtt./wtt[end]
-  wtl = (x->x[7]).(wtdsh)
+  wtl = (x->parse(Int,string(x[7]))).(wtdsh)
 
   lpn = wtv .|> x->parse(Int, string(x)[2:end])
 
