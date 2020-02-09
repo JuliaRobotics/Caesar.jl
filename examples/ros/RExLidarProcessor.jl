@@ -1,25 +1,32 @@
 using DistributedFactorGraphs
-using IncrementalInference, RoME
-using JSON2
+using IncrementalInference, RoME;
+using JSON2;
 
 # Where to fetch data
-dfgDataFolder = "/tmp/rex"
+dfgDataFolder = "/tmp/rex";
 
 # Load the graph
 fg = initfg()
-loadDFG("$dfgDataFolder/dfg", IncrementalInference, fg)
+loadDFG("$dfgDataFolder/dfg", IncrementalInference, fg);
 
 # Check what's in it
 ls(fg)
 lsf(fg)  # there should be no factors the first time a session is loaded
 
 # How about bigdata entries?
-count(v -> :RADAR in getBigDataKeys(v), getVariables(fg))
-count(v -> :LIDAR in getBigDataKeys(v), getVariables(fg))
+count(v -> :RADAR in getBigDataKeys(v), getVariables(fg));
+count(v -> :LIDAR in getBigDataKeys(v), getVariables(fg));
 
 # may be too intense as it is fetching ALL data too?
-allRadarVariables = filter(v -> :RADAR in getBigDataKeys(v), getVariables(fg))
+allRadarVariables = filter(v -> :RADAR in getBigDataKeys(v), getVariables(fg));
 
+# sort variables by timestamp
+import Base.isless
+
+function isless(a::DFGVariable, b::DFGVariable)
+    return isless(a.timestamp,b.timestamp)
+end
+allRadarVariables = sort(allRadarVariables)
 
 function fetchRadarMsg(var::DFGVariable, store::FileDataStore)
     entry = getBigDataEntry(var, :RADAR)
@@ -31,63 +38,33 @@ end
 datastore = FileDataStore("$dfgDataFolder/bigdata")
 msg = fetchRadarMsg(allRadarVariables[1], datastore)
 
+function azimuth(msg::NamedTuple)
+    """
+    Assemble azimuth vector
 
-function assembleping(msg, resolution )
-    ping_polar= reshape(msg.radar_data, (msg.m, msg.n))
-
-    # assemble azimuth vector
-    a = range(msg.angle_start, msg.angle_end, length=msg.n)
-    # convert to radians
-    a = deg2rad.(a)
-    # normalize to [-pi,pi)
-    a[a.>pi]=a[a.>pi].-(2*pi)
-    # assemble range vector
-    r = Vector(range(msg.range_min, msg.range_max, length=msg.m ))
-
-    # tight cartesian around the sector
-    # ping_cart = tocartsector(ping_polar, r, a, resolution)
-    # full 360
-    ping_cart = tocart(ping_polar, r, a, resolution)
-
-    return (ping_polar, ping_cart)
-end
-
-# Now let's extract the radar sector measurement
-
-# set resolution to 1m/px
-(polar, cart) = assembleping(msg, 1.0)
-
-fullsweep = zeros(size(cart))
-
-for  i in 1:length(allRadarVariables)
-    msg = fetchRadarMsg(allRadarVariables[i], datastore)
-    (polar, cart) = assembleping(msg, 1.0)
-
-    fullsweep = fullsweep + cart
-
-    if (i%12==0)
-        # now that we have a full sweep, we can try to match with the previous one!
-        # TODO: register w/  previous sweep
-        # save to disk
-        fname = join(["full_",String(i/12),".jpg"])
-        save(joinpath(output_dir,fname),UInt8.(fullsweep))
-        # reset sweep
-        fullsweep = zeros(size(cart))
+    This function assembles a vector of azimuth angles for the given ping. It
+    handles both the conversion from [0,360) to [-pi,pi), and the wrap around
+    scenario when msg.angle_start > msg.angle_end (or, equivalently,
+    msg.angle_increment != 0.17578125).
+    """
+    if msg.angle_start > msg.angle_end
+        # wrap around; increments become messy
+        delta = (360 - msg.angle_start) + (msg.angle_end)
+        angle_step = delta/msg.n
+        a = Vector(range(msg.angle_start, msg.angle_start+delta,length = msg.n))
+        a[a.>360].-=360.
+        #   sa = [Vector(range(msg.angle_start, 360.0, step = 0.17578125)); Vector(reverse(range(msg.angle_end, 0.,step=-0.17578125)))]
+        # use reverse to ensure we stop at the correct angle
+    else
+        a = range(msg.angle_start, msg.angle_end, length=msg.n)
     end
-    fname = join(["polar_",String(allRadarVariables[i].label),".jpg"])
-    save(joinpath(output_dir,fname),UInt8.(polar))
-    fname = join(["cart_",String(allRadarVariables[i].label),".jpg"])
-    save(joinpath(output_dir,fname),UInt8.(cart))
 
+    @show a
+    a = deg2rad.(Vector(a))   # to radians
+    a[a.>pi]=a[a.>pi].-(2*pi) # normalize to [-pi,pi)
+
+    return (a)
 end
-
-using Images, ImageView
-imshow(polar)
-imshow(cart)
-
-output_dir = joinpath(dfgDataFolder,"pings")
-mkdir(output_dir)
-save(joinpath(output_dir,"ping.jpg"),UInt8.(cart))
 
 function nearest(v::Vector{Float64}, q::Float64)::Int64
     return findmin(abs.(v.-q))[2]
@@ -166,7 +143,6 @@ function tocart(ping_polar::Array{Any,2},r::Vector{Float64}, a::Vector{Float64},
     res - resolution, in m/px
     """
 
-
     n = Int64(round((2*r[end]/res)))
     x = Vector(range(-r[end], r[end], length=n))
     y = Vector(range(-r[end], r[end], length=n))
@@ -191,6 +167,91 @@ function tocart(ping_polar::Array{Any,2},r::Vector{Float64}, a::Vector{Float64},
     end
     return ping_cart
 end
+
+
+
+function assembleping(msg::NamedTuple, resolution::Float64)
+    """
+    Assemble polar and cartesian pings from radar message.
+    """
+    ping_polar= reshape(msg.radar_data, (msg.m, msg.n))
+
+    # assemble azimuth and range vectors
+    a = azimuth(msg)
+    r = Vector(range(msg.range_min, msg.range_max, length=msg.m ))
+
+    # option a: tight cartesian around the sector
+    # ping_cart = tocartsector(ping_polar, r, a, resolution)
+
+    # option b: full 360
+    ping_cart = tocart(ping_polar, r, a, resolution)
+
+    return (ping_polar, ping_cart)
+end
+
+# Now let's extract the radar sector measurement
+
+
+
+# set resolution to 1m/px
+(polar, cart) = assembleping(msg, 1.0)
+
+using Images, ImageView
+imshow(polar)
+imshow(cart)
+
+output_dir = joinpath(dfgDataFolder,"pings")
+if (!isdir(output_dir))
+    mkdir(output_dir)
+end
+save(joinpath(output_dir,"ping.jpg"),UInt8.(cart))
+
+
+# now let's process all radar variables in here
+
+fullsweep = zeros(size(cart))
+last_angle = 0.
+sweep = 0;
+
+for  i in 1:length(allRadarVariables)
+    msg = fetchRadarMsg(allRadarVariables[i], datastore)
+
+    delta_angle = msg.angle_increment
+    if (msg.angle_increment<0 && msg.angle_increment > 0.2)
+        # wrap around issues caused by driver: angle_increment
+        delta_angle = 0.17578125;
+    end
+
+    println(String(allRadarVariables[i].label)," - start:",msg.angle_start,", stop:",msg.angle_end, " step:",msg.angle_increment, " steps:",msg.n)
+    (polar, cart) = assembleping(msg, 1.0)
+    global fullsweep # need global due to julia's scope handling
+    global last_angle
+    global sweep
+    fullsweep = fullsweep + cart
+
+    if (msg.angle_end < msg.angle_start)# || msg.angle_start<last_angle)
+        println("!")
+        # now that we have a full sweep, we can try to match with the previous one!
+        # TODO: register w/  previous sweep
+        # save to disk
+        fname = join(["full_",string(sweep),".jpg"])
+        save(joinpath(output_dir,fname),UInt8.(clamp.(fullsweep,0,255)))
+        # reset sweep
+        fullsweep = zeros(size(cart))
+        sweep = sweep+1
+    end
+    # fname = join(["polar_",String(allRadarVariables[i].label),".jpg"])
+    # save(joinpath(output_dir,fname),UInt8.(polar))
+    fname = join(["cart_",String(allRadarVariables[i].label),".jpg"])
+    save(joinpath(output_dir,fname),UInt8.(cart))
+    last_angle = msg.angle_end
+end
+
+
+
+
+
+
 
 
 
