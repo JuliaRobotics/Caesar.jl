@@ -20,7 +20,7 @@ count(v -> :LIDAR in getBigDataKeys(v), getVariables(fg));
 # may be too intense as it is fetching ALL data too?
 allRadarVariables = filter(v -> :RADAR in getBigDataKeys(v), getVariables(fg));
 
-# sort variables by timestamp
+# sort variables by timestamp (deprecated in DFG 0.6.0)
 import Base.isless
 
 function isless(a::DFGVariable, b::DFGVariable)
@@ -46,6 +46,7 @@ function azimuth(msg::NamedTuple)
     handles both the conversion from [0,360) to [-pi,pi), and the wrap around
     scenario when msg.angle_start > msg.angle_end (or, equivalently,
     msg.angle_increment != 0.17578125).
+
     """
     if msg.angle_start > msg.angle_end
         # wrap around; increments become messy
@@ -69,7 +70,6 @@ end
 function nearest(v::Vector{Float64}, q::Float64)::Int64
     return findmin(abs.(v.-q))[2]
 end
-
 
 function tocartsector(ping_polar::Array{Any,2},r::Vector{Float64}, a::Vector{Float64}, res::Float64 )
     """
@@ -137,7 +137,6 @@ function tocartsector(ping_polar::Array{Any,2},r::Vector{Float64}, a::Vector{Flo
     return ping_cart
 end
 
-
 function tocart(ping_polar::Array{Any,2},r::Vector{Float64}, a::Vector{Float64}, res::Float64 )
     """
     res - resolution, in m/px
@@ -168,8 +167,6 @@ function tocart(ping_polar::Array{Any,2},r::Vector{Float64}, a::Vector{Float64},
     return ping_cart
 end
 
-
-
 function assembleping(msg::NamedTuple, resolution::Float64)
     """
     Assemble polar and cartesian pings from radar message.
@@ -192,9 +189,8 @@ end
 # Now let's extract the radar sector measurement
 
 
-
 # set resolution to 1m/px
-(polar, cart) = assembleping(msg, 1.0)
+(polar, cart) = assembleping(msg, 1.0);
 
 using Images, ImageView
 imshow(polar)
@@ -217,8 +213,10 @@ for  i in 1:length(allRadarVariables)
     msg = fetchRadarMsg(allRadarVariables[i], datastore)
 
     delta_angle = msg.angle_increment
+    # TODO: check upper bound; may have valid but coarse sectors
     if (msg.angle_increment<0 && msg.angle_increment > 0.2)
         # wrap around issues caused by driver: angle_increment
+        println("Angle increment exceeds bounds (",msg.angle_increment,"); using default value")
         delta_angle = 0.17578125;
     end
 
@@ -229,6 +227,7 @@ for  i in 1:length(allRadarVariables)
     global sweep
     fullsweep = fullsweep + cart
 
+    # TODO: de-rotate angles by vehicle heading, so that test checks for full sweep in world frame
     if (msg.angle_end < msg.angle_start)# || msg.angle_start<last_angle)
         println("!")
         # now that we have a full sweep, we can try to match with the previous one!
@@ -236,6 +235,15 @@ for  i in 1:length(allRadarVariables)
         # save to disk
         fname = join(["full_",string(sweep),".jpg"])
         save(joinpath(output_dir,fname),UInt8.(clamp.(fullsweep,0,255)))
+
+        # add full sweep to last variable
+        # Make a big data entry in the graph
+        element = GeneralBigDataEntry(fg, allRadarVariables[i], :RADARSWEEP, mimeType="application/json")
+        # Set it in the store
+        addBigData!(datastore, element, Vector{UInt8}(JSON2.write(fullsweep)))
+        # Add the entry to the graph
+        addBigDataEntry!(allRadarVariables[i], element)
+
         # reset sweep
         fullsweep = zeros(size(cart))
         sweep = sweep+1
@@ -249,15 +257,25 @@ end
 
 
 
+# let's try to fetch variables with fullsweeps in them
+allSweepVariables = filter(v -> :RADARSWEEP in getBigDataKeys(v), getVariables(fg));
 
+# try and display one of them
+function fetchSweep(var::DFGVariable, store::FileDataStore)
+    entry = getBigDataEntry(var, :RADARSWEEP)
+    rawData = getBigData(datastore, entry)
+    # raw data is json-encoded; this decoding should happen inside getBigData?
+    return Vector{Float64}(JSON2.read(IOBuffer(rawData)))
+end
 
+sweep = fetchSweep(allSweepVariables[10], datastore)
+n = Int(sqrt(length(s)))
+sweep = reshape(sweep,(n,n))
+imshow(sweep)
 
-
-
-
-##############################
-### LASERS AND STUFF BELOW ###
-##############################
+##############################################################################
+########################### LASERS AND STUFF BELOW ###########################
+##############################################################################
 
 # Quick function to find the closest point as trivial example
 # We're going to save this back into the data as 'processed data'
