@@ -4,8 +4,7 @@
 
     To do:
     - re-enable JSON replies
-    - switch to a pattern that does not require use of global variables
-    - periodic export of factor graph object
+        s- periodic export of factor graph object
 
     To run:
     - source devel/setup.bash in all 3 terminals
@@ -48,8 +47,7 @@ using DocStringExtensions
 # function handleGPS(msg, fg)
 # end
 
-# Set this
-global dfg_datafolder = "/tmp/rex"
+
 
 """
     $TYPEDEF
@@ -173,8 +171,7 @@ function handleGPS!(msg::sensor_msgs.msg.NavSatFix, fg::G, datastore::D, systems
 end
 
 function main()
-    # Not a great pattern but just for proof of concept.
-    global dfg_datafolder
+    dfg_datafolder = "/tmp/rex"
 
     @info "Hit CTRL+C to exit and save the graph..."
 
@@ -186,14 +183,11 @@ function main()
     # System state
     systemstate = SystemState()
 
-    # /gps/fix              10255 msgs    : sensor_msgs/NavSatFix
-    # /gps/nmea_sentence    51275 msgs    : nmea_msgs/Sentence
-    # /radar_0               9104 msgs    : seagrant_msgs/radar
 
-    # TODO: Enable and disable as needed.
-    # Skipping LIDAR's because those are huge...
+    # Enable and disable as needed.
+    # Skipping LIDAR because those are huge...
     radar_sub = Subscriber{seagrant_msgs.msg.radar}("/radar_0", handleRadar!, (fg,datastore,systemstate,), queue_size = 10)
-    radarpc_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/radar_pointcloud0", handleRadarPointcloud!, (fg,datastore,systemstate,), queue_size = 10)
+    # radarpc_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/radar_pointcloud0", handleRadarPointcloud!, (fg,datastore,systemstate,), queue_size = 10)
     # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", handleLidar!, (fg,datastore,systemstate,), queue_size = 10)
     gps_sub = Subscriber{sensor_msgs.msg.NavSatFix}("/gps/fix", handleGPS!, (fg,datastore,systemstate,), queue_size = 10)
 
@@ -203,7 +197,7 @@ function main()
         rossleep(loop_rate)
     end
 
-    @info "Okay, exiting..."
+    @info "Exiting"
     # After the graph is built, for now we'll save it to drive to share.
     # Save the DFG graph with the following:
     @info "Saving DFG to $dfg_datafolder/dfg"
