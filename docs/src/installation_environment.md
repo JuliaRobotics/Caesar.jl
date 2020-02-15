@@ -7,10 +7,10 @@ Caesar.jl is one of the packages within the [JuliaRobotics](http://www.juliarobo
 The following system packages are used by Caesar.jl:
 ```
 # required packages
-sudo apt-get install hdf5-tools
+sudo apt-get install hdf5-tools imagemagick
 
 # optional packages
-sudo apt-get install graphviz imagemagick
+sudo apt-get install graphviz
 ```
 
 ## New to Julia and want a full Development Install
@@ -70,9 +70,10 @@ user@...$ julia -e "println(\"...testing...\")"
 Download and install Atom as instructed on the website, or via command line:
 
 ```
-cd ~/Downloads
-wget https://atom.io/download/deb
-dpkg -i atom-amd64.deb
+mkdir -p ~/Downloads/atom
+cd ~/Downloads/atom
+wget https://atom.io/download/deb -q --show-progress
+sudo dpkg -i deb
 ```
 
 After installing and running Atom, you can choose to either install `uber-juno` package [in one go](https://github.com/JunoLab/uber-juno/blob/master/setup.md) or install the three associated packages individually.
