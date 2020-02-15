@@ -14,7 +14,7 @@ The Caesar.jl project is expressly focused on making this algorithmic code avail
 
 ### Just-In-Time Compiling (i.e. why are first runs slow?)
 Julia uses just-in-time compilation ([unless already pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
- which takes additional time the first time a new function is called. Additional calls to a function is fast from the second call onwards since the static function is now cached and ready for use.
+ which takes additional time the first time a new function is called. Additional calls to a cached function are fast from the second call onwards since the static binary code is now cached and ready for use.
 
 ### Static, Shared Object `.so` Compilation
 
