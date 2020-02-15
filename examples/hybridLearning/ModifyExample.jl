@@ -8,18 +8,18 @@ cd(@__DIR__)
 using Pkg
 pkg"activate ."
 
-
 # using Revise
 
 using Flux
 using DifferentialEquations
-using DiffEqFlux, OrdinaryDiffEq, Optim, Plots
+using DiffEqFlux, OrdinaryDiffEq, Optim
 using Zygote, DiffEqSensitivity
-using MAT
-using TransformUtils
 
 ## Load MAT VicPrk data
 
+using TransformUtils
+using Plots
+using MAT
 
 vpdata = matread(ENV["HOME"]*"/data/dataset_victoria_park/original_MATLAB_dataset/aa3_dr.mat")
 
@@ -39,6 +39,7 @@ odo = allOdoEasy(vpsensors)
 START=1
 STOP=5000
 plot(odo[START:STOP,1], odo[START:STOP,2])
+plot(odo[:,1], odo[:,2])
 
 ode_data = odo[START:STOP,:]' .|> Float32
 
@@ -56,6 +57,7 @@ ts = range(tspan[1],tspan[2],length=datasize)
 model = Chain(Dense(5,50,tanh),
               Dense(50,3,tanh))
 #
+
 
 function dudt_(u,p,t)
   input = [u; t; t]
@@ -81,13 +83,15 @@ concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts,sensealg=ForwardDiffSensiti
 concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts)
 
 
-
 function predict_rd()
-  concrete_solve(prob_n_ode,MethodOfSteps(Tsit5()),_u0,ps_m,saveat=ts,sensealg=TrackerAdjoint())
+# destructure param -> vector and back
+  concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts)
+
+
+  # concrete_solve(prob_n_ode,MethodOfSteps(Tsit5()),_u0,ps_m,saveat=ts,sensealg=TrackerAdjoint()) # report why for DDE only
   # concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts,sensealg=TrackerAdjoint())
   # concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts,sensealg=ZygoteAdjoint())
   # concrete_solve(prob_n_ode, Tsit5(), _u0, ps_m, saveat=ts, sensealg=ForwardDiffSensitivity())
-  # concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts)
   # diffeq_rd(p, prob_n_ode, Tsit5(), saveat=ts, u0=_u0) # deprecated
 end
 
@@ -125,6 +129,8 @@ fxdata = Iterators.repeated((), 30)
 opt = ADAM()
 cb()  # Test call
 
+
+## want to use sciml_train (Optim) -- Flux not as stable for stiff
 
 Flux.train!(loss_n_ode2, ps_m, fxdata, opt, cb=Flux.throttle(cb, 1))
 
