@@ -62,8 +62,8 @@ ROS integration is a priority for this project and will accompany the so-called 
 
 When multiple numerical values/solutions exists for the (or nearly) same factor graph -- then solutions, including a reference solution (ground truth) can just be stacked in that variable.  See and comment on [a few cases here](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/182#issuecomment-545979307).
 
-### Current Julia version, v1.2.x
-Caesar.jl and packages are currently [targeting Julia v1.2.x](https://julialang.org/downloads/) (4Q2019).
+### Current Julia version?
+Caesar.jl and packages are currently targeting [Julia version](https://julialang.org/downloads/) as per the [local install page](https://juliarobotics.org/Caesar.jl/latest/installation_environment/).
 
 ### How does JSON-Schema work?
 
