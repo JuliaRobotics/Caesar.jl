@@ -23,12 +23,13 @@ The easiest method is---via the terminal---to [download the desired](https://jul
 
 ```bash
 cd ~
-mkdir -p julia-software
-cd julia-software
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.2/julia-1.2.0-linux-x86_64.tar.gz
-tar -xvf julia-1.2.0-linux-x86_64.tar.gz
-cd /usr/bin
-sudo ln -s ~/julia-software/julia-1.2.0/bin/julia julia
+mkdir -p .julia
+cd .julia
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.3/julia-1.3.1-linux-x86_64.tar.gz
+tar -xvf julia-1.3.1-linux-x86_64.tar.gz
+rm julia-1.3.1-linux-x86_64.tar.gz
+cd /usr/local/bin
+sudo ln -s ~/julia-software/julia-1.3.1/bin/julia julia
 ```
 !!! note
     Feel free to modify this setup as you see fit.
@@ -100,14 +101,14 @@ To install a Julia package, simply open a `julia` REPL (equally the julia REPL i
 
 ```julia
 ] # activate Pkg manager
-(v1.2) pkg> add Caesar
+(v1.3) pkg> add Caesar
 ```
 
 These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaRegistries/General](http://github.com/JuliaRegistries/General).
 Unregistered latest packages can also be installed with using only the `Pkg.develop` function:
 
 ```julia
-# Just using Caesar URL as an example --  Caesar is already registered with METADATA
+# Just using Caesar URL as an example --  Caesar is already on JuliaRegistries/General
 using Pkg
 Pkg.develop(PackageSpec(url="https://github.com/JuliaRobotics/Caesar.jl.git"))
 ```
