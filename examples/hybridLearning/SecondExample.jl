@@ -7,7 +7,7 @@ pkg"instantiate"
 pkg"precompile"
 
 
-using Revise
+# using Revise
 
 using Zygote
 using DiffEqFlux, Flux, Optim, OrdinaryDiffEq
@@ -35,7 +35,7 @@ end
 
 tspan = (0.0f0,25.0f0)
 
-ann = FastChain(FastDense(5,3,tanh)) #, FastDense(16,16,tanh), FastDense(16,3))
+ann = FastChain(FastDense(5,16,tanh), FastDense(16,16,tanh), FastDense(16,3))
 p = initial_params(ann)
 
 # regular ODE states -- i.e. non-time-dependent input states

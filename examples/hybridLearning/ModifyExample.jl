@@ -4,16 +4,40 @@
 # https://github.com/JuliaDiffEq/DiffEqFlux.jl#universal-differential-equations-for-neural-optimal-control
 # https://docs.juliadiffeq.org/stable/tutorials/ode_example/#Defining-Parameterized-Functions-1
 
-cd(@__DIR__)
 using Pkg
-pkg"activate ."
+Pkg.activate(@__DIR__)
+pkg"instantiate"
+0
+# pkg"precompile"
+
 
 # using Revise
 
-using Flux
-using DifferentialEquations
-using DiffEqFlux, OrdinaryDiffEq, Optim
-using Zygote, DiffEqSensitivity
+# using Flux
+# using DifferentialEquations
+# using DiffEqFlux, OrdinaryDiffEq, Optim
+
+
+using DiffEqFlux, Flux, Optim, OrdinaryDiffEq
+
+
+## Fix issue Zygote.jl #440 #516
+using Zygote
+
+
+Zygote.@adjoint function vcat(xs::Union{Number, AbstractVector}...)
+    vcat(xs...), dy -> begin
+        d = 0
+        map(xs) do x
+            x isa Number && return dy[d+=1]
+            l = length(x)
+            dx = dy[d+1:d+l]
+            d += l
+            return dx
+        end
+    end
+end
+
 
 ## Load MAT VicPrk data
 
@@ -39,7 +63,7 @@ odo = allOdoEasy(vpsensors)
 START=1
 STOP=5000
 plot(odo[START:STOP,1], odo[START:STOP,2])
-plot(odo[:,1], odo[:,2])
+# plot(odo[:,1], odo[:,2])
 
 ode_data = odo[START:STOP,:]' .|> Float32
 
@@ -54,45 +78,39 @@ ts = range(tspan[1],tspan[2],length=datasize)
 # model = Chain(x -> x.^3,
 #               Dense(4,50,tanh),
 #               Dense(50,3,tanh))
-model = Chain(Dense(5,50,tanh),
-              Dense(50,3,tanh))
-#
+model = FastChain(FastDense(5,50,relu), FastDense(50,50,relu), FastDense(50,3,relu))
+# model parameters
+p = initial_params(model)
 
+# regular ODE states -- i.e. non-time-dependent input states
+u0 = zeros(Float32, 3) #Float32(1.1)
+# θ is all non-time-dependent input parameters
+θ = Float32[u0;p]
 
 function dudt_(u,p,t)
   input = [u; t; t]
-  # Flux.Tracker.collect(model(input))
-  model(input)
+  model(input, p)
 end
 
-ps_m = Flux.params(model)
 
-# p = Float32[0.0]
-# p = param(p)
-_u0 = u0
-# _u0 = param(u0)
-
-
-prob_n_ode = ODEProblem(dudt_, u0, tspan, ps_m)
+input0 = [0f0;0f0]
+prob = ODEProblem(dudt_, u0, tspan, p)
+concrete_solve(prob, Tsit5(), u0, p, abstol=1e-8, reltol=1e-6, saveat=ts)
+Array(  concrete_solve(prob,Tsit5(), θ[1:3], θ[4:end], saveat=ts)  )
 
 
-# diffeq_rd(p, prob_n_ode, Tsit5())  # Test run
-concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts,sensealg=TrackerAdjoint())
-concrete_solve(prob_n_ode,MethodOfSteps(Tsit5()),_u0,ps_m,saveat=ts,sensealg=TrackerAdjoint())
-concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts,sensealg=ForwardDiffSensitivity())
-concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts)
+predict_adjoint(θ)
+
+
+function predict_adjoint(θ)
+  Array(  concrete_solve(prob,Tsit5(), θ[1:3], θ[4:end], saveat=0.0:1:25.0)  )
+  # Array(concrete_solve(prob,Tsit5(),[0f0,0f0,θ[1]],θ[2:end],saveat=0.0:1:25.0))
+end
 
 
 function predict_rd()
 # destructure param -> vector and back
   concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts)
-
-
-  # concrete_solve(prob_n_ode,MethodOfSteps(Tsit5()),_u0,ps_m,saveat=ts,sensealg=TrackerAdjoint()) # report why for DDE only
-  # concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts,sensealg=TrackerAdjoint())
-  # concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts,sensealg=ZygoteAdjoint())
-  # concrete_solve(prob_n_ode, Tsit5(), _u0, ps_m, saveat=ts, sensealg=ForwardDiffSensitivity())
-  # diffeq_rd(p, prob_n_ode, Tsit5(), saveat=ts, u0=_u0) # deprecated
 end
 
 
