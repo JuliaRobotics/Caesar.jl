@@ -8,7 +8,7 @@ using Pkg
 Pkg.activate(@__DIR__)
 pkg"instantiate"
 0
-# pkg"precompile"
+pkg"precompile"
 
 
 # using Revise
@@ -70,7 +70,7 @@ odo = allOdoEasy(vpsensors)
 # vcat(ode_data, zeros(Float32, size()))
 
 START=1
-STOP=5000
+STOP=1500
 plot(odo[START:STOP,1], odo[START:STOP,2])
 # plot(odo[:,1], odo[:,2])
 
@@ -90,7 +90,7 @@ ts = range(tspan[1],tspan[2],length=datasize)
 # model = Chain(x -> x.^3,
 #               Dense(4,50,tanh),
 #               Dense(50,3,tanh))
-model = FastChain(FastDense(6,20,relu), FastDense(20,20,relu), FastDense(20,4,relu))
+model = FastChain(FastDense(6,10,relu), FastDense(10,10,relu), FastDense(10,4,relu))
 # model parameters
 p = initial_params(model)
 
@@ -106,7 +106,7 @@ function dudt_(u,p,t)
   # sp = 0 < t ? speed(t) : 0.0
   # st = 0 < t ? steer(t) : 0.0
   # tidx = findmin(abs.(vpdata["time"][:]*1e-3 .- t))[2]
-  tidx = round(Int, (t-t0)*40+1)
+  tidx = round(Int, (t-t0)*40+1) # interpolation approach has issues with train
   tidx = 1 < tidx ? tidx : 1
   sp = vpdata["speed"][tidx, 1] + 1e-6*randn()
   st = vpdata["steering"][tidx, 1]
@@ -141,12 +141,12 @@ function loss_adjoint(θ)
   pred = predict_adjoint(θ)
   loss = 0.0
   for idx in 1:size(ode_data,2)
-    loss = (ode_data[1,idx]-pred[1,idx])^2 + (ode_data[2,idx]-pred[2,idx])^2 + (cos(ode_data[3,idx])-cos(pred[3,idx]))^2 + (sin(ode_data[3,idx])-sin(pred[3,idx]))^2 + (pred[4,idx])^2
+    loss = (ode_data[1,idx]-pred[1,idx])^2 + (ode_data[2,idx]-pred[2,idx])^2 + (cos(ode_data[3,idx])-cos(pred[3,idx]))^2 + (sin(ode_data[3,idx])-sin(pred[3,idx]))^2 # + (pred[4,idx])^2
   end
   loss
 end
 
-l = loss_adjoint(θ)
+
 
 # Callback
 cb = function (θ,l)
@@ -155,22 +155,96 @@ cb = function (θ,l)
   return false
 end
 
-cb(θ,l)
 
 
 # loss1 = loss_adjoint(θ)
 
-res = DiffEqFlux.sciml_train(loss_adjoint, θ, ADAM(0.1), cb = cb, maxiters=1000)
-# res = DiffEqFlux.sciml_train(loss_adjoint, θ, BFGS(initial_stepnorm=0.01), cb = cb)
+function doTraining(model, u0; maxiters=50)
+  p = initial_params(model)
+  θlocal = Float32[u0;p]
+  l = loss_adjoint(θlocal)
+  cb(θlocal,l)
+
+  res = DiffEqFlux.sciml_train(loss_adjoint, θlocal, ADAM(0.1/(100*rand())), cb = cb, maxiters=maxiters)
+  # res = DiffEqFlux.sciml_train(loss_adjoint, θ, BFGS(initial_stepnorm=0.01), cb = cb)
+
+  return res
+end
 
 
-# import Tracker: param
-# import Zygote: param, Params
-# import Flux: param
-# #
-# param(x::Params) = x
+res = doTraining(model, u0, maxiters=10)
 
+res.minimum
+
+import Base.Threads.@spawn
+
+
+MC = 30
+TASKS = Vector{Any}(undef,MC)
+for i in 1:MC
+  TASKS[i] = Threads.@spawn doTraining(model, u0, maxiters=50)
+end
+
+RES = Vector{Any}(undef,MC)
+for i in 1:MC
+  RES[i] = fetch(TASKS[i])
+  @show i, RES[i].minimum
+end
+
+## understanding
 #
+# Threads.@threads for i = 1:10
+#    println("i = $i on thread $(Threads.threadid())")
+# end
+#
+# for i = 1:10
+#    Threads.@spawn println("i = $i on thread $(Threads.threadid())")
+# end
+
+
+
+## PLOT result =================================================================
+
+
+
+
+plot(odo[START:STOP,1], odo[START:STOP,2])
+
+
+XX = predict_adjoint(res4.minimizer)
+
+
+plot(XX[1:2,:]')
+
+plot(XX[1,:], XX[2,:])
+
+
+
+plot(vpsensors[:,2])
+plot(vpsensors[:,3])
+
+
+
+
+
+
+
+
+##==============================================================================
+## Store result
+
+using DelimitedFiles
+using Dates
+
+
+res.minimizer
+
+writedlm(ENV["HOME"]*"/Documents/networks/neural_002.txt", res.minimizer)
+fid = open(ENV["HOME"]*"/Documents/networks/config_002.txt", "w")
+println(fid, "model = FastChain(FastDense(6,10,relu), FastDense(10,10,relu), FastDense(10,4,relu))")
+close(fid)
+
+
 
 
 
