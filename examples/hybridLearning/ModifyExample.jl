@@ -99,65 +99,39 @@ concrete_solve(prob, Tsit5(), u0, p, abstol=1e-8, reltol=1e-6, saveat=ts)
 Array(  concrete_solve(prob,Tsit5(), θ[1:3], θ[4:end], saveat=ts)  )
 
 
+
+function predict_adjoint(θ)
+  Array(  concrete_solve(prob,Tsit5(), θ[1:3], θ[4:end], saveat=ts)  )
+end
+
 predict_adjoint(θ)
 
 
-function predict_adjoint(θ)
-  Array(  concrete_solve(prob,Tsit5(), θ[1:3], θ[4:end], saveat=0.0:1:25.0)  )
-  # Array(concrete_solve(prob,Tsit5(),[0f0,0f0,θ[1]],θ[2:end],saveat=0.0:1:25.0))
-end
 
 
-function predict_rd()
-# destructure param -> vector and back
-  concrete_solve(prob_n_ode,Tsit5(),_u0,ps_m,saveat=ts)
-end
-
-
-predict_rd()
-
-
-function loss_n_ode2()
-  pred = predict_rd()
-  # loss = sum(abs2,ode_data .- pred)
-  # Q = [1 0 0; 0 1 0; 0 0 1]
+function loss_adjoint(θ)
+  pred = predict_adjoint(θ)
   loss = 0.0
-  # res = zeros(3)
   for idx in 1:size(ode_data,2)
-  #   jXjhat = SE2(ode_data[1:3,idx]) \ SE2(pred[1:3,idx])
-  #   se2vee!(res, jXjhat)
-    # loss += res'*Q*res
     loss = (ode_data[1,idx]-pred[1,idx])^2 + (ode_data[2,idx]-pred[2,idx])^2 + (cos(ode_data[2,idx])-cos(pred[2,idx]))^2 + (sin(ode_data[2,idx])-sin(pred[2,idx]))^2
   end
-  loss #,pred
+  loss
 end
 
-ps_m = Flux.params(model)
-
-loss_n_ode2()
+l = loss_adjoint(θ)
 
 # Callback
-cb = function()
-    display(loss_n_ode2())
+cb = function (θ,l)
+  println(l)
+  #display(plot(solve(remake(prob,p=Flux.data(p3),u0=Flux.data(u0)),Tsit5(),saveat=0.1),ylim=(0,6)))
+  return false
 end
 
+cb(θ,l)
 
 
-fxdata = Iterators.repeated((), 30)
-opt = ADAM()
-cb()  # Test call
-
-
-## want to use sciml_train (Optim) -- Flux not as stable for stiff
-
-Flux.train!(loss_n_ode2, ps_m, fxdata, opt, cb=Flux.throttle(cb, 1))
-
-
-0
-
-# res = DiffEqFlux.sciml_train(loss_n_ode2, _u0, ADAM(),maxiters=30)
-# res1 = DiffEqFlux.sciml_train(loss_n_ode2, ps_m, ADAM(0.05), maxiters = 300)
-
+loss1 = loss_adjoint(θ)
+res = DiffEqFlux.sciml_train(loss_adjoint, θ, BFGS(initial_stepnorm=0.01), cb = cb)
 
 
 
