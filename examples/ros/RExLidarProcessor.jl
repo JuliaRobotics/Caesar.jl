@@ -3,11 +3,12 @@ using IncrementalInference, RoME;
 using JSON2;
 
 # Where to fetch data
-dfgDataFolder = "/tmp/rex";
+# dfgDataFolder = "/tmp/rex";
+dfgDataFolder = ENV["HOME"]*"/Documents/rex";
 
 # Load the graph
 fg = initfg()
-loadDFG("$dfgDataFolder/dfg", IncrementalInference, fg);
+loadDFG("$dfgDataFolder/rexnew.tar.gz", IncrementalInference, fg);
 
 # Check what's in it
 ls(fg)
@@ -187,12 +188,16 @@ function assembleping(msg::NamedTuple, resolution::Float64)
 end
 
 # Now let's extract the radar sector measurement
+fg = initfg()
+loadDFG("$dfgDataFolder/fullsweep.tar.gz.tar.gz", IncrementalInference, fg);
+
 
 
 # set resolution to 1m/px
 (polar, cart) = assembleping(msg, 1.0);
 
-using Images, ImageView
+using ImageMagick
+using Images, ImageView, ImageFiltering
 imshow(polar)
 imshow(cart)
 
@@ -260,18 +265,122 @@ end
 # let's try to fetch variables with fullsweeps in them
 allSweepVariables = filter(v -> :RADARSWEEP in getBigDataKeys(v), getVariables(fg));
 
+saveDFG(fg, "$dfgDataFolder/fullsweep.tar.gz")
+
+# no one solves
+map(s->setSolvable!(fg, s, 0), getVariableIds(fg))
+
+# make full sweep variables solvable
+fsvars = allSweepVariables .|> getLabel
+map(s->setSolvable!(fg, s, 1), fsvars)
+
+activeVars = ls(fg, solvable=1) |> sortDFG
+
 # try and display one of them
 function fetchSweep(var::DFGVariable, store::FileDataStore)
     entry = getBigDataEntry(var, :RADARSWEEP)
     rawData = getBigData(datastore, entry)
     # raw data is json-encoded; this decoding should happen inside getBigData?
-    return Vector{Float64}(JSON2.read(IOBuffer(rawData)))
+    rawdata = Vector{Float64}(JSON2.read(IOBuffer(rawData)))
+    n = Int(sqrt(length(rawdata)))
+    sweep = reshape(rawdata,(n,n))
+    return sweep # That's pretty sweep if i say so myself...
 end
 
-sweep = fetchSweep(allSweepVariables[10], datastore)
-n = Int(sqrt(length(s)))
-sweep = reshape(sweep,(n,n))
-imshow(sweep)
+# Here!
+sweeps = map(v -> fetchSweep(getVariable(fg, v), datastore), activeVars)
+
+
+imshow(sweeps[10])
+imshow(sweeps[11])
+
+
+using CoordinateTransformations
+using DocStringExtensions
+using ImageTransformations
+
+center(sweeps[11])
+
+trans = center(sweeps[11])
+# imshow(sweeps[11])
+
+
+rot = RotMatrix(pi/2)
+
+rot = RotMatrix(pi/64)
+# tfm = recenter(rot, [488;488]) # also works
+tfm = recenter(rot, trans)
+tfsweep = warp(sweeps[11], tfm)
+# imshow(tfsweep)
+
+mask = findall(x->isnan(x),tfsweep)
+tfsweep[mask] .= 0.0
+
+im = tfsweep[1:floor(Int,trans[1])*2, 1:floor(Int,trans[1])*2]
+# imshow(im)
+
+function shift2(a::Array{Float64,2}, dx::Real, dy::Real, dh::Float64)
+    tfm = recenter(RotMatrix(dh), center(a)) # [0.0;0.0]
+    bp = warp(a, tfm);
+    # remove NaN
+    mask = findall(x->isnan(x),bp)
+    bp[mask] .= 0.0
+
+    return bp
+    # Cull out the image.
+    # return bp[1:size(a,1),1:size(a,2)]
+    # return tbp
+end
+
+imshow(shift2(sweeps[11], 0.0, 0.0, 0.0))
+
+function sweepTheta(a::Array{Float64,2}, b::Array{Float64,2}, tmin::Float64, tmax::Float64)
+   theta = linspace(tmin, tmax, 100)
+   c = map(t -> evaluate(a,b,0,0,t))
+   return c
+end
+
+size(sweeps[11]) # 976, 976
+size(tfsweep) # 976, 976
+
+
+"""
+    $SIGNATURES
+
+Utility function to help quantify the mismatch between two images given a transform.
+"""
+function mismatch(a,b; kernel=Kernel.gaussian(10))
+    imga = imfilter(a, kernel);
+    imgb = imfilter(b, kernel);
+
+    sqrt(sum((imga.-imgb).^2))
+end
+
+function evaltf(a::Array{Float64,2},b::Array{Float64,2}, dx::Float64, dy::Float64, dh::Float64)
+    # transform image
+    bp = shift2(b,dx,dy,dh)
+    # return mismatch(a,bp)
+    # @show size(a), size(b), size(bp)
+    ap, bpp = paddedviews(0.0, a, bp)
+    return mismatch(ap,bpp)
+end
+
+
+evaltf(sweeps[10],sweeps[11],0.,0.,0.)
+evaltf(sweeps[10],sweeps[11],0.,0.,2*pi)
+evaltf(sweeps[10],sweeps[11],0.,0.,1.0pi)
+
+sweepy(im1, im2) = (x->@show evaltf(im1,im2,0.,0.,x)).(0:0.1:2pi)
+Plots.plot(sweepy(sweeps[12], sweeps[13]))
+
+sweepInCircle = (x->@show evaltf(sweeps[10],sweeps[11],0.,0.,x)).(0:0.1:2pi)
+
+using Plots #The Plot Thickens
+
+Plots.plot(sweepInCircle)
+
+imshow(imfilter(sweeps[11], Kernel.gaussian(50)))
+imshow(sweeps[11])
 
 ##############################################################################
 ########################### LASERS AND STUFF BELOW ###########################
