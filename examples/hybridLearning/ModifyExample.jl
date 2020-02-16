@@ -20,6 +20,9 @@ pkg"precompile"
 using DiffEqFlux, Flux, Optim, OrdinaryDiffEq
 using DifferentialEquations
 
+# Requires Julia 1.3 and up
+import Base.Threads.@spawn
+
 ## Fix issue Zygote.jl #440 #516
 using Zygote
 
@@ -176,46 +179,70 @@ res = doTraining(model, u0, maxiters=10)
 
 res.minimum
 
-import Base.Threads.@spawn
 
 
-MC = 30
-TASKS = Vector{Any}(undef,MC)
-for i in 1:MC
-  TASKS[i] = Threads.@spawn doTraining(model, u0, maxiters=50)
+
+function trainGeneration(model, u0; maxiters::Int=50, MC::Int=30)
+
+  TASKS = Vector{Any}(undef,MC)
+  for i in 1:MC
+    TASKS[i] = Threads.@spawn doTraining(model, u0, maxiters=maxiters)
+  end
+
+  RES = Vector{Any}(undef,MC)
+  for i in 1:MC
+    RES[i] = fetch(TASKS[i])
+    @show i, RES[i].minimum
+  end
+
+  PP = Vector{Vector{Float32}}(undef, MC)
+  CO = zeros(MC)
+
+  for i in 1:MC
+    CO[i] = RES[i].minimum
+    PP[i] = deepcopy(RES[i].minimizer)
+  end
+
+  # TASKS = Vector{Any}(undef,MC)
+  # RES = Vector{Any}(undef,MC)
+  # GC.gc()
+  ord = sortperm(CO)
+  return PP[ord], CO[ord]
 end
 
-RES = Vector{Any}(undef,MC)
-for i in 1:MC
-  RES[i] = fetch(TASKS[i])
-  @show i, RES[i].minimum
-end
 
-## understanding
-#
-# Threads.@threads for i = 1:10
-#    println("i = $i on thread $(Threads.threadid())")
-# end
-#
-# for i = 1:10
-#    Threads.@spawn println("i = $i on thread $(Threads.threadid())")
-# end
+PPs, COs = trainGeneration(model, u0; maxiters=50)
 
+GC.gc()
 
 
 ## PLOT result =================================================================
 
 
+# p vectors
+
+sort(CO)
+PPm = hcat(PPs...)
 
 
-plot(odo[START:STOP,1], odo[START:STOP,2])
+heatmap(PPm)
 
 
-XX = predict_adjoint(res4.minimizer)
 
+XX = predict_adjoint(PPs[1])
+
+DRx = [odo[START:STOP,1]';XX[1,:]']'
+DRy = [odo[START:STOP,2]';XX[2,:]']'
+
+fn = plot(DRx, DRy, fmt=:svg)
+
+savefig(ENV["HOME"]*"/Documents/networks/test.svg")
 
 plot(XX[1:2,:]')
 
+
+
+plot(odo[START:STOP,1], odo[START:STOP,2])
 plot(XX[1,:], XX[2,:])
 
 
@@ -224,7 +251,7 @@ plot(vpsensors[:,2])
 plot(vpsensors[:,3])
 
 
-
+gui()
 
 
 
@@ -239,11 +266,14 @@ using Dates
 
 res.minimizer
 
-writedlm(ENV["HOME"]*"/Documents/networks/neural_002.txt", res.minimizer)
-fid = open(ENV["HOME"]*"/Documents/networks/config_002.txt", "w")
-println(fid, "model = FastChain(FastDense(6,10,relu), FastDense(10,10,relu), FastDense(10,4,relu))")
-close(fid)
-
+for i in 3:32
+  res = RES[i-2]
+  writedlm(ENV["HOME"]*"/Documents/networks/neural_$i.txt", res.minimizer)
+  fid = open(ENV["HOME"]*"/Documents/networks/config_$i.txt", "w")
+  println(fid, "minimum=$(res.minimum)")
+  println(fid, "model = FastChain(FastDense(6,10,relu), FastDense(10,10,relu), FastDense(10,4,relu))")
+  close(fid)
+end
 
 
 

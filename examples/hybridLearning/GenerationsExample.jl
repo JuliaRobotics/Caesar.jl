@@ -1,0 +1,296 @@
+# testing nearal ODE
+# https://discourse.julialang.org/t/diffeqflux-with-time-as-additional-input-to-neural-ode/26456/3
+# https://discourse.julialang.org/t/defining-and-input-signal-for-a-differential-equation/23703/10
+# https://github.com/JuliaDiffEq/DiffEqFlux.jl#universal-differential-equations-for-neural-optimal-control
+# https://docs.juliadiffeq.org/stable/tutorials/ode_example/#Defining-Parameterized-Functions-1
+
+using Pkg
+Pkg.activate(@__DIR__)
+pkg"instantiate"
+0
+pkg"precompile"
+
+
+# using Revise
+
+# using Flux
+# using DiffEqFlux, OrdinaryDiffEq, Optim
+
+
+using DiffEqFlux, Flux, Optim, OrdinaryDiffEq
+using DifferentialEquations
+
+# Requires Julia 1.3 and up
+import Base.Threads.@spawn
+
+## Fix issue Zygote.jl #440 #516
+using Zygote
+
+
+Zygote.@adjoint function vcat(xs::Union{Number, AbstractVector}...)
+    vcat(xs...), dy -> begin
+        d = 0
+        map(xs) do x
+            x isa Number && return dy[d+=1]
+            l = length(x)
+            dx = dy[d+1:d+l]
+            d += l
+            return dx
+        end
+    end
+end
+
+
+## Load MAT VicPrk data
+
+using TransformUtils
+using Plots
+using MAT
+using Interpolations
+
+vpdata = matread(ENV["HOME"]*"/data/dataset_victoria_park/original_MATLAB_dataset/aa3_dr.mat")
+
+
+# utility functions
+
+include(joinpath(@__DIR__, "..", "wheeled", "parametricWheelOdo.jl"))
+
+vpdata["time"] .*= 1e-3
+vpdata["time"] = round.(vpdata["time"][:], digits=5)
+
+vpsensors = hcat(vpdata["time"],
+                 vpdata["speed"],
+                 vpdata["steering"])
+#
+
+# see the input data
+# plot(vpsensors[:,2])
+# plot(vpsensors[:,3])
+
+# # Likely unused
+# steer =  LinearInterpolation( (vpdata["time"],) , vpdata["steering"][:])
+# speed =  LinearInterpolation( (vpdata["time"],) , vpdata["speed"][:])
+
+
+## Get baseline solution over all data
+odo = allOdoEasy(vpsensors)
+# vcat(ode_data, zeros(Float32, size()))
+
+# calculate local speed
+deltadist = sum( (odo[1:end-1,1:2] - odo[2:end,1:2]).^2, dims=2) .|> sqrt |> vec
+push!(deltadist, deltadist[end])
+bodySpeed = deltadist*40
+
+
+
+
+# Callback to show current cost during training
+cb = function (θ,l)
+  println("thread=$(Threads.threadid()), cost=$l")
+  return false
+end
+
+
+
+# Train a single instancwe
+function doTraining(model::FastChain,
+                    u0::Vector{<:Real};
+                    p::Vector{<:Real}=initial_params(model),
+                    maxiters=50,
+                    α=0.1/(100*rand()) )
+  #
+  θlocal = Float32[u0;p]
+
+  function dudt_(u,p,t)
+    tidx = round(Int, (t-tspan[1])*40+1) # interpolation approach has issues with train
+    tidx = 1 < tidx ? tidx : 1
+    sp = vpdata["speed"][tidx, 1] + 1e-6*randn()
+    st = vpdata["steering"][tidx, 1]
+    input = [u; sp; st]
+    model(input, p)
+  end
+
+  prob = ODEProblem(dudt_, u0, tspan, p)
+
+  function predict_adjoint(θ)
+    Array(  concrete_solve(prob, Tsit5(), θ[1:5], θ[6:end], saveat=ts)  )
+  end
+
+  function loss_adjoint(θ)
+    pred = predict_adjoint(θ)
+    loss = 0.0
+    for idx in 1:size(ode_data,2)
+      loss = (ode_data[1,idx]-pred[1,idx])^2 + (ode_data[2,idx]-pred[2,idx])^2 + (cos(ode_data[3,idx])-pred[3,idx])^2 + (sin(ode_data[3,idx])-pred[4,idx])^2 + (bodySpeed[idx]-pred[5,idx])^2
+    end
+    loss
+  end
+
+  # l = loss_adjoint(θlocal)
+  # cb(θlocal,l)
+
+  res = DiffEqFlux.sciml_train(loss_adjoint, θlocal, ADAM(α), cb = cb, maxiters=maxiters)
+  # res = DiffEqFlux.sciml_train(loss_adjoint, θ, BFGS(initial_stepnorm=0.01), cb = cb)
+
+  return res
+end
+
+
+
+function trainGeneration(models::Vector{FastChain}, u0; maxiters::Int=50, MC::Int=10)
+
+  TASKS = Vector{Any}(undef,MC)
+  for i in 1:MC
+    TASKS[i] = Threads.@spawn doTraining(models[i], u0, maxiters=maxiters)
+  end
+
+  RES = Vector{Any}(undef,MC)
+  PP = Vector{Vector{Float32}}(undef, MC)
+  CO = zeros(MC)
+  for i in 1:MC
+    RES[i] = fetch(TASKS[i])
+    CO[i] = RES[i].minimum
+    PP[i] = deepcopy(RES[i].minimizer)
+    @show i, RES[i].minimum
+  end
+
+
+  # TASKS = Vector{Any}(undef,MC)
+  # RES = Vector{Any}(undef,MC)
+  # GC.gc()
+  ord = sortperm(CO)
+  return PP[ord], CO[ord]
+end
+
+
+
+function main(vpdata, ode_data, usrmodel::FastChain; MC::Int=10, maxiters::Int=50)
+  global ts, tspan
+
+  t0 = tspan[1]
+  # t0 = vpdata["time"][1] |> Float32
+
+  # x_i, y_i, cosθ_i, sinθ_i, vx_i
+  u0 = Float32[0.; 0.; 1.; 0.; 0.]
+  # u0 = zeros(Float32, 4) #Float32(1.1)
+
+
+  ## Specialized Neural model with time dependent inputs==========================
+  models = Vector{FastChain}(undef, MC)
+  for thr in 1:MC
+    models[thr] = deepcopy(usrmodel)
+  end
+
+
+  PPs, COs = trainGeneration(models, u0; maxiters=maxiters, MC=MC)
+
+  return PPs, COs
+end
+
+
+
+START=1
+STOP=1500
+ode_data = odo[START:STOP,:]' .|> Float32
+datasize = size(ode_data,2)
+tspan = (Float32(vpdata["time"][1]), Float32(vpdata["time"][datasize]))
+ts = range(tspan[1],tspan[2],length=datasize)
+
+# 7 inputs are x, y, cθ, sθ, speed, speed, steer
+usrmdl = FastChain(FastDense(7,10,relu),
+                   FastDense(10,10,relu),
+                   FastDense(10,5,relu))
+#
+
+
+plot(odo[START:STOP,1], odo[START:STOP,2])
+
+plot(bodySpeed[START:STOP])
+
+
+PPs, COs = main(vpdata, ode_data, usrmdl, MC=8, maxiters=40)
+
+
+# GC.gc()
+
+
+## PLOT result =================================================================
+
+
+# p vectors
+
+
+PPm = hcat(PPs...)
+
+COs
+heatmap(PPm)
+
+
+
+function dudt_test(u,p,t)
+  global usrmdl, tspan, vpdata
+  tidx = round(Int, (t-tspan[1])*40+1) # interpolation approach has issues with train
+  tidx = 1 < tidx ? tidx : 1
+  sp = vpdata["speed"][tidx, 1] + 1e-6*randn()
+  st = vpdata["steering"][tidx, 1]
+  input = [u; sp; st]
+  usrmdl(input, p)
+end
+
+u0_test = Float32[ode_data[:,1]; 0.]
+prob_test = ODEProblem(dudt_test, u0_test, tspan) #, p
+
+function predict_adjoint_test(θ)
+  Array(  concrete_solve(prob_test, Tsit5(), θ[1:5], θ[6:end], saveat=ts)  )
+end
+
+
+XX = predict_adjoint_test(PPs[4])
+
+DRx = [odo[START:STOP,1]';XX[1,:]']'
+DRy = [odo[START:STOP,2]';XX[2,:]']'
+
+fn = plot(DRx, DRy, fmt=:svg)
+
+savefig(ENV["HOME"]*"/Documents/networks/test.svg")
+
+plot(XX[1:2,:]')
+
+
+
+
+plot(XX[1,:], XX[2,:])
+
+
+
+
+
+gui()
+
+
+
+
+
+##==============================================================================
+## Store result
+
+using DelimitedFiles
+using Dates
+
+
+res.minimizer
+
+for i in 3:32
+  res = RES[i-2]
+  writedlm(ENV["HOME"]*"/Documents/networks/neural_$i.txt", res.minimizer)
+  fid = open(ENV["HOME"]*"/Documents/networks/config_$i.txt", "w")
+  println(fid, "minimum=$(res.minimum)")
+  println(fid, "model = FastChain(FastDense(6,10,relu), FastDense(10,10,relu), FastDense(10,4,relu))")
+  close(fid)
+end
+
+
+
+
+
+
+#
