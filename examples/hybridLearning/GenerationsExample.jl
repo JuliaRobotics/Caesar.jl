@@ -97,7 +97,7 @@ function doTraining(model::FastChain,
                     u0::Vector{<:Real};
                     p::Vector{<:Real}=initial_params(model),
                     maxiters=50,
-                    α=0.1/(100*rand()) )
+                    α=0.05/(10*rand()) )
   #
   θlocal = Float32[u0;p]
 
@@ -120,7 +120,7 @@ function doTraining(model::FastChain,
     pred = predict_adjoint(θ)
     loss = 0.0
     for idx in 1:size(ode_data,2)
-      loss = (ode_data[1,idx]-pred[1,idx])^2 + (ode_data[2,idx]-pred[2,idx])^2 + (cos(ode_data[3,idx])-pred[3,idx])^2 + (sin(ode_data[3,idx])-pred[4,idx])^2 + (bodySpeed[idx]-pred[5,idx])^2
+      loss = (ode_data[1,idx]-pred[1,idx])^2 + (ode_data[2,idx]-pred[2,idx])^2 + 10*(cos(ode_data[3,idx])-pred[3,idx])^2 + 10*(sin(ode_data[3,idx])-pred[4,idx])^2 + (bodySpeed[idx]-pred[5,idx])^2 + 10*(1-pred[3,idx]^2-pred[4,idx]^2)^2
     end
     loss
   end
@@ -189,16 +189,16 @@ end
 
 
 START=1
-STOP=1500
+STOP=1300
 ode_data = odo[START:STOP,:]' .|> Float32
 datasize = size(ode_data,2)
 tspan = (Float32(vpdata["time"][1]), Float32(vpdata["time"][datasize]))
 ts = range(tspan[1],tspan[2],length=datasize)
 
 # 7 inputs are x, y, cθ, sθ, speed, speed, steer
-usrmdl = FastChain(FastDense(7,10,relu),
-                   FastDense(10,10,relu),
-                   FastDense(10,5,relu))
+usrmdl = FastChain(FastDense(7,20,tanh),
+                   FastDense(20,20,tanh),
+                   FastDense(20,5,tanh))
 #
 
 
@@ -207,7 +207,7 @@ plot(odo[START:STOP,1], odo[START:STOP,2])
 plot(bodySpeed[START:STOP])
 
 
-PPs, COs = main(vpdata, ode_data, usrmdl, MC=8, maxiters=40)
+PPs, COs = main(vpdata, ode_data, usrmdl, MC=7, maxiters=150)
 
 
 # GC.gc()
@@ -244,14 +244,25 @@ function predict_adjoint_test(θ)
 end
 
 
-XX = predict_adjoint_test(PPs[4])
+
+XX = predict_adjoint_test(PPs[5])
 
 DRx = [odo[START:STOP,1]';XX[1,:]']'
 DRy = [odo[START:STOP,2]';XX[2,:]']'
+DRv = [bodySpeed[START:STOP]';XX[5,:]']'
+
+DRct = [cos.(odo[START:STOP,3]');XX[3,:]']'
+DRst = [sin.(odo[START:STOP,3]');XX[4,:]']'
 
 fn = plot(DRx, DRy, fmt=:svg)
 
-savefig(ENV["HOME"]*"/Documents/networks/test.svg")
+# savefig(ENV["HOME"]*"/Documents/networks/test.svg")
+
+fn = plot(DRv, fmt=:svg)
+
+fn = plot(DRct, fmt=:svg)
+fn = plot(DRst, fmt=:svg)
+
 
 plot(XX[1:2,:]')
 
