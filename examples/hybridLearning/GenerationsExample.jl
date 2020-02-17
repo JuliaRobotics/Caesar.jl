@@ -153,7 +153,7 @@ function doTraining(model::FastChain,
     pred = predict_adjoint(θ)
     loss = 0.0
     for idx in 1:size(ode_data,2)
-      loss = (ode_data[1,idx]-pred[1,idx])^2 + (ode_data[2,idx]-pred[2,idx])^2 + 10*(cos(ode_data[3,idx])-pred[3,idx])^2 + 10*(sin(ode_data[3,idx])-pred[4,idx])^2 + (bodySpeed[idx]-pred[5,idx])^2 + 10*(1-pred[3,idx]^2-pred[4,idx]^2)^2
+      loss = (ode_data[1,idx]-pred[1,idx])^2 + (ode_data[2,idx]-pred[2,idx])^2 + 10*(cos(ode_data[3,idx])-pred[3,idx])^2 + 10*(sin(ode_data[3,idx])-pred[4,idx])^2 + (bodySpeed[idx]-pred[5,idx])^2 + (1-pred[3,idx]^2-pred[4,idx]^2)^2
     end
     loss
   end
