@@ -29,7 +29,7 @@ wget https://julialang-s3.julialang.org/bin/linux/x64/1.3/julia-1.3.1-linux-x86_
 tar -xvf julia-1.3.1-linux-x86_64.tar.gz
 rm julia-1.3.1-linux-x86_64.tar.gz
 cd /usr/local/bin
-sudo ln -s ~/julia-software/julia-1.3.1/bin/julia julia
+sudo ln -s ~/.julia/julia-1.3.1/bin/julia julia
 ```
 !!! note
     Feel free to modify this setup as you see fit.
