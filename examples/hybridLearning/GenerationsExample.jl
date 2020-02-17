@@ -10,6 +10,37 @@ pkg"instantiate"
 0
 pkg"precompile"
 
+using ArgParse
+
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table! s begin
+        "--individuals"
+            help = "Number of simultaneous training individuals to compute"
+            arg_type = Int
+            default = 10
+        "--maxiters"
+            help = "Max ADAM optimization iterations"
+            arg_type = Int
+            default = 100
+        "--stop"
+            help = "number of encoder readings to consume for trahectory length"
+            arg_type = Int
+            default = 1300
+        # "--flag1"
+        #     help = "an option without argument, i.e. a flag"
+        #     action = :store_true
+        # "arg1"
+        #     help = "a positional argument"
+        #     required = true
+    end
+
+    return parse_args(s)
+end
+
+pargs = parse_commandline()
+
 
 # using Revise
 
@@ -17,8 +48,10 @@ pkg"precompile"
 # using DiffEqFlux, OrdinaryDiffEq, Optim
 
 
+using Dates, DelimitedFiles
 using DiffEqFlux, Flux, Optim, OrdinaryDiffEq
 using DifferentialEquations
+
 
 # Requires Julia 1.3 and up
 import Base.Threads.@spawn
@@ -189,11 +222,12 @@ end
 
 
 START=1
-STOP=1300
+STOP=pargs["stop"]
 ode_data = odo[START:STOP,:]' .|> Float32
 datasize = size(ode_data,2)
 tspan = (Float32(vpdata["time"][1]), Float32(vpdata["time"][datasize]))
 ts = range(tspan[1],tspan[2],length=datasize)
+
 
 # 7 inputs are x, y, cθ, sθ, speed, speed, steer
 usrmdl = FastChain(FastDense(7,20,tanh),
@@ -202,28 +236,46 @@ usrmdl = FastChain(FastDense(7,20,tanh),
 #
 
 
-plot(odo[START:STOP,1], odo[START:STOP,2])
+# plot(odo[START:STOP,1], odo[START:STOP,2])
+# plot(odo[:,1], odo[:,2])
+# plot(bodySpeed[START:STOP])
 
-plot(bodySpeed[START:STOP])
 
 
-PPs, COs = main(vpdata, ode_data, usrmdl, MC=7, maxiters=150)
+PPs, COs = main(vpdata, ode_data, usrmdl, MC=pargs["individuals"], maxiters=pargs["maxiters"])
 
 
 # GC.gc()
 
 
-## PLOT result =================================================================
+
+##==============================================================================
+## Plot Store result
 
 
-# p vectors
+dtim = now()
+resultsFolder = ENV["HOME"]*"/Documents/networks/$dtim/"
+mkpath(resultsFolder)
 
+
+fid = open(resultsFolder*"model.txt", "w")
+for i in 1:length(usrmdl.layers)
+  ll = usrmdl.layers[i]
+  println(fid, "layer $i")
+  println(fid, "in: $(ll.in)")
+  println(fid, "out: $(ll.out)")
+  println(fid, "act: $(ll.σ)")
+end
+close(fid)
 
 PPm = hcat(PPs...)
+# COs
 
-COs
+writedlm(resultsFolder*"loss.txt", COs)
+writedlm(resultsFolder*"params.txt", PPm')
+
 heatmap(PPm)
-
+savefig(resultsFolder*"heatmap.svg")
 
 
 function dudt_test(u,p,t)
@@ -244,8 +296,9 @@ function predict_adjoint_test(θ)
 end
 
 
+for i in 1:length(COs)
 
-XX = predict_adjoint_test(PPs[5])
+XX = predict_adjoint_test(PPs[i])
 
 DRx = [odo[START:STOP,1]';XX[1,:]']'
 DRy = [odo[START:STOP,2]';XX[2,:]']'
@@ -256,49 +309,20 @@ DRst = [sin.(odo[START:STOP,3]');XX[4,:]']'
 
 fn = plot(DRx, DRy, fmt=:svg)
 
-# savefig(ENV["HOME"]*"/Documents/networks/test.svg")
+savefig(resultsFolder*"result_xy_$i.svg")
 
 fn = plot(DRv, fmt=:svg)
+savefig(resultsFolder*"result_v_$i.svg")
 
 fn = plot(DRct, fmt=:svg)
+savefig(resultsFolder*"result_costh_$i.svg")
 fn = plot(DRst, fmt=:svg)
+savefig(resultsFolder*"result_sinth_$i.svg")
 
+# plot(XX[1:2,:]')
+# plot(XX[1,:], XX[2,:])
 
-plot(XX[1:2,:]')
-
-
-
-
-plot(XX[1,:], XX[2,:])
-
-
-
-
-
-gui()
-
-
-
-
-
-##==============================================================================
-## Store result
-
-using DelimitedFiles
-using Dates
-
-
-res.minimizer
-
-for i in 3:32
-  res = RES[i-2]
-  writedlm(ENV["HOME"]*"/Documents/networks/neural_$i.txt", res.minimizer)
-  fid = open(ENV["HOME"]*"/Documents/networks/config_$i.txt", "w")
-  println(fid, "minimum=$(res.minimum)")
-  println(fid, "model = FastChain(FastDense(6,10,relu), FastDense(10,10,relu), FastDense(10,4,relu))")
-  close(fid)
 end
-
 
 
 
