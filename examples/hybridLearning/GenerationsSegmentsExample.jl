@@ -23,15 +23,15 @@ function parse_commandline()
         "--maxiters"
             help = "Max ADAM optimization iterations"
             arg_type = Int
-            default = 100
+            default = 500
         "--epochs"
             help = "number of encoder readings (epochs) to consume for pose to pose trigger"
             arg_type = Int
-            default = 40
+            default = 80
         "--segments"
             help = "number of interpose segments to combine"
             arg_type = Int
-            default = 20
+            default = 50
         # "--flag1"
         #     help = "an option without argument, i.e. a flag"
         #     action = :store_true
@@ -112,6 +112,7 @@ vpsensors = hcat(vpdata["time"],
 ## Get baseline solution over all data
 odo = allOdoEasy(vpsensors)
 # vcat(ode_data, zeros(Float32, size()))
+
 
 # calculate local speed
 deltadist = sum( (odo[1:end-1,1:2] - odo[2:end,1:2]).^2, dims=2) .|> sqrt |> vec
@@ -246,7 +247,7 @@ function main(vpdata, ode_data, usrmodel::FastChain; MC::Int=10, maxiters::Int=5
   end
 
 
-  PPs, COs = trainGeneration(models, U0s; maxiters=maxiters, MC=MC)
+  PPs, COs = trainGeneration(models, U0s; maxiters=maxiters, MC=MC, α=0.05)
 
   return PPs, COs
 end
@@ -274,7 +275,7 @@ usrmdl = FastChain(FastDense(7,20,tanh),
 
 
 # test
-ptest = doTraining(usrmdl, U0s, maxiters=100, α=0.01)
+# ptest = doTraining(usrmdl, U0s, maxiters=100, α=0.01)
 
 PPs, COs = main(vpdata, ode_data, usrmdl, MC=pargs["individuals"], maxiters=pargs["maxiters"])
 
@@ -322,11 +323,14 @@ function dudt_test(u,p,t)
   usrmdl(input, p)
 end
 
-u0_test = Float32[ode_data[:,1]; 0.]
-prob_test = ODEProblem(dudt_test, u0_test, tspan) #, p
+u0_test = U0s[:,1]
+
+tspan_test = (tspan[1], tspan[1]+numEpochs*0.025*pargs["segments"])
+
+prob_test = ODEProblem(dudt_test, u0_test, tspan_test) #, p
 
 function predict_adjoint_test(θ)
-  Array(  concrete_solve(prob_test, Tsit5(), θ[1:5], θ[6:end], saveat=ts)  )
+  Array(  concrete_solve(prob_test, Tsit5(), u0_test, θ[6:end], saveat=tspan_test)  ) # θ[1:5]
 end
 
 
@@ -334,12 +338,12 @@ for i in 1:length(COs)
 
 XX = predict_adjoint_test(PPs[i])
 
-DRx = [odo[START:STOP,1]';XX[1,:]']'
-DRy = [odo[START:STOP,2]';XX[2,:]']'
-DRv = [bodySpeed[START:STOP]';XX[5,:]']'
+DRx = [odo[START:size(XX,2),1]';XX[1,:]']'
+DRy = [odo[START:size(XX,2),2]';XX[2,:]']'
+DRv = [bodySpeed[START:size(XX,2)]';XX[5,:]']'
 
-DRct = [cos.(odo[START:STOP,3]');XX[3,:]']'
-DRst = [sin.(odo[START:STOP,3]');XX[4,:]']'
+DRct = [cos.(odo[START:size(XX,2),3]');XX[3,:]']'
+DRst = [sin.(odo[START:size(XX,2),3]');XX[4,:]']'
 
 fn = plot(DRx, DRy, fmt=:svg)
 
