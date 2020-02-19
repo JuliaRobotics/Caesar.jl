@@ -43,7 +43,7 @@ jobs:
       script:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
         - julia -e 'using Pkg; pkg"add DistributedFactorGraphs#master"; pkg"add IncrementalInference#master"; pkg"add RoME#master";'
-        - julia --check-bounds=yes -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.test("Caesar"; coverage=false)'
+        - julia --check-bounds=yes -e 'using Pkg; Pkg.test("Caesar"; coverage=false)'
       after_success: skip
 
 notifications:
