@@ -31,13 +31,14 @@ jobs:
     - stage: "Documentation"
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
-        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting",rev="master")); Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"));'
+        - julia --project=docs/ -e 'using Pkg; pkg"add IncrementalInference"; pkg"add RoME"; pkg"add KernelDensityEstimatePlotting"; pkg"add RoMEPlotting";'
         - julia --project=docs/ docs/make.jl
       name: "HTML"
       after_success: skip
 
 notifications:
   email: false
-  
 
+
+# - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
+# - julia -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting",rev="master")); Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"));'
