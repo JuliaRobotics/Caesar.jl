@@ -20,26 +20,26 @@ addons:
     - hdf5-tools
 
 jobs:
+  allow_failures:
+    - julia: nightly
   include:
+    - stage: "Tests"
+      script:
+        - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+        - julia --check-bounds=yes -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.test("Caesar"; coverage=true)'
+      after_success:
+        - julia --project=coverage/ -e 'using Pkg; Pkg.instantiate()'
+        - julia --project=coverage/ coverage/coverage.jl
     - stage: "Documentation"
-      julia: 1.2
-      os: linux
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
+      name: "HTML"
       after_success: skip
-  fast_finish: true
-
-#         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
-#         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting",rev="master")); Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"));'
 
 notifications:
   email: false
-
-matrix:
-  allow_failures:
-    - julia: nightly
-
-after_success:
-  - julia --project=coverage/ -e 'using Pkg; Pkg.instantiate()'
-  - julia --project=coverage/ coverage/coverage.jl
+  
+#         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
+#         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting",rev="master")); Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"));'
+#   fast_finish: true
