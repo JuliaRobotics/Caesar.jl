@@ -9,6 +9,8 @@
 
 # julia -O3 -p12 LCM_SLAM_client.jl -i 20000
 
+# JULIA_NUM_THREADS=9 julia -O3 GenerateResults.jl /tmp/caesar/2020-02-19T12\:50\:59.092/fg_after_x71.tar.gz --plotSeriesBeliefs 0 --skip
+
 
 #
 # ffmpeg -start_number 21 -i /tmp/caesar/2020-01-27T01\:46\:52.871/lines/fg_x%d.png -c:v libx264 -r 30 -pix_fmt yuv420p ~/Videos/out871.mp4

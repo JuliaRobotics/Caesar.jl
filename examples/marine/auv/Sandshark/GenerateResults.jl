@@ -1,4 +1,9 @@
 
+using Pkg
+Pkg.activate(@__DIR__)
+pkg"instantiate"
+pkg"precompile"
+
 # using Revise
 
 using ArgParse
@@ -11,9 +16,6 @@ using Glob
 
 include(joinpath(@__DIR__, "CommonUtils.jl"))
 
-#DUPLICATE DEFINITION
-# @enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
-# @enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -56,9 +58,7 @@ else
   parsed_args
 end
 
-# pargs["reportDir"] = "/tmp/caesar/2020-01-23T13:36:12.392/fg_after_x381.tar.gz"
-# pargs["reportDir"] = "/media/dehann/temp2/caesar/2020-01-26T20:36:57.456/fg_after_x321.tar.gz"
-# pargs["reportDir"] = "/tmp/caesar/2020-01-27T01:46:52.871/fg_after_x1181.tar.gz"
+# pargs["reportDir"] = "/tmp/caesar/2020-02-19T12:50:59.092/fg_after_x71.tar.gz"
 
 if !haskey(pargs, "reportDir") && isdefined(Main, :fg)
   pargs["reportDir"] = getLogPath(fg)
