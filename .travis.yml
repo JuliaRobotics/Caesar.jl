@@ -1,7 +1,12 @@
 language: julia
+sudo: required
+dist: trusty
 
 os:
   - linux
+
+arch:
+  - amd64
 
 julia:
   - 1.0
