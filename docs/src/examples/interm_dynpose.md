@@ -24,11 +24,10 @@ If the required VariableNode does not exist, then one can be created, such as ad
 mutable struct DynPoint2 <: IncrementalInference.InferenceVariable
   ut::Int64 # microsecond time
   dims::Int
-  labels::Vector{String}
-  DynPoint2(;ut::Int64=0, labels::Vector{<:AbstractString}=String[]) = new(ut, 4, labels)
+  DynPoint2(;ut::Int64=0) = new(ut, 4)
 end
 ```
-The `dims` field is permanently set to 4, i.e. `[x, y, dx/dt, dy/dt]`.  Labels represent special labels that can be used for more efficient indexing in database systems.  The `ut`parameter is for storing the microsecond time stamp for that variable node.
+The `dims` field is permanently set to 4, i.e. `[x, y, dx/dt, dy/dt]`.  The `ut`parameter is for storing the microsecond time stamp for that variable node.
 
 In order to implement your own factor type outside `IncrementalInference` you should import the required identifiers, as follows:
 ```julia

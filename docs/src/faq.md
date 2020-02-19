@@ -14,7 +14,7 @@ The Caesar.jl project is expressly focused on making this algorithmic code avail
 
 ### Just-In-Time Compiling (i.e. why are first runs slow?)
 Julia uses just-in-time compilation ([unless already pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
- which takes additional time the first time a new function is called. Additional calls to a function is fast from the second call onwards since the static function is now cached and ready for use.
+ which takes additional time the first time a new function is called. Additional calls to a cached function are fast from the second call onwards since the static binary code is now cached and ready for use.
 
 ### Static, Shared Object `.so` Compilation
 
@@ -62,8 +62,8 @@ ROS integration is a priority for this project and will accompany the so-called 
 
 When multiple numerical values/solutions exists for the (or nearly) same factor graph -- then solutions, including a reference solution (ground truth) can just be stacked in that variable.  See and comment on [a few cases here](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/182#issuecomment-545979307).
 
-### Current Julia version, v1.2.x
-Caesar.jl and packages are currently [targeting Julia v1.2.x](https://julialang.org/downloads/) (4Q2019).
+### Current Julia version?
+Caesar.jl and packages are currently targeting [Julia version](https://julialang.org/downloads/) as per the [local install page](https://juliarobotics.org/Caesar.jl/latest/installation_environment/).
 
 ### How does JSON-Schema work?
 
@@ -73,3 +73,6 @@ Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [
 
 See [discourse discussion](https://discourse.julialang.org/t/way-to-show-where-memory-allocations-occur/2161/3).
 
+### Increase Linux Open File Limit?
+
+If you see the error "Open Files Limit", please [follow these intructions on your local system](https://easyengine.io/tutorials/linux/increase-open-files-limit/).  This is likely to happen when debug code and a large number of files are stored in the general solution specific logpath.
