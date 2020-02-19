@@ -26,6 +26,7 @@ after_success:
   - julia --project=coverage/ coverage/coverage.jl
 
 jobs:
+  fast_finish: true
   include:
     - stage: "Documentation"
       julia: 1.2
@@ -39,7 +40,6 @@ jobs:
         - julia --project=docs/ docs/make.jl
       name: "HTML"
       after_success: skip
-    fast_finish: true
 
 matrix:
   allow_failures:
