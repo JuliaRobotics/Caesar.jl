@@ -1,13 +1,17 @@
 # AUV msg slam client model
 
+using Distributed
+# addprocs(8)
+
 using Pkg
 Pkg.activate(@__DIR__)
 pkg"instantiate"
 pkg"precompile"
 
-
-using Distributed
-# addprocs(8)
+@everywhere begin
+    using Pkg
+    Pkg.activate(@__DIR__)
+end
 
 using Caesar, RoME, DistributedFactorGraphs
 @everywhere using Caesar, RoME, DistributedFactorGraphs
