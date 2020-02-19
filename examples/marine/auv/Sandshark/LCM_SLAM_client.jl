@@ -1,5 +1,11 @@
 # AUV msg slam client model
 
+using Pkg
+Pkg.activate(@__DIR__)
+pkg"instantiate"
+pkg"precompile"
+
+
 using Distributed
 # addprocs(8)
 
