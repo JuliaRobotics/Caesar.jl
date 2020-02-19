@@ -17,31 +17,23 @@ addons:
     packages:
     - hdf5-tools
 
-# script:
-#   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-#   - julia --check-bounds=yes -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.test("Caesar"; coverage=true)'
-
 after_success:
   - julia --project=coverage/ -e 'using Pkg; Pkg.instantiate()'
   - julia --project=coverage/ coverage/coverage.jl
 
 jobs:
-  fast_finish: true
   include:
     - stage: "Documentation"
       julia: 1.2
-      env: BUILDINGDOCS=true
       os: linux
       script:
-        - julia -e 'import Pkg; Pkg.add("Documenter")'
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME",rev="master"));'
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting",rev="master")); Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"));'
         - julia --project=docs/ docs/make.jl
-      name: "HTML"
       after_success: skip
+  fast_finish: true
 
 matrix:
   allow_failures:
     - julia: nightly
-    - env: BUILDINGDOCS=true
