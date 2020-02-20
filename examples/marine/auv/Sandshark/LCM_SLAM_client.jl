@@ -167,6 +167,10 @@ function main(;parsed_args=parse_commandline(),
   # prepare the solver in the background
   ST = manageSolveTree!(fg, dashboard, dbg=dbg, timinglog=solvetiminglog, limitfixeddown=parsed_args["limitfixeddown"])
 
+  dshfile = open(joinLogPath(fg,"dashboard_start.json"),"w")
+  JSON2.write(dshfile, dashboard)
+  close(dshfile)
+
   # middleware handlers
   # start with LBL and magnetometer
   subscribe(lcm, "AUV_LBL_INTERPOLATED", (c,d)->lbl_hdlr(c,d,fg,dashboard,lblDict,LBLLog), pose_t)
