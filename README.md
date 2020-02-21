@@ -28,6 +28,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
 | [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
 | [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
+| [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | n/a |
 | [~~Graphs.jl~~][graphs-url] | [![][gjl-stable]][gjl-releases] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] | n/a |
 | [~~CloudGraphs.jl~~][cloudgraphs-url] | ![][cg-stable] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] | [![][mst-shield2]][dfg-milestones] |
 
@@ -120,6 +121,14 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [graphs-url]: http://www.github.com/JuliaAttic/Graphs.jl
 [gjl-stable]: https://img.shields.io/badge/2019Q2-v0.10.x-green.svg
 [gjl-releases]: https://github.com/JuliaAttic/Graphs.jl/releases
+
+[lgraphs-cov-img]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl/coverage.svg?branch=master
+[lgraphs-cov-url]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl?branch=master
+[lgraphs-build-img]: https://travis-ci.org/JuliaGraphs/LightGraphs.jl.svg?branch=master
+[lgraphs-build-url]: https://travis-ci.org/JuliaGraphs/LightGraphs.jl
+[lgraphs-url]: http://www.github.com/JuliaGraphs/LightGraphs.jl
+[lgjl-stable]: https://img.shields.io/badge/2019Q3-v1.3.x-green.svg
+[lgjl-releases]: https://github.com/JuliaGraphs/LightGraphs.jl/releases
 
 [dfg-cov-img]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl/coverage.svg?branch=master
 [dfg-cov-url]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl?branch=master
