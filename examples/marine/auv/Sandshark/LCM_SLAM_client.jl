@@ -340,10 +340,11 @@ tree, smt, hist = solveTree!(fg, maxparallel=1000)
 
 saveDFG(fg, joinpath(getLogPath(fg),"fg_batchsolve") )
 
-plb = plotSandsharkFromDFG(fg, drawTriads=false)
-plb |> PDF(joinpath(getLogPath(fg),"traj_batch.pdf"))
 
-
+if parsed_args["genResults"]
+  plb = plotSandsharkFromDFG(fg, drawTriads=false)
+  plb |> PDF(joinpath(getLogPath(fg),"traj_batch.pdf"))
+end
 
 
 @show getLogPath(fg)
