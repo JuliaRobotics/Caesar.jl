@@ -23,83 +23,12 @@ using JSON2
 using DSP
 # using JLD2, FileIO
 
-using ArgParse
 
 # mute LCM broadcasting beyond this computer
 run(`$(ENV["HOME"])/mutelcm.sh`)
 
 
-## moved to CommonUtils.jl
-# @enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
-
-
-function parse_commandline()
-    s = ArgParseSettings()
-
-    @add_arg_table s begin
-        "--kappa_odo"
-            help = "Scale the odometry covariance"
-            arg_type = Float64
-            default = 1.0
-        "--stride_range"
-            help = "Every how many poses to try add a range measurement"
-            arg_type = Int
-            default = 4
-        "--fixedlag"
-            help = "FIFO fixed-lag solve length"
-            arg_type = Int
-            default = 30
-        "--magStdDeg"
-            help = "Magnetometer standard deviation"
-            arg_type = Float64
-            default = 5.0
-        "--iters", "-i"
-            help = "LCM messages to handle"
-            arg_type = Int
-            default = 10000
-        "--speed", "-s"
-            help = "Target playback speed for LCMLog"
-            arg_type = Float64
-            default = 0.2
-        "--dbg"
-            help = "debug flag"
-            action = :store_true
-        "--genResults"
-            help = "Generate output results"
-            action = :store_true
-        "--warmupjit"
-            help = "Warm up JIT during startup"
-            action = :store_true
-        "--savePlotting"
-            help = "Store factor graph after each pose"
-            action = :store_true
-        "--odoGyroBias"
-            help = "Use gyro biased channel for odometry"
-            action = :store_true
-        "--reportPoses"
-            help = "Generate report on interpose pose factors"
-            action = :store_true
-        "--reportRanges"
-            help = "Generate report on range factors"
-            action = :store_true
-        "--limitfixeddown"
-            help = "Limit numerical computations for recycled and marginalized cliques during down solve."
-            action = :store_true
-        "--recordTrees"
-            help = "Store copies of the Bayes tree for later animation, sets the rate in sleep(1/rate)"
-            arg_type = Float64
-            default = -1.0
-        "--plotSeriesBeliefs"
-            help = "Glob fg_* archives and draw belief frames as many as is requested, default 0 is for all"
-            arg_type = Int
-            default = 0
-        # "arg1"
-        #     help = "a positional argument"
-        #     required = true
-    end
-
-    return parse_args(s)
-end
+include(joinpath(@__DIR__, "CommonUtils.jl"))
 
 
 # bring required utilities and handlers into context

@@ -8,49 +8,13 @@ pkg"precompile"
 
 using ArgParse
 using Caesar, RoME, DistributedFactorGraphs
-using DelimitedFiles
-using DSP
 using Dates
 using Glob
 
 
 include(joinpath(@__DIR__, "CommonUtils.jl"))
+# include(joinpath(@__DIR__, "Plotting.jl"))
 
-
-function parse_commandline()
-    s = ArgParseSettings()
-
-    @add_arg_table s begin
-        # "--kappa_odo"
-        #     help = "Scale the odometry covariance"
-        #     arg_type = Float64
-        #     default = 1.0
-        "--plotSeriesBeliefs"
-            help = "Glob fg_* archives and draw belief frames as many as is requested, default 0 is for all"
-            arg_type = Int
-            default = 0
-        "--reportPoses"
-            help = "Generate report on interpose pose factors"
-            action = :store_true
-        "--reportRanges"
-            help = "Generate report on range factors"
-            action = :store_true
-        "--drawAllRanges"
-            help = "Draw ranges as separate images"
-            action = :store_true
-        "--skip"
-            help = "Skip existing images"
-            action = :store_true
-        "--drawFG"
-            help = "Draw factor graph to PDF"
-            action = :store_true
-        "reportDir"
-            help = "which folder in which to produce results."
-            required = false
-    end
-
-    return parse_args(s)
-end
 
 pargs = if !isdefined(Main, :parsed_args)
   parse_commandline()
@@ -58,13 +22,14 @@ else
   parsed_args
 end
 
-# pargs["reportDir"] = "/tmp/caesar/2020-02-19T12:50:59.092/fg_after_x71.tar.gz"
 
-if !haskey(pargs, "reportDir") && isdefined(Main, :fg)
-  pargs["reportDir"] = getLogPath(fg)
+pargs["reportDir"] = if !haskey(pargs, "reportDir") && isdefined(Main, :fg)
+  getLogPath(fg)
+else
+  "/tmp/caesar/2020-02-22T02:21:20.777/fg_after_x781.tar.gz"
 end
 
-include(joinpath(@__DIR__, "Plotting.jl"))
+
 
 # @show pargs["reportDir"]
 # @show splitpath(pargs["reportDir"])
@@ -154,29 +119,6 @@ plb |> PDF(joinLogPath(fg,"traj_ref.pdf"))
 ## plot the DEAD RECKON THREAD
 
 
-function loadResultsDRT(fg)
-  drt_data = readdlm(joinLogPath(fg, "DRT.csv"), ',')
-
-  DRTT = DateTime.(drt_data[:,1])
-  XX = Float64.(drt_data[:,4])
-  YY = Float64.(drt_data[:,5])
-
-  # filter the signals for hard jumps between drt transitions
-  responsetype = Lowpass(1.0; fs=50)
-  designmethod = FIRWindow(hanning(64))
-
-  # remove those near zero
-  mask = 40.0 .< (XX.^2 + YY.^2)
-
-  TTm = DRTT[mask]
-  XXm = XX[mask]
-  YYm = YY[mask]
-  XXf = filt(digitalfilter(responsetype, designmethod), XXm)
-  YYf = filt(digitalfilter(responsetype, designmethod), YYm)
-
-  return drt_data, TTm, XXm, YYm, XXf, YYf
-end
-
 drt_data, TTm, XXm, YYm, XXf, YYf = loadResultsDRT(fg)
 
 mask = YYf .< -32
@@ -258,13 +200,19 @@ include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 # nvsyms = ls(fg, r"x\d") |> length
 
 # how to suppress window and simply export
-pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=15, fadeFloor=0.2, resolution=(1920,1080))
+pl, Z = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=2, fadeFloor=0.2, resolution=(1920,1080))
 # pl |> typeof |> fieldnames
 
 
 Base.rm(joinLogPath(fg,"fgBeliefs.png"), force=true)
 Makie.save(joinLogPath(fg,"fgBeliefs.png"), pl)
 
+
+addLinesBelief!(fg, pl, TTm)
+
+
+Base.rm(joinLogPath(fg,"fgBeliefsLines.png"), force=true)
+Makie.save(joinLogPath(fg,"fgBeliefsLines.png"), pl)
 
 # pargs["plotSeriesBeliefs"] = 3
 0
@@ -304,7 +252,7 @@ for ind in indiv
   #   continue
   # end
   try
-    pl = plotVariableBeliefs(fgl, r"x\d", sortVars=true, fade=minimum([15; nvars]), fadeFloor=0.2,
+    pl, Z = plotVariableBeliefs(fgl, r"x\d", sortVars=true, fade=minimum([15; nvars]), fadeFloor=0.2,
                               xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,
                               resolution=(1920, 1080) )
     #
@@ -312,7 +260,7 @@ for ind in indiv
     Makie.save(joinLogPath(fg,"frames/$fname.png"), pl)
 
     # draw lines
-    addLinesBelief!(fgl, pl)
+    addLinesBelief!(fgl, pl, TTM)
     Base.rm(joinLogPath(fg,"lines/$fname.png"), force=true)
     Makie.save(joinLogPath(fg,"lines/$fname.png"), pl)
   catch ex

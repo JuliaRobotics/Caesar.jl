@@ -9,6 +9,7 @@ using Caesar, RoME, DistributedFactorGraphs
 
 @everywhere import RoME: Point2, Point3
 using Makie
+using MakieLayout
 using DocStringExtensions
 
 import DistributedFactorGraphs: getEstimates
@@ -77,7 +78,7 @@ Example
 -------
 ```julia
 fg = generateCanonicalFG_Hexagonal()
-pl = plotVariableBeliefs(fg, r"x\\d") # using optional Regex filter
+pl, Z = plotVariableBeliefs(fg, r"x\\d") # using optional Regex filter
 ```
 
 Related
@@ -88,8 +89,9 @@ function plotVariableBeliefs(dfg::AbstractDFG,
                              regexFilter::Union{Nothing, Regex}=nothing;
                              vsyms::Vector{Symbol}=getVariableIds(dfg, regexFilter),
                              extras::Vector{Symbol}=Symbol[],
-                             N::Int=500,
+                             N::Int=100,
                              minColorBase::Float64=-0.3,
+                             maxColorBase::Float64=1.0,
                              sortVars::Bool=false,
                              varStride::Int=-1,
                              autoStride::Int=300,
@@ -104,7 +106,10 @@ function plotVariableBeliefs(dfg::AbstractDFG,
                              xmin::Real=99999999,
                              xmax::Real=-99999999,
                              ymin::Real=99999999,
-                             ymax::Real=-99999999  )
+                             ymax::Real=-99999999,
+                             scale::Float64=1.0,
+                             origin=(0,0),
+                             scene=resolution==nothing ? Scene() : Scene(resolution=resolution)  )
   #
   # get range over which to plot
   dfgran = getRangeCartesian(dfg, regexFilter, digits=digits, extend=extend,
@@ -171,11 +176,11 @@ function plotVariableBeliefs(dfg::AbstractDFG,
   end
 
   # set the base "background" color level by dropping one element to the desired minimum
-  Z[1,1] += minColorBase
+  Z[1,end] += minColorBase
+  Z[1,end-1] = maxColorBase
 
   # finally use Makie to draw the figure
-  scene = resolution == nothing ? Scene() : Scene(resolution=resolution)
-  Makie.contour!(scene, x, y, Z, levels = 0, linewidth = 0, fillrange = true)
+  Makie.contour!(scene, scale.*x.+origin[1], scale.*y.+origin[2], Z, levels = 0, linewidth = 0, fillrange = true), Z
 end
 
 
@@ -183,7 +188,9 @@ end
 
 
 
-function addLinesBelief!(fg, pl)
+function addLinesBelief!(fg, pl, TTm;
+                         scale::Float64=1.0,
+                         origin=(0,0))
   ## This is a little excessive, but doesnt really matter
   # set all main variables and factors solvable
   setSolvable!(fg, :l1, 1)
@@ -217,15 +224,15 @@ function addLinesBelief!(fg, pl)
   XXmm, YYmm = XXm[drttm], YYm[drttm]
   # draw slam PPE suggested solution
   try
-    lines!(pl, XYT[:,1], XYT[:,2], color=:black)
-    lines!(pl, XXmm, YYmm, color=:red)
+    lines!(pl, scale.*XYT[:,1].+origin[1], scale.*XYT[:,2].+origin[2], color=:black)
+    lines!(pl, scale.*XXmm.+origin[1], scale.*YYmm.+origin[2], color=:red)
   catch ex
     @error ex
   end
   pl
 end
 
-
+0
 
 # fg = generateCanonicalFG_Hexagonal()
 # pl = plotVariableBeliefs(fg, r"x\d") # using optional Regex filter
