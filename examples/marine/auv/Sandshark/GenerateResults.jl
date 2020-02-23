@@ -13,7 +13,7 @@ using Glob
 
 
 include(joinpath(@__DIR__, "CommonUtils.jl"))
-# include(joinpath(@__DIR__, "Plotting.jl"))
+include(joinpath(@__DIR__, "Plotting.jl"))
 
 
 pargs = if !isdefined(Main, :parsed_args)
