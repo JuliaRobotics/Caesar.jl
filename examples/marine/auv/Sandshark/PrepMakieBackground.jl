@@ -89,7 +89,7 @@ using Glob
 # pargs["plotSeriesBeliefs"] = 0
 
 # plot a series of frames
-if 0 <= pargs["plotSeriesBeliefs"]
+if 0 <= pargs["plotSeriesBeliefsNew"]
 
 global frame = 0 # still finiky, leave at 0
 pattern = "fg_x"
@@ -99,7 +99,7 @@ indiv = splitpath.(files) .|> x->x[end]
 presort = (x->x[length(pattern)+1:end-length(ext)]).(indiv)
 sorted = parse.(Int, presort) |> sortperm
 # reduce the number of frames, if requested
-indiv = pargs["plotSeriesBeliefs"] == 0 ? indiv[sorted] : indiv[sorted[(frame+1):pargs["plotSeriesBeliefs"]]]
+indiv = pargs["plotSeriesBeliefsNew"] == 0 ? indiv[sorted] : indiv[sorted[(frame+1):pargs["plotSeriesBeliefsNew"]]]
 # get range from last file in glob
 fg = LightDFG{SolverParams}(params=SolverParams(logpath=getLogPath(fg)))
 loadDFG(joinLogPath(fg, indiv[end]), Main, fg)

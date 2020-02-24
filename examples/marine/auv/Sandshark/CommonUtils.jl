@@ -64,7 +64,11 @@ function parse_commandline()
         "--plotSeriesBeliefs"
             help = "Glob fg_* archives and draw belief frames as many as is requested, default 0 is for all"
             arg_type = Int
-            default = 0
+            default = -1
+        "--plotSeriesBeliefsNew"
+            help = "Glob fg_* archives and draw belief frames as many as is requested, default 0 is for all with background"
+            arg_type = Int
+            default = -1
         "--reportPoses"
             help = "Generate report on interpose pose factors"
             action = :store_true

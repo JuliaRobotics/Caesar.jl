@@ -250,14 +250,15 @@ ple = Gadfly.plot(
   Gadfly.layer(x=ts[1:end-1], y=drtErr, Geom.line, Theme(default_color=colorant"black")),
 )
 
-
+errX = Xppe[1:end-1]-itpx.(ts[1:end-1])
+errY = Yppe[1:end-1]-itpy.(ts[1:end-1])
 plhx = Gadfly.plot(
-  Gadfly.layer(x=Xppe[1:end-1]-itpx.(ts[1:end-1]), Geom.histogram(density=true)),
-  Guide.xlabel("error [m]"), Guide.ylabel("density")
+  Gadfly.layer(x=errX, Geom.histogram(density=true)),
+  Guide.xlabel("error [m]"), Guide.ylabel("density"), Guide.title("x, σ=$(round(std(errX),digits=3))"),
 ) # , Theme(default_color=colorant"black")
 plhy = Gadfly.plot(
-  Gadfly.layer(x=Yppe[1:end-1]-itpy.(ts[1:end-1]), Geom.histogram(density=true)),
-  Guide.xlabel("error [m]")
+  Gadfly.layer(x=errY, Geom.histogram(density=true)),
+  Guide.xlabel("error [m]"), Guide.title("y, σ=$(round(std(errY),digits=3))"),
 ) # , Theme(default_color=colorant"black")
 
 plhx |> PDF(joinLogPath(fg, "drtErrHistx.pdf"),6cm,5cm)
