@@ -1372,7 +1372,7 @@ version = "0.6.0"
 
 [[RoME]]
 deps = ["ApproxManifoldProducts", "CoordinateTransformations", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "Graphs", "IncrementalInference", "JLD2", "KernelDensityEstimate", "LinearAlgebra", "Optim", "ProgressMeter", "Reexport", "Rotations", "Statistics", "TransformUtils"]
-git-tree-sha1 = "acf2911f846153e6882f7a2e2ce12d1a1d14c8f7"
+git-tree-sha1 = "53ec172ab3bed29b685b3a18145eb635709ba362"
 repo-rev = "master"
 repo-url = "https://github.com/JuliaRobotics/RoME.jl.git"
 uuid = "91fb55c2-4c03-5a59-ba21-f4ea956187b8"
