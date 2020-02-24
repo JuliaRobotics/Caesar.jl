@@ -231,13 +231,15 @@ itplbly = LinearInterpolation(ts[imask], Ylbl[imask])
 plx = Gadfly.plot(
   Gadfly.layer(x=ts[1:end-1], y=Xppe[1:end-1], Geom.line, Theme(default_color=colorant"black")),
   Gadfly.layer(x=ts[1:end-1], y=itpx.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"red")),
-  Gadfly.layer(x=ts[1:end-1], y=itplblx.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"magenta"))
+  Gadfly.layer(x=ts[1:end-1], y=itplblx.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"magenta")),
+  Guide.xlabel("time [s]"), Guide.ylabel("East [m]"),
 )
 
 ply = Gadfly.plot(
   Gadfly.layer(x=ts[1:end-1], y=Yppe[1:end-1], Geom.line, Theme(default_color=colorant"black")),
   Gadfly.layer(x=ts[1:end-1], y=itpy.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"red")),
-  Gadfly.layer(x=ts[1:end-1], y=itplbly.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"magenta"))
+  Gadfly.layer(x=ts[1:end-1], y=itplbly.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"magenta")),
+  Guide.xlabel(""), Guide.ylabel("North [m]"),
 )
 
 
@@ -254,11 +256,11 @@ errX = Xppe[1:end-1]-itpx.(ts[1:end-1])
 errY = Yppe[1:end-1]-itpy.(ts[1:end-1])
 plhx = Gadfly.plot(
   Gadfly.layer(x=errX, Geom.histogram(density=true)),
-  Guide.xlabel("error [m]"), Guide.ylabel("density"), Guide.title("x, σ=$(round(std(errX),digits=3))"),
+  Guide.xlabel("x [m]"), Guide.ylabel("density"), Guide.title("DRT error, σ=$(round(std(errX),digits=3))"),
 ) # , Theme(default_color=colorant"black")
 plhy = Gadfly.plot(
   Gadfly.layer(x=errY, Geom.histogram(density=true)),
-  Guide.xlabel("error [m]"), Guide.title("y, σ=$(round(std(errY),digits=3))"),
+  Guide.xlabel("y [m]"), Guide.title("DRT error, σ=$(round(std(errY),digits=3))"),
 ) # , Theme(default_color=colorant"black")
 
 plhx |> PDF(joinLogPath(fg, "drtErrHistx.pdf"),6cm,5cm)
