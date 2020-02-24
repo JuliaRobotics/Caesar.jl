@@ -129,6 +129,10 @@ function parse_commandline()
             help = "Store copies of the Bayes tree for later animation, sets the rate in sleep(1/rate)"
             arg_type = Float64
             default = -1.0
+        "--scaleOdoX"
+            help = "Scale the delta X odo parameters."
+            arg_type = Float64
+            default = 1.0
     end
 
     return parse_args(s)

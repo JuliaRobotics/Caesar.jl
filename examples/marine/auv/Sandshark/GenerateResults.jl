@@ -10,6 +10,7 @@ using ArgParse
 using Caesar, RoME, DistributedFactorGraphs
 using Dates
 using Glob
+using Interpolations
 
 
 include(joinpath(@__DIR__, "CommonUtils.jl"))
@@ -26,7 +27,9 @@ end
 pargs["reportDir"] = if !haskey(pargs, "reportDir") && isdefined(Main, :fg)
   getLogPath(fg)
 else
-  "/tmp/caesar/2020-02-22T02:21:20.777/fg_after_x781.tar.gz"
+  # "/tmp/caesar/2020-02-22T02:21:20.777/fg_after_x781.tar.gz"
+  # "/tmp/caesar/2020-02-23T01:43:32.222/fg_after_x1391.tar.gz"
+  pargs["reportDir"]
 end
 
 
@@ -41,6 +44,7 @@ fg = if !isdefined(Main, :fg)
   @show pathElem = splitpath(pargs["reportDir"])
   @show getSolverParams(fg).logpath = joinpath(pathElem[1:end-1]...)
   loadDFG(pargs["reportDir"], Main, fg)
+  ensureAllInitialized!(fg)
   fg
 else
   fg
@@ -87,6 +91,7 @@ wtt[end]
 # set all to solvable=1
 
 map(x->setSolvable!(fg, x, 1), setdiff(ls(fg), ls(fg, r"drt_\d")))
+map(x->setSolvable!(fg, x, 0), union(ls(fg, r"drt\d"),lsf(fg, r"drt"))  )
 map(x->setSolvable!(fg, x, 1 ),[lsf(fg, Pose2Pose2);
                                 lsf(fg, Pose2Point2Range);
                                 lsfPriors(fg)] )
@@ -189,6 +194,54 @@ pl = Gadfly.layer(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"black"))
 union!(plb.layers, pl)
 plb |> PDF(joinLogPath(fg,"traj_ref_drt_dirodo.pdf"))
 
+## summarize errors
+
+
+
+
+itpx = LinearInterpolation(drtt, XXfm)
+itpy = LinearInterpolation(drtt, YYfm)
+
+itplblx = LinearInterpolation(ts[imask], Xlbl[imask])
+itplbly = LinearInterpolation(ts[imask], Ylbl[imask])
+
+plx = Gadfly.plot(
+  Gadfly.layer(x=ts[1:end-1], y=Xppe[1:end-1], Geom.line, Theme(default_color=colorant"black")),
+  Gadfly.layer(x=ts[1:end-1], y=itpx.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"red")),
+  Gadfly.layer(x=ts[1:end-1], y=itplblx.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"magenta"))
+)
+
+ply = Gadfly.plot(
+  Gadfly.layer(x=ts[1:end-1], y=Yppe[1:end-1], Geom.line, Theme(default_color=colorant"black")),
+  Gadfly.layer(x=ts[1:end-1], y=itpy.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"red")),
+  Gadfly.layer(x=ts[1:end-1], y=itplbly.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"magenta"))
+)
+
+
+plx |> PDF(joinLogPath(fg, "drtOverlayx.pdf"),12cm,5cm)
+ply |> PDF(joinLogPath(fg, "drtOverlayy.pdf"),12cm,5cm)
+
+drtErr = (Xppe[1:end-1]-itpx.(ts[1:end-1])).^2 + (Yppe[1:end-1]-itpy.(ts[1:end-1])).^2 .|> sqrt
+
+ple = Gadfly.plot(
+  Gadfly.layer(x=ts[1:end-1], y=drtErr, Geom.line, Theme(default_color=colorant"black")),
+)
+
+
+plhx = Gadfly.plot(
+  Gadfly.layer(x=Xppe[1:end-1]-itpx.(ts[1:end-1]), Geom.histogram(density=true)),
+  Guide.xlabel("error [m]"), Guide.ylabel("density")
+) # , Theme(default_color=colorant"black")
+plhy = Gadfly.plot(
+  Gadfly.layer(x=Yppe[1:end-1]-itpy.(ts[1:end-1]), Geom.histogram(density=true)),
+  Guide.xlabel("error [m]")
+) # , Theme(default_color=colorant"black")
+
+plhx |> PDF(joinLogPath(fg, "drtErrHistx.pdf"),6cm,5cm)
+plhy |> PDF(joinLogPath(fg, "drtErrHisty.pdf"),6cm,5cm)
+
+
+
 
 
 ## plot densities
@@ -260,7 +313,7 @@ for ind in indiv
     Makie.save(joinLogPath(fg,"frames/$fname.png"), pl)
 
     # draw lines
-    addLinesBelief!(fgl, pl, TTM)
+    addLinesBelief!(fgl, pl, TTm)
     Base.rm(joinLogPath(fg,"lines/$fname.png"), force=true)
     Makie.save(joinLogPath(fg,"lines/$fname.png"), pl)
   catch ex

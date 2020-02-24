@@ -109,7 +109,8 @@ function plotVariableBeliefs(dfg::AbstractDFG,
                              ymax::Real=-99999999,
                              scale::Float64=1.0,
                              origin=(0,0),
-                             scene=resolution==nothing ? Scene() : Scene(resolution=resolution)  )
+                             scene=resolution==nothing ? Scene() : Scene(resolution=resolution),
+                             colormap=:viridis  )
   #
   # get range over which to plot
   dfgran = getRangeCartesian(dfg, regexFilter, digits=digits, extend=extend,
@@ -180,7 +181,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
   Z[1,end-1] = maxColorBase
 
   # finally use Makie to draw the figure
-  Makie.contour!(scene, scale.*x.+origin[1], scale.*y.+origin[2], Z, levels = 0, linewidth = 0, fillrange = true), Z
+  Makie.contour!(scene, scale.*x.+origin[1], scale.*y.+origin[2], Z, levels = 0, linewidth = 0, fillrange = true, colormap=colormap), Z
 end
 
 
@@ -190,7 +191,9 @@ end
 
 function addLinesBelief!(fg, pl, TTm;
                          scale::Float64=1.0,
-                         origin=(0,0))
+                         origin=(0,0),
+                         ppe::Bool=true, drt::Bool=true, ref::Bool=true,
+                         maskRef::Tuple{Second, Second}=(Second(0),Second(0))   )
   ## This is a little excessive, but doesnt really matter
   # set all main variables and factors solvable
   setSolvable!(fg, :l1, 1)
@@ -222,10 +225,31 @@ function addLinesBelief!(fg, pl, TTm;
 
   drttm = TTm .< getTimestamp(getVariable(fg, asyms[end]))
   XXmm, YYmm = XXm[drttm], YYm[drttm]
+
+  posesyms = ls(fg, r"x\d") |> sortDFG
+  filter!(x->isInitialized(fg, x), posesyms)
+  filter!(x->solverData(getVariable(fg, x), :lbl) != nothing, posesyms)
+  XXlbl = (x->(solverData(getVariable(fg, x), :lbl).val[1,1])).(posesyms)
+  YYlbl = (x->(solverData(getVariable(fg, x), :lbl).val[2,1])).(posesyms)
+
+  ts = (x->getTimestamp(getVariable(fg, x))).(posesyms) .|> datetime2unix
+  T0 = ts[1]
+  ts .-= ts[1]
+  mask = maskRef[1].value .< ts .< maskRef[2].value
+  imask = xor.(mask, true)
+  @show sum(mask)
+
+  XXlbl = XXlbl[imask]
+  YYlbl = YYlbl[imask]
+
+  # XXlbl[mask] .= Inf
+  # YYlbl[mask] .= Inf
+
   # draw slam PPE suggested solution
   try
-    lines!(pl, scale.*XYT[:,1].+origin[1], scale.*XYT[:,2].+origin[2], color=:black)
-    lines!(pl, scale.*XXmm.+origin[1], scale.*YYmm.+origin[2], color=:red)
+     !ppe ? nothing : lines!(pl, scale.*XYT[:,1].+origin[1], scale.*XYT[:,2].+origin[2], color=:green)
+     !drt ? nothing : lines!(pl, scale.*XXmm.+origin[1], scale.*YYmm.+origin[2], color=:red)
+     !ref ? nothing : lines!(pl, scale.*XXlbl.+origin[1], scale.*YYlbl.+origin[2], color=:black)
   catch ex
     @error ex
   end

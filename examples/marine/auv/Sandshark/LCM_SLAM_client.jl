@@ -30,6 +30,7 @@ run(`$(ENV["HOME"])/mutelcm.sh`)
 
 include(joinpath(@__DIR__, "CommonUtils.jl"))
 
+global ODOSCALE = [1.0; 1.0; 1.0]
 
 # bring required utilities and handlers into context
 include(joinpath(@__DIR__, "MsgHandlers.jl"))
@@ -219,6 +220,8 @@ end
 
 # user intentions
 parsed_args=parse_commandline()
+
+@show ODOSCALE[1] *= parsed_args["scaleOdoX"]
 
 # ## Uncomment for different defaults in Juno
 # parsed_args["iters"] = 15000

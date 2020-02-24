@@ -28,7 +28,9 @@ pargs["reportDir"] = if !haskey(pargs, "reportDir") && isdefined(Main, :fg)
   getLogPath(fg)
 else
   # "/tmp/caesar/2020-02-03T03:07:45.938/fg_after_x1181.tar.gz"
-  "/tmp/caesar/2020-02-22T02:21:20.777/fg_after_x781.tar.gz"
+  # "/tmp/caesar/2020-02-22T02:21:20.777/fg_after_x781.tar.gz"
+  # "/tmp/caesar/2020-02-23T01:43:32.222/fg_after_x1391.tar.gz"
+  # "/tmp/caesar/2020-02-23T01:43:32.222/fg_final.tar.gz"
 end
 
 
@@ -37,7 +39,7 @@ end
 # @show splitpath(pargs["reportDir"])
 
 # load the factor graph needed
-fg = if !isdefined(Main, :fg)
+fg = if true || !isdefined(Main, :fg)
   println("going to load fg")
   fg = LightDFG{SolverParams}(params=SolverParams())
   @show pathElem = splitpath(pargs["reportDir"])
@@ -62,14 +64,19 @@ include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 
 ##
 
+DRT = false
+PPE = true
+REF = false
+
 include(joinpath(@__DIR__, "MakiePlotImg.jl"))
 
 
-
+scene
 ##
 
 
-Makie.save("/tmp/test.png", scene)
+
+Makie.save(joinpath(getLogPath(fg), "withBackround.png"), scene)
 
 
 
@@ -78,13 +85,13 @@ Makie.save("/tmp/test.png", scene)
 using Glob
 
 
-pargs["plotSeriesBeliefs"] = 0
+# pargs["plotSeriesBeliefs"] = 0
 
 # plot a series of frames
 if 0 <= pargs["plotSeriesBeliefs"]
 
 global frame = 0 # still finiky, leave at 0
-pattern = "fg_after_x"
+pattern = "fg_x"
 ext = ".tar.gz"
 files = glob("$(pattern)*$ext", getLogPath(fg))
 indiv = splitpath.(files) .|> x->x[end]

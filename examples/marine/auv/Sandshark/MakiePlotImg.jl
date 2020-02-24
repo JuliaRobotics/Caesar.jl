@@ -1,4 +1,9 @@
 
+## Some defaults if not already defined
+
+DRT = isdefined(Main, :DRT) ? DRT : true
+PPE = isdefined(Main, :PPE) ? PPE : true
+REF = isdefined(Main, :REF) ? REF : true
 
 ##
 
@@ -22,7 +27,6 @@ for ax in figaxes
 end
 
 ax = figaxes[1,1]
-ax.title = "Charles River"
 # figaxes[1, 1].aspect = DataAspect()
 
 # ??
@@ -59,12 +63,16 @@ ax2 = LAxis(scene)
 
 arx = dcx # 1282
 ary = dcy # 775
-xlims!(ax2, 0, 260)
-ylims!(ax2, 0, 170)
+xlims!(ax2, 0, 300)
+ylims!(ax2, 0, 200)
 ax2.aspect = AxisAspect(arx/ary)
 tightlimits!(ax2)
 
-ax2
+ax2.title = "Charles River Basin, MA"
+ax2.xlabel = "East [meters]"
+ax2.ylabel = "North [meters]"
+
+scene
 
 # ax2.ytickalign = 100
 # ax2.yticklabelalign = :right # doesnt work
@@ -77,7 +85,7 @@ scl = 5.0
 ofsx = 90*scl
 ofsy = 145*scl
 
-addLinesBelief!(fg, figaxes[1,1], TTm, scale=scl, origin=(ofsx,ofsy))
+addLinesBelief!(fg, figaxes[1,1], TTm, scale=scl, origin=(ofsx,ofsy), drt=DRT, ppe=PPE, ref=REF, maskRef=(Second(420),Second(450)) )
 
 scene
 ##
@@ -85,7 +93,8 @@ scene
 
 # resolution=(dcx,dcy)
 # pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=2, fadeFloor=0.2, scene=figaxes[1,1], scale=scl, origin=(ofsx,750))
-pl, Z = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=12, extend=0.0,fadeFloor=0.1, scale=scl, origin=(ofsx,ofsy), N=100,
+pl, Z = plotVariableBeliefs(fg, r"x\d", colormap=:blues, minColorBase=0.0,
+                            sortVars=true, fade=1, extend=0.0,fadeFloor=0.2, scale=scl, origin=(ofsx,ofsy), N=100,
                             xmin=(0-ofsx)/scl, xmax=(dcx-ofsx)/scl,ymin=(0-ofsy)/scl,ymax=(dcy-ofsy)/scl, scene=figaxes[1,1])
 #
 
