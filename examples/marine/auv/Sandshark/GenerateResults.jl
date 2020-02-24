@@ -290,7 +290,7 @@ Base.rm(joinLogPath(fg,"fgBeliefs.png"), force=true)
 Makie.save(joinLogPath(fg,"fgBeliefs.png"), pl)
 
 
-addLinesBelief!(fg, pl, TTm, drt=false, ppe=true, lbl=true)
+addLinesBelief!(fg, pl, TTm, drt=false, ppe=true, ref=true)
 
 
 Base.rm(joinLogPath(fg,"fgBeliefsLines.png"), force=true)
