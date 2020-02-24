@@ -197,7 +197,15 @@ plb |> PDF(joinLogPath(fg,"traj_ref_drt_dirodo.pdf"))
 ## summarize errors
 
 
+# timestamp
+ts = (x->getTimestamp(getVariable(fg, x))).(posesyms) .|> datetime2unix
+T0 = ts[1]
+ts .-= ts[1]
+ts[end]
 
+# from DRT
+drtt = datetime2unix.(TTmm)
+drtt .-= drtt[1]
 
 itpx = LinearInterpolation(drtt, XXfm)
 itpy = LinearInterpolation(drtt, YYfm)
@@ -247,13 +255,19 @@ plhy |> PDF(joinLogPath(fg, "drtErrHisty.pdf"),6cm,5cm)
 ## plot densities
 
 
+include(joinpath(@__DIR__, "PrepMakieBackground.jl"))
+
+
+
+## more conventional
+
 include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 
 
 # nvsyms = ls(fg, r"x\d") |> length
 
 # how to suppress window and simply export
-pl, Z = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=2, fadeFloor=0.2, resolution=(1920,1080))
+pl, Z = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=2, fadeFloor=0.2, resolution=(1920,1080), colormap=:blues)
 # pl |> typeof |> fieldnames
 
 
@@ -261,7 +275,7 @@ Base.rm(joinLogPath(fg,"fgBeliefs.png"), force=true)
 Makie.save(joinLogPath(fg,"fgBeliefs.png"), pl)
 
 
-addLinesBelief!(fg, pl, TTm)
+addLinesBelief!(fg, pl, TTm, drt=false, ppe=true, lbl=true)
 
 
 Base.rm(joinLogPath(fg,"fgBeliefsLines.png"), force=true)

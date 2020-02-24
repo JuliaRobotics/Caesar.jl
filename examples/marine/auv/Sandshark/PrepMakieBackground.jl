@@ -31,6 +31,7 @@ else
   # "/tmp/caesar/2020-02-22T02:21:20.777/fg_after_x781.tar.gz"
   # "/tmp/caesar/2020-02-23T01:43:32.222/fg_after_x1391.tar.gz"
   # "/tmp/caesar/2020-02-23T01:43:32.222/fg_final.tar.gz"
+  pargs["reportDir"]
 end
 
 
