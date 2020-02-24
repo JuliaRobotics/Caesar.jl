@@ -76,8 +76,8 @@ scene
 ##
 
 
-
-Makie.save(joinpath(getLogPath(fg), "withBackround.png"), scene)
+@show scenepath = joinLogPath(fg, "withBackround.png")
+Makie.save(scenepath, scene)
 
 
 
