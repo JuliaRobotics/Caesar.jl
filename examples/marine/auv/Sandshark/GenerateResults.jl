@@ -203,6 +203,11 @@ T0 = ts[1]
 ts .-= ts[1]
 ts[end]
 
+# filter on timestamps
+# remove 420-450s
+mask = 420 .< ts .< 450
+imask = xor.(mask, true)
+
 # from DRT
 drtt = datetime2unix.(TTmm)
 drtt .-= drtt[1]
