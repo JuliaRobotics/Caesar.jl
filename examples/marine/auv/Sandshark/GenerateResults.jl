@@ -115,7 +115,8 @@ pl = Gadfly.layer(x=XX, y=YY, Geom.path, Theme(default_color=colorant"magenta"))
 union!(plb.layers, pl)
 plb |> PDF(joinLogPath(fg,"traj_ref.pdf"))
 
-
+XXlbl = deepcopy(XX)
+YYlbl = deepcopy(YY)
 
 
 
@@ -196,6 +197,15 @@ plb |> PDF(joinLogPath(fg,"traj_ref_drt_dirodo.pdf"))
 
 ## summarize errors
 
+posesyms = ls(fg, r"x\d") |> sortDFG
+filter!(x->isInitialized(fg, x), posesyms)
+filter!(x->solverData(getVariable(fg, x), :lbl) != nothing, posesyms)
+Xlbl = (x->(solverData(getVariable(fg, x), :lbl).val[1,1])).(posesyms)
+Ylbl = (x->(solverData(getVariable(fg, x), :lbl).val[2,1])).(posesyms)
+
+# pose PPE
+Xppe = (x->(getVariablePPE(getVariable(fg, x)).suggested[1])).(posesyms)
+Yppe = (x->(getVariablePPE(getVariable(fg, x)).suggested[2])).(posesyms)
 
 # timestamp
 ts = (x->getTimestamp(getVariable(fg, x))).(posesyms) .|> datetime2unix
