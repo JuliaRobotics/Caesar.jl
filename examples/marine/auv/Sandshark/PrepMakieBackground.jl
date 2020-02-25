@@ -66,7 +66,7 @@ include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 
 ##
 
-DRT = false
+DRT = true
 PPE = true
 REF = false
 
@@ -78,7 +78,7 @@ scene
 
 
 @show scenepath = joinLogPath(fg, "withBackround.png")
-Base.rm(scenepath)
+Base.rm(scenepath, force=true)
 Makie.save(scenepath, scene)
 
 

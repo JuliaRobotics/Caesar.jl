@@ -32,8 +32,11 @@ function getRangeCartesian(dfg::AbstractDFG,
                            xmin::Real=99999999,
                            xmax::Real=-99999999,
                            ymin::Real=99999999,
-                           ymax::Real=-99999999  )
+                           ymax::Real=-99999999,
+                           force::Bool=false )
   #
+
+  if !force
   # which variables to consider
   vsyms = getVariableIds(dfg, regexFilter)
 
@@ -56,6 +59,7 @@ function getRangeCartesian(dfg::AbstractDFG,
   # clamp to nearest integers
   xmin = floor(xmin, digits=digits); xmax = ceil(xmax, digits=digits)
   ymin = floor(ymin, digits=digits); ymax = ceil(ymax, digits=digits)
+  end
 
   return [xmin xmax; ymin ymax]
 end
@@ -107,6 +111,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
                              xmax::Real=-99999999,
                              ymin::Real=99999999,
                              ymax::Real=-99999999,
+                             force::Bool=false,
                              scale::Float64=1.0,
                              origin=(0,0),
                              scene=resolution==nothing ? Scene() : Scene(resolution=resolution),
@@ -114,7 +119,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
   #
   # get range over which to plot
   dfgran = getRangeCartesian(dfg, regexFilter, digits=digits, extend=extend,
-                              xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+                              xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, force=force)
 
   x = LinRange(dfgran[1,1], dfgran[1,2], N)
   y = LinRange(dfgran[2,1], dfgran[2,2], N)
@@ -223,7 +228,7 @@ function addLinesBelief!(fg, pl, TTm;
   XYTv = map(x->getVariablePPE(getVariable(fg, x)).suggested, vsyms)
   XYT = hcat((v->v[1]).(XYTv), (v->v[2]).(XYTv), (v->v[3]).(XYTv))
 
-  drttm = TTm .< getTimestamp(getVariable(fg, asyms[end]))
+  drttm = getTimestamp(getVariable(fg, asyms[1])) .< TTm .< getTimestamp(getVariable(fg, asyms[end]))
   XXmm, YYmm = XXm[drttm], YYm[drttm]
 
   posesyms = ls(fg, r"x\d") |> sortDFG
@@ -247,7 +252,7 @@ function addLinesBelief!(fg, pl, TTm;
 
   # draw slam PPE suggested solution
   try
-     !ppe ? nothing : lines!(pl, scale.*XYT[:,1].+origin[1], scale.*XYT[:,2].+origin[2], color=:green)
+     !ppe ? nothing : lines!(pl, scale.*XYT[:,1].+origin[1], scale.*XYT[:,2].+origin[2], color=:black)
      !drt ? nothing : lines!(pl, scale.*XXmm.+origin[1], scale.*YYmm.+origin[2], color=:red)
      !ref ? nothing : lines!(pl, scale.*XXlbl.+origin[1], scale.*YYlbl.+origin[2], color=:black)
   catch ex

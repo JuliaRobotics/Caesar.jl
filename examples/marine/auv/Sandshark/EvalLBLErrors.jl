@@ -2,6 +2,63 @@
 
 using Statistics
 
+## Load necessary code
+
+using Pkg
+Pkg.activate(@__DIR__)
+pkg"instantiate"
+pkg"precompile"
+
+
+using FileIO
+
+
+include(joinpath(@__DIR__, "CommonUtils.jl"))
+# include(joinpath(@__DIR__, "Plotting.jl"))
+
+
+## load specific case
+
+
+pargs = if !isdefined(Main, :parsed_args)
+  parse_commandline()
+else
+  parsed_args
+end
+
+##
+
+pargs["reportDir"] = if false && !haskey(pargs, "reportDir") && isdefined(Main, :fg)
+  getLogPath(fg)
+else
+  # "/tmp/caesar/2020-02-23T01:43:32.222/fg_before_x291.tar.gz"
+  # "/tmp/caesar/2020-02-24T04:22:23.282/fg_after_x1391.tar.gz"
+  "/tmp/caesar/2020-02-24T04:19:39.943/fg_after_x1391.tar.gz"
+end
+
+
+# @show pargs["reportDir"]
+# @show splitpath(pargs["reportDir"])
+
+# load the factor graph needed
+fg = if true
+  println("going to load fg")
+  fg = LightDFG{SolverParams}(params=SolverParams())
+  @show pathElem = splitpath(pargs["reportDir"])
+  @show getSolverParams(fg).logpath = joinpath(pathElem[1:end-1]...)
+  loadDFG(pargs["reportDir"], Main, fg)
+  fg
+else
+  fg
+end
+
+
+# random temp data
+drt_data, TTm, XXm, YYm, XXf, YYf = loadResultsDRT(fg)
+
+
+
+##
 
 posesyms = ls(fg, r"x\d") |> sortDFG
 filter!(x->isInitialized(fg, x), posesyms)
@@ -33,8 +90,12 @@ Gadfly.plot(x=ts, y=Xppe, Geom.line)
 Gadfly.plot(x=ts, y=Yppe, Geom.line)
 
 lblErr2 = (Xppe-Xlbl).^2 + (Yppe-Ylbl).^2
-Statistics.mean(lblErr2[imask]) |> sqrt
-cov(sqrt.(lblErr2[imask])) |> sqrt
+@show Statistics.mean(lblErr2[imask]) |> sqrt
+@show cov(sqrt.(lblErr2[imask])) |> sqrt
+
+
+##
+
 
 Gadfly.plot(x=Xppe-Xlbl, Geom.histogram)
 Gadfly.plot(x=ts, y=Xppe-Xlbl, Geom.line)
