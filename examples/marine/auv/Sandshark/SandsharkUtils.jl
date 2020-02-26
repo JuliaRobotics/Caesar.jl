@@ -319,7 +319,7 @@ function manageSolveTree!(dfg::AbstractDFG, dashboard::Dict; dbg::Bool=false, ti
         dt_save1 = (time_ns()-t0)/1e9
         # constrain solve with the latest pose at the top
         # @show latestPose = intersect(getLastPoses(dfg, filterLabel=r"x\d", number=12), ls(dfg, r"x\d", solvable=1))[end]
-        tree, smt, hist = solveTree!(dfg, tree) # , variableConstraints=[latestPose;]
+        tree, smt, hist = solveTree!(dfg, tree, maxparallel=1000) # , variableConstraints=[latestPose;]
         dt_solve = (time_ns()-t0)/1e9
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(lasp)"))
 
