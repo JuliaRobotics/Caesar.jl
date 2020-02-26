@@ -1,48 +1,23 @@
-using DistributedFactorGraphs
-using IncrementalInference, RoME
 
-# Example of a quick processor.
 
-# Set this
-dfgDataFolder = "/tmp/rex"
 
-# Load the graph
-fg = initfg()
-loadDFG("$dfgDataFolder/dfg", IncrementalInference, fg)
 
-# Check what's in it
-ls(fg)
-lsf(fg)
-# How about bigdata entries?
-count(v -> :RADAR in getBigDataKeys(v), getVariables(fg))
-count(v -> :LIDAR in getBigDataKeys(v), getVariables(fg))
-allLidarVariables = filter(v -> :LIDAR in getBigDataKeys(v), getVariables(fg))
 
-# Reopen the file data store
-datastore = FileDataStore("$dfgDataFolder/bigdata")
-# Let's just use the first key for testing
-var = allLidarVariables[1]
-entry = getBigDataEntry(var, :LIDAR)
-rawData = getBigData(datastore, entry)
 
-# Okay, all loaded.
 
-### Quick example of working with the data...
 
-"""
-Quick function to extract a frame of Float32's from raw data.
-"""
-function extractDataFrame(rawData::Vector{UInt8}, floatStepSize::Int, extractIndexes::Vector{Int})
-    reformat = reinterpret(Float32, rawData)
-    #Set up a map to get the indexes out
-    dataset = map(i -> reformat[extractIndexes.+i], collect(0:(Int(length(reformat)/floatStepSize)-1))*floatStepSize)
-    return dataset
-end
 
-# Now extract and format to our dataframe
-lidarData = extractDataFrame(rawData, 8, [1,2,3])
-# Radar would be similar (need to confirm that function works though):
-#radarData = extractDataFrame(rawData, 3, [1,2,3])
+
+# let's try to fetch variables with fullsweeps in them
+allSweepVariables = filter(v -> :RADARSWEEP in getBigDataKeys(v), getVariables(fg));
+
+saveDFG(fg, "$dfgDataFolder/fullsweep.tar.gz")
+
+# Okay... see you lidar!
+
+##############################################################################
+########################### LASERS AND STUFF BELOW ###########################
+##############################################################################
 
 # Quick function to find the closest point as trivial example
 # We're going to save this back into the data as 'processed data'
@@ -82,3 +57,25 @@ addBigDataEntry!(var, element)
 saveDFG(fg, "$dfgDataFolder/dfg")
 
 # You can now load this later and retrieve that data.
+
+
+
+
+### Quick example of working with the data...
+
+"""
+Quick function to extract a frame of Float32's from raw data.
+(this is used for pointcloud data)
+"""
+function extractDataFrame(rawData::Vector{UInt8}, floatStepSize::Int, extractIndexes::Vector{Int})
+    reformat = reinterpret(Float32, rawData)
+    #Set up a map to get the indexes out
+    dataset = map(i -> reformat[extractIndexes.+i], collect(0:(Int(length(reformat)/floatStepSize)-1))*floatStepSize)
+    return dataset
+end
+
+
+# Now extract and format to our dataframe
+lidarData = extractDataFrame(rawData, 8, [1,2,3])
+# Radar would be similar (need to confirm that function works though):
+# radarData = extractDataFrame(msg.radar_data, 3, [1,2,3])

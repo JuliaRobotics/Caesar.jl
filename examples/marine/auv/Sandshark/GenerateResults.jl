@@ -1,54 +1,21 @@
 
+using Pkg
+Pkg.activate(@__DIR__)
+pkg"instantiate"
+pkg"precompile"
+
 # using Revise
 
 using ArgParse
 using Caesar, RoME, DistributedFactorGraphs
-using DelimitedFiles
-using DSP
 using Dates
 using Glob
+using Interpolations
 
 
 include(joinpath(@__DIR__, "CommonUtils.jl"))
+include(joinpath(@__DIR__, "Plotting.jl"))
 
-#DUPLICATE DEFINITION
-# @enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
-# @enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
-
-function parse_commandline()
-    s = ArgParseSettings()
-
-    @add_arg_table s begin
-        # "--kappa_odo"
-        #     help = "Scale the odometry covariance"
-        #     arg_type = Float64
-        #     default = 1.0
-        "--plotSeriesBeliefs"
-            help = "Glob fg_* archives and draw belief frames as many as is requested, default 0 is for all"
-            arg_type = Int
-            default = 0
-        "--reportPoses"
-            help = "Generate report on interpose pose factors"
-            action = :store_true
-        "--reportRanges"
-            help = "Generate report on range factors"
-            action = :store_true
-        "--drawAllRanges"
-            help = "Draw ranges as separate images"
-            action = :store_true
-        "--skip"
-            help = "Skip existing images"
-            action = :store_true
-        "--drawFG"
-            help = "Draw factor graph to PDF"
-            action = :store_true
-        "reportDir"
-            help = "which folder in which to produce results."
-            required = false
-    end
-
-    return parse_args(s)
-end
 
 pargs = if !isdefined(Main, :parsed_args)
   parse_commandline()
@@ -56,15 +23,16 @@ else
   parsed_args
 end
 
-# pargs["reportDir"] = "/tmp/caesar/2020-01-23T13:36:12.392/fg_after_x381.tar.gz"
-# pargs["reportDir"] = "/media/dehann/temp2/caesar/2020-01-26T20:36:57.456/fg_after_x321.tar.gz"
-# pargs["reportDir"] = "/tmp/caesar/2020-01-27T01:46:52.871/fg_after_x1181.tar.gz"
 
-if !haskey(pargs, "reportDir") && isdefined(Main, :fg)
-  pargs["reportDir"] = getLogPath(fg)
+pargs["reportDir"] = if !haskey(pargs, "reportDir") && isdefined(Main, :fg)
+  getLogPath(fg)
+else
+  # "/tmp/caesar/2020-02-22T02:21:20.777/fg_after_x781.tar.gz"
+  # "/tmp/caesar/2020-02-23T01:43:32.222/fg_after_x1391.tar.gz"
+  pargs["reportDir"]
 end
 
-include(joinpath(@__DIR__, "Plotting.jl"))
+
 
 # @show pargs["reportDir"]
 # @show splitpath(pargs["reportDir"])
@@ -76,6 +44,7 @@ fg = if !isdefined(Main, :fg)
   @show pathElem = splitpath(pargs["reportDir"])
   @show getSolverParams(fg).logpath = joinpath(pathElem[1:end-1]...)
   loadDFG(pargs["reportDir"], Main, fg)
+  ensureAllInitialized!(fg)
   fg
 else
   fg
@@ -122,6 +91,7 @@ wtt[end]
 # set all to solvable=1
 
 map(x->setSolvable!(fg, x, 1), setdiff(ls(fg), ls(fg, r"drt_\d")))
+map(x->setSolvable!(fg, x, 0), union(ls(fg, r"drt\d"),lsf(fg, r"drt"))  )
 map(x->setSolvable!(fg, x, 1 ),[lsf(fg, Pose2Pose2);
                                 lsf(fg, Pose2Point2Range);
                                 lsfPriors(fg)] )
@@ -145,7 +115,8 @@ pl = Gadfly.layer(x=XX, y=YY, Geom.path, Theme(default_color=colorant"magenta"))
 union!(plb.layers, pl)
 plb |> PDF(joinLogPath(fg,"traj_ref.pdf"))
 
-
+XXlbl = deepcopy(XX)
+YYlbl = deepcopy(YY)
 
 
 
@@ -153,29 +124,6 @@ plb |> PDF(joinLogPath(fg,"traj_ref.pdf"))
 
 ## plot the DEAD RECKON THREAD
 
-
-function loadResultsDRT(fg)
-  drt_data = readdlm(joinLogPath(fg, "DRT.csv"), ',')
-
-  DRTT = DateTime.(drt_data[:,1])
-  XX = Float64.(drt_data[:,4])
-  YY = Float64.(drt_data[:,5])
-
-  # filter the signals for hard jumps between drt transitions
-  responsetype = Lowpass(1.0; fs=50)
-  designmethod = FIRWindow(hanning(64))
-
-  # remove those near zero
-  mask = 40.0 .< (XX.^2 + YY.^2)
-
-  TTm = DRTT[mask]
-  XXm = XX[mask]
-  YYm = YY[mask]
-  XXf = filt(digitalfilter(responsetype, designmethod), XXm)
-  YYf = filt(digitalfilter(responsetype, designmethod), YYm)
-
-  return drt_data, TTm, XXm, YYm, XXf, YYf
-end
 
 drt_data, TTm, XXm, YYm, XXf, YYf = loadResultsDRT(fg)
 
@@ -247,10 +195,89 @@ pl = Gadfly.layer(x=XXf, y=YYf, Geom.path, Theme(default_color=colorant"black"))
 union!(plb.layers, pl)
 plb |> PDF(joinLogPath(fg,"traj_ref_drt_dirodo.pdf"))
 
+## summarize errors
+
+posesyms = ls(fg, r"x\d") |> sortDFG
+filter!(x->isInitialized(fg, x), posesyms)
+filter!(x->solverData(getVariable(fg, x), :lbl) != nothing, posesyms)
+Xlbl = (x->(solverData(getVariable(fg, x), :lbl).val[1,1])).(posesyms)
+Ylbl = (x->(solverData(getVariable(fg, x), :lbl).val[2,1])).(posesyms)
+
+# pose PPE
+Xppe = (x->(getVariablePPE(getVariable(fg, x)).suggested[1])).(posesyms)
+Yppe = (x->(getVariablePPE(getVariable(fg, x)).suggested[2])).(posesyms)
+
+# timestamp
+ts = (x->getTimestamp(getVariable(fg, x))).(posesyms) .|> datetime2unix
+T0 = ts[1]
+ts .-= ts[1]
+ts[end]
+
+# filter on timestamps
+# remove 420-450s
+mask = 420 .< ts .< 450
+imask = xor.(mask, true)
+
+# from DRT
+drtt = datetime2unix.(TTmm)
+drtt .-= drtt[1]
+
+itpx = LinearInterpolation(drtt, XXfm)
+itpy = LinearInterpolation(drtt, YYfm)
+
+itplblx = LinearInterpolation(ts[imask], Xlbl[imask])
+itplbly = LinearInterpolation(ts[imask], Ylbl[imask])
+
+plx = Gadfly.plot(
+  Gadfly.layer(x=ts[1:end-1], y=Xppe[1:end-1], Geom.line, Theme(default_color=colorant"black")),
+  Gadfly.layer(x=ts[1:end-1], y=itpx.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"red")),
+  Gadfly.layer(x=ts[1:end-1], y=itplblx.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"magenta")),
+  Guide.xlabel("time [s]"), Guide.ylabel("East [m]"),
+)
+
+ply = Gadfly.plot(
+  Gadfly.layer(x=ts[1:end-1], y=Yppe[1:end-1], Geom.line, Theme(default_color=colorant"black")),
+  Gadfly.layer(x=ts[1:end-1], y=itpy.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"red")),
+  Gadfly.layer(x=ts[1:end-1], y=itplbly.(ts[1:end-1]), Geom.line, Theme(default_color=colorant"magenta")),
+  Guide.xlabel(""), Guide.ylabel("North [m]"),
+)
+
+
+plx |> PDF(joinLogPath(fg, "drtOverlayx.pdf"),12cm,5cm)
+ply |> PDF(joinLogPath(fg, "drtOverlayy.pdf"),12cm,5cm)
+
+drtErr = (Xppe[1:end-1]-itpx.(ts[1:end-1])).^2 + (Yppe[1:end-1]-itpy.(ts[1:end-1])).^2 .|> sqrt
+
+ple = Gadfly.plot(
+  Gadfly.layer(x=ts[1:end-1], y=drtErr, Geom.line, Theme(default_color=colorant"black")),
+)
+
+errX = Xppe[1:end-1]-itpx.(ts[1:end-1])
+errY = Yppe[1:end-1]-itpy.(ts[1:end-1])
+plhx = Gadfly.plot(
+  Gadfly.layer(x=errX, Geom.histogram(density=true)),
+  Guide.xlabel("x [m]"), Guide.ylabel("density"), Guide.title("DRT error, σ=$(round(std(errX),digits=3))"),
+) # , Theme(default_color=colorant"black")
+plhy = Gadfly.plot(
+  Gadfly.layer(x=errY, Geom.histogram(density=true)),
+  Guide.xlabel("y [m]"), Guide.title("DRT error, σ=$(round(std(errY),digits=3))"),
+) # , Theme(default_color=colorant"black")
+
+plhx |> PDF(joinLogPath(fg, "drtErrHistx.pdf"),6cm,5cm)
+plhy |> PDF(joinLogPath(fg, "drtErrHisty.pdf"),6cm,5cm)
+
+
+
 
 
 ## plot densities
 
+
+include(joinpath(@__DIR__, "PrepMakieBackground.jl"))
+
+
+
+## more conventional
 
 include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 
@@ -258,13 +285,19 @@ include(joinpath(@__DIR__, "MakiePlotsFG.jl"))
 # nvsyms = ls(fg, r"x\d") |> length
 
 # how to suppress window and simply export
-pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=15, fadeFloor=0.2, resolution=(1920,1080))
+pl, Z = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=10, fadeFloor=0.2, resolution=(1920,1080), colormap=:blues)
 # pl |> typeof |> fieldnames
-
+pl
 
 Base.rm(joinLogPath(fg,"fgBeliefs.png"), force=true)
 Makie.save(joinLogPath(fg,"fgBeliefs.png"), pl)
 
+
+addLinesBelief!(fg, pl, TTm, drt=false, ppe=true, ref=true)
+
+
+Base.rm(joinLogPath(fg,"fgBeliefsLines.png"), force=true)
+Makie.save(joinLogPath(fg,"fgBeliefsLines.png"), pl)
 
 # pargs["plotSeriesBeliefs"] = 3
 0
@@ -304,7 +337,7 @@ for ind in indiv
   #   continue
   # end
   try
-    pl = plotVariableBeliefs(fgl, r"x\d", sortVars=true, fade=minimum([15; nvars]), fadeFloor=0.2,
+    pl, Z = plotVariableBeliefs(fgl, r"x\d", sortVars=true, fade=minimum([15; nvars]), fadeFloor=0.2,
                               xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,
                               resolution=(1920, 1080) )
     #
@@ -312,7 +345,7 @@ for ind in indiv
     Makie.save(joinLogPath(fg,"frames/$fname.png"), pl)
 
     # draw lines
-    addLinesBelief!(fgl, pl)
+    addLinesBelief!(fgl, pl, TTm)
     Base.rm(joinLogPath(fg,"lines/$fname.png"), force=true)
     Makie.save(joinLogPath(fg,"lines/$fname.png"), pl)
   catch ex
