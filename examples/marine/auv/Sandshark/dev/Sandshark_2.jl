@@ -176,9 +176,9 @@ plotKDE([kde!(pts);X25], dims=[3], levels=1, c=["red";"green"])
 # writeGraphPdf(fg)
 # ensureAllInitialized!(fg)
 t = string(now())
-savejld(fg, file="presolve_$t.jld")
-IIF.batchSolve!(fg) #, N=100
-savejld(fg, file="postsolve_$t.jld")
+# saveDFG(fg, file="presolve_$t.jld")
+IIF.solveTree!(fg) #, N=100
+# saveDFG(fg, file="postsolve_$t.jld")
 
 # pl = drawPoses(fg, spscale=2.75) # Just for odo plot
 # Roll again for inspiration check

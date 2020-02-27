@@ -16,7 +16,7 @@ npslam.drawFactorGraphpdf()
 
 print npslam.ls()
 npslam.redrawAll(pname='initp',posec='b',lname='landminit',landmc='r')
-npslam.batchSolve()
+npslam.solveTree()
 npslam.redrawAll()
 
 v5 = npslam.addOdo([5, 0, -np.pi/2])
@@ -33,7 +33,7 @@ for i in range(1,11):
 
 print npslam.ls()
 npslam.redrawAll(pname='initp',posec='b',lname='landminit',landmc='r')
-npslam.batchSolve()
+npslam.solveTree()
 npslam.redrawAll()
 
 
@@ -54,7 +54,7 @@ poses,landms = npslam.ls()
 
 print npslam.ls()
 npslam.redrawAll(pname='initp',posec='b',lname='landminit',landmc='r')
-npslam.batchSolve()
+npslam.solveTree()
 npslam.redrawAll()
 
 

@@ -120,7 +120,7 @@ addLinearArrayConstraint(fg, (4.0, 0.0), :x2, :l3, rangecov=rangecov,bearingcov=
 # visualizeDensityMesh!(vc, fg, :l2, meshid=3)
 
 
-batchSolve(fg)
+solveTree!(fg)
 visualize(fg, vc, drawlandms=false, densitymeshes=[:l3;:l2], N=N)
 visualizeDensityMesh!(vc, fg, :x2, meshid=3)
 

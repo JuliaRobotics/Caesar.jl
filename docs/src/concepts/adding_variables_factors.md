@@ -58,7 +58,7 @@ using RoMEPlotting
 #TODO
 
 # 4. Solve graph
-batchSolve!(fg)
+solveTree!(fg)
 
 # 5. Graph solution - assuming that you have this open in Atom.
 drawPoses(fg)

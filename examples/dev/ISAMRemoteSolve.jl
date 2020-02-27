@@ -54,8 +54,8 @@ function doISAMSolve(d,f;toT=Inf, savejld=false, retfg=false, MM=MM)
 
   fgu = emptyFactorGraph()
   appendFactorGraph!(fgu, d, f, toT=toT,lcmode=:unimodal,MM=MM);
-  println(cl, "BATCHSOLVE ")
-  println("BATCHSOLVE")
+  println(cl, "SOLVETREE ")
+  println("SOLVETREE")
   gtvals = requestAllPosesLandmsRemote(fgu)
   close(clr)
   if savejld

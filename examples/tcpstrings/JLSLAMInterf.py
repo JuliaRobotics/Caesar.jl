@@ -172,8 +172,8 @@ class NPSLAMWrapper(object):
     def reset(self):
         self.sendCmd('RESET')
 
-    def batchSolve(self):
-        self.sendCmd('BATCHSOLVE')
+    def solveTree(self):
+        self.sendCmd('SOLVETREE')
 
     def setReadyForSolve(self):
         self.sendCmd('SETALLREADY')
