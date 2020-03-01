@@ -63,8 +63,8 @@ setSolvableCmd = Dict{String, Any}("request" => "setSolvable", "payload" => JSON
 @test sendCmd(config, fg, setSolvableCmd) == "{\"status\":\"OK\"}"
 
 # Call batch solve
-batchSolveCmd = Dict{String, Any}("request" => "batchSolve")
-result = sendCmd(config, fg, batchSolveCmd)
+solveTreeCmd = Dict{String, Any}("request" => "solveTree")
+result = sendCmd(config, fg, solveTreeCmd)
 @test JSON.parse(result)["status"] == "OK"
 
 # Just for fun

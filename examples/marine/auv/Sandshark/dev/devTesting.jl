@@ -90,11 +90,11 @@ for posesym in [:x1], lmsym in [:l1;:l2]
   addFactor!(fg, [posesym;lmsym], brDict[posesym][lmsym])
 end
 
-writeGraphPdf(fg,engine="dot")
+drawGraph(fg,engine="dot")
 
 # t = string(now())
 # savejld(fg, file="presolve_$t.jld")
-IIF.batchSolve!(fg)
+solveTree!(fg)
 # savejld(fg, file="postsolve_$t.jld")
 
 

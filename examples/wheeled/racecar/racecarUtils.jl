@@ -163,7 +163,9 @@ addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
 show ? writeGraphPdf(fg) : nothing
 
 # quick solve as sanity check
-tree = batchSolve!(fg, N=N, drawpdf=true, show=show, recursive=failsafe)
+failsafe ? @warn("recursive failsafe no longer as option") : nothing
+# , N=N, drawpdf=true, show=show, recursive=failsafe
+tree, smt, hist = solveTree!(fg)
 
 # add other positions
 maxlen = (length(tag_bagl)-1)
@@ -180,8 +182,9 @@ for psid in (prev_psid+1):1:maxlen
   # writeGraphPdf(fg)
 
   if psid % BB == 0 || psid == maxlen
-    IIF.savejld(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
-    tree = batchSolve!(fg, drawpdf=true, show=show, N=N, recursive=true)
+    saveDFG(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
+    # , drawpdf=true, show=show, N=N, recursive=true
+    tree, smt, hist = solveTree!(fg)
   end
   jldfile = resultsdir*"/racecar_fg_$(psym).jld2"
   T1 = @spawn IIF.savejld(fg, file=jldfile)

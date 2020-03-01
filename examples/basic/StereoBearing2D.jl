@@ -67,14 +67,14 @@ addFactor!(fg, [:x0; :l1], Pose2Point2BearingRange(Normal(m1, mstd), Rayleigh(2.
 
 
 
-writeGraphPdf(fg, show=true)
+drawGraph(fg, show=true)
 
 # ensureAllInitialized!(fg)
 # setValKDE!(fg, :l0, AMP.manikde!(randn(2,100), Point2().manifolds))
 # setValKDE!(fg, :l1, AMP.manikde!(randn(2,100), Point2().manifolds))
 
 # solve the system -- remember first runs are slow (just in time compile code)
-batchSolve!(fg, N=100)
+solveTree!(fg)
 
 # getKDEMean(getVertKDE(fg, :x0))
 
@@ -223,8 +223,9 @@ plotKDE(L01, levels=3, axis=[-0.5 2; -0.5 1.5])
 
 #
 
-
-tree = batchSolve!(fg, drawpdf=true, show=true)
+getSolverParams(fg).drawtree=true
+getSolverParams(fg).showtree=true
+tree = solveTree!(fg)
 
 
 spyCliqMat(tree,:l0)

@@ -89,7 +89,7 @@ end
 putReady(true)
 
 # perform inference on local version, and remember first runs are slower owing to Julia's just-in-time compiling
-batchSolve!(fg)
+solveTree!(fg)
 
 # No need to call batchSolve on cloud - it picks up on changes and
 # 8. Let's check on the solver updates.
@@ -127,7 +127,7 @@ addFactor([:x6, :l1], p2br2)
 # Graff: PutReady to tell Graff to solve
 putReady(true)
 # Local: Solve
-batchSolve!(fg)
+solveTree!(fg)
 
 # If you like you can request a full graph solve
 requestSessionSolve()

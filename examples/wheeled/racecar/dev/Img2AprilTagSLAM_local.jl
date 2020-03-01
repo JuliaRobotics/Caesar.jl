@@ -162,7 +162,7 @@ results2csv(fg; dir=imgdir, filename="results.csv")
 
 
 # save factor graph for later testing and evaluation
-batchSolve!(fg, drawpdf=true, N=N)
+solveTree!(fg)
 
 IIF.savejld(fg, file=imgdir*"/racecar_fg_final_resolve.jld")
 # fgr, = loadjld(file=imgdir*"/racecar_fg_final_resolve.jld")
@@ -208,7 +208,7 @@ ensureAllInitialized!(fg)
 IIF.savejld(fg, file=imgdir*"/racecar_fg_presolve.jld")
 results2csv(fg; dir=imgdir, filename="results_presolve_nloops.csv")
 
-batchSolve!(fg, drawpdf=true, N=N)
+solveTree!(fg)
 
 IIF.savejld(fg, file=imgdir*"/racecar_fg_solved1_nloops.jld")
 results2csv(fg; dir=imgdir, filename="results_solved_nloops.csv")

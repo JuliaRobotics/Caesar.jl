@@ -3,7 +3,7 @@ module Caesar
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
 import Distributions: Normal
 import RoME: getRangeKDEMax2D, getLastPose
-import IncrementalInference: batchSolve!, getSample, initfg
+import IncrementalInference: getSample, initfg
 
 using Reexport
 

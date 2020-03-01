@@ -117,13 +117,14 @@ function parseLandmarkXY!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString
   error("parseLandmarkXY! -- not finished implementing yet")
   nothing
 end
-
-function batchSolve!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
-  println("batchSolve -- wiping tree and solving")
-  slam.tree = wipeBuildNewTree!(slam.fg)
-  @time inferOverTree!(slam.fg, slam.tree, N=100)
-  nothing
-end
+#
+# see solveTree!(::SLAMWrapper)
+# function batchSolve!(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
+#   println("batchSolve -- wiping tree and solving")
+#   slam.tree = wipeBuildNewTree!(slam.fg)
+#   @time inferOverTree!(slam.fg, slam.tree, N=100)
+#   nothing
+# end
 
 function parseGetparticles(slam::SLAMWrapper, sp2::Array{SubString{AbstractString},1})
   val = getVal(slam.fg, string(sp2[1]))
@@ -212,8 +213,8 @@ function parseTCP!(slam::SLAMWrapper, line::AbstractString)
       f = parseLandmBRAuto!
     elseif cmd == "SETALLREADY"
       f = parseSetReady!
-    elseif cmd == "BATCHSOLVE"  # do not call batch when using DB solver
-      f = batchSolve!
+    elseif cmd == "SOLVETREE"  # do not call batch when using DB solver
+      f = solveTree!
     elseif cmd == "GETPARTICLES"
       f = parseGetparticles
     elseif cmd == "LS"

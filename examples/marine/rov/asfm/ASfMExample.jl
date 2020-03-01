@@ -214,7 +214,7 @@ addLinearArrayConstraint(fg, (3.07297, 0.041406), :x6, :l7, rangecov=rangecov,be
 # @time inferOverTree!(fg, tree)
 # solving[1]=false;
 
-batchSolve(fg)
+solveTree!(fg)
 visualize(fg, vc, N=N, drawtype=:fit, gt=gt)
 
 

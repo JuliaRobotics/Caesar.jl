@@ -17,7 +17,7 @@ npslam.addOdo([47.5, 0, -np.pi/2], noise=bonoi) #x4
 npslam.drawFactorGraphpdf()
 print npslam.ls()
 npslam.redrawAll()
-npslam.batchSolve()
+npslam.solveTree()
 npslam.redrawAll()
 
 npslam.addOdo([55, 0, 0],noise=bonoi) # x5
@@ -27,7 +27,7 @@ npslam.addLandmBRMM([-np.pi/2,5.0], npslam.getID('x5'), to1=npslam.getID('l1'), 
 npslam.drawFactorGraphpdf()
 print npslam.ls()
 npslam.redrawAll(pname='initp',posec='b',lname='landminit',landmc='r')
-npslam.batchSolve()
+npslam.solveTree()
 npslam.redrawAll()
 
 npslam.addOdo([45, 0, np.pi*3.0/4.0], noise=bonoi) #x6
@@ -36,7 +36,7 @@ npslam.addOdo([57, 0, 0], noise=bonoi)#x8
 
 npslam.drawFactorGraphpdf()
 print npslam.ls()
-npslam.batchSolve()
+npslam.solveTree()
 npslam.redrawAll(pname='poses2',lname='lndm2',posec='r')
 
 
@@ -48,7 +48,7 @@ npslam.addLandmBR([+np.pi/2,5.0], npslam.getID('x9'), to=npslam.getID('l3'))
 
 npslam.drawFactorGraphpdf()
 print npslam.ls()
-npslam.batchSolve()
+npslam.solveTree()
 npslam.redrawAll(pname='poses3',lname='lndm3',posec='b')
 
 # for i in range(1,11):

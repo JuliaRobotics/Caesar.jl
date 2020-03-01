@@ -61,7 +61,7 @@ addLinearArrayConstraint(fg, (4.0, 0.0), :x7, :l3, rangecov=rangecov,bearingcov=
 addLinearArrayConstraint(fg, (4.0, 0.0), :x8, :l4, rangecov=rangecov,bearingcov=bearingcov)
 addLinearArrayConstraint(fg, (4.0, 0.0), :x9, :l4, rangecov=rangecov,bearingcov=bearingcov)
 
-batchSolve(fg)
+solveTree!(fg)
 
 # visualize(fg, vc, drawlandms=true, densitymeshes=[:l1;:x2])
 visualize(fg, vc, drawlandms=true, densitymeshes=[:l2;:x4])

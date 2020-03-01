@@ -173,7 +173,7 @@ end
 # writeGraphPdf(fg, engine="dot")
 
 ensureAllInitialized!(fg)
-batchSolve!(fg)
+solveTree!(fg)
 
 # drawPosesLandms(fg)
 drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY, "Multi-modal ISAM (bearing+range measurement every $nonParamStep poses, l1 uncertainty $l1Uncertainty)")

@@ -14,7 +14,7 @@ Fixed-lag solving is enabled when creating the factor-graph. Users provide a win
 
 ## Example Overview
 
-In the example, the basic Hexagonal 2D is grown to solve 200 variables. The original example remains the same, i.e., a vehicle is driving around in a hexagon and seeing the same bearing+range landmark as it crosses the starting point. At every 20th variable, a solve is invoked. Rather than use `batchSolve()`, the solve is performed in parts (construction of Bayes tree, solving the graph) to get performance statistics as the graph grows.
+In the example, the basic Hexagonal 2D is grown to solve 200 variables. The original example remains the same, i.e., a vehicle is driving around in a hexagon and seeing the same bearing+range landmark as it crosses the starting point. At every 20th variable, a solve is invoked. Rather than use `solveTree!(fg)`, the solve is performed in parts (construction of Bayes tree, solving the graph) to get performance statistics as the graph grows.
 
 ```julia
 numVariables = 200
