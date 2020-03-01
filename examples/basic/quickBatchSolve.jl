@@ -12,6 +12,8 @@ using RoME
 fg = initfg()
 loadDFG(ARGS[1], Main, fg)
 
+ensureAllInitialized!(fg)
+
 getSolverParams(fg).drawtree = true
 @time solveTree!(fg);
 
