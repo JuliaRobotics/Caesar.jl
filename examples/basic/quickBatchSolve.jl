@@ -20,7 +20,8 @@ getSolverParams(fg).drawtree = true
 savepath = splitpath(ARGS[1])
 savename = split(savepath[end], '.')[1]
 
-saveDFG(fg, joinpath(savepath[1:end-1],savename*"_solve"))
+saveDFG(fg, joinpath(savepath[1:end-1]...,savename*"_solve"))
+
 
 
 ##
