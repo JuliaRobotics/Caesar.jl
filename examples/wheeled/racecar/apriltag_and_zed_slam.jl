@@ -1,5 +1,8 @@
 # Local compute version
 
+# using Pkg
+# Pkg.activate(@__DIR__)
+
 # @show ARGS
 include("parsecommands.jl")
 
@@ -10,6 +13,7 @@ using Distributed
 # check_procs(4) # make sure there are 4 processes waiting before loading packages
 
 using Dates, Statistics
+using Caesar
 @everywhere using Caesar
 @everywhere using JLD2
 using CoordinateTransformations, Rotations, StaticArrays
