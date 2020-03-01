@@ -7,12 +7,14 @@ Pkg.precompile()
 
 ## Load all required packages
 using Distributed
-# addprocs(5) # make sure there are 4 processes waiting before loading packages
+addprocs(5) # make sure there are 4 processes waiting before loading packages
 
 @everywhere begin
   using Pkg
   Pkg.activate(@__DIR__)
 end
+
+WP = WorkerPool(2:nprocs() |> collect )
 
 
 # @show ARGS
@@ -104,7 +106,7 @@ end
 
 
 
-fg = main(resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"]  )
+fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"]  )
 
 
 

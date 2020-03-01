@@ -125,7 +125,8 @@ end
 ## BUILD FACTOR GRAPH FOR SLAM SOLUTION,
 
 
-function main(resultsdir::String,
+function main(WP,
+              resultsdir::String,
               camidxs,
               tag_bagl;
               maxlen = (length(tag_bagl)-1),
@@ -182,7 +183,7 @@ tree, smt, hist = solveTree!(fg)
 
 # Gadfly.push_theme(:default)
 
-# @sync begin
+@sync begin
 
 for psid in (prev_psid+1):1:maxlen
   # global prev_psid, maxlen
@@ -196,15 +197,16 @@ for psid in (prev_psid+1):1:maxlen
     # , drawpdf=true, show=show, N=N, recursive=true
     tree, smt, hist = solveTree!(fg, tree)
   end
-  savefile = resultsdir*"/racecar_fg_$(psym)"
-  saveDFG(fg, savefile)
-  # T1 = @spawn IIF.savejld(fg, file=jldfile)
-  # @async fetch(T1)
+
+  T1 = remotecall(saveDFG, WP, fg, resultsdir*"/racecar_fg_$(psym)")
+  @async fetch(T1)
+  # saveDFG(fg, resultsdir*"/racecar_fg_$(psym)")
 
   ## save factor graph for later testing and evaluation
-  # ensureAllInitialized!(fg)
-  T2 = plotRacecarInterm(fg, resultsdir, psym)
-  # @async fetch(T2)
+  ensureAllInitialized!(fg)
+  T2 = remotecall(plotRacecarInterm, WP, fg, resultsdir, psym)
+  @async fetch(T2)
+  # plotRacecarInterm(fg, resultsdir, psym)
 
   # prepare for next iteration
   prev_psid = psid
@@ -213,7 +215,7 @@ end # for
 # extract results for later use as training data
 results2csv(fg, dir=resultsdir, filename="results.csv")
 
-# end #sync
+end #sync
 
 return fg
 end # main
