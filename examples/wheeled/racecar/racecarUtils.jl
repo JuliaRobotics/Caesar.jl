@@ -195,7 +195,7 @@ for psid in (prev_psid+1):1:maxlen
   if psid % BB == 0 || psid == maxlen
     saveDFG(fg, resultsdir*"/racecar_fg_$(psym)_presolve")
     # , drawpdf=true, show=show, N=N, recursive=true
-    tree, smt, hist = solveTree!(fg, tree)
+    tree, smt, hist = solveTree!(fg, tree, maxparallel=500)
   end
 
   T1 = remotecall(saveDFG, WP, fg, resultsdir*"/racecar_fg_$(psym)")
