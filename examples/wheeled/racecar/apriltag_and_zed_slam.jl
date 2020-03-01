@@ -1,33 +1,42 @@
 # Local compute version
 
-# using Pkg
-# Pkg.activate(@__DIR__)
+using Pkg
+Pkg.activate(@__DIR__)
+
+## Load all required packages
+using Distributed
+addprocs(5) # make sure there are 4 processes waiting before loading packages
+
+@everywhere begin
+  using Pkg
+  Pkg.activate(@__DIR__)
+end
+
 
 # @show ARGS
 include("parsecommands.jl")
 
 
-## Load all required packages
-using Distributed
-
-# check_procs(4) # make sure there are 4 processes waiting before loading packages
-
 using Dates, Statistics
-using Caesar
-@everywhere using Caesar
-@everywhere using JLD2
 using CoordinateTransformations, Rotations, StaticArrays
-
-using AprilTags
+using ImageCore
 using Images, ImageDraw
 # using ImageView
+using AprilTags
+
+using RoME
+using Caesar
+0
+@everywhere using Caesar
+@everywhere using JLD2
+
 
 @everywhere begin
-using Fontconfig
-using Cairo
-using Compose
+# using Fontconfig
+# using Compose
 using Gadfly
 using RoMEPlotting
+using Cairo
 # using FileIO
 # using GeometryTypes # using MeshCat
 end
@@ -73,8 +82,8 @@ include(joinpath(dirname(@__FILE__),"cameraUtils.jl") )
   Gadfly.draw(PNG(joinpath(resultsdirl, "images", "$(psyml).png"),15cm, 10cm),pl)
   pl = drawPosesLandms(fgl, spscale=0.1, meanmax=:mean) # ,xmin=-3,xmax=3,ymin=-2,ymax=2);
   Gadfly.draw(PNG(joinpath(resultsdirl, "images", "hist_$(psyml).png"),15cm, 10cm),pl)
-  pl = plotPose2Vels(fgl, Symbol("$(psyml)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
-  Gadfly.draw(PNG(joinpath(resultsdirl, "images", "vels_$(psyml).png"),15cm, 10cm),pl)
+  # pl = plotPose2Vels(fgl, Symbol("$(psyml)"), coord=Coord.Cartesian(xmin=-1.0, xmax=1.0))
+  # Gadfly.draw(PNG(joinpath(resultsdirl, "images", "vels_$(psyml).png"),15cm, 10cm),pl)
   # save combined image with tags
   nothing
 end

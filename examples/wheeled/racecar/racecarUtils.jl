@@ -3,7 +3,7 @@
 
 # add AprilTag sightings from this pose
 function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true )
-  @show currtags = ls(fg)[2]
+  @show currtags = ls(fg, r"l")
   for lmid in keys(posetags)
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
@@ -128,6 +128,7 @@ end
 function main(resultsdir::String,
               camidxs,
               tag_bagl;
+              maxlen = (length(tag_bagl)-1),
               BB=20,
               N=100,
               lagLength=75,
@@ -135,6 +136,7 @@ function main(resultsdir::String,
               jldfile::String="",
               failsafe::Bool=false,
               show::Bool=false  )
+#
 
 # Factor graph construction
 fg = initfg()
@@ -142,25 +144,33 @@ prev_psid = 0
 
 # load from previous file
 if jldfile != ""
-  fg, = loadjld( file=joinpath(resultsdir,jldfile) )
-  xx, = ls(fg)
+  # fg, = loadjld( file=joinpath(resultsdir,jldfile) )
+  fg = initfg()
+  loadDFG(joinpath(resultsdir,jldfile), Main, fg)
+  xx = ls(fg, r"x")
   prev_psid = parse(Int, string(xx[end])[2:end])
 end
 
-fg.solverParams.isfixedlag = dofixedlag
-fg.solverParams.qfl = lagLength
+# fg.solverParams.isfixedlag = dofixedlag
+# fg.solverParams.qfl = lagLength
+defaultFixedLagOnTree!(fg, lagLength)
 
 psid = 0
 pssym = Symbol("x$psid")
 # first pose with zero prior
-addVariable!(fg, pssym, DynPose2(ut=0))
+addVariable!(fg, pssym, Pose2)
 # addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
-addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
-                                              MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))
+addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2)))) )
+#
+# addVariable!(fg, pssym, DynPose2(ut=0))
+# # addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
+# addFactor!(fg, [pssym], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
+#                                               MvNormal(zeros(2),Matrix(Diagonal([0.1;0.05].^2)))))
+#
 
-addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=DynPose2Pose2)
+addApriltags!(fg, pssym, tag_bagl[psid], lmtype=Pose2, fcttype=Pose2Pose2) # DynPose2Pose2
 
-show ? writeGraphPdf(fg) : nothing
+show ? drawGraph(fg, show=true) : nothing
 
 # quick solve as sanity check
 failsafe ? @warn("recursive failsafe no longer as option") : nothing
@@ -168,32 +178,33 @@ failsafe ? @warn("recursive failsafe no longer as option") : nothing
 tree, smt, hist = solveTree!(fg)
 
 # add other positions
-maxlen = (length(tag_bagl)-1)
 
-Gadfly.push_theme(:default)
 
-@sync begin
+# Gadfly.push_theme(:default)
+
+# @sync begin
 
 for psid in (prev_psid+1):1:maxlen
-  prev_psid
-  maxlen
+  # global prev_psid, maxlen
   @show psym = Symbol("x$psid")
-  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=VelPose2VelPose2, fcttype=DynPose2Pose2, autoinit=true)
+  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=Pose2Pose2, fcttype=Pose2Pose2, autoinit=true)
+  # odotype=VelPose2VelPose2, fcttype=DynPose2Pose2
   # writeGraphPdf(fg)
 
   if psid % BB == 0 || psid == maxlen
-    saveDFG(fg, file=resultsdir*"/racecar_fg_$(psym)_presolve.jld2")
+    saveDFG(fg, resultsdir*"/racecar_fg_$(psym)_presolve")
     # , drawpdf=true, show=show, N=N, recursive=true
-    tree, smt, hist = solveTree!(fg)
+    tree, smt, hist = solveTree!(fg, tree)
   end
-  jldfile = resultsdir*"/racecar_fg_$(psym).jld2"
-  T1 = @spawn IIF.savejld(fg, file=jldfile)
-  @async fetch(T1)
+  savefile = resultsdir*"/racecar_fg_$(psym)"
+  saveDFG(fg, savefile)
+  # T1 = @spawn IIF.savejld(fg, file=jldfile)
+  # @async fetch(T1)
 
   ## save factor graph for later testing and evaluation
   # ensureAllInitialized!(fg)
-  T2 = @spawn plotRacecarInterm(fg, resultsdir, psym)
-  @async fetch(T2)
+  T2 = plotRacecarInterm(fg, resultsdir, psym)
+  # @async fetch(T2)
 
   # prepare for next iteration
   prev_psid = psid
@@ -202,7 +213,7 @@ end # for
 # extract results for later use as training data
 results2csv(fg, dir=resultsdir, filename="results.csv")
 
-end #sync
+# end #sync
 
 return fg
 end # main
