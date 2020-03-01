@@ -27,7 +27,7 @@ global sessionverbs = [
     :getVariable;
     :getFactor;
     :setSolvable;
-    :batchSolve;
+    :solveTree;
     # per variable
     :setVarKDE; # needed for workaround on bad autoinit -- sorry
     :getVarMAPKDE; # marginal belief points (KDE)

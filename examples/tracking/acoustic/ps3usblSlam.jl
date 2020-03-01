@@ -56,7 +56,7 @@ writeGraphPdf(fg, show=true)
 
 ##
 
-batchSolve!(fg)
+solveTree!(fg)
 
 ##
 
@@ -101,8 +101,8 @@ writeGraphPdf(fg, show=true)
 
 ##
 
-
-batchSolve!(fg, N=100)
+getSolveParams(fg).N = 100
+solveTree!(fg)
 
 
 ## look at one mode only

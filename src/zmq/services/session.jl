@@ -7,7 +7,7 @@ export
   ls,
   getVert,
   setSolvable,
-  batchSolve,
+  solveTree!,
   # per variable
   setVarKDE, # needed for workaround on bad autoinit
   getVarMAPKDE, # marginal belief points (KDE)
@@ -150,10 +150,10 @@ function setSolvable(configDict, fg, requestDict)::Dict{String, Any}
     return okResponse
 end
 
-function batchSolve(configDict, fg, requestDict)::Dict{String, Any}
+function solveTree(configDict, fg, requestDict)::Dict{String, Any}
     resp = Dict{String, Any}("startTime" => now())
     # Call solve
-    batchSolve!(fg)
+    solveTree!(fg)
     resp["endTime"] = now()
     resp["durationSec"] = Dates.value(resp["endTime"] - resp["startTime"])/1000.0
     resp["status"] = "OK"

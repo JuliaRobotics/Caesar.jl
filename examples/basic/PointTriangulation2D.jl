@@ -54,7 +54,7 @@ addFactor!(fg, [:x0; :l1], Pose2Point2Bearing(Normal(m1, mstd)))
 
 
 # solve the system -- remember first runs are slow (just in time compile code)
-[batchSolve!(fg) for i in 1:5]
+[solveTree!(fg) for i in 1:5]
 
 # getKDEMean(getVertKDE(fg, :x0))
 
@@ -136,13 +136,14 @@ plotKDE(L01, levels=3, axis=[-0.5 2; -0.5 1.5])
 
 #
 
-
-tree = batchSolve!(fg, drawpdf=true, show=true)
+getSolverParams(fg).drawpdf=true
+getSolverParams(fg).showtree=true
+tree = solveTree!(fg)
 
 
 spyCliqMat(tree,:l0)
 
-writeGraphPdf(fg, show=true)
+drawGraph(fg, show=true)
 
 
 

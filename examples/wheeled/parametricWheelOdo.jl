@@ -1,7 +1,7 @@
 using TransformUtils
 
 
-
+# in-place x, speed vc, steering alpha, dt
 function uteOdom(x::Array{Float64,1}, vc::Float64, alpha::Float64, dt::Float64)
   L = 2.83; H=076; b=0.5;a=3.78;
   d = [(vc*cos(x[3])-vc/L*tan(x[3])*(a*sin(x[3])+b*cos(x[3])));
@@ -43,6 +43,15 @@ function uteOdomEasy(x::Array{Float64,1}, whlspd::Float64, strangl::Float64, dt:
 end
 
 # perform integration over all data, sensors is rows of data, by columns of sensors
+# L=2.83, H=0.76, b=0.5, a=3.78
+# x = anealfind(x) many times
+# julia> x
+# 5-element Array{Float64,1}:
+ # 0.934965
+ # 0.00159147
+ # 2.80381
+ # 0.828329
+ # 1.0199
 function allOdoEasy(sensors::Array{Float64,2};
                     L=2.80381, H=0.828329, whlsf=0.94, strsf=1.0199, strbi=0.00159)
   #msensors = [sensors[:,1]';x[1]*sensors[:,2]';x[5]*sensors[:,3]'+x[2]]';

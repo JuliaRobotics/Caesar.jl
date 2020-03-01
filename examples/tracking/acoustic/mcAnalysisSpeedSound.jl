@@ -34,7 +34,8 @@ for mc in 1:10, ss in 420:20:420 #270:20:410
     addFactor!(fg, [:x0; :l0], Pose2Point2BearingRange(pcLeft, Rayleigh(1.0)))
     addFactor!(fg, [:x0; :l1], Pose2Point2BearingRange(pcRight, Rayleigh(1.0)))
 
-    batchSolve!(fg, N=100)
+    getSolverParams(fg).N = 100
+    solveTree!(fg)
 
     pts = getVal(fg, :x0)
     pts0 = pts[:,pts[1,:] .< 1.0]

@@ -64,13 +64,13 @@ plotKDE(ppbrDict[epochs[23]].range)
 writeGraphPdf(fg, engine="dot")
 
 ensureAllInitialized!(fg)
-batchSolve!(fg)
+solveTree!(fg)
 
 drawPosesLandms(fg)
 
-savejld(fg, file="presolve_$t.jld")
-IIF.batchSolve!(fg) #, N=100
-savejld(fg, file="postsolve_$t.jld")
+# saveDFG(fg, file="presolve_$t.jld")
+IIF.solveTree!(fg) #, N=100
+# saveDFG(fg, file="postsolve_$t.jld")
 
 # pl = drawPoses(fg, spscale=2.75) # Just for odo plot
 # Roll again for inspiration check
