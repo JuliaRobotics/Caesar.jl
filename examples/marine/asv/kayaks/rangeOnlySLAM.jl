@@ -80,7 +80,6 @@ getSolverParams(fg).downsolve = true
 
 tree, smt, hist = solveTree!(fg, maxparallel=100)
 drawTree(tree,filepath = "/tmp/test.pdf")
-# tree, smt = batchSolve!(fg,maxparallel=100)
 # fg2 = deepcopy(fg)
 # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
 

@@ -76,7 +76,7 @@ visualizeDensityMesh!(vc, fg, :l2)
 sleep(3)
 
 
-batchSolve(fg)
+solveTree!(fg)
 visualize(fg, vc, densitymeshes=[:l1, :l2], N=N, drawlandms=false)
 
 # should just be the point where landmark likelihoods sightings intersect

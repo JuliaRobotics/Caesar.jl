@@ -89,7 +89,6 @@ ensureAllInitialized!(fg)
 
 tree, smt, hist = solveTree!(fg, maxparallel=100)
 drawTree(tree,filepath = "/tmp/caesar/bt.pdf", show=true, imgs=false)
-# tree, smt = batchSolve!(fg,maxparallel=100)
 # fg2 = deepcopy(fg)
 # tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
 

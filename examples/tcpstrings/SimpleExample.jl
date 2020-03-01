@@ -23,11 +23,11 @@ sendCmd(cl, "INIT")
 sendCmd(cl, "ODOMETRY 1 2 10.0 0.0 0.0 0.1 0 0 0.05 0 0.05")
 sendCmd(cl, "ODOMETRY 2 3 10.0 0.0 0.0 0.1 0 0 0.05 0 0.05")
 Vb = getParticles(cl, "x3");
-sendCmd(cl, "BATCHSOLVE")
+sendCmd(cl, "SOLVETREE")
 Va = getParticles(cl, "x3");
 @show size(Va)
 sendCmd(cl, "LANDMBR 3 4 $(pi/2) 10.0 0.01 0 0.5")
-sendCmd(cl, "BATCHSOLVE")
+sendCmd(cl, "SOLVETREE")
 l1 = getParticles(cl, "l1");
 @show size(l1)
 

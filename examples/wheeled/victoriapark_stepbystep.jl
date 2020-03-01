@@ -137,7 +137,7 @@ writeGraphPdf(fg)
 @async run(`evince fg.pdf`)
 
 
-batchSolve!(fg)
+solveTree!(fg)
 pl1=drawPosesLandms(fg)
 draw(PDF("after.pdf",20cm,20cm),pl1)
 

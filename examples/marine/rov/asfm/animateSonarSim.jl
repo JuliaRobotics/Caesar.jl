@@ -120,7 +120,7 @@ bearing5 = 0.0
 addLinearArrayConstraint(fg, (rho5, bearing5), :x5, :l1, rangecov=rangecov,bearingcov=bearingcov)
 
 
-batchSolve(fg)
+solveTree!(fg)
 
 # visualize(fg, vc, densitymeshes=[:l1;:x5])
 visualizeallposes!(vc, fg, drawlandms=false)

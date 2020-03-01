@@ -93,11 +93,8 @@ end
 #
 
 
-
-# IIF.batchSolve!(fg)
-tree = wipeBuildNewTree!(fg, drawpdf=true)
-@async run(`evince bt.pdf`)
-@time inferOverTree!(fg, tree, N=N)
+getSolverParams(fg).N = N
+@time solveTree!(fg)
 
 
 

@@ -83,9 +83,6 @@ pl=drawPosesLandms(fg);
 Gadfly.draw(PDF("/tmp/before.pdf",20cm,20cm),pl)
 
 
-# batchSolve(fg)
-# on ssh terminal, run slamindb(iterations=1)
-
 
 
 

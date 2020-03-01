@@ -58,7 +58,6 @@ areCliqVariablesAllMarginalized
 assignTreeHistory!
 asyncTreeInferUp!
 attemptTreeSimilarClique
-batchSolve!
 blockCliqUntilChildrenHaveUpStatus
 buildSubgraphFromLabels
 buildTreeFromOrdering!
