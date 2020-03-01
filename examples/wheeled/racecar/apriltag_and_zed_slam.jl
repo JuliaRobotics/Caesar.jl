@@ -5,7 +5,7 @@ Pkg.activate(@__DIR__)
 
 ## Load all required packages
 using Distributed
-addprocs(5) # make sure there are 4 processes waiting before loading packages
+# addprocs(5) # make sure there are 4 processes waiting before loading packages
 
 @everywhere begin
   using Pkg

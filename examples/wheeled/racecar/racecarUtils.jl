@@ -129,7 +129,7 @@ function main(resultsdir::String,
               camidxs,
               tag_bagl;
               maxlen = (length(tag_bagl)-1),
-              BB=20,
+              BB=10,
               N=100,
               lagLength=75,
               dofixedlag=true,
@@ -153,7 +153,7 @@ end
 
 # fg.solverParams.isfixedlag = dofixedlag
 # fg.solverParams.qfl = lagLength
-defaultFixedLagOnTree!(fg, lagLength)
+defaultFixedLagOnTree!(fg, lagLength, limitfixeddown=false)
 
 psid = 0
 pssym = Symbol("x$psid")
