@@ -2,6 +2,8 @@
 
 using Pkg
 Pkg.activate(@__DIR__)
+Pkg.instantiate()
+Pkg.precompile()
 
 ## Load all required packages
 using Distributed
