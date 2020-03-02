@@ -4,6 +4,9 @@ cd(@__DIR__)
 using Pkg
 pkg"activate ."
 
+# load the necessary Python bindings
+include(joinpath(@__DIR__,"PythonTensorFlowUsage.jl"))
+
 # using Revise
 
 using Flux
