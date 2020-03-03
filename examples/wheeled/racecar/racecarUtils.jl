@@ -44,17 +44,46 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
   nothing
 end
 
-function addnextpose!(fg, prev_psid, new_psid, pose_tag_bag; lmtype=Point2, odotype=Pose2Pose2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true)
+function addnextpose!(fg,
+                      prev_psid,
+                      new_psid,
+                      pose_tag_bag;
+                      lmtype=Point2,
+                      odotype=Pose2Pose2,
+                      fcttype=Pose2Pose2,
+                      DAerrors=0.0,
+                      autoinit=true,
+                      odopredfnc=nothing,
+                      joysticktimeseries=nothing,
+                      parametricOdoMix=0.3)
+  #
   prev_pssym = Symbol("x$(prev_psid)")
   new_pssym = Symbol("x$(new_psid)")
-  # first pose with zero prior
-  if odotype == Pose2Pose2
-    addVariable!(fg, new_pssym, Pose2)
-    addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))), autoinit=autoinit)
-  elseif odotype == VelPose2VelPose2
-    addVariable!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
-    addFactor!(fg, [prev_pssym; new_pssym], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([0.4;0.4;0.3].^2))),
-                                                             MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2)))), autoinit=autoinit)
+
+  let odoKDE, DXmvn = MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))
+    # predict delta x y th odo if able
+    if odopredfnc != nothing && joysticktimeseries != nothing
+      nnpts = odopredfnc(joysticktimeseries)
+      # replace theta points
+      nnpts[:,3] .= rand(DXmvn, size(nnpts,1))[:,3]
+      mvnpts = rand( DXmvn, round(Int, parametricOdoMix*size(nnpts, 1)) )
+      odoKDE = manikde!([nnpts;mvnpts], Pose2)
+    else
+      odoKDE = DXmvn
+    end
+
+    # first pose with zero prior
+    if odotype == Pose2Pose2
+      addVariable!(fg, new_pssym, Pose2)
+      addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(odoKDE), autoinit=autoinit)
+    elseif odotype == VelPose2VelPose2
+      addVariable!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
+      addFactor!(fg, [prev_pssym; new_pssym],
+                  VelPose2VelPose2(odoKDE,
+                                   MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2)))),
+                 autoinit=autoinit)
+      #
+    end
   end
 
   addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors)
@@ -136,7 +165,8 @@ function main(WP,
               dofixedlag=true,
               jldfile::String="",
               failsafe::Bool=false,
-              show::Bool=false  )
+              show::Bool=false,
+              odopredfnc=nothing  )
 #
 
 # Factor graph construction
@@ -188,7 +218,7 @@ tree, smt, hist = solveTree!(fg)
 for psid in (prev_psid+1):1:maxlen
   # global prev_psid, maxlen
   @show psym = Symbol("x$psid")
-  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=Pose2Pose2, fcttype=Pose2Pose2, autoinit=true)
+  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=Pose2Pose2, fcttype=Pose2Pose2, autoinit=true, odopredfnc=odopredfnc)
   # odotype=VelPose2VelPose2, fcttype=DynPose2Pose2
   # writeGraphPdf(fg)
 
