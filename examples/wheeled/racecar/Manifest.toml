@@ -44,9 +44,9 @@ version = "3.5.0+2"
 
 [[ArrayInterface]]
 deps = ["LinearAlgebra", "Requires", "SparseArrays"]
-git-tree-sha1 = "4f1109cf20b2a31b5196f346bba07b2c61587442"
+git-tree-sha1 = "81e5dd1f5374aba2badfe967fc6a132c02ab471a"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "2.4.1"
+version = "2.5.0"
 
 [[AxisAlgorithms]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "WoodburyMatrices"]
@@ -945,9 +945,7 @@ version = "0.6.0"
 
 [[RoMEPlotting]]
 deps = ["ApproxManifoldProducts", "Cairo", "Colors", "Compose", "Dates", "DistributedFactorGraphs", "DocStringExtensions", "Fontconfig", "Gadfly", "Graphs", "IncrementalInference", "KernelDensityEstimate", "KernelDensityEstimatePlotting", "LinearAlgebra", "Reexport", "RoME", "Statistics", "StatsBase"]
-git-tree-sha1 = "bc0489c529ad19985d3ce66c840a6461de183e19"
-repo-rev = "master"
-repo-url = "https://github.com/JuliaRobotics/RoMEPlotting.jl.git"
+git-tree-sha1 = "1cde39ecdba18d54a33f464f4fd8a56b818d80a1"
 uuid = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
 version = "0.2.0"
 
@@ -1192,9 +1190,9 @@ version = "1.2.0"
 
 [[ZeroMQ_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "a2973b77e69568da1294d940b51031e7a5cea850"
+git-tree-sha1 = "d24fc0004686b534cc7518412b626deeea0b0208"
 uuid = "8f1865be-045e-5c20-9c9f-bfbfb0764568"
-version = "4.3.2+0"
+version = "4.3.2+1"
 
 [[Zlib_jll]]
 deps = ["Libdl", "Pkg"]
