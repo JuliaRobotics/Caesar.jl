@@ -102,10 +102,11 @@ else
   @load resultsdir*"/tag_det_per_pose.jld2" tag_bag
 end
 
+## Load joystick time series data
 
 
 
-fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2  )
+fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joysticktimeseries=joyTImeseries  )
 
 
 
