@@ -41,3 +41,4 @@ preds = map(x->x.predict([[A]]), models)
 predsingle = pyimport("queryAllModels")["predictSinglePose"]
 
 predsingle(A)
+# returns  10×3 Array{Real,2}:
