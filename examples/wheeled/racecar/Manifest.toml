@@ -176,6 +176,12 @@ git-tree-sha1 = "59aa488537311b5401f39faeb07ca7621e36e256"
 uuid = "ed09eef8-17a6-5b46-8889-db040fac31e3"
 version = "0.3.1"
 
+[[Conda]]
+deps = ["JSON", "VersionParsing"]
+git-tree-sha1 = "7a58bb32ce5d85f8bf7559aa7c2842f9aecf52fc"
+uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
+version = "1.4.1"
+
 [[Contour]]
 deps = ["LinearAlgebra", "StaticArrays", "Test"]
 git-tree-sha1 = "b974e164358fea753ef853ce7bad97afec15bb80"
@@ -884,6 +890,12 @@ git-tree-sha1 = "51b74991da46594fb411a715e7e092bef50b99ff"
 uuid = "3349acd9-ac6a-5e09-bcdb-63829b23a429"
 version = "0.8.0"
 
+[[PyCall]]
+deps = ["Conda", "Dates", "Libdl", "LinearAlgebra", "MacroTools", "Serialization", "VersionParsing"]
+git-tree-sha1 = "ce0780857d129208c4e5a6d722486fb40ce11bf8"
+uuid = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+version = "1.91.3"
+
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
 git-tree-sha1 = "dc84e810393cfc6294248c9032a9cdacc14a3db4"
@@ -1073,6 +1085,11 @@ deps = ["JSON", "Missings", "Nullables"]
 git-tree-sha1 = "fee27a95f3d5da3cbe85ab4682e2df29dab1b283"
 uuid = "cbff2730-442d-58d7-89d1-8e530c41eb02"
 version = "0.3.1"
+
+[[VersionParsing]]
+git-tree-sha1 = "80229be1f670524750d905f8fc8148e5a8c4537f"
+uuid = "81def892-9a0e-5fdd-b105-ffc91e053289"
+version = "1.2.0"
 
 [[WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
