@@ -2,11 +2,11 @@
 
 using Pkg
 Pkg.activate(@__DIR__)
+Pkg.instantiate()
 
 # load the necessary Python bindings
 include(joinpath(@__DIR__,"PythonTensorFlowUsage.jl"))
 
-Pkg.instantiate()
 Pkg.precompile()
 
 
