@@ -11,8 +11,8 @@ tf = pyimport("tensorflow")
 
 tf.keras.models.load_model
 
-Base.cd(ENV["USER"]*"/learning-odometry/")
 
+Base.cd(ENV["USER"]*"/learning-odometry/")
 mmodel = tf.keras.models.load_model("original_network0.h5")
 
 mmodel.predict
@@ -37,6 +37,12 @@ models[1].predict([[A]])
 
 preds = map(x->x.predict([[A]]), models)
 
+## Using aggregate python functions
+
+py"""
+import sys
+sys.path.insert(0, "/home/singhk/learning-odometry/")
+"""
 
 predsingle = pyimport("queryAllModels")["predictSinglePose"]
 
