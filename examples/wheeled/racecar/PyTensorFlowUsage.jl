@@ -7,12 +7,16 @@ Pkg.build("PyCall")
 
 using PyCall
 
-tf = pyimport("tensorflow")
+# tf = pyimport("tensorflow")
+# tf.keras.models.load_model
 
-tf.keras.models.load_model
+py"""
+import sys
+sys.path.insert(0, "/home/singhk/learning-odometry/")
+"""
 
-@show tfmodeldir = joinpath(ENV["USER"],"learning-odometry/")
-Base.cd(tfmodeldir)
+# @show tfmodeldir = joinpath(ENV["HOME"],"learning-odometry/")
+# Base.cd(tfmodeldir)
 
 PyTFOdoPredictorPoint2 = pyimport("queryAllModels")["predictSinglePose"]
 
