@@ -95,7 +95,7 @@ end
 
 global tag_bag = Dict()
 if parsed_args["previous"] == ""
-  tag_bag = detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs)
+  tag_bag = detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs, iterposes=parsed_args["iterposes"])
   # save the tag bag file for future use
   @save resultsdir*"/tag_det_per_pose.jld2" tag_bag
 else
