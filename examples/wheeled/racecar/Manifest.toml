@@ -258,10 +258,10 @@ deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[DistributedFactorGraphs]]
-deps = ["Base64", "Colors", "Dates", "Distributions", "DocStringExtensions", "Graphs", "JSON", "JSON2", "LightGraphs", "LinearAlgebra", "Neo4j", "Reexport", "Requires", "SparseArrays", "Unmarshal"]
-git-tree-sha1 = "6212f0bceedc34b0d65aba1f6adee3c24bcb6771"
+deps = ["Base64", "Colors", "Dates", "Distributions", "DocStringExtensions", "Graphs", "JSON", "JSON2", "LightGraphs", "LinearAlgebra", "Neo4j", "Reexport", "Requires", "SparseArrays", "UUIDs", "Unmarshal"]
+git-tree-sha1 = "3f90be5655781713fb87b34eaa557e6584185c1f"
 uuid = "b5cc3c7e-6572-11e9-2517-99fb8daf2f04"
-version = "0.6.2"
+version = "0.7.1"
 
 [[Distributions]]
 deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns"]
@@ -505,9 +505,9 @@ version = "0.18.0"
 
 [[IncrementalInference]]
 deps = ["ApproxManifoldProducts", "Combinatorics", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "FunctionalStateMachine", "Graphs", "JLD2", "JSON2", "KernelDensityEstimate", "LinearAlgebra", "Logging", "MetaGraphs", "NLsolve", "Optim", "ProgressMeter", "Random", "Reexport", "Requires", "SparseArrays", "Statistics", "StatsBase", "SuiteSparse"]
-git-tree-sha1 = "cf36c949f04290dd61117547138e11eba1da5b53"
+git-tree-sha1 = "6135dce5955fc2df28c3915baa32aa66bd76cbef"
 uuid = "904591bb-b899-562f-9e6f-b8df64c7d480"
-version = "0.9.0"
+version = "0.10.0"
 
 [[IndirectArrays]]
 git-tree-sha1 = "c2a145a145dc03a7620af1444e0264ef907bd44f"
@@ -708,9 +708,9 @@ uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[MbedTLS]]
 deps = ["Dates", "MbedTLS_jll", "Random", "Sockets"]
-git-tree-sha1 = "709797fadd2d3b7e3f040a9f6e12726a6d6d2bf5"
+git-tree-sha1 = "a9e2221f06b42f56052f43ad7edecb01d0ef5ab4"
 uuid = "739be429-bea8-5141-9913-cc70e7f3736d"
-version = "1.0.0"
+version = "1.0.1"
 
 [[MbedTLS_jll]]
 deps = ["Libdl", "Pkg"]
@@ -892,9 +892,9 @@ version = "0.8.0"
 
 [[PyCall]]
 deps = ["Conda", "Dates", "Libdl", "LinearAlgebra", "MacroTools", "Serialization", "VersionParsing"]
-git-tree-sha1 = "ce0780857d129208c4e5a6d722486fb40ce11bf8"
+git-tree-sha1 = "3a3fdb9000d35958c9ba2323ca7c4958901f115d"
 uuid = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-version = "1.91.3"
+version = "1.91.4"
 
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
@@ -951,13 +951,17 @@ version = "0.2.2+0"
 
 [[RoME]]
 deps = ["ApproxManifoldProducts", "CoordinateTransformations", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "Graphs", "IncrementalInference", "JLD2", "KernelDensityEstimate", "LinearAlgebra", "Optim", "ProgressMeter", "Reexport", "Rotations", "Statistics", "TransformUtils"]
-git-tree-sha1 = "14396d23677ac9c6c7d0db789b2fc0a588b3d249"
+git-tree-sha1 = "d5642f64982b086324c914959efbf3f507ae03bc"
+repo-rev = "master"
+repo-url = "https://github.com/JuliaRobotics/RoME.jl.git"
 uuid = "91fb55c2-4c03-5a59-ba21-f4ea956187b8"
 version = "0.6.0"
 
 [[RoMEPlotting]]
 deps = ["ApproxManifoldProducts", "Cairo", "Colors", "Compose", "Dates", "DistributedFactorGraphs", "DocStringExtensions", "Fontconfig", "Gadfly", "Graphs", "IncrementalInference", "KernelDensityEstimate", "KernelDensityEstimatePlotting", "LinearAlgebra", "Reexport", "RoME", "Statistics", "StatsBase"]
-git-tree-sha1 = "1cde39ecdba18d54a33f464f4fd8a56b818d80a1"
+git-tree-sha1 = "9109ef979f7fa2749b1fa6e4cab21ed49c97ae8e"
+repo-rev = "master"
+repo-url = "https://github.com/JuliaRobotics/RoMEPlotting.jl.git"
 uuid = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
 version = "0.2.0"
 
@@ -1020,9 +1024,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics"]
-git-tree-sha1 = "be5c7d45daa449d12868f4466dbf5882242cf2d9"
+git-tree-sha1 = "19bfcb46245f69ff4013b3df3b977a289852c3a1"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.32.1"
+version = "0.32.2"
 
 [[StatsFuns]]
 deps = ["Rmath", "SpecialFunctions"]
@@ -1042,9 +1046,9 @@ version = "1.0.0"
 
 [[Tables]]
 deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
-git-tree-sha1 = "a54b8ce702aa863eced47bade03123d4dca0db84"
+git-tree-sha1 = "242b7fde70b8bc6a30d6476adf17ca3cf1ced6ee"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.0.2"
+version = "1.0.3"
 
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
