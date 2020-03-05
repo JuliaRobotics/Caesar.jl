@@ -3,11 +3,13 @@
 using Pkg
 Pkg.activate(@__DIR__)
 Pkg.instantiate()
+# Pkg.precompile()
+
+Base.cd(ENV["HOME"]*"/learning-odometry")
 
 # load the necessary Python bindings
-include(joinpath(@__DIR__,"PythonTensorFlowUsage.jl"))
+include(joinpath(@__DIR__,"PyTensorFlowUsage.jl"))
 
-Pkg.precompile()
 
 
 ## Load all required packages
