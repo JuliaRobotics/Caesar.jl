@@ -11,6 +11,8 @@ Base.cd(ENV["HOME"]*"/learning-odometry")
 include(joinpath(@__DIR__,"PyTensorFlowUsage.jl"))
 
 
+Base.cd(@__DIR__)
+
 
 ## Load all required packages
 using Distributed
@@ -27,7 +29,7 @@ WP = WorkerPool(2:nprocs() |> collect )
 # @show ARGS
 include("parsecommands.jl")
 
-
+using DelimitedFiles
 using Dates, Statistics
 using CoordinateTransformations, Rotations, StaticArrays
 using ImageCore
@@ -55,7 +57,7 @@ end
 # setup configuration
 using YAML
 
-include(joinpath(dirname(@__FILE__),"configParameters.jl") )
+include(joinpath(@__DIR__,"configParameters.jl") )
 
 
 # Figure export folder
@@ -70,13 +72,13 @@ resultsdir = joinpath(resultsparentdir, "$(currdirtime)")
 
 if parsed_args["previous"] == ""
   # When running fresh from new data
-  include(joinpath(dirname(@__FILE__),"createResultsDirs.jl"))
+  include(joinpath(@__DIR__,"createResultsDirs.jl"))
 end
 
 
 # Utils required for this processing script
-include(joinpath(dirname(@__FILE__),"racecarUtils.jl") )
-include(joinpath(dirname(@__FILE__),"cameraUtils.jl") )
+include(joinpath(@__DIR__,"racecarUtils.jl") )
+include(joinpath(@__DIR__,"cameraUtils.jl") )
 # include(joinpath(dirname(@__FILE__),"visualizationUtils.jl") )
 
 
@@ -107,9 +109,22 @@ end
 ## Load joystick time series data
 
 
+runnr = parse(Int, parsed_args["folder_name"][end])
+joyTimeseries = readdlm(joinpath(datadir,parsed_args["folder_name"],"labRun$(runnr)_joy.csv"), ',')
+joyTimeseries = joyTimeseries[2:end,[1,6,8]]
+joyTimeseries[:,1] .= joyTimeseries[:,1]*1e-9 .|> unix2datetime;
+
+# load the detections file to get timestamps
+detcData = readdlm(joinpath(datadir,parsed_args["folder_name"],"labRun$(runnr)Detections.csv"), ',')
+detcData = detcData[2:end,:]
+detcPoseTs = detcData[:,4]*1e-9 .+ detcData[:,3] .|> unix2datetime
+# joyTimeseries[:,1] .< detcPoseTs[2]??
+
+## run the solution
 
 
-fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joysticktimeseries=joyTImeseries  )
+
+fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joysticktimeseries=joyTimeseries  )
 
 
 
