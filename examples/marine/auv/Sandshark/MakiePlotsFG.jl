@@ -233,9 +233,9 @@ function addLinesBelief!(fg, pl, TTm;
 
   posesyms = ls(fg, r"x\d") |> sortDFG
   filter!(x->isInitialized(fg, x), posesyms)
-  filter!(x->solverData(getVariable(fg, x), :lbl) != nothing, posesyms)
-  XXlbl = (x->(solverData(getVariable(fg, x), :lbl).val[1,1])).(posesyms)
-  YYlbl = (x->(solverData(getVariable(fg, x), :lbl).val[2,1])).(posesyms)
+  filter!(x->getSolverData(getVariable(fg, x), :lbl) != nothing, posesyms)
+  XXlbl = (x->(getSolverData(getVariable(fg, x), :lbl).val[1,1])).(posesyms)
+  YYlbl = (x->(getSolverData(getVariable(fg, x), :lbl).val[2,1])).(posesyms)
 
   ts = (x->getTimestamp(getVariable(fg, x))).(posesyms) .|> datetime2unix
   T0 = ts[1]
