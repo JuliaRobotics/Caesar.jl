@@ -116,7 +116,8 @@ function main(;parsed_args=parse_commandline(),
   dashboard[:odoTime] = lblKeys[1]
   @show startT = lblKeys[1]
 
-  setTimestamp!(getVariable(fg, :x0), lblKeys[1])
+  setTimestamp!(fg, :x0, lblKeys[1])
+  # setTimestamp!(getVariable(fg, :x0), lblKeys[1])
 
   # add starting prior
   addFactor!(fg, [:x0;], PriorPose2(MvNormal(initPose,Matrix(Diagonal([0.5; 0.5; 1.0].^2)))), autoinit=false)
