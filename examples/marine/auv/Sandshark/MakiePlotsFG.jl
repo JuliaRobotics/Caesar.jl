@@ -93,7 +93,7 @@ getRangeCartesian,
 function plotVariableBeliefs(dfg::AbstractDFG,
                              regexFilter::Union{Nothing, Regex}=nothing;
                              solvable::Int=0,
-                             vsyms::Vector{Symbol}=listVariable(dfg, regexFilter, solvable),
+                             vsyms::Vector{Symbol}=listVariables(dfg, regexFilter, solvable),
                              extras::Vector{Symbol}=Symbol[],
                              N::Int=100,
                              minColorBase::Float64=-0.3,

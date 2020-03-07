@@ -1406,17 +1406,13 @@ version = "0.2.2+0"
 
 [[RoME]]
 deps = ["ApproxManifoldProducts", "CoordinateTransformations", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "Graphs", "IncrementalInference", "JLD2", "KernelDensityEstimate", "LinearAlgebra", "Optim", "ProgressMeter", "Reexport", "Rotations", "Statistics", "TransformUtils"]
-git-tree-sha1 = "d5642f64982b086324c914959efbf3f507ae03bc"
-repo-rev = "master"
-repo-url = "https://github.com/JuliaRobotics/RoME.jl.git"
+path = "/home/dehann/.julia/dev/RoME"
 uuid = "91fb55c2-4c03-5a59-ba21-f4ea956187b8"
 version = "0.6.0"
 
 [[RoMEPlotting]]
 deps = ["ApproxManifoldProducts", "Cairo", "Colors", "Compose", "Dates", "DistributedFactorGraphs", "DocStringExtensions", "Fontconfig", "Gadfly", "Graphs", "IncrementalInference", "KernelDensityEstimate", "KernelDensityEstimatePlotting", "LinearAlgebra", "Reexport", "RoME", "Statistics", "StatsBase"]
-git-tree-sha1 = "9109ef979f7fa2749b1fa6e4cab21ed49c97ae8e"
-repo-rev = "master"
-repo-url = "https://github.com/JuliaRobotics/RoMEPlotting.jl.git"
+path = "/home/dehann/.julia/dev/RoMEPlotting"
 uuid = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
 version = "0.2.0"
 
