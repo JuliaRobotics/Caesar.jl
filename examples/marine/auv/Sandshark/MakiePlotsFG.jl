@@ -2,7 +2,9 @@
 
 using Distributed
 
+using Dates
 using Caesar, RoME, DistributedFactorGraphs
+@everywhere using Dates
 @everywhere using Caesar, RoME, DistributedFactorGraphs
 @everywhere using KernelDensityEstimate
 @everywhere using ProgressMeter
@@ -12,7 +14,6 @@ using Makie
 using MakieLayout
 using DocStringExtensions
 
-import DistributedFactorGraphs: getEstimates
 
 """
     $SIGNATURES
@@ -91,7 +92,8 @@ getRangeCartesian,
 """
 function plotVariableBeliefs(dfg::AbstractDFG,
                              regexFilter::Union{Nothing, Regex}=nothing;
-                             vsyms::Vector{Symbol}=getVariableIds(dfg, regexFilter),
+                             solvable::Int=0,
+                             vsyms::Vector{Symbol}=listVariable(dfg, regexFilter, solvable),
                              extras::Vector{Symbol}=Symbol[],
                              N::Int=100,
                              minColorBase::Float64=-0.3,

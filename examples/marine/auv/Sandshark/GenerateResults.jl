@@ -337,7 +337,7 @@ for ind in indiv
   #   continue
   # end
   try
-    pl, Z = plotVariableBeliefs(fgl, r"x\d", sortVars=true, fade=minimum([15; nvars]), fadeFloor=0.2,
+    pl, Z = plotVariableBeliefs(fgl, r"x\d", solvable=1, sortVars=true, fade=minimum([15; nvars]), fadeFloor=0.2,
                               xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,
                               resolution=(1920, 1080) )
     #
