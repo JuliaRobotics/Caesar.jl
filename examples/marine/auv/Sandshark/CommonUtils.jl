@@ -20,7 +20,7 @@ function devAccumulateOdoPose2(DX::Array{Float64,2},
   #
   # entries are rows with columns dx,dy,dtheta
   @assert size(DX,2) == 3
-  mpp = MutablePose2Pose2Gaussian(Zij=MvNormal(X0, P0), timestamp=timestamp )
+  mpp = MutablePose2Pose2Gaussian(MvNormal(X0, P0), timestamp=timestamp )
   nXYT = zeros(size(DX,1), 3)
   for i in 1:size(DX,1)
     RoME.accumulateDiscreteLocalFrame!(mpp,DX[i, :],Qc,dt)
