@@ -44,6 +44,9 @@ end
 ```
 One could also use [`let`, see Stack overflow](https://stackoverflow.com/questions/51930537/scope-of-variables-in-julia) or [the Julia docs page on scoping](https://docs.julialang.org/en/v1/manual/variables-and-scoping/index.html).  Also note it is good practice to use local scope (i.e. inside a function) variables for performance reasons.
 
+!!! note
+    This behaviour is going to change in Julia 1.5 back to what Julia 0.6 was in interactive cases, and therefore likely less of a problem in future versions.  From Julia 1.5 Change Notes, see ([#28789], [#33864]).
+
 ### Why ZMQ Middleware Layer (multilang)?
 
 [Zero Message Queue (ZMQ)](https://zeromq.org/) is a widely used data transport layer used to build various other multiprocess middleware with wide support among other programming languages.
