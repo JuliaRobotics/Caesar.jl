@@ -18,7 +18,7 @@ A simple 2D robot trajectory example is expanded below using techniques develope
 
 [Hexagonal Fixed-Lag](interm_fixedlag_hexagonal.md)
 
-### A Under-Constrained Solution (unforced multimodality)
+### A Underdetermined Solution (unforced multimodality)
 This tutorial describes a range-only system where there are always more variable dimensions than range measurements made.
 The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point -- other examples show inference results where highly non-Gaussian error distributions are used.
 
@@ -28,6 +28,15 @@ Multi-modal range only example ([click here or image for full Vimeo](http://vime
 ```
 
 [Multi-Modal Under-Constrained Example](basic_slamedonut.md)
+
+### Towards Real-Time Underwater Acoustic Navigation
+
+This example uses "dead reckon tethering" (DRT) to perform many of the common robot odometry and high frequency pose updated operations.  These features are a staple and standard part of the distributed factor graph system.
+
+Click on image ([or this link to Vimeo](http://vimeo.com/396532767)) for a video illustration:
+```@raw html
+<a href="http://vimeo.com/396532767" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/76251581-24ea0680-623f-11ea-9906-ecbe5d8ef790.gif" alt="AUV SLAM" width="640" border="0" /></a>
+```
 
 ### Uncertain Data Associations, a Multi-Modal Solution (forced multi-hypothesis)
 
