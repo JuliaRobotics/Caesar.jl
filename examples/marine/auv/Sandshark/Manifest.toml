@@ -782,7 +782,7 @@ version = "0.22.0"
 
 [[IncrementalInference]]
 deps = ["ApproxManifoldProducts", "Combinatorics", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "FunctionalStateMachine", "Graphs", "JLD2", "JSON2", "KernelDensityEstimate", "LinearAlgebra", "Logging", "MetaGraphs", "NLsolve", "Optim", "ProgressMeter", "Random", "Reexport", "Requires", "SparseArrays", "Statistics", "StatsBase", "SuiteSparse"]
-git-tree-sha1 = "6135dce5955fc2df28c3915baa32aa66bd76cbef"
+path = "/home/dehann/.julia/dev/IncrementalInference"
 uuid = "904591bb-b899-562f-9e6f-b8df64c7d480"
 version = "0.10.0"
 

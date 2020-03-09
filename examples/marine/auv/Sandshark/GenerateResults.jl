@@ -4,6 +4,10 @@ Pkg.activate(@__DIR__)
 pkg"instantiate"
 pkg"precompile"
 
+using Distributed
+@everywhere using Pkg
+@everywhere Pkg.activate(@__DIR__)
+
 # using Revise
 
 using ArgParse
