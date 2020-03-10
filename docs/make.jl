@@ -26,6 +26,7 @@ makedocs(
             "Initial Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
             "Interacting w/ Factor Graphs" => "concepts/interacting_fgs.md",
+            "Data Association" => "concepts/dataassociation.md",
             "Available Variables/Factors" => "concepts/available_varfacs.md",
             "Plotting (2D)" => "concepts/2d_plotting.md",
             "Visualization (3D)" => "concepts/arena_visualizations.md",
