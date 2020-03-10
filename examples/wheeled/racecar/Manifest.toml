@@ -183,10 +183,10 @@ uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 version = "1.4.1"
 
 [[Contour]]
-deps = ["LinearAlgebra", "StaticArrays", "Test"]
-git-tree-sha1 = "b974e164358fea753ef853ce7bad97afec15bb80"
+deps = ["StaticArrays"]
+git-tree-sha1 = "6d56f927b33d3820561b8f89d7de311718683846"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
-version = "0.5.1"
+version = "0.5.2"
 
 [[CoordinateTransformations]]
 deps = ["Compat", "Rotations", "StaticArrays"]
@@ -463,9 +463,9 @@ version = "0.6.9"
 
 [[ImageMagick]]
 deps = ["FileIO", "ImageCore", "ImageMagick_jll", "InteractiveUtils", "Libdl", "Pkg", "Random"]
-git-tree-sha1 = "6952114380957cbd5858164a909c0d5a1f902031"
+git-tree-sha1 = "0563e9b247de1d2950ebaf06971b1e771b0cd8ca"
 uuid = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
-version = "1.1.2"
+version = "1.1.3"
 
 [[ImageMagick_jll]]
 deps = ["JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pkg", "Zlib_jll", "libpng_jll"]
@@ -505,9 +505,9 @@ version = "0.18.0"
 
 [[IncrementalInference]]
 deps = ["ApproxManifoldProducts", "Combinatorics", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "FunctionalStateMachine", "Graphs", "JLD2", "JSON2", "KernelDensityEstimate", "LinearAlgebra", "Logging", "MetaGraphs", "NLsolve", "Optim", "ProgressMeter", "Random", "Reexport", "Requires", "SparseArrays", "Statistics", "StatsBase", "SuiteSparse"]
-git-tree-sha1 = "6135dce5955fc2df28c3915baa32aa66bd76cbef"
+git-tree-sha1 = "198bfe4847d011a77fe5e305fa0270aded4e7880"
 uuid = "904591bb-b899-562f-9e6f-b8df64c7d480"
-version = "0.10.0"
+version = "0.10.1"
 
 [[IndirectArrays]]
 git-tree-sha1 = "c2a145a145dc03a7620af1444e0264ef907bd44f"
@@ -677,10 +677,10 @@ deps = ["Libdl"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[Loess]]
-deps = ["Distances", "Random", "Statistics", "Test"]
-git-tree-sha1 = "0ee46caf683a422b595be4dfaed6cda28f541e25"
+deps = ["Distances", "Statistics"]
+git-tree-sha1 = "67b1bc5f42144fb83b065b8a8e117e56ec10e601"
 uuid = "4345ca2d-374a-55d4-8d30-97f9976e7612"
-version = "0.5.0"
+version = "0.5.1"
 
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
@@ -785,15 +785,15 @@ version = "0.11.4"
 
 [[OpenBLAS_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "adc45e596df7007d48bf6829efb1dc64fdec3ddc"
+git-tree-sha1 = "858f107d79a016d9511e34186fe2af11566ba762"
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.7+6"
+version = "0.3.7+7"
 
 [[OpenSpecFun_jll]]
 deps = ["CompilerSupportLibraries_jll", "Libdl", "Pkg"]
-git-tree-sha1 = "d110040968b9afe95c6bd9c6233570b0fe8abd22"
+git-tree-sha1 = "d51c416559217d974a1113522d5919235ae67a87"
 uuid = "efe28fd5-8261-553b-a9e1-b2916fc3738e"
-version = "0.5.3+2"
+version = "0.5.3+3"
 
 [[Optim]]
 deps = ["FillArrays", "LineSearches", "LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "PositiveFactorizations", "Printf", "SparseArrays", "StatsBase"]
@@ -950,20 +950,16 @@ uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
 version = "0.2.2+0"
 
 [[RoME]]
-deps = ["ApproxManifoldProducts", "CoordinateTransformations", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "Graphs", "IncrementalInference", "JLD2", "KernelDensityEstimate", "LinearAlgebra", "Optim", "ProgressMeter", "Reexport", "Rotations", "Statistics", "TransformUtils"]
-git-tree-sha1 = "d5642f64982b086324c914959efbf3f507ae03bc"
-repo-rev = "master"
-repo-url = "https://github.com/JuliaRobotics/RoME.jl.git"
+deps = ["ApproxManifoldProducts", "CoordinateTransformations", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "Graphs", "IncrementalInference", "JLD2", "KernelDensityEstimate", "LinearAlgebra", "Optim", "ProgressMeter", "Reexport", "Rotations", "Statistics", "TransformUtils"]
+git-tree-sha1 = "7c61065ab26fac61729937186cfe372e41b4c1d7"
 uuid = "91fb55c2-4c03-5a59-ba21-f4ea956187b8"
-version = "0.6.0"
+version = "0.6.1"
 
 [[RoMEPlotting]]
 deps = ["ApproxManifoldProducts", "Cairo", "Colors", "Compose", "Dates", "DistributedFactorGraphs", "DocStringExtensions", "Fontconfig", "Gadfly", "Graphs", "IncrementalInference", "KernelDensityEstimate", "KernelDensityEstimatePlotting", "LinearAlgebra", "Reexport", "RoME", "Statistics", "StatsBase"]
-git-tree-sha1 = "9109ef979f7fa2749b1fa6e4cab21ed49c97ae8e"
-repo-rev = "master"
-repo-url = "https://github.com/JuliaRobotics/RoMEPlotting.jl.git"
+git-tree-sha1 = "62086574d732617e16479eaf96d675efcf50732b"
 uuid = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
-version = "0.2.0"
+version = "0.2.1"
 
 [[Rotations]]
 deps = ["LinearAlgebra", "StaticArrays", "Statistics"]
