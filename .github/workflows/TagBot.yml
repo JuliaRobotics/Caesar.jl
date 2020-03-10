@@ -1,7 +1,11 @@
 name: TagBot
+
 on:
   schedule:
-    - cron: 0 * * * *
+    - cron: '20 00 * * *'
+  issues:
+    types: [closed,]
+    
 jobs:
   TagBot:
     runs-on: ubuntu-latest
