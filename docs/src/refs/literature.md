@@ -22,6 +22,8 @@ Newly created page to list related references and additional literature pertaini
 
 [1.9]  Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. IEEE, Intl. Conference on Robotics and Automation, ICRA (2019).
 
+[1.10] Fourie, D., Espinoza, A. T., Kaess, M., and Leonard, J. J., 2020. “Characterizing marginalization and incremental operations on the Bayes tree,” in International Workshop on Algorithmic Foundations of Robotics (WAFR), submitted, under review.
+
 ### Important References
 
 [2.1]  Kaess, Michael, et al. ["iSAM2: Incremental smoothing and mapping using the Bayes tree"](http://journals.sagepub.com/doi/abs/10.1177/0278364911430419) The International Journal of Robotics Research (2011): 0278364911430419.
