@@ -29,10 +29,10 @@ makedocs(
             "Data Association" => "concepts/dataassociation.md",
             "Available Variables/Factors" => "concepts/available_varfacs.md",
             "Plotting (2D)" => "concepts/2d_plotting.md",
-            "Visualization (3D)" => "concepts/arena_visualizations.md",
             "Multi-Language Support" => "concepts/multilang.md",
             "Cloud Server/Database" => "concepts/database_interactions.md",
             "Multi-session/agent Solving" => "concepts/multisession.md",
+            "Visualization (3D)" => "concepts/arena_visualizations.md",
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
