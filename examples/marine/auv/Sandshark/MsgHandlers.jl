@@ -181,7 +181,8 @@ function pose_hdlr(channel::String,
                                                cov=dashboard[:odoCov]  )
     #
     # set timestamp to msg times
-    setTimestamp!(getVariable(dfg, nPose), odoT)
+    # setTimestamp!(getVariable(dfg, nPose), odoT)
+    setTimestamp!(dfg, nPose, odoT)
     # delete drt unless used by real time prediction
     # TODO assuming stride ends on a 0
     poseStrideTail = sortDFG(ls(dfg, r"x\d+9\b|x9\b", solvable=0))

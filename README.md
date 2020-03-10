@@ -17,7 +17,7 @@ Click on the badges to follow web url links:
 
 Code changes are currently tracked via Github's integrated Milestone/Issues/PR system.
 
-| **Major Dependencies**  |  **Stable**     |  **Dev (master)**   |  **Test Coverage**  |  **Milestones**  |
+| **Major Dependencies**  |  **Stable**     |  **Dev (master)**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
 | Caesar.jl | [![][caesar-stable]][caesar-releases] | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] | [![][mst-shield]][caesar-milestones] |
 | [RoME.jl][rome-url] | [![][r-stable]][r-releases] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] | [![][mst-shield]][r-milestones] |
@@ -63,7 +63,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
 [build-tag]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.4
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
-[caesar-stable]: https://img.shields.io/badge/2020Q1-v0.4.x-green.svg
+[caesar-stable]: https://img.shields.io/badge/2020Q1-v0.5.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://caesarjl.slack.com
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
@@ -75,7 +75,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
 [r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.5
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2019Q4-v0.5.x-green.svg
+[r-stable]: https://img.shields.io/badge/2020Q1-v0.6.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
@@ -85,7 +85,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [iif-build-v08]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.8
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
-[iif-stable]: https://img.shields.io/badge/2020Q1-v0.8.x-green.svg
+[iif-stable]: https://img.shields.io/badge/2020Q1-v0.10.x-green.svg
 [iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
 [iif-releases]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
 
@@ -135,7 +135,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
 [dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2020Q1-v0.5.x-green.svg
+[dfg-stable]: https://img.shields.io/badge/2020Q1-v0.7.x-green.svg
 [dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones
 [dfg-releases]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
 
