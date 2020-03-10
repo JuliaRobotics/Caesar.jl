@@ -1,10 +1,9 @@
 #  Multimodal incremental Smoothing and Mapping Algorithm
 
-> **Work In Progress**
+!!! note
+    Major refactoring of documentation under way 2020Q1.  Much of the previous text has be repositioned and being improved.  See references for details and check back here for updates in the coming weeks.
 
-Placeholder for details on how the approximate sum-product inference algorithm ([mmiSAM](https://github.com/JuliaRobotics/IncrementalInference.jl)) works.  Until then, see [related literature](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more details.
-
-Algorithm combats the so called curse-of-dimensionality on the basis of eight principles outlined in the thesis work ["Multimodal and Inertial Sensor Solutions to Navigation-type Factor Graphs"](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/#Direct-References-1).
+Caesar.jl uses an approximate sum-product inference algorithm ([mmiSAM](https://github.com/JuliaRobotics/IncrementalInference.jl)) works.  Until then, see [related literature](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more details.
 
 # Joint Probability
 
@@ -20,23 +19,29 @@ See [tree solve video here](https://vimeo.com/332507701).
 <a href="http://vimeo.com/332507701" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/52549397-e4505d00-2da0-11e9-958b-e9034c30477c.png" alt="Bayes/Junction tree example" width="640" border="0" /></a>
 ```
 
-## Focussing Computation on Tree
-
-### Incremental Updates
-
-Recycling computations
-
-### Fixed-Lag operation
-
-Also mixed priority solving
-
-### Federated Tree Solution (Multi session/agent)
-
-Tentatively see [the multisession page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/multisession/).
+Algorithm combats the so called curse-of-dimensionality on the basis of eight principles outlined in the thesis work ["Multimodal and Inertial Sensor Solutions to Navigation-type Factor Graphs"](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/#Direct-References-1).
 
 # Chapman-Kolmogorov (Belief Propagation / Sum-product)
 
 The main computational effort is to focus compute cycles on dominant modes exhibited by the data, by dropping low likelihood modes (although not indefinitely) and not sacrificing accuracy individual major features. 
+
+> D. Fourie, A. T. Espinoza, M. Kaess, and J. J. Leonard, “Characterizing marginalization and incremental operations on the Bayes tree,” in International Workshop on Algorithmic Foundations of Robotics (WAFR), 2020, submitted, under review.
+
+## Focussing Computation on Tree
+
+Link to new dedicated [Bayes tree pages](http://juliarobotics.org/Caesar.jl/latest/principles/bayestreePrinciples/).  The following sections describe different elements of clique recycling.
+
+### Incremental Updates
+
+Recycling computations similar to iSAM2, with option to complete future downward pass.
+
+### Fixed-Lag operation (out-marginalization)
+
+Active user (likely) computational limits on message passing.  Also mixed priority solving
+
+### Federated Tree Solution (Multi session/agent)
+
+Tentatively see [the multisession page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/multisession/).
 
 ## Clique State Machine
 
@@ -44,7 +49,7 @@ The CSM is used to govern the inference process within a clique.  A [FunctionalS
 
 ## Sequential Nested Gibbs Method
 
-Current default inference method.
+Current default inference method.  See [Fourie et al., IROS 2016]
 
 ### Convolution Approximation (Quasi-Deterministic)
 
