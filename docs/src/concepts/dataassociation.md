@@ -8,14 +8,18 @@ Data association applies well beyond just loop-closure, including but not limite
 
 Consider the following canonical illustrations regarding feature selection on some domain (say landmarks in geometry space):
 
+```@raw html
 <p align="center">
 <img src="https://user-images.githubusercontent.com/6412556/76276600-2686ef00-627e-11ea-9c86-fd21852ef793.png" width="640" border="0" />
 </p>
+```
 
 ## Modeling Multihypothesis
 
 The `addFactor!` function offers the `multihypo=[1;0.6;0.3;0.1;1]` keyword option, where the user can convert any one variable of an arbitrary factor into a fractional list of probabilities -- e.g. a three variable factor now has triple association uncertainty on the middle variable.  A more classical binary multihypothesis example is illustated in the multimodal (non-Gaussian) factor graph below:
 
+```@raw html
 <p align="center">
 <img src="https://user-images.githubusercontent.com/6412556/76276833-dfe5c480-627e-11ea-9d84-2df1e1138bbf.png" width="640" border="0" />
 </p>
+```
