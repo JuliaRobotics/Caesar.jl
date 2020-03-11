@@ -8,7 +8,7 @@ struct PyNeuralPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwiseMini
   predictFnc::P
   joyVelData::D
   naiveModel::M
-  naiveFrac::Int
+  naiveFrac::Float64
   Zij::Pose2Pose2
   specialSampler::Function
 end

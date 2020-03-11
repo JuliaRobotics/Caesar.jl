@@ -31,6 +31,7 @@ include("parsecommands.jl")
 
 using DelimitedFiles
 using Dates, Statistics
+using YAML
 using CoordinateTransformations, Rotations, StaticArrays
 using ImageCore
 using Images, ImageDraw
@@ -55,9 +56,8 @@ using Cairo
 # using GeometryTypes # using MeshCat
 end
 
-# setup configuration
-using YAML
 
+# setup configuration
 include(joinpath(@__DIR__,"configParameters.jl") )
 
 
