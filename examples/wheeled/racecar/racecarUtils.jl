@@ -83,7 +83,7 @@ function addnextpose!(fg,
       pp = !donnpose ? Pose2Pose2(DXmvn) : PyNeuralPose2Pose2(odopredfnc,joyvel[prev_pssym],DXmvn,naiveFrac)
       addFactor!(fg, [prev_pssym; new_pssym], pp, graphinit=autoinit)
     elseif odotype == VelPose2VelPose2
-      donnpose ? error("Not implemented for VelPose2VelPose2 yet")
+      donnpose ? error("Not implemented for VelPose2VelPose2 yet") : nothing
       addVariable!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
       vpvp = VelPose2VelPose2(odoKDE, MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2))))
       addFactor!(fg, [prev_pssym; new_pssym], vpvp, graphinit=autoinit)
