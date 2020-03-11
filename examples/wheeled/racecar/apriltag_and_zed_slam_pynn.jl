@@ -36,6 +36,7 @@ using ImageCore
 using Images, ImageDraw
 # using ImageView
 using AprilTags
+using DataInterpolations
 
 using RoME
 using Caesar
@@ -112,17 +113,42 @@ end
 runnr = parse(Int, parsed_args["folder_name"][end])
 joyTimeseries = readdlm(joinpath(datadir,parsed_args["folder_name"],"labRun$(runnr)_joy.csv"), ',')
 joyTimeseries = joyTimeseries[2:end,[1,6,8]]
-joyTimeseries[:,1] .= joyTimeseries[:,1]*1e-9 .|> unix2datetime;
+joyTimeseries[:,1] .= joyTimeseries[:,1]*1e-9 # .|> unix2datetime;
 
 # load the detections file to get timestamps
 detcData = readdlm(joinpath(datadir,parsed_args["folder_name"],"labRun$(runnr)Detections.csv"), ',')
 detcData = detcData[2:end,:]
 detcPoseTs = detcData[:,4]*1e-9 .+ detcData[:,3] .|> unix2datetime
-# joyTimeseries[:,1] .< detcPoseTs[2]??
+
+## find timeseries segments that go with each pose
+joyTsDict = Dict{Symbol, Array{Float64,2}}()
+mask = joyTimeseries[:,1] .< datetime2unix(detcPoseTs[1])
+joyTsDict[:x0] = joyTimeseries[mask,:]
+
+for i in 2:length(detcPoseTs)
+  mask = datetime2unix(detcPoseTs[i-1]) .<= joyTimeseries[:,1] .< datetime2unix(detcPoseTs[i])
+  joyTsDict[Symbol("x$(i-1)")] = joyTimeseries[mask,:]
+end
+
+## interpolate up to PyQuest values...
+
+intJoyDict = Dict{Symbol,Array{Float64,2}}()
+# for sym, lclJD = :x1, joyTsDict[:x1]
+for (sym, lclJD) in joyTsDict
+  tsLcl = range(lclJD[1,1],lclJD[end,1],length=25)
+  intrTrTemp = DataInterpolations.LinearInterpolation(lclJD[:,2],lclJD[:,1])
+  intrStTemp = DataInterpolations.LinearInterpolation(lclJD[:,3],lclJD[:,1])
+  newVal = zeros(25,4)
+  newVal[:,1] = intrTrTemp.(tsLcl)
+  newVal[:,2] = intrStTemp.(tsLcl)
+  # currently have no velocity values
+  intJoyDict[sym] = newVal
+end
+
+
+
 
 ## run the solution
-
-
 
 fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joysticktimeseries=joyTimeseries  )
 
