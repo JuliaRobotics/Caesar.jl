@@ -5,11 +5,11 @@ import IncrementalInference: getSample
 using Random, Statistics
 
 struct PyNeuralPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwiseMinimize
-  Zij::Pose2Pose2
   predictFnc::P
   joyVelData::D
   naiveModel::M
   naiveFrac::Int
+  Zij::Pose2Pose2
   specialSampler::Function
 end
 
@@ -64,12 +64,11 @@ function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
 end
 
 # Convenience function to help call the right constuctor
-PyNeuralPose2Pose2(z::T,
-                   nn::P,
+PyNeuralPose2Pose2(nn::P,
                    jvd::D,
                    md::M,
                    naiveFrac::Float64=0.4,
-                   ss::Function=sampleNeuralPose2) where {M <: SamplableBelief, D <: Vector} = PyNeuralPose2Pose2{T,P,D,M}(z,nn,jvd,md,naiveFrac,ss)
+                   ss::Function=sampleNeuralPose2) where {M <: SamplableBelief, D <: Vector} = PyNeuralPose2Pose2{T,P,D,M}(nn,jvd,md,naiveFrac,ss)
 #
 
 

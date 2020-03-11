@@ -55,37 +55,41 @@ function addnextpose!(fg,
                       autoinit=true,
                       odopredfnc=nothing,
                       joyvel=nothing,
-                      parametricOdoMix=0.3)
+                      naiveFrac=0.4)
   #
   prev_pssym = Symbol("x$(prev_psid)")
   new_pssym = Symbol("x$(new_psid)")
-  donnpose = false
+  #naive odometry model
+  DXmvn = MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))
 
-  let odoKDE, DXmvn = MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))
-    # predict delta x y th odo if able
-    if odopredfnc != nothing && joyvel != nothing
-      donnpose = true
-      nnpts = odopredfnc(joyvel)
-      # replace theta points
-      nnpts[:,3] .= rand(DXmvn, size(nnpts,1))[:,3]
-      mvnpts = rand( DXmvn, round(Int, parametricOdoMix*size(nnpts, 1)) )
-      odoKDE = manikde!([nnpts;mvnpts], Pose2)
-    else
-      odoKDE = DXmvn
-    end
+  donnpose = false
+  if odopredfnc != nothing && joyvel != nothing
+    donnpose = true
+  end
+
+  # let odoKDE,
+    # # predict delta x y th odo if able
+    #   nnpts = odopredfnc(joyvel)
+    #   # replace theta points
+    #   nnpts[:,3] .= rand(DXmvn, size(nnpts,1))[:,3]
+    #   mvnpts = rand( DXmvn, round(Int, parametricOdoMix*size(nnpts, 1)) )
+    #   odoKDE = manikde!([nnpts;mvnpts], Pose2)
+    # else
+    #   odoKDE = DXmvn
 
     # first pose with zero prior
     if odotype == Pose2Pose2
       addVariable!(fg, new_pssym, Pose2)
-      pp = Pose2Pose2(odoKDE)
+      pp = !donnpose ? Pose2Pose2(DXmvn) : PyNeuralPose2Pose2(odopredfnc,joyvel[prev_pssym],DXmvn,naiveFrac)
       addFactor!(fg, [prev_pssym; new_pssym], pp, graphinit=autoinit)
     elseif odotype == VelPose2VelPose2
+      donnpose ? error("Not implemented for VelPose2VelPose2 yet")
       addVariable!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
       vpvp = VelPose2VelPose2(odoKDE, MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2))))
       addFactor!(fg, [prev_pssym; new_pssym], vpvp, graphinit=autoinit)
       #
     end
-  end
+  # end
 
   addApriltags!(fg, new_pssym, pose_tag_bag, lmtype=lmtype, fcttype=fcttype, DAerrors=DAerrors)
   new_pssym
