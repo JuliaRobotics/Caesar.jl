@@ -3,6 +3,7 @@
 import Base: convert
 import IncrementalInference: getSample
 using Random, Statistics
+using DistributedFactorGraphs, TransformUtils
 
 struct PyNeuralPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwiseMinimize
   predictFnc::P
@@ -40,9 +41,15 @@ function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
   # calculate an average velocity component
   DT = jT - iT
   DXY = (@view jPts[1:2,:]) - (@view jPts[1:2,:])
-  VXY = DXY ./ DT
-  # replace velocity values for this sampling
+  # rotate delta position from world to local iX frame
+  for i in 1:size(iPts,2)
+    DXY[1:2,i] .= TransformUtils.R(iPts[3,i])'*DXY[1:2,i]
+  end
+  # replace delta (velocity) values for this sampling
   mVXY = Statistics.mean(VXY, dims=2)
+  # divide time to get velocity
+  mVXY ./= DT
+
   for i in 1:len
     nfb.joyVelData[i][3:4] = mVXY
   end
