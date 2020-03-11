@@ -16,7 +16,7 @@ end
 
 # special sampling function
 function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
-                           N::Int=1,
+                           N::Int,
                            Xi::DFGVariable,
                            Xj::DFGVariable)::Tuple
   #
