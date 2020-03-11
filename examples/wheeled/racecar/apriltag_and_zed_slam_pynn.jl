@@ -132,17 +132,21 @@ end
 
 ## interpolate up to PyQuest values...
 
-intJoyDict = Dict{Symbol,Array{Float64,2}}()
+intJoyDict = Dict{Symbol,Vector{Vector{Float64}}}()
 # for sym, lclJD = :x1, joyTsDict[:x1]
 for (sym, lclJD) in joyTsDict
   tsLcl = range(lclJD[1,1],lclJD[end,1],length=25)
   intrTrTemp = DataInterpolations.LinearInterpolation(lclJD[:,2],lclJD[:,1])
   intrStTemp = DataInterpolations.LinearInterpolation(lclJD[:,3],lclJD[:,1])
-  newVal = zeros(25,4)
-  newVal[:,1] = intrTrTemp.(tsLcl)
-  newVal[:,2] = intrStTemp.(tsLcl)
+  newVec = Vector{Vector{Float64}}()
+  for tsL in tsLcl
+    newVal = zeros(4)
+    newVal[1] = intrTrTemp(tsL)
+    newVal[2] = intrStTemp(tsL)
+    push!(newVec, newVal)
+  end
   # currently have no velocity values
-  intJoyDict[sym] = newVal
+  intJoyDict[sym] = newVec
 end
 
 
@@ -150,7 +154,7 @@ end
 
 ## run the solution
 
-fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joysticktimeseries=joyTimeseries  )
+fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joyvel=intJoyDict  )
 
 
 

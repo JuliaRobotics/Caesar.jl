@@ -54,16 +54,18 @@ function addnextpose!(fg,
                       DAerrors=0.0,
                       autoinit=true,
                       odopredfnc=nothing,
-                      joysticktimeseries=nothing,
+                      joyvel=nothing,
                       parametricOdoMix=0.3)
   #
   prev_pssym = Symbol("x$(prev_psid)")
   new_pssym = Symbol("x$(new_psid)")
+  donnpose = false
 
   let odoKDE, DXmvn = MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))
     # predict delta x y th odo if able
-    if odopredfnc != nothing && joysticktimeseries != nothing
-      nnpts = odopredfnc(joysticktimeseries)
+    if odopredfnc != nothing && joyvel != nothing
+      donnpose = true
+      nnpts = odopredfnc(joyvel)
       # replace theta points
       nnpts[:,3] .= rand(DXmvn, size(nnpts,1))[:,3]
       mvnpts = rand( DXmvn, round(Int, parametricOdoMix*size(nnpts, 1)) )
@@ -75,13 +77,12 @@ function addnextpose!(fg,
     # first pose with zero prior
     if odotype == Pose2Pose2
       addVariable!(fg, new_pssym, Pose2)
-      addFactor!(fg, [prev_pssym; new_pssym], Pose2Pose2(odoKDE), autoinit=autoinit)
+      pp = Pose2Pose2(odoKDE)
+      addFactor!(fg, [prev_pssym; new_pssym], pp, graphinit=autoinit)
     elseif odotype == VelPose2VelPose2
       addVariable!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
-      addFactor!(fg, [prev_pssym; new_pssym],
-                  VelPose2VelPose2(odoKDE,
-                                   MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2)))),
-                 autoinit=autoinit)
+      vpvp = VelPose2VelPose2(odoKDE, MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2))))
+      addFactor!(fg, [prev_pssym; new_pssym], vpvp, graphinit=autoinit)
       #
     end
   end
@@ -166,7 +167,8 @@ function main(WP,
               jldfile::String="",
               failsafe::Bool=false,
               show::Bool=false,
-              odopredfnc=nothing  )
+              odopredfnc=nothing,
+              joyvel=nothing  )
 #
 
 # Factor graph construction
@@ -218,7 +220,7 @@ tree, smt, hist = solveTree!(fg)
 for psid in (prev_psid+1):1:maxlen
   # global prev_psid, maxlen
   @show psym = Symbol("x$psid")
-  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=Pose2Pose2, fcttype=Pose2Pose2, autoinit=true, odopredfnc=odopredfnc)
+  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=Pose2Pose2, fcttype=Pose2Pose2, autoinit=true, odopredfnc=odopredfnc, joyvel=joyvel)
   # odotype=VelPose2VelPose2, fcttype=DynPose2Pose2
   # writeGraphPdf(fg)
 
