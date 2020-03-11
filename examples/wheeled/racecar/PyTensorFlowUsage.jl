@@ -12,7 +12,7 @@ using PyCall
 
 py"""
 import sys
-sys.path.insert(0, "/home/singhk/learning-odometry/")
+sys.path.insert(0, ENV["HOME"]*"/learning-odometry/")
 """
 
 # @show tfmodeldir = joinpath(ENV["HOME"],"learning-odometry/")
