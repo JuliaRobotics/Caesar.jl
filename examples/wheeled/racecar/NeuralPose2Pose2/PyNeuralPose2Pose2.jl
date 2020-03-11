@@ -68,7 +68,7 @@ PyNeuralPose2Pose2(nn::P,
                    jvd::D,
                    md::M,
                    naiveFrac::Float64=0.4,
-                   ss::Function=sampleNeuralPose2) where {P, M <: SamplableBelief, D <: Vector} = PyNeuralPose2Pose2{P,D,M}(nn,jvd,md,naiveFrac,ss)
+                   ss::Function=sampleNeuralPose2) where {P, M <: SamplableBelief, D <: Vector} = PyNeuralPose2Pose2{P,D,M}(nn,jvd,md,naiveFrac,Pose2Pose2(MvNormal(zeros(3),diagm(ones(3)))),ss)
 #
 
 
