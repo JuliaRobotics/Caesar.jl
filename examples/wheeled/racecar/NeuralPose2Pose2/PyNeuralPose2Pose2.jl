@@ -11,15 +11,16 @@ struct PyNeuralPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwiseMini
   naiveModel::M
   naiveFrac::Float64
   Zij::Pose2Pose2
-  specialSampler::Function
+  specialSampler::Function # special keyword field name used to invoke 'specialSampler' logic
 end
 
 
 # special sampling function
 function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
                            N::Int,
-                           Xi::DFGVariable,
-                           Xj::DFGVariable)::Tuple
+                           fmd::FactorMetadata,
+                           Xi::VariableNodeData,
+                           Xj::VariableNodeData)::Tuple
   #
   @assert size(jPts,2) == size(iPts,2) "sampleNeuralPose2 can currently only evaluate equal population size variables"
 
