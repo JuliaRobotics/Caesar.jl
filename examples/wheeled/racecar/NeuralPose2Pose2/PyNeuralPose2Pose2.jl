@@ -19,8 +19,8 @@ end
 function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
                            N::Int,
                            fmd::FactorMetadata,
-                           Xi::VariableNodeData,
-                           Xj::VariableNodeData)::Tuple
+                           Xi::DFGVariable,
+                           Xj::DFGVariable)::Tuple
   #
 
   # calculate naive model and Predictive fraction of samples, respectively
