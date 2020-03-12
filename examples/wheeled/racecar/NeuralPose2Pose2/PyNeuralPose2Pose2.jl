@@ -47,7 +47,7 @@ function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
     DXY[1:2,i] .= TransformUtils.R(iPts[3,i])'*DXY[1:2,i]
   end
   # replace delta (velocity) values for this sampling
-  mVXY = Statistics.mean(VXY, dims=2)
+  mVXY = Statistics.mean(DXY, dims=2)
   # divide time to get velocity
   mVXY ./= DT
 
