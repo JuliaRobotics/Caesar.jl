@@ -88,13 +88,13 @@ racecarslampyodo_8() {
 }
 
 
-racecarall() {
+racecarslampynnall() {
   racecarslampyodo_1 $* &
-  racecarslampyodo_2 $* &
-  racecarslampyodo_3 $* &
-  racecarslampyodo_4 $* &
-  racecarslampyodo_5 $* &
-  racecarslampyodo_6 $* &
-  racecarslampyodo_7 $* &
-  racecarslampyodo_8 $* &
+  sleep 30; racecarslampyodo_2 $* &
+  sleep 60; racecarslampyodo_3 $* &
+  sleep 90; racecarslampyodo_4 $* &
+  sleep 120; racecarslampyodo_5 $* &
+  sleep 150; racecarslampyodo_6 $* &
+  sleep 180; racecarslampyodo_7 $* &
+  sleep 210; racecarslampyodo_8 $* &
 }
