@@ -8,7 +8,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
       @info "adding node $lmsym"
-      addVariable!(fg, lmsym, lmtype, timestamp=getTimestamp(fg, pssym))
+      addVariable!(fg, lmsym, lmtype, timestamp=getTimestamp(getVariable(fg, pssym)))
     end
     ppbr = nothing
     if lmtype == RoME.Point2
