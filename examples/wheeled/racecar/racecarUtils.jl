@@ -235,7 +235,7 @@ tree, smt, hist = solveTree!(fg)
 
 # Gadfly.push_theme(:default)
 
-@sync begin
+# @sync begin
 
 for psid in (prev_psid+1):1:maxlen
   # global prev_psid, maxlen
@@ -250,15 +250,15 @@ for psid in (prev_psid+1):1:maxlen
     tree, smt, hist = solveTree!(fg, tree, maxparallel=500)
   end
 
-  T1 = remotecall(saveDFG, WP, fg, resultsdir*"/racecar_fg_$(psym)")
-  @async fetch(T1)
-  # saveDFG(fg, resultsdir*"/racecar_fg_$(psym)")
+  # T1 = remotecall(saveDFG, WP, fg, resultsdir*"/racecar_fg_$(psym)")
+  # @async fetch(T1)
+  saveDFG(fg, resultsdir*"/racecar_fg_$(psym)")
 
   ## save factor graph for later testing and evaluation
   ensureAllInitialized!(fg)
-  T2 = remotecall(plotRacecarInterm, WP, fg, resultsdir, psym)
-  @async fetch(T2)
-  # plotRacecarInterm(fg, resultsdir, psym)
+  # T2 = remotecall(plotRacecarInterm, WP, fg, resultsdir, psym)
+  # @async fetch(T2)
+  plotRacecarInterm(fg, resultsdir, psym)
 
   # prepare for next iteration
   prev_psid = psid
@@ -267,7 +267,7 @@ end # for
 # extract results for later use as training data
 results2csv(fg, dir=resultsdir, filename="results.csv")
 
-end #sync
+# end #sync
 
 return fg
 end # main
