@@ -137,18 +137,22 @@ end
 intJoyDict = Dict{Symbol,Vector{Vector{Float64}}}()
 # for sym, lclJD = :x1, joyTsDict[:x1]
 for (sym, lclJD) in joyTsDict
-  tsLcl = range(lclJD[1,1],lclJD[end,1],length=25)
-  intrTrTemp = DataInterpolations.LinearInterpolation(lclJD[:,2],lclJD[:,1])
-  intrStTemp = DataInterpolations.LinearInterpolation(lclJD[:,3],lclJD[:,1])
-  newVec = Vector{Vector{Float64}}()
-  for tsL in tsLcl
-    newVal = zeros(4)
-    newVal[1] = intrTrTemp(tsL)
-    newVal[2] = intrStTemp(tsL)
-    push!(newVec, newVal)
+  if 1 < size(lclJD,1)
+    tsLcl = range(lclJD[1,1],lclJD[end,1],length=25)
+    intrTrTemp = DataInterpolations.LinearInterpolation(lclJD[:,2],lclJD[:,1])
+    intrStTemp = DataInterpolations.LinearInterpolation(lclJD[:,3],lclJD[:,1])
+    newVec = Vector{Vector{Float64}}()
+    for tsL in tsLcl
+      newVal = zeros(4)
+      newVal[1] = intrTrTemp(tsL)
+      newVal[2] = intrStTemp(tsL)
+      push!(newVec, newVal)
+    end
+    # currently have no velocity values
+    intJoyDict[sym] = newVec
+  else
+    intJoyDict[sym] = [zeros(4) for i in 1:25]
   end
-  # currently have no velocity values
-  intJoyDict[sym] = newVec
 end
 
 # add the NeuralPose2Pose2 factor in Main workspace
