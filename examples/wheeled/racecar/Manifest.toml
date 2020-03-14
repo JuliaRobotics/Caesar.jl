@@ -117,6 +117,12 @@ git-tree-sha1 = "41129bf1af018b49855a846b1b3955cee980bf8a"
 uuid = "39d38320-a18c-5735-a4f5-135970cd79b8"
 version = "0.1.2"
 
+[[CodeTracking]]
+deps = ["InteractiveUtils", "UUIDs"]
+git-tree-sha1 = "0becdab7e6fbbcb7b88d8de5b72e5bb2f28239f3"
+uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
+version = "0.5.8"
+
 [[CodecZlib]]
 deps = ["BinaryProvider", "Libdl", "TranscodingStreams"]
 git-tree-sha1 = "05916673a2627dd91b4969ff8ba6941bc85a960e"
@@ -206,6 +212,11 @@ git-tree-sha1 = "d56f26542bb7af9c0ec16e098a0a33352f3c9d8e"
 uuid = "7ad07ef1-bdf2-5661-9d2b-286fd4296dac"
 version = "0.1.0"
 
+[[Crayons]]
+git-tree-sha1 = "cb7a62895da739fe5bb43f1a26d4292baf4b3dc0"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.0.1"
+
 [[CustomUnitRanges]]
 git-tree-sha1 = "0d42a23be3acfb3c58569b28ed3ab8bd67af5ced"
 uuid = "dc8bdbbb-1ca9-579f-8c36-e416f6a65cce"
@@ -242,6 +253,12 @@ version = "1.0.0"
 [[Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[Debugger]]
+deps = ["CodeTracking", "Crayons", "Highlights", "InteractiveUtils", "JuliaInterpreter", "Markdown", "REPL"]
+git-tree-sha1 = "0b5e62b2ec174866953276bbd384c2154f178642"
+uuid = "31a5f54b-26ea-5ae9-a837-f05ce5417438"
+version = "0.6.4"
 
 [[DelimitedFiles]]
 deps = ["Mmap"]
@@ -466,6 +483,12 @@ git-tree-sha1 = "de4a6f9e7c4710ced6838ca906f81905f7385fd6"
 uuid = "a1b4810d-1bce-5fbd-ac56-80944d57a21f"
 version = "0.2.0"
 
+[[Highlights]]
+deps = ["DocStringExtensions", "InteractiveUtils", "REPL"]
+git-tree-sha1 = "f823a2d04fb233d52812c8024a6d46d9581904a4"
+uuid = "eafb193a-b7ab-5a9e-9068-77385905fa72"
+version = "0.4.5"
+
 [[IRTools]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
 git-tree-sha1 = "1a4355e4b5b50be2311ebb644f34f3306dbd0410"
@@ -540,9 +563,9 @@ version = "0.2.3"
 
 [[ImageTransformations]]
 deps = ["AxisAlgorithms", "ColorVectorSpace", "CoordinateTransformations", "IdentityRanges", "ImageCore", "Interpolations", "OffsetArrays", "StaticArrays"]
-git-tree-sha1 = "2b485350fb128bcdfa2a4dc8c4693c564e5bbf14"
+git-tree-sha1 = "34e3b7549af44043e37ba321334afa322ec63a9d"
 uuid = "02fcd773-0e25-5acc-982a-7f6622650795"
-version = "0.8.3"
+version = "0.8.4"
 
 [[Images]]
 deps = ["AxisArrays", "Base64", "ColorTypes", "ColorVectorSpace", "Colors", "FileIO", "FixedPointNumbers", "Graphics", "ImageAxes", "ImageCore", "ImageDistances", "ImageFiltering", "ImageMetadata", "ImageMorphology", "ImageShow", "ImageTransformations", "IndirectArrays", "MappedArrays", "OffsetArrays", "Reexport", "SparseArrays", "StaticArrays", "Statistics", "StatsBase", "TiledIteration"]
@@ -552,7 +575,7 @@ version = "0.18.0"
 
 [[IncrementalInference]]
 deps = ["ApproxManifoldProducts", "Combinatorics", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "FunctionalStateMachine", "Graphs", "JLD2", "JSON2", "KernelDensityEstimate", "LinearAlgebra", "Logging", "MetaGraphs", "NLsolve", "Optim", "ProgressMeter", "Random", "Reexport", "Requires", "SparseArrays", "Statistics", "StatsBase", "SuiteSparse"]
-git-tree-sha1 = "348f7a68e7cb0473c8b159dc54dec03a6c96c5f6"
+git-tree-sha1 = "4630d72f1af0b4117e4d71eb440df95c1ad40b54"
 repo-rev = "hotfix/1Q20/specSampXi"
 repo-url = "https://github.com/JuliaRobotics/IncrementalInference.jl.git"
 uuid = "904591bb-b899-562f-9e6f-b8df64c7d480"
@@ -636,6 +659,12 @@ deps = ["Libdl", "Pkg"]
 git-tree-sha1 = "b007cedc10bb017cdae3af0062fe4dd29b483c70"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "2.0.1+0"
+
+[[JuliaInterpreter]]
+deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
+git-tree-sha1 = "2eadbbde5534346cbb837c3a75b377cba477a06d"
+uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
+version = "0.7.13"
 
 [[Juno]]
 deps = ["Base64", "Logging", "Media", "Profile", "Test"]
@@ -870,9 +899,9 @@ version = "8.42.0+1"
 
 [[PDMats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "5f303510529486bb02ac4d70da8295da38302194"
+git-tree-sha1 = "2fc6f50ddd959e462f0a2dbc802ddf2a539c6e35"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.9.11"
+version = "0.9.12"
 
 [[PaddedViews]]
 deps = ["OffsetArrays", "Test"]
@@ -1012,7 +1041,7 @@ version = "0.2.2+0"
 
 [[RoME]]
 deps = ["ApproxManifoldProducts", "CoordinateTransformations", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "Graphs", "IncrementalInference", "JLD2", "KernelDensityEstimate", "LinearAlgebra", "Optim", "ProgressMeter", "Reexport", "Rotations", "Statistics", "TransformUtils"]
-git-tree-sha1 = "7c61065ab26fac61729937186cfe372e41b4c1d7"
+path = "/home/singhk/.julia/dev/RoME"
 uuid = "91fb55c2-4c03-5a59-ba21-f4ea956187b8"
 version = "0.6.1"
 
@@ -1136,7 +1165,9 @@ version = "0.9.5"
 
 [[TransformUtils]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "01ae15c543b9313537c214b1144c027a64f9f0ca"
+git-tree-sha1 = "c8a478620b56059fc553b54af500f6cef77e9386"
+repo-rev = "maint/1Q20/real"
+repo-url = "https://github.com/dehann/TransformUtils.jl.git"
 uuid = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"
 version = "0.2.3"
 
@@ -1292,9 +1323,9 @@ version = "1.4.4+0"
 
 [[Zygote]]
 deps = ["ArrayLayouts", "DiffRules", "FFTW", "FillArrays", "ForwardDiff", "IRTools", "InteractiveUtils", "LinearAlgebra", "MacroTools", "NNlib", "NaNMath", "Random", "Requires", "SpecialFunctions", "Statistics", "ZygoteRules"]
-git-tree-sha1 = "7dc5fdb4917ac5a84e199ae654316a01cd4a278b"
+git-tree-sha1 = "4a3c8decdf1d498cd13fe29827350d727a3b3854"
 uuid = "e88e6eb3-aa80-5325-afca-941959d7151f"
-version = "0.4.9"
+version = "0.4.10"
 
 [[ZygoteRules]]
 deps = ["MacroTools"]

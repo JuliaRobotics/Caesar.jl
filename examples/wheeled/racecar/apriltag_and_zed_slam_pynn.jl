@@ -157,17 +157,35 @@ include(joinpath(@__DIR__, "NeuralPose2Pose2/PyNeuralPose2Pose2.jl"))
 
 ## run the solution
 
-fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joyvel=intJoyDict, poseTimes=poseTimes  )
+
+# fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joyvel=intJoyDict, poseTimes=poseTimes  )
 
 
 
 0
 
+fg = initfg()
+
+addVariable!(fg, :x0, Pose2)
+addVariable!(fg, :x1, Pose2)
+
+pp2 = PriorPose2(MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.005].^2)))
+addFactor!(fg, [:x0], pp2)
+
+# the neural factor
+DXmvn = MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.005].^2))
+odopredfnc=PyTFOdoPredictorPoint2
+joyvel=intJoyDict
+pp = PyNeuralPose2Pose2(odopredfnc,joyvel[:x0],DXmvn,0.4)
+addFactor!(fg, [:x0], pp)
+
+
+
+
 
 # fails
 # key 1 not found
 # julia101 -p 4 apriltag_and_zed_slam.jl --previous "2018-11-09T01:42:33.279" --jldfile "racecar_fg_x299.jld2" --folder_name "labrun7" --failsafe
-
 
 
 #

@@ -1,4 +1,5 @@
 [deps]
+ApproxManifoldProducts = "9bbbb610-88a1-53cd-9763-118ce10c1f89"
 AprilTags = "f0fec3d5-a81e-5a6a-8c28-d2b34f3659de"
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 Caesar = "62eebf14-49bc-5f46-9df9-f7b7ef379406"
@@ -6,6 +7,7 @@ Cairo = "159f3aea-2a34-519c-b102-8c37f9878175"
 CoordinateTransformations = "150eb455-5306-5404-9cee-2592286d6298"
 DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Debugger = "31a5f54b-26ea-5ae9-a837-f05ce5417438"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 DistributedFactorGraphs = "b5cc3c7e-6572-11e9-2517-99fb8daf2f04"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
