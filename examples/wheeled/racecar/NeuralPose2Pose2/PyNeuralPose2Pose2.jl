@@ -5,7 +5,7 @@ import IncrementalInference: getSample
 using Random, Statistics
 using DistributedFactorGraphs, TransformUtils
 
-struct PyNeuralPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwiseMinimize
+struct PyNeuralPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwise
   predictFnc::P
   joyVelData::D
   naiveModel::M
@@ -86,9 +86,9 @@ function (nfb::PyNeuralPose2Pose2)(
             res::AbstractArray{<:Real},
             userdata::FactorMetadata,
             idx::Int,
-            meas, #::Tuple{AbstractArray{<:Real},},
+            meas::Tuple{AbstractArray{<:Real},},
             Xi::AbstractArray{<:Real,2},
-            Xj::AbstractArray{<:Real,2}  ) <: FunctorPairwise
+            Xj::AbstractArray{<:Real,2}  )
   #
   @show "this far"
   nfb.Zij(res,userdata,idx,meas,Xi,Xj)
