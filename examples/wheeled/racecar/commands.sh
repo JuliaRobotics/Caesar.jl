@@ -63,26 +63,38 @@ racecarall() {
 
 
 racecarslampyodo_1() {
-    julia -O 3 -p 8 apriltag_and_zed_slam_pynn.jl --folder_name "labrun1" $*
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun1" $*
 }
 racecarslampyodo_2() {
-    julia -O 3 -p 8 apriltag_and_zed_slam_pynn.jl --folder_name "labrun2" $*
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun2" $*
 }
 racecarslampyodo_3() {
-    julia -O 3 -p 8 apriltag_and_zed_slam_pynn.jl --folder_name "labrun3" $*
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun3" $*
 }
 racecarslampyodo_4() {
-    julia -O 3 -p 8 apriltag_and_zed_slam_pynn.jl --folder_name "labrun4" $*
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun4" $*
 }
 racecarslampyodo_5() {
-    julia -O 3 -p 8 apriltag_and_zed_slam_pynn.jl --folder_name "labrun5" $*
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun5" $*
 }
 racecarslampyodo_6() {
-    julia -O 3 -p 8 apriltag_and_zed_slam_pynn.jl --folder_name "labrun6" $*
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun6" $*
 }
 racecarslampyodo_7() {
-    julia -O 3 -p 8 apriltag_and_zed_slam_pynn.jl --folder_name "labrun7" $*
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun7" $*
 }
 racecarslampyodo_8() {
-    julia -O 3 -p 8 apriltag_and_zed_slam_pynn.jl --folder_name "labrun8" $*
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun8" $*
+}
+
+
+racecarall() {
+  racecarslampyodo_1 $* &
+  racecarslampyodo_2 $* &
+  racecarslampyodo_3 $* &
+  racecarslampyodo_4 $* &
+  racecarslampyodo_5 $* &
+  racecarslampyodo_6 $* &
+  racecarslampyodo_7 $* &
+  racecarslampyodo_8 $* &
 }
