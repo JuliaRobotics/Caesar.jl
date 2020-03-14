@@ -14,6 +14,7 @@ struct PyNeuralPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwise
   specialSampler::Function # special keyword field name used to invoke 'specialSampler' logic
 end
 
+
 function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
                           N::Int,
                           fmd::FactorMetadata,
@@ -45,9 +46,9 @@ function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
   # replace delta (velocity) values for this sampling
   mVXY = Statistics.mean(DXY, dims=2)
   # divide time to get velocity
-  if DT.value < 1e-9
-    mVXY ./= 1e-3*DT.value
-  end
+  mVXY ./= 1e-3*DT.value
+  mVXY[1] = isnan(mVXY[1]) ? 0.0 : mVXY[1]
+  mVXY[2] = isnan(mVXY[2]) ? 0.0 : mVXY[2]
 
   for i in 1:len
     nfb.joyVelData[i][3:4] = mVXY
@@ -84,7 +85,7 @@ PyNeuralPose2Pose2(nn::P,
                    jvd::D,
                    md::M,
                    naiveFrac::Float64=0.4,
-                   ss::Function=sampleNeuralPose2) where {P, M <: SamplableBelief, D <: Vector} = PyNeuralPose2Pose2{P,D,M}(nn,jvd,md,naiveFrac,Pose2Pose2(MvNormal(zeros(3),diagm(ones(3)))),ss)
+                   ss::Function=sampleNeuralPose2) where {P, M <: SamplableBelief, D <: Vector} = PyNeuralPose2Pose2{P,D,M}(nn,jvd,md,naiveFrac,Pose2Pose2(MvNormal(zeros(3),diagm(ones(3)))),ss )
 #
 
 
