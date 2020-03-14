@@ -90,6 +90,7 @@ function (nfb::PyNeuralPose2Pose2)(
             Xi::AbstractArray{<:Real,2},
             Xj::AbstractArray{<:Real,2}  ) <: FunctorPairwise
   #
+  @show "this far"
   nfb.Zij(res,userdata,idx,meas,Xi,Xj)
   nothing
 end
