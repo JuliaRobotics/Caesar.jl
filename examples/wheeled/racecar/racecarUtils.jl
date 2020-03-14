@@ -174,11 +174,13 @@ function main(WP,
               show::Bool=false,
               odopredfnc=nothing,
               joyvel=nothing,
-              poseTimes=nothing )
+              poseTimes=nothing,
+              multiproc=true )
 #
 
 # Factor graph construction
 fg = initfg()
+getSolverParams(fg).multiproc=multiproc
 prev_psid = 0
 
 # load from previous file

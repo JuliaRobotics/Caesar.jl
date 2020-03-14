@@ -101,4 +101,24 @@ function (nfb::PyNeuralPose2Pose2)(
   nothing
 end
 
+
+
+## packing converters
+
+struct PackedPyNeuralPose2Pose2 <: IncrementalInference.PackedInferenceType
+  joyVelData::Vector{Vector{Float64}}
+  naiveModel::String
+  naiveFrac::Float64
+end
+
+
+function convert(::Type{PyNeuralPose2Pose2}, d::PackedPyNeuralPose2Pose2)
+  PyNeuralPose2Pose2(PyTFOdoPredictorPoint2,d.joyVelData,extractdistribution(d.naiveModel),d.naiveFrac)
+end
+
+function convert(::Type{PackedPyNeuralPose2Pose2}, d::PyNeuralPose2Pose2)
+  PackedPyNeuralPose2Pose2(d.joyVelData, string(d.naiveModel), d.naiveFrac)
+end
+
+
 #

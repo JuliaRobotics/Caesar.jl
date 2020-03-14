@@ -16,7 +16,7 @@ Base.cd(@__DIR__)
 
 ## Load all required packages
 using Distributed
-addprocs(5) # make sure there are 4 processes waiting before loading packages
+# addprocs(5) # make sure there are 4 processes waiting before loading packages
 
 @everywhere begin
   using Pkg
@@ -158,26 +158,28 @@ include(joinpath(@__DIR__, "NeuralPose2Pose2/PyNeuralPose2Pose2.jl"))
 ## run the solution
 
 
-# fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joyvel=intJoyDict, poseTimes=poseTimes  )
+fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joyvel=intJoyDict, poseTimes=poseTimes, multiproc=false  )
 
 
+## development
 
-0
-
-fg = initfg()
-
-addVariable!(fg, :x0, Pose2, timestamp=poseTimes[:x0])
-addVariable!(fg, :x1, Pose2, timestamp=poseTimes[:x1])
-
-pp2 = PriorPose2(MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.005].^2)))
-addFactor!(fg, [:x0], pp2)
-
-# the neural factor
-DXmvn = MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.005].^2))
-odopredfnc=PyTFOdoPredictorPoint2
-joyvel=intJoyDict
-pp = PyNeuralPose2Pose2(odopredfnc,joyvel[:x0],DXmvn,0.4)
-addFactor!(fg, [:x0;:x1], pp)
+#
+# 0
+#
+# fg = initfg()
+#
+# addVariable!(fg, :x0, Pose2, timestamp=poseTimes[:x0])
+# addVariable!(fg, :x1, Pose2, timestamp=poseTimes[:x1])
+#
+# pp2 = PriorPose2(MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.005].^2)))
+# addFactor!(fg, [:x0], pp2)
+#
+# # the neural factor
+# DXmvn = MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.005].^2))
+# odopredfnc=PyTFOdoPredictorPoint2
+# joyvel=intJoyDict
+# pp = PyNeuralPose2Pose2(odopredfnc,joyvel[:x0],DXmvn,0.4)
+# addFactor!(fg, [:x0;:x1], pp)
 
 
 
