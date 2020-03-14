@@ -197,7 +197,7 @@ defaultFixedLagOnTree!(fg, lagLength, limitfixeddown=false)
 psid = 0
 pssym = Symbol("x$psid")
 # first pose with zero prior
-addVariable!(fg, pssym, Pose2)
+addVariable!(fg, pssym, Pose2, timestamp=poseTimes[:x0])
 # addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2))))
 addFactor!(fg, [pssym], PriorPose2(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2)))) )
 #

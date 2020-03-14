@@ -166,8 +166,8 @@ include(joinpath(@__DIR__, "NeuralPose2Pose2/PyNeuralPose2Pose2.jl"))
 
 fg = initfg()
 
-addVariable!(fg, :x0, Pose2)
-addVariable!(fg, :x1, Pose2)
+addVariable!(fg, :x0, Pose2, timestamp=poseTimes[:x0])
+addVariable!(fg, :x1, Pose2, timestamp=poseTimes[:x1])
 
 pp2 = PriorPose2(MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.005].^2)))
 addFactor!(fg, [:x0], pp2)
