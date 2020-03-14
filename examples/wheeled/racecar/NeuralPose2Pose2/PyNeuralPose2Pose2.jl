@@ -45,7 +45,9 @@ function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
   # replace delta (velocity) values for this sampling
   mVXY = Statistics.mean(DXY, dims=2)
   # divide time to get velocity
-  mVXY ./= 1e-3*DT.value
+  if DT.value < 1e-9
+    mVXY ./= 1e-3*DT.value
+  end
 
   for i in 1:len
     nfb.joyVelData[i][3:4] = mVXY
