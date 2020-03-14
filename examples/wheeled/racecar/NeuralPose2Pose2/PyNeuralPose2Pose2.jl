@@ -86,7 +86,7 @@ function (nfb::PyNeuralPose2Pose2)(
             res::AbstractArray{<:Real},
             userdata::FactorMetadata,
             idx::Int,
-            meas::Tuple{AbstractArray{<:Real},},
+            meas, #::Tuple{AbstractArray{<:Real},},
             Xi::AbstractArray{<:Real,2},
             Xj::AbstractArray{<:Real,2}  ) <: FunctorPairwise
   #
