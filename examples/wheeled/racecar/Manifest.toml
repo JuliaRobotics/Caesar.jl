@@ -576,7 +576,7 @@ version = "0.18.0"
 [[IncrementalInference]]
 deps = ["ApproxManifoldProducts", "Combinatorics", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "FunctionalStateMachine", "Graphs", "JLD2", "JSON2", "KernelDensityEstimate", "LinearAlgebra", "Logging", "MetaGraphs", "NLsolve", "Optim", "ProgressMeter", "Random", "Reexport", "Requires", "SparseArrays", "Statistics", "StatsBase", "SuiteSparse"]
 git-tree-sha1 = "4630d72f1af0b4117e4d71eb440df95c1ad40b54"
-repo-rev = "hotfix/1Q20/specSampXi"
+repo-rev = "master"
 repo-url = "https://github.com/JuliaRobotics/IncrementalInference.jl.git"
 uuid = "904591bb-b899-562f-9e6f-b8df64c7d480"
 version = "0.10.1"
@@ -1041,7 +1041,7 @@ version = "0.2.2+0"
 
 [[RoME]]
 deps = ["ApproxManifoldProducts", "CoordinateTransformations", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "Graphs", "IncrementalInference", "JLD2", "KernelDensityEstimate", "LinearAlgebra", "Optim", "ProgressMeter", "Reexport", "Rotations", "Statistics", "TransformUtils"]
-path = "/home/singhk/.julia/dev/RoME"
+git-tree-sha1 = "7c61065ab26fac61729937186cfe372e41b4c1d7"
 uuid = "91fb55c2-4c03-5a59-ba21-f4ea956187b8"
 version = "0.6.1"
 
