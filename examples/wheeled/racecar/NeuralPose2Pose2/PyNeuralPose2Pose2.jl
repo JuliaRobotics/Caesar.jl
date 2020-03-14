@@ -14,30 +14,26 @@ struct PyNeuralPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwiseMini
   specialSampler::Function # special keyword field name used to invoke 'specialSampler' logic
 end
 
-
-# special sampling function
 function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
-                           N::Int,
-                           fmd::FactorMetadata,
-                           Xi::DFGVariable,
-                           Xj::DFGVariable)::Tuple
-  #
+                          N::Int,
+                          fmd::FactorMetadata,
+                          Xi::DFGVariable,
+                          Xj::DFGVariable)::Tuple
+ #
 
   # calculate naive model and Predictive fraction of samples, respectively
   Nn = round(Int, nfb.naiveFrac*N)
   # calculate desired number of predicted values
   Np = N - Nn
-  len = length(nfb.joyVelData) # expect this to be only 25 at development time, likely to change
+  len = length(nfb.joyVelData) # expect this to be only 25 at developmenttime, likely to change
 
   # model samples (all for theta at this time)
   smpls_mAll = rand(nfb.naiveModel, N)
-  # naive fraction
-  smpls_n = @view smpls_mAll[1:Nn, :] # sample per row??
 
   # sample predictive fraction
   iT, jT = getTimestamp(Xi), getTimestamp(Xj)
   iPts, jPts = (getKDE(Xi) |> getPoints), (getKDE(Xj) |> getPoints)
-  @assert size(jPts,2) == size(iPts,2) "sampleNeuralPose2 can currently only evaluate equal population size variables"
+  @assert size(jPts,2) == size(iPts,2) "sampleNeuralPose2 can currently only evaluate equal population   size variables"
 
   # calculate an average velocity component
   DT = jT - iT
@@ -59,14 +55,20 @@ function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
   smpls_pAll = nfb.predictFnc(nfb.joyVelData)
 
   # number of predictors to choose from, and choose random subset
-  selPreds = @view shuffle!(1:len |> collect)[1:Np] # TODO better in-place
-  # randomly select particles for prediction (with possible duplicates for when Np > size(iPts,2))
+  Npreds = size(smpls_pAll,1)
+  allPreds = 1:Npreds |> collect
+  # randomly select particles for prediction (with possible duplicates forwhen Np > size(iPts,2))
+  Npp = Np < Npreds ? Np : Npreds
+  Nnn = N - Npp
+  selPreds = @view shuffle!(allPreds)[1:Npp] # TODO better in-place
   smpls_p = smpls_pAll[selPreds,:] # sample per row??
-  smpls_p[:,3] .= smpls_mAll[Nn+1:N,3] # use naive delta theta at this time
+  smpls_p[:,3] .= smpls_mAll[3,Nnn+1:N] # use naive delta theta at this time
 
+  # naive fraction
+  smpls_n = @view smpls_mAll[:, 1:Nnn] # sample per column
   # join and shuffle predicted odo values
   shfSmpl = shuffle!(1:N |> collect)
-  smpls = hcat(smpls_n', smpls_p')[:,shfSmpl]
+  smpls = hcat(smpls_n, smpls_p')[:,shfSmpl]
 
   return (smpls, )
 end
