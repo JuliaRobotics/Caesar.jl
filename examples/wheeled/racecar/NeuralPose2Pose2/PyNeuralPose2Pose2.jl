@@ -1,9 +1,13 @@
 # PyNeuralPose2Pose2
 
-import Base: convert
-import IncrementalInference: getSample
 using Random, Statistics
 using DistributedFactorGraphs, TransformUtils
+@everywhere using Random, Statistics
+@everywhere using DistributedFactorGraphs, TransformUtils
+
+@everywhere begin
+import Base: convert
+import IncrementalInference: getSample
 
 struct PyNeuralPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwise
   predictFnc::P
@@ -120,5 +124,6 @@ function convert(::Type{PackedPyNeuralPose2Pose2}, d::PyNeuralPose2Pose2)
   PackedPyNeuralPose2Pose2(d.joyVelData, string(d.naiveModel), d.naiveFrac)
 end
 
+end # everywhere
 
 #
