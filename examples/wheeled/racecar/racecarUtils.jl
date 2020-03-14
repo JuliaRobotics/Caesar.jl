@@ -145,10 +145,11 @@ if !isdir(dir*"/results")
   mkdir(dir*"/results")
 end
 fid = open(dir*"/results/"*filename,"w")
-for sym in [ls(fg)[1]...;ls(fg)[2]...]
-  p = getVertKDE(fg, sym)
-  val = string(KDE.getKDEMax(p))
-  println(fid, "$sym, $(val[2:(end-1)])")
+for sym in ls(fg)
+  # p = getKDE(fg, sym)
+  # val = string(KDE.getKDEMax(p))
+  val = getPPE(fg, sym).suggested
+  println(fid, "$sym, $(val[1]), $(val[2]), $(val[3])")
 end
 close(fid)
 
