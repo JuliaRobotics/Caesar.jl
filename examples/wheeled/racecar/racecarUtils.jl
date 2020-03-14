@@ -8,7 +8,7 @@ function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point
     @show lmsym = Symbol("l$lmid")
     if !(lmsym in currtags)
       @info "adding node $lmsym"
-      addVariable!(fg, lmsym, lmtype)
+      addVariable!(fg, lmsym, lmtype, timestamp=getTimestamp(fg, pssym))
     end
     ppbr = nothing
     if lmtype == RoME.Point2
@@ -47,7 +47,8 @@ end
 function addnextpose!(fg,
                       prev_psid,
                       new_psid,
-                      pose_tag_bag;
+                      pose_tag_bag,
+                      poseTimes;
                       lmtype=Point2,
                       odotype=Pose2Pose2,
                       fcttype=Pose2Pose2,
@@ -55,7 +56,7 @@ function addnextpose!(fg,
                       autoinit=true,
                       odopredfnc=nothing,
                       joyvel=nothing,
-                      naiveFrac=0.4)
+                      naiveFrac=0.4 )
   #
   prev_pssym = Symbol("x$(prev_psid)")
   new_pssym = Symbol("x$(new_psid)")
@@ -79,12 +80,12 @@ function addnextpose!(fg,
 
     # first pose with zero prior
     if odotype == Pose2Pose2
-      addVariable!(fg, new_pssym, Pose2)
+      addVariable!(fg, new_pssym, Pose2, timestamp=poseTimes[new_pssym])
       pp = !donnpose ? Pose2Pose2(DXmvn) : PyNeuralPose2Pose2(odopredfnc,joyvel[prev_pssym],DXmvn,naiveFrac)
       addFactor!(fg, [prev_pssym; new_pssym], pp, graphinit=autoinit)
     elseif odotype == VelPose2VelPose2
       donnpose ? error("Not implemented for VelPose2VelPose2 yet") : nothing
-      addVariable!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))))
+      addVariable!(fg, new_pssym, DynPose2(ut=round(Int, 200_000*(new_psid))), timestamp=poseTimes[new_pssym] )
       vpvp = VelPose2VelPose2(odoKDE, MvNormal(zeros(2),Matrix(Diagonal([0.2;0.1].^2))))
       addFactor!(fg, [prev_pssym; new_pssym], vpvp, graphinit=autoinit)
       #
@@ -172,7 +173,8 @@ function main(WP,
               failsafe::Bool=false,
               show::Bool=false,
               odopredfnc=nothing,
-              joyvel=nothing  )
+              joyvel=nothing,
+              poseTimes=nothing )
 #
 
 # Factor graph construction
@@ -224,7 +226,7 @@ tree, smt, hist = solveTree!(fg)
 for psid in (prev_psid+1):1:maxlen
   # global prev_psid, maxlen
   @show psym = Symbol("x$psid")
-  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], lmtype=Pose2, odotype=Pose2Pose2, fcttype=Pose2Pose2, autoinit=true, odopredfnc=odopredfnc, joyvel=joyvel)
+  addnextpose!(fg, prev_psid, psid, tag_bagl[psid], poseTimes, lmtype=Pose2, odotype=Pose2Pose2, fcttype=Pose2Pose2, autoinit=true, odopredfnc=odopredfnc, joyvel=joyvel)
   # odotype=VelPose2VelPose2, fcttype=DynPose2Pose2
   # writeGraphPdf(fg)
 

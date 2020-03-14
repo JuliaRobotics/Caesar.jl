@@ -122,12 +122,14 @@ detcPoseTs = detcData[:,4]*1e-9 .+ detcData[:,3] .|> unix2datetime
 
 ## find timeseries segments that go with each pose
 joyTsDict = Dict{Symbol, Array{Float64,2}}()
+poseTimes = Dict{Symbol, DateTime}(:x0 => detcPoseTs[1])
 mask = joyTimeseries[:,1] .< datetime2unix(detcPoseTs[1])
 joyTsDict[:x0] = joyTimeseries[mask,:]
 
 for i in 2:length(detcPoseTs)
   mask = datetime2unix(detcPoseTs[i-1]) .<= joyTimeseries[:,1] .< datetime2unix(detcPoseTs[i])
   joyTsDict[Symbol("x$(i-1)")] = joyTimeseries[mask,:]
+  poseTimes[Symbol("x$(i-1)")] = detcPoseTs[i-1] # later helper
 end
 
 ## interpolate up to PyQuest values...
@@ -155,7 +157,7 @@ include(joinpath(@__DIR__, "NeuralPose2Pose2/PyNeuralPose2Pose2.jl"))
 
 ## run the solution
 
-fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joyvel=intJoyDict  )
+fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joyvel=intJoyDict, poseTimes=poseTimes  )
 
 
 

@@ -70,6 +70,10 @@ function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
   shfSmpl = shuffle!(1:N |> collect)
   smpls = hcat(smpls_n, smpls_p')[:,shfSmpl]
 
+  # @show Statistics.mean(smpls, dims=2)
+  # @show maximum(smpls, dims=2)
+  # @show minimum(smpls, dims=2)
+
   return (smpls, )
 end
 
@@ -90,7 +94,6 @@ function (nfb::PyNeuralPose2Pose2)(
             Xi::AbstractArray{<:Real,2},
             Xj::AbstractArray{<:Real,2}  )
   #
-  @show "this far"
   nfb.Zij(res,userdata,idx,meas,Xi,Xj)
   nothing
 end
