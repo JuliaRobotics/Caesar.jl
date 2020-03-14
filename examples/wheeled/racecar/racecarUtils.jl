@@ -56,7 +56,7 @@ function addnextpose!(fg,
                       autoinit=true,
                       odopredfnc=nothing,
                       joyvel=nothing,
-                      naiveFrac=0.4 )
+                      naiveFrac=0.6 )
   #
   prev_pssym = Symbol("x$(prev_psid)")
   new_pssym = Symbol("x$(new_psid)")
@@ -145,11 +145,22 @@ if !isdir(dir*"/results")
   mkdir(dir*"/results")
 end
 fid = open(dir*"/results/"*filename,"w")
-for sym in ls(fg)
+prevpos = [0.0;0.0;0.0]
+prevT = getTimestamp(getVariable(fg, :x0))
+for sym in ls(fg, r"x\d") # poses first
   # p = getKDE(fg, sym)
   # val = string(KDE.getKDEMax(p))
   val = getPPE(fg, sym).suggested
-  println(fid, "$sym, $(val[1]), $(val[2]), $(val[3])")
+  # assuming Pose2 was used
+  newT = getTimestamp(getVariable(fg, sym))
+  DT = (newT-prevT).value*1e-3
+  velx = (val[1] - prevpos[1])./DT
+  vely = (val[2] - prevpos[2])./DT
+  velx = isnan(velx) ? 0.0 : velx
+  vely = isnan(vely) ? 0.0 : vely
+  prevT = newT
+  prevpos = val
+  println(fid, "$sym, $(val[1]), $(val[2]), $(val[3]), $velx, $vely")
 end
 close(fid)
 
