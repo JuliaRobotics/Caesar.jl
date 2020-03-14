@@ -177,7 +177,7 @@ DXmvn = MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.005].^2))
 odopredfnc=PyTFOdoPredictorPoint2
 joyvel=intJoyDict
 pp = PyNeuralPose2Pose2(odopredfnc,joyvel[:x0],DXmvn,0.4)
-addFactor!(fg, [:x0], pp)
+addFactor!(fg, [:x0;:x1], pp)
 
 
 
