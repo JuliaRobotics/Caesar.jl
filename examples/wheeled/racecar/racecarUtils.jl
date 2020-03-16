@@ -1,5 +1,6 @@
 
-
+using TransformUtils
+const TU = TransformUtils
 
 # add AprilTag sightings from this pose
 function addApriltags!(fg, pssym, posetags; bnoise=0.1, rnoise=0.1, lmtype=Point2, fcttype=Pose2Pose2, DAerrors=0.0, autoinit=true )
@@ -156,8 +157,12 @@ for sym in ls(fg, r"x\d") # poses first
   DT = (newT-prevT).value*1e-3
   velx = (val[1] - prevpos[1])./DT
   vely = (val[2] - prevpos[2])./DT
-  velx = isnan(velx) ? 0.0 : velx
-  vely = isnan(vely) ? 0.0 : vely
+  wVelx = isnan(velx) ? 0.0 : velx
+  wVely = isnan(vely) ? 0.0 : vely
+  # rotate velocity from world to body frame
+  bVel = TU.R(-val[3])*[wVelx;wVely]
+  velx = bVel[1]
+  vely = bVel[2]
   prevT = newT
   prevpos = val
   println(fid, "$sym, $(val[1]), $(val[2]), $(val[3]), $velx, $vely")
@@ -179,7 +184,7 @@ function main(WP,
               maxlen = (length(tag_bagl)-1),
               BB=10,
               N=100,
-              lagLength=75,
+              lagLength=100,
               dofixedlag=true,
               jldfile::String="",
               failsafe::Bool=false,
