@@ -56,3 +56,45 @@ racecarall() {
 # racecarall --cxoffset 0.5
 # racecarall --cyoffset -0.5
 # racecarall --cyoffset 0.5
+
+
+
+
+
+
+racecarslampyodo_1() {
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun1" $*
+}
+racecarslampyodo_2() {
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun2" $*
+}
+racecarslampyodo_3() {
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun3" $*
+}
+racecarslampyodo_4() {
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun4" $*
+}
+racecarslampyodo_5() {
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun5" $*
+}
+racecarslampyodo_6() {
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun6" $*
+}
+racecarslampyodo_7() {
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun7" $*
+}
+racecarslampyodo_8() {
+    julia -O 3 -p 2 apriltag_and_zed_slam_pynn.jl --folder_name "labrun8" $*
+}
+
+
+racecarslampynnall() {
+  racecarslampyodo_1 $* &
+  sleep 30; racecarslampyodo_2 $* &
+  sleep 60; racecarslampyodo_3 $* &
+  sleep 90; racecarslampyodo_4 $* &
+  sleep 120; racecarslampyodo_5 $* &
+  sleep 150; racecarslampyodo_6 $* &
+  sleep 180; racecarslampyodo_7 $* &
+  sleep 210; racecarslampyodo_8 $* &
+}
