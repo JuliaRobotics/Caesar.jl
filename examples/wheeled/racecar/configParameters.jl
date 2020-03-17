@@ -44,7 +44,9 @@ datafolder = ENV["HOME"]*"/data/racecar/$(parsed_args["folder_name"])/";
 
 # TODO: automate construction of camidxs from data folder itself
 global camidxs = 0:5:5
-if parsed_args["folder_name"] == "labrun2"
+if parsed_args["folder_name"] == "labrun1"
+  camidxs =  100:5:1060
+elseif parsed_args["folder_name"] == "labrun2"
   camidxs =  0:5:1625
 elseif parsed_args["folder_name"] == "labrun3"
   camidxs =  205:5:1165
