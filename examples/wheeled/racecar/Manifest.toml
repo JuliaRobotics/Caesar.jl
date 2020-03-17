@@ -1165,11 +1165,11 @@ version = "0.9.5"
 
 [[TransformUtils]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "c8a478620b56059fc553b54af500f6cef77e9386"
-repo-rev = "maint/1Q20/real"
+git-tree-sha1 = "f22c7dbe677b3f12583f45b7e429f13dba5cff25"
+repo-rev = "master"
 repo-url = "https://github.com/dehann/TransformUtils.jl.git"
 uuid = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"
-version = "0.2.3"
+version = "0.2.4"
 
 [[UUIDs]]
 deps = ["Random", "SHA"]
