@@ -6,8 +6,9 @@ using RoME
 using DSP
 using ArgParse
 
-@enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
-@enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
+# NOTE, moved to RoME
+# @enum HandlerStateMachine HSMReady HSMHandling HSMOverlapHandling HSMBlocking
+# @enum SolverStateMachine SSMReady SSMConsumingSolvables SSMSolving
 
 # Accumulate delta X values using FGOS
 # TODO, refactor into RoME
