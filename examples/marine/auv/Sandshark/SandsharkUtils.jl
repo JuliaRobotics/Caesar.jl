@@ -221,7 +221,8 @@ function initializeAUV_noprior(dfg::AbstractDFG,
 
   # dashboard[:loopSolver] = true
 
-  # dashboard[:SOLVESTRIDE] = stride_solve # add a range measurement every xth pose
+  # dashboard[:SOLVESTRIDE] = stride_solve
+  # add a range measurement every xth pose
   dashboard[:poseStride] = 0
   # dashboard[:canTakePoses] = HSMReady
   # dashboard[:solveInProgress] = SSMReady

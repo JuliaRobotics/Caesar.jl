@@ -63,5 +63,5 @@ function (rbs::RosbagSubscriber)(chl::AbstractString,
   push!(rbs.channels, cn)
   rbs.callbacks[cn] = (m)->callback(m,args...)
   rbs.syncBuffer[cn] = (unix2datetime(0), 0)
-  rbs.readers[cn] = RosbagParser(rbs.bagfile, leftimgtopic)
+  rbs.readers[cn] = RosbagParser(rbs.bagfile, chl)
 end

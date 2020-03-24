@@ -80,6 +80,7 @@ function main(;parsed_args=parse_commandline(),
   solvetiminglog = open(joinLogPath(fg,"timing_solve.csv"),"w")
 
   # prepare the solver in the background
+  defaultFixedLagOnTree!(fg, parsed_args["fixedlag"], limitfixeddown=parsed_args["limitfixeddown"])
   ST = manageSolveTree!(fg, dashboard, dbg=dbg, timinglog=solvetiminglog, limitfixeddown=parsed_args["limitfixeddown"])
 
   dshfile = open(joinLogPath(fg,"dashboard_start.json"),"w")
