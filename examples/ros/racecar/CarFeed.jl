@@ -92,7 +92,8 @@ include(joinpath(@__DIR__, "CarSlamUtils.jl"))
 ## start solver
 
 defaultFixedLagOnTree!(slam.dfg, 30, limitfixeddown=true)
-ST = manageSolveTree!(slam.dfg, slam.solveSettings)
+getSolverParams(slam.dfg).dbg = true
+ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=true)
 
 
 
@@ -118,16 +119,17 @@ end
 
 ## discovery
 
+
+
 tree, smt, hist = solveTree!(slam.dfg)
 
 using RoMEPlotting, Gadfly
 Gadfly.set_default_plot_size(35cm, 25cm)
 
-drawPoses(slam.dfg, spscale=0.3, drawhist=false)
+# drawPoses(slam.dfg, spscale=0.3, drawhist=false)
 drawPosesLandms(slam.dfg, spscale=0.3, drawhist=false)
 
 reportFactors(slam.dfg, Pose2Pose2, show=false)
 
-run(`evince /tmp/caesar/2020-03-23T02:59:15.647/03:15:17_Pose2Pose2.pdf`)
 
 #
