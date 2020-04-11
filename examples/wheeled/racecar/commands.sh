@@ -116,18 +116,22 @@ copylatesttoconductor() {
   last8log > /tmp/caesar/last8
   while read ln; do
     echo "Copy to conductor $ln"
-    cp -r /tmp/caesar/$ln /tmp/caesar/conductor/solves/
+    # get labrun
+    julia -O3 -e "splitpath(\"`cat /tmp/caesar/$ln/readme.txt | head -n2 | tail -n1`\")[end] |> println" > /tmp/caesar/whichresults
+    WHICHRES=`cat /tmp/caesar/whichresults`
+    cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
+    echo $ln > /tmp/caesar/conductor/solves/$WHICHRES.aux
   done < /tmp/caesar/last8
 }
 
 racecarpynnconductor() {
   racecarslampynnall
   sleep 60
-  getjuliaprocs > /tmp/caesar/juliaprocs
 
   while [ 0 -lt `getjuliaprocs | wc -l` ]; do
     echo "waiting for julia procs to finish, /tmp/juliaprocs="
     echo `getjuliaprocs`
+    getjuliaprocs > /tmp/caesar/juliaprocs
     sleep 30;
   done
 
