@@ -101,12 +101,11 @@ racecarslampynnall() {
 
 # get user slam procs
 getjuliaprocs() {
-  ps | grep julia | awk '{print $1}' > /tmp/caesar/juliaprocs
+  ps -U $USER | grep "julia" | grep -v grep | awk '{print $1}'
 }
 
 killjuliaprocs() {
-  getjuliaprocs
-  cat /tmp/caesar/juliaprocs | xargs kill -9
+  getjuliaprocs | xargs kill -9
 }
 
 last8log() {
@@ -124,9 +123,9 @@ copylatesttoconductor() {
 racecarpynnconductor() {
   racecarslampynnall
   sleep 60
-  getjuliaprocs
+  getjuliaprocs > /tmp/caesar/juliaprocs
 
-  while [ 0 -lt `wc -l /tmp/caesar/juliaprocs | awk '{print $1}'` ]; do
+  while [ 0 -lt `wc -c /tmp/caesar/juliaprocs | awk '{print $1}'` ]; do
     echo "waiting for julia procs to finish, /tmp/juliaprocs="
     cat /tmp/caesar/juliaprocs
     sleep 30;
