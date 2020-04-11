@@ -2,7 +2,7 @@ name = "Caesar"
 uuid = "62eebf14-49bc-5f46-9df9-f7b7ef379406"
 keywords = ["SLAM", "state-estimation", "mm-iSAM", "inference", "robotics"]
 desc = "Non-Gaussian simultaneous localization and mapping"
-version = "0.5.0"
+version = "0.5.1"
 
 [deps]
 ApproxManifoldProducts = "9bbbb610-88a1-53cd-9763-118ce10c1f89"
@@ -57,7 +57,7 @@ FileIO = "1"
 Graphs = "0.10.2"
 ImageCore = "0.7, 0.8, 0.9"
 ImageMagick = "0.7, 1.0, 1.1"
-IncrementalInference = "0.10.1"
+IncrementalInference = "0.10.1, 0.11"
 JLD2 = "0.1, 0.2"
 JSON = "0.18, 0.19, 0.20, 0.21, 0.22, 0.23"
 JSON2 = "0.3, 0.4"

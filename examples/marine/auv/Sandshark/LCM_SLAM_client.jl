@@ -36,21 +36,6 @@ global ODOSCALE = [1.0; 1.0; 1.0]
 include(joinpath(@__DIR__, "MsgHandlers.jl"))
 include(joinpath(@__DIR__, "SandsharkUtils.jl"))
 
-# list all cases in which message handling can continue
-# return true if MSG handler can continue
-# function HSMCanContinue(dashboard::Dict)::Bool
-#   if dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMSolving ||
-#      dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMSolving ||
-#      dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMReady ||
-#      dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMSolving ||
-#      dashboard[:canTakePoses] == HSMReady && dashboard[:solveInProgress] == SSMConsumingSolvables ||
-#      dashboard[:canTakePoses] == HSMHandling && dashboard[:solveInProgress] == SSMConsumingSolvables ||
-#      dashboard[:canTakePoses] == HSMOverlapHandling && dashboard[:solveInProgress] == SSMConsumingSolvables
-#     #
-#     return true
-#   end
-#   return false
-# end
 
 
 function main(;parsed_args=parse_commandline(),
@@ -95,6 +80,7 @@ function main(;parsed_args=parse_commandline(),
   solvetiminglog = open(joinLogPath(fg,"timing_solve.csv"),"w")
 
   # prepare the solver in the background
+  defaultFixedLagOnTree!(fg, parsed_args["fixedlag"], limitfixeddown=parsed_args["limitfixeddown"])
   ST = manageSolveTree!(fg, dashboard, dbg=dbg, timinglog=solvetiminglog, limitfixeddown=parsed_args["limitfixeddown"])
 
   dshfile = open(joinLogPath(fg,"dashboard_start.json"),"w")
@@ -141,7 +127,7 @@ function main(;parsed_args=parse_commandline(),
     # mkpath(getLogPath(fg))
     open(joinLogPath(fg, "dash.csv"), "w") do io
       while recordWTDSH[1]
-        line = [now() getLastPoses(fg,filterLabel=r"x\d",number=1)[1] dashboard[:poseStride] dashboard[:canTakePoses] dashboard[:solveInProgress] dashboard[:realTimeSlack].value length(dashboard[:poseSolveToken].data)]
+        line = [now() getLastPoses(fg,filterLabel=r"x\d",number=1)[1] dashboard[:poseStride] dashboard[:solveSettings].canTakePoses dashboard[:solveSettings].solveInProgress dashboard[:realTimeSlack].value length(dashboard[:solveSettings].poseSolveToken.data)]
         # push!(WTDSH, (line...))
         writedlm(io, line, ',')
         sleep(0.005)
@@ -167,7 +153,7 @@ function main(;parsed_args=parse_commandline(),
 
 
   # run handler
-  dashboard[:canTakePoses] = HSMHandling
+  dashboard[:solveSettings].canTakePoses = HSMHandling
   holdTimeRTS = now()
   offsetT = now() - startT
   dashboard[:doDelay] = lcm isa LCMLog
@@ -177,10 +163,10 @@ function main(;parsed_args=parse_commandline(),
       if dashboard[:doDelay]
         # might be delaying the solver -- ie real time slack grows above zero
         holdTimeRTS = now()
-        while 1 < length(dashboard[:poseSolveToken].data)  # !HSMCanContinue(dashboard)
+        while 1 < length(dashboard[:solveSettings].poseSolveToken.data)  # !HSMCanContinue(dashboard)
             # while dashboard[:canTakePoses] == HSMBlocking && dashboard[:solveInProgress] == SSMSolving
           flush(DRTLog)
-          @info "delay for solver, canTakePoses=$(dashboard[:canTakePoses]), tokens=$(dashboard[:poseSolveToken].data), RTS=$(dashboard[:realTimeSlack])"
+          @info "delay for solver, canTakePoses=$(dashboard[:solveSettings].canTakePoses), tokens=$(dashboard[:solveSettings].poseSolveToken.data), RTS=$(dashboard[:realTimeSlack])"
           # map(x->flush(x.stream), [DRTLog;LBLLog;Odolog;dirodolog;rawodolog;allthtlog;posetiminglog,solvetiminglog])
           sleep(0.2)
         end
@@ -200,7 +186,7 @@ function main(;parsed_args=parse_commandline(),
   # close out solver and other loops
   parsed_args["recordTrees"] = -1.0
   recordWTDSH[1] = false
-  dashboard[:loopSolver] = false
+  dashboard[:solveSettings].loopSolver = false
 
   # close UDP listening on LCM other file handles
   close(lcm)

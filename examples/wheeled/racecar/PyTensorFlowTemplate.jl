@@ -7,6 +7,12 @@ Pkg.build("PyCall")
 
 using PyCall
 
+py"""
+import sys
+sys.path.insert(0, "/home/singhk/learning-odometry/")
+"""
+# pushfirst!(PyVector(pyimport("sys")."path"), "/home/singhk/learning-odometry/" )
+
 tf = pyimport("tensorflow")
 
 tf.keras.models.load_model
