@@ -106,11 +106,11 @@ loop!(BagSubscriber)
 ##
 
 sleep(0.01)  # allow gui sime time to setup
-for i in 1:5000
-  loop!(BagSubscriber)
+# for i in 1:5000
+while loop!(BagSubscriber)
   if 2 <= length(slam.solveSettings.poseSolveToken.data)
     @info "delay for solver, canTakePoses=$(slam.solveSettings.canTakePoses), tokens=$(slam.solveSettings.poseSolveToken.data)"
-    sleep(0.5)
+    sleep(1.0)
   end
 end
 
@@ -121,15 +121,17 @@ end
 
 
 
-tree, smt, hist = solveTree!(slam.dfg)
+# tree, smt, hist = solveTree!(slam.dfg)
 
 using RoMEPlotting, Gadfly
 Gadfly.set_default_plot_size(35cm, 25cm)
 
 # drawPoses(slam.dfg, spscale=0.3, drawhist=false)
 drawPosesLandms(slam.dfg, spscale=0.3, drawhist=false)
+# drawPosesLandms(fg4, spscale=0.3, drawhist=false)
 
 reportFactors(slam.dfg, Pose2Pose2, show=false)
+# reportFactors(fg4, Pose2Pose2, show=false)
 
 
 #
