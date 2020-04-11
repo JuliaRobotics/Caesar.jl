@@ -125,11 +125,10 @@ racecarpynnconductor() {
   sleep 60
   getjuliaprocs > /tmp/caesar/juliaprocs
 
-  while [ 0 -lt `wc -c /tmp/caesar/juliaprocs | awk '{print $1}'` ]; do
+  while [ 0 -lt `getjuliaprocs | wc -l` ]; do
     echo "waiting for julia procs to finish, /tmp/juliaprocs="
-    cat /tmp/caesar/juliaprocs
+    echo `getjuliaprocs`
     sleep 30;
-    getjuliaprocs
   done
 
   copylatesttoconductor
