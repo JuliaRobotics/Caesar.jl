@@ -130,6 +130,7 @@ racecarpynnconductor() {
     echo "waiting for julia procs to finish, /tmp/juliaprocs="
     cat /tmp/caesar/juliaprocs
     sleep 30;
+    getjuliaprocs
   done
 
   copylatesttoconductor
