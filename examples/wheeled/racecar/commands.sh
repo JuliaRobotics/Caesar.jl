@@ -89,7 +89,7 @@ racecarslampyodo_8() {
 
 
 racecarslampynnall() {
-  racecarslampyodo_1 $* &
+  sleep 01; racecarslampyodo_1 $* &
   sleep 30; racecarslampyodo_2 $* &
   sleep 60; racecarslampyodo_3 $* &
   sleep 90; racecarslampyodo_4 $* &
@@ -97,4 +97,41 @@ racecarslampynnall() {
   sleep 150; racecarslampyodo_6 $* &
   sleep 180; racecarslampyodo_7 $* &
   sleep 210; racecarslampyodo_8 $* &
+}
+
+# get user slam procs
+getjuliaprocs() {
+  ps | grep julia | awk '{print $1}' > /tmp/caesar/juliaprocs
+}
+
+killjuliaprocs() {
+  getjuliaprocs
+  cat /tmp/caesar/juliaprocs | xargs kill -9
+}
+
+last8log() {
+  tail -n8 /tmp/caesar/racecar.log | awk '{print $1}' | sed 's/,//g'
+}
+
+copylatesttoconductor() {
+  last8log > /tmp/caesar/last8
+  while read ln; do
+    echo "Copy to conductor $ln"
+    cp -r /tmp/caesar/$ln /tmp/caesar/conductor/solves/
+  done < /tmp/caesar/last8
+}
+
+racecarpynnconductor() {
+  racecarslampynnall
+  sleep 60
+  getjuliaprocs
+
+  while [ 0 -lt `wc -l /tmp/caesar/juliaprocs | awk '{print $1}'` ]; do
+    echo "waiting for julia procs to finish, /tmp/juliaprocs="
+    cat /tmp/caesar/juliaprocs
+    sleep 30;
+  done
+
+  copylatesttoconductor
+
 }
