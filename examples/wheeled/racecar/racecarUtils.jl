@@ -197,6 +197,7 @@ function main(WP,
 
 # Factor graph construction
 fg = initfg()
+getSolverParams(fg).logpath = resultsdir
 getSolverParams(fg).multiproc=multiproc
 prev_psid = 0
 
