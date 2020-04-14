@@ -6,6 +6,8 @@ import RoME: getRangeKDEMax2D, getLastPose
 import IncrementalInference: getSample, initfg
 
 using Reexport
+using Requires
+using Dates
 
 @reexport using RoME
 @reexport using IncrementalInference
@@ -179,5 +181,12 @@ include("beamforming/MatchedFilter.jl")
 include("beamforming/SASBearing2D.jl")
 include("beamforming/SASUtils.jl")
 
+# conditional loading for ROS
+function __init__()
+  @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" begin
+    @info "Loading Caesar ROS specific utilities (using RobotOS.jl)."
+    include("ros/Utils/RosbagSubscriber.jl")
+  end
+end
 
 end
