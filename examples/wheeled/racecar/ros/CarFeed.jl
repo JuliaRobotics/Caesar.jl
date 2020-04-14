@@ -17,13 +17,10 @@ ENV["PYTHON"] = "/usr/bin/python"
 Pkg.build("PyCall")
 using PyCall
 
-## Load rosbag reader
-
-include( joinpath(projdir,"..","Utils","RosbagSubscriber.jl") )
-
 
 ## prepare ROS integration
 
+# this will trigger inclusion of RobotOS functionality in Caesar too.
 using RobotOS
 
 # standard types
@@ -47,6 +44,12 @@ using Gtk.ShortNames
 using Caesar, RoME, IncrementalInference
 using DistributedFactorGraphs
 using TransformUtils
+
+## Load rosbag reader
+
+# this now occurs as part of Caesar after RobotOS
+include( joinpath(projdir,"..","Utils","RosbagSubscriber.jl") )
+
 
 ## add 3D vis
 

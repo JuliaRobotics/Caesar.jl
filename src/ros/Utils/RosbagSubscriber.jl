@@ -1,12 +1,14 @@
 # not checking for python version, user should do so in calling script
-using Dates
+# using Dates
 using PyCall
+
+export RosbagSubscriber
 
 ## Load rosbag file parser
 
-pushfirst!(PyVector(pyimport("sys")."path"), joinpath(@__DIR__,"..","Python") )
+pushfirst!(PyVector(pyimport("sys")."path"), @__DIR__ )
 
-rosbagReaderTemplate = pyimport("rosbagReaderTemplate")
+rosbagReaderTemplate = pyimport("rosbagReader")
 RosbagParser = rosbagReaderTemplate."RosbagParser"
 
 
