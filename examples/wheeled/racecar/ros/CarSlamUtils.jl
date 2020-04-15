@@ -99,37 +99,9 @@ function drawLatestImagePair(syncImgs)
   nothing
 end
 
-##  SLAM Functions
 
 
-mutable struct SLAMCommonHelper
-  lastPoseOdomBuffer::SE3 # common helper
-  SLAMCommonHelper(lpo::SE3=SE3(0)) = new(lpo)
-end
-
-mutable struct SLAMWrapperLocal{G <: AbstractDFG} <: AbstractSLAM
-  dfg::G
-  poseCount::Int
-  frameCounter::Int
-  poseStride::Int # pose every frameStride (naive pose trigger)
-  helpers::SLAMCommonHelper
-  solveSettings::ManageSolveSettings
-end
-
-SLAMWrapperLocal(;dfg::G=initfg(),
-                  poseCount::Int=0,
-                  frameCounter::Int=0,
-                  poseStride::Int=10,
-                  helpers::SLAMCommonHelper=SLAMCommonHelper(),
-                  solveSettings::ManageSolveSettings=ManageSolveSettings() ) where {G <: AbstractDFG}= SLAMWrapperLocal{G}(dfg,
-                      poseCount, frameCounter, poseStride, helpers, solveSettings)
-#
-
-
-
-
-
-
+# Is this a general requirement?
 function updateSLAM!(slamw::SLAMWrapperLocal, syncHdlr)
   idxL, idxR, idxO = getSyncLatestPair(syncHdlr, weirdOffset=WEIRDOFFSET)
   if idxL == 0
@@ -207,13 +179,8 @@ function updateSLAM!(slamw::SLAMWrapperLocal, syncHdlr)
     # settransform!(vis[:poses][Symbol(newpose)], wTb)
   end
 
-  # FIXME
-  if slamw.poseCount % slamw.solveSettings.solveStride == 0
-    @info "trigger a solve, $newpose, $(length(slamw.solveSettings.poseSolveToken.data)) ====================================="
-    put!(slamw.solveSettings.poseSolveToken, newpose)
-    @info "done put of $newpose"
-    # also update DRT containers
-  end
+  # check whether a solve should be trigger
+  checkSolveStrideTrigger!(slam)
 
   nothing
 end

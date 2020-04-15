@@ -2,6 +2,10 @@
 
 # source /opt/ros/melodic/setup.bash
 
+##
+
+using Distributed
+
 
 ## Project path variables
 
@@ -41,14 +45,14 @@ using AprilTags
 
 using Gtk.ShortNames
 
-using Caesar, RoME, IncrementalInference
-using DistributedFactorGraphs
-using TransformUtils
+using Caesar
+@everywhere using Caesar
+@everywhere using RoME, IncrementalInference, DistributedFactorGraphs, TransformUtils
 
 ## Load rosbag reader
 
 # this now occurs as part of Caesar after RobotOS
-include( joinpath(projdir,"..","Utils","RosbagSubscriber.jl") )
+# include( joinpath(projdir,"..","Utils","RosbagSubscriber.jl") )
 
 
 ## add 3D vis
@@ -95,7 +99,9 @@ include(joinpath(@__DIR__, "CarSlamUtils.jl"))
 ## start solver
 
 defaultFixedLagOnTree!(slam.dfg, 30, limitfixeddown=true)
-getSolverParams(slam.dfg).dbg = true
+# getSolverParams(slam.dfg).dbg = true
+getSolverParams(slam.dfg).drawtree = true
+getSolverParams(slam.dfg).showtree = false
 ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=true)
 
 
@@ -109,15 +115,18 @@ loop!(BagSubscriber)
 ##
 
 sleep(0.01)  # allow gui sime time to setup
-# for i in 1:5000
 while loop!(BagSubscriber)
-  if 2 <= length(slam.solveSettings.poseSolveToken.data)
-    @info "delay for solver, canTakePoses=$(slam.solveSettings.canTakePoses), tokens=$(slam.solveSettings.poseSolveToken.data)"
-    sleep(1.0)
-  end
+# for i in 1:5000
+  # loop!(BagSubscriber)
+  blockProgress(slam) # required to prevent duplicate solves occuring at the same time
 end
 
+## close all
 
+
+stopManageSolveTree!(slam)
+
+delete!(vis)
 
 
 ## discovery
@@ -127,14 +136,15 @@ end
 # tree, smt, hist = solveTree!(slam.dfg)
 
 using RoMEPlotting, Gadfly
-Gadfly.set_default_plot_size(35cm, 25cm)
+Gadfly.set_default_plot_size(35cm, 20cm)
 
 # drawPoses(slam.dfg, spscale=0.3, drawhist=false)
-drawPosesLandms(slam.dfg, spscale=0.3, drawhist=false)
+pl = drawPosesLandms(slam.dfg, spscale=0.3, drawhist=false)
+pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
 # drawPosesLandms(fg4, spscale=0.3, drawhist=false)
 
-reportFactors(slam.dfg, Pose2Pose2, show=false)
+pl = reportFactors(slam.dfg, Pose2Pose2, show=false)
+# pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
 # reportFactors(fg4, Pose2Pose2, show=false)
-
 
 #

@@ -209,11 +209,11 @@ function pose_hdlr(channel::String,
 
     if dashboard[:doDelay] && 10 <= dashboard[:poseStride]
       # how far to escalate -- :canTakePoses is de-escalated by solver in manageSolveTree()
-      if dashboard[:solveSettings].canTakePoses == HSMHandling
-        dashboard[:solveSettings].canTakePoses = HSMOverlapHandling
-      elseif dashboard[:solveSettings].canTakePoses == HSMOverlapHandling
-        dashboard[:solveSettings].canTakePoses = HSMBlocking
-      end
+      # if dashboard[:solveSettings].canTakePoses == HSMHandling
+      #   dashboard[:solveSettings].canTakePoses = HSMOverlapHandling
+      # elseif dashboard[:solveSettings].canTakePoses == HSMOverlapHandling
+      #   dashboard[:solveSettings].canTakePoses = HSMBlocking
+      # end
       @info "new solve token $nPose"
       put!(dashboard[:solveSettings].poseSolveToken, nPose)
       dashboard[:poseStride] = 0
