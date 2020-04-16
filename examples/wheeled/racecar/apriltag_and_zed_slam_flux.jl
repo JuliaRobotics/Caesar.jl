@@ -150,7 +150,7 @@ end
 ## More code required
 
 # add the NeuralPose2Pose2 factor in Main workspace
-include( joinpath(dirname(pathof(Caesar)), "..", "examples", "learning", "hybrid", "NeuralPose2Pose2", "FluxPose2Pose2.jl") )
+include( joinpath(dirname(pathof(Caesar)), "..", "examples", "learning", "hybrid", "NeuralPose2Pose2", "FluxModelsPose2Pose2.jl") )
 
 include(joinpath(@__DIR__, "LoadPyNNText.jl"))
 
