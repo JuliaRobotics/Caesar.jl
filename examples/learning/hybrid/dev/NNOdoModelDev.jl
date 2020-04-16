@@ -165,12 +165,13 @@ c5_py = pymodel.predict([[pyX]])
 
 ##  Utility functions to take values from tf
 
-function buildPyNNModel_01_FromElements(W1::AbstractMatrix{<:Real},
-                                        b1::AbstractVector{<:Real},
-                                        W2::AbstractMatrix{<:Real},
-                                        b2::AbstractVector{<:Real},
-                                        W3::AbstractMatrix{<:Real},
-                                        b3::AbstractVector{<:Real})
+
+function buildPyNNModel_01_FromElements(W1::AbstractMatrix{<:Real}=zeros(4,8),
+                                        b1::AbstractVector{<:Real}=zeros(8),
+                                        W2::AbstractMatrix{<:Real}=zeros(8,48),
+                                        b2::AbstractVector{<:Real}=zeros(8),
+                                        W3::AbstractMatrix{<:Real}=zeros(2,8),
+                                        b3::AbstractVector{<:Real}=zeros(2))
   #
   # W1 = randn(Float32, 4,8)
   # b1 = randn(Float32,8)
@@ -196,7 +197,7 @@ end
 # As loaded from tensorflow get_weights
 # Super specialized function
 function buildPyNNModel_01_FromWeights(pywe)
-  buildPyNNModel_01_FromElements(pywe[1], pywe[2], pywe[3]', pywe[4], pywe[5]', pywe[6])
+  buildPyNNModel_01_FromElements(pywe[1], pywe[2][:], pywe[3]', pywe[4][:], pywe[5]', pywe[6][:])
 end
 
 
