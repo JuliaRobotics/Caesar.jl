@@ -1,4 +1,4 @@
-# FluxPose2Pose2
+# FluxModelsPose2Pose2
 
 using Random, Statistics
 using DistributedFactorGraphs, TransformUtils
@@ -13,7 +13,7 @@ using Flux
 import Base: convert
 import IncrementalInference: getSample
 
-struct FluxPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwise
+struct FluxModelsPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwise
   predictFnc::P
   joyVelData::D
   naiveModel::M
@@ -23,7 +23,7 @@ struct FluxPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwise
 end
 
 
-function sampleNeuralPose2(nfb::FluxPose2Pose2,
+function sampleNeuralPose2(nfb::FluxModelsPose2Pose2,
                            N::Int,
                            fmd::FactorMetadata,
                            Xi::DFGVariable,
@@ -89,15 +89,15 @@ function sampleNeuralPose2(nfb::FluxPose2Pose2,
 end
 
 # Convenience function to help call the right constuctor
-FluxPose2Pose2(nn::P,
+FluxModelsPose2Pose2(nn::P,
                    jvd::D,
                    md::M,
                    naiveFrac::Float64=0.4,
-                   ss::Function=sampleNeuralPose2) where {P, M <: SamplableBelief, D <: Vector} = FluxPose2Pose2{P,D,M}(nn,jvd,md,naiveFrac,Pose2Pose2(MvNormal(zeros(3),diagm(ones(3)))),ss )
+                   ss::Function=sampleNeuralPose2) where {P, M <: SamplableBelief, D <: Vector} = FluxModelsPose2Pose2{P,D,M}(nn,jvd,md,naiveFrac,Pose2Pose2(MvNormal(zeros(3),diagm(ones(3)))),ss )
 #
 
 
-function (nfb::FluxPose2Pose2)(
+function (nfb::FluxModelsPose2Pose2)(
             res::AbstractArray{<:Real},
             userdata::FactorMetadata,
             idx::Int,
@@ -120,11 +120,11 @@ struct PackedPyNeuralPose2Pose2 <: IncrementalInference.PackedInferenceType
 end
 
 
-function convert(::Type{FluxPose2Pose2}, d::PackedPyNeuralPose2Pose2)
-  FluxPose2Pose2(PyTFOdoPredictorPoint2,d.joyVelData,extractdistribution(d.naiveModel),d.naiveFrac)
+function convert(::Type{FluxModelsPose2Pose2}, d::PackedPyNeuralPose2Pose2)
+  FluxModelsPose2Pose2(PyTFOdoPredictorPoint2,d.joyVelData,extractdistribution(d.naiveModel),d.naiveFrac)
 end
 
-function convert(::Type{PackedPyNeuralPose2Pose2}, d::FluxPose2Pose2)
+function convert(::Type{PackedPyNeuralPose2Pose2}, d::FluxModelsPose2Pose2)
   PackedPyNeuralPose2Pose2(d.joyVelData, string(d.naiveModel), d.naiveFrac)
 end
 

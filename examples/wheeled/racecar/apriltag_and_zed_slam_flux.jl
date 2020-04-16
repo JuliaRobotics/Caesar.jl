@@ -155,14 +155,26 @@ include( joinpath(dirname(pathof(Caesar)), "..", "examples", "learning", "hybrid
 include(joinpath(@__DIR__, "LoadPyNNText.jl"))
 
 ## load the required models into common predictor
-# modelX =  loadTfModelIntoFlux(dest...)
 
+allModels = []
+for i in 0:99
+  push!(allModels, loadTfModelIntoFlux("/tmp/caesar/conductor/models/retrained_network_weights$i") )
+end
 
+function JlOdoPredictorPoint2(smpls::AbstractMatrix{<:Real},
+                              allModelsLocal::Vector)
+  #
+  arr = zeros(length(allModelsLocal), 2)
+  for i in 1:length(allModelsLocal)
+    arr[i,:] = allModelsLocal[i](smpls)
+  end
+  return arr
+end
 
 ## run the solution
 
 
-fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=PyTFOdoPredictorPoint2, joyvel=intJoyDict, poseTimes=poseTimes, multiproc=false  )
+fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=(x)->JlOdoPredictorPoint2(x, allModels), joyvel=intJoyDict, poseTimes=poseTimes, multiproc=false  )
 
 
 ## development
