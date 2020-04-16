@@ -16,6 +16,20 @@ Further topics on factor graph (and Bayes/junction tree) inference formulation, 
 
     Coming soon, the steps described on this page will be fully accessible via [multi-language interfaces (middleware)](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#) -- some of these interfaces already exist.
 
+### Causality and Markov Assumption
+
+WIP: Causal connection explanation.
+
+EKF-SLAM
+
+## Joint Probability and Chapman-Kolmogorov
+
+WIP; The high level task is to "invert" measurements Z give the state of the world Theta
+
+### Maximum Likelihood vs. Message Passing
+
+WIP; This dicussion will lead towards Bayesian Networks (Pearl) and Bayes Trees (Kaess et al., Fourie et al.).
+
 ## The Target Tracking Problem (Conventional Filtering)
 
 Consider a common example, two dimensional target tracking, where a projectile transits over a tracking station using various sensing technologies [[Zarchan 2013]](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Position and velocity estimates of the target
