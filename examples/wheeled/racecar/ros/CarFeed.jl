@@ -114,6 +114,8 @@ loop!(BagSubscriber)
 
 ##
 
+getSolverParams(slam.dfg).drawtree = false
+
 sleep(0.01)  # allow gui sime time to setup
 while loop!(BagSubscriber)
 # for i in 1:5000
@@ -146,5 +148,7 @@ pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
 pl = reportFactors(slam.dfg, Pose2Pose2, show=false)
 # pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
 # reportFactors(fg4, Pose2Pose2, show=false)
+
+
 
 #
