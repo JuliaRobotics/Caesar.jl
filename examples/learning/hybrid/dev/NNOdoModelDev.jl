@@ -13,13 +13,14 @@ using PyCall
 # """
 py"""
 import sys
-sys.path.insert(0, "/home/singhk/learning-odometry/")
+sys.path.insert(0, "/home/dehann/.julia/dev/Caesar/examples/learning/hybrid/dev/")
 """
 
+Base.cd("/home/dehann/.julia/dev/Caesar/examples/learning/hybrid/dev/")
+
 # np = pyimport("numpy")
-# pywe = pyimport("model_weights0")
-# pywe.getModelWeights()
-# include("model_weights0.jl")
+getM = pyimport("model_weights0")
+pywe = getM.getWeights()
 
 
 pymodels = pyimport("PyNNModels")
@@ -204,7 +205,7 @@ end
 
 testModJl = buildPyNNModel_01_FromWeights(pywe)
 
-
+testModJl(jlX)
 
 
 
