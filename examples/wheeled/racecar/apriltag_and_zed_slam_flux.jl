@@ -147,8 +147,16 @@ for (sym, lclJD) in joyTsDict
   end
 end
 
+## More code required
+
 # add the NeuralPose2Pose2 factor in Main workspace
-include(joinpath(@__DIR__, "NeuralPose2Pose2/FluxPose2Pose2.jl"))
+include( joinpath(dirname(pathof(Caesar)), "..", "examples", "learning", "hybrid", "NeuralPose2Pose2", "FluxPose2Pose2.jl") )
+
+include(joinpath(@__DIR__, "LoadPyNNText.jl"))
+
+## load the required models into common predictor
+# modelX =  loadTfModelIntoFlux(dest...)
+
 
 
 ## run the solution

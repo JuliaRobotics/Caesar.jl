@@ -156,7 +156,8 @@ for (sym, lclJD) in joyTsDict
 end
 
 # add the NeuralPose2Pose2 factor in Main workspace
-include(joinpath(@__DIR__, "NeuralPose2Pose2/PyNeuralPose2Pose2.jl"))
+include( joinpath(dirname(pathof(Caesar)), "..", "examples", "learning", "hybrid", "NeuralPose2Pose2", "PyNeuralPose2Pose2.jl") )
+# include(joinpath(@__DIR__, "NeuralPose2Pose2/PyNeuralPose2Pose2.jl"))
 
 
 ## run the solution
