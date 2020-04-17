@@ -82,7 +82,11 @@ function addnextpose!(fg,
     # first pose with zero prior
     if odotype == Pose2Pose2
       addVariable!(fg, new_pssym, Pose2, timestamp=poseTimes[new_pssym])
-      pp = !donnpose ? Pose2Pose2(DXmvn) : PyNeuralPose2Pose2(odopredfnc,joyvel[prev_pssym],DXmvn,naiveFrac)
+      joyVals = zeros(25,4)
+      for i in 1:25
+        joyVals[i,:] .= joyvel[prev_pssym][i]
+      end
+      pp = !donnpose ? Pose2Pose2(DXmvn) : FluxModelsPose2Pose2(odopredfnc,joyVals,DXmvn,naiveFrac) # PyNeuralPose2Pose2(odopredfnc,joyvel[prev_pssym],DXmvn,naiveFrac)
       addFactor!(fg, [prev_pssym; new_pssym], pp, graphinit=autoinit)
     elseif odotype == VelPose2VelPose2
       donnpose ? error("Not implemented for VelPose2VelPose2 yet") : nothing
@@ -265,7 +269,11 @@ for psid in (prev_psid+1):1:maxlen
   ensureAllInitialized!(fg)
   # T2 = remotecall(plotRacecarInterm, WP, fg, resultsdir, psym)
   # @async fetch(T2)
-  plotRacecarInterm(fg, resultsdir, psym)
+  if 1 < nprocs()
+    remotecall(plotRacecarInterm, WP, fg, resultsdir, psym)
+  else
+    plotRacecarInterm(fg, resultsdir, psym)
+  end
 
   # prepare for next iteration
   prev_psid = psid

@@ -127,7 +127,7 @@ function main(;parsed_args=parse_commandline(),
     # mkpath(getLogPath(fg))
     open(joinLogPath(fg, "dash.csv"), "w") do io
       while recordWTDSH[1]
-        line = [now() getLastPoses(fg,filterLabel=r"x\d",number=1)[1] dashboard[:poseStride] dashboard[:solveSettings].canTakePoses dashboard[:solveSettings].solveInProgress dashboard[:realTimeSlack].value length(dashboard[:solveSettings].poseSolveToken.data)]
+        line = [now() getLastPoses(fg,filterLabel=r"x\d",number=1)[1] dashboard[:poseStride] Int(isready(dashboard[:solveSettings].canTakePoses)) dashboard[:solveSettings].solveInProgress dashboard[:realTimeSlack].value length(dashboard[:solveSettings].poseSolveToken.data)]
         # push!(WTDSH, (line...))
         writedlm(io, line, ',')
         sleep(0.005)
@@ -153,7 +153,7 @@ function main(;parsed_args=parse_commandline(),
 
 
   # run handler
-  dashboard[:solveSettings].canTakePoses = HSMHandling
+  # dashboard[:solveSettings].canTakePoses = HSMHandling
   holdTimeRTS = now()
   offsetT = now() - startT
   dashboard[:doDelay] = lcm isa LCMLog
@@ -166,7 +166,8 @@ function main(;parsed_args=parse_commandline(),
         while 1 < length(dashboard[:solveSettings].poseSolveToken.data)  # !HSMCanContinue(dashboard)
             # while dashboard[:canTakePoses] == HSMBlocking && dashboard[:solveInProgress] == SSMSolving
           flush(DRTLog)
-          @info "delay for solver, canTakePoses=$(dashboard[:solveSettings].canTakePoses), tokens=$(dashboard[:solveSettings].poseSolveToken.data), RTS=$(dashboard[:realTimeSlack])"
+          @info "delay for solver, tokens=$(dashboard[:solveSettings].poseSolveToken.data), RTS=$(dashboard[:realTimeSlack])"
+          # , canTakePoses=$(dashboard[:solveSettings].canTakePoses)
           # map(x->flush(x.stream), [DRTLog;LBLLog;Odolog;dirodolog;rawodolog;allthtlog;posetiminglog,solvetiminglog])
           sleep(0.2)
         end

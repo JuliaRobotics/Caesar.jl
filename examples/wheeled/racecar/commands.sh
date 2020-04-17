@@ -105,6 +105,45 @@ racecarslampynnall() {
   sleep 210; racecarslampyodo_8 $* &
 }
 
+
+
+racecarslamflux_1() {
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun1" $*
+}
+racecarslamflux_2() {
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun2" $*
+}
+racecarslamflux_3() {
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun3" $*
+}
+racecarslamflux_4() {
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun4" $*
+}
+racecarslamflux_5() {
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun5" $*
+}
+racecarslamflux_6() {
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun6" $*
+}
+racecarslamflux_7() {
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun7" $*
+}
+racecarslamflux_8() {
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun8" $*
+}
+
+
+racecarslamfluxall() {
+  sleep 01; racecarslamflux_1 $* &
+  sleep 60; racecarslamflux_2 $* &
+  sleep 120; racecarslamflux_3 $* &
+  sleep 180; racecarslamflux_4 $* &
+  sleep 240; racecarslamflux_5 $* &
+  sleep 300; racecarslamflux_6 $* &
+  sleep 360; racecarslamflux_7 $* &
+  sleep 420; racecarslamflux_8 $* &
+}
+
 # get user slam procs
 getjuliaprocs() {
   ps -U $USER | grep "julia" | grep -v grep | awk '{print $1}'
@@ -132,7 +171,8 @@ copylatesttoconductor() {
 }
 
 racecarpynnconductor() {
-  racecarslampynnall
+  racecarslamfluxall
+  # racecarslampynnall
   sleep 60
 
   while [ 0 -lt `getjuliaprocs | wc -l` ]; do

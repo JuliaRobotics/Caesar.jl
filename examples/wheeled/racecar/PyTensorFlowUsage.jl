@@ -18,7 +18,7 @@ sys.path.insert(0, "/home/singhk/learning-odometry/")
 # @show tfmodeldir = joinpath(ENV["HOME"],"learning-odometry/")
 # Base.cd(tfmodeldir)
 
-PyTFOdoPredictorPoint2 = pyimport("queryAllModels")["predictSinglePose"]
+PyTFOdoPredictorPoint2 = pyimport("queryAllModels")."predictSinglePose" # was ["predictSinglePose"]
 
 # test that its working
 A = [rand(4) for i in 1:25]

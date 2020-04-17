@@ -40,9 +40,9 @@ function buildtagdict(cTt,
                       bTcl )
   #
   # @show tvec, q
-  # @show cTt = tvec ∘ LinearMap(Ql)
-  @show bTcl, cTt
-  @show bTt = bTcl ∘ cTt
+  cTt = tvec ∘ LinearMap(Ql)
+  # @show bTcl, cTt
+  bTt = bTcl ∘ cTt
   bP2t = getTagPP2(bTt)
 
   onetag = Dict{Symbol, Any}()
@@ -141,7 +141,7 @@ end
 
 # get Pose2Pose2 tag orientation transform
 function getTagPP2(bTt)
-  @show bTt
+  # @show bTt
   cVz = LinearMap(Quat(bTt.linear))([1.0;0;0])
   wYt = atan(cVz[2],cVz[1])
   Translation(bTt.translation[1],bTt.translation[2],0) ∘ LinearMap(RotZ(wYt))

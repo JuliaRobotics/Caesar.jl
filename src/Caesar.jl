@@ -183,9 +183,13 @@ include("beamforming/SASUtils.jl")
 
 # conditional loading for ROS
 function __init__()
-  @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" begin
-    @info "Loading Caesar ROS specific utilities (using RobotOS.jl)."
-    include("ros/Utils/RosbagSubscriber.jl")
+  @require PyCall="438e738f-606a-5dbb-bf0a-cddfbfd45ab0" begin
+    @info "Loading Caesar PyCall specific utilities (using PyCall)."
+    @eval using .PyCall
+    @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" begin
+      @info "Loading Caesar ROS specific utilities (using RobotOS)."
+      include("ros/Utils/RosbagSubscriber.jl")
+    end
   end
 end
 
