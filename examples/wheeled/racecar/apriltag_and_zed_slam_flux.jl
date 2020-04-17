@@ -5,6 +5,7 @@ Pkg.activate(@__DIR__)
 Pkg.instantiate()
 Pkg.precompile()
 
+using ArgParse
 using Gadfly
 using DelimitedFiles
 using Dates, Statistics
@@ -20,16 +21,17 @@ using DataInterpolations
 using DistributedFactorGraphs
 using IncrementalInference
 using RoME
-using Caesar
 using RoMEPlotting
+using Caesar
 using CuArrays
 using Flux
-using ArgParse
 
 ## Load all required packages
 using Distributed
 
-addprocs(5) # make sure there are 4 processes waiting before loading packages
+if nprocs() == 1
+  addprocs(5) # make sure there are 4 processes waiting before loading packages
+end
 
 @everywhere begin
   using Pkg
