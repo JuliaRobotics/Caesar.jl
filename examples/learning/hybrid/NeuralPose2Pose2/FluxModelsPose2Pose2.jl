@@ -13,7 +13,7 @@ using Flux
 import Base: convert
 import IncrementalInference: getSample
 
-struct FluxModelsPose2Pose2{P,D<:Vector,M<:SamplableBelief} <: FunctorPairwise
+struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: FunctorPairwise
   predictFnc::P
   joyVelData::D
   naiveModel::M
@@ -34,7 +34,7 @@ function sampleNeuralPose2(nfb::FluxModelsPose2Pose2,
   Nn = round(Int, nfb.naiveFrac*N)
   # calculate desired number of predicted values
   Np = N - Nn
-  len = length(nfb.joyVelData) # expect this to be only 25 at developmenttime, likely to change
+  len = size(nfb.joyVelData,1) # expect this to be only 25 at developmenttime, likely to change
 
   # model samples (all for theta at this time)
   smpls_mAll = rand(nfb.naiveModel, N)
@@ -59,11 +59,14 @@ function sampleNeuralPose2(nfb::FluxModelsPose2Pose2,
   mVXY[2] = isnan(mVXY[2]) ? 0.0 : mVXY[2]
 
   for i in 1:len
-    nfb.joyVelData[i][3:4] = mVXY
+    nfb.joyVelData[i,3:4] = mVXY
   end
   # and predict
       # A = [rand(4) for i in 1:25]
   smpls_pAll = nfb.predictFnc(nfb.joyVelData)
+  if size(smpls_pAll,2) == 2
+    smpls_pAll = hcat(smpls_pAll, zeros(size(smpls_pAll,1)))
+  end
 
   # number of predictors to choose from, and choose random subset
   Npreds = size(smpls_pAll,1)
@@ -90,10 +93,10 @@ end
 
 # Convenience function to help call the right constuctor
 FluxModelsPose2Pose2(nn::P,
-                   jvd::D,
-                   md::M,
-                   naiveFrac::Float64=0.4,
-                   ss::Function=sampleNeuralPose2) where {P, M <: SamplableBelief, D <: Vector} = FluxModelsPose2Pose2{P,D,M}(nn,jvd,md,naiveFrac,Pose2Pose2(MvNormal(zeros(3),diagm(ones(3)))),ss )
+                     jvd::D,
+                     md::M,
+                     naiveFrac::Float64=0.4,
+                     ss::Function=sampleNeuralPose2) where {P, M <: SamplableBelief, D <: AbstractMatrix} = FluxModelsPose2Pose2{P,D,M}(nn,jvd,md,naiveFrac,Pose2Pose2(MvNormal(zeros(3),diagm(ones(3)))),ss )
 #
 
 
@@ -113,19 +116,19 @@ end
 
 ## packing converters
 
-struct PackedPyNeuralPose2Pose2 <: IncrementalInference.PackedInferenceType
-  joyVelData::Vector{Vector{Float64}}
+struct PackedFluxModelsPose2Pose2 <: IncrementalInference.PackedInferenceType
+  joyVelData::Matrix{Float64}
   naiveModel::String
   naiveFrac::Float64
 end
 
 
-function convert(::Type{FluxModelsPose2Pose2}, d::PackedPyNeuralPose2Pose2)
+function convert(::Type{FluxModelsPose2Pose2}, d::PackedFluxModelsPose2Pose2)
   FluxModelsPose2Pose2(PyTFOdoPredictorPoint2,d.joyVelData,extractdistribution(d.naiveModel),d.naiveFrac)
 end
 
-function convert(::Type{PackedPyNeuralPose2Pose2}, d::FluxModelsPose2Pose2)
-  PackedPyNeuralPose2Pose2(d.joyVelData, string(d.naiveModel), d.naiveFrac)
+function convert(::Type{PackedFluxModelsPose2Pose2}, d::FluxModelsPose2Pose2)
+  PackedFluxModelsPose2Pose2(d.joyVelData, string(d.naiveModel), d.naiveFrac)
 end
 
 end # everywhere

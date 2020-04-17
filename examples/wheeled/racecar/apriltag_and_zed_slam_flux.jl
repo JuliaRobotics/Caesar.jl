@@ -3,27 +3,13 @@
 using Pkg
 Pkg.activate(@__DIR__)
 Pkg.instantiate()
-# Pkg.precompile()
+Pkg.precompile()
 
-
-## Load all required packages
-using Distributed
-# addprocs(5) # make sure there are 4 processes waiting before loading packages
-
-@everywhere begin
-  using Pkg
-  Pkg.activate(@__DIR__)
-end
-
-WP = WorkerPool(2:nprocs() |> collect )
-
-
-# @show ARGS
-include("parsecommands.jl")
-
+using Gadfly
 using DelimitedFiles
 using Dates, Statistics
 using YAML
+using JLD2
 using CoordinateTransformations, Rotations, StaticArrays
 using ImageCore
 using Images, ImageDraw
@@ -31,18 +17,60 @@ using Images, ImageDraw
 using AprilTags
 using DataInterpolations
 
+using DistributedFactorGraphs
+using IncrementalInference
 using RoME
 using Caesar
-0
-@everywhere using Caesar
+using RoMEPlotting
+using CuArrays
+using Flux
+using ArgParse
+
+## Load all required packages
+using Distributed
+
+addprocs(5) # make sure there are 4 processes waiting before loading packages
+
+@everywhere begin
+  using Pkg
+  Pkg.activate(@__DIR__)
+end
+
+WP = nprocs == 1 ? WorkerPool([1]) : WorkerPool(2:nprocs() |> collect )
+
+# using DistributedFactorGraphs
+for i in procs()
+  fetch( Distributed.@spawnat i @eval using DistributedFactorGraphs )
+  fetch( Distributed.@spawnat i @eval using IncrementalInference )
+  fetch( Distributed.@spawnat i @eval using RoME )
+  fetch( Distributed.@spawnat i @eval using Caesar )
+  fetch( Distributed.@spawnat i @eval using CuArrays )
+  fetch( Distributed.@spawnat i @eval using Flux )
+end
+
+for i in procs()
+  fetch( Distributed.@spawnat i @eval using RoMEPlotting )
+end
+
 @everywhere using JLD2
+@everywhere using DistributedFactorGraphs
+@everywhere using IncrementalInference
+@everywhere using RoME
+@everywhere using Caesar
+@everywhere using RoMEPlotting
+@everywhere using Flux
+
+# @show ARGS
+include("parsecommands.jl")
+
+
+
 
 
 @everywhere begin
 # using Fontconfig
 # using Compose
 using Gadfly
-using RoMEPlotting
 using Cairo
 # using FileIO
 # using GeometryTypes # using MeshCat
@@ -152,16 +180,17 @@ end
 # add the NeuralPose2Pose2 factor in Main workspace
 include( joinpath(dirname(pathof(Caesar)), "..", "examples", "learning", "hybrid", "NeuralPose2Pose2", "FluxModelsPose2Pose2.jl") )
 
-include(joinpath(@__DIR__, "LoadPyNNText.jl"))
+include(joinpath(@__DIR__, "LoadPyNNTxt.jl"))
 
 ## load the required models into common predictor
 
 allModels = []
 for i in 0:99
-  push!(allModels, loadTfModelIntoFlux("/tmp/caesar/conductor/models/retrained_network_weights$i") )
+# /home/dehann/data/racecar/results/conductor/models/retrained_network_weights0
+  push!(allModels, loadTfModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
 end
 
-function JlOdoPredictorPoint2(smpls::AbstractMatrix{<:Real},
+@everywhere function JlOdoPredictorPoint2(smpls::AbstractMatrix{<:Real},
                               allModelsLocal::Vector)
   #
   arr = zeros(length(allModelsLocal), 2)
@@ -174,14 +203,14 @@ end
 ## run the solution
 
 
-fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=(x)->JlOdoPredictorPoint2(x, allModels), joyvel=intJoyDict, poseTimes=poseTimes, multiproc=false  )
+fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], failsafe=parsed_args["failsafe"], show=parsed_args["show"], odopredfnc=(x)->JlOdoPredictorPoint2(x, allModels), joyvel=intJoyDict, poseTimes=poseTimes, multiproc=true  )
 
 
 ## development
 
-#
-# 0
-#
+
+0
+
 # fg = initfg()
 #
 # addVariable!(fg, :x0, Pose2, timestamp=poseTimes[:x0])
@@ -192,18 +221,30 @@ fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], fail
 #
 # # the neural factor
 # DXmvn = MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.005].^2))
-# odopredfnc=PyTFOdoPredictorPoint2
+# odopredfnc=(x)->JlOdoPredictorPoint2(x, allModels)
 # joyvel=intJoyDict
-# pp = PyNeuralPose2Pose2(odopredfnc,joyvel[:x0],DXmvn,0.4)
+#
+# joyVals = zeros(25,4)
+# for i in 1:25
+#   joyVals[i,:] .= joyvel[:x0][i]
+# end
+#
+# pp = FluxModelsPose2Pose2(odopredfnc,joyVals, DXmvn,0.4)  # joyvel[:x0]
 # addFactor!(fg, [:x0;:x1], pp)
-
-
-
+#
+# pts = approxConv(fg, :x0x1f1, :x1)
 
 
 # fails
 # key 1 not found
 # julia101 -p 4 apriltag_and_zed_slam.jl --previous "2018-11-09T01:42:33.279" --jldfile "racecar_fg_x299.jld2" --folder_name "labrun7" --failsafe
+
+
+
+
+
+
+
 
 
 #

@@ -40,9 +40,9 @@ function buildtagdict(cTt,
                       bTcl )
   #
   # @show tvec, q
-  # @show cTt = tvec ∘ LinearMap(Ql)
+  cTt = tvec ∘ LinearMap(Ql)
   # @show bTcl, cTt
-  # @show bTt = bTcl ∘ cTt
+  bTt = bTcl ∘ cTt
   bP2t = getTagPP2(bTt)
 
   onetag = Dict{Symbol, Any}()
