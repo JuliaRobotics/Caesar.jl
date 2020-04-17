@@ -108,28 +108,28 @@ racecarslampynnall() {
 
 
 racecarslamflux_1() {
-    julia -O 3 -p 5 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun1" $*
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun1" $*
 }
 racecarslamflux_2() {
-    julia -O 3 -p 5 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun2" $*
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun2" $*
 }
 racecarslamflux_3() {
-    julia -O 3 -p 5 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun3" $*
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun3" $*
 }
 racecarslamflux_4() {
-    julia -O 3 -p 5 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun4" $*
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun4" $*
 }
 racecarslamflux_5() {
-    julia -O 3 -p 5 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun5" $*
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun5" $*
 }
 racecarslamflux_6() {
-    julia -O 3 -p 5 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun6" $*
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun6" $*
 }
 racecarslamflux_7() {
-    julia -O 3 -p 5 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun7" $*
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun7" $*
 }
 racecarslamflux_8() {
-    julia -O 3 -p 5 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun8" $*
+    julia -O 3 $CAESAR_EX_DIR/apriltag_and_zed_slam_flux.jl --folder_name "labrun8" $*
 }
 
 
