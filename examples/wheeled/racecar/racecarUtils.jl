@@ -152,7 +152,8 @@ end
 fid = open(dir*"/results/"*filename,"w")
 prevpos = [0.0;0.0;0.0]
 prevT = getTimestamp(getVariable(fg, :x0))
-for sym in ls(fg, r"x\d") # poses first
+poses = ls(fg, r"x\d") |> sortDFG
+for sym in poses # poses first
   # p = getKDE(fg, sym)
   # val = string(KDE.getKDEMax(p))
   val = getPPE(fg, sym).suggested
@@ -201,6 +202,7 @@ function main(WP,
 
 # Factor graph construction
 fg = initfg()
+getSolverParams(fg).logpath = resultsdir
 getSolverParams(fg).multiproc=multiproc
 prev_psid = 0
 
