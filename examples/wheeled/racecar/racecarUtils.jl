@@ -269,7 +269,11 @@ for psid in (prev_psid+1):1:maxlen
   ensureAllInitialized!(fg)
   # T2 = remotecall(plotRacecarInterm, WP, fg, resultsdir, psym)
   # @async fetch(T2)
-  plotRacecarInterm(fg, resultsdir, psym)
+  if 1 < nprocs()
+    remotecall(plotRacecarInterm, WP, fg, resultsdir, psym)
+  else
+    plotRacecarInterm(fg, resultsdir, psym)
+  end
 
   # prepare for next iteration
   prev_psid = psid
