@@ -9,6 +9,7 @@ println(fid, currdirtime)
 println(fid, datafolder)
 println(fid, camidxs)
 println(fid, ARGS)
+println(fid, "res.csv: wPx,wPy,wTh,bVx,bVy")
 close(fid)
 
 fid = open(resultsparentdir*"/racecar.log", "a")

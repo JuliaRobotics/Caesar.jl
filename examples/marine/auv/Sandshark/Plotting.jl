@@ -41,7 +41,7 @@ function plotSandsharkFromDFG(dfg::AbstractDFG;
   #variables and poses connected to br factors
   brvars = 0 < length(brf) ? union(map(x->ls(dfg, x), brf)...) : Symbol[]
   brposes = setdiff(brvars, ls(dfg, r"l"))
-  brposes .= sortVarNested(brposes)
+  brposes .= sortDFG(brposes)
 
   # get body frame beam estimate
   brfacts = Dict{Symbol, BallTreeDensity}()

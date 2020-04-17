@@ -42,7 +42,7 @@ path.py=8.2.1=py27_0
 pathlib2=2.1.0=py27_0
 pexpect=4.0.1=py27_0
 pickleshare=0.7.4=py27_0
-pillow=3.4.2=py27_0
+pillow=6.2.2=py27_0
 pip=8.1.2=py27_0
 pixman=0.32.6=0
 prompt_toolkit=1.0.3=py27_0

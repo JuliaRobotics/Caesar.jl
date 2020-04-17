@@ -2,7 +2,9 @@
 
 using Distributed
 
+using Dates
 using Caesar, RoME, DistributedFactorGraphs
+@everywhere using Dates
 @everywhere using Caesar, RoME, DistributedFactorGraphs
 @everywhere using KernelDensityEstimate
 @everywhere using ProgressMeter
@@ -12,7 +14,6 @@ using Makie
 using MakieLayout
 using DocStringExtensions
 
-import DistributedFactorGraphs: getEstimates
 
 """
     $SIGNATURES
@@ -91,7 +92,8 @@ getRangeCartesian,
 """
 function plotVariableBeliefs(dfg::AbstractDFG,
                              regexFilter::Union{Nothing, Regex}=nothing;
-                             vsyms::Vector{Symbol}=getVariableIds(dfg, regexFilter),
+                             solvable::Int=0,
+                             vsyms::Vector{Symbol}=listVariables(dfg, regexFilter, solvable=solvable),
                              extras::Vector{Symbol}=Symbol[],
                              N::Int=100,
                              minColorBase::Float64=-0.3,
@@ -130,7 +132,7 @@ function plotVariableBeliefs(dfg::AbstractDFG,
     xy[i,2,:] .= y
   end
 
-  # vsyms are variables for plotting, while applying available filters
+  ## vsyms are variables for plotting, while applying available filters
 
   # specialty feature
   sortVars ? (vsyms .= vsyms |> sortDFG) : nothing
@@ -233,9 +235,9 @@ function addLinesBelief!(fg, pl, TTm;
 
   posesyms = ls(fg, r"x\d") |> sortDFG
   filter!(x->isInitialized(fg, x), posesyms)
-  filter!(x->solverData(getVariable(fg, x), :lbl) != nothing, posesyms)
-  XXlbl = (x->(solverData(getVariable(fg, x), :lbl).val[1,1])).(posesyms)
-  YYlbl = (x->(solverData(getVariable(fg, x), :lbl).val[2,1])).(posesyms)
+  filter!(x->getSolverData(getVariable(fg, x), :lbl) != nothing, posesyms)
+  XXlbl = (x->(getSolverData(getVariable(fg, x), :lbl).val[1,1])).(posesyms)
+  YYlbl = (x->(getSolverData(getVariable(fg, x), :lbl).val[2,1])).(posesyms)
 
   ts = (x->getTimestamp(getVariable(fg, x))).(posesyms) .|> datetime2unix
   T0 = ts[1]

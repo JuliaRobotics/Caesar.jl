@@ -100,8 +100,6 @@ getCliqDownMsgsAfterDownSolve
 getCliqFrontalVarIds
 getCliqVarInitOrderUp
 getCliqMat
-getCliqMsgsDown
-getCliqMsgsUp
 getCliqOrderUpSolve
 getCliqParentMsgDown
 getCliqSeparatorVarIds

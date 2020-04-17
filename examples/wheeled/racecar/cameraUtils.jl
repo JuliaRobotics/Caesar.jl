@@ -40,9 +40,9 @@ function buildtagdict(cTt,
                       bTcl )
   #
   # @show tvec, q
-  # @show cTt = tvec ∘ LinearMap(Ql)
-  @show bTcl, cTt
-  @show bTt = bTcl ∘ cTt
+  cTt = tvec ∘ LinearMap(Ql)
+  # @show bTcl, cTt
+  bTt = bTcl ∘ cTt
   bP2t = getTagPP2(bTt)
 
   onetag = Dict{Symbol, Any}()
@@ -122,12 +122,12 @@ function getAprilTagTransform(tag::AprilTag;
 end
 
 
-function prepTagBag(TAGS)
+function prepTagBag(TAGS; iterposes::Int=99999999)
   tvec = Translation(0.0,0,0)
   q = Quat(1.0,0,0,0)
   # package tag detections for all keyframes in a tag_bag
   tag_bag = Dict{Int, Any}()
-  for psid in 0:(length(TAGS)-1)
+  for psid in 0:minimum([(length(TAGS)-1), iterposes])
     tag_det = Dict{Int, Any}()
     for tag in TAGS[psid+1]
       q, tvec = getAprilTagTransform(tag, camK, k1, k2, tagsize)
@@ -141,7 +141,7 @@ end
 
 # get Pose2Pose2 tag orientation transform
 function getTagPP2(bTt)
-  @show bTt
+  # @show bTt
   cVz = LinearMap(Quat(bTt.linear))([1.0;0;0])
   wYt = atan(cVz[2],cVz[1])
   Translation(bTt.translation[1],bTt.translation[2],0) ∘ LinearMap(RotZ(wYt))
@@ -149,7 +149,7 @@ end
 
 
 ## DETECT APRILTAGS FROM IMAGE DATA
-function detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs)
+function detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs; iterposes::Int=999999999)
 
     # prep keyframe image data
     camlookup = prepCamLookup(camidxs)
@@ -158,7 +158,7 @@ function detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs)
     IMGS, TAGS = detectTagsViaCamLookup(camlookup, joinpath(datafolder,imgfolder), resultsdir)
 
     # prep dictionary with all tag detections and poses
-    tag_bag = prepTagBag(TAGS)
+    tag_bag = prepTagBag(TAGS, iterposes=iterposes)
 
     # save the tag detections for later comparison
     fid=open(resultsdir*"/tags/pose_tags.csv","w")

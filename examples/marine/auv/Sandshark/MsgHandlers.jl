@@ -112,7 +112,7 @@ function range_hdlr(channel::String, msgdata::raw_t, dfg::AbstractDFG, dashboard
 
         # set the factors as solvable (landmark if not there yet too)
         addLm = getSolvable(dfg, :l1) == 1 ? Symbol[] : [:l1; :l1f1]
-        put!(dashboard[:solvables], [fSym;addLm])
+        put!(dashboard[:solveSettings].solvables, [fSym;addLm])
       end
     end
   end
@@ -148,7 +148,7 @@ function pose_hdlr(channel::String,
   # get message time
 
   # write the latest DRT solution to file
-  drtFnc = string(dashboard[:drtCurrent][1], dashboard[:drtCurrent][2], "f1") |> Symbol
+  drtFnc = string(dashboard[:solveSettings].drtCurrent[1], dashboard[:solveSettings].drtCurrent[2], "f1") |> Symbol
   val = accumulateFactorMeans(dfg, [drtFnc;])
   drtFncMu = getFactorType(dfg, drtFnc).Zij.μ
   println(drtlog, "$odoT, $(drtFnc), $(dashboard[:lastPose]), $(val[1]), $(val[2]), $(val[3]), $(scodo[1]), $(scodo[2]), $(scodo[3]), $(collect(keys(dashboard[:drtMpp]))), $(drtFncMu)")
@@ -163,7 +163,7 @@ function pose_hdlr(channel::String,
 
     # get factor to next pose
     nPose = nextPose(dashboard[:lastPose])
-    @info "pose_hdlr, adding new pose $nPose, at $odoT.  DRTs $(collect(keys(dashboard[:drtMpp]))), drtCurrent=$(dashboard[:drtCurrent])"
+    @info "pose_hdlr, adding new pose $nPose, at $odoT.  DRTs $(collect(keys(dashboard[:drtMpp]))), drtCurrent=$(dashboard[:solveSettings].drtCurrent)"
 
     # get drt from last pose
     lastPoseDrt = intersect(ls(dfg, dashboard[:lastPose]), ls(dfg, MutablePose2Pose2Gaussian))[1]
@@ -181,7 +181,8 @@ function pose_hdlr(channel::String,
                                                cov=dashboard[:odoCov]  )
     #
     # set timestamp to msg times
-    setTimestamp!(getVariable(dfg, nPose), odoT)
+    # setTimestamp!(getVariable(dfg, nPose), odoT)
+    setTimestamp!(dfg, nPose, odoT)
     # delete drt unless used by real time prediction
     # TODO assuming stride ends on a 0
     poseStrideTail = sortDFG(ls(dfg, r"x\d+9\b|x9\b", solvable=0))
@@ -203,18 +204,18 @@ function pose_hdlr(channel::String,
     drec1 = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
     addFactor!(dfg, [nPose; nDrt], drec1, solvable=0, autoinit=false)
     dashboard[:drtMpp][nPose] = drec1
-    put!(dashboard[:solvables], [nPose; fctsym])
+    put!(dashboard[:solveSettings].solvables, [nPose; fctsym])
     dashboard[:poseStride] += 1
 
     if dashboard[:doDelay] && 10 <= dashboard[:poseStride]
       # how far to escalate -- :canTakePoses is de-escalated by solver in manageSolveTree()
-      if dashboard[:canTakePoses] == HSMHandling
-        dashboard[:canTakePoses] = HSMOverlapHandling
-      elseif dashboard[:canTakePoses] == HSMOverlapHandling
-        dashboard[:canTakePoses] = HSMBlocking
-      end
+      # if dashboard[:solveSettings].canTakePoses == HSMHandling
+      #   dashboard[:solveSettings].canTakePoses = HSMOverlapHandling
+      # elseif dashboard[:solveSettings].canTakePoses == HSMOverlapHandling
+      #   dashboard[:solveSettings].canTakePoses = HSMBlocking
+      # end
       @info "new solve token $nPose"
-      put!(dashboard[:poseSolveToken], nPose)
+      put!(dashboard[:solveSettings].poseSolveToken, nPose)
       dashboard[:poseStride] = 0
     end
 
