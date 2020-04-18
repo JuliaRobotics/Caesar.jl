@@ -68,33 +68,31 @@ open(vis)
 const ImgType = Array{ColorTypes.RGB{FixedPointNumbers.Normed{UInt8,8}},2}
 
 # Consume rosbag with car data
-bagfile = joinpath(ENV["HOME"],"data/racecar/mrg/lab_run.bag")
-leftimgtopic = "/zed/zed_node/left/image_rect_color/compressed"
-# leftimgtopic = "/zed/zed_node/left_raw/image_raw_color/compressed"
-rightimgtopic = "/zed/zed_node/right/image_rect_color/compressed"
+bagfile = joinpath(ENV["HOME"],"data/racecar/labrun5/labRun5.bag")
 
-zedodomtopic = "/zed/zed_node/odom"
+leftimgtopic = "/zed/left/image_rect_color"
+# rightimgtopic = "/zed/right/image_rect_color"
+zedodomtopic = "/zed/odom"
 
 
 # from bagfile
-fx = 340.59393310546875
-fy = 340.59393310546875
-cx = 330.41748046875
-cy = 196.3251953125
+fx = 341.4563903808594
+fy = 341.4563903808594
+cx = 329.19091796875
+cy = 196.3658447265625
 
 K = [-fx 0  cx;
       0 fy cy]
 
-WEIRDOFFSET = Dict(:right => 4267, :zedodo => 3073)
 
-gui = imshow_gui((600, 100), (1, 2))  # 2 columns, 1 row of images (each initially 300×300)
+gui = imshow_gui((600, 100), (1, 1))  # 2 columns, 1 row of images (each initially 300×300)
 canvases = gui["canvas"]
 
 detector = AprilTagDetector()
 
 ##
 
-include(joinpath(@__DIR__, "CarSlamUtilsStereo.jl"))
+include(joinpath(@__DIR__, "CarSlamUtils.jl"))
 
 ## start solver
 
