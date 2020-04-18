@@ -167,6 +167,9 @@ copylatesttoconductor() {
     echo $ln > /tmp/caesar/conductor/solves/$WHICHRES.aux
     cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
     cp -f /tmp/caesar/$ln/results/results.csv /home/singhk/data/racecar/$WHICHRES/results_$WHICHRES.csv
+    #also copy the latest image
+    LSTIMG=`ls -t | head -n20 | grep -v "hist" | head -n1`
+    cp -f /tmp/caesar/$ln/results/images/$LSTIMG /tmp/caesar/conductor/solves/img_${WHICHRES}_${LSTIMG}
   done < /tmp/caesar/last8
 }
 
