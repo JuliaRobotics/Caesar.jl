@@ -168,6 +168,10 @@ for sym in poses # poses first
   bVel = TU.R(-val[3])*[wVelx;wVely]
   velx = bVel[1]
   vely = bVel[2]
+  if sym in [:x0;:x1]
+    velx = 0.0
+    vely = 0.0
+  end
   prevT = newT
   prevpos = val
   println(fid, "$sym, $(val[1]), $(val[2]), $(val[3]), $velx, $vely")

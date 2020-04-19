@@ -49,11 +49,6 @@ using Caesar
 @everywhere using Caesar
 @everywhere using RoME, IncrementalInference, DistributedFactorGraphs, TransformUtils
 
-## Load rosbag reader
-
-# this now occurs as part of Caesar after RobotOS
-# include( joinpath(projdir,"..","Utils","RosbagSubscriber.jl") )
-
 
 ## add 3D vis
 
@@ -85,14 +80,35 @@ K = [-fx 0  cx;
       0 fy cy]
 
 
-gui = imshow_gui((600, 100), (1, 1))  # 2 columns, 1 row of images (each initially 300×300)
-canvases = gui["canvas"]
-
-detector = AprilTagDetector()
-
 ##
 
-include(joinpath(@__DIR__, "CarSlamUtils.jl"))
+include(joinpath(@__DIR__, "CarSlamUtilsMono.jl"))
+
+WEIRDOFFSET = Dict{Symbol, Int}() # Dict(:camOdo => 3073)
+
+gui = imshow_gui((600, 100), (1, 1))  # 2 columns, 1 row of images (each initially 300×300)
+canvases = gui["canvas"]
+detector = AprilTagDetector()
+
+tools = RacecarTools(detector)
+
+
+slam = SLAMWrapperLocal()
+getSolverParams(slam.dfg).drawtree = true
+getSolverParams(slam.dfg).showtree = false
+
+addVariable!(slam.dfg, :x0, Pose2)
+addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2))))
+
+bagSubscriber = RosbagSubscriber(bagfile)
+
+syncz = SynchronizeCarMono(syncList=[:leftFwdCam;:camOdo])
+fec = FrontEndContainer(30,slam,bagSubscriber,syncz,tools)
+
+bagSubscriber(leftimgtopic, leftImgHdlr, fec)
+bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET)
+
+
 
 ## start solver
 
@@ -106,18 +122,18 @@ ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=true)
 
 ##
 
-loop!(BagSubscriber)
-loop!(BagSubscriber)
-loop!(BagSubscriber)
+loop!(bagSubscriber)
+loop!(bagSubscriber)
+loop!(bagSubscriber)
 
 ##
 
 getSolverParams(slam.dfg).drawtree = false
 
 sleep(0.01)  # allow gui sime time to setup
-while loop!(BagSubscriber)
+while loop!(bagSubscriber)
 # for i in 1:5000
-  # loop!(BagSubscriber)
+  # loop!(bagSubscriber)
   blockProgress(slam) # required to prevent duplicate solves occuring at the same time
 end
 

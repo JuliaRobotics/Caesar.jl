@@ -8,21 +8,9 @@ SyncImages[:left] = CircularBuffer{Tuple{Int, Any}}(30) # ImgType
 SyncImages[:right] = CircularBuffer{Tuple{Int, Any}}(30)
 SyncImages[:zedodo] = CircularBuffer{Tuple{Int, Any}}(30)
 
-delete!(vis[:tags])
-delete!(vis[:poses])
 
-## User functions
-
-function showImage(image, tags, K)
-    # Convert image to RGB
-    imageCol = RGB.(image)
-    #traw color box on tag corners
-    foreach(tag->drawTagBox!(imageCol, tag, width = 2, drawReticle = false), tags)
-    foreach(tag->drawTagAxes!(imageCol,tag, K), tags)
-    imageCol
-end
-
-function getSyncLatestPair(syncHdlrs::Dict; weirdOffset::Dict=Dict())::Tuple
+function getSyncLatestPair(syncHdlrs::Dict; weirdOffset::Dict=Dict())
+  @warn "getSyncLatestPair(::Dict,...) is being replaced by findSyncLatest(<:SynchronizerBuffer,...)"
   # get all sequence numbers
   ks = keys(syncHdlrs) |> collect
   len = length(ks)
@@ -228,20 +216,3 @@ end
 # function joystickHdlr(msgdata, )
 #
 # end
-
-
-
-## setup subscriptions to bagfile
-
-slam = SLAMWrapperLocal()
-getSolverParams(slam.dfg).drawtree = true
-
-
-addVariable!(slam.dfg, :x0, Pose2)
-addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2))))
-
-BagSubscriber = RosbagSubscriber(bagfile)
-
-BagSubscriber(leftimgtopic, leftImgHdlr, slam)
-BagSubscriber(rightimgtopic, rightImgHdlr, slam)
-BagSubscriber(zedodomtopic, odomHdlr, slam)
