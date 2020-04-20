@@ -201,13 +201,16 @@ function main(WP,
               odopredfnc=nothing,
               joyvel=nothing,
               poseTimes=nothing,
-              multiproc=true )
+              multiproc=true,
+              drawtree=true )
 #
 
 # Factor graph construction
 fg = initfg()
 getSolverParams(fg).logpath = resultsdir
 getSolverParams(fg).multiproc=multiproc
+getSolverParams(fg).drawtree=drawtree
+getSolverParams(fg).showtree=false
 prev_psid = 0
 
 # load from previous file
