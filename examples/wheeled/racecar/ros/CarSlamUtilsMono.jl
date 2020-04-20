@@ -6,21 +6,21 @@ include(joinpath(@__DIR__, "CarSlamUtilsCommon.jl"))
 ##
 
 # Is this a general requirement?
-function updateSLAM!(slamw::SLAMWrapperLocal, fec, WEIRDOFFSET)
-  idxL, idxR, idxO = findSyncLatestIdx(fec.synchronizer, weirdOffset=WEIRDOFFSET)
-  if idxL == 0
+function updateSLAMMono!(fec::FrontEndContainer,
+                         WEIRDOFFSET::Dict,
+                         syncList::Vector{Symbol}=fec.synchronizer.syncList)
+  #
+  syncz = fec.synchronizer
+  idxL,idxO = findSyncLatestIdx(syncz, syncList=[:leftFwdCam;:camOdo], weirdOffset=WEIRDOFFSET)
+  if idxL == 0 || idxO == 0
     return nothing
   end
   # already have a counter
-  slamw.frameCounter = syncHdlr[:zedodo][idxO][1]
-  # bad traffic, i.e. useless rule
-  # if slamw.frameCounter % slamw.poseStride != 0
-  #   return nothing
-  # end
+  fec.slam.frameCounter = syncz.camOdo[idxO][1]
 
   # calculate delta odo since last pose
-  zTi = slamw.helpers.lastPoseOdomBuffer
-  zT = syncHdlr[:zedodo][idxO][2]
+  zTi = fec.slam.helpers.lastPoseOdomBuffer
+  zT = syncz.camOdo[idxO][2]
   iT = zTi\zT
   # x-fwd, y-right, z-up
   psi = convert(Euler, iT.R).Y  # something not right here?
@@ -34,24 +34,24 @@ function updateSLAM!(slamw::SLAMWrapperLocal, fec, WEIRDOFFSET)
   # @show convert(Euler, iT.R).Y  # something not right here?
 
   # reset interpose odometry counter for outside global odo integration process
-  slamw.helpers.lastPoseOdomBuffer = syncHdlr[:zedodo][idxO][2] |> deepcopy
+  fec.slam.helpers.lastPoseOdomBuffer = syncz.camOdo[idxO][2] |> deepcopy
 
   # add new pose
-  prevpose = Symbol("x$(slamw.poseCount)")
-  slamw.poseCount += 1
-  newpose = Symbol("x$(slamw.poseCount)")
-  addVariable!(slamw.dfg, newpose, Pose2)
+  prevpose = Symbol("x$(fec.slam.poseCount)")
+  fec.slam.poseCount += 1
+  newpose = Symbol("x$(fec.slam.poseCount)")
+  addVariable!(fec.slam.dfg, newpose, Pose2)
 
   # TODO add covariance later
   pp = Pose2Pose2(MvNormal(DX, diagm([0.05; 0.05; 0.3].^2)))
   # pp = Pose2Pose2(MvNormal([0.1;0.0;0.0], diagm([0.4; 0.2; 0.3].^2)))
-  addFactor!(slamw.dfg, [prevpose;newpose], pp)
+  addFactor!(fec.slam.dfg, [prevpose;newpose], pp)
 
   # variables that can be initialized / solved
-  put!(slamw.solveSettings.solvables, [newpose; ls(slamw.dfg,newpose)[1]])
+  put!(fec.slam.solveSettings.solvables, [newpose; ls(fec.slam.dfg,newpose)[1]])
 
   # add any potential landmarks and factors
-  tagsL = detector(syncHdlr[:left][idxL][2])
+  tagsL = detector(syncz.leftFwdCam[idxL][2])
   # tagsR = detector(syncHdlr[:right][idxR][2])
 
   @show tagsL |> length
@@ -84,7 +84,7 @@ function updateSLAM!(slamw::SLAMWrapperLocal, fec, WEIRDOFFSET)
   end
 
   # check whether a solve should be trigger
-  checkSolveStrideTrigger!(slam)
+  checkSolveStrideTrigger!(fec.slam)
 
   nothing
 end
@@ -128,7 +128,7 @@ end
 
 
 function leftImgHdlr(msgdata, fec::FrontEndContainer)
-  @show "leftImgHdlr", msgdata[2].header.seq
+  # @show "leftImgHdlr", msgdata[2].header.seq
   leftdata = take!(IOBuffer(msgdata[2].data))
 
   # more direct image from ROS and zed
@@ -151,6 +151,7 @@ end
 
 
 function odomHdlr(msgdata, fec::FrontEndContainer, WO)
+  # @show "odomHdlr", msgdata[2].header.seq
 
   pos = msgdata[2].pose.pose.position
   quat = msgdata[2].pose.pose.orientation
@@ -162,12 +163,22 @@ function odomHdlr(msgdata, fec::FrontEndContainer, WO)
   push!(fec.synchronizer.camOdo, (msgdata[2].header.seq, zTi) )
 
   drawLatestImage(fec, syncList=[:leftFwdCam;])
-  # updateSLAMMono!(slamw, fec.synchronizer, WO)
+  updateSLAMMono!(fec.slam, fec.synchronizer, WO)
 
   nothing
 end
 
 
 function joystickHdlr(msgdata, fec::FrontEndContainer)
+  # @show "joystickHdlr", msgdata[2].header.seq
+  data = Dict(:axis => msgdata[2].axes,
+              :buttons => msgdata[2].buttons)
+  # @show data
+  push!(fec.synchronizer.cmdVal, (msgdata[2].header.seq, data) )
+
   #
 end
+
+
+
+#

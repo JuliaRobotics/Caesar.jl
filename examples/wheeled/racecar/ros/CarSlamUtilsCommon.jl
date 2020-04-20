@@ -12,6 +12,7 @@ abstract type SynchronizingBuffer end
 struct SynchronizeCarMono <: SynchronizingBuffer
   syncList::Vector{Symbol}
   leftFwdCam::CircularBuffer{Tuple{Int, Any}}
+  rightFwdCam::CircularBuffer{Tuple{Int, Any}}
   camOdo::CircularBuffer{Tuple{Int, Any}}
   cmdVal::CircularBuffer{Tuple{Int, Any}}
 end
@@ -19,8 +20,9 @@ end
 SynchronizeCarMono(len::Int=30;
                    syncList::Vector=Symbol[],
                    leftFwdCam=CircularBuffer{Tuple{Int, Any}}(len),
+                   rightFwdCam=CircularBuffer{Tuple{Int, Any}}(len),
                    camOdo=CircularBuffer{Tuple{Int, Any}}(len),
-                   cmdVal=CircularBuffer{Tuple{Int, Any}}(len) ) = SynchronizeCarMono(syncList,leftFwdCam,camOdo,cmdVal)
+                   cmdVal=CircularBuffer{Tuple{Int, Any}}(len) ) = SynchronizeCarMono(syncList,leftFwdCam,rightFwdCam,camOdo,cmdVal)
 #
 
 struct RacecarTools

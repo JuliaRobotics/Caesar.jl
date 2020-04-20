@@ -68,6 +68,7 @@ bagfile = joinpath(ENV["HOME"],"data/racecar/labrun5/labRun5.bag")
 leftimgtopic = "/zed/left/image_rect_color"
 # rightimgtopic = "/zed/right/image_rect_color"
 zedodomtopic = "/zed/odom"
+joysticktopic = "/joy"
 
 
 # from bagfile
@@ -87,7 +88,7 @@ K = [-fx 0  cx;
 
 include(joinpath(@__DIR__, "CarSlamUtilsMono.jl"))
 
-WEIRDOFFSET = Dict{Symbol, Int}() # Dict(:camOdo => 3073)
+WEIRDOFFSET = Dict{Symbol, Int}(:cmdVal => -11345)
 
 gui = imshow_gui((600, 100), (1, 2))  # 2 columns, 1 row of images (each initially 300×300)
 canvases = gui["canvas"]
@@ -112,6 +113,7 @@ fec = FrontEndContainer(slam,bagSubscriber,syncz,tools)
 # callbacks via Python
 bagSubscriber(leftimgtopic, leftImgHdlr, fec)
 bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET)
+bagSubscriber(joysticktopic, joystickHdlr, fec)
 
 
 
@@ -127,7 +129,7 @@ ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=true)
 
 ##
 
-(fec.synchronizer.leftFwdCam |> last)[2] |> collect |> imshow
+# (fec.synchronizer.leftFwdCam |> last)[2] |> collect |> imshow
 
 loop!(bagSubscriber)
 loop!(bagSubscriber)
@@ -135,13 +137,12 @@ loop!(bagSubscriber)
 
 ##
 
-getSolverParams(slam.dfg).drawtree = false
 
 sleep(0.01)  # allow gui sime time to setup
-while loop!(bagSubscriber)
-# for i in 1:1000
+# while loop!(bagSubscriber)
+for i in 1:3000
   loop!(bagSubscriber)
-  # blockProgress(slam) # required to prevent duplicate solves occuring at the same time
+  blockProgress(slam) # required to prevent duplicate solves occuring at the same time
 end
 
 ## close all
