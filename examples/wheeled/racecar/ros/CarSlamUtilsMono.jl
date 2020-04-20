@@ -1,5 +1,9 @@
 # monocular camera on car tools
 
+include(joinpath(@__DIR__, "CarSlamUtilsCommon.jl"))
+
+
+##
 
 # Is this a general requirement?
 function updateSLAM!(slamw::SLAMWrapperLocal, fec, WEIRDOFFSET)
@@ -88,16 +92,59 @@ end
 
 
 
+function drawLatestImage(fec::FrontEndContainer; syncList=[:leftFwdCam;])
+  # get synced images
+  @show idxL = findSyncLatestIdx(fec.synchronizer, weirdOffset=WEIRDOFFSET, syncList=syncList )
+
+  # @info "drawLatestImagePair, $idxL, $idxR, $idxO"
+  if idxL == 0
+    return nothing
+  end
+
+  # Do apriltag detection
+  tagsL = detector(fec.synchronizer.leftFwdCam[idxL][2] |> collect)
+
+  # @show poses = (T->homographytopose(T.H, fx, fy, cx, cy, taglength = 160.)).(tagsL)
+  imgLt = showImage(fec.synchronizer.leftFwdCam[idxL][2], tagsL, K)
+
+  # imgL = syncImgs[:left][idxL][2] .|> Gray
+  # imgR = syncImgs[:right][idxR][2] .|> Gray
+  # featuresL = Keypoints(fastcorners(imgL, 12, 0.25))
+  # featuresR = Features(fastcorners(imgR, 12, 0.25))
+  # offsetx = CartesianIndex(0, 5)
+  # offsety = CartesianIndex(5, 0)
+  # map(m -> draw!(imgLt, LineSegment(m - offsetx, m + offsetx)), featuresL)
+  # map(m -> draw!(imgLt, LineSegment(m - offsety, m + offsety)), featuresL)
+
+  # draw both
+  imshow(canvases[1,1], imgLt)
+
+  Gtk.showall(gui["window"])
+  nothing
+end
 
 
 ##  MessageHandler
 
 
 function leftImgHdlr(msgdata, fec::FrontEndContainer)
-  # @show "leftImgHdlr", msgdata[2].header.seq
+  @show "leftImgHdlr", msgdata[2].header.seq
   leftdata = take!(IOBuffer(msgdata[2].data))
 
-  push!(fec.synchronizer.leftFwdCam, (msgdata[2].header.seq, ImageMagick.load_(leftdata)) )
+  # more direct image from ROS and zed
+  nvi = normedview(leftdata)
+  # im3 = last(fec.synchronizer.leftFwdCam)[2]
+  arr = reshape(nvi, 3, 672,376) # im3
+  pv = PermutedDimsArray(arr, (1,3,2))
+  pvn = similar(pv)
+  pvn[3,:,:] .= pv[1,:,:]
+  pvn[2,:,:] .= pv[2,:,:]
+  pvn[1,:,:] .= pv[3,:,:]
+  ldImg = colorview(RGB, pvn)
+
+  # for compressed images
+  # ldImg = ImageMagick.load_(leftdata)
+  push!(fec.synchronizer.leftFwdCam, (msgdata[2].header.seq, ldImg) )
   # img = last(SyncImages[:left])
   nothing
 end
@@ -114,13 +161,13 @@ function odomHdlr(msgdata, fec::FrontEndContainer, WO)
   zTi = SE3(zPi, zQi)
   push!(fec.synchronizer.camOdo, (msgdata[2].header.seq, zTi) )
 
-  drawLatestImagePair(fec.synchronizer)
-  updateSLAMMono!(slamw, fec.synchronizer, WO)
+  drawLatestImage(fec, syncList=[:leftFwdCam;])
+  # updateSLAMMono!(slamw, fec.synchronizer, WO)
 
   nothing
 end
 
 
 function joystickHdlr(msgdata, fec::FrontEndContainer)
-
+  #
 end

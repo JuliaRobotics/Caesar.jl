@@ -28,10 +28,10 @@ using PyCall
 using RobotOS
 
 # standard types
-@rosimport sensor_msgs.msg: CompressedImage
-@rosimport geometry_msgs.msg: PoseStamped
-
-rostypegen()
+# @rosimport sensor_msgs.msg: CompressedImage
+# @rosimport geometry_msgs.msg: PoseStamped
+#
+# rostypegen()
 
 ### Rest of Julia types
 
@@ -79,6 +79,9 @@ cy = 196.3658447265625
 K = [-fx 0  cx;
       0 fy cy]
 
+# guessing
+# 758016/3 = 252672
+# (c, a / c) = (672, 376.0)
 
 ##
 
@@ -86,9 +89,10 @@ include(joinpath(@__DIR__, "CarSlamUtilsMono.jl"))
 
 WEIRDOFFSET = Dict{Symbol, Int}() # Dict(:camOdo => 3073)
 
-gui = imshow_gui((600, 100), (1, 1))  # 2 columns, 1 row of images (each initially 300×300)
+gui = imshow_gui((600, 100), (1, 2))  # 2 columns, 1 row of images (each initially 300×300)
 canvases = gui["canvas"]
 detector = AprilTagDetector()
+
 
 tools = RacecarTools(detector)
 
@@ -102,9 +106,10 @@ addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2
 
 bagSubscriber = RosbagSubscriber(bagfile)
 
-syncz = SynchronizeCarMono(syncList=[:leftFwdCam;:camOdo])
-fec = FrontEndContainer(30,slam,bagSubscriber,syncz,tools)
+syncz = SynchronizeCarMono(30,syncList=[:leftFwdCam;:camOdo])
+fec = FrontEndContainer(slam,bagSubscriber,syncz,tools)
 
+# callbacks via Python
 bagSubscriber(leftimgtopic, leftImgHdlr, fec)
 bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET)
 
@@ -122,6 +127,8 @@ ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=true)
 
 ##
 
+(fec.synchronizer.leftFwdCam |> last)[2] |> collect |> imshow
+
 loop!(bagSubscriber)
 loop!(bagSubscriber)
 loop!(bagSubscriber)
@@ -132,9 +139,9 @@ getSolverParams(slam.dfg).drawtree = false
 
 sleep(0.01)  # allow gui sime time to setup
 while loop!(bagSubscriber)
-# for i in 1:5000
-  # loop!(bagSubscriber)
-  blockProgress(slam) # required to prevent duplicate solves occuring at the same time
+# for i in 1:1000
+  loop!(bagSubscriber)
+  # blockProgress(slam) # required to prevent duplicate solves occuring at the same time
 end
 
 ## close all

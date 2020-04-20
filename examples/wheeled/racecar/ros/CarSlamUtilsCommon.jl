@@ -39,25 +39,27 @@ struct FrontEndContainer{M,T,A}
   tools::A
 end
 
-FrontEndContainer(l::Int,m::M,t::T,a::A) where {M, T, A} = FrontEndContainer{M,T,A}(l,m,t,a)
+FrontEndContainer(s::SLAMWrapperLocal,m::M,t::T,a::A) where {M, T, A} = FrontEndContainer{M,T,A}(s,m,t,a)
 
 ## data management functions
 
 # function getSyncLatestPair(syncHdlrs::Dict; weirdOffset::Dict=Dict())::Tuple
-function findSyncLatestIdx(syncz::SynchronizingBuffer; weirdOffset::Dict=Dict())::Tuple
+function findSyncLatestIdx(syncz::SynchronizingBuffer;
+                           weirdOffset::Dict=Dict(),
+                           syncList::Vector{Symbol}=syncz.syncList)
   # get all sequence numbers
-  ks = syncz.syncList
-  len = length(ks)
+  len = length(syncList)
   if len == 1
     # simply return the newest element in the buffer
-    return length(getfield(syncz, ks[1]))
+    sy = getfield(syncz, syncList[1])
+    return length(sy)
   elseif len == 0
     @warn "findSyncLatestIdx has nothing to synchronize -- on account of .syncList being empty."
     return 0  # error
   end
   LEN = Vector{Int}(undef, len)
   for idx in 1:len
-    LEN[idx] = getfield(syncz, ks[idx]) |> length
+    LEN[idx] = getfield(syncz, syncList[idx]) |> length
     if LEN[idx] == 0
       return (NTuple{len, Int}(zeros(len)))
     end
@@ -65,9 +67,9 @@ function findSyncLatestIdx(syncz::SynchronizingBuffer; weirdOffset::Dict=Dict())
 
   SEQ = Vector{Vector{Int}}(undef, len)
   for idx in 1:len
-    SEQ[idx] = (x->getfield(syncz, ks[idx])[x][1]).(1:LEN[idx])
-    if haskey(weirdOffset, ks[idx])
-      SEQ[idx] .+= weirdOffset[ks[idx]]
+    SEQ[idx] = (x->getfield(syncz, syncList[idx])[x][1]).(1:LEN[idx])
+    if haskey(weirdOffset, syncList[idx])
+      SEQ[idx] .+= weirdOffset[syncList[idx]]
     end
   end
 

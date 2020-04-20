@@ -42,7 +42,13 @@ function loop!(rbs::RosbagSubscriber)
   msgT = msg[end]
   return if isa(msgT, PyObject)
     # update the syncBuffer
-    rbs.syncBuffer[nextMsgChl] = (unix2datetime(msgT.to_sec()), msgT.to_nsec()%1000000000)
+    msgNs = msgT.to_sec()
+    # jlSeconds = isa(msg, PyObject) ? msgNs : msgNs
+    jlSeconds = floor(Int64, Float64(msgNs))
+    jlNanosec = msgT.to_nsec()%1000000000
+    # try use regular seconds if no Nanosecond information is available
+    jlNanosec = floor(Int,jlNanosec) == 0 && 0 < Float64(msgNs) % 1.0 |> abs ? Float64(msgNs) % 1.0 : jlNanosec
+    rbs.syncBuffer[nextMsgChl] = (unix2datetime(jlSeconds), jlNanosec)
     # call the callback
     rbs.callbacks[nextMsgChl](msg)
     true
