@@ -202,7 +202,8 @@ function main(WP,
               joyvel=nothing,
               poseTimes=nothing,
               multiproc=true,
-              drawtree=true )
+              drawtree=true,
+              batchResolve=true)
 #
 
 # Factor graph construction
@@ -285,6 +286,14 @@ for psid in (prev_psid+1):1:maxlen
   # prepare for next iteration
   prev_psid = psid
 end # for
+
+# do a batch resolve first
+if batchResolve
+  dontMarginalizeVariablesAll!(fg)
+  foreach(x->setSolvable!(fg, x, 1), setdiff(ls(fg),ls(fg,r"drt")))
+  foreach(x->setSolvable!(fg, x, 1), setdiff(lsf(fg),lsf(fg,r"drt")))
+  tree = solveTree!(fg, maxparallel=1000)
+end
 
 # extract results for later use as training data
 results2csv(fg, dir=resultsdir, filename="results.csv")
