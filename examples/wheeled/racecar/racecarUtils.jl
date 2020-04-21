@@ -294,6 +294,7 @@ if batchResolve
   foreach(x->setSolvable!(fg, x, 1), setdiff(lsf(fg),lsf(fg,r"drt")))
   tree = solveTree!(fg, maxparallel=1000)
 end
+saveDFG(fg, resultsdir*"/racecar_fg_final")
 
 # extract results for later use as training data
 results2csv(fg, dir=resultsdir, filename="results.csv")
