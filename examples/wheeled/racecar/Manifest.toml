@@ -62,9 +62,9 @@ version = "2.8.5"
 
 [[ArrayLayouts]]
 deps = ["FillArrays", "LinearAlgebra"]
-git-tree-sha1 = "bc779df8d73be70e4e05a63727d3a4dfb4c52b1f"
+git-tree-sha1 = "f8904599065b57f51715faf6278126f853aef6fc"
 uuid = "4c555306-a7a7-4459-81d9-ec55ddd5c99a"
-version = "0.1.5"
+version = "0.2.4"
 
 [[AxisAlgorithms]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "WoodburyMatrices"]
@@ -650,11 +650,11 @@ version = "0.22.2"
 
 [[IncrementalInference]]
 deps = ["ApproxManifoldProducts", "Combinatorics", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "FunctionalStateMachine", "Graphs", "JLD2", "JSON2", "KernelDensityEstimate", "LinearAlgebra", "Logging", "MetaGraphs", "NLSolversBase", "NLsolve", "Optim", "ProgressMeter", "Random", "Reexport", "Requires", "SparseArrays", "Statistics", "StatsBase", "SuiteSparse"]
-git-tree-sha1 = "f3bcf6ee5dc86b68cc9312b1390c3300391b4ba1"
+git-tree-sha1 = "469f4875422e265588107d29b883a3d5bf6b283d"
 repo-rev = "master"
 repo-url = "https://github.com/JuliaRobotics/IncrementalInference.jl.git"
 uuid = "904591bb-b899-562f-9e6f-b8df64c7d480"
-version = "0.11.1"
+version = "0.11.2"
 
 [[IndirectArrays]]
 git-tree-sha1 = "c2a145a145dc03a7620af1444e0264ef907bd44f"
@@ -778,15 +778,15 @@ version = "2.10.0+1"
 
 [[LazyArrays]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "MacroTools", "StaticArrays"]
-git-tree-sha1 = "d10de258d0c999350d433e4eed35201c9d790bcd"
+git-tree-sha1 = "0f42c76af38c1a3d7e753cf8dfb0f8c5d18cba56"
 uuid = "5078a376-72f3-5289-bfd5-ec5146d43c02"
-version = "0.14.11"
+version = "0.16.5"
 
 [[LazyStack]]
 deps = ["LinearAlgebra", "NamedDims", "OffsetArrays", "Test", "ZygoteRules"]
-git-tree-sha1 = "2e900f3ffe34c8b2c1543b62cc8a4a576c8549aa"
+git-tree-sha1 = "a8bf67afad3f1ee59d367267adb7c44ccac7fdee"
 uuid = "1fad7336-0346-5a1a-a56f-a06ba010965b"
-version = "0.0.5"
+version = "0.0.7"
 
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -1039,9 +1039,9 @@ version = "0.12.0"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "75d07cb840c300084634b4991761886d0d762724"
+git-tree-sha1 = "f8f5d2d4b4b07342e5811d2b6428e45524e241df"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "1.0.1"
+version = "1.0.2"
 
 [[Pixman_jll]]
 deps = ["Libdl", "Pkg"]
@@ -1266,9 +1266,9 @@ version = "1.0.4"
 
 [[TensorCast]]
 deps = ["Compat", "LazyArrays", "LazyStack", "LinearAlgebra", "MacroTools", "OffsetArrays", "Random", "StaticArrays", "ZygoteRules"]
-git-tree-sha1 = "036614ce47bfa2eee4d774e5e25409bfc50af7d9"
+git-tree-sha1 = "cbffffcc405e12727ed9628bada9d4faf9a631e8"
 uuid = "02d47bb6-7ce6-556a-be16-bb1710789e2b"
-version = "0.2.1"
+version = "0.2.2"
 
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
@@ -1349,9 +1349,9 @@ version = "1.1.33+2"
 
 [[Xorg_libX11_jll]]
 deps = ["Libdl", "Pkg", "Xorg_libxcb_jll", "Xorg_xtrans_jll"]
-git-tree-sha1 = "b04e87c6b8a7f80aa9f8239dd5d23bb3324728fa"
+git-tree-sha1 = "bbfb646a5a86dc636041c8ee945799b69d37fdba"
 uuid = "4f6342f7-b3d2-589e-9d20-edeb45f2b2bc"
-version = "1.6.9+1"
+version = "1.6.9+2"
 
 [[Xorg_libXau_jll]]
 deps = ["Libdl", "Pkg", "Xorg_xproto_jll"]
@@ -1367,15 +1367,15 @@ version = "1.1.3+2"
 
 [[Xorg_libXext_jll]]
 deps = ["Libdl", "Pkg", "Xorg_libX11_jll", "Xorg_util_macros_jll", "Xorg_xextproto_jll"]
-git-tree-sha1 = "43ff58a4d17cc9710bfadccaa7249f2e44c4b20b"
+git-tree-sha1 = "079acccb5437761d93c483f2edb5fc3ed21ea7db"
 uuid = "1082639a-0dae-5f34-9b06-72781eeb8cb3"
-version = "1.3.4+1"
+version = "1.3.4+2"
 
 [[Xorg_libXrender_jll]]
 deps = ["Libdl", "Pkg", "Xorg_libX11_jll", "Xorg_renderproto_jll"]
-git-tree-sha1 = "84708092aaae22c33c120064a36f1853a2d99d94"
+git-tree-sha1 = "d5492a36d33359cf93ad573ea5e235cd71728649"
 uuid = "ea2f1a96-1ddc-540d-b46f-429655e07cfa"
-version = "0.9.10+1"
+version = "0.9.10+2"
 
 [[Xorg_libpthread_stubs_jll]]
 deps = ["Libdl", "Pkg"]
@@ -1385,9 +1385,9 @@ version = "0.1.0+1"
 
 [[Xorg_libxcb_jll]]
 deps = ["Libdl", "Pkg", "XSLT_jll", "Xorg_libXau_jll", "Xorg_libXdmcp_jll", "Xorg_libpthread_stubs_jll", "Xorg_util_macros_jll", "Xorg_xcb_proto_jll"]
-git-tree-sha1 = "6f5c3e3d1e3201613f38c4042ca79521e3c0bb97"
+git-tree-sha1 = "c1efb50fb6a8c40c45451611fbf93feabe5f9611"
 uuid = "c7cfdc94-dc32-55de-ac96-5a1b8d977c5b"
-version = "1.13.0+1"
+version = "1.13.0+2"
 
 [[Xorg_renderproto_jll]]
 deps = ["Libdl", "Pkg"]
