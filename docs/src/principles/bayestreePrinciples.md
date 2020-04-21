@@ -2,7 +2,7 @@
 
 This page describes how to visualize, study, test, and compare Bayes (Junction) tree concepts with special regard for variable ordering.
 
-## Why a Bayes (Juntion) tree
+## Why a Bayes (Junction) tree
 
 The tree is algebraicly equivalent---but acyclic---structure to the factor graph:  i.) Inference is easier on on acyclic graphs; ii.) We can exploit Smart Message Passing benefits (known from the full conditional independence structure encoded in the tree), since the tree represents the "complete form" when marginalizing each variable one at a time (also known as elimination game, marginalization, also related to smart factors).  In loose terms, the Bayes (Junction) tree has implicit access to all Schur complements (if it parametric and linearized) of each variable to all others.  Please see [this page more information regarding advanced topics on the Bayes tree](https://www.juliarobotics.org/Caesar.jl/latest/principles/initializingOnBayesTree/).
 

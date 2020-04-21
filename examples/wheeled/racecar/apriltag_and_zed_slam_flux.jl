@@ -31,12 +31,18 @@ using Distributed
 
 if nprocs() == 1
   addprocs(7) # make sure there are 4 processes waiting before loading packages
+  # machines = [(ENV["JLCLST02"],3);]
 end
 
 @everywhere begin
   using Pkg
   Pkg.activate(@__DIR__)
+  Pkg.instantiate()
 end
+
+using RoME
+using Flux
+using RoMEPlotting
 
 WP = nprocs == 1 ? WorkerPool([1]) : WorkerPool(2:nprocs() |> collect )
 
@@ -46,7 +52,7 @@ for i in procs()
   fetch( Distributed.@spawnat i @eval using IncrementalInference )
   fetch( Distributed.@spawnat i @eval using RoME )
   fetch( Distributed.@spawnat i @eval using Caesar )
-  fetch( Distributed.@spawnat i @eval using CuArrays )
+  # fetch( Distributed.@spawnat i @eval using CuArrays )
   fetch( Distributed.@spawnat i @eval using Flux )
 end
 
