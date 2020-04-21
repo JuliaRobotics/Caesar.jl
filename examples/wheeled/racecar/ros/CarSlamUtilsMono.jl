@@ -51,7 +51,7 @@ function updateSLAMMono!(fec::FrontEndContainer,
   put!(fec.slam.solveSettings.solvables, [newpose; ls(fec.slam.dfg,newpose)[1]])
 
   # add any potential landmarks and factors
-  tagsL = detector(syncz.leftFwdCam[idxL][2])
+  tagsL = detector(syncz.leftFwdCam[idxL][2] |> collect)
   # tagsR = detector(syncHdlr[:right][idxR][2])
 
   @show tagsL |> length
@@ -163,7 +163,7 @@ function odomHdlr(msgdata, fec::FrontEndContainer, WO)
   push!(fec.synchronizer.camOdo, (msgdata[2].header.seq, zTi) )
 
   drawLatestImage(fec, syncList=[:leftFwdCam;])
-  updateSLAMMono!(fec.slam, fec.synchronizer, WO)
+  updateSLAMMono!(fec, WO)
 
   nothing
 end

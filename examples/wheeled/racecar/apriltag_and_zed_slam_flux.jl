@@ -30,7 +30,7 @@ using Flux
 using Distributed
 
 if nprocs() == 1
-  addprocs(5) # make sure there are 4 processes waiting before loading packages
+  addprocs(7) # make sure there are 4 processes waiting before loading packages
 end
 
 @everywhere begin
