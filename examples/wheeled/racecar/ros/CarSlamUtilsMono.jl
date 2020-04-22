@@ -5,6 +5,7 @@ include(joinpath(@__DIR__, "CarSlamUtilsCommon.jl"))
 
 ##
 
+
 # Is this a general requirement?
 function updateSLAMMono!(fec::FrontEndContainer,
                          WEIRDOFFSET::Dict,
@@ -20,7 +21,7 @@ function updateSLAMMono!(fec::FrontEndContainer,
 
   # calculate delta odo since last pose
   zTi = fec.slam.helpers.lastPoseOdomBuffer
-  zT = syncz.camOdo[idxO][2]
+  zT = syncz.camOdo[idxO][3]
   iT = zTi\zT
   # x-fwd, y-right, z-up
   psi = convert(Euler, iT.R).Y  # something not right here?
@@ -34,24 +35,27 @@ function updateSLAMMono!(fec::FrontEndContainer,
   # @show convert(Euler, iT.R).Y  # something not right here?
 
   # reset interpose odometry counter for outside global odo integration process
-  fec.slam.helpers.lastPoseOdomBuffer = syncz.camOdo[idxO][2] |> deepcopy
+  fec.slam.helpers.lastPoseOdomBuffer = syncz.camOdo[idxO][3] |> deepcopy
 
   # add new pose
   prevpose = Symbol("x$(fec.slam.poseCount)")
   fec.slam.poseCount += 1
   newpose = Symbol("x$(fec.slam.poseCount)")
-  addVariable!(fec.slam.dfg, newpose, Pose2)
+  # take timestamp from image msg
+  imgTime = nanosecond2datetime(syncz.leftFwdCam[idxL][2])
+  addVariable!(fec.slam.dfg, newpose, Pose2, timestamp=imgTime)
 
   # TODO add covariance later
   pp = Pose2Pose2(MvNormal(DX, diagm([0.05; 0.05; 0.3].^2)))
   # pp = Pose2Pose2(MvNormal([0.1;0.0;0.0], diagm([0.4; 0.2; 0.3].^2)))
-  addFactor!(fec.slam.dfg, [prevpose;newpose], pp)
+  # take timestamp from image msg
+  addFactor!(fec.slam.dfg, [prevpose;newpose], pp, timestamp=nanosecond2datetime(syncz.camOdo[idxO][2]) )
 
   # variables that can be initialized / solved
   put!(fec.slam.solveSettings.solvables, [newpose; ls(fec.slam.dfg,newpose)[1]])
 
   # add any potential landmarks and factors
-  tagsL = detector(syncz.leftFwdCam[idxL][2] |> collect)
+  tagsL = detector(syncz.leftFwdCam[idxL][3] |> collect)
   # tagsR = detector(syncHdlr[:right][idxR][2])
 
   @show tagsL |> length
@@ -72,7 +76,7 @@ function updateSLAMMono!(fec::FrontEndContainer,
     Dtag = [bTt.translation[1:2,];theta]
     # println("$(tag.id), $(ld[3]), $(round.(Dtag, digits=3))")
     p2l2 = Pose2Pose2(MvNormal(Dtag,diagm([0.1;0.1;0.1].^2)))
-    addFactor!(slam.dfg, [newpose;lmid], p2l2)
+    addFactor!(slam.dfg, [newpose;lmid], p2l2, timestamp=imgTime)
 
     setobject!(vis[:tags][Symbol("tag_$(tag.id)")][:triad], Triad(0.2))
     tagobj = HyperRectangle(Vec(0.,0,0), Vec(0.3,0.3,0.03))
@@ -81,10 +85,27 @@ function updateSLAMMono!(fec::FrontEndContainer,
 
     # setobject!(vis[:poses][Symbol(newpose)], Triad(0.5))
     # settransform!(vis[:poses][Symbol(newpose)], wTb)
+
   end
 
   # check whether a solve should be trigger
   checkSolveStrideTrigger!(fec.slam)
+
+
+  # find joystick command segment
+  cmdTimes = (x->fec.synchronizer.cmdVal[x][2]).(1:length(fec.synchronizer.cmdVal)) .|> nanosecond2datetime
+  addHist = getAddHistory(fec.slam.dfg)
+  filter!(x->occursin(r"x\d",string(x)), addHist)
+  mask = getTimestamp(getVariable(fec.slam.dfg,addHist[end-1])) .<= cmdTimes .< getTimestamp(getVariable(fec.slam.dfg,addHist[end]))
+  # @show cmdTimes[mask]
+
+  # store this data as big data blob
+  # Make a big data entry in the graph - use JSON2 to just write this (really really verbosely)
+  element = GeneralBigDataEntry(fec.slam.dfg, getVariable(fec.slam.dfg, prevpose), :JOYSTICK_CMD_VALS, mimeType="application/json")
+  # # Set it in the store
+  addBigData!(fec.datastore, element, Vector{UInt8}(JSON2.write(fec.synchronizer.cmdVal[(1:length(fec.synchronizer.cmdVal))[mask]])))
+  # # Add the entry to the graph
+  addBigDataEntry!(getVariable(fec.slam.dfg, prevpose), element)
 
   nothing
 end
@@ -94,7 +115,7 @@ end
 
 function drawLatestImage(fec::FrontEndContainer; syncList=[:leftFwdCam;])
   # get synced images
-  @show idxL = findSyncLatestIdx(fec.synchronizer, weirdOffset=WEIRDOFFSET, syncList=syncList )
+  idxL = findSyncLatestIdx(fec.synchronizer, weirdOffset=WEIRDOFFSET, syncList=syncList )
 
   # @info "drawLatestImagePair, $idxL, $idxR, $idxO"
   if idxL == 0
@@ -102,10 +123,10 @@ function drawLatestImage(fec::FrontEndContainer; syncList=[:leftFwdCam;])
   end
 
   # Do apriltag detection
-  tagsL = detector(fec.synchronizer.leftFwdCam[idxL][2] |> collect)
+  tagsL = detector(fec.synchronizer.leftFwdCam[idxL][3] |> collect)
 
   # @show poses = (T->homographytopose(T.H, fx, fy, cx, cy, taglength = 160.)).(tagsL)
-  imgLt = showImage(fec.synchronizer.leftFwdCam[idxL][2], tagsL, K)
+  imgLt = showImage(fec.synchronizer.leftFwdCam[idxL][3], tagsL, K)
 
   # imgL = syncImgs[:left][idxL][2] .|> Gray
   # imgR = syncImgs[:right][idxR][2] .|> Gray
@@ -129,6 +150,10 @@ end
 
 function leftImgHdlr(msgdata, fec::FrontEndContainer)
   # @show "leftImgHdlr", msgdata[2].header.seq
+  # @show "leftImgHdlr"
+  mtms = getROSPyMsgTimestamp(msgdata[end])
+  nsT = Int64(datetime2unix(mtms[1]))*1000_000_000 + mtms[2]
+
   leftdata = take!(IOBuffer(msgdata[2].data))
 
   # more direct image from ROS and zed
@@ -144,7 +169,7 @@ function leftImgHdlr(msgdata, fec::FrontEndContainer)
 
   # for compressed images
   # ldImg = ImageMagick.load_(leftdata)
-  push!(fec.synchronizer.leftFwdCam, (msgdata[2].header.seq, ldImg) )
+  push!(fec.synchronizer.leftFwdCam, (msgdata[2].header.seq, nsT, ldImg) )
   # img = last(SyncImages[:left])
   nothing
 end
@@ -152,6 +177,9 @@ end
 
 function odomHdlr(msgdata, fec::FrontEndContainer, WO)
   # @show "odomHdlr", msgdata[2].header.seq
+  # @show "odomHdlr"
+  mtms = getROSPyMsgTimestamp(msgdata[end])
+  nsT = Int64(datetime2unix(mtms[1]))*1000_000_000 + mtms[2]
 
   pos = msgdata[2].pose.pose.position
   quat = msgdata[2].pose.pose.orientation
@@ -160,9 +188,11 @@ function odomHdlr(msgdata, fec::FrontEndContainer, WO)
   zQi = TU.Quaternion(quat.w,[quat.x;quat.y;quat.z])
 
   zTi = SE3(zPi, zQi)
-  push!(fec.synchronizer.camOdo, (msgdata[2].header.seq, zTi) )
+  push!(fec.synchronizer.camOdo, (msgdata[2].header.seq, nsT, zTi) )
 
+  # show leftFwdCam image
   drawLatestImage(fec, syncList=[:leftFwdCam;])
+
   updateSLAMMono!(fec, WO)
 
   nothing
@@ -171,10 +201,13 @@ end
 
 function joystickHdlr(msgdata, fec::FrontEndContainer)
   # @show "joystickHdlr", msgdata[2].header.seq
+  mtms = getROSPyMsgTimestamp(msgdata[end])
+  nsT = Int64(datetime2unix(mtms[1]))*1000_000_000 + mtms[2]
+
   data = Dict(:axis => msgdata[2].axes,
               :buttons => msgdata[2].buttons)
   # @show data
-  push!(fec.synchronizer.cmdVal, (msgdata[2].header.seq, data) )
+  push!(fec.synchronizer.cmdVal, (msgdata[2].header.seq, nsT, data) )
 
   #
 end

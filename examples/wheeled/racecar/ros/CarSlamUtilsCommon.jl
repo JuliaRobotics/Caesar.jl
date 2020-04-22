@@ -11,18 +11,19 @@ abstract type SynchronizingBuffer end
 
 struct SynchronizeCarMono <: SynchronizingBuffer
   syncList::Vector{Symbol}
-  leftFwdCam::CircularBuffer{Tuple{Int, Any}}
-  rightFwdCam::CircularBuffer{Tuple{Int, Any}}
-  camOdo::CircularBuffer{Tuple{Int, Any}}
-  cmdVal::CircularBuffer{Tuple{Int, Any}}
+  # sequence #, time nanoseconds, data
+  leftFwdCam::CircularBuffer{Tuple{Int, Int64, Any}}
+  rightFwdCam::CircularBuffer{Tuple{Int, Int64, Any}}
+  camOdo::CircularBuffer{Tuple{Int, Int64, Any}}
+  cmdVal::CircularBuffer{Tuple{Int, Int64, Any}}
 end
 
 SynchronizeCarMono(len::Int=30;
                    syncList::Vector=Symbol[],
-                   leftFwdCam=CircularBuffer{Tuple{Int, Any}}(len),
-                   rightFwdCam=CircularBuffer{Tuple{Int, Any}}(len),
-                   camOdo=CircularBuffer{Tuple{Int, Any}}(len),
-                   cmdVal=CircularBuffer{Tuple{Int, Any}}(len) ) = SynchronizeCarMono(syncList,leftFwdCam,rightFwdCam,camOdo,cmdVal)
+                   leftFwdCam=CircularBuffer{Tuple{Int, Int, Any}}(len),
+                   rightFwdCam=CircularBuffer{Tuple{Int, Int, Any}}(len),
+                   camOdo=CircularBuffer{Tuple{Int, Int, Any}}(len),
+                   cmdVal=CircularBuffer{Tuple{Int, Int, Any}}(len) ) = SynchronizeCarMono(syncList,leftFwdCam,rightFwdCam,camOdo,cmdVal)
 #
 
 struct RacecarTools
@@ -39,9 +40,10 @@ struct FrontEndContainer{M,T,A}
   middleware::M
   synchronizer::T
   tools::A
+  datastore
 end
 
-FrontEndContainer(s::SLAMWrapperLocal,m::M,t::T,a::A) where {M, T, A} = FrontEndContainer{M,T,A}(s,m,t,a)
+FrontEndContainer(s::SLAMWrapperLocal,m::M,t::T,a::A,d) where {M, T, A} = FrontEndContainer{M,T,A}(s,m,t,a,d)
 
 ## data management functions
 
@@ -100,6 +102,60 @@ function showImage(image, tags, K)
     foreach(tag->drawTagBox!(imageCol, tag, width = 2, drawReticle = false), tags)
     foreach(tag->drawTagAxes!(imageCol,tag, K), tags)
     imageCol
+end
+
+
+
+function fetchDataElement(var::DFGVariable, store::FileDataStore, lbl::Symbol)
+    entry = getBigDataEntry(var, lbl)
+    rawData = getBigData(datastore, entry)
+    # raw data is json-encoded; this decoding should happen inside getBigData?
+    return JSON2.read(IOBuffer(rawData))
+end
+
+
+function jsonResultsSLAM2D(fec)
+  allDicts = []
+  allvars = ls(fec.slam.dfg, r"x\d") |> sortDFG
+
+  for vidx in 1:(length(allvars)-1)
+    ps = allvars[vidx]
+    ns = allvars[vidx+1]
+    cmdData = fetchDataElement(getVariable(fec.slam.dfg,ps), fec.datastore, :JOYSTICK_CMD_VALS)
+    # axis: 2:throttle, 4:steering
+    cd = Dict{Symbol,Any}(
+      :posei => ps,
+      :posej => ns,
+      :axis_time => (x->x[2]).(cmdData),
+      :axis_throttle => (x->x[3].axis[2]).(cmdData),
+      :axis_steer => (x->x[3].axis[4]).(cmdData),
+      :world_posei => getPPE(fec.slam.dfg,ps).suggested,
+      :world_posej => getPPE(fec.slam.dfg,ns).suggested,
+      :ti => getTimestamp(getVariable(fec.slam.dfg, ps)),
+      :tj => getTimestamp(getVariable(fec.slam.dfg, ns)),
+    )
+    DT = (cd[:tj]-cd[:ti]).value*1e-3
+    cd[:deltaT] = DT
+    deltax = (cd[:world_posej][1] - cd[:world_posei][1])
+    deltay = (cd[:world_posej][2] - cd[:world_posei][2])
+    velx = deltax./DT
+    vely = deltay./DT
+    wVelx = isnan(velx) ? 0.0 : velx
+    wVely = isnan(vely) ? 0.0 : vely
+    # rotate velocity from world to body frame
+    cd[:bodyi_delta_pose] = se2vee(SE2(cd[:world_posei])\SE2(cd[:world_posej]))
+    biRw = TU.R(-cd[:world_posei][3])
+    bVel = biRw*[wVelx;wVely]
+    velx = bVel[1]
+    vely = bVel[2]
+    if vidx in [1;2]
+      velx = 0.0
+      vely = 0.0
+    end
+    cd[:body_veli] = [velx;vely]
+    push!(allDicts, cd)
+  end
+  return allDicts
 end
 
 

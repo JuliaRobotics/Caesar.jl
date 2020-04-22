@@ -18,6 +18,8 @@ using DataStructures
 using ColorTypes, FixedPointNumbers
 using FreeTypeAbstraction # for drawTagID!
 using AprilTags
+using JSON2
+using Dates
 
 using Caesar
 
@@ -106,7 +108,8 @@ using RoME
 const ImgType = Array{ColorTypes.RGB{FixedPointNumbers.Normed{UInt8,8}},2}
 
 # Consume rosbag with car data
-bagfile = joinpath(ENV["HOME"],"data/racecar/labRun7.bag")
+runfile = "labRun7"
+bagfile = joinpath(ENV["HOME"],"data/racecar/$runfile.bag")
 
 leftimgtopic = "/zed/left/image_rect_color"
 # rightimgtopic = "/zed/right/image_rect_color"
@@ -127,31 +130,35 @@ K = [-fx 0  cx;
 # 758016/3 = 252672
 # (c, a / c) = (672, 376.0)
 
-##
 
 include(joinpath(@__DIR__, "CarSlamUtilsMono.jl"))
 
-WEIRDOFFSET = Dict{Symbol, Int}(:cmdVal => -11345)
+
+##
+
+WEIRDOFFSET = Dict{Symbol, Int}() #:cmdVal => -11345)
 
 gui = imshow_gui((600, 100), (1, 2))  # 2 columns, 1 row of images (each initially 300×300)
 canvases = gui["canvas"]
 detector = AprilTagDetector()
 
-
 tools = RacecarTools(detector)
 
+
+## SLAM portion
 
 slam = SLAMWrapperLocal()
 getSolverParams(slam.dfg).drawtree = true
 getSolverParams(slam.dfg).showtree = false
 
-addVariable!(slam.dfg, :x0, Pose2)
-addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2))))
+dfg_datafolder = getLogPath(slam.dfg)
+datastore = FileDataStore("$dfg_datafolder/bigdata")
+
 
 bagSubscriber = RosbagSubscriber(bagfile)
 
 syncz = SynchronizeCarMono(30,syncList=[:leftFwdCam;:camOdo])
-fec = FrontEndContainer(slam,bagSubscriber,syncz,tools)
+fec = FrontEndContainer(slam,bagSubscriber,syncz,tools,datastore)
 
 # callbacks via Python
 bagSubscriber(leftimgtopic, leftImgHdlr, fec)
@@ -159,31 +166,43 @@ bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET)
 bagSubscriber(joysticktopic, joystickHdlr, fec)
 
 
-
-## start solver
-
 defaultFixedLagOnTree!(slam.dfg, 50, limitfixeddown=true)
 # getSolverParams(slam.dfg).dbg = true
 getSolverParams(slam.dfg).drawtree = true
 getSolverParams(slam.dfg).showtree = false
-ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
-
 
 
 ##
 
 # (fec.synchronizer.leftFwdCam |> last)[2] |> collect |> imshow
 
-loop!(bagSubscriber)
-loop!(bagSubscriber)
-loop!(bagSubscriber)
+# consume a few messages to find initialization timestamp
+for i in 1:100
+  @show i, bagSubscriber.nextMsgChl
+  0 == length(fec.synchronizer.leftFwdCam) || 0 == length(fec.synchronizer.camOdo) ? nothing : break
+  loop!(bagSubscriber)
+end
+
+## initialize the factor graph
+
+T0 = nanosecond2datetime(fec.synchronizer.leftFwdCam[1][2])
+
+addVariable!(slam.dfg, :x0, Pose2, timestamp=T0)
+addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2))), timestamp=T0)
+
+
+## start solver
+
+
+ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
+
 
 ##
 
 
 sleep(0.01)  # allow gui sime time to setup
 while loop!(bagSubscriber)
-# for i in 1:5000
+# for i in 1:2000
 #   loop!(bagSubscriber)
   blockProgress(slam) # required to prevent duplicate solves occuring at the same time
 end
@@ -196,71 +215,59 @@ stopManageSolveTree!(slam)
 delete!(vis)
 
 
-## discovery
+
+## interpose results
+
+allD = jsonResultsSLAM2D(fec)
+
+allStr = JSON2.write(allD)
+
+fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results_before_resolve.json"),"w")
+println(fid, allStr)
+close(fid)
 
 
+## batch resolve
 
-# tree, smt, hist = solveTree!(slam.dfg)
-
-using Gadfly
-using RoMEPlotting
-Gadfly.set_default_plot_size(35cm, 20cm)
-
-# drawPoses(slam.dfg, spscale=0.3, drawhist=false)
-pl = drawPosesLandms(slam.dfg, spscale=0.3, drawhist=false)
-pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
-# drawPosesLandms(fg4, spscale=0.3, drawhist=false)
-
-pl = reportFactors(slam.dfg, Pose2Pose2, show=false)
-# pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
-# reportFactors(fg4, Pose2Pose2, show=false)
-
+fg2 = deepcopy(fec.slam.dfg)
 
 dontMarginalizeVariablesAll!(fec.slam.dfg)
 foreach(x->setSolvable!(fec.slam.dfg, x, 1), ls(fec.slam.dfg))
 foreach(x->setSolvable!(fec.slam.dfg, x, 1), lsf(fec.slam.dfg))
 
-
-for i in 1:100
-  tree, smt, hist = solveTree!(fec.slam.dfg)
-  pl = drawPosesLandms(fec.slam.dfg, spscale=0.3, drawhist=false)
-  pl |> PDF(joinLogPath(fec.slam.dfg,"fg_resolve_$(i).pdf"))
-end
+tree, smt, hist = solveTree!(fec.slam.dfg)
 
 
-plotLocalProduct(fec.slam.dfg, :l1, levels=5, dims=[1;2])
-plotTreeProductUp(fec.slam.dfg, tree, :l1, levels=5, dims=[1;2])
+## after resolve interpose results
 
-saveDFG(fec.slam.dfg,joinLogPath(fec.slam.dfg,"fg_final"))
+allD = jsonResultsSLAM2D(fec)
 
-## using syncList to fetch interpose buffered data
+allStr = JSON2.write(allD)
 
+fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results.json"),"w")
+println(fid, allStr)
+close(fid)
 
-idxL,idxO = findSyncLatestIdx(fec.synchronizer, syncList=[:leftFwdCam;:cmdVal], weirdOffset=WEIRDOFFSET)
-
-
-WEIRDOFFSET
-
-fec.synchronizer
+## discovery
 
 
+# tree, smt, hist = solveTree!(slam.dfg)
 
+using Gadfly
+using Cairo
+using RoMEPlotting
+Gadfly.set_default_plot_size(35cm, 20cm)
 
-## display tag text
+# drawPoses(slam.dfg, spscale=0.3, drawhist=false)
+pl = drawPosesLandms(fg2, spscale=0.3, drawhist=false)
+pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
+# drawPosesLandms(fg4, spscale=0.3, drawhist=false)
 
-using FreeTypeAbstraction
+pl = drawPosesLandms(fec.slam.dfg, spscale=0.3, drawhist=false)
+pl |> PDF(joinLogPath(fec.slam.dfg,"fg_resolve.pdf"))
 
-
-
-
-img = (fec.synchronizer.leftFwdCam |> last)[2] |> collect
-
-
-tagsL = detector(img)
-
-foreach(x->drawTagID!(img, x),tagsL)
-
-imshow(img)
-
+pl = reportFactors(fec.slam.dfg, Pose2Pose2, show=false)
+# pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
+# reportFactors(fg4, Pose2Pose2, show=false)
 
 #
