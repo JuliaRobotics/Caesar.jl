@@ -1,4 +1,9 @@
-# monocular camera on car tools
+## requirements in this file
+
+using LinearAlgebra
+
+
+## monocular camera on car tools
 
 include(joinpath(@__DIR__, "CarSlamUtilsCommon.jl"))
 
@@ -26,6 +31,8 @@ function updateSLAMMono!(fec::FrontEndContainer,
   # x-fwd, y-right, z-up
   psi = convert(Euler, iT.R).Y  # something not right here?
   DX = [iT.t[1];iT.t[2]; psi]
+
+  # Tigger a new pose
   if !(0 < abs.(DX[3]) - pi/4 || 0 < norm(DX[1:2]) - 0.5)
     # havent travelled far enough yet
     return nothing
@@ -71,17 +78,20 @@ function updateSLAMMono!(fec::FrontEndContainer,
     # wTb = LinearMap(zT.R.R) ∘ Translation(zT.t...)
     # wTt = wTb ∘ bTt
 
-    ld = cross(bTt.linear*[0;0;1], [0;0;1])
+    ld = LinearAlgebra.cross(bTt.linear*[0;0;1], [0;0;1])
     theta = atan(ld[2],ld[1])
     Dtag = [bTt.translation[1:2,];theta]
     # println("$(tag.id), $(ld[3]), $(round.(Dtag, digits=3))")
     p2l2 = Pose2Pose2(MvNormal(Dtag,diagm([0.1;0.1;0.1].^2)))
     addFactor!(slam.dfg, [newpose;lmid], p2l2, timestamp=imgTime)
 
-    setobject!(vis[:tags][Symbol("tag_$(tag.id)")][:triad], Triad(0.2))
-    tagobj = HyperRectangle(Vec(0.,0,0), Vec(0.3,0.3,0.03))
-    setobject!(vis[:tags][Symbol("tag_$(tag.id)")][:plate], tagobj)
-    settransform!(vis[:tags][Symbol("tag_$(tag.id)")], bTt) # bTt
+    # FIXME should be in FEC
+    if parsed_args["vis3d"]
+      setobject!(vis[:tags][Symbol("tag_$(tag.id)")][:triad], Triad(0.2))
+      tagobj = HyperRectangle(Vec(0.,0,0), Vec(0.3,0.3,0.03))
+      setobject!(vis[:tags][Symbol("tag_$(tag.id)")][:plate], tagobj)
+      settransform!(vis[:tags][Symbol("tag_$(tag.id)")], bTt) # bTt
+    end
 
     # setobject!(vis[:poses][Symbol(newpose)], Triad(0.5))
     # settransform!(vis[:poses][Symbol(newpose)], wTb)

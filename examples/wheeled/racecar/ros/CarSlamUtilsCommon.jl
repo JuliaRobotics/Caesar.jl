@@ -1,9 +1,13 @@
 # common car camera tools
 
+using LinearAlgebra
+using DataStructures
+using RoME, DistributedFactorGraphs
+
 ## clear old memory
 
-delete!(vis[:tags])
-delete!(vis[:poses])
+# delete!(vis[:tags])
+# delete!(vis[:poses])
 
 ##
 
@@ -121,6 +125,9 @@ function jsonResultsSLAM2D(fec)
   for vidx in 1:(length(allvars)-1)
     ps = allvars[vidx]
     ns = allvars[vidx+1]
+    if 0 == getPPEDict(getVariable(fec.slam.dfg, ns)) |> length || 0 == getPPEDict(getVariable(fec.slam.dfg, ps)) |> length
+      continue
+    end
     cmdData = fetchDataElement(getVariable(fec.slam.dfg,ps), fec.datastore, :JOYSTICK_CMD_VALS)
     # axis: 2:throttle, 4:steering
     cd = Dict{Symbol,Any}(

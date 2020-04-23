@@ -1,146 +1,49 @@
 ## BEFORE RUNNING THIS SCRIPT, MAKE SURE ros is in the environment
 
-# source /opt/ros/melodic/setup.bash
+## Get user commands
 
-## Project path variables
+# Populates `parsed_args`
+include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 
-projdir = @__DIR__
+# assume in Atom editor (not scripted use)
+if length(ARGS) == 0
+  parsed_args["folder_name"] = "labrun8"
+  parsed_args["remoteprocs"] = 10
+  parsed_args["vis2d"] = true
+end
+
 
 ## load main process processes only
 
-using ImageView
-using Gtk.ShortNames
-
-using LinearAlgebra
-using ImageMagick
-using ImageFeatures, ImageDraw, Images, CoordinateTransformations
-using DataStructures
-using ColorTypes, FixedPointNumbers
-using FreeTypeAbstraction # for drawTagID!
-using AprilTags
-using JSON2
-using Dates
-
-using Caesar
-
-## add 3D vis
-
-using MeshCat, GeometryTypes, ColorTypes, CoordinateTransformations
-
-vis = Visualizer()
-open(vis)
-
-## work with multiple processes
-
-using Distributed
-
-# populate remote machines on cluster later (was need for Python workaround and left)
-prcs115 = Int[]
-
-## Process on this machine but not remote machines
-
-using Caesar
-
-## Prepare python version
-
-using Pkg
-@everywhere using Pkg
-
-# ENV["PYTHON"] = "/usr/bin/python3.6"
-@everywhere begin
-  ENV["PYTHON"] = "/usr/bin/python"
-  Pkg.build("PyCall")
+if parsed_args["vis2d"]
+  using Cairo
+  using Gadfly
+  using RoMEPlotting
+  Gadfly.set_default_plot_size(35cm, 20cm)
 end
 
-using PyCall
-@everywhere using PyCall
+# create context for vis3d
+vis = if parsed_args["vis3d"]
+  using MeshCat, GeometryTypes, ColorTypes, CoordinateTransformations
+  vis = Visualizer()
+  open(vis)
+  vis
+end
 
+## bring in all the required source code
 
-# for prc in prcs115
-#   @info "Load rospy at worker $prc"
-#   fut = Distributed.@spawnat prc begin
-#     # import subprocess
-#     # rc = subprocess.call("/opt/ros/melodic/setup.bash",shell=True)
-#     # """
-#     py"""
-#     import sys
-#     sys.path.insert(0, "/opt/ros/melodic/lib/python2.7/dist-packages")
-#     """
-#     py"""
-#     import rospy
-#     """
-#   end
-#   @show fetch(fut)
-# end
+# bring up the multiprocess cluster
+include(joinpath(@__DIR__, "CarFeedCommonSetup.jl"))
 
-
-## prepare ROS integration
-
-# this will trigger inclusion of RobotOS functionality in Caesar too.
-using RobotOS
-
-# standard types
-# @rosimport sensor_msgs.msg: CompressedImage
-# @rosimport geometry_msgs.msg: PoseStamped
-#
-# rostypegen()
-
-## start common processes on local machine
-
-addprocs(6)
-
-## Start processes on remote machines
-
-machines = [("labuser@192.168.1.115",15)]
-prcs115 = addprocs(machines)
-
-
-## Load solver libraries everywhere
-
-using RoME
-@everywhere using RoME
-@everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils
-
-
-## Constant parameters
-
-# using JSON2
-const ImgType = Array{ColorTypes.RGB{FixedPointNumbers.Normed{UInt8,8}},2}
-
-# Consume rosbag with car data
-runfile = "labRun7"
-bagfile = joinpath(ENV["HOME"],"data/racecar/$runfile.bag")
-
-leftimgtopic = "/zed/left/image_rect_color"
-# rightimgtopic = "/zed/right/image_rect_color"
-zedodomtopic = "/zed/odom"
-joysticktopic = "/joy"
-
-
-# from bagfile
-fx = 341.4563903808594
-fy = 341.4563903808594
-cx = 329.19091796875
-cy = 196.3658447265625
-
-K = [-fx 0  cx;
-      0 fy cy]
-
-# guessing
-# 758016/3 = 252672
-# (c, a / c) = (672, 376.0)
-
-
+# a few required utils
 include(joinpath(@__DIR__, "CarSlamUtilsMono.jl"))
 
 
 ##
 
-WEIRDOFFSET = Dict{Symbol, Int}() #:cmdVal => -11345)
 
-gui = imshow_gui((600, 100), (1, 2))  # 2 columns, 1 row of images (each initially 300×300)
+gui = imshow_gui((1000, 200), (1, 2))  # 2 columns, 1 row of images (each initially 300×300)
 canvases = gui["canvas"]
-detector = AprilTagDetector()
 
 tools = RacecarTools(detector)
 
@@ -153,6 +56,17 @@ getSolverParams(slam.dfg).showtree = false
 
 dfg_datafolder = getLogPath(slam.dfg)
 datastore = FileDataStore("$dfg_datafolder/bigdata")
+
+# also store parsed_args used in this case
+fid = open(joinLogPath(slam.dfg,"args.json"),"w")
+println(fid, JSON2.write(parsed_args))
+close(fid)
+
+# TODO add to results.log
+fid = open(joinpath(dirname(getLogPath(slam.dfg)),"results.log"),"a")
+resdirname = splitpath(getLogPath(slam.dfg))[end]
+println(fid, "$resdirname -- CarFeedMono.jl, $(parsed_args["folder_name"]), $ARGS")
+close(fid)
 
 
 bagSubscriber = RosbagSubscriber(bagfile)
@@ -212,33 +126,18 @@ end
 
 stopManageSolveTree!(slam)
 
-delete!(vis)
+parsed_args["vis3d"] ? delete!(vis) : nothing
 
+# wiat for previous and then ensure all data is solved at least once
+@info "CarFeedMono.jl is waiting on penultimate trigger solve to finalize."
+blockSolvingInProgress(fec.slam)
+checkSolveStrideTrigger!(fec.slam, force=true)
+sleep(10)
+@info "CarFeedMono.jl is waiting on last trigger solve to finalize."
+blockSolvingInProgress(fec.slam)
 
 
 ## interpose results
-
-allD = jsonResultsSLAM2D(fec)
-
-allStr = JSON2.write(allD)
-
-fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results_before_resolve.json"),"w")
-println(fid, allStr)
-close(fid)
-
-
-## batch resolve
-
-fg2 = deepcopy(fec.slam.dfg)
-
-dontMarginalizeVariablesAll!(fec.slam.dfg)
-foreach(x->setSolvable!(fec.slam.dfg, x, 1), ls(fec.slam.dfg))
-foreach(x->setSolvable!(fec.slam.dfg, x, 1), lsf(fec.slam.dfg))
-
-tree, smt, hist = solveTree!(fec.slam.dfg)
-
-
-## after resolve interpose results
 
 allD = jsonResultsSLAM2D(fec)
 
@@ -248,26 +147,64 @@ fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results.json"),"w")
 println(fid, allStr)
 close(fid)
 
-## discovery
+## save the factor graph
+
+saveDFG(fec.slam.dfg, joinLogPath(fec.slam.dfg, "fg_$(slam.poseCount)"))
 
 
-# tree, smt, hist = solveTree!(slam.dfg)
+## draw results
 
-using Gadfly
-using Cairo
-using RoMEPlotting
-Gadfly.set_default_plot_size(35cm, 20cm)
+if parsed_args["vis2d"]
 
 # drawPoses(slam.dfg, spscale=0.3, drawhist=false)
-pl = drawPosesLandms(fg2, spscale=0.3, drawhist=false)
-pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
+pl = drawPosesLandms(fec.slam.dfg, spscale=0.3, drawhist=false)
+pl |> PDF(joinLogPath(fec.slam.dfg,"fg_$(slam.poseCount).pdf"))
 # drawPosesLandms(fg4, spscale=0.3, drawhist=false)
 
-pl = drawPosesLandms(fec.slam.dfg, spscale=0.3, drawhist=false)
-pl |> PDF(joinLogPath(fec.slam.dfg,"fg_resolve.pdf"))
+if parsed_args["report_factors"]
+  reportFactors(fec.slam.dfg, Pose2Pose2, show=false)
+end
 
-pl = reportFactors(fec.slam.dfg, Pose2Pose2, show=false)
-# pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount).pdf"))
-# reportFactors(fg4, Pose2Pose2, show=false)
+end
+
+## batch resolve
+
+if parsed_args["batch_resolve"]
+
+# fg2 = deepcopy(fec.slam.dfg)
+
+dontMarginalizeVariablesAll!(fec.slam.dfg)
+foreach(x->setSolvable!(fec.slam.dfg, x, 1), ls(fec.slam.dfg))
+foreach(x->setSolvable!(fec.slam.dfg, x, 1), lsf(fec.slam.dfg))
+
+tree, smt, hist = solveTree!(fec.slam.dfg)
+
+saveDFG(fec.slam.dfg, joinLogPath(fec.slam.dfg, "fg_$(slam.poseCount)_resolve"))
+
+end
+
+## after resolve interpose results
+
+allD = jsonResultsSLAM2D(fec)
+
+allStr = JSON2.write(allD)
+
+fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results_batchresolve.json"),"w")
+println(fid, allStr)
+close(fid)
+
+
+## draw a second time
+
+
+if parsed_args["batch_resolve"] && parsed_args["vis2d"]
+
+
+pl = drawPosesLandms(fec.slam.dfg, spscale=0.3, drawhist=false)
+pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount)_resolve.pdf"))
+
+end
+
+
 
 #
