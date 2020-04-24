@@ -195,16 +195,16 @@ racecarpynnconductor() {
 
 
 racecarslamros() {
-    julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --remoteprocs 15 --vis2d
+    julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
 }
 
 racecarslamrosall() {
-  racecarslamros --folder_name "labrun1" $*
-  racecarslamros --folder_name "labrun2" $*
-  racecarslamros --folder_name "labrun3" $*
-  racecarslamros --folder_name "labrun4" $*
-  racecarslamros --folder_name "labrun5" $*
-  racecarslamros --folder_name "labrun6" $*
-  racecarslamros --folder_name "labrun7" $*
-  racecarslamros --folder_name "labrun8" $*
+  racecarslamros --folder_name "labrun1" $* &
+  sleep 60; racecarslamros --folder_name "labrun2" $*
+  racecarslamros --folder_name "labrun3" $* &
+  sleep 60; racecarslamros --folder_name "labrun4" $*
+  racecarslamros --folder_name "labrun5" $* &
+  sleep 60; racecarslamros --folder_name "labrun6" $*
+  racecarslamros --folder_name "labrun7" $* &
+  speel 60; racecarslamros --folder_name "labrun8" $*
 }

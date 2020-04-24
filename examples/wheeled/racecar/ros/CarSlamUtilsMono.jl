@@ -32,8 +32,9 @@ function updateSLAMMono!(fec::FrontEndContainer,
   psi = convert(Euler, iT.R).Y  # something not right here?
   DX = [iT.t[1];iT.t[2]; psi]
 
-  # Tigger a new pose
-  if !(0 < abs.(DX[3]) - pi/4 || 0 < norm(DX[1:2]) - 0.5)
+  # Tigger a new pose or skip out
+  if !(0 < abs.(DX[3]) - parsed_args["pose_trigger_rotate"] ||
+       0 < norm(DX[1:2]) - parsed_args["pose_trigger_distance"])
     # havent travelled far enough yet
     return nothing
   end
@@ -52,6 +53,7 @@ function updateSLAMMono!(fec::FrontEndContainer,
   imgTime = nanosecond2datetime(syncz.leftFwdCam[idxL][2])
   addVariable!(fec.slam.dfg, newpose, Pose2, timestamp=imgTime)
 
+  # FluxModelsPose2Pose2(odopredfnc,joyVals,DXmvn,naiveFrac)
   # TODO add covariance later
   pp = Pose2Pose2(MvNormal(DX, diagm([0.05; 0.05; 0.3].^2)))
   # pp = Pose2Pose2(MvNormal([0.1;0.0;0.0], diagm([0.4; 0.2; 0.3].^2)))
@@ -148,9 +150,10 @@ function drawLatestImage(fec::FrontEndContainer; syncList=[:leftFwdCam;])
   # map(m -> draw!(imgLt, LineSegment(m - offsety, m + offsety)), featuresL)
 
   # draw both
-  imshow(canvases[1,1], imgLt)
-
-  Gtk.showall(gui["window"])
+  if parsed_args["imshow"]
+    imshow(canvases[1,1], imgLt)
+    Gtk.showall(gui["window"])
+  end
   nothing
 end
 

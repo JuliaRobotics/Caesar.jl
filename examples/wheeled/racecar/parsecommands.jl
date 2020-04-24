@@ -35,6 +35,14 @@ function parse_commandline()
             help = "Tag sized scaling"
             arg_type = Float64
             default = 1.0
+        "--pose_trigger_distance"
+            help = "Required distance travelled to trigger new pose."
+            arg_type = Float64
+            default = 0.5
+        "--pose_trigger_rotate"
+            help = "Required rotation to trigger new pose."
+            arg_type = Float64
+            default = pi/4
         "--batch_size"
             help = "Batch solve every n poses"
             arg_type = Int64
@@ -59,6 +67,9 @@ function parse_commandline()
             action = :store_true
         "--vis3d"
             help = "Draw 3D visualizations"
+            action = :store_true
+        "--imshow"
+            help = "Show camera visualization"
             action = :store_true
         "--batch_resolve"
             help = "Resolve the entire factor graph at the end"

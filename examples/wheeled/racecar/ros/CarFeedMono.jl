@@ -41,9 +41,15 @@ include(joinpath(@__DIR__, "CarSlamUtilsMono.jl"))
 
 ##
 
-
-gui = imshow_gui((1000, 200), (1, 2))  # 2 columns, 1 row of images (each initially 300×300)
-canvases = gui["canvas"]
+gui, canvases = if parsed_args["imshow"]
+  gui = imshow_gui((1000, 200), (1, 2))  # 2 columns, 1 row of images (each initially 300×300)
+  canvases = gui["canvas"]
+  # allow gui time to load
+  sleep(1.0)
+  gui, canvases
+else
+  nothing, nothing
+end
 
 tools = RacecarTools(detector)
 
