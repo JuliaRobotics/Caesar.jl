@@ -168,6 +168,10 @@ for sym in poses # poses first
   bVel = TU.R(-val[3])*[wVelx;wVely]
   velx = bVel[1]
   vely = bVel[2]
+  if sym in [:x0;:x1]
+    velx = 0.0
+    vely = 0.0
+  end
   prevT = newT
   prevpos = val
   println(fid, "$sym, $(val[1]), $(val[2]), $(val[3]), $velx, $vely")
@@ -197,13 +201,17 @@ function main(WP,
               odopredfnc=nothing,
               joyvel=nothing,
               poseTimes=nothing,
-              multiproc=true )
+              multiproc=true,
+              drawtree=true,
+              batchResolve=true)
 #
 
 # Factor graph construction
 fg = initfg()
 getSolverParams(fg).logpath = resultsdir
 getSolverParams(fg).multiproc=multiproc
+getSolverParams(fg).drawtree=drawtree
+getSolverParams(fg).showtree=false
 prev_psid = 0
 
 # load from previous file
@@ -278,6 +286,15 @@ for psid in (prev_psid+1):1:maxlen
   # prepare for next iteration
   prev_psid = psid
 end # for
+
+# do a batch resolve first
+if batchResolve
+  dontMarginalizeVariablesAll!(fg)
+  foreach(x->setSolvable!(fg, x, 1), setdiff(ls(fg),ls(fg,r"drt")))
+  foreach(x->setSolvable!(fg, x, 1), setdiff(lsf(fg),lsf(fg,r"drt")))
+  tree = solveTree!(fg, maxparallel=1000)
+end
+saveDFG(fg, resultsdir*"/racecar_fg_final")
 
 # extract results for later use as training data
 results2csv(fg, dir=resultsdir, filename="results.csv")

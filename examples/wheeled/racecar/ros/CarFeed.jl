@@ -94,7 +94,23 @@ detector = AprilTagDetector()
 
 ##
 
-include(joinpath(@__DIR__, "CarSlamUtils.jl"))
+include(joinpath(@__DIR__, "CarSlamUtilsStereo.jl"))
+
+## setup subscriptions to bagfile
+
+slam = SLAMWrapperLocal()
+getSolverParams(slam.dfg).drawtree = true
+
+addVariable!(slam.dfg, :x0, Pose2)
+addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2))))
+
+BagSubscriber = RosbagSubscriber(bagfile)
+
+BagSubscriber(leftimgtopic, leftImgHdlr, slam)
+BagSubscriber(rightimgtopic, rightImgHdlr, slam)
+BagSubscriber(zedodomtopic, odomHdlr, slam)
+
+# syncz = SynchronizeCarMono(syncList=[:leftFwdCam;:rightFwdCam])
 
 ## start solver
 

@@ -167,6 +167,9 @@ copylatesttoconductor() {
     echo $ln > /tmp/caesar/conductor/solves/$WHICHRES.aux
     cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
     cp -f /tmp/caesar/$ln/results/results.csv /home/singhk/data/racecar/$WHICHRES/results_$WHICHRES.csv
+    #also copy the latest image
+    LSTIMG=`ls -t /tmp/caesar/$ln/images | head -n20 | grep -v "hist" | head -n1`
+    cp -f /tmp/caesar/$ln/images/$LSTIMG /tmp/caesar/conductor/solves/img_${WHICHRES}_${LSTIMG}
   done < /tmp/caesar/last8
 }
 
@@ -184,4 +187,24 @@ racecarpynnconductor() {
 
   copylatesttoconductor
 
+}
+
+
+
+
+
+
+racecarslamros() {
+    julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
+}
+
+racecarslamrosall() {
+  racecarslamros --folder_name "labrun1" $* &
+  sleep 60; racecarslamros --folder_name "labrun2" $*
+  racecarslamros --folder_name "labrun3" $* &
+  sleep 60; racecarslamros --folder_name "labrun4" $*
+  racecarslamros --folder_name "labrun5" $* &
+  sleep 60; racecarslamros --folder_name "labrun6" $*
+  racecarslamros --folder_name "labrun7" $* &
+  speel 60; racecarslamros --folder_name "labrun8" $*
 }

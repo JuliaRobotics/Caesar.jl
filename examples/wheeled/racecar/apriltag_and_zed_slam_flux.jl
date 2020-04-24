@@ -18,25 +18,32 @@ using Images, ImageDraw
 using AprilTags
 using DataInterpolations
 
+# using CuArrays
+using Flux
+
 using DistributedFactorGraphs
 using IncrementalInference
 using RoME
 using RoMEPlotting
 using Caesar
-using CuArrays
-using Flux
 
 ## Load all required packages
 using Distributed
 
 if nprocs() == 1
-  addprocs(5) # make sure there are 4 processes waiting before loading packages
+  addprocs(7) # make sure there are 4 processes waiting before loading packages
+  # machines = [(ENV["JLCLST02"],3);]
 end
 
 @everywhere begin
   using Pkg
   Pkg.activate(@__DIR__)
+  Pkg.instantiate()
 end
+
+using RoME
+using Flux
+using RoMEPlotting
 
 WP = nprocs == 1 ? WorkerPool([1]) : WorkerPool(2:nprocs() |> collect )
 
@@ -46,7 +53,7 @@ for i in procs()
   fetch( Distributed.@spawnat i @eval using IncrementalInference )
   fetch( Distributed.@spawnat i @eval using RoME )
   fetch( Distributed.@spawnat i @eval using Caesar )
-  fetch( Distributed.@spawnat i @eval using CuArrays )
+  # fetch( Distributed.@spawnat i @eval using CuArrays )
   fetch( Distributed.@spawnat i @eval using Flux )
 end
 
@@ -179,28 +186,8 @@ end
 
 ## More code required
 
-# add the NeuralPose2Pose2 factor in Main workspace
-include( joinpath(dirname(pathof(Caesar)), "..", "examples", "learning", "hybrid", "NeuralPose2Pose2", "FluxModelsPose2Pose2.jl") )
+inlcude(joinpath(dirname(pathof(Caesar)), "examples", "learning", "hybrid", "FluxModelsPose2Pose2", "FluxModelsPose2Pose2.jl"))
 
-include(joinpath(@__DIR__, "LoadPyNNTxt.jl"))
-
-## load the required models into common predictor
-
-allModels = []
-for i in 0:99
-# /home/dehann/data/racecar/results/conductor/models/retrained_network_weights0
-  push!(allModels, loadTfModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
-end
-
-@everywhere function JlOdoPredictorPoint2(smpls::AbstractMatrix{<:Real},
-                              allModelsLocal::Vector)
-  #
-  arr = zeros(length(allModelsLocal), 2)
-  for i in 1:length(allModelsLocal)
-    arr[i,:] = allModelsLocal[i](smpls)
-  end
-  return arr
-end
 
 ## run the solution
 
@@ -209,6 +196,8 @@ fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], fail
 
 
 ## development
+
+
 
 
 0
@@ -240,11 +229,6 @@ fg = main(WP, resultsdir, camidxs, tag_bag, jldfile=parsed_args["jldfile"], fail
 # fails
 # key 1 not found
 # julia101 -p 4 apriltag_and_zed_slam.jl --previous "2018-11-09T01:42:33.279" --jldfile "racecar_fg_x299.jld2" --folder_name "labrun7" --failsafe
-
-
-
-
-
 
 
 
