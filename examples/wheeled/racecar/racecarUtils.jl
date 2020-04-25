@@ -57,12 +57,12 @@ function addnextpose!(fg,
                       autoinit=true,
                       odopredfnc=nothing,
                       joyvel=nothing,
-                      naiveFrac=0.6 )
+                      naiveFrac=0.6,
+                      DXmvn = MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2)) )
   #
   prev_pssym = Symbol("x$(prev_psid)")
   new_pssym = Symbol("x$(new_psid)")
   #naive odometry model
-  DXmvn = MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))
 
   donnpose = false
   if odopredfnc != nothing && joyvel != nothing

@@ -14,7 +14,11 @@ include(joinpath(@__DIR__, "CarSlamUtilsCommon.jl"))
 # Is this a general requirement?
 function updateSLAMMono!(fec::FrontEndContainer,
                          WEIRDOFFSET::Dict,
-                         syncList::Vector{Symbol}=fec.synchronizer.syncList)
+                         syncList::Vector{Symbol}=fec.synchronizer.syncList;
+                         useFluxModels::Bool=false,
+                          odopredfnc=nothing,
+                          joyVals=nothing,
+                          naiveFrac::Float64=0.6)
   #
   syncz = fec.synchronizer
   idxL,idxO = findSyncLatestIdx(syncz, syncList=[:leftFwdCam;:camOdo], weirdOffset=WEIRDOFFSET)
@@ -53,12 +57,15 @@ function updateSLAMMono!(fec::FrontEndContainer,
   imgTime = nanosecond2datetime(syncz.leftFwdCam[idxL][2])
   addVariable!(fec.slam.dfg, newpose, Pose2, timestamp=imgTime)
 
-  # FluxModelsPose2Pose2(odopredfnc,joyVals,DXmvn,naiveFrac)
-  # TODO add covariance later
-  pp = Pose2Pose2(MvNormal(DX, diagm([0.05; 0.05; 0.3].^2)))
-  # pp = Pose2Pose2(MvNormal([0.1;0.0;0.0], diagm([0.4; 0.2; 0.3].^2)))
+  pp = if useFluxModels
+    FluxModelsPose2Pose2(odopredfnc,joyVals,DXmvn,naiveFrac)
+  else
+    # TODO add covariance later
+    Pose2Pose2(MvNormal(DX, diagm([0.05; 0.05; 0.3].^2)))
+  end
   # take timestamp from image msg
-  addFactor!(fec.slam.dfg, [prevpose;newpose], pp, timestamp=nanosecond2datetime(syncz.camOdo[idxO][2]) )
+  addFactor!(fec.slam.dfg, [prevpose;newpose], pp,
+             timestamp=nanosecond2datetime(syncz.camOdo[idxO][2]) )
 
   # variables that can be initialized / solved
   put!(fec.slam.solveSettings.solvables, [newpose; ls(fec.slam.dfg,newpose)[1]])

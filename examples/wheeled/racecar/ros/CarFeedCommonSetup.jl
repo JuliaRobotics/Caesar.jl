@@ -12,6 +12,7 @@ using FreeTypeAbstraction # for drawTagID!
 using AprilTags
 using JSON2
 using Dates
+using DataInterpolations
 
 using Caesar
 
@@ -93,8 +94,9 @@ end
 ## Load solver libraries everywhere
 
 using RoME
+using DataInterpolations
 @everywhere using RoME
-@everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils
+@everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils, DataInterpolations
 
 
 ## Constant parameters
