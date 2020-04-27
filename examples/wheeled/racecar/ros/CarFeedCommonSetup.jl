@@ -14,6 +14,9 @@ using JSON2
 using Dates
 using DataInterpolations
 
+using CuArrays
+using Flux
+using RoME
 using Caesar
 
 
@@ -31,9 +34,8 @@ using Distributed
 # populate remote machines on cluster later (was need for Python workaround and left)
 prcs115 = Int[]
 
-## Process on this machine but not remote machines
-
-using Caesar
+# ## Process on this machine but not remote machines
+# using Caesar
 
 ## Prepare python version
 
@@ -97,8 +99,10 @@ end
 
 ## Load solver libraries everywhere
 
+using CuArrays, Flux
 using RoME
 using DataInterpolations
+@everywhere using CuArrays, Flux
 @everywhere using RoME
 @everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils, DataInterpolations
 
