@@ -9,7 +9,7 @@ include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 if length(ARGS) == 0
   parsed_args["folder_name"] = "labrun8"
   parsed_args["remoteprocs"] = 0
-  parsed_args["localprocs"] = 2
+  parsed_args["localprocs"] = 8
   parsed_args["vis2d"] = true
   parsed_args["vis3d"] = false
   parsed_args["imshow"] = true
@@ -76,7 +76,7 @@ slam = SLAMWrapperLocal()
 getSolverParams(slam.dfg).drawtree = true
 getSolverParams(slam.dfg).showtree = false
 
-datastore = FileDataStore(joinLogPath(slam.dfg,"bigdata"))
+datastore = FileDataStore( joinLogPath(slam.dfg,"bigdata") )
 
 # also store parsed_args used in this case
 fid = open(joinLogPath(slam.dfg,"args.json"),"w")
@@ -97,7 +97,7 @@ fec = FrontEndContainer(slam,bagSubscriber,syncz,tools,datastore)
 
 # callbacks via Python
 bagSubscriber(leftimgtopic, leftImgHdlr, fec)
-bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET, predFluxOdo2, allModels ) # extra value triggers flux mode
+bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET, allModels ) # extra value triggers flux mode
 bagSubscriber(joysticktopic, joystickHdlr, fec)
 # (x)->JlOdoPredictorPoint2(x, allModels)
 

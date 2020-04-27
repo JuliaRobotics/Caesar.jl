@@ -87,6 +87,14 @@ end
   return newArr
 end
 
+@everywhere function interpToOutx2(indata::Vector{<:AbstractVector{<:Real}}; outlen=25)
+  arr = zeros(length(indata),2)
+  for i in 1:length(indata), j in 1:2
+    arr[i, j] = indata[i][j]
+  end
+  interpToOutx2(arr, outlen=outlen)
+end
+
 # @everywhere function interpTo25x4Old(lclJD)
 #   @warn "Unsure of interpTo25x4Old is doing the right thing (this is the old version)"
 #   if 0 == size(lclJD,1)
@@ -164,7 +172,7 @@ function updateSLAMMono!(fec::FrontEndContainer,
     # convert to NN required format
     # joyVelVal = catJoyVelData(joyVals, velVal)
     # interpolate joystick values to correct length
-    joyVals25x2 = interpToOutx2( (x->x[:axis][[2;4]]).(joyVals) )
+    joyVals25x2 = interpToOutx2( ( x->[ x[3][:axis][2]; x[3][:axis][2] ] ).(joyVals) )
     @show size(joyVals25x2)
     joyVals25 = hcat(joyVals25x2, zeros(25,2))
     # build the factor
@@ -308,7 +316,7 @@ function odomHdlr(msgdata, fec::FrontEndContainer, WO, allModels=nothing)
   drawLatestImage(fec, syncList=[:leftFwdCam;])
 
   # update the factor graph object as required
-  if odopredfnc == nothing
+  if allModels == nothing
     updateSLAMMono!(fec, WO, useFluxModels=false )
   else
     updateSLAMMono!(  fec, WO, useFluxModels=true, allModels=allModels, naiveFrac=0.6  )
