@@ -87,7 +87,11 @@ addprocs(parsed_args["localprocs"])
 ## Start processes on remote machines
 
 if 0 < parsed_args["remoteprocs"]
-  machines = [(ENV["JL_CLUSTER_HY"],parsed_args["remoteprocs"])]
+  machines = []
+  allmc = split(ENV[parsed_args["remoteserver"]], ';')
+  for mc in allmc
+    push!(machines, (mc,parsed_args["remoteprocs"]))
+  end
   prcs115 = addprocs(machines)
 end
 

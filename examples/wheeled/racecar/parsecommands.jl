@@ -55,6 +55,10 @@ function parse_commandline()
             help = "How many remote Julia processes to use"
             arg_type = Int64
             default = 0
+        "--remoteserver"
+            help = "Which remote server to use for processing"
+            arg_type = String
+            default = "JL_CLUSTER_HY"
         "--iterposes"
             help = "maximum number of poses to process"
             arg_type = Int64

@@ -57,39 +57,26 @@ function loadTfModelIntoFlux(dest::AbstractString)
 end
 
 
-## More common functions
-
-# for FluxModelsPose2Pose2
-@everywhere function interpTo25x4(lclJD)
-  #
-  if 1 < size(lclJD,1)
-    tsLcl = range(lclJD[1,1],lclJD[end,1],length=25)
-    intrTrTemp = DataInterpolations.LinearInterpolation(lclJD[:,2],lclJD[:,1])
-    intrStTemp = DataInterpolations.LinearInterpolation(lclJD[:,3],lclJD[:,1])
-    newVec = Vector{Vector{Float64}}()
-    for tsL in tsLcl
-      newVal = zeros(4)
-      newVal[1] = intrTrTemp(tsL)
-      newVal[2] = intrStTemp(tsL)
-      push!(newVec, newVal)
-    end
-    # currently have no velocity values
-    return newVec
-  else
-    return [zeros(4) for i in 1:25]
-  end
-end
+## predictor functions
 
 
-@everywhere function JlOdoPredictorPoint2(smpls::AbstractMatrix{<:Real},
-                                          allModelsLocal::Vector)
-  #
-  arr = zeros(length(allModelsLocal), 2)
-  for i in 1:length(allModelsLocal)
-    arr[i,:] = allModelsLocal[i](smpls)
-  end
-  return arr
-end
+# @everywhere function predFluxOdo2(smpls::AbstractMatrix{<:Real},
+#                                   allModelsLocal::Vector)
+#   #
+#
+# end
+
+
+# @everywhere function JlOdoPredictorPoint2(smpls::AbstractMatrix{<:Real},
+#                                           allModelsLocal::Vector)
+#   #
+#   @warn "JlOdoPredictorPoint2 is now OBSOLETE"
+#   arr = zeros(length(allModelsLocal), 2)
+#   for i in 1:length(allModelsLocal)
+#     arr[i,:] = allModelsLocal[i](smpls)
+#   end
+#   return arr
+# end
 
 
 

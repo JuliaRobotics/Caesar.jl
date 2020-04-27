@@ -10,14 +10,109 @@ include(joinpath(@__DIR__, "CarSlamUtilsCommon.jl"))
 
 ##
 
+# find joystick command segment
+# get all inputs up to this next pose
+function whichJoystickValues(fec, fromT::DateTime, upToTime::DateTime)
+  # upToTime = msgTime # getTimestamp(getVariable(fec.slam.dfg,addHist[end]))
+  cmdTimes = (x->fec.synchronizer.cmdVal[x][2]).(1:length(fec.synchronizer.cmdVal)) .|> nanosecond2datetime
+  addHist = getAddHistory(fec.slam.dfg)
+  filter!(x->occursin(r"x\d",string(x)), addHist)
+  mask = fromT .<= cmdTimes .< upToTime
+
+  idxes = (1:length(fec.synchronizer.cmdVal))[mask]
+  # get the actual times from the buffer
+  joyValsTuple = fec.synchronizer.cmdVal[idxes]
+  # @show typeof(joyValsTuple)
+  # @show keys(joyValsTuple[1][3])
+  # @show typeof(joyValsTuple[1][3])
+  # @show joyValsTuple[1][3].axis
+  # (x->x[3][:axis][[2;4]]).(joyValsTuple)
+  # (x->x[3]).(joyValsTuple)
+
+  # Tuple{Int,Int,Dict{Symbol, Any}}
+  joyValsTuple
+end
+
+# for FluxModelsPose2Pose2
+# ::AbstractArray{<:Real}
+@everywhere function interpToOutx4(indata::AbstractMatrix{<:Real}; outlen=25)
+  #
+  len = size(indata,1)
+  if 0 == len
+    return zeros(outlen,4)
+  end
+
+  # assume evenly spaced
+  idx = 1:len
+  # tsLcl = range(indata[1,1],indata[end,1],length=outlen)
+  iThrtTemp = DataInterpolations.LinearInterpolation(indata[:,1], idx)
+  iSterTemp = DataInterpolations.LinearInterpolation(indata[:,2], idx)
+  iVelxTemp = DataInterpolations.LinearInterpolation(indata[:,3], idx)
+  iVelyTemp = DataInterpolations.LinearInterpolation(indata[:,4], idx)
+  newArr = Matrix{Float64}(undef, outlen, 4)
+  lookup = range(1,len, length=outlen)
+  for i in 1:outlen
+    lid = lookup[i]
+    newArr[i, 1] = iThrtTemp(lid)
+    newArr[i, 2] = iSterTemp(lid)
+    newArr[i, 3] = iVelxTemp(lid)
+    newArr[i, 4] = iVelyTemp(lid)
+  end
+  # currently have no velocity values
+  return newArr
+end
+
+@everywhere function interpToOutx2(indata::AbstractMatrix{<:Real}; outlen=25)
+  #
+  @show typeof(indata)
+  @show size(indata)
+  len = size(indata,1)
+  if 0 == len
+    return zeros(outlen,2)
+  end
+
+  # assume evenly spaced
+  idx = 1:len
+  # tsLcl = range(indata[1,1],indata[end,1],length=outlen)
+  iThrtTemp = DataInterpolations.LinearInterpolation(indata[:,1], idx)
+  iSterTemp = DataInterpolations.LinearInterpolation(indata[:,2], idx)
+  newArr = Matrix{Float64}(undef, outlen, 2)
+  lookup = range(1,len, length=outlen)
+  for i in 1:outlen
+    lid = lookup[i]
+    newArr[i, 1] = iThrtTemp(lid)
+    newArr[i, 2] = iSterTemp(lid)
+  end
+  # currently have no velocity values
+  return newArr
+end
+
+# @everywhere function interpTo25x4Old(lclJD)
+#   @warn "Unsure of interpTo25x4Old is doing the right thing (this is the old version)"
+#   if 0 == size(lclJD,1)
+#     return [zeros(4) for i in 1:25]
+#   end
+#
+#   tsLcl = range(lclJD[1,1],lclJD[end,1],length=25)
+#   intrTrTemp = DataInterpolations.LinearInterpolation(lclJD[:,2],lclJD[:,1])
+#   intrStTemp = DataInterpolations.LinearInterpolation(lclJD[:,3],lclJD[:,1])
+#   newVec = Vector{Vector{Float64}}()
+#   for tsL in tsLcl
+#     newVal = zeros(4)
+#     newVal[1] = intrTrTemp(tsL)
+#     newVal[2] = intrStTemp(tsL)
+#     push!(newVec, newVal)
+#   end
+#   # currently have no velocity values
+#   return newVec
+# end
 
 # Is this a general requirement?
 function updateSLAMMono!(fec::FrontEndContainer,
                          WEIRDOFFSET::Dict,
                          syncList::Vector{Symbol}=fec.synchronizer.syncList;
                          useFluxModels::Bool=false,
-                          odopredfnc=nothing,
-                          joyVals=nothing,
+                          allModels=nothing,
                           naiveFrac::Float64=0.6)
   #
   syncz = fec.synchronizer
@@ -57,11 +152,26 @@ function updateSLAMMono!(fec::FrontEndContainer,
   imgTime = nanosecond2datetime(syncz.leftFwdCam[idxL][2])
   addVariable!(fec.slam.dfg, newpose, Pose2, timestamp=imgTime)
 
+  # previous pose time
+  prevPoseT = getTimestamp(getVariable(fec.slam.dfg,prevpose))
+
+  baselineOdo = MvNormal(DX, diagm([0.05; 0.05; 0.3].^2))
   pp = if useFluxModels
-    FluxModelsPose2Pose2(odopredfnc,joyVals,DXmvn,naiveFrac)
+    # find joystick values required
+    joyVals = whichJoystickValues(fec, prevPoseT, imgTime)
+        ## lets store the values while we're here
+        addDataEntry!( fec.slam.dfg, prevpose, fec.datastore, :JOYSTICK_CMD_VALS, "application/json", Vector{UInt8}(JSON2.write( joyVals ))  )
+    # convert to NN required format
+    # joyVelVal = catJoyVelData(joyVals, velVal)
+    # interpolate joystick values to correct length
+    joyVals25x2 = interpToOutx2( (x->x[:axis][[2;4]]).(joyVals) )
+    @show size(joyVals25x2)
+    joyVals25 = hcat(joyVals25x2, zeros(25,2))
+    # build the factor
+    FluxModelsPose2Pose2(allModels, joyVals25, baselineOdo, naiveFrac)
   else
     # TODO add covariance later
-    Pose2Pose2(MvNormal(DX, diagm([0.05; 0.05; 0.3].^2)))
+    Pose2Pose2(baselineOdo)
   end
   # take timestamp from image msg
   addFactor!(fec.slam.dfg, [prevpose;newpose], pp,
@@ -109,22 +219,6 @@ function updateSLAMMono!(fec::FrontEndContainer,
 
   # check whether a solve should be trigger
   checkSolveStrideTrigger!(fec.slam)
-
-
-  # find joystick command segment
-  cmdTimes = (x->fec.synchronizer.cmdVal[x][2]).(1:length(fec.synchronizer.cmdVal)) .|> nanosecond2datetime
-  addHist = getAddHistory(fec.slam.dfg)
-  filter!(x->occursin(r"x\d",string(x)), addHist)
-  mask = getTimestamp(getVariable(fec.slam.dfg,addHist[end-1])) .<= cmdTimes .< getTimestamp(getVariable(fec.slam.dfg,addHist[end]))
-  # @show cmdTimes[mask]
-
-  # store this data as big data blob
-  # Make a big data entry in the graph - use JSON2 to just write this (really really verbosely)
-  element = GeneralBigDataEntry(fec.slam.dfg, getVariable(fec.slam.dfg, prevpose), :JOYSTICK_CMD_VALS, mimeType="application/json")
-  # # Set it in the store
-  addBigData!(fec.datastore, element, Vector{UInt8}(JSON2.write(fec.synchronizer.cmdVal[(1:length(fec.synchronizer.cmdVal))[mask]])))
-  # # Add the entry to the graph
-  addBigDataEntry!(getVariable(fec.slam.dfg, prevpose), element)
 
   nothing
 end
@@ -195,7 +289,7 @@ function leftImgHdlr(msgdata, fec::FrontEndContainer)
 end
 
 
-function odomHdlr(msgdata, fec::FrontEndContainer, WO)
+function odomHdlr(msgdata, fec::FrontEndContainer, WO, allModels=nothing)
   # @show "odomHdlr", msgdata[2].header.seq
   # @show "odomHdlr"
   mtms = getROSPyMsgTimestamp(msgdata[end])
@@ -213,7 +307,12 @@ function odomHdlr(msgdata, fec::FrontEndContainer, WO)
   # show leftFwdCam image
   drawLatestImage(fec, syncList=[:leftFwdCam;])
 
-  updateSLAMMono!(fec, WO)
+  # update the factor graph object as required
+  if odopredfnc == nothing
+    updateSLAMMono!(fec, WO, useFluxModels=false )
+  else
+    updateSLAMMono!(  fec, WO, useFluxModels=true, allModels=allModels, naiveFrac=0.6  )
+  end
 
   nothing
 end

@@ -8,7 +8,8 @@ include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 # assume in Atom editor (not scripted use)
 if length(ARGS) == 0
   parsed_args["folder_name"] = "labrun8"
-  parsed_args["remoteprocs"] = 10
+  parsed_args["remoteprocs"] = 0
+  parsed_args["localprocs"] = 2
   parsed_args["vis2d"] = true
   parsed_args["vis3d"] = false
   parsed_args["imshow"] = true
@@ -48,25 +49,10 @@ include(joinpath(@__DIR__, "CarSlamUtilsMono.jl"))
 
 include(joinpath(dirname(@__DIR__), "LoadPyNNTxt.jl"))
 
-## load the required models into common predictor
-
 allModels = []
 for i in 0:99
 # /home/dehann/data/racecar/results/conductor/models/retrained_network_weights0
   push!(allModels, loadTfModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
-end
-
-
-## Last functions
-
-@everywhere function JlOdoPredictorPoint2(smpls::AbstractMatrix{<:Real},
-                                          allModelsLocal::Vector  )
-  #
-  arr = zeros(length(allModelsLocal), 2)
-  for i in 1:length(allModelsLocal)
-    arr[i,:] = allModelsLocal[i](smpls)
-  end
-  return arr
 end
 
 
@@ -90,8 +76,7 @@ slam = SLAMWrapperLocal()
 getSolverParams(slam.dfg).drawtree = true
 getSolverParams(slam.dfg).showtree = false
 
-dfg_datafolder = getLogPath(slam.dfg)
-datastore = FileDataStore("$dfg_datafolder/bigdata")
+datastore = FileDataStore(joinLogPath(slam.dfg,"bigdata"))
 
 # also store parsed_args used in this case
 fid = open(joinLogPath(slam.dfg,"args.json"),"w")
@@ -112,7 +97,7 @@ fec = FrontEndContainer(slam,bagSubscriber,syncz,tools,datastore)
 
 # callbacks via Python
 bagSubscriber(leftimgtopic, leftImgHdlr, fec)
-bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET)
+bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET, predFluxOdo2, allModels ) # extra value triggers flux mode
 bagSubscriber(joysticktopic, joystickHdlr, fec)
 # (x)->JlOdoPredictorPoint2(x, allModels)
 
@@ -150,60 +135,63 @@ ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
 
 ##  Special async task to add Neural odo to fg when data becomes available.
 
-# latest pose
-allVars = ls(fec.slam.dfg, r"x\d") |> sortDFG
-# does it have FluxModelsPose2Pose2 factor?
-allFluxFct = ls(fec.slam.dfg, FluxModelsPose2Pose2)
-mask = (x->intersect(ls(fec.slam.dfg, x), allFluxFct ) |> length).(allVars) .== 0
-varsWithout = allVars[mask][end-5:end]
-
-# what are the command values from previous pose
-let prevPs = prevPs
-prevPs = varsWithout[1]
-for i in 2:length(varsWithout)
-
-ps = varsWithout[i]
-theVar = getVariable(fec.slam.dfg, ps)
-# skip if no entry yet
-hasDataEntry(theVar, :JOYSTICK_CMD_VALS) ? nothing : continue
-cmdData = fetchDataElement(theVar, fec.datastore, :JOYSTICK_CMD_VALS)
-throttle = (x->x[3].axis[2]).(cmdData)
-steering = (x->x[3].axis[4]).(cmdData)
-DT = ( getTimestamp(theVar) - getTimestamp(getVariable(fec.slam.dfg, prevPs)) ).value*1e-3
-xj = getPPE(fec.slam.dfg, ps).suggested
-xi = getPPE(fec.slam.dfg, prevPs).suggested
-biRw = TU.R(-xi[3])
-biV = biRw * (xj[1:2] - xi[1:2]) / DT
-biVrep = repeat(biV', length(throttle))
-joyval = hcat(throttle, steering, biVrep)
-
+# # latest pose
+# allVars = ls(fec.slam.dfg, r"x\d") |> sortDFG
+# # does it have FluxModelsPose2Pose2 factor?
+# allFluxFct = ls(fec.slam.dfg, FluxModelsPose2Pose2)
+# mask = (x->intersect(ls(fec.slam.dfg, x), allFluxFct ) |> length).(allVars) .== 0
+# varsWithout = allVars[mask][end-5:end]
 #
-@show prevPs, ps, size(joyval,1)
-
-itpJoy = interpTo25x4(joyval)
-
-
-
-prevPs = ps
-end
-end
-
-# interpolate joyvals to right size
+# # what are the command values from previous pose
+# let prevPs = prevPs, i=i
+# prevPs = varsWithout[1]
+# i = 2
+# for i in 2:length(varsWithout)
+#
+# ps = varsWithout[i]
+# theVar = getVariable(fec.slam.dfg, ps)
+# # skip if no entry yet
+# # hasDataEntry(theVar, :JOYSTICK_CMD_VALS) ? nothing : continue
+# cmdData = fetchDataElement(theVar, fec.datastore, :JOYSTICK_CMD_VALS)
+# throttle = (x->x[3].axis[2]).(cmdData)
+# steering = (x->x[3].axis[4]).(cmdData)
+# DT = ( getTimestamp(theVar) - getTimestamp(getVariable(fec.slam.dfg, prevPs)) ).value*1e-3
+# xj = getPPE(fec.slam.dfg, ps).suggested
+# xi = getPPE(fec.slam.dfg, prevPs).suggested
+# biRw = TU.R(-xi[3])
+# biV = biRw * (xj[1:2] - xi[1:2]) / DT
+# biVrep = repeat(biV', length(throttle))
+# joyval = hcat(throttle, steering, biVrep)
+#
+# #
+# @show prevPs, ps, size(joyval,1)
+#
 # joyval
-
-# the naive model (should be the camera)
-DXmvn = MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))
-
-fmp2 = FluxModelsPose2Pose2(x->JlOdoPredictorPoint2(x,allModels), joyval25, DXmvn,0.6)
-
-
-# convert to [25 x 4] input
+# itpJoy = interpToOutx4(joyval)
+#
+# JlOdoPredictorPoint2(itpJoy,allModels)
+#
+#
+# prevPs = ps
+# end
+# end
+#
+# # interpolate joyvals to right size
+# # joyval
+#
+# # the naive model (should be the camera)
+# DXmvn = MvNormal(zeros(3),diagm([0.4;0.1;0.4].^2))
+#
+# fmp2 = FluxModelsPose2Pose2(x->JlOdoPredictorPoint2(x,allModels), joyval25, DXmvn,0.6)
+#
+#
+# # convert to [25 x 4] input
 
 
 
 ##
 
-sleep(0.01)  # allow gui sime time to setup
+sleep(0.01)  # allow gui some time to setup
 # while loop!(bagSubscriber)
 for i in 1:1000
   loop!(bagSubscriber)
