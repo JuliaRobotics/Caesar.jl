@@ -38,11 +38,15 @@ function parse_commandline()
         "--pose_trigger_distance"
             help = "Required distance travelled to trigger new pose."
             arg_type = Float64
-            default = 0.5
+            default = 0.4
         "--pose_trigger_rotate"
             help = "Required rotation to trigger new pose."
             arg_type = Float64
             default = pi/4
+        "--naive_frac"
+            help = "Fraction of particles to use naive odo model."
+            arg_type = Float64
+            default = 0.6
         "--batch_size"
             help = "Batch solve every n poses"
             arg_type = Int64

@@ -163,17 +163,18 @@ function updateSLAMMono!(fec::FrontEndContainer,
   # previous pose time
   prevPoseT = getTimestamp(getVariable(fec.slam.dfg,prevpose))
 
+  # find joystick values required
+  joyVals = whichJoystickValues(fec, prevPoseT, imgTime)
+  ## lets store the values while we're here
+  addDataEntry!( fec.slam.dfg, prevpose, fec.datastore, :JOYSTICK_CMD_VALS, "application/json", Vector{UInt8}(JSON2.write( joyVals ))  )
+
   baselineOdo = MvNormal(DX, diagm([0.05; 0.05; 0.3].^2))
   pp = if useFluxModels
-    # find joystick values required
-    joyVals = whichJoystickValues(fec, prevPoseT, imgTime)
-        ## lets store the values while we're here
-        addDataEntry!( fec.slam.dfg, prevpose, fec.datastore, :JOYSTICK_CMD_VALS, "application/json", Vector{UInt8}(JSON2.write( joyVals ))  )
     # convert to NN required format
     # joyVelVal = catJoyVelData(joyVals, velVal)
     # interpolate joystick values to correct length
     joyVals25x2 = interpToOutx2( ( x->[ x[3][:axis][2]; x[3][:axis][2] ] ).(joyVals) )
-    @show size(joyVals25x2)
+    # @show size(joyVals25x2)
     joyVals25 = hcat(joyVals25x2, zeros(25,2))
     # build the factor
     FluxModelsPose2Pose2(allModels, joyVals25, baselineOdo, naiveFrac)
@@ -319,7 +320,7 @@ function odomHdlr(msgdata, fec::FrontEndContainer, WO, allModels=nothing)
   if allModels == nothing
     updateSLAMMono!(fec, WO, useFluxModels=false )
   else
-    updateSLAMMono!(  fec, WO, useFluxModels=true, allModels=allModels, naiveFrac=0.6  )
+    updateSLAMMono!(  fec, WO, useFluxModels=true, allModels=allModels, naiveFrac=parsed_args["naive_frac"]  )
   end
 
   nothing
