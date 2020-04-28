@@ -193,18 +193,42 @@ racecarpynnconductor() {
 
 
 
-
 racecarslamros() {
     julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
 }
 
-racecarslamrosall() {
-  racecarslamros --folder_name "labrun1" $* &
-  sleep 60; racecarslamros --folder_name "labrun2" $*
-  racecarslamros --folder_name "labrun3" $* &
-  sleep 60; racecarslamros --folder_name "labrun4" $*
-  racecarslamros --folder_name "labrun5" $* &
-  sleep 60; racecarslamros --folder_name "labrun6" $*
-  racecarslamros --folder_name "labrun7" $* &
-  speel 60; racecarslamros --folder_name "labrun8" $*
+racecarslamrosflux() {
+    julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMonoFlux.jl $* --batch_resolve --vis2d
 }
+
+racecarslamrosall() {
+  sleep 00; racecarslamros --folder_name "labrun7" $* &
+  sleep 60; racecarslamros --folder_name "labrun6" $* &
+  sleep 60; racecarslamros --folder_name "labrun8" $*
+  sleep 00; racecarslamros --folder_name "labrun4" $* &
+  sleep 60; racecarslamros --folder_name "labrun2" $* &
+  sleep 60; racecarslamros --folder_name "labrun3" $*
+  sleep 00; racecarslamros --folder_name "labrun5" $* &
+  sleep 60; racecarslamros --folder_name "labrun1" $*
+}
+
+racecarslamrosfluxall() {
+  sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun6" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun8" $* 
+  sleep 00; racecarslamrosflux --folder_name "labrun4" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun2" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun3" $*
+  sleep 00; racecarslamrosflux --folder_name "labrun5" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun1" $*
+}
+
+
+
+## analysis runs
+
+# racecarslamrosall --localprocs 4 --remoteprocs 7 --imshow --naive_frac 0.9
+
+
+
+##

@@ -8,7 +8,7 @@ include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 # assume in Atom editor (not scripted use)
 if length(ARGS) == 0
   parsed_args["folder_name"] = "labrun8"
-  parsed_args["remoteprocs"] = 4
+  parsed_args["remoteprocs"] = 0
   parsed_args["localprocs"] = 4
   parsed_args["vis2d"] = true
   parsed_args["vis3d"] = false
@@ -50,7 +50,7 @@ include(joinpath(dirname(@__DIR__), "LoadPyNNTxt.jl"))
 allModels = []
 for i in 0:99
 # /home/dehann/data/racecar/results/conductor/models/retrained_network_weights0
-  push!(allModels, loadTfModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
+  push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
 end
 
 
@@ -124,6 +124,7 @@ addVariable!(slam.dfg, :x0, Pose2, timestamp=T0)
 addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2))), timestamp=T0)
 
 
+
 ## start solver
 
 
@@ -134,9 +135,9 @@ ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
 ##
 
 sleep(0.01)  # allow gui some time to setup
-while loop!(bagSubscriber)
-# for i in 1:1000
-#   loop!(bagSubscriber)
+# while loop!(bagSubscriber)
+for i in 1:1000
+  loop!(bagSubscriber)
   blockProgress(slam) # required to prevent duplicate solves occuring at the same time
 end
 
@@ -194,9 +195,10 @@ if parsed_args["batch_resolve"]
 
 # fg2 = deepcopy(fec.slam.dfg)
 
-dontMarginalizeVariablesAll!(fec.slam.dfg)
-foreach(x->setSolvable!(fec.slam.dfg, x, 1), ls(fec.slam.dfg))
-foreach(x->setSolvable!(fec.slam.dfg, x, 1), lsf(fec.slam.dfg))
+enableSolveAllNotDRT!(fec.slam.dfg)
+# dontMarginalizeVariablesAll!(fec.slam.dfg)
+# foreach(x->setSolvable!(fec.slam.dfg, x, 1), ls(fec.slam.dfg))
+# foreach(x->setSolvable!(fec.slam.dfg, x, 1), lsf(fec.slam.dfg))
 
 tree, smt, hist = solveTree!(fec.slam.dfg)
 
