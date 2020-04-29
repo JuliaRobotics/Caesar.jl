@@ -175,21 +175,6 @@ copylatesttoconductor() {
   done < /tmp/caesar/last8
 }
 
-racecarpynnconductor() {
-  racecarslamfluxall $*
-  # racecarslampynnall
-  sleep 60
-
-  while [ 0 -lt `getjuliaprocs | wc -l` ]; do
-    echo "waiting for julia procs to finish, /tmp/juliaprocs="
-    echo `getjuliaprocs`
-    getjuliaprocs > /tmp/caesar/juliaprocs
-    sleep 30;
-  done
-
-  copylatesttoconductor
-
-}
 
 
 getFrac() {
@@ -244,5 +229,26 @@ racecarslamrosfluxall() {
 #   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.6
 #   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.5
 # }
+
+
+
+
+racecarpynnconductor() {
+  racecarslamfluxall $*
+  # racecarslampynnall
+  sleep 60
+
+  while [ 0 -lt `getjuliaprocs | wc -l` ]; do
+    echo "waiting for julia procs to finish, /tmp/juliaprocs="
+    echo `getjuliaprocs`
+    getjuliaprocs > /tmp/caesar/juliaprocs
+    sleep 30;
+  done
+
+  copylatesttoconductor
+
+}
+
+
 
 ##
