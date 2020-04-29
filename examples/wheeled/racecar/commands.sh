@@ -190,7 +190,10 @@ racecarpynnconductor() {
 }
 
 
-
+getFrac() {
+  A=`julia -O3 -e "(11-$1)/10 |> print"`
+  echo $A
+}
 
 
 racecarslamros() {
