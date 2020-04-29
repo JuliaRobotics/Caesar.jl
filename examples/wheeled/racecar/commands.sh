@@ -215,6 +215,17 @@ racecarslamrosfluxall() {
   sleep 60; racecarslamrosflux --folder_name "labrun1" $*
 }
 
+racecarslamrosfluxALL() {
+  sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun6" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun8" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun4" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun2" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun3" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun5" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun1" $*
+}
+
 
 
 ## analysis runs
@@ -234,7 +245,7 @@ racecarslamrosfluxall() {
 
 
 racecarpynnconductor() {
-  racecarslamfluxall $*
+  racecarslamrosfluxALL $*
   # racecarslampynnall
   sleep 60
 
