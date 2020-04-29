@@ -167,6 +167,8 @@ copylatesttoconductor() {
     echo $ln > /tmp/caesar/conductor/solves/$WHICHRES.aux
     cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
     cp -f /tmp/caesar/$ln/results/results.csv /home/singhk/data/racecar/$WHICHRES/results_$WHICHRES.csv
+    cp -f /tmp/caesar/$ln/results/${WHICHRES}_results.json /tmp/caesar/conductor/solves/
+    cp -f /tmp/caesar/$ln/results/${WHICHRES}_results.json /home/singhk/data/racecar/$WHICHRES/
     #also copy the latest image
     LSTIMG=`ls -t /tmp/caesar/$ln/images | head -n20 | grep -v "hist" | head -n1`
     cp -f /tmp/caesar/$ln/images/$LSTIMG /tmp/caesar/conductor/solves/img_${WHICHRES}_${LSTIMG}
@@ -174,7 +176,7 @@ copylatesttoconductor() {
 }
 
 racecarpynnconductor() {
-  racecarslamfluxall
+  racecarslamfluxall $*
   # racecarslampynnall
   sleep 60
 
@@ -195,6 +197,8 @@ getFrac() {
   echo $A
 }
 
+# racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
+# racecarslamrosfluxall --localprocs 8 --remoteprocs 0 --naive_frac `getFrac $i`
 
 racecarslamros() {
     JULIA_NUM_THREADS=4 julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
