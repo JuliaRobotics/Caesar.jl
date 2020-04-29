@@ -1,7 +1,9 @@
 ## BEFORE RUNNING THIS SCRIPT, MAKE SURE ros is in the environment
 
-using ImageView
-using Gtk.ShortNames
+if parsed_args["imshow"]
+  using ImageView
+  using Gtk.ShortNames
+end
 
 using LinearAlgebra
 using ImageMagick
