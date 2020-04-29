@@ -7,12 +7,13 @@ include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 
 # assume in Atom editor (not scripted use)
 if length(ARGS) == 0
-  parsed_args["folder_name"] = "labrun8"
+  parsed_args["folder_name"] = "labrun2"
   parsed_args["remoteprocs"] = 0
   parsed_args["localprocs"] = 4
   parsed_args["vis2d"] = true
   parsed_args["vis3d"] = false
   parsed_args["imshow"] = true
+  parsed_args["msgloops"] = 1000
 end
 
 
@@ -84,7 +85,8 @@ close(fid)
 # TODO add to results.log
 fid = open(joinpath(dirname(getLogPath(slam.dfg)),"results.log"),"a")
 resdirname = splitpath(getLogPath(slam.dfg))[end]
-println(fid, "$resdirname -- CarFeedMono.jl, $(parsed_args["folder_name"]), $ARGS")
+thisfile = splitpath(@__FILE__)[end]
+println(fid, "$resdirname -- $thisfile, $(parsed_args["folder_name"]), $ARGS")
 close(fid)
 
 
@@ -132,13 +134,21 @@ ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
 
 
 
-##
+## Run main ROS listener loop
 
 sleep(0.01)  # allow gui some time to setup
-# while loop!(bagSubscriber)
-for i in 1:1000
-  loop!(bagSubscriber)
+rosloops = 0
+let rosloops = rosloops
+while loop!(bagSubscriber)
+  # plumbing to limit the number of messages
+  rosloops += 1
+  if parsed_args["msgloops"] < rosloops
+    @warn "reached --msgloops limit of $rosloops"
+    break
+  end
+  # delay progress for whatever reason
   blockProgress(slam) # required to prevent duplicate solves occuring at the same time
+end
 end
 
 ## close all

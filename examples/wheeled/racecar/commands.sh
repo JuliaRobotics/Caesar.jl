@@ -194,11 +194,11 @@ racecarpynnconductor() {
 
 
 racecarslamros() {
-    julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
+    JULIA_NUM_THREADS=4 julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
 }
 
 racecarslamrosflux() {
-    julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMonoFlux.jl $* --batch_resolve --vis2d
+    JULIA_NUM_THREADS=4 julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMonoFlux.jl $* --batch_resolve --vis2d --savedfg
 }
 
 racecarslamrosall() {
@@ -215,7 +215,7 @@ racecarslamrosall() {
 racecarslamrosfluxall() {
   sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
   sleep 60; racecarslamrosflux --folder_name "labrun6" $* &
-  sleep 60; racecarslamrosflux --folder_name "labrun8" $* 
+  sleep 60; racecarslamrosflux --folder_name "labrun8" $*
   sleep 00; racecarslamrosflux --folder_name "labrun4" $* &
   sleep 60; racecarslamrosflux --folder_name "labrun2" $* &
   sleep 60; racecarslamrosflux --folder_name "labrun3" $*
@@ -227,8 +227,15 @@ racecarslamrosfluxall() {
 
 ## analysis runs
 
-# racecarslamrosall --localprocs 4 --remoteprocs 7 --imshow --naive_frac 0.9
+# racecarslamrosfluxall --localprocs 4 --remoteprocs 7 --imshow --naive_frac 0.9
 
-
+# racecarslamrosflux_analysis1() {
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 1.0
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.9
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.8
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.6
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.5
+# }
 
 ##

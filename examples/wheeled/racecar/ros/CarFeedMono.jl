@@ -71,7 +71,8 @@ close(fid)
 # TODO add to results.log
 fid = open(joinpath(dirname(getLogPath(slam.dfg)),"results.log"),"a")
 resdirname = splitpath(getLogPath(slam.dfg))[end]
-println(fid, "$resdirname -- CarFeedMono.jl, $(parsed_args["folder_name"]), $ARGS")
+thisfile = splitpath(@__FILE__)[end]
+println(fid, "$resdirname -- $thisfile, $(parsed_args["folder_name"]), $ARGS")
 close(fid)
 
 

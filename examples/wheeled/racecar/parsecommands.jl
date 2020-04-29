@@ -66,7 +66,11 @@ function parse_commandline()
         "--iterposes"
             help = "maximum number of poses to process"
             arg_type = Int64
-            default = 9999999999
+            default = Int64(2)^63-Int64(1)
+        "--msgloops"
+            help = "Maximum number or messages to consume in the main loop (ROS/LCM/etc)"
+            arg_type = Int64
+            default = Int64(2)^63-Int64(1)
         "--show"
             help = "Show pdfs during computation using `evince`"
             action = :store_true

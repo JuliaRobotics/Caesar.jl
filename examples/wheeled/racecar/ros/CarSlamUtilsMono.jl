@@ -88,11 +88,24 @@ end
 end
 
 @everywhere function interpToOutx2(indata::Vector{<:AbstractVector{<:Real}}; outlen=25)
+  if length(indata) == 1
+    @warn "interpToOutx2 indata is too short, returning zeros"
+    return zeros(25,2)
+  end
   arr = zeros(length(indata),2)
   for i in 1:length(indata), j in 1:2
     arr[i, j] = indata[i][j]
   end
   interpToOutx2(arr, outlen=outlen)
+end
+
+@everywhere function interpToOutx2(indata::Vector{Any}; outlen=25)
+  if length(indata) == 0
+    return zeros(25,2)
+  else
+    @show indata
+    error("interpToOutx2(indata::Vector{Any} does not know how to work with (see above)")
+  end
 end
 
 # @everywhere function interpTo25x4Old(lclJD)
@@ -173,7 +186,9 @@ function updateSLAMMono!(fec::FrontEndContainer,
     # convert to NN required format
     # joyVelVal = catJoyVelData(joyVals, velVal)
     # interpolate joystick values to correct length
-    joyVals25x2 = interpToOutx2( ( x->[ x[3][:axis][2]; x[3][:axis][2] ] ).(joyVals) )
+    joyAs25x2 = ( x->[ x[3][:axis][2]; x[3][:axis][2] ] ).(joyVals)
+      @show typeof(joyAs25x2), size(joyAs25x2)
+    joyVals25x2 = interpToOutx2( joyAs25x2 )
     # @show size(joyVals25x2)
     joyVals25 = hcat(joyVals25x2, zeros(25,2))
     # build the factor
