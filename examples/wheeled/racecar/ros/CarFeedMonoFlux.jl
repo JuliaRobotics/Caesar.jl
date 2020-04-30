@@ -14,6 +14,7 @@ if length(ARGS) == 0
   parsed_args["vis3d"] = false
   parsed_args["imshow"] = true
   parsed_args["msgloops"] = 5000
+  parsed_args["usesimmodels"] = true
 end
 
 
@@ -51,7 +52,11 @@ include(joinpath(dirname(@__DIR__), "LoadPyNNTxt.jl"))
 allModels = []
 for i in 0:99
 # /home/dehann/data/racecar/results/conductor/models/retrained_network_weights0
-  push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
+  if parsed_args["usesimmodels"]
+    push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/sim_models/sim_network_weights$i") )
+  else
+    push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
+  end
 end
 
 
