@@ -2,19 +2,27 @@
 
 ## Standardizing the API, verbNoun Definitions:
 
-The API derives from a set of [standard definitions for `verb`s and `Noun`s, please see the developer wiki regarding these definitions](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Standard-Definitions-of-API-via-verbs-and-set-theory).
+The API derives from a set of [standard definitions for `verb`s and `Noun`s, please see the developer wiki regarding these definitions](http://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Standard-Definitions-of-API-via-verbs-and-set-theory).
 
-### Read DistributedFactorGraphs.jl Docs
+## DistributedFactorGraphs.jl Docs
 
-These are [more hardy developer docs](https://juliarobotics.org/DistributedFactorGraphs.jl/latest/), such as the lower level data management API etc.
+These are [more hardy developer docs](http://juliarobotics.org/DistributedFactorGraphs.jl/latest/), such as the lower level data management API etc.
 
 ## Design Wiki, Data and Architecture
 
-More developer zone material will be added here in the future, but for the time being check out the [Caesar Wiki](https://github.com/JuliaRobotics/Caesar.jl/wiki/Data-Design-for-Caesar-RoME-IIF).
+More developer zone material will be added here in the future, but for the time being check out the [Caesar Wiki](http://github.com/JuliaRobotics/Caesar.jl/wiki/Data-Design-for-Caesar-RoME-IIF).
+
+## Coding Templates
+
+We've started to organize useful coding templates that are not available elsewhere (such as [JuliaDocs](http://docs.julialang.org/en/v1/)) in a more local developers [Coding Templates Wiki](http://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Coding-Templates).
 
 ## Parametric Solve Whiteboard
 
 https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Parametric-Solve-Whiteboard
+
+## PoC Work on ROS Setup
+
+Early ROS workflow has now been integrated for more standard (SLAM-style) front-end development in the RoME.jl package, however, early work required some debugging for ROS environment setup which is maintained no [a wiki here](http://github.com/JuliaRobotics/Caesar.jl/wiki/ROS-PoC).
 
 ## Early PoC work on Tree based Initialization
 
@@ -22,7 +30,7 @@ https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Tree-Based-Initial
 
 ## Variable Ordering Links
 
-Wiki for [variable ordering links](https://github.com/JuliaRobotics/Caesar.jl/wiki/Variable-Ordering-References).
+Wiki for [variable ordering links](http://github.com/JuliaRobotics/Caesar.jl/wiki/Variable-Ordering-References).
 
 ## Developer's Poem
 
