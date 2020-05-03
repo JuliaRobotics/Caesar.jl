@@ -3,7 +3,7 @@
 # using Revise
 using CuArrays
 using Flux
-using RoME
+using RoME, IncrementalInference
 
 using Cairo, Fontconfig
 using RoMEPlotting
@@ -12,7 +12,7 @@ Gadfly.set_default_plot_size(35cm,20cm)
 
 
 function loadFGsFromList(fgpaths::Vector{<:AbstractString})
-  FG = []
+  FG = typeof(initfg())[]
 
   let FG = FG
   for fgpath in fgpaths
@@ -35,12 +35,13 @@ function loadFGsFromList(fgpaths::Vector{<:AbstractString})
 end
 
 function drawInterposePredictions(fg::AbstractDFG;
-                                  N=100)
+                                  N::Int=100,
+                                  varList::Vector{Symbol}=ls(fg, r"x\d") |> sortDFG  )
   #
-
-  mkpath(joinLogPath(fg, "predImgs"))
-  varList = (ls(fg, r"x\d") |> sortDFG)
-  prevPs = :x0
+  allfiles = readdir(getLogPath(fg))
+  lstCount = findall(x->occursin(r"predImgs", x), allfiles) |> length
+  mkpath(joinLogPath(fg, "predImgs_$lstCount"))
+  prevPs = varList[1]
   let prevPs = prevPs
   for ps in varList[2:end]
     @show fcs = string(prevPs,ps,"f1") |> Symbol
@@ -53,7 +54,7 @@ function drawInterposePredictions(fg::AbstractDFG;
     @show nfb.joyVelData[1,:]
     for i in 1:N # nfb in NFBs,
       # pts_pynn[1:2,i] = nfb.allPredModels[i](nfb.joyVelData)
-      pts_pynn[1:2,i] = models[i](nfb.joyVelData)
+      pts_pynn[1:2,i] = nfb.allPredModels[i](nfb.joyVelData)
     end
     # pts = approxConv(fg, fcs, ps, meas)
     nfb.naiveFrac[] = 1.0
@@ -77,17 +78,17 @@ function drawInterposePredictions(fg::AbstractDFG;
     pl = plotKDE([X1slam;X1pynn;X1naiv], dims=[1;2],legend=["slam";"pred";"naiv"],title="labrun ?, $prevPs ->   $ps",levels=6)
     push!(pl.layers, Gadfly.layer(x=[0],y=[0],Geom.point)[1])
     pl.coord = Coord.Cartesian(xmin=-1,xmax=2,ymin=-1.5,ymax=1.5)
-    pl |> PDF(joinLogPath(fg,"predImgs", "pred_$ps.pdf"),15cm,10cm)
+    pl |> PDF(joinLogPath(fg,"predImgs_$lstCount", "pred_$ps.pdf"),15cm,10cm)
     prevPs = ps
   end
   end
 
   unitelist = [["pred_$(x).pdf" for x in varList[2:end]]; "z.pdf"]
   workingdir = pwd()
-  Base.cd(joinLogPath(fg,"predImgs"))
+  Base.cd(joinLogPath(fg,"predImgs_$lstCount"))
   run(`pdfunite $unitelist`)
   Base.cd(workingdir)
-  showzpath = joinLogPath(fg,"predImgs","z.pdf")
+  showzpath = joinLogPath(fg,"predImgs_$lstCount","z.pdf")
   @async run(`evince $showzpath`)
 
 end
@@ -107,7 +108,7 @@ function loss(x,y, i, models)
 end
 
 
-function assembleInterposeData(FG::Vector{<:AbstractDFG})
+function assembleInterposeData(FG::AbstractVector)
 
   MDATA = []
   for fg in FG
@@ -164,7 +165,11 @@ function updateFluxModelsPose2Pose2All!(fg::AbstractDFG,
   #
   NFBs = (x->getFactorType(fg, x)).(fcList)
   lModels = makeCopy ? deepcopy(models) : models
-  (x->(x.allPredModels = lModels)).(NFBs)
+  for nfb in NFBs, i in 1:length(lModels)
+    @assert length(nfb.allPredModels)==length(lModels) "cannot update prediction models of different lengths"
+    nfb.allPredModels[i] = lModels[i]
+  end
+  # (x->(x.allPredModels = lModels)).(NFBs)
   nothing
 end
 
@@ -190,7 +195,27 @@ FG = loadFGsFromList(fgpaths)
 
 ## Human evaluation of a few factors
 
+# get new smaller graph
 
+varList = ls(FG[1], r"x\d") |> sortDFG
+nfg = IIF.buildSubgraphFromLabels!(FG[1], varList[1:20])
+
+drawGraph(nfg, show=true)
+
+
+MDATA=assembleInterposeData([nfg])
+
+
+newmodels = trainNewModels([nfg;],EPOCHS=1)
+
+getLogPath(nfg)
+drawInterposePredictions(nfg)
+
+
+updateFluxModelsPose2Pose2All!(nfg, newmodels)
+
+
+drawInterposePredictions(nfg)
 
 
 
@@ -208,7 +233,7 @@ tasks = for i in 1:1 #length(FG)
 end
 
 
-updateFluxModelsPose2Pose2!(FG[1])
+updateFluxModelsPose2Pose2!(FG[1], newmodels)
 
 tasks = for i in 1:1 # length(FG)
   Threads.@spawn drawInterposePredictions(FG[$i])
