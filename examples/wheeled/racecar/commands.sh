@@ -154,7 +154,13 @@ killjuliaprocs() {
 }
 
 last8log() {
-  tail -n8 /tmp/caesar/racecar.log | awk '{print $1}' | sed 's/,//g'
+  # tail -n8 /tmp/caesar/racecar.log | awk '{print $1}' | sed 's/,//g'
+  tail -n8 /tmp/caesar/results.log | awk '{print $1}' | sed 's/,//g'
+}
+
+racecarresultslabrun() {
+  # julia -O3 -e "splitpath(\"`cat /tmp/caesar/$ln/readme.txt | head -n2 | tail -n1`\")[end] |> println"
+  julia -O3 -e "using JSON; JSON.parsefile(\"/tmp/caesar/$1/args.json\")[\"folder_name\"] |> println"
 }
 
 copylatesttoconductor() {
@@ -162,16 +168,19 @@ copylatesttoconductor() {
   while read ln; do
     echo "Copy to conductor $ln"
     # get labrun
-    julia -O3 -e "splitpath(\"`cat /tmp/caesar/$ln/readme.txt | head -n2 | tail -n1`\")[end] |> println" > /tmp/caesar/whichresults
-    WHICHRES=`cat /tmp/caesar/whichresults`
+    WHICHRES=`racecarresultslabrun $ln`
+    # racecarresultslabrun $ln > /tmp/caesar/whichresults
+    # WHICHRES=`cat /tmp/caesar/whichresults`
+
     echo $ln > /tmp/caesar/conductor/solves/$WHICHRES.aux
-    cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
-    cp -f /tmp/caesar/$ln/results/results.csv /home/singhk/data/racecar/$WHICHRES/results_$WHICHRES.csv
-    cp -f /tmp/caesar/$ln/results/${WHICHRES}_results.json /tmp/caesar/conductor/solves/
-    cp -f /tmp/caesar/$ln/results/${WHICHRES}_results.json /home/singhk/data/racecar/$WHICHRES/
+    # cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
+    # cp -f /tmp/caesar/$ln/results/results.csv /home/singhk/data/racecar/$WHICHRES/results_$WHICHRES.csv
+    cp -f /tmp/caesar/$ln/${WHICHRES}_results.json /tmp/caesar/conductor/solves/
+    # cp -f /tmp/caesar/$ln/${WHICHRES}_results.json /home/singhk/data/racecar/$WHICHRES/
     #also copy the latest image
-    LSTIMG=`ls -t /tmp/caesar/$ln/images | head -n20 | grep -v "hist" | head -n1`
-    cp -f /tmp/caesar/$ln/images/$LSTIMG /tmp/caesar/conductor/solves/img_${WHICHRES}_${LSTIMG}
+    cp -f /tmp/caesar/$ln/*_resolve.pdf /tmp/caesar/conductor/solves/${WHICHRES}_resolve.pdf
+    # LSTIMG=`ls -t /tmp/caesar/$ln/images | head -n20 | grep -v "hist" | head -n1`
+    # cp -f /tmp/caesar/$ln/images/$LSTIMG /tmp/caesar/conductor/solves/img_${WHICHRES}_${LSTIMG}
   done < /tmp/caesar/last8
 }
 
@@ -241,6 +250,14 @@ racecarslamrosfluxALL() {
 #   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.5
 # }
 
+delaybashracecarjulias() {
+  while [ 0 -lt `getjuliaprocs | wc -l` ]; do
+    echo "waiting for julia procs to finish, /tmp/juliaprocs="
+    echo `getjuliaprocs`
+    getjuliaprocs > /tmp/caesar/juliaprocs
+    sleep 30;
+  done
+}
 
 
 
@@ -249,17 +266,14 @@ racecarpynnconductor() {
   # racecarslampynnall
   sleep 60
 
-  while [ 0 -lt `getjuliaprocs | wc -l` ]; do
-    echo "waiting for julia procs to finish, /tmp/juliaprocs="
-    echo `getjuliaprocs`
-    getjuliaprocs > /tmp/caesar/juliaprocs
-    sleep 30;
-  done
+  delaybashracecarjulias
 
   copylatesttoconductor
 
 }
 
+
+  # racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 1.0;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.9;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.8;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
 
 
 ##

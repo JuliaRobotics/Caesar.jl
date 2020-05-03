@@ -13,7 +13,7 @@ if length(ARGS) == 0
   parsed_args["vis2d"] = true
   parsed_args["vis3d"] = false
   parsed_args["imshow"] = true
-  parsed_args["msgloops"] = 5000
+  parsed_args["msgloops"] = 3000
   parsed_args["usesimmodels"] = true
 end
 

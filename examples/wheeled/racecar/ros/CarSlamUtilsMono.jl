@@ -186,7 +186,8 @@ function updateSLAMMono!(fec::FrontEndContainer,
     # convert to NN required format
     # joyVelVal = catJoyVelData(joyVals, velVal)
     # interpolate joystick values to correct length
-    joyAs25x2 = ( x->[ x[3][:axis][2]; x[3][:axis][2] ] ).(joyVals)
+      # 2:throttle, 4:steering
+    joyAs25x2 = ( x->[ x[3][:axis][2]; x[3][:axis][4] ] ).(joyVals)
       @show typeof(joyAs25x2), size(joyAs25x2)
     joyVals25x2 = interpToOutx2( joyAs25x2 )
     # @show size(joyVals25x2)
