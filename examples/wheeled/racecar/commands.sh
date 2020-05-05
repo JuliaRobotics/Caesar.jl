@@ -276,4 +276,26 @@ racecarpynnconductor() {
   # racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 1.0;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.9;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.8;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
 
 
+
+racecartrainflux() {
+    JULIA_NUM_THREADS=10 julia -O 3 $CAESAR_EX_DIR/FluxModelsTraining.jl $*
+}
+
+racecartrainflux10times() {
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+}
+
+
+
+
+
 ##

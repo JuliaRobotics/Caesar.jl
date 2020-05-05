@@ -7,20 +7,32 @@ using Flux
 using RoME, IncrementalInference
 
 using Cairo, Fontconfig
-using RoMEPlotting
-using Gadfly
+using Gadfly, RoMEPlotting
 Gadfly.set_default_plot_size(35cm,20cm)
+
+
+## If distributed plotting is being used
+
+# using Distributed
+# addprocs(8)
+#
+# # using IncrementalInference, Flux, RoME, RoMEPlotting, Gadfly, Cairo, Fontconfig
+# # @everywhere using IncrementalInference, Flux, RoME, RoMEPlotting,
+#
+# using Gadfly, Cairo, Fontconfig
+# @everywhere using Gadfly, Cairo, Fontconfig
+#
+# WP = WorkerPool(setdiff(procs(), [1]))
 
 ##
 
-
-function loadFGsFromList(fgpaths::Vector{<:AbstractString})
+function loadFGsFromList(fgpaths::Vector{<:AbstractString}; trainingNum::Int=0)
   FG = typeof(initfg())[]
 
   # let FG = FG
   for fgpath in fgpaths
     fg = initfg()
-    getSolverParams(fg).logpath = joinpath(splitpath(fgpath)[1:end-1]...,"training")
+    getSolverParams(fg).logpath = joinpath(splitpath(fgpath)[1:end-1]...,"training_$(trainingNum)")
     mkpath(getLogPath(fg))
 
     loadDFG(fgpath, Main, fg)
@@ -36,6 +48,7 @@ function loadFGsFromList(fgpaths::Vector{<:AbstractString})
 
   return FG
 end
+
 
 function plotInterpose(fg::AbstractDFG, prevPs::Symbol, ps::Symbol, fcs::Symbol, lstCount::Int, N::Int)
   nfb = getFactorType(fg, fcs)
@@ -112,7 +125,7 @@ function drawInterposePredictions(fg::AbstractDFG;
   run(`pdfunite $unitelist`)
   Base.cd(workingdir)
   showzpath = joinLogPath(fg,"predImgs_$lstCount","$(runNumber)_z_$lstCount.pdf")
-  @async run(`evince $showzpath`)
+  # @async run(`evince $showzpath`)
 
 end
 
@@ -150,21 +163,28 @@ function drawInterposeFromData(fg::AbstractDFG,
     push!(unitelist, "$(runNumber)_pred_$(pc).pdf")
   end
 
-  println("waiting on all tasks")
+  println("waiting on all tasks, $(length(taskList))")
+  # asyncTasks = []
   for ts in taskList
     pl, fpath = fetch(ts)
     @show fpath
     pl |> PDF(fpath)
+    # gg = (p, f) -> (p |> PDF(f))
+    # ts = @async Distributed.remotecall(gg, WP, pl, fpath)
+    # push!(asyncTasks, ts)
   end
-  println("done waiting on tasks")
+  # println("waiting on async tasks")
+  # @show (x->fetch(x)).(asyncTasks)
+  # println("done waiting on tasks")
 
   push!(unitelist, "$(runNumber)_z_$lstCount.pdf")
   workingdir = pwd()
   Base.cd(joinLogPath(fg,"pred_y_$lstCount"))
+  @show pwd()
   run(`pdfunite $unitelist`)
   Base.cd(workingdir)
   showzpath = joinLogPath(fg,"pred_y_$lstCount","$(runNumber)_z_$lstCount.pdf")
-  @async run(`evince $showzpath`)
+  # @async run(`evince $showzpath`)
 
   nothing
 end
@@ -178,7 +198,7 @@ end
 function loss(x,y, i, models)
   res = 0
   for k in 1:length(x)
-    res += sum( (y[k][1:2,i]-models[i](x[k])).^2 )
+    res += sum( [100;1].*(y[k][1:2,i]-models[i](x[k])).^2 )
   end
   res/length(x)
 end
@@ -234,7 +254,8 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
                         opt = ADAM(0.1),
                         EPOCHS=50,
                         MDATA=assembleInterposeData(FG),
-                        loss::Function=loss)
+                        loss::Function=loss,
+                        models=nothing)
   #
   # get the models from the first FG only (all factors use the same N models)
   fg = FG[1]
@@ -242,21 +263,32 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
   NFBs = (x->getFactorType(fg, x)).(fcList)
 
   # same models are used everywhere, after training make sure to reset the weights for all NN objects, not just those in models
-  models = NFBs[1].allPredModels |> deepcopy
+  lModels = models == nothing ? deepcopy(NFBs[1].allPredModels) : models
 
   mkpath(joinLogPath(fg,"loss_$iter"))
 
   ## Do training
   N = 100
 
-  evalcb(n, io=stdout) = println(io, "$n, $(sum([loss(mdata..., n, models) for mdata in MDATA]))")
-  for n in 1:N
+  evalcb(n, io=stdout) = println(io, "$n, $(sum([loss(mdata..., n, lModels) for mdata in MDATA]))")
+
+  function wrapTraining!(n::Int, lModels, MDATA, opt, EPOCHS)
     fid = open(joinLogPath(fg,"loss_$iter","sample_$n.txt"), "w")
-    Flux.@epochs EPOCHS Flux.train!((x,y)->loss(x,y,n, models), Flux.params(models[n]), MDATA, opt, cb = Flux.throttle(()->evalcb(n, fid), 0.1) )
+    Flux.@epochs EPOCHS Flux.train!((x,y)->loss(x,y,n, lModels), Flux.params(lModels[n]), MDATA, opt, cb = Flux.throttle(()->evalcb(n, fid), 0.1) )
     close(fid)
+    nothing
   end
 
-  return models
+  taskList = Task[]
+  for n in 1:N
+    ts = Threads.@spawn wrapTraining!($n, lModels, MDATA, opt, EPOCHS)
+    push!(taskList, ts)
+  end
+  println("Waiting on all training tasks.")
+  (x->wait(x)).(taskList)
+  println("Done waiting on training tasks.")
+
+  return lModels
 end
 
 
@@ -290,44 +322,64 @@ fgpaths = [
   "/tmp/caesar/2020-05-01T05:25:04.904/fg_55_resolve.tar.gz"
 ]
 
+maxTr = Ref{Int}()
+maxTr[] = 0
+let maxTr = maxTr
+for fgp in fgpaths
+  fgdir = dirname(fgp)
+  numDirsT = findall(x->occursin(r"training",x), readdir(fgdir)) |> length
+  maxTr[] = maximum([maxTr[]; numDirsT])
+end
+end
 
-FG = loadFGsFromList(fgpaths)
+FG = loadFGsFromList(fgpaths, trainingNum=maxTr[])
+
+@show maxTr
 
 
+## final prep
 
-## Human evaluation of a few factors
-
+# Human evaluation of a few factors
 # get a smaller graph
 
 # varList = ls(FG[1], r"x\d") |> sortDFG
 # nfg = IIF.buildSubgraphFromLabels!(FG[1], varList[1:50])
 # drawGraph(nfg, show=true)
 
-FITFG = FG[1:8]
+FITFG = FG[1:6]
 MDATA=assembleInterposeData(FITFG)
 
 
 # get any copy of the models
 fcList = ls(FITFG[1], FluxModelsPose2Pose2) |> sortDFG
-models = getFactorType(FITFG[1], fcList[1]).allPredModels
+models = getFactorType(FITFG[1], fcList[1]).allPredModels |> deepcopy
 
-let FITFG=FITFG, MDATA=MDATA
+let models=models
+for i in 1:length(models)
+  theta, re  = Flux.destructure(models[i])
+  theta .= randn(Float32, length(theta))
+  models[i] = re(theta)
+end
+end
+
+let FITFG=FITFG, MDATA=MDATA, models=models
   for i in 1:length(FITFG)
     drawInterposeFromData(FITFG[i], MDATA[i], models, 0, runNumber=i)
     # drawInterposePredictions(FITFG[i])
   end
 end
 
-# loss(MDATA[1][1], MDATA[1][2], 1, models)
 
-let MDATA=MDATA
-for i in 1:50
+## loss(MDATA[1][1], MDATA[1][2], 1, models)
+
+let FITFG=FITFG, MDATA=MDATA, models=models
+for i in 1:5
   LMDATA=[]
   for j in 1:length(MDATA)
     permlist = shuffle!(1:length(MDATA[j][1]) |> collect)
     push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
   end
-  newmodels = trainNewModels(FITFG, iter=i, EPOCHS=50, opt=Descent(0.08/(0.5*i)), MDATA=LMDATA, loss=loss)
+  newmodels = trainNewModels(FITFG, iter=i, EPOCHS=50, opt=ADAM(0.1/(0.25*i+0.5)), MDATA=LMDATA, loss=loss, models=models)
   runNum = 0
   for lfg in FITFG
     runNum += 1
@@ -341,10 +393,10 @@ end
 
 ##
 
-# Final results
-for lfg in FITFG
-  drawInterposePredictions(lfg, runNumber=9999)
-end
+# # Final results
+# for lfg in FITFG
+#   drawInterposePredictions(lfg, runNumber=9999)
+# end
 
 ##
 
