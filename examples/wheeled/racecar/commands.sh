@@ -297,5 +297,8 @@ racecartrainflux10times() {
 
 
 
+# racecarslamrosfluxall --localprocs 6 --remoteprocs 0 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
+
+
 
 ##
