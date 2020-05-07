@@ -15,7 +15,7 @@ Click on the badges to follow web url links:
 
 # Bleeding-edge Development Status
 
-Code changes are currently tracked via Github's integrated Milestone/Issues/PR system.
+Code changes are currently tracked via Github's integrated Milestone/Issues/PR system -- click on the badges below to follow links into hightlights of the ecosystem.
 
 | **Major Dependencies**  |  **Stable**     |  **Dev (master)**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
