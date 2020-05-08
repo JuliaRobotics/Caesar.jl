@@ -1,7 +1,9 @@
 ## BEFORE RUNNING THIS SCRIPT, MAKE SURE ros is in the environment
 
-using ImageView
-using Gtk.ShortNames
+if parsed_args["imshow"]
+  using ImageView
+  using Gtk.ShortNames
+end
 
 using LinearAlgebra
 using ImageMagick
@@ -12,7 +14,11 @@ using FreeTypeAbstraction # for drawTagID!
 using AprilTags
 using JSON2
 using Dates
+using DataInterpolations
 
+using CuArrays
+using Flux
+using RoME
 using Caesar
 
 
@@ -30,9 +36,8 @@ using Distributed
 # populate remote machines on cluster later (was need for Python workaround and left)
 prcs115 = Int[]
 
-## Process on this machine but not remote machines
-
-using Caesar
+# ## Process on this machine but not remote machines
+# using Caesar
 
 ## Prepare python version
 
@@ -86,15 +91,22 @@ addprocs(parsed_args["localprocs"])
 ## Start processes on remote machines
 
 if 0 < parsed_args["remoteprocs"]
-  machines = [(ENV["JL_CLUSTER_HY"],parsed_args["remoteprocs"])]
+  machines = []
+  allmc = split(ENV[parsed_args["remoteserver"]], ';')
+  for mc in allmc
+    push!(machines, (mc,parsed_args["remoteprocs"]))
+  end
   prcs115 = addprocs(machines)
 end
 
 ## Load solver libraries everywhere
 
+using CuArrays, Flux
 using RoME
+using DataInterpolations
+@everywhere using CuArrays, Flux
 @everywhere using RoME
-@everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils
+@everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils, DataInterpolations
 
 
 ## Constant parameters

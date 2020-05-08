@@ -41,8 +41,8 @@ end
   Pkg.instantiate()
 end
 
-using RoME
 using Flux
+using RoME
 using RoMEPlotting
 
 WP = nprocs == 1 ? WorkerPool([1]) : WorkerPool(2:nprocs() |> collect )
@@ -51,10 +51,10 @@ WP = nprocs == 1 ? WorkerPool([1]) : WorkerPool(2:nprocs() |> collect )
 for i in procs()
   fetch( Distributed.@spawnat i @eval using DistributedFactorGraphs )
   fetch( Distributed.@spawnat i @eval using IncrementalInference )
+  fetch( Distributed.@spawnat i @eval using Flux )
   fetch( Distributed.@spawnat i @eval using RoME )
   fetch( Distributed.@spawnat i @eval using Caesar )
   # fetch( Distributed.@spawnat i @eval using CuArrays )
-  fetch( Distributed.@spawnat i @eval using Flux )
 end
 
 for i in procs()
@@ -163,30 +163,45 @@ end
 
 ## interpolate up to PyQuest values...
 
+
 intJoyDict = Dict{Symbol,Vector{Vector{Float64}}}()
 # for sym, lclJD = :x1, joyTsDict[:x1]
 for (sym, lclJD) in joyTsDict
-  if 1 < size(lclJD,1)
-    tsLcl = range(lclJD[1,1],lclJD[end,1],length=25)
-    intrTrTemp = DataInterpolations.LinearInterpolation(lclJD[:,2],lclJD[:,1])
-    intrStTemp = DataInterpolations.LinearInterpolation(lclJD[:,3],lclJD[:,1])
-    newVec = Vector{Vector{Float64}}()
-    for tsL in tsLcl
-      newVal = zeros(4)
-      newVal[1] = intrTrTemp(tsL)
-      newVal[2] = intrStTemp(tsL)
-      push!(newVec, newVal)
-    end
-    # currently have no velocity values
-    intJoyDict[sym] = newVec
-  else
-    intJoyDict[sym] = [zeros(4) for i in 1:25]
-  end
+  intJoyDict[sym] = interpTo25x4(lclJD)
+  # if 1 < size(lclJD,1)
+  #   tsLcl = range(lclJD[1,1],lclJD[end,1],length=25)
+  #   intrTrTemp = DataInterpolations.LinearInterpolation(lclJD[:,2],lclJD[:,1])
+  #   intrStTemp = DataInterpolations.LinearInterpolation(lclJD[:,3],lclJD[:,1])
+  #   newVec = Vector{Vector{Float64}}()
+  #   for tsL in tsLcl
+  #     newVal = zeros(4)
+  #     newVal[1] = intrTrTemp(tsL)
+  #     newVal[2] = intrStTemp(tsL)
+  #     push!(newVec, newVal)
+  #   end
+  #   # currently have no velocity values
+  #   intJoyDict[sym] = newVec
+  # else
+  #   intJoyDict[sym] = [zeros(4) for i in 1:25]
+  # end
 end
 
 ## More code required
 
 inlcude(joinpath(dirname(pathof(Caesar)), "examples", "learning", "hybrid", "FluxModelsPose2Pose2", "FluxModelsPose2Pose2.jl"))
+
+
+include(joinpath(@__DIR__, "LoadPyNNTxt.jl"))
+
+
+## load the required models into common predictor
+
+allModels = []
+for i in 0:99
+# /home/dehann/data/racecar/results/conductor/models/retrained_network_weights0
+  push!(allModels, loadTfModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
+end
+
 
 
 ## run the solution

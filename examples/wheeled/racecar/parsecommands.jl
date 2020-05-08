@@ -38,11 +38,15 @@ function parse_commandline()
         "--pose_trigger_distance"
             help = "Required distance travelled to trigger new pose."
             arg_type = Float64
-            default = 0.5
+            default = 0.4
         "--pose_trigger_rotate"
             help = "Required rotation to trigger new pose."
             arg_type = Float64
             default = pi/4
+        "--naive_frac"
+            help = "Fraction of particles to use naive odo model."
+            arg_type = Float64
+            default = 0.6
         "--batch_size"
             help = "Batch solve every n poses"
             arg_type = Int64
@@ -55,10 +59,18 @@ function parse_commandline()
             help = "How many remote Julia processes to use"
             arg_type = Int64
             default = 0
+        "--remoteserver"
+            help = "Which remote server to use for processing"
+            arg_type = String
+            default = "JL_CLUSTER_HY"
         "--iterposes"
             help = "maximum number of poses to process"
             arg_type = Int64
-            default = 9999999999
+            default = Int64(2)^63-Int64(1)
+        "--msgloops"
+            help = "Maximum number or messages to consume in the main loop (ROS/LCM/etc)"
+            arg_type = Int64
+            default = Int64(2)^63-Int64(1)
         "--show"
             help = "Show pdfs during computation using `evince`"
             action = :store_true
@@ -76,6 +88,12 @@ function parse_commandline()
             action = :store_true
         "--report_factors"
             help = "Resolve the entire factor graph at the end"
+            action = :store_true
+        "--savedfg"
+            help = "Store DFG objects to file"
+            action = :store_true
+        "--usesimmodels"
+            help = "Use sim trained models"
             action = :store_true
     end
 

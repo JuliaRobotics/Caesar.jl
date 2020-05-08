@@ -128,6 +128,11 @@ function jsonResultsSLAM2D(fec)
     if 0 == getPPEDict(getVariable(fec.slam.dfg, ns)) |> length || 0 == getPPEDict(getVariable(fec.slam.dfg, ps)) |> length
       continue
     end
+    @show "fetchDataElement for $ps"
+    if !hasDataEntry(getVariable(fec.slam.dfg,ps), :JOYSTICK_CMD_VALS)
+      @error "missing data entry :JOYSTICK_CMD_VALS in $ps of length(allvars)=$(length(allvars))"
+      continue
+    end
     cmdData = fetchDataElement(getVariable(fec.slam.dfg,ps), fec.datastore, :JOYSTICK_CMD_VALS)
     # axis: 2:throttle, 4:steering
     cd = Dict{Symbol,Any}(

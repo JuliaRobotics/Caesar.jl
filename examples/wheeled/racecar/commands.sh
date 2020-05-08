@@ -154,7 +154,13 @@ killjuliaprocs() {
 }
 
 last8log() {
-  tail -n8 /tmp/caesar/racecar.log | awk '{print $1}' | sed 's/,//g'
+  # tail -n8 /tmp/caesar/racecar.log | awk '{print $1}' | sed 's/,//g'
+  tail -n8 /tmp/caesar/results.log | awk '{print $1}' | sed 's/,//g'
+}
+
+racecarresultslabrun() {
+  # julia -O3 -e "splitpath(\"`cat /tmp/caesar/$ln/readme.txt | head -n2 | tail -n1`\")[end] |> println"
+  julia -O3 -e "using JSON; JSON.parsefile(\"/tmp/caesar/$1/args.json\")[\"folder_name\"] |> println"
 }
 
 copylatesttoconductor() {
@@ -162,49 +168,137 @@ copylatesttoconductor() {
   while read ln; do
     echo "Copy to conductor $ln"
     # get labrun
-    julia -O3 -e "splitpath(\"`cat /tmp/caesar/$ln/readme.txt | head -n2 | tail -n1`\")[end] |> println" > /tmp/caesar/whichresults
-    WHICHRES=`cat /tmp/caesar/whichresults`
+    WHICHRES=`racecarresultslabrun $ln`
+    # racecarresultslabrun $ln > /tmp/caesar/whichresults
+    # WHICHRES=`cat /tmp/caesar/whichresults`
+
     echo $ln > /tmp/caesar/conductor/solves/$WHICHRES.aux
-    cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
-    cp -f /tmp/caesar/$ln/results/results.csv /home/singhk/data/racecar/$WHICHRES/results_$WHICHRES.csv
+    # cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
+    # cp -f /tmp/caesar/$ln/results/results.csv /home/singhk/data/racecar/$WHICHRES/results_$WHICHRES.csv
+    cp -f /tmp/caesar/$ln/${WHICHRES}_results.json /tmp/caesar/conductor/solves/
+    # cp -f /tmp/caesar/$ln/${WHICHRES}_results.json /home/singhk/data/racecar/$WHICHRES/
     #also copy the latest image
-    LSTIMG=`ls -t /tmp/caesar/$ln/images | head -n20 | grep -v "hist" | head -n1`
-    cp -f /tmp/caesar/$ln/images/$LSTIMG /tmp/caesar/conductor/solves/img_${WHICHRES}_${LSTIMG}
+    cp -f /tmp/caesar/$ln/*_resolve.pdf /tmp/caesar/conductor/solves/${WHICHRES}_resolve.pdf
+    # LSTIMG=`ls -t /tmp/caesar/$ln/images | head -n20 | grep -v "hist" | head -n1`
+    # cp -f /tmp/caesar/$ln/images/$LSTIMG /tmp/caesar/conductor/solves/img_${WHICHRES}_${LSTIMG}
   done < /tmp/caesar/last8
 }
 
-racecarpynnconductor() {
-  racecarslamfluxall
-  # racecarslampynnall
-  sleep 60
 
+
+getFrac() {
+  A=`julia -O3 -e "(11-$1)/10 |> print"`
+  echo $A
+}
+
+# racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
+# racecarslamrosfluxall --localprocs 8 --remoteprocs 0 --naive_frac `getFrac $i`
+
+racecarslamros() {
+    JULIA_NUM_THREADS=4 julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
+}
+
+racecarslamrosflux() {
+    JULIA_NUM_THREADS=4 julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMonoFlux.jl $* --batch_resolve --vis2d --savedfg
+}
+
+racecarslamrosall() {
+  sleep 00; racecarslamros --folder_name "labrun7" $* &
+  sleep 60; racecarslamros --folder_name "labrun6" $* &
+  sleep 60; racecarslamros --folder_name "labrun8" $*
+  sleep 00; racecarslamros --folder_name "labrun4" $* &
+  sleep 60; racecarslamros --folder_name "labrun2" $* &
+  sleep 60; racecarslamros --folder_name "labrun3" $*
+  sleep 00; racecarslamros --folder_name "labrun5" $* &
+  sleep 60; racecarslamros --folder_name "labrun1" $*
+}
+
+racecarslamrosfluxall() {
+  sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun6" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun8" $*
+  sleep 00; racecarslamrosflux --folder_name "labrun4" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun2" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun3" $*
+  sleep 00; racecarslamrosflux --folder_name "labrun5" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun1" $*
+}
+
+racecarslamrosfluxALL() {
+  sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun6" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun8" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun4" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun2" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun3" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun5" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun1" $*
+}
+
+
+
+## analysis runs
+
+# racecarslamrosfluxall --localprocs 4 --remoteprocs 7 --imshow --naive_frac 0.9
+
+# racecarslamrosflux_analysis1() {
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 1.0
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.9
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.8
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.6
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.5
+# }
+
+delaybashracecarjulias() {
   while [ 0 -lt `getjuliaprocs | wc -l` ]; do
     echo "waiting for julia procs to finish, /tmp/juliaprocs="
     echo `getjuliaprocs`
     getjuliaprocs > /tmp/caesar/juliaprocs
     sleep 30;
   done
+}
+
+
+
+racecarpynnconductor() {
+  racecarslamrosfluxALL $*
+  # racecarslampynnall
+  sleep 60
+
+  delaybashracecarjulias
 
   copylatesttoconductor
 
 }
 
 
+  # racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 1.0;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.9;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.8;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
 
 
 
-
-racecarslamros() {
-    julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
+racecartrainflux() {
+    JULIA_NUM_THREADS=10 julia -O 3 $CAESAR_EX_DIR/FluxModelsTraining.jl $*
 }
 
-racecarslamrosall() {
-  racecarslamros --folder_name "labrun1" $* &
-  sleep 60; racecarslamros --folder_name "labrun2" $*
-  racecarslamros --folder_name "labrun3" $* &
-  sleep 60; racecarslamros --folder_name "labrun4" $*
-  racecarslamros --folder_name "labrun5" $* &
-  sleep 60; racecarslamros --folder_name "labrun6" $*
-  racecarslamros --folder_name "labrun7" $* &
-  speel 60; racecarslamros --folder_name "labrun8" $*
+racecartrainflux10times() {
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
 }
+
+
+
+
+# racecarslamrosfluxall --localprocs 6 --remoteprocs 0 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
+
+
+
+##

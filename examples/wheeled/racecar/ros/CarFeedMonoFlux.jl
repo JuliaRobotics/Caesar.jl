@@ -7,9 +7,14 @@ include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 
 # assume in Atom editor (not scripted use)
 if length(ARGS) == 0
-  parsed_args["folder_name"] = "labrun8"
-  parsed_args["remoteprocs"] = 10
+  parsed_args["folder_name"] = "labrun2"
+  parsed_args["remoteprocs"] = 0
+  parsed_args["localprocs"] = 4
   parsed_args["vis2d"] = true
+  parsed_args["vis3d"] = false
+  parsed_args["imshow"] = true
+  parsed_args["msgloops"] = 3000
+  parsed_args["usesimmodels"] = true
 end
 
 
@@ -32,11 +37,27 @@ end
 
 ## bring in all the required source code
 
+
 # bring up the multiprocess cluster
 include(joinpath(@__DIR__, "CarFeedCommonSetup.jl"))
 
 # a few required utils
 include(joinpath(@__DIR__, "CarSlamUtilsMono.jl"))
+
+
+## load neural models
+
+include(joinpath(dirname(@__DIR__), "LoadPyNNTxt.jl"))
+
+allModels = []
+for i in 0:99
+# /home/dehann/data/racecar/results/conductor/models/retrained_network_weights0
+  if parsed_args["usesimmodels"]
+    push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/sim_models/sim_network_weights$i") )
+  else
+    push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
+  end
+end
 
 
 ##
@@ -53,15 +74,13 @@ end
 
 tools = RacecarTools(detector)
 
-
 ## SLAM portion
 
 slam = SLAMWrapperLocal()
 getSolverParams(slam.dfg).drawtree = true
 getSolverParams(slam.dfg).showtree = false
 
-dfg_datafolder = getLogPath(slam.dfg)
-datastore = FileDataStore("$dfg_datafolder/bigdata")
+datastore = FileDataStore( joinLogPath(slam.dfg,"bigdata") )
 
 # also store parsed_args used in this case
 fid = open(joinLogPath(slam.dfg,"args.json"),"w")
@@ -78,14 +97,14 @@ close(fid)
 
 bagSubscriber = RosbagSubscriber(bagfile)
 
-syncz = SynchronizeCarMono(30,syncList=[:leftFwdCam;:camOdo])
+syncz = SynchronizeCarMono(200,syncList=[:leftFwdCam;:camOdo])
 fec = FrontEndContainer(slam,bagSubscriber,syncz,tools,datastore)
 
 # callbacks via Python
 bagSubscriber(leftimgtopic, leftImgHdlr, fec)
-bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET)
+bagSubscriber(zedodomtopic, odomHdlr, fec, WEIRDOFFSET, allModels ) # extra value triggers flux mode
 bagSubscriber(joysticktopic, joystickHdlr, fec)
-
+# (x)->JlOdoPredictorPoint2(x, allModels)
 
 defaultFixedLagOnTree!(slam.dfg, 50, limitfixeddown=true)
 # getSolverParams(slam.dfg).dbg = true
@@ -112,20 +131,29 @@ addVariable!(slam.dfg, :x0, Pose2, timestamp=T0)
 addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2))), timestamp=T0)
 
 
+
 ## start solver
 
 
 ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
 
 
-##
 
+## Run main ROS listener loop
 
-sleep(0.01)  # allow gui sime time to setup
+sleep(0.01)  # allow gui some time to setup
+rosloops = 0
+let rosloops = rosloops
 while loop!(bagSubscriber)
-# for i in 1:2000
-#   loop!(bagSubscriber)
+  # plumbing to limit the number of messages
+  rosloops += 1
+  if parsed_args["msgloops"] < rosloops
+    @warn "reached --msgloops limit of $rosloops"
+    break
+  end
+  # delay progress for whatever reason
   blockProgress(slam) # required to prevent duplicate solves occuring at the same time
+end
 end
 
 ## close all
@@ -150,13 +178,15 @@ allD = jsonResultsSLAM2D(fec)
 
 allStr = JSON2.write(allD)
 
-fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results.json"),"w")
+fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results_prebatch.json"),"w")
 println(fid, allStr)
 close(fid)
 
 ## save the factor graph
 
-saveDFG(fec.slam.dfg, joinLogPath(fec.slam.dfg, "fg_$(slam.poseCount)"))
+if parsed_args["savedfg"]
+  saveDFG(fec.slam.dfg, joinLogPath(fec.slam.dfg, "fg_$(slam.poseCount)_prebatch"))
+end
 
 
 ## draw results
@@ -165,7 +195,7 @@ if parsed_args["vis2d"]
 
 # drawPoses(slam.dfg, spscale=0.3, drawhist=false)
 pl = drawPosesLandms(fec.slam.dfg, spscale=0.3, drawhist=false)
-pl |> PDF(joinLogPath(fec.slam.dfg,"fg_$(slam.poseCount).pdf"))
+pl |> PDF(joinLogPath(fec.slam.dfg,"fg_$(slam.poseCount)_prebatch.pdf"))
 # drawPosesLandms(fg4, spscale=0.3, drawhist=false)
 
 if parsed_args["report_factors"]
@@ -180,13 +210,16 @@ if parsed_args["batch_resolve"]
 
 # fg2 = deepcopy(fec.slam.dfg)
 
-dontMarginalizeVariablesAll!(fec.slam.dfg)
-foreach(x->setSolvable!(fec.slam.dfg, x, 1), ls(fec.slam.dfg))
-foreach(x->setSolvable!(fec.slam.dfg, x, 1), lsf(fec.slam.dfg))
+enableSolveAllNotDRT!(fec.slam.dfg)
+# dontMarginalizeVariablesAll!(fec.slam.dfg)
+# foreach(x->setSolvable!(fec.slam.dfg, x, 1), ls(fec.slam.dfg))
+# foreach(x->setSolvable!(fec.slam.dfg, x, 1), lsf(fec.slam.dfg))
 
 tree, smt, hist = solveTree!(fec.slam.dfg)
 
-saveDFG(fec.slam.dfg, joinLogPath(fec.slam.dfg, "fg_$(slam.poseCount)_resolve"))
+if parsed_args["savedfg"]
+  saveDFG(fec.slam.dfg, joinLogPath(fec.slam.dfg, "fg_$(slam.poseCount)_resolve"))
+end
 
 end
 
@@ -196,7 +229,7 @@ allD = jsonResultsSLAM2D(fec)
 
 allStr = JSON2.write(allD)
 
-fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results_batchresolve.json"),"w")
+fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results.json"),"w")
 println(fid, allStr)
 close(fid)
 
