@@ -447,7 +447,7 @@ for i in 1:10
     runNum += 1
     updateFluxModelsPose2Pose2All!(lfg, newmodels)
     # drawInterposePredictions(lfg, runNumber=runNum)
-    lfg_, mdata_, newmodels_, i_, runNum_ = deepcopy(lfg), deepcopy(mdata), deepcopy(newmodels), deepcopy(i), deepcopy(runNum)
+    lfg_, mdata_, newmodels_, i_, runNum_ = deepcopy(lfg), deepcopy(MDATA[runNum]), deepcopy(newmodels), deepcopy(i), deepcopy(runNum)
     ts = @async drawInterposeFromData(lfg_, mdata_, newmodels_, i_, runNumber=runNum_)
     # drawInterposeFromData(lfg, MDATA[runNum], newmodels, i, runNumber=runNum)
     push!(PLOTTASKS, ts)
