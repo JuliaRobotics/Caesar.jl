@@ -198,7 +198,7 @@ end
 # k is the number of interpose segments in this data
 # k+j are intermediate accumulations of longer chords over poses in trajectory
 # cho is the interpose accumulation distance
-function loss(x,y, i, models, chord=[5;10;20])
+function loss(x,y, i, models, chord=[3;5;10;20;35;50])
   len = length(x)
   res = 0
   for k in 1:len
@@ -313,7 +313,7 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
   ## Do training
   N = 100
 
-  evalcb(n, io=stdout) = println(io, "$n, $(sum([loss(mdata..., n, lModels) for mdata in MDATA]))")
+  evalcb(n, io=stdout) = println(io, "$n, $(([loss(mdata..., n, lModels) for mdata in MDATA]))")
 
   function wrapTraining!(n::Int, lModels, MDATA, opt, EPOCHS)
     fid = open(joinLogPath(fg,"loss_$iter","sample_$n.txt"), "w")
@@ -324,12 +324,11 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
 
   taskList = Task[]
   for n in 1:N
-    # ts = Threads.@spawn
-    wrapTraining!(n, lModels, MDATA, opt, EPOCHS)
-    # push!(taskList, ts)
+    ts = Threads.@spawn wrapTraining!($n, lModels, MDATA, opt, EPOCHS)
+    push!(taskList, ts)
   end
   println("Waiting on all training tasks.")
-  # (x->wait(x)).(taskList)
+  (x->wait(x)).(taskList)
   println("Done waiting on training tasks.")
 
   return lModels
@@ -406,7 +405,7 @@ FG = loadFGsFromList(fgpaths, trainingNum=maxTr[])
 # nfg = IIF.buildSubgraphFromLabels!(FG[1], varList[1:50])
 # drawGraph(nfg, show=true)
 
-FITFG = FG[1:1]
+FITFG = FG[1:6]
 MDATA=assembleInterposeData(FITFG)
 
 
@@ -432,28 +431,34 @@ end
 
 ## loss(MDATA[1][1], MDATA[1][2], 1, models)
 
-let FITFG=FITFG, MDATA=MDATA, models=models
-for i in 1:1
+PLOTTASKS = []
+
+let FITFG=FITFG, MDATA=MDATA, models=models, PLOTTASKS=PLOTTASKS
+for i in 1:10
   LMDATA=[]
   for j in 1:length(MDATA)
     permlist = (1:length(MDATA[j][1]) |> collect)
     # permlist = shuffle!(1:length(MDATA[j][1]) |> collect)
     push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
   end
-  newmodels = trainNewModels(FITFG, iter=i, EPOCHS=10, opt=ADAM(0.1/(0.25*i+0.5)), MDATA=LMDATA, loss=loss, models=models)
+  newmodels = trainNewModels(FITFG, iter=i, EPOCHS=30, opt=ADAM(0.1/(0.25*i+0.5)), MDATA=LMDATA, loss=loss, models=models)
   runNum = 0
-  # for lfg in FITFG
-  #   runNum += 1
-  #   updateFluxModelsPose2Pose2All!(lfg, newmodels)
-  #   # drawInterposePredictions(lfg, runNumber=runNum)
-  #   drawInterposeFromData(lfg, MDATA[runNum], newmodels, i, runNumber=runNum)
-  # end
+  for lfg in FITFG
+    runNum += 1
+    updateFluxModelsPose2Pose2All!(lfg, newmodels)
+    # drawInterposePredictions(lfg, runNumber=runNum)
+    lfg_, mdata_, newmodels_, i_, runNum_ = deepcopy(lfg), deepcopy(mdata), deepcopy(newmodels), deepcopy(i), deepcopy(runNum)
+    ts = @async drawInterposeFromData(lfg_, mdata_, newmodels_, i_, runNumber=runNum_)
+    # drawInterposeFromData(lfg, MDATA[runNum], newmodels, i, runNumber=runNum)
+    push!(PLOTTASKS, ts)
+  end
 end
 end
 
 
 ##
 0
+
 # # Final results
 # for lfg in FITFG
 #   drawInterposePredictions(lfg, runNumber=9999)
