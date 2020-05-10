@@ -199,7 +199,7 @@ include(joinpath(@__DIR__, "LoadPyNNTxt.jl"))
 allModels = []
 for i in 0:99
 # /home/dehann/data/racecar/results/conductor/models/retrained_network_weights0
-  push!(allModels, loadTfModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
+  push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") ) # loadTfModelIntoFlux
 end
 
 

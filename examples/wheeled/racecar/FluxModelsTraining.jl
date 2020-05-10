@@ -195,13 +195,56 @@ end
 # models = NFBs[1].allPredModels |> deepcopy
 # x = nfb.joyVelData
 # y = x1.vals
-function loss(x,y, i, models)
+# k is the number of interpose segments in this data
+# k+j are intermediate accumulations of longer chords over poses in trajectory
+# cho is the interpose accumulation distance
+function loss(x,y, i, models, chord=[5;10;20])
+  len = length(x)
   res = 0
-  for k in 1:length(x)
-    res += sum( [100;1].*(y[k][1:2,i]-models[i](x[k])).^2 )
+  for k in 1:len
+    res += sum( (y[k][1:2,i] - models[i](x[k])).^2 )
   end
-  res/length(x)
+  # first mse component
+  res /= len
+
+  # do chord segments
+  # can cheat since XY only odo is linear (add and subtract linearly)
+  for cho in chord, k in 1:cho:(len-cho)
+    separate = +( ([ y[k+j][1:2,i] - models[i](x[k+j]) for j in 0:(cho-1)])... )
+    res += sum( separate.^2 ) # / (len/cho)
+  end
+  res
 end
+
+# function lossALMOST(x,y, i, models, chord=[5;])
+#   res = 0
+#   for k in 1:5:length(x)
+#     if k+4 <= length(x)
+#       # individuals
+#       for kk in k:k+4
+#         res += sum( (y[kk][1:2,i] - models[i](x[kk])).^2 )
+#       end
+#
+#       # can cheat since linear
+#       res += sum( (y[k+0][1:2,i] - models[i](x[k+0]) +
+#                    y[k+1][1:2,i] - models[i](x[k+1]) +
+#                    y[k+2][1:2,i] - models[i](x[k+2]) +
+#                    y[k+3][1:2,i] - models[i](x[k+3]) +
+#                    y[k+4][1:2,i] - models[i](x[k+4])
+#                   ).^2
+#                 )
+#     end
+#   end
+#   res/length(x)
+# end
+#
+# function lossOLD(x,y, i, models, chord=[5;])
+#   res = 0
+#   for k in 1:length(x)
+#     res += sum( (y[k][1:2,i]-models[i](x[k])).^2 )
+#   end
+#   res/length(x)
+# end
 
 
 function assembleInterposeData(FG::AbstractVector)
@@ -281,11 +324,12 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
 
   taskList = Task[]
   for n in 1:N
-    ts = Threads.@spawn wrapTraining!($n, lModels, MDATA, opt, EPOCHS)
-    push!(taskList, ts)
+    # ts = Threads.@spawn
+    wrapTraining!(n, lModels, MDATA, opt, EPOCHS)
+    # push!(taskList, ts)
   end
   println("Waiting on all training tasks.")
-  (x->wait(x)).(taskList)
+  # (x->wait(x)).(taskList)
   println("Done waiting on training tasks.")
 
   return lModels
@@ -311,16 +355,32 @@ end
 
 ## update the models in a factor graph object
 
+# Distance 0.5
+# fgpaths = [
+#   "/tmp/caesar/2020-05-01T04:27:36.467/fg_75_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-01T04:28:55.212/fg_67_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-01T04:30:08.258/fg_72_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-01T04:59:39.114/fg_61_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-01T05:01:03.337/fg_53_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-01T05:02:15.57/fg_58_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-01T05:23:54.609/fg_55_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-01T05:25:04.904/fg_55_resolve.tar.gz"
+# ]
+
+# distance 0.2
 fgpaths = [
-  "/tmp/caesar/2020-05-01T04:27:36.467/fg_75_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T04:28:55.212/fg_67_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T04:30:08.258/fg_72_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T04:59:39.114/fg_61_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T05:01:03.337/fg_53_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T05:02:15.57/fg_58_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T05:23:54.609/fg_55_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T05:25:04.904/fg_55_resolve.tar.gz"
+  "/tmp/caesar/2020-05-08T13:56:26.606/fg_153_resolve.tar.gz";
+  "/tmp/caesar/2020-05-08T13:57:30.049/fg_129_resolve.tar.gz";
+   "/tmp/caesar/2020-05-08T13:58:35.61/fg_143_resolve.tar.gz";
+  "/tmp/caesar/2020-05-08T14:00:00.995/fg_115_resolve.tar.gz";
+  "/tmp/caesar/2020-05-08T14:01:27.805/fg_107_resolve.tar.gz";
+  "/tmp/caesar/2020-05-08T14:02:54.472/fg_111_resolve.tar.gz";
+  "/tmp/caesar/2020-05-08T14:04:03.479/fg_107_resolve.tar.gz";
+  "/tmp/caesar/2020-05-08T14:04:49.405/fg_106_resolve.tar.gz"
 ]
+
+
+
 
 maxTr = Ref{Int}()
 maxTr[] = 0
@@ -346,7 +406,7 @@ FG = loadFGsFromList(fgpaths, trainingNum=maxTr[])
 # nfg = IIF.buildSubgraphFromLabels!(FG[1], varList[1:50])
 # drawGraph(nfg, show=true)
 
-FITFG = FG[1:6]
+FITFG = FG[1:1]
 MDATA=assembleInterposeData(FITFG)
 
 
@@ -373,26 +433,27 @@ end
 ## loss(MDATA[1][1], MDATA[1][2], 1, models)
 
 let FITFG=FITFG, MDATA=MDATA, models=models
-for i in 1:5
+for i in 1:1
   LMDATA=[]
   for j in 1:length(MDATA)
-    permlist = shuffle!(1:length(MDATA[j][1]) |> collect)
+    permlist = (1:length(MDATA[j][1]) |> collect)
+    # permlist = shuffle!(1:length(MDATA[j][1]) |> collect)
     push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
   end
-  newmodels = trainNewModels(FITFG, iter=i, EPOCHS=50, opt=ADAM(0.1/(0.25*i+0.5)), MDATA=LMDATA, loss=loss, models=models)
+  newmodels = trainNewModels(FITFG, iter=i, EPOCHS=10, opt=ADAM(0.1/(0.25*i+0.5)), MDATA=LMDATA, loss=loss, models=models)
   runNum = 0
-  for lfg in FITFG
-    runNum += 1
-    updateFluxModelsPose2Pose2All!(lfg, newmodels)
-    # drawInterposePredictions(lfg, runNumber=runNum)
-    drawInterposeFromData(lfg, MDATA[runNum], newmodels, i, runNumber=runNum)
-  end
+  # for lfg in FITFG
+  #   runNum += 1
+  #   updateFluxModelsPose2Pose2All!(lfg, newmodels)
+  #   # drawInterposePredictions(lfg, runNumber=runNum)
+  #   drawInterposeFromData(lfg, MDATA[runNum], newmodels, i, runNumber=runNum)
+  # end
 end
 end
 
 
 ##
-
+0
 # # Final results
 # for lfg in FITFG
 #   drawInterposePredictions(lfg, runNumber=9999)
