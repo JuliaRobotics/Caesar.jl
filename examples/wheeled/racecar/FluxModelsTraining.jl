@@ -320,7 +320,7 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
 
   function wrapTraining!(n::Int, lModels, MDATA, opt, EPOCHS)
     fid = open(joinLogPath(fg,"loss_$iter","sample_$n.txt"), "w")
-    println(io, "chords=$rndChord")
+    println(fid, "chords=$rndChord")
     Flux.@epochs EPOCHS Flux.train!((x,y)->loss(x,y,n,lModels, rndChord), Flux.params(lModels[n]), MDATA, opt, cb = Flux.throttle(()->evalcb(n, fid), 0.1) )
     close(fid)
     nothing

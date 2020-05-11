@@ -226,13 +226,13 @@ racecarslamrosfluxall() {
 
 racecarslamrosfluxALL() {
   sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
-  sleep 60; racecarslamrosflux --folder_name "labrun6" $* &
-  sleep 60; racecarslamrosflux --folder_name "labrun8" $* &
-  sleep 60; racecarslamrosflux --folder_name "labrun4" $* &
-  sleep 60; racecarslamrosflux --folder_name "labrun2" $* &
-  sleep 60; racecarslamrosflux --folder_name "labrun3" $* &
-  sleep 60; racecarslamrosflux --folder_name "labrun5" $* &
-  sleep 60; racecarslamrosflux --folder_name "labrun1" $*
+  sleep 80; racecarslamrosflux --folder_name "labrun6" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun8" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun4" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun2" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun3" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun5" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun1" $*
 }
 
 
@@ -240,7 +240,7 @@ racecarslamrosfluxALL() {
 ## analysis runs
 
 # racecarslamrosfluxall --localprocs 4 --remoteprocs 7 --imshow --naive_frac 0.9
-# JULIA_NUM_THREADS=2 racecarslamrosfluxALL --localprocs 0 --remoteproc 10 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
+# JULIA_NUM_THREADS=2 racecarslamrosfluxALL --localprocs 0 --remoteproc 10 --imshow --naive_frac 1.0 --pose_trigger_distance 0.1
 # racecarslamrosflux --folder_name "labrun7" --localprocs 0 --remoteproc 15 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2 &
 
 # racecarslamrosflux_analysis1() {
