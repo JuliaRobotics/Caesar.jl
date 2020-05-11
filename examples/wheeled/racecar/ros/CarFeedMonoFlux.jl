@@ -59,6 +59,8 @@ for i in 0:99
   end
 end
 
+@assert length(allModels) == 100 "Flux models did not load correctly"
+
 
 ##
 

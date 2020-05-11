@@ -198,14 +198,14 @@ end
 # k is the number of interpose segments in this data
 # k+j are intermediate accumulations of longer chords over poses in trajectory
 # cho is the interpose accumulation distance
-function loss(x,y, i, models, chord=[3;5;10;20;35;50])
+function loss(x,y, i, models, chord=[3;4;5;6;7;8;9;10;11;12;13;14;15;20;30;40;50])
   len = length(x)
   res = 0
-  for k in 1:len
-    res += sum( (y[k][1:2,i] - models[i](x[k])).^2 )
-  end
-  # first mse component
-  res /= len
+  # for k in 1:len
+  #   res += sum( (y[k][1:2,i] - models[i](x[k])).^2 )
+  # end
+  # # first mse component
+  # res /= len
 
   # do chord segments
   # can cheat since XY only odo is linear (add and subtract linearly)
@@ -313,11 +313,15 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
   ## Do training
   N = 100
 
+  # try find bigger trends by varying chords less
+  rndChord = rand(1:(rand(10:50,1)[1]), rand(5:30,1)[1]) |> sort |> unique |> collect
+
   evalcb(n, io=stdout) = println(io, "$n, $(([loss(mdata..., n, lModels) for mdata in MDATA]))")
 
   function wrapTraining!(n::Int, lModels, MDATA, opt, EPOCHS)
     fid = open(joinLogPath(fg,"loss_$iter","sample_$n.txt"), "w")
-    Flux.@epochs EPOCHS Flux.train!((x,y)->loss(x,y,n, lModels), Flux.params(lModels[n]), MDATA, opt, cb = Flux.throttle(()->evalcb(n, fid), 0.1) )
+    println(io, "chords=$rndChord")
+    Flux.@epochs EPOCHS Flux.train!((x,y)->loss(x,y,n,lModels, rndChord), Flux.params(lModels[n]), MDATA, opt, cb = Flux.throttle(()->evalcb(n, fid), 0.1) )
     close(fid)
     nothing
   end
@@ -366,18 +370,33 @@ end
 #   "/tmp/caesar/2020-05-01T05:25:04.904/fg_55_resolve.tar.gz"
 # ]
 
-# distance 0.2
+# # distance 0.2
+# fgpaths = [
+#   "/tmp/caesar/2020-05-08T13:56:26.606/fg_153_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-08T13:57:30.049/fg_129_resolve.tar.gz";
+#    "/tmp/caesar/2020-05-08T13:58:35.61/fg_143_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-08T14:00:00.995/fg_115_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-08T14:01:27.805/fg_107_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-08T14:02:54.472/fg_111_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-08T14:04:03.479/fg_107_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-08T14:04:49.405/fg_106_resolve.tar.gz"
+# ]
+
+# distance 0.2, 100%
 fgpaths = [
-  "/tmp/caesar/2020-05-08T13:56:26.606/fg_153_resolve.tar.gz";
-  "/tmp/caesar/2020-05-08T13:57:30.049/fg_129_resolve.tar.gz";
-   "/tmp/caesar/2020-05-08T13:58:35.61/fg_143_resolve.tar.gz";
-  "/tmp/caesar/2020-05-08T14:00:00.995/fg_115_resolve.tar.gz";
-  "/tmp/caesar/2020-05-08T14:01:27.805/fg_107_resolve.tar.gz";
-  "/tmp/caesar/2020-05-08T14:02:54.472/fg_111_resolve.tar.gz";
-  "/tmp/caesar/2020-05-08T14:04:03.479/fg_107_resolve.tar.gz";
-  "/tmp/caesar/2020-05-08T14:04:49.405/fg_106_resolve.tar.gz"
+  "/tmp/caesar/2020-05-10T20:49:04.562/fg_115_resolve.tar.gz";
+  "/tmp/caesar/2020-05-10T20:51:37.102/fg_111_resolve.tar.gz";
+  "/tmp/caesar/2020-05-10T20:50:13.711/fg_107_resolve.tar.gz";
+  "/tmp/caesar/2020-05-10T20:53:01.092/fg_107_resolve.tar.gz";
+  "/tmp/caesar/2020-05-10T20:53:58.127/fg_106_resolve.tar.gz";
+  "/tmp/caesar/2020-05-10T20:48:19.487/fg_143_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T00:33:33.244/fg_153_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T00:28:50.956/fg_129_resolve.tar.gz";
 ]
 
+# Pose2Pose2 only
+#  "/tmp/caesar/2020-05-10T21:02:26.82/fg_129_resolve.tar.gz"; #
+# "/tmp/caesar/2020-05-10T20:58:34.792/fg_153_resolve.tar.gz"; #
 
 
 
@@ -405,7 +424,7 @@ FG = loadFGsFromList(fgpaths, trainingNum=maxTr[])
 # nfg = IIF.buildSubgraphFromLabels!(FG[1], varList[1:50])
 # drawGraph(nfg, show=true)
 
-FITFG = FG[1:6]
+FITFG = FG[1:8]
 MDATA=assembleInterposeData(FITFG)
 
 
@@ -420,6 +439,8 @@ for i in 1:length(models)
   models[i] = re(theta)
 end
 end
+
+## draw non-trained init models
 
 let FITFG=FITFG, MDATA=MDATA, models=models
   for i in 1:length(FITFG)
@@ -441,7 +462,7 @@ for i in 1:10
     # permlist = shuffle!(1:length(MDATA[j][1]) |> collect)
     push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
   end
-  newmodels = trainNewModels(FITFG, iter=i, EPOCHS=30, opt=ADAM(0.1/(0.25*i+0.5)), MDATA=LMDATA, loss=loss, models=models)
+  newmodels = trainNewModels(FITFG, iter=i, EPOCHS=20, opt=ADAM(0.05/(0.25*i+0.75)), MDATA=LMDATA, loss=loss, models=models)
   runNum = 0
   for lfg in FITFG
     runNum += 1

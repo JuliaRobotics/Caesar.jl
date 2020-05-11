@@ -198,41 +198,41 @@ racecarslamros() {
     JULIA_NUM_THREADS=4 julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
 }
 
+racecarslamrosall() {
+  sleep 00; racecarslamros --folder_name "labrun7" $* &
+  sleep 60; racecarslamros --folder_name "labrun6" $* &
+  sleep 60; racecarslamros --folder_name "labrun8" $*
+  sleep 00; racecarslamros --folder_name "labrun4" $* &
+  sleep 60; racecarslamros --folder_name "labrun2" $* &
+  sleep 60; racecarslamros --folder_name "labrun3" $*
+  sleep 00; racecarslamros --folder_name "labrun5" $* &
+  sleep 60; racecarslamros --folder_name "labrun1" $*
+}
+
 racecarslamrosflux() {
     JULIA_NUM_THREADS=4 julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMonoFlux.jl $* --batch_resolve --vis2d --savedfg
 }
 
-racecarslamrosall() {
-  sleep 00; racecarslamros --folder_name "labrun7" $* &
-  sleep 40; racecarslamros --folder_name "labrun6" $* &
-  sleep 40; racecarslamros --folder_name "labrun8" $*
-  sleep 00; racecarslamros --folder_name "labrun4" $* &
-  sleep 40; racecarslamros --folder_name "labrun2" $* &
-  sleep 40; racecarslamros --folder_name "labrun3" $*
-  sleep 00; racecarslamros --folder_name "labrun5" $* &
-  sleep 40; racecarslamros --folder_name "labrun1" $*
-}
-
 racecarslamrosfluxall() {
   sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun6" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun8" $*
+  sleep 60; racecarslamrosflux --folder_name "labrun6" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun8" $*
   sleep 00; racecarslamrosflux --folder_name "labrun4" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun2" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun3" $*
+  sleep 60; racecarslamrosflux --folder_name "labrun2" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun3" $*
   sleep 00; racecarslamrosflux --folder_name "labrun5" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun1" $*
+  sleep 60; racecarslamrosflux --folder_name "labrun1" $*
 }
 
 racecarslamrosfluxALL() {
   sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun6" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun8" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun4" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun2" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun3" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun5" $* &
-  sleep 40; racecarslamrosflux --folder_name "labrun1" $*
+  sleep 60; racecarslamrosflux --folder_name "labrun6" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun8" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun4" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun2" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun3" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun5" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun1" $*
 }
 
 
@@ -240,6 +240,8 @@ racecarslamrosfluxALL() {
 ## analysis runs
 
 # racecarslamrosfluxall --localprocs 4 --remoteprocs 7 --imshow --naive_frac 0.9
+# JULIA_NUM_THREADS=2 racecarslamrosfluxALL --localprocs 0 --remoteproc 10 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
+# racecarslamrosflux --folder_name "labrun7" --localprocs 0 --remoteproc 15 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2 &
 
 # racecarslamrosflux_analysis1() {
 #   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 1.0
