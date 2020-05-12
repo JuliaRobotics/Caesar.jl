@@ -462,16 +462,28 @@ end
 #   "/tmp/caesar/2020-05-08T14:04:49.405/fg_106_resolve.tar.gz"
 # ]
 
-# distance 0.2, 100%
+# distance=0.2, naive_frac=100%
+# fgpaths = [
+#   "/tmp/caesar/2020-05-10T20:49:04.562/fg_115_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-10T20:51:37.102/fg_111_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-10T20:50:13.711/fg_107_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-10T20:53:01.092/fg_107_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-10T20:53:58.127/fg_106_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-10T20:48:19.487/fg_143_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-11T00:33:33.244/fg_153_resolve.tar.gz";
+#   "/tmp/caesar/2020-05-11T00:28:50.956/fg_129_resolve.tar.gz";
+# ]
+
+# distance=0.1, naive_frac=100%
 fgpaths = [
-  "/tmp/caesar/2020-05-10T20:49:04.562/fg_115_resolve.tar.gz";
-  "/tmp/caesar/2020-05-10T20:51:37.102/fg_111_resolve.tar.gz";
-  "/tmp/caesar/2020-05-10T20:50:13.711/fg_107_resolve.tar.gz";
-  "/tmp/caesar/2020-05-10T20:53:01.092/fg_107_resolve.tar.gz";
-  "/tmp/caesar/2020-05-10T20:53:58.127/fg_106_resolve.tar.gz";
-  "/tmp/caesar/2020-05-10T20:48:19.487/fg_143_resolve.tar.gz";
-  "/tmp/caesar/2020-05-11T00:33:33.244/fg_153_resolve.tar.gz";
-  "/tmp/caesar/2020-05-11T00:28:50.956/fg_129_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T02:25:53.702/fg_204_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T02:24:42.366/fg_199_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T02:23:03.163/fg_210_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T02:21:31.177/fg_205_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T02:19:23.089/fg_218_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T02:17:39.071/fg_271_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T02:15:58.713/fg_239_resolve.tar.gz";
+  "/tmp/caesar/2020-05-11T02:14:23.945/fg_300_resolve.tar.gz";
 ]
 
 # Pose2Pose2 only
