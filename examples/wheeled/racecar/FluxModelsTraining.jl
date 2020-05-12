@@ -122,7 +122,7 @@ function drawInterposePredictions(fg::AbstractDFG;
   end
   println("done waiting on tasks")
 
-  unitelist = [["$(runNumber)_pred_$(x).pdf" for x in varList[2:end]]; "$(runNumber)_z_$lstCount.pdf"]
+  unitelist = [["$(runNumber)_pred_$(x).pdf" for x in varList[2:end]]; "../$(runNumber)_z_$lstCount.pdf"]
   workingdir = pwd()
   Base.cd(joinLogPath(fg,"predImgs_$lstCount"))
   run(`pdfunite $unitelist`)
@@ -410,7 +410,7 @@ function updateFluxModelsPose2Pose2All!(fg::AbstractDFG,
 end
 
 
-function geneticAccelerationWithDehomoganization!(models, LMDATA, loss_, rndChord, rndSkip; N=100)
+function geneticAccelerationWithDehomogenization!(models, LMDATA, loss_, rndChord, rndSkip; N=100)
   # eval loss of all models i
   ALLVALS = zeros(N)
   for i in 1:N, md in 1:length(LMDATA)
@@ -558,7 +558,7 @@ for i in 1:10
   end
 
   # genetic acceleration
-  geneticAccelerationWithDehomoganization!(models, LMDATA, loss, rndChord, rndSkip, N=100)
+  geneticAccelerationWithDehomogenization!(models, LMDATA, loss, rndChord, rndSkip, N=100)
 end
 end
 
