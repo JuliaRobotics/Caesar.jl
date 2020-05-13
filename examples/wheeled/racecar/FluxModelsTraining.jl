@@ -180,13 +180,15 @@ function drawInterposeFromData(fg::AbstractDFG,
   # @show (x->fetch(x)).(asyncTasks)
   # println("done waiting on tasks")
 
-  push!(unitelist, "$(runNumber)_z_$lstCount.pdf")
+  # place unified result in parent directory
+  push!(unitelist, "../$(runNumber)_z_$lstCount.pdf")
   workingdir = pwd()
   Base.cd(joinLogPath(fg,"pred_y_$lstCount"))
   @show pwd()
   run(`pdfunite $unitelist`)
   Base.cd(workingdir)
-  showzpath = joinLogPath(fg,"pred_y_$lstCount","$(runNumber)_z_$lstCount.pdf")
+  # showzpath = joinLogPath(fg,"$(runNumber)_z_$lstCount.pdf")
+  # showzpath = joinLogPath(fg,"pred_y_$lstCount","$(runNumber)_z_$lstCount.pdf")
   # @async run(`evince $showzpath`)
 
   nothing
@@ -419,7 +421,7 @@ function geneticAccelerationWithDehomogenization!(models, LMDATA, loss_, rndChor
   end
 
   # get parameter sigma levels
-  ALLTHETA = Vector{Vector{Float32}}(length(models))
+  ALLTHETA = Vector{Vector{Float32}}(undef, length(models))
   for i in 1:length(models)
     ALLTHETA[i], re = Flux.destructure(models[i])
   end
