@@ -1,7 +1,7 @@
 # load dfg objects used for training FluxModelsPose2Pose2
 
 # using Revise
-using Random
+using Random, Statistics
 using CuArrays
 using Flux
 using RoME, IncrementalInference
@@ -436,7 +436,7 @@ function geneticAccelerationWithDehomogenization!(models, LMDATA, loss_, rndChor
   # sort best to worst, and pick top 20 to replace bottom 10
   permloss = sortperm(ALLVALS)
   for i in (N-9):N
-    θ, re = destructure(models[permloss[i]])
+    θ, re = Flux.destructure(models[permloss[i]])
     # randomly pick two individuals from best 20
     ind = (rand(1:20,10) |> unique)[1:2]
     A, reA = Flux.destructure(models[permloss[ind[1]]])
