@@ -54,6 +54,8 @@ Newly created page to list related references and additional literature pertaini
 
 [3.1]  Duits, Remco, Erik J. Bekkers, and Alexey Mashtakov. ["Fourier Transform on the Homogeneous Space of 3D Positions and Orientations for Exact Solutions to Linear Parabolic and (Hypo-) Elliptic PDEs."](https://www.preprints.org/manuscript/201811.0027/download/final_file) arXiv preprint arXiv:1811.00363 (2018).
 
+[3.2]  Mohamed, S., Rosca, M., Figurnov, M. and Mnih, A., 2019. [Monte carlo gradient estimation in machine learning. arXiv preprint arXiv:1906.10652](https://arxiv.org/pdf/1906.10652).
+
 ### Signal Processing (Beamforming and Channel Deconvolution)
 
 [4.1]  Van Trees, H.L., 2004. Optimum array processing: Part IV of detection, estimation, and modulation theory. John Wiley & Sons.
