@@ -312,7 +312,7 @@ function mmdAllModelsData(logpath, iter, MDATA, lModels, N, rndChord, rndSkip)
     return md, p, res[1]
   end
 
-  res = zeros(1)
+  # res = zeros(1)
   TASKS = Task[]
   for md in 1:length(MDATA)
     mdata = MDATA[md]
@@ -547,7 +547,7 @@ end
 PLOTTASKS = []
 
 let FITFG=FITFG, MDATA=MDATA, models=models, PLOTTASKS=PLOTTASKS
-for i in 1:10
+for i in 1:1
   LMDATA=[]
   for j in 1:length(MDATA)
     # permlist = (1:length(MDATA[j][1]) |> collect)
@@ -555,7 +555,7 @@ for i in 1:10
     # push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
     push!(LMDATA, MDATA[j] )
   end
-  newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=20, opt=ADAM(0.05/(0.25*i+0.75)), MDATA=LMDATA, loss=loss, models=models, N=100)
+  newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=15, opt=ADAM(0.05/(0.25*i+0.75)), MDATA=LMDATA, loss=loss, models=models, N=100)
   # replace the active model list
   models = newmodels
   runNum = 0
