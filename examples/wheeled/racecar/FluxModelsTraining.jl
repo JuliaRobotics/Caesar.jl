@@ -411,10 +411,24 @@ end
 
 
 function geneticAccelerationWithDehomogenization!(models, LMDATA, loss_, rndChord, rndSkip; N=100)
+  @assert N == length(models) "N and number of models need to be the same"
   # eval loss of all models i
   ALLVALS = zeros(N)
   for i in 1:N, md in 1:length(LMDATA)
     ALLVALS[i] += loss_(LMDATA[md][1], LMDATA[md][2], i, models, rndChord, rndSkip)
+  end
+
+  # get parameter sigma levels
+  ALLTHETA = Vector{Vector{Float32}}(length(models))
+  for i in 1:length(models)
+    ALLTHETA[i], re = Flux.destructure(models[i])
+  end
+  COV = zeros(length(ALLTHETA[1]))
+  MEA = zeros(length(ALLTHETA[1]))
+  for j in 1:length(ALLTHETA[1])
+    thisparam = (x->x[j]).(ALLTHETA)
+    MEA[j] = Statistics.mean(thisparam)
+    COV[j] = Statistics.std(thisparam)
   end
 
   # sort best to worst, and pick top 20 to replace bottom 10
@@ -423,12 +437,17 @@ function geneticAccelerationWithDehomogenization!(models, LMDATA, loss_, rndChor
     θ, re = destructure(models[permloss[i]])
     # randomly pick two individuals from best 20
     ind = (rand(1:20,10) |> unique)[1:2]
-    A, reA = destructure(models[permloss[ind[1]]])
-    B, reB = destructure(models[permloss[ind[2]]])
+    A, reA = Flux.destructure(models[permloss[ind[1]]])
+    B, reB = Flux.destructure(models[permloss[ind[2]]])
     sel = (rand(1:length(A),5*length(A)) |> unique)[1:round(Int,length(A)/2)]
     isel = setdiff(1:length(A), sel)
+
     θ[sel] .= A[sel]
     θ[isel] .= B[isel]
+
+    # add some noise to dehomoginize (should do according to sigma levels across θ)
+    θ .+= COV.*randn(Float32, length(θ))
+
     models[permloss[i]] = re(θ)
   end
 
@@ -524,6 +543,7 @@ MDATA=assembleInterposeData(FITFG)
 fcList = ls(FITFG[1], FluxModelsPose2Pose2) |> sortDFG
 models = getFactorType(FITFG[1], fcList[1]).allPredModels |> deepcopy
 
+# randomize with some noise
 let models=models
 for i in 1:length(models)
   theta, re  = Flux.destructure(models[i])
