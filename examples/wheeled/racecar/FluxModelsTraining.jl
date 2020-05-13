@@ -569,7 +569,7 @@ end
 PLOTTASKS = []
 
 let FITFG=FITFG, MDATA=MDATA, models=models, PLOTTASKS=PLOTTASKS
-for i in 1:1
+for i in 1:5
   LMDATA=[]
   for j in 1:length(MDATA)
     # permlist = (1:length(MDATA[j][1]) |> collect)
