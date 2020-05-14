@@ -501,6 +501,8 @@ for fgp in fgpaths
 end
 end
 
+maxTr[] += parsed_args["trainingNumOffset"]
+
 FG = loadFGsFromList(fgpaths, trainingNum=maxTr[])
 
 @show maxTr

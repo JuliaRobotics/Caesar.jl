@@ -59,6 +59,10 @@ function parse_commandline()
             help = "How many times to repeat the Flux training cycles."
             arg_type = Int64
             default = 5
+        "--trainingNumOffset"
+            help = "Offset training folder number."
+            arg_type = Int64
+            default = 0
         "--rndSkip"
             help = "Flux training number of interpose starting points to skip; can/should be used in combination with rndChords.  -1 is randomized"
             arg_type = Int64
