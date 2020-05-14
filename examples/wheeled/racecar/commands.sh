@@ -280,8 +280,22 @@ racecarpynnconductor() {
 
 
 racecartrainflux() {
-    JULIA_NUM_THREADS=10 julia -O 3 $CAESAR_EX_DIR/FluxModelsTraining.jl $*
+  julia -O 3 $CAESAR_EX_DIR/FluxModelsTraining.jl $*
 }
+
+racecartrainfluxSINGLE() {
+  racecartrainflux --numFGDatasets 1 $*
+}
+
+racecartrainfluxBASIC() {
+  racecartrainfluxSINGLE --epochsFlux 1 --fluxGenerations 2 --rndSkip 10 $*
+}
+
+racecartrainfluxBASIC10cm() {
+  racecartrainfluxBASIC --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" $*
+}
+
+# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 2 --epochsFlux 3 --fluxGenerations 3 --rndSkip 10
 
 racecartrainflux10times() {
   racecartrainflux

@@ -51,6 +51,30 @@ function parse_commandline()
             help = "Batch solve every n poses"
             arg_type = Int64
             default = 20
+        "--epochsFlux"
+            help = "How many epochs to induce during Flux training."
+            arg_type = Int64
+            default = 15
+        "--fluxGenerations"
+            help = "How many times to repeat the Flux training cycles."
+            arg_type = Int64
+            default = 5
+        "--rndSkip"
+            help = "Flux training number of interpose starting points to skip; can/should be used in combination with rndChords.  -1 is randomized"
+            arg_type = Int64
+            default = -1
+        "--rndChord"
+            help = "Flux training number of interpose chords.  Int[] is randomized"
+            arg_type = String
+            default = "Int[]"
+        "--fgpathsflux"
+            help = "Point to a text file containing which results (savedfg.tar.gz destinations) to use for training."
+            arg_type = String
+            default = ""
+        "--numFGDatasets"
+            help = "How many fgpathsflux datasets to include in FG for Flux training; default -1 is use all available."
+            arg_type = Int64
+            default = -1
         "--localprocs"
             help = "How many local Julia processes to use"
             arg_type = Int64
@@ -101,3 +125,6 @@ function parse_commandline()
 end
 
 parsed_args = parse_commandline()
+
+# convert from strings to types
+parsed_args["rndChord"] = eval(Meta.parse(parsed_args["rndChord"]))

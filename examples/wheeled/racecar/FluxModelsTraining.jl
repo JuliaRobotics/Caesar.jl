@@ -1,7 +1,26 @@
 # load dfg objects used for training FluxModelsPose2Pose2
 
+## Get user commands
+
+# Populates `parsed_args`
+include(joinpath((@__DIR__),"parsecommands.jl"))
+
+# assume in Atom editor (not scripted use)
+if length(ARGS) == 0
+  parsed_args["fgpathsflux"] = "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt"
+  parsed_args["numFGDatasets"] =  1
+  parsed_args["epochsFlux"] =  1
+  parsed_args["fluxGenerations"] = 2
+  parsed_args["rndSkip"] = 10
+end
+
+@assert length(parsed_args["fgpathsflux"]) != 0 "must include a valid --fgpathsflux flag and value."
+
+## load dependencies
+
 # using Revise
 using Random, Statistics
+using JSON2
 using CuArrays
 using Flux
 using RoME, IncrementalInference
@@ -10,8 +29,6 @@ using ApproxManifoldProducts
 using Cairo, Fontconfig
 using Gadfly, RoMEPlotting
 Gadfly.set_default_plot_size(35cm,20cm)
-
-
 
 
 ## If distributed plotting is being used
@@ -342,6 +359,7 @@ end
 # opt = Descent(0.01)
 # opt = Descent(0.001)
 # opt = Momentum(0.01)
+# try find bigger trends by varying chords less frequently
 function trainNewModels(FG::Vector{<:AbstractDFG};
                         iter::Int=0,
                         opt = ADAM(0.1),
@@ -349,8 +367,13 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
                         MDATA=assembleInterposeData(FG),
                         loss::Function=loss,
                         models=nothing,
-                        N=100  )
+                        N=100,
+                        rndChord=Int[],
+                        rndSkip=-1   )
+
   #
+  rndChord = length(rndChord) != 0 ? rndChord : rand((rand(1:5,1)[1]):(rand(10:50,1)[1]), rand(5:30,1)[1]) |> sort |> unique |> collect
+  rndSkip = rndSkip != -1 ? rndSkip : rand(1:10, 1)[1]
   # get the models from the first FG only (all factors use the same N models)
   fg = FG[1]
   fcList = ls(fg, FluxModelsPose2Pose2) |> sortDFG
@@ -363,9 +386,6 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
 
   ## Do training
 
-  # try find bigger trends by varying chords less frequently
-  rndChord = rand((rand(1:5,1)[1]):(rand(10:50,1)[1]), rand(5:30,1)[1]) |> sort |> unique |> collect
-  rndSkip = rand(1:10, 1)[1]
 
   evalcb(n, io=stdout) = println(io, "$n, $(([loss(mdata..., n, lModels) for mdata in MDATA]))")
 
@@ -374,7 +394,11 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
     fid = open(joinLogPath(fg,"loss_$iter","sample_$n.txt"), "w")
     println(fid, "chords=$rndChord")
     println(fid, "skip=$rndSkip")
-    Flux.@epochs EPOCHS Flux.train!((x,y)->loss(x,y,n,lModels, rndChord, rndSkip), Flux.params(lModels[n]), MDATA, opt, cb = Flux.throttle(()->evalcb(n, fid), 0.1) )
+    Flux.@epochs EPOCHS Flux.train!((x,y)->loss(x,y,n,lModels, rndChord, rndSkip),
+                                    Flux.params(lModels[n]),
+                                    MDATA,
+                                    opt,
+                                    cb = Flux.throttle(()->evalcb(n, fid), 0.1)  )
     close(fid)
     nothing
   end
@@ -459,59 +483,13 @@ end
 
 ## update the models in a factor graph object
 
-# Distance 0.5
-# fgpaths = [
-#   "/tmp/caesar/2020-05-01T04:27:36.467/fg_75_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-01T04:28:55.212/fg_67_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-01T04:30:08.258/fg_72_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-01T04:59:39.114/fg_61_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-01T05:01:03.337/fg_53_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-01T05:02:15.57/fg_58_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-01T05:23:54.609/fg_55_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-01T05:25:04.904/fg_55_resolve.tar.gz"
-# ]
-
-# # distance 0.2
-# fgpaths = [
-#   "/tmp/caesar/2020-05-08T13:56:26.606/fg_153_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-08T13:57:30.049/fg_129_resolve.tar.gz";
-#    "/tmp/caesar/2020-05-08T13:58:35.61/fg_143_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-08T14:00:00.995/fg_115_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-08T14:01:27.805/fg_107_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-08T14:02:54.472/fg_111_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-08T14:04:03.479/fg_107_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-08T14:04:49.405/fg_106_resolve.tar.gz"
-# ]
-
-# distance=0.2, naive_frac=100%
-# fgpaths = [
-#   "/tmp/caesar/2020-05-10T20:49:04.562/fg_115_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-10T20:51:37.102/fg_111_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-10T20:50:13.711/fg_107_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-10T20:53:01.092/fg_107_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-10T20:53:58.127/fg_106_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-10T20:48:19.487/fg_143_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-11T00:33:33.244/fg_153_resolve.tar.gz";
-#   "/tmp/caesar/2020-05-11T00:28:50.956/fg_129_resolve.tar.gz";
-# ]
-
-# distance=0.1, naive_frac=100%
-fgpaths = [
-  "/tmp/caesar/2020-05-11T02:25:53.702/fg_204_resolve.tar.gz";
-  "/tmp/caesar/2020-05-11T02:24:42.366/fg_199_resolve.tar.gz";
-  "/tmp/caesar/2020-05-11T02:23:03.163/fg_210_resolve.tar.gz";
-  "/tmp/caesar/2020-05-11T02:21:31.177/fg_205_resolve.tar.gz";
-  "/tmp/caesar/2020-05-11T02:19:23.089/fg_218_resolve.tar.gz";
-  "/tmp/caesar/2020-05-11T02:17:39.071/fg_271_resolve.tar.gz";
-  "/tmp/caesar/2020-05-11T02:15:58.713/fg_239_resolve.tar.gz";
-  "/tmp/caesar/2020-05-11T02:14:23.945/fg_300_resolve.tar.gz";
-]
-
-# Pose2Pose2 only
-#  "/tmp/caesar/2020-05-10T21:02:26.82/fg_129_resolve.tar.gz"; #
-# "/tmp/caesar/2020-05-10T20:58:34.792/fg_153_resolve.tar.gz"; #
+fid = open(parsed_args["fgpathsflux"],"r")
+fgpaths = readlines(fid)
+close(fid)
 
 
+
+##
 
 maxTr = Ref{Int}()
 maxTr[] = 0
@@ -527,6 +505,15 @@ FG = loadFGsFromList(fgpaths, trainingNum=maxTr[])
 
 @show maxTr
 
+## store parameters for later reference
+
+# also store parsed_args used in this case
+for lfg in FG
+  fid = open(joinLogPath(lfg,"args.json"),"w")
+  println(fid, JSON2.write(parsed_args))
+  close(fid)
+end
+
 
 ## final prep
 
@@ -537,7 +524,7 @@ FG = loadFGsFromList(fgpaths, trainingNum=maxTr[])
 # nfg = IIF.buildSubgraphFromLabels!(FG[1], varList[1:50])
 # drawGraph(nfg, show=true)
 
-FITFG = FG[1:8]
+FITFG = parsed_args["numFGDatasets"] == -1 ? FG[1:end] : FG[1:parsed_args["numFGDatasets"]]
 MDATA=assembleInterposeData(FITFG)
 
 
@@ -569,7 +556,7 @@ end
 PLOTTASKS = []
 
 let FITFG=FITFG, MDATA=MDATA, models=models, PLOTTASKS=PLOTTASKS
-for i in 1:5
+for i in 1:parsed_args["fluxGenerations"]
   LMDATA=[]
   for j in 1:length(MDATA)
     # permlist = (1:length(MDATA[j][1]) |> collect)
@@ -577,7 +564,7 @@ for i in 1:5
     # push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
     push!(LMDATA, MDATA[j] )
   end
-  newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=15, opt=ADAM(0.05/(0.25*i+0.75)), MDATA=LMDATA, loss=loss, models=models, N=100)
+  newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=parsed_args["epochsFlux"], opt=ADAM(0.1/(0.25*i+0.75)), MDATA=LMDATA, loss=loss, models=models, N=100, rndSkip=parsed_args["rndSkip"], rndChord=parsed_args["rndChord"]  )
   # replace the active model list
   models = newmodels
   runNum = 0
