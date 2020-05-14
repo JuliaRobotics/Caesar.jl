@@ -30,6 +30,13 @@ using Cairo, Fontconfig
 using Gadfly, RoMEPlotting
 Gadfly.set_default_plot_size(35cm,20cm)
 
+using Distributed
+addprocs(parsed_args["localprocs"])
+using RoMEPlotting
+using Gadfly, Cairo, Fontconfig
+@everywhere using RoMEPlotting,  Gadfly, Cairo, Fontconfig
+
+WP = WorkerPool(setdiff(procs(),[1]))
 
 ## If distributed plotting is being used
 
@@ -132,10 +139,13 @@ function drawInterposePredictions(fg::AbstractDFG;
   # end
 
   println("waiting on all tasks")
-  for ts in taskList
-    pl,fldr,fn = fetch(ts)
-    @show fn
-    pl |> PDF(joinLogPath(fg,fldr,"$(runNumber)_"*fn),15cm,10cm)
+  @sync for ts in taskList
+    @async begin
+      pl,fldr,fn = fetch(ts)
+      @show fn
+      remotecall_fetch(x->Gadfly.draw(PDF(joinLogPath(fg,fldr,"$(runNumber)_"*fn),15cm,10cm), WP, pl) )
+      # pl |> PDF(joinLogPath(fg,fldr,"$(runNumber)_"*fn),15cm,10cm)
+    end
   end
   println("done waiting on tasks")
 
@@ -185,13 +195,15 @@ function drawInterposeFromData(fg::AbstractDFG,
 
   println("waiting on all tasks, $(length(taskList))")
   # asyncTasks = []
-  for ts in taskList
-    pl, fpath = fetch(ts)
-    @show fpath
-    pl |> PDF(fpath)
-    # gg = (p, f) -> (p |> PDF(f))
-    # ts = @async Distributed.remotecall(gg, WP, pl, fpath)
-    # push!(asyncTasks, ts)
+  @sync for ts in taskList
+    @async begin
+      pl, fpath = fetch(ts)
+      @show fpath
+      remotecall_fetch(x->Gadfly.draw(PDF(fpath,15cm,10cm),x), WP, pl)
+      # gg = (p, f) -> (p |> PDF(f))
+      # ts = @async Distributed.remotecall(gg, WP, pl, fpath)
+      # push!(asyncTasks, ts)
+    end
   end
   # println("waiting on async tasks")
   # @show (x->fetch(x)).(asyncTasks)
@@ -340,6 +352,9 @@ function mmdAllModelsData(logpath, iter, MDATA, lModels, N, rndChord, rndSkip)
       push!(TASKS, ts)
     end
   end
+  # per dataset accumulated mmd
+  MMD = zeros(length(MDATA))
+
   println("Fetching all mmd data and writing to file, length(TASKS)=$(length(TASKS))")
   fid = open(joinpath(logpath, "mmd_$iter.txt"), "w")
   println(fid, "chords=$rndChord")
@@ -348,9 +363,17 @@ function mmdAllModelsData(logpath, iter, MDATA, lModels, N, rndChord, rndSkip)
   for ts in TASKS
     md, ps, re = fetch(ts)
     println(fid, "$md, $ps, $re")
+    MMD[md] += re
   end
   close(fid)
   println("Done iter=$iter mmd data and writing to file")
+  fid = open(joinpath(logpath, "mmd_accumulated_$iter.txt"), "w")
+  println(fid, "chords=$rndChord")
+  println(fid, "skip=$rndSkip")
+  for i in 1:length(MMD)
+    println(fid, "$i, $(MMD[i])")
+  end
+  close(fid)
   nothing
 end
 
