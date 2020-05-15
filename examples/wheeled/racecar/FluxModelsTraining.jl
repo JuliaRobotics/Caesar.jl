@@ -194,9 +194,9 @@ function drawInterposeFromData(fg::AbstractDFG,
   end
 
   println("waiting on all tasks, $(length(taskList))")
-  # asyncTasks = []
-  @sync for ts in taskList
-    @async begin
+  asyncTasks = []
+  for ts in taskList
+    newts = @async begin
       pl, fpath = fetch(ts)
       @show fpath
       remotecall_fetch(x->Gadfly.draw(PDF(fpath,15cm,10cm),x), WP, pl)
@@ -204,10 +204,11 @@ function drawInterposeFromData(fg::AbstractDFG,
       # ts = @async Distributed.remotecall(gg, WP, pl, fpath)
       # push!(asyncTasks, ts)
     end
+    push!(asyncTasks, newts)
   end
-  # println("waiting on async tasks")
-  # @show (x->fetch(x)).(asyncTasks)
-  # println("done waiting on tasks")
+  println("waiting on async tasks")
+  @show (x->fetch(x)).(asyncTasks)
+  println("done waiting on tasks")
 
   # place unified result in parent directory
   push!(unitelist, "../$(runNumber)_z_$lstCount.pdf")

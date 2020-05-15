@@ -277,6 +277,7 @@ racecarpynnconductor() {
 
   # racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 1.0;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.9;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.8;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
 
+# racecarslamrosfluxall --localprocs 6 --remoteprocs 0 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
 
 
 racecartrainflux() {
@@ -295,7 +296,9 @@ racecartrainfluxBASIC10cm() {
   racecartrainfluxBASIC --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" $*
 }
 
-# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 5 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --trainingNumOffset 10000
+# JULIA_NUM_THREADS=40 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 5 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 10 --trainingNumOffset 10000
+
+# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 8 --epochsFlux 10 --fluxGenerations 10 --rndSkip 20 --localprocs 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt"
 
 racecartrainflux10times() {
   racecartrainflux
@@ -313,7 +316,6 @@ racecartrainflux10times() {
 
 
 
-# racecarslamrosfluxall --localprocs 6 --remoteprocs 0 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
 
 
 
