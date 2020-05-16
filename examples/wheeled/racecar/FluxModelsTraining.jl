@@ -138,15 +138,19 @@ function drawInterposePredictions(fg::AbstractDFG;
   end
   # end
 
-  println("waiting on all tasks")
-  @sync for ts in taskList
-    @async begin
+  println("waiting on all drawing tasks")
+  asyncTasks = []
+  for ts in taskList
+    newts = @async begin
       pl,fldr,fn = fetch(ts)
       @show fn
       remotecall_fetch(x->Gadfly.draw(PDF(joinLogPath(fg,fldr,"$(runNumber)_"*fn),15cm,10cm), WP, pl) )
       # pl |> PDF(joinLogPath(fg,fldr,"$(runNumber)_"*fn),15cm,10cm)
     end
+    push!(asyncTasks, newts)
   end
+  println("waiting on drawing async tasks")
+  (x->fetch(x)).(asyncTasks)
   println("done waiting on tasks")
 
   unitelist = [["$(runNumber)_pred_$(x).pdf" for x in varList[2:end]]; "../$(runNumber)_z_$lstCount.pdf"]
@@ -230,10 +234,11 @@ end
 # models = NFBs[1].allPredModels |> deepcopy
 # x = nfb.joyVelData
 # y = x1.vals
+# i which of N particles/models to evaluate
 # k is the number of interpose segments in this data
 # k+j are intermediate accumulations of longer chords over poses in trajectory
 # cho is the interpose accumulation distance
-function loss(x,y, i, models, chord=[1;5;10], skip=1)
+function loss(x,y, i, models, chord=[1;5;10], skip=10)
   len = length(x)
   res = 0
 
@@ -563,6 +568,7 @@ let models=models
 for i in 1:length(models)
   theta, re  = Flux.destructure(models[i])
   theta .= randn(Float32, length(theta))
+  # theta = theta |> collect |> gpu
   models[i] = re(theta)
 end
 end

@@ -298,7 +298,10 @@ racecartrainfluxBASIC10cm() {
 
 # JULIA_NUM_THREADS=40 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 5 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 10 --trainingNumOffset 10000
 
+# JULIA_NUM_THREADS=40 racecartrainflux --numFGDatasets 6 --epochsFlux 10 --fluxGenerations 5 --rndSkip 50 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20
+
 # JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 8 --epochsFlux 10 --fluxGenerations 10 --rndSkip 20 --localprocs 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt"
+
 
 racecartrainflux10times() {
   racecartrainflux

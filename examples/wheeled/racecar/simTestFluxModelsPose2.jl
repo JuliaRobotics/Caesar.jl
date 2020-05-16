@@ -35,6 +35,23 @@ for i in 2:4, j in 1:50
   @assert sim5Inputs[1][j] - sim5Inputs[i][j] |> norm < 1e-10 "input data inconsistent"
 end
 
+## check on GPU
+
+# allModelsGPU = deepcopy(allModels)
+
+# loadPose2OdoNNModelIntoFluxGPU
+# sim1_gpu = Float32.(sim5Inputs[1][1]) |> gpu
+# fnc = allModelsGPU[1]
+# @btime fnc(sim1_gpu)
+
+## compare to CPU
+
+# sim1_cpu = Float32.(sim5Inputs[1][1])
+# fnc = allModels[1]
+# @btime fnc($sim1_cpu)
+
+# turns out much faster while the scalar slow down on GPU is not fixed
+##
 
 modelnum = 4
 pred5 = (allModels[modelnum]).(sim5Inputs[modelnum])
