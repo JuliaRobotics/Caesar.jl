@@ -47,6 +47,10 @@ function parse_commandline()
             help = "Fraction of particles to use naive odo model."
             arg_type = Float64
             default = 0.6
+        "--ADAM_step"
+            help = "ADAM training step size (might be annealed locally during training)."
+            arg_type = Float64
+            default = 0.1
         "--batch_size"
             help = "Batch solve every n poses"
             arg_type = Int64

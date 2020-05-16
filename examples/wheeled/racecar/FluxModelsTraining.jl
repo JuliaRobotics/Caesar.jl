@@ -12,6 +12,7 @@ if length(ARGS) == 0
   parsed_args["epochsFlux"] =  1
   parsed_args["fluxGenerations"] = 2
   parsed_args["rndSkip"] = 10
+  parsed_args["ADAM_step"] = 0.1
 end
 
 @assert length(parsed_args["fgpathsflux"]) != 0 "must include a valid --fgpathsflux flag and value."
@@ -596,7 +597,7 @@ for i in 1:parsed_args["fluxGenerations"]
     # push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
     push!(LMDATA, MDATA[j] )
   end
-  newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=parsed_args["epochsFlux"], opt=ADAM(0.1/(0.25*i+0.75)), MDATA=LMDATA, loss=loss, models=models, N=100, rndSkip=parsed_args["rndSkip"], rndChord=parsed_args["rndChord"]  )
+  newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=parsed_args["epochsFlux"], opt=ADAM(parsed_args["ADAM_step"]/(0.25*i+0.75)), MDATA=LMDATA, loss=loss, models=models, N=100, rndSkip=parsed_args["rndSkip"], rndChord=parsed_args["rndChord"]  )
   # replace the active model list
   models = newmodels
   runNum = 0
