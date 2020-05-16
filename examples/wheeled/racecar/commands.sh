@@ -279,6 +279,9 @@ racecarpynnconductor() {
 
 # racecarslamrosfluxall --localprocs 6 --remoteprocs 0 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
 
+# JULIA_NUM_THREADS=50 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 10 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20 --ADAM_step 0.3
+
+# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 5 --rndSkip 1 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 10 --ADAM_step 0.3 --rndChord "[1;]"
 
 racecartrainflux() {
   julia -O 3 $CAESAR_EX_DIR/FluxModelsTraining.jl $*

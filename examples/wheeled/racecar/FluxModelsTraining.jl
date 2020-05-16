@@ -586,9 +586,8 @@ end
 
 ## loss(MDATA[1][1], MDATA[1][2], 1, models)
 
-PLOTTASKS = []
 
-let FITFG=FITFG, MDATA=MDATA, models=models, PLOTTASKS=PLOTTASKS
+let FITFG=FITFG, MDATA=MDATA, models=models
 for i in 1:parsed_args["fluxGenerations"]
   LMDATA=[]
   for j in 1:length(MDATA)
@@ -601,26 +600,29 @@ for i in 1:parsed_args["fluxGenerations"]
   # replace the active model list
   models = newmodels
   runNum = 0
+  PLOTTASKS = []
   for lfg in FITFG
     runNum += 1
     updateFluxModelsPose2Pose2All!(lfg, models)
     # drawInterposePredictions(lfg, runNumber=runNum)
     lfg_, mdata_, models_, i_, runNum_ = deepcopy(lfg), deepcopy(MDATA[runNum]), deepcopy(models), deepcopy(i), deepcopy(runNum)
+    println("going to drawInterposeFromData for runNum=$runNum")
     ts = @async drawInterposeFromData(lfg_, mdata_, models_, i_, runNumber=runNum_)
     # drawInterposeFromData(lfg, MDATA[runNum], models, i, runNumber=runNum)
     push!(PLOTTASKS, ts)
   end
+  println("waiting on all plotting tasks to finish")
+  (x->fetch(x)).(PLOTTASKS)
+  println("all plotting tasks have finished")
 
   # genetic acceleration
+  println("Going for genetic acceleration")
   geneticAccelerationWithDehomogenization!(models, LMDATA, loss, rndChord, rndSkip, N=100)
 end
 end
 
 ##
 
-println("waiting on all plotting tasks to finish")
-(x->fetch(x)).(PLOTTASKS)
-println("all plotting tasks have finished")
 
 ##
 0
