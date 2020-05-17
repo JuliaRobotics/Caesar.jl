@@ -205,9 +205,6 @@ function drawInterposeFromData(fg::AbstractDFG,
       pl, fpath = fetch(ts)
       @show fpath
       remotecall_fetch(x->Gadfly.draw(PDF(fpath,15cm,10cm),x), WP, pl)
-      # gg = (p, f) -> (p |> PDF(f))
-      # ts = @async Distributed.remotecall(gg, WP, pl, fpath)
-      # push!(asyncTasks, ts)
     end
     push!(asyncTasks, newts)
   end
@@ -375,12 +372,17 @@ function mmdAllModelsData(logpath, iter, MDATA, lModels, N, rndChord, rndSkip)
   close(fid)
   println("Done iter=$iter mmd data and writing to file")
   fid = open(joinpath(logpath, "mmd_accumulated_$iter.txt"), "w")
+  fid_ = open(joinpath(logpath, "mmd_accumulated_generations.txt"), "a")
   println(fid, "chords=$rndChord")
   println(fid, "skip=$rndSkip")
+  print(fid_, "$iter")
   for i in 1:length(MMD)
     println(fid, "$i, $(MMD[i])")
+    print(fid_, ", $(MMD[i])")
   end
+  println(fid_,"")
   close(fid)
+  close(fid_)
   nothing
 end
 
@@ -599,6 +601,7 @@ for i in 1:parsed_args["fluxGenerations"]
   newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=parsed_args["epochsFlux"], opt=ADAM(parsed_args["ADAM_step"]/(0.25*i+0.75)), MDATA=LMDATA, loss=loss, models=models, N=100, rndSkip=parsed_args["rndSkip"], rndChord=parsed_args["rndChord"]  )
   # replace the active model list
   models = newmodels
+
   runNum = 0
   PLOTTASKS = []
   for lfg in FITFG
@@ -610,6 +613,12 @@ for i in 1:parsed_args["fluxGenerations"]
     ts = @async drawInterposeFromData(lfg_, mdata_, models_, i_, runNumber=runNum_)
     # drawInterposeFromData(lfg, MDATA[runNum], models, i, runNumber=runNum)
     push!(PLOTTASKS, ts)
+
+    # store the new model weights
+    jsstr = JSON2.write(flattenFactorModel(getFactorType(lfg, :x0x1f1)))
+    @show fid = open(joinLogPath(lfg,"models_$i.json"),"w")
+    println(fid, jsstr)
+    close(fid)
   end
   println("waiting on all plotting tasks to finish")
   (x->fetch(x)).(PLOTTASKS)
@@ -621,7 +630,6 @@ for i in 1:parsed_args["fluxGenerations"]
 end
 end
 
-##
 
 
 ##

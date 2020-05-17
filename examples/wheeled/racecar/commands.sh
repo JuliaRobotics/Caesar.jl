@@ -279,9 +279,12 @@ racecarpynnconductor() {
 
 # racecarslamrosfluxall --localprocs 6 --remoteprocs 0 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
 
-# JULIA_NUM_THREADS=50 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 10 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20 --ADAM_step 0.3
+# JULIA_NUM_THREADS=50 racecartrainflux --numFGDatasets 8 --epochsFlux 5 --fluxGenerations 10 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20 --ADAM_step 0.3
 
-# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 5 --rndSkip 1 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 10 --ADAM_step 0.3 --rndChord "[1;]"
+# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 8 --epochsFlux 5 --fluxGenerations 10 --rndSkip 1 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.5 --rndChord "[1;5;10]"
+
+## quick test
+#
 
 racecartrainflux() {
   julia -O 3 $CAESAR_EX_DIR/FluxModelsTraining.jl $*
@@ -297,6 +300,14 @@ racecartrainfluxBASIC() {
 
 racecartrainfluxBASIC10cm() {
   racecartrainfluxBASIC --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" $*
+}
+
+racecartrainfluxQUICKTEST10cm() {
+  JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 1 --epochsFlux 1 --fluxGenerations 1 --rndSkip 1 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.1 --rndChord "[1;5]"
+}
+
+racecartrainfluxLONGERTEST10cm() {
+  JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 1 --epochsFlux 3 --fluxGenerations 5 --rndSkip 1 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.1 --rndChord "[1;5]"
 }
 
 # JULIA_NUM_THREADS=40 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 5 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 10 --trainingNumOffset 10000
