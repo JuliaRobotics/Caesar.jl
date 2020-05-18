@@ -525,7 +525,7 @@ close(fid)
 
 ##
 
-maxTr = RefValue{Int}()
+maxTr = Ref{Int}()
 maxTr[] = 0
 let maxTr = maxTr
 for fgp in fgpaths
