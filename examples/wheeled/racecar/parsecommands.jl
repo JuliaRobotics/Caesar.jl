@@ -75,6 +75,10 @@ function parse_commandline()
             help = "Flux training number of interpose chords.  Int[] is randomized"
             arg_type = String
             default = "Int[]"
+        "--loadInitModels"
+            help = "Load initial model weights from factor graph object"
+            arg_type = String
+            default = ""
         "--fgpathsflux"
             help = "Point to a text file containing which results (savedfg.tar.gz destinations) to use for training."
             arg_type = String

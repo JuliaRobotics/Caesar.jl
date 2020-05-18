@@ -33,9 +33,11 @@ Gadfly.set_default_plot_size(35cm,20cm)
 
 using Distributed
 addprocs(parsed_args["localprocs"])
+using Cairo, Fontconfig
 using RoMEPlotting
-using Gadfly, Cairo, Fontconfig
-@everywhere using RoMEPlotting,  Gadfly, Cairo, Fontconfig
+using Gadfly
+@everywhere using Cairo, Fontconfig
+@everywhere using RoMEPlotting, Gadfly
 
 WP = WorkerPool(setdiff(procs(),[1]))
 
@@ -523,7 +525,7 @@ close(fid)
 
 ##
 
-maxTr = Ref{Int}()
+maxTr = RefValue{Int}()
 maxTr[] = 0
 let maxTr = maxTr
 for fgp in fgpaths
@@ -576,6 +578,21 @@ for i in 1:length(models)
 end
 end
 
+## load models from file (in case of continuation)
+
+let models=models, FITFG=FITFG
+if 0 < length(parsed_args["loadInitModels"])
+  println("Loading init models from $(parsed_args["loadInitModels"])")
+  mfg = initfg()
+  loadDFG(parsed_args["loadInitModels"], Main, mfg)
+  models = getFactorType(mfg, lsf(mfg, FluxModelsPose2Pose2)[1]).allPredModels
+  for i in 1:length(FITFG)
+    updateFluxModelsPose2Pose2All!(FITFG[i], models)
+  end
+  println("Done loading init models.")
+end
+end
+
 ## draw non-trained init models
 
 let FITFG=FITFG, MDATA=MDATA, models=models
@@ -598,7 +615,8 @@ for i in 1:parsed_args["fluxGenerations"]
     # push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
     push!(LMDATA, MDATA[j] )
   end
-  newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=parsed_args["epochsFlux"], opt=ADAM(parsed_args["ADAM_step"]/(0.25*i+0.75)), MDATA=LMDATA, loss=loss, models=models, N=100, rndSkip=parsed_args["rndSkip"], rndChord=parsed_args["rndChord"]  )
+  newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=parsed_args["epochsFlux"], opt=ADAM(parsed_args["ADAM_step"]), MDATA=LMDATA, loss=loss, models=models, N=100, rndSkip=parsed_args["rndSkip"], rndChord=parsed_args["rndChord"]  )
+  # opt=ADAM(parsed_args["ADAM_step"]/(0.25*i+0.75))
   # replace the active model list
   models = newmodels
 
@@ -615,10 +633,8 @@ for i in 1:parsed_args["fluxGenerations"]
     push!(PLOTTASKS, ts)
 
     # store the new model weights
-    jsstr = JSON2.write(flattenFactorModel(getFactorType(lfg, :x0x1f1)))
-    @show fid = open(joinLogPath(lfg,"models_$i.json"),"w")
-    println(fid, jsstr)
-    close(fid)
+    msfg = buildSubgraph(lfg_,[:x0;:x1],1)
+    saveDFG(msfg, joinLogPath(lfg,"models_gen_$i"))
   end
   println("waiting on all plotting tasks to finish")
   (x->fetch(x)).(PLOTTASKS)
