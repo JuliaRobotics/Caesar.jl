@@ -18,11 +18,13 @@ Newly created page to list related references and additional literature pertaini
 
 [1.7]  Fourie, D., Vaz Teixeira, P., Leonard, J.: ["Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities"](https://marinerobotics.mit.edu/sites/default/files/fourie_iros19_manifolds.pdf), IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019),.
 
-[1.8]  Fourie, D., Leonard, J.: "Inertial Odometry with Retroactive Sensor Calibration", publication under review.
+[1.8]  Teixeira, P.N.V., Fourie, D., Kaess, M. and Leonard, J.J., 2019, September. ["Dense, sonar-based reconstruction of underwater scenes"](https://www.cs.cmu.edu/~kaess/pub/Teixeira19iros.pdf). In 2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) (pp. 8060-8066). IEEE.
 
-[1.9]  Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. IEEE, Intl. Conference on Robotics and Automation, ICRA (2019).
+[1.9]  Fourie, D., Leonard, J.: "Inertial Odometry with Retroactive Sensor Calibration", 2015-2019.
 
-[1.10] Fourie, D., Espinoza, A. T., Kaess, M., and Leonard, J. J., 2020. “Characterizing marginalization and incremental operations on the Bayes tree,” in International Workshop on Algorithmic Foundations of Robotics (WAFR), submitted, under review.
+[1.10]  Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. IEEE, Intl. Conference on Robotics and Automation, ICRA (2019).
+
+[1.11] Fourie, D., Espinoza, A. T., Kaess, M., and Leonard, J. J., 2020. “Characterizing marginalization and incremental operations on the Bayes tree,” in International Workshop on Algorithmic Foundations of Robotics (WAFR), submitted, under review.
 
 ### Important References
 
