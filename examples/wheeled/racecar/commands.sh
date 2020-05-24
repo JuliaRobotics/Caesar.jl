@@ -279,9 +279,11 @@ racecarpynnconductor() {
 
 # racecarslamrosfluxall --localprocs 6 --remoteprocs 0 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
 
-# JULIA_NUM_THREADS=50 racecartrainflux --numFGDatasets 8 --epochsFlux 5 --fluxGenerations 10 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20 --ADAM_step 0.3
+# JULIA_NUM_THREADS=50 racecartrainflux --numFGDatasets 4 --epochsFlux 5 --fluxGenerations 20 --rndSkip 5 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20 --ADAM_step 0.1 --loadInitModels "/tmp/caesar/2020-05-11T02:25:53.702/models_10.tar.gz"
 
-# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 8 --epochsFlux 5 --fluxGenerations 10 --rndSkip 1 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.5 --rndChord "[1;5;10]"
+# JULIA_NUM_THREADS=50 racecartrainflux --numFGDatasets 4 --epochsFlux 5 --fluxGenerations 10 --rndSkip 50  --rndChord "[1;5;10]" --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20 --ADAM_step 0.1 --loadInitModels "/tmp/caesar/2020-05-11T02:25:53.702/models_10.tar.gz"
+
+# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 8 --epochsFlux 5 --fluxGenerations 10 --rndSkip 5 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.1 --rndChord "[1;5;10]"
 
 ## quick test
 #
@@ -307,7 +309,7 @@ racecartrainfluxQUICKTEST10cm() {
 }
 
 racecartrainfluxLONGERTEST10cm() {
-  JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 1 --epochsFlux 5 --fluxGenerations 10 --rndSkip 5 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.1 --rndChord "[1;5;10]" --loadInitModels "/tmp/caesar/2020-05-11T02:25:53.702/training_15/models_10.tar.gz"
+  JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 1 --epochsFlux 5 --fluxGenerations 50 --rndSkip 3 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.1 --rndChord "[1;5;10]" --loadInitModels "/tmp/caesar/2020-05-11T02:25:53.702/training_15/models_10.tar.gz"
 }
 
 # JULIA_NUM_THREADS=40 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 5 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 10 --trainingNumOffset 10000

@@ -585,7 +585,7 @@ if 0 < length(parsed_args["loadInitModels"])
   println("Loading init models from $(parsed_args["loadInitModels"])")
   mfg = initfg()
   loadDFG(parsed_args["loadInitModels"], Main, mfg)
-  models = getFactorType(mfg, lsf(mfg, FluxModelsPose2Pose2)[1]).allPredModels
+  models .= getFactorType(mfg, lsf(mfg, FluxModelsPose2Pose2)[1]).allPredModels
   for i in 1:length(FITFG)
     updateFluxModelsPose2Pose2All!(FITFG[i], models)
   end
@@ -601,6 +601,11 @@ let FITFG=FITFG, MDATA=MDATA, models=models
     # drawInterposePredictions(FITFG[i])
   end
 end
+
+# store the new model weights
+println("saving init models data in models_gen_0.tar.gz")
+msfg = buildSubgraph(FITFG[1],[:x0;:x1],1)
+saveDFG(msfg, joinLogPath(FITFG[1],"models_gen_0"))
 
 
 ## loss(MDATA[1][1], MDATA[1][2], 1, models)
