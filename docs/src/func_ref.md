@@ -73,7 +73,6 @@ compareSimilarFactors
 compareSimilarVariables
 compareSubsetFactorGraph
 compareVariable
-convert2packedfunctionnode
 csmAnimate
 cycleInitByVarOrder!
 decodefg
@@ -85,7 +84,6 @@ downGibbsCliqueDensity
 downMsgPassingRecursive
 drawCliqSubgraphUpMocking
 dwnMsg
-encodefg
 fifoFreeze!
 filterHistAllToArray
 findRelatedFromPotential
