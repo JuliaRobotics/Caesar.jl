@@ -10,19 +10,19 @@ Newly created page to list related references and additional literature pertaini
 
 [1.3]  Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: ["SLAMinDB: Centralized graph databases for mobile robotics"](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf), IEEE Intl. Conf. on Robotics and Automation (ICRA), Singapore, 2017.
 
-[1.4]  Rypkema, N. R.,: "Underwater \& Out of Sight: Towards Ubiquity in UnderwaterRobotics", Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2019.
+[1.4]  Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: ["Non-Gaussian SLAM utilizing Synthetic Aperture Sonar"](https://marinerobotics.mit.edu/sites/default/files/cheung_icra2019.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
-[1.5]  Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: ["Non-Gaussian SLAM utilizing Synthetic Aperture Sonar"](https://marinerobotics.mit.edu/sites/default/files/cheung_icra2019.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
+[1.5]  Doherty, K., Fourie, D., Leonard, J.: ["Multimodal Semantic SLAM with Probabilistic Data Association"](https://marinerobotics.mit.edu/sites/default/files/doherty_icra2019_revised.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
-[1.6]  Doherty, K., Fourie, D., Leonard, J.: ["Multimodal Semantic SLAM with Probabilistic Data Association"](https://marinerobotics.mit.edu/sites/default/files/doherty_icra2019_revised.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
+[1.6]  Fourie, D., Vaz Teixeira, P., Leonard, J.: ["Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities"](https://marinerobotics.mit.edu/sites/default/files/fourie_iros19_manifolds.pdf), IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019),.
 
-[1.7]  Fourie, D., Vaz Teixeira, P., Leonard, J.: ["Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities"](https://marinerobotics.mit.edu/sites/default/files/fourie_iros19_manifolds.pdf), IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019),.
+[1.7]  Teixeira, P.N.V., Fourie, D., Kaess, M. and Leonard, J.J., 2019, September. ["Dense, sonar-based reconstruction of underwater scenes"](https://www.cs.cmu.edu/~kaess/pub/Teixeira19iros.pdf). In 2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) (pp. 8060-8066). IEEE.
 
-[1.8]  Fourie, D., Leonard, J.: "Inertial Odometry with Retroactive Sensor Calibration", publication under review.
+[1.8]  Fourie, D., Leonard, J.: "Inertial Odometry with Retroactive Sensor Calibration", 2015-2019.
 
-[1.9]  Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. IEEE, Intl. Conference on Robotics and Automation, ICRA (2019).
+[1.9] Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. IEEE, Intl. Conference on Robotics and Automation, ICRA (2019).
 
-[1.10] Fourie, D., Espinoza, A. T., Kaess, M., and Leonard, J. J., 2020. “Characterizing marginalization and incremental operations on the Bayes tree,” in International Workshop on Algorithmic Foundations of Robotics (WAFR), submitted, under review.
+[1.10] Fourie, D., Teran E., A., Kaess, M., and Leonard, J. J., [“Characterizing marginalization and incremental operations on the Bayes tree,”](https://marinerobotics.mit.edu/sites/default/files/WAFR2020_rev38_0.pdf) in International Workshop on Algorithmic Foundations of Robotics (WAFR), 2020, Oulu, Finland, Springer Publishing.
 
 ### Important References
 
@@ -42,17 +42,23 @@ Newly created page to list related references and additional literature pertaini
 
 [2.8]  Zarchan, Paul, and Howard Musoff, eds. Fundamentals of Kalman filtering: a practical approach. American Institute of Aeronautics and Astronautics, Inc., 2013.
 
-[2.9]  Hanebeck, Uwe D. ["FLUX: Progressive State Estimation Based on Zakai-type Distributed Ordinary Differential Equations."](https://arxiv.org/pdf/1808.02825) arXiv preprint arXiv:1808.02825 (2018).
+[2.9]  Rypkema, N. R.,: ["Underwater & Out of Sight: Towards Ubiquity in UnderwaterRobotics"](http://dspace.mit.edu/bitstream/handle/1721.1/124118/1142630448-MIT.pdf), Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2019.
 
-[2.10]  Muandet, Krikamol, et al. ["Kernel mean embedding of distributions: A review and beyond."](https://www.nowpublishers.com/article/DownloadSummary/MAL-060) Foundations and Trends® in Machine Learning 10.1-2 (2017): 1-141.
+[2.10] Vaz Teixeira, P.: ["Dense, Sonar-based Reconstruction of Underwater Scenes"](http://dspace.mit.edu/bitstream/handle/1721.1/123776/1139519986-MIT.pdf), Ph.D. Thesis, Massachusetts Institute of Technology Electrical Engineering and Computer Science together with Woods Hole Oceanographic Institution Department for Applied Ocean Science and Engineering, September 2019.
 
-[2.11]  Hsiao, M. and Kaess, M., 2019, May. MH-iSAM2: Multi-hypothesis iSAM using Bayes Tree and Hypo-tree. In 2019 International Conference on Robotics and Automation (ICRA) (pp. 1274-1280). IEEE.
+[2.11] Hanebeck, Uwe D. ["FLUX: Progressive State Estimation Based on Zakai-type Distributed Ordinary Differential Equations."](https://arxiv.org/pdf/1808.02825) arXiv preprint arXiv:1808.02825 (2018).
 
-[2.12]  Arnborg, S., Corneil, D.G. and Proskurowski, A., 1987. [Complexity of finding embeddings in a k-tree](https://epubs.siam.org/doi/pdf/10.1137/0608024). SIAM Journal on Algebraic Discrete Methods, 8(2), pp.277-284.
+[2.12] Muandet, Krikamol, et al. ["Kernel mean embedding of distributions: A review and beyond."](https://www.nowpublishers.com/article/DownloadSummary/MAL-060) Foundations and Trends® in Machine Learning 10.1-2 (2017): 1-141.
+
+[2.13] Hsiao, M. and Kaess, M., 2019, May. MH-iSAM2: Multi-hypothesis iSAM using Bayes Tree and Hypo-tree. In 2019 International Conference on Robotics and Automation (ICRA) (pp. 1274-1280). IEEE.
+
+[2.14] Arnborg, S., Corneil, D.G. and Proskurowski, A., 1987. [Complexity of finding embeddings in a k-tree](https://epubs.siam.org/doi/pdf/10.1137/0608024). SIAM Journal on Algebraic Discrete Methods, 8(2), pp.277-284.
 
 ### Additional References
 
 [3.1]  Duits, Remco, Erik J. Bekkers, and Alexey Mashtakov. ["Fourier Transform on the Homogeneous Space of 3D Positions and Orientations for Exact Solutions to Linear Parabolic and (Hypo-) Elliptic PDEs."](https://www.preprints.org/manuscript/201811.0027/download/final_file) arXiv preprint arXiv:1811.00363 (2018).
+
+[3.2]  Mohamed, S., Rosca, M., Figurnov, M. and Mnih, A., 2019. [Monte carlo gradient estimation in machine learning. arXiv preprint arXiv:1906.10652](https://arxiv.org/pdf/1906.10652).
 
 ### Signal Processing (Beamforming and Channel Deconvolution)
 

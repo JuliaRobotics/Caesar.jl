@@ -68,6 +68,10 @@ When multiple numerical values/solutions exists for the (or nearly) same factor 
 ### Current Julia version?
 Caesar.jl and packages are currently targeting [Julia version](https://julialang.org/downloads/) as per the [local install page](https://juliarobotics.org/Caesar.jl/latest/installation_environment/).
 
+### How to Enable `@debug` Logging.jl
+
+https://stackoverflow.com/questions/53548681/how-to-enable-debugging-messages-in-juno-julia-editor
+
 ### How does JSON-Schema work?
 
 Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).
