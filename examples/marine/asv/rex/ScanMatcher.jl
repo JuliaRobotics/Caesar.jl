@@ -6,15 +6,16 @@ using IncrementalInference, RoME
 using JSON2
 
 # Where to fetch data
-dfgDataFolder = ENV["HOME"]*"/data/rex";
+dfgDataFolder = joinpath(ENV["HOME"],"data","rex")
 datastore = FileDataStore("$dfgDataFolder/bigdata")
-
 # Load the graph
 fg = initfg()
-loadDFG("$dfgDataFolder/fullsweep.tar.gz.tar.gz", IncrementalInference, fg);
+
+# Reformat the data.
+loadDFG!(fg, "$dfgDataFolder/fullsweep_updated.tar.gz");
 
 # disable solving for all variables
-map(s->setSolvable!(fg, s, 0), getVariableIds(fg))
+map(s->setSolvable!(fg, s, 0), ls(fg))
 
 # fetch variables containing a full sweep
 allSweepVariables = filter(v -> :RADARSWEEP in getBigDataKeys(v), getVariables(fg));
@@ -40,7 +41,7 @@ end
 sweeps = map(v -> fetchSweep(getVariable(fg, v), datastore), activeVars)
 
 # show a couple of sweeps just to test
-using Images
+using Images, ImageView
 imshow(sweeps[10])
 imshow(sweeps[11])
 
@@ -78,7 +79,7 @@ function evaluateTransform(a::Array{Float64,2},b::Array{Float64,2}, dx::Float64,
     bp = transformImage(b,dx,dy,dh)
     # get matching padded views
     ap, bpp = paddedviews(0.0, a, bp)
-    return mismatch(ap,bpp)
+    return getMismatch(ap,bpp)
 end
 
 # sanity check: identity transform should yield zero cost
