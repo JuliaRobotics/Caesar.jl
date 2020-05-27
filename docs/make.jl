@@ -40,6 +40,7 @@ makedocs(
             "Under-defined Trilateration, 2D" => "examples/basic_slamedonut.md",
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
+            "Dead Reckon Tether" => "examples/deadreckontether.md",
         ],
         "Principles" => [
             "Filters vs. Graphs" => "principles/filterCorrespondence.md",
