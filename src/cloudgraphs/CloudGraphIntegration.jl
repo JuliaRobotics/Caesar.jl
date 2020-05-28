@@ -1,7 +1,5 @@
 # integration code for database usage via CloudGraphs.jl
 
-import IncrementalInference: getVert, getfnctype, ls
-
 export
   executeQuery,
   listAllVariables,
@@ -170,6 +168,7 @@ function ls(cgl::CloudGraph, session::AbstractString, robot::AbstractString, use
   return dd
 end
 
+# deprecated
 function getfnctype(cvl::CloudGraphs.CloudVertex)
   vert = cloudVertex2ExVertex(cvl)
   return getfnctype(vert)

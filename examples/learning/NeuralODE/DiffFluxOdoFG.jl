@@ -42,9 +42,15 @@ TIMES, POSES, JOYDATA = extractTimePoseJoyData(fg)
 # make sure its Float32
 TIMES, POSES, JOYDATA = Float32.(TIMES), Float32.(POSES), Float32.(JOYDATA)
 
-# get all velcoities
+# get all velocities
 
 
+
+# structure all data according to poses
+
+
+
+##
 
 # take in [X;u] = [x;y;ct;st;dx;dy;thr;str]
 # output X
@@ -206,7 +212,7 @@ loss_univ(result_univ.minimizer)
 
 ####  Dev on interpose values
 
-
+using RoMEPlotting
 
 dfg = initfg()
 loadDFG("/tmp/caesar/2020-05-11T02:25:53.702/fg_204_resolve.tar.gz", Main, dfg)
@@ -215,16 +221,68 @@ setNaiveFracAll!(dfg,1.0)
 
 pred, meas = solveFactorMeasurements(dfg, :x0x1f1)
 
+# reportFactors(dfg, FluxModelsPose2Pose2, [:x0x1f1;])
+
 #
 
 
-function solveFactorMeasurementsChain(dfg::AbstractDFG, fsyms::Vector{Symbol})
-  fcts = getFactorType.(dfg, fsyms)
+
+# function solveFactorMeasurementsChain(dfg::AbstractDFG, fsyms::Vector{Symbol})
+#
+#   # FCTS = getFactorType.(dfg, fsyms)
+#   FCTS = solveFactorMeasurements.(dfg, fsyms)
+#
+# end
+
+
+# assume single variable separators only
+function accumulateFactorChain(dfg::AbstractDFG, fsyms::Vector{Symbol}, from::Symbol, to::Symbol)
+
+  # get associated variables
+  svars = union(ls.(dfg, fsyms)...)
+
+  # use subgraph copys to do calculations
+  tfg_meas = buildSubgraph(dfg, [svars;fsyms])
+  tfg_pred = buildSubgraph(dfg, [svars;fsyms])
+
+  # drive variable values manually to ensure no additional stochastics are introduced.
+  nextvar = from
+  initval = getVal(tfg_meas, nextvar)
+  fill!(initval, 0.0)
+  initManual!(tfg_meas, nextvar, initval)
+  initManual!(tfg_pred, nextvar, initval)
+
+  # nextfct = fsyms[1] # for debugging
+  for nextfct in fsyms
+    nextvars = setdiff(ls(tfg_meas,nextfct),[nextvar])
+    @assert length(nextvars) == 1 "accumulateFactorChain requires each factor pair to separated by a single variable"
+    nextvar = nextvars[1]
+    meas, pred = solveFactorMeasurements(dfg, nextfct)
+    pts_meas = approxConv(tfg_meas, nextfct, nextvar, (meas,ones(Int,100),collect(1:100)))
+    pts_pred = approxConv(tfg_pred, nextfct, nextvar, (pred,ones(Int,100),collect(1:100)))
+    initManual!(tfg_meas, nextvar, pts_meas)
+    initManual!(tfg_pred, nextvar, pts_pred)
+  end
+  return getVal(tfg_meas,nextvar), getVal(tfg_pred,nextvar)
 end
 
+
+meas, pred = accumulateFactorChain(dfg, fsyms, :x0, :x2)
+
+
 fsyms = [:x0x1f1; :x1x2f1]
+from = :x0
+to = :x2
+
+
 
 getFactorType.(dfg, fsyms)
+
+
+
+
+
+
 
 
 import Base: length, iterate
