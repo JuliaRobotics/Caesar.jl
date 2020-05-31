@@ -6,7 +6,7 @@ using DiffEqFlux, Flux, Optim, OrdinaryDiffEq, Plots
 using DataInterpolations
 using RoME
 
-# import DistributedFactorGraphs: getVariableLabelNumber, findFactorsBetweenNaive
+import DistributedFactorGraphs: getVariableLabelNumber, findFactorsBetweenNaive
 
 using JLD2
 using Dates
@@ -217,6 +217,9 @@ loss_univ(result_univ.minimizer)
 ####  Dev on interpose values
 
 using RoMEPlotting
+Gadfly.set_default_plot_size(35cm,20cm)
+
+
 
 dfg = initfg()
 loadDFG("/tmp/caesar/2020-05-11T02:25:53.702/fg_204_resolve.tar.gz", Main, dfg)
@@ -242,41 +245,16 @@ meas, pred = solveFactorMeasurements(dfg, :x0x1f1)
 
 
 
-
-# Calculate the relative chords between consecutive poses in the factor graph.
-# Data structure is Dict{Symbol,Dict{Symbol,Tuple{Matrix,Matrix}}}.
-# The two Matrix values are 3x100, with the first as shown in the attached screen capture.
-# These values should be the relative transform from dict[:x0][:x1], or dict[:x0][:x2], or dict[:x0][:x2] etc for all poses up to some reasonable chord length.
-# There are also two matrix values: the first is the relative transform based on measurements only, the second matrix is the same relative transform but according to the SLAM solution of any and all data being used.
-function assembleChordsDict(dfg::AbstractDFG,
-                            vsyms = ls(dfg, r"x\d") |> sortDFG;
-                            MAXADI = 20,
-                            lastPoseNum = getVariableLabelNumber(vsyms[end]),
-                            chords = Dict{Symbol,Dict{Symbol,Tuple}}()  )
-  #
-  # fsyms = [:x0x1f1; :x1x2f1]
+chords = RoME.assembleChordsDict(dfg, MAXADI=10)
 
 
-  @sync for from in vsyms[1:end-1]
-    SRT = getVariableLabelNumber(from)
-    chords[from] = Dict{Symbol,Tuple}()
-    maxadi = lastPoseNum - getVariableLabelNumber(from)
-    maxadi = MAXADI < maxadi ? MAXADI : maxadi
-    for adi in 1:maxadi
-      to = Symbol("x",getVariableLabelNumber(from)+adi)
-      tt = Threads.@spawn accumulateFactorChain(dfg, $from, $to)
-      @async begin
-        chords[$from][$to] = fetch(tt)
-      end
-    end
-  end
-
-  chords
-end
-
-chords = assembleChordsDict(dfg, MAXADI=2)
+plotFactorValues(chords[:x0][:x1]...)
+plotFactorValues(chords[:x1][:x2]...)
+plotFactorValues(chords[:x0][:x2]...)
 
 
+
+JLD2.@save "/tmp/caesar/2020-05-11T02:25:53.702/chords_10.jld2" chords
 
 
 using JSON2
@@ -302,7 +280,37 @@ reshape(ndat[:x0][:x1][1], 3,100)
 
 
 
+## Store joystick values in composite
+
+
+joysticks = Dict{Symbol,Dict{Symbol,Matrix}}()
+
+MAXADI = 5
+vsyms = ls(dfg, r"x\d") |> sortDFG
+
+
+lastPoseNum = getVariableLabelNumber(vsyms[end])
+for from in vsyms[1:end-1]
+  SRT = getVariableLabelNumber(from)
+  joysticks[from] = Dict{Symbol, Matrix}()
+  maxadi = lastPoseNum - getVariableLabelNumber(from)
+  maxadi = MAXADI < maxadi ? MAXADI : maxadi
+  for adi in 1:maxadi
+    to = Symbol("x",getVariableLabelNumber(from)+adi)
+    fsyms = findFactorsBetweenNaive(dfg, from, to)
+    vecjoy = getFactorType.(dfg, fsyms) .|> x->x.joyVelData
+    joysticks[from][to] = length(vecjoy)== 1 ? vecjoy[1] : vcat(vecjoy...)
+  end
+end
+
 
 chords[:x0][:x1]
+joysticks[:x0][:x1]
+
+chords[:x0][:x2]
+joysticks[:x0][:x2]
+
+
+
 
 #
