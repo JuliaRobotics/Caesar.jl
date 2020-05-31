@@ -1,14 +1,18 @@
 # https://diffeqflux.sciml.ai/dev/examples/LV-Univ/
 
-using Revise
+# using Revise
 
 using DiffEqFlux, Flux, Optim, OrdinaryDiffEq, Plots
 using DataInterpolations
 using RoME
 
+# import DistributedFactorGraphs: getVariableLabelNumber, findFactorsBetweenNaive
+
 using JLD2
 using Dates
 using Printf
+
+# import IncrementalInference: accumulateFactorChain
 
 # For DistributedFactorGraphs containing FluxModelsPose2Pose2.
 # extract pose positions and times as well as joyveldata from flux factors.
@@ -219,7 +223,7 @@ loadDFG("/tmp/caesar/2020-05-11T02:25:53.702/fg_204_resolve.tar.gz", Main, dfg)
 
 setNaiveFracAll!(dfg,1.0)
 
-pred, meas = solveFactorMeasurements(dfg, :x0x1f1)
+meas, pred = solveFactorMeasurements(dfg, :x0x1f1)
 
 # reportFactors(dfg, FluxModelsPose2Pose2, [:x0x1f1;])
 
@@ -235,60 +239,70 @@ pred, meas = solveFactorMeasurements(dfg, :x0x1f1)
 # end
 
 
-# assume single variable separators only
-function accumulateFactorChain(dfg::AbstractDFG, fsyms::Vector{Symbol}, from::Symbol, to::Symbol)
 
-  # get associated variables
-  svars = union(ls.(dfg, fsyms)...)
 
-  # use subgraph copys to do calculations
-  tfg_meas = buildSubgraph(dfg, [svars;fsyms])
-  tfg_pred = buildSubgraph(dfg, [svars;fsyms])
 
-  # drive variable values manually to ensure no additional stochastics are introduced.
-  nextvar = from
-  initval = getVal(tfg_meas, nextvar)
-  fill!(initval, 0.0)
-  initManual!(tfg_meas, nextvar, initval)
-  initManual!(tfg_pred, nextvar, initval)
 
-  # nextfct = fsyms[1] # for debugging
-  for nextfct in fsyms
-    nextvars = setdiff(ls(tfg_meas,nextfct),[nextvar])
-    @assert length(nextvars) == 1 "accumulateFactorChain requires each factor pair to separated by a single variable"
-    nextvar = nextvars[1]
-    meas, pred = solveFactorMeasurements(dfg, nextfct)
-    pts_meas = approxConv(tfg_meas, nextfct, nextvar, (meas,ones(Int,100),collect(1:100)))
-    pts_pred = approxConv(tfg_pred, nextfct, nextvar, (pred,ones(Int,100),collect(1:100)))
-    initManual!(tfg_meas, nextvar, pts_meas)
-    initManual!(tfg_pred, nextvar, pts_pred)
+# Calculate the relative chords between consecutive poses in the factor graph.
+# Data structure is Dict{Symbol,Dict{Symbol,Tuple{Matrix,Matrix}}}.
+# The two Matrix values are 3x100, with the first as shown in the attached screen capture.
+# These values should be the relative transform from dict[:x0][:x1], or dict[:x0][:x2], or dict[:x0][:x2] etc for all poses up to some reasonable chord length.
+# There are also two matrix values: the first is the relative transform based on measurements only, the second matrix is the same relative transform but according to the SLAM solution of any and all data being used.
+function assembleChordsDict(dfg::AbstractDFG,
+                            vsyms = ls(dfg, r"x\d") |> sortDFG;
+                            MAXADI = 20,
+                            lastPoseNum = getVariableLabelNumber(vsyms[end]),
+                            chords = Dict{Symbol,Dict{Symbol,Tuple}}()  )
+  #
+  # fsyms = [:x0x1f1; :x1x2f1]
+
+
+  @sync for from in vsyms[1:end-1]
+    SRT = getVariableLabelNumber(from)
+    chords[from] = Dict{Symbol,Tuple}()
+    maxadi = lastPoseNum - getVariableLabelNumber(from)
+    maxadi = MAXADI < maxadi ? MAXADI : maxadi
+    for adi in 1:maxadi
+      to = Symbol("x",getVariableLabelNumber(from)+adi)
+      tt = Threads.@spawn accumulateFactorChain(dfg, $from, $to)
+      @async begin
+        chords[$from][$to] = fetch(tt)
+      end
+    end
   end
-  return getVal(tfg_meas,nextvar), getVal(tfg_pred,nextvar)
+
+  chords
 end
 
-
-meas, pred = accumulateFactorChain(dfg, fsyms, :x0, :x2)
-
-
-fsyms = [:x0x1f1; :x1x2f1]
-from = :x0
-to = :x2
-
-
-
-getFactorType.(dfg, fsyms)
+chords = assembleChordsDict(dfg, MAXADI=2)
 
 
 
 
+using JSON2
+
+str = JSON2.write(chords)
+
+io = open("/tmp/chords.json", "w")
+println(io, str)
+close(io)
+
+io = open("/tmp/chords.json","r")
+data = read(io)
+close(io)
+
+rstr = String(take!(IOBuffer(data)))
+
+
+ndat = JSON2.read(rstr)
+
+
+reshape(ndat[:x0][:x1][1], 3,100)
 
 
 
 
-import Base: length, iterate
 
-length(::AbstractDFG) = 1
-iterate(dfg::AbstractDFG, state::Int=0) = (dfg,state+1)
-
+chords[:x0][:x1]
 
 #
