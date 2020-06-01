@@ -18,9 +18,9 @@ Further topics on factor graph (and Bayes/junction tree) inference formulation, 
 
 ### Causality and Markov Assumption
 
-WIP: Causal connection explanation.
+WIP: Causal connection explanation:  How is the graph based method the same as Kalman filtering variants (UKF, EKF), including Bayesian filtering (PF, etc.), and the Hidden Markov Model (HMM) methodology.  
 
-EKF-SLAM
+Furthermore, see below for connection to EKF-SLAM too.
 
 ## Joint Probability and Chapman-Kolmogorov
 
@@ -106,3 +106,7 @@ Consider a multi-sensory system along with data transmission delays, variable sa
 !!! note
 
     Mmisam allows for parametric, non-parametric, or intensity noise models which can be incorporated into any differentiable residual function.
+
+## Anecdotal Example (EKF-SLAM / MSC-KF)
+
+WIP: Explain how this method is similar to EKF-SLAM and MSC-KF...
