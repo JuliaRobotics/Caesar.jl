@@ -112,7 +112,13 @@ for i in 1:(endsweep-startsweep)
 end
 
 # Run the initialization (very slow right now)
-ensureAllInitialized!(newfg)
+# ensureAllInitialized!(newfg)
+
+# Factor debugging
+# fs = getFactorFunction.(getFactor.(newfg, lsf(newfg)))
+# fs = filter(f -> f isa AlignRadarPose2, fs)
+# pf = convert.(PackedAlignRadarPose3, fs)
+# convert.(AlignRadarPose2, pf)
 
 # Save the graph
 saveDFG(newfg, "$dfgDataFolder/segment_test.tar.gz");
@@ -124,6 +130,13 @@ pts = approxConv(newfg, :x0x1f1, :x1)
 # solving will internally call ensureAllInitialized!(newfg)
 tree, smt, hist = solveTree!(newfg)
 
+## Looking at the results
+using Plots
+
+ppes = map(v -> getSuggestedPPE(getPPE(getVariable(newfg, v))), ls(newfg))
+x = map(ppe -> ppe[1], ppes); y = map(ppe -> ppe[2], ppes); h = map(ppe -> ppe[3], ppes)
+Plots.plot(x, y, title="Path Plot", lw=3)
+
 
 ## Stuff
 using Optim
@@ -133,7 +146,6 @@ cost(x, im1, im2) = evaluateTransform(im1,im2,x[1],x[2],x[3])
 
 
 # Plotting
-using Plots
 xrange = -100.0:1.0:100.0
 hrange = -pi:0.1:pi
 val = reshape(
