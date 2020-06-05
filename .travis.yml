@@ -27,14 +27,6 @@ jobs:
     - env: CANARYTEST=true
   fast_finish: true
   include:
-    - stage: "Documentation"
-      julia: 1.4
-      script:
-        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-        - julia --project=docs/ -e 'using Pkg; pkg"add IncrementalInference"; pkg"add RoME"; pkg"add KernelDensityEstimatePlotting"; pkg"add RoMEPlotting#master";'
-        - julia --project=docs/ docs/make.jl
-      name: "HTML"
-      after_success: skip
     - name: "ALL MASTERS"
       env: CANARYTEST=true
       julia: 1.5
@@ -42,6 +34,14 @@ jobs:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
         - julia -e 'using Pkg; pkg"add DistributedFactorGraphs#master"; pkg"add IncrementalInference#master"; pkg"add RoME#master";'
         - julia --check-bounds=yes -e 'using Pkg; Pkg.test("Caesar"; coverage=false)'
+      after_success: skip
+    - stage: "Documentation"
+      julia: 1.4
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        - julia --project=docs/ -e 'using Pkg; pkg"add IncrementalInference"; pkg"add RoME"; pkg"add KernelDensityEstimatePlotting"; pkg"add RoMEPlotting#master";'
+        - julia --project=docs/ docs/make.jl
+      name: "HTML"
       after_success: skip
 
 notifications:
