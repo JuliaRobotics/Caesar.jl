@@ -75,7 +75,7 @@ TransformUtils = "^0.2.2"
 Unmarshal = "0.2.1, 0.3"
 YAML = "0.3"
 ZMQ = "1"
-julia = "1.2, 1.3, 1.4, 1.5"
+julia = "1.3"
 
 [extras]
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
