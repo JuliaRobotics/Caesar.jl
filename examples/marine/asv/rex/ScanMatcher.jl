@@ -98,7 +98,7 @@ using LinearAlgebra
 using Optim
 
 startsweep = 5
-endsweep = 10
+endsweep = 25
 graphinit = false
 
 # newfg = initfg()
@@ -112,23 +112,26 @@ for i in 1:(endsweep-startsweep)
 end
 
 # Run the initialization (very slow right now)
-# ensureAllInitialized!(newfg)
+ensureAllInitialized!(newfg)
+
+# solving will internally call ensureAllInitialized!(newfg)
+tree, smt, hist = solveTree!(newfg)
 
 # Factor debugging
-# fs = getFactorFunction.(getFactor.(newfg, lsf(newfg)))
-# fs = filter(f -> f isa AlignRadarPose2, fs)
-# pf = convert.(PackedAlignRadarPose3, fs)
-# convert.(AlignRadarPose2, pf)
+# using ImageView
+# imshow(fs[5].im1)
+# sim = image2string(sweeps[5])
+# orig = string2image(sim)
+#
+# pf = convert(PackedAlignRadarPose3, fs[5])
+# back = convert(AlignRadarPose2, pf)
 
 # Save the graph
 saveDFG(newfg, "$dfgDataFolder/segment_test.tar.gz");
 
-lsf(newfg)
 # this should run the radar alignment
 pts = approxConv(newfg, :x0x1f1, :x1)
 
-# solving will internally call ensureAllInitialized!(newfg)
-tree, smt, hist = solveTree!(newfg)
 
 ## Looking at the results
 using Plots

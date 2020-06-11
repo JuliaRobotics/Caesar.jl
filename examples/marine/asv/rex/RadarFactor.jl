@@ -13,6 +13,7 @@ arp2 = AlignRadarPose2(sweep[10], sweep[11], MvNormal(zeros(3), diagm([5;5;pi/4]
 """
 
 using TensorCast
+using Images, FileIO, Base64
 
 import IncrementalInference: getSample
 import Base: convert
@@ -61,30 +62,36 @@ function (rp2::AlignRadarPose2)(res::Vector{Float64},
 end
 
 struct PackedAlignRadarPose2 <: PackedInferenceType
-  im1::Vector{Vector{Float64}}
-  im2::Vector{Vector{Float64}}
+  im1::String
+  im2::String
   PreSampler::String
   p2p2::PackedPose2Pose2
 end
 
+function image2string(image::Array{Float64, 2})::String
+  io = IOBuffer()
+  save(Stream(format"PNG", io), image)
+  return base64encode(io.data)
+end
+
+function string2image(stringdata::String)::Array{Float64, 2}
+  io = IOBuffer(base64decode(stringdata))
+  return load(Stream(format"PNG", io))
+end
+
+
 function convert(::Type{PackedAlignRadarPose2}, arp2::AlignRadarPose2)
-  TensorCast.@cast pim1[row][col] := arp2.im1[row,col]
-  TensorCast.@cast pim1[row] := collect(pim1[row])
-  TensorCast.@cast pim2[row][col] := arp2.im2[row,col]
-  TensorCast.@cast pim2[row] := collect(pim2[row])
-  PackedAlignRadarPose2(
-    pim1,
-    pim2,
+  return PackedAlignRadarPose2(
+    image2string(arp2.im1),
+    image2string(arp2.im2),
     string(arp2.PreSampler),
     convert(PackedPose2Pose2, arp2.p2p2))
 end
 
 function convert(::Type{AlignRadarPose2}, parp2::PackedAlignRadarPose2)
-  TensorCast.@cast im1[row,col] := parp2.im1[row][col]
-  TensorCast.@cast im2[row,col] := parp2.im2[row][col]
   AlignRadarPose2(
-    collect(im1),
-    collect(im2),
+    string2image(parp2.im1),
+    string2image(parp2.im2),
     extractdistribution(parp2.PreSampler),
     convert(Pose2Pose2, parp2.p2p2))
 end
