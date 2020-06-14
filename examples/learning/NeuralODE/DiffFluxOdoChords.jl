@@ -41,10 +41,12 @@ end
 
 fg = initfg()
 loadDFG("/tmp/caesar/2020-05-11T02:25:53.702/fg_204_resolve.tar.gz", Main, fg)
-TIMES, POSES, JOYDATA = extractTimePoseJoyData(fg)
 
-# make sure its Float32
-TIMES, POSES, JOYDATA = Float32.(TIMES), Float32.(POSES), Float32.(JOYDATA)
+
+# TIMES, POSES, JOYDATA = extractTimePoseJoyData(fg)
+#
+# # make sure its Float32
+# TIMES, POSES, JOYDATA = Float32.(TIMES), Float32.(POSES), Float32.(JOYDATA)
 
 # get all velocities
 
@@ -52,6 +54,96 @@ TIMES, POSES, JOYDATA = Float32.(TIMES), Float32.(POSES), Float32.(JOYDATA)
 
 # structure all data according to poses
 
+## get timestamps
+
+MAXADI = 10
+vsyms = ls(fg, r"x\d") |> sortDFG
+
+# store all timestamps in a dictionary
+timestamps = Dict{Symbol, DateTime}()
+vsyms .|> x->(timestamps[x]=getTimestamp(getVariable(fg, x)));
+
+timestamps
+
+
+## Get chords info
+
+# chords = RoME.assembleChordsDict(fg, MAXADI=10)
+JLD2.@load "/tmp/caesar/2020-05-11T02:25:53.702/chords_10.jld2" chords
+
+
+## Make sure velocities are set
+
+whichVelIdx = ones(Int, 100)
+measSeq = collect(1:100)
+
+setNaiveFracAll!(fg, 1.0)
+meas = freshSamples(fg, :x0x1f1, 100)
+setNaiveFracAll!(fg, 0.0)
+for fs in fsyms, idx in 1:100
+  fill!(whichVelIdx,1)
+  whichVelIdx[idx] = 2
+  dummy = approxConv(fg, fs, :x1, (meas[1],whichVelIdx,measSeq) )
+  vecjoy = getFactorType(fg, fs).joyVelData
+end
+
+## Store joystick values in composite
+
+# datastructure to be populated
+joysticks = Dict{Symbol,Dict{Symbol,Vector{Matrix{Float32}}}}()
+
+whichVelIdx = ones(Int, 1)
+measSeq = ones(Int, 100)
+lastPoseNum = getVariableLabelNumber(vsyms[end])
+for from in vsyms[1:end-1]
+  SRT = getVariableLabelNumber(from)
+  joysticks[from] = Dict{Symbol, Vector{Matrix{Float32}}}()
+  maxadi = lastPoseNum - getVariableLabelNumber(from)
+  maxadi = MAXADI < maxadi ? MAXADI : maxadi
+  for adi in 1:maxadi
+      to = Symbol("x",getVariableLabelNumber(from)+adi)
+      # init the to field
+      if !haskey(joysticks[from], to)
+        joysticks[from][to]=Vector{Matrix{Float32}}(undef, 100)
+        for i in 1:100  joysticks[from][to][i]=zeros(Float32,0,4); end
+      end
+      fsyms = findFactorsBetweenNaive(fg, from, to)
+      # vecjoy = getFactorType.(fg, fsyms) .|> x->x.joyVelData
+      # joysticks[from][to] = length(vecjoy)== 1 ? vecjoy[1] : vcat(vecjoy...)
+      for fs in fsyms
+        intermTo = getVariableOrder(fg, fs)[end]
+        setNaiveFracAll!(fg, 1.0)
+        meas = freshSamples(fg, fs, 1)
+        setNaiveFracAll!(fg, 0.0)
+        for idx in 1:100
+          # fill!(whichVelIdx,1) # only if doing all 100
+          whichVelIdx[1] = 2
+          fill!(measSeq, idx)
+          dummy = approxConv(fg, fs, intermTo, (meas[1],whichVelIdx,measSeq) )
+          vecjoy = getFactorType(fg, fs).joyVelData
+          joysticks[from][to][idx] = vcat(joysticks[from][to][idx], vecjoy)
+        end
+        @show "done $fs"
+      end
+  end
+end
+
+joysticks
+
+# JLD2.@save "/tmp/caesar/2020-05-11T02:25:53.702/joysticks_10_alpha.jld2" joysticks
+
+# joysticks_ = deepcopy(joysticks)
+
+##
+
+chords[:x0][:x1]
+joysticks[:x0][:x1]
+
+chords[:x2][:x9]
+joysticks[:x2][:x9]
+
+
+datasets = [ chords[:x0][:x1]]
 
 
 ##
@@ -72,32 +164,16 @@ n_weights = length(p_model)
 
 p_all = p_model # [p_model; p_system]
 
-
-## quasi-static parameters
-
-START = 3
-
-vx0, vy0 = JOYDATA[START,1,3], JOYDATA[START,1,4] # 0, 0
-x0 = [0.0;0;1.0;0.0;vx0;vy0]
+# parameters to be optimized
 θ = Float32.(p_all)
 
 
+## quasi-static parameters
 
-##
-
-STEPS = 2
-
-tspan = (TIMES[START], TIMES[START+STEPS])
-# dt = TIMES[START+1]-TIMES[START]
-tsteps = range(tspan[1],tspan[2],length=size(JOYDATA,2)*STEPS)  # 0.0f0:1.0:25.0f0
-
-joySteps = [JOYDATA[i,:,1:2] for i in START:(START+STEPS-1)]
-joyStepsCat = vcat(joySteps...)
-
+# START = 3
 #
-throttle_itp = LinearInterpolation( joyStepsCat[:,1], tsteps )
-steering_itp = LinearInterpolation( joyStepsCat[:,2], tsteps )
-
+# vx0, vy0 = JOYDATA[START,1,3], JOYDATA[START,1,4] # 0, 0
+# x0 = [0.0;0;1.0;0.0;vx0;vy0]
 
 # dx/dt = Fx + g(x,u)
 function dxdt_odo!( dx, x, p, t, model_g, thr_itp, str_itp )
@@ -119,14 +195,50 @@ end
 # state = p[(end-3):end]
 
 
-prob_odo = ODEProblem((dx,x,p,t)->dxdt_odo!(dx,x,p,t,model_g,throttle_itp,steering_itp), x0, tspan, p_all)
-sol_odo = solve(prob_odo, Tsit5(), x0, p_all,
-                         abstol = 1e-8, reltol = 1e-6)
+## loss function elements
+
+# elems = [[:x2];
+#          [:x2;:x3;];
+#          [:x2;:x3;:x4];]
+SRT, STP = 2, 3
+elems = [[Symbol("x",i) for i in SRT:j+1] for j in SRT:STP-1]
+
+
+##
+
+idx = 1
+vx0, vy0 = 0.0, 0.0
+x0 = [0.0;0;1.0;0.0;vx0;vy0] .|> Float32
+
+STEP = 1
+from = elems[STEP][1]
+to = elems[STEP][end]
+next = Symbol("x",getVariableLabelNumber(to)+1)
+# haskey(joysticks[from], next) || break
+DT = (timestamps[to]-timestamps[from]).value/1000 |> Float32
+tspan = (0.0f0, DT)
+tsteps = range(tspan[1],tspan[2],length=25*(length(elems[STEP])-1))
+
+# use interpolators
+throttle_itp = LinearInterpolation( joysticks[from][to][:,1], tsteps )
+steering_itp = LinearInterpolation( joysticks[from][to][:,2], tsteps )
+
+prob_odo = ODEProblem((dx,x,p,t)->dxdt_odo!(dx,x,p,t,model_g,throttle_itp,steering_itp), x0, tspan, θ)
+sol_odo = solve(prob_odo, Tsit5(), p=θ, saveat=tsteps, abstol=1e-6,reltol=1e-6 )
+
+predArr = Array(sol_odo)
+predicted = predArr[:,end]
+
+val = chords[from][to][2][:,idx]
+target = [val[1];val[2];cos(val[3]);sin(val[3]);]
+
+joysticks[from][:x8]
+
 
 function predict_univ(θ, x0_)
   # solving for both the ODE solution and network parameters
-  return Array(solve(prob_odo, Tsit5(), x0_, θ,
-                              saveat = tsteps))
+  return Array(solve(prob_odo, Tsit5(), p=θ,
+                              saveat=tsteps))
 end
 
 function loss_univ(θ)
@@ -282,44 +394,6 @@ ndat = JSON2.read(rstr)
 
 
 reshape(ndat[:x0][:x1][1], 3,100)
-
-
-
-
-## Store joystick values in composite
-
-
-joysticks = Dict{Symbol,Dict{Symbol,Matrix}}()
-
-MAXADI = 10
-vsyms = ls(dfg, r"x\d") |> sortDFG
-
-
-lastPoseNum = getVariableLabelNumber(vsyms[end])
-for from in vsyms[1:end-1]
-  SRT = getVariableLabelNumber(from)
-  joysticks[from] = Dict{Symbol, Matrix}()
-  maxadi = lastPoseNum - getVariableLabelNumber(from)
-  maxadi = MAXADI < maxadi ? MAXADI : maxadi
-  for adi in 1:maxadi
-    to = Symbol("x",getVariableLabelNumber(from)+adi)
-    fsyms = findFactorsBetweenNaive(dfg, from, to)
-    vecjoy = getFactorType.(dfg, fsyms) .|> x->x.joyVelData
-    joysticks[from][to] = length(vecjoy)== 1 ? vecjoy[1] : vcat(vecjoy...)
-  end
-end
-
-
-chords[:x0][:x1]
-joysticks[:x0][:x1]
-
-chords[:x0][:x9]
-joysticks[:x0][:x9]
-
-
-
-
-datasets = [ chords[:x0][:x1]]
 
 
 
