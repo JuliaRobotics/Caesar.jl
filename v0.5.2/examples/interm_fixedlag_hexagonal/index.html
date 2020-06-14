@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Fixed-Lag Solving 2D · Caesar.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">Caesar.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Introduction</a></li><li><span class="tocitem">Welcome</span><ul><li><a class="tocitem" href="../../installation_environment/">Installation</a></li><li><a class="tocitem" href="../../faq/">FAQ</a></li></ul></li><li><span class="tocitem">Getting Started</span><ul><li><a class="tocitem" href="../../concepts/concepts/">Initial Concepts</a></li><li><a class="tocitem" href="../../concepts/building_graphs/">Building Factor Graphs</a></li><li><a class="tocitem" href="../../concepts/interacting_fgs/">Interacting w/ Factor Graphs</a></li><li><a class="tocitem" href="../../concepts/dataassociation/">Data Association</a></li><li><a class="tocitem" href="../../concepts/available_varfacs/">Available Variables/Factors</a></li><li><a class="tocitem" href="../../concepts/2d_plotting/">Plotting (2D)</a></li><li><a class="tocitem" href="../../concepts/multilang/">Multi-Language Support</a></li><li><a class="tocitem" href="../../concepts/database_interactions/">Cloud Server/Database</a></li><li><a class="tocitem" href="../../concepts/multisession/">Multi-session/agent Solving</a></li><li><a class="tocitem" href="../../concepts/arena_visualizations/">Visualization (3D)</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../examples/">Caesar Examples</a></li><li><a class="tocitem" href="../basic_continuousscalar/">ContinuousScalar as 1D Example</a></li><li><a class="tocitem" href="../basic_slamedonut/">Under-defined Trilateration, 2D</a></li><li><a class="tocitem" href="../basic_hexagonal2d/">Hexagonal 2D SLAM</a></li><li class="is-active"><a class="tocitem" href>Fixed-Lag Solving 2D</a><ul class="internal"><li><a class="tocitem" href="#Example-Code-1"><span>Example Code</span></a></li><li><a class="tocitem" href="#Introduction-1"><span>Introduction</span></a></li><li><a class="tocitem" href="#Example-Overview-1"><span>Example Overview</span></a></li><li><a class="tocitem" href="#Results-1"><span>Results</span></a></li><li><a class="tocitem" href="#Additional-Example-1"><span>Additional Example</span></a></li></ul></li><li><a class="tocitem" href="../deadreckontether/">Dead Reckon Tether</a></li></ul></li><li><span class="tocitem">Principles</span><ul><li><a class="tocitem" href="../../principles/filterCorrespondence/">Filters vs. Graphs</a></li><li><a class="tocitem" href="../../principles/approxConvDensities/">Generic Convolutions</a></li><li><a class="tocitem" href="../../principles/multiplyingDensities/">Multiplying Functions (.py)</a></li><li><a class="tocitem" href="../../principles/bayestreePrinciples/">Bayes (Junction) tree</a></li><li><a class="tocitem" href="../../principles/initializingOnBayesTree/">Advanced Bayes Tree Topics</a></li><li><a class="tocitem" href="../../concepts/mmisam_alg/">Multimodal iSAM Algorithm</a></li></ul></li><li><span class="tocitem">How to Expand?</span><ul><li><a class="tocitem" href="../../concepts/adding_variables_factors/">Custom Variables and Factors</a></li><li><a class="tocitem" href="../basic_definingfactors/">Creating Variables and Factors</a></li><li><a class="tocitem" href="../interm_dynpose/">Creating DynPose Factor</a></li></ul></li><li><span class="tocitem">Developer Zone</span><ul><li><a class="tocitem" href="../../dev/wiki/">Wiki Pointers</a></li></ul></li><li><span class="tocitem">Literature</span><ul><li><a class="tocitem" href="../../refs/literature/">References</a></li></ul></li><li><span class="tocitem">Function Reference</span><ul><li><a class="tocitem" href="../../func_ref/">Caesar&#39;s Reference</a></li><li><a class="tocitem" href="../../vis_func_ref/">Visualization Reference</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Fixed-Lag Solving 2D</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Fixed-Lag Solving 2D</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/JuliaRobotics/Caesar.jl/blob/master/docs/src/examples/interm_fixedlag_hexagonal.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Hexagonal-2D-with-Fixed-Lag-Solving-1"><a class="docs-heading-anchor" href="#Hexagonal-2D-with-Fixed-Lag-Solving-1">Hexagonal 2D with Fixed-Lag Solving</a><a class="docs-heading-anchor-permalink" href="#Hexagonal-2D-with-Fixed-Lag-Solving-1" title="Permalink"></a></h1><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>This feature has recently been updated and the documentation below needs to be updated.  The new interface is greatly simplified from the example below.  The results presented below are also out of date, new performance figures are expected to be faster (2Q2020).  </p></div></div><p>This example provides an overview of how to enable it and the benefits of using fixed-lag solving. The objective is to provide a near-constant solve time for ever-growing graphs by only recalculating the most recent portion. Think of this as a placeholder, as we develop the solution this tutorial will be updated to demonstrate how that is achieved.</p><h2 id="Example-Code-1"><a class="docs-heading-anchor" href="#Example-Code-1">Example Code</a><a class="docs-heading-anchor-permalink" href="#Example-Code-1" title="Permalink"></a></h2><p>The complete code for this example can be found in the fixed-lag branch of RoME: <a href="https://github.com/JuliaRobotics/RoME.jl/blob/feature/fixedlag_example/examples/Hexagonal2D_SLAM_FixedLag.jl">Hexagonal Fixed-Lag Example</a>.</p><h2 id="Introduction-1"><a class="docs-heading-anchor" href="#Introduction-1">Introduction</a><a class="docs-heading-anchor-permalink" href="#Introduction-1" title="Permalink"></a></h2><p>Fixed-lag solving is enabled when creating the factor-graph. Users provide a window–-the quasi fixed-lag constant (QFL)–-which defines how many of the most-recent variables should be calculated. Any other variables are &#39;frozen.&#39; The objective of this example is to explore providing a near-constant solve time for ever-growing graphs by only recalculating the most recent portion.</p><h2 id="Example-Overview-1"><a class="docs-heading-anchor" href="#Example-Overview-1">Example Overview</a><a class="docs-heading-anchor-permalink" href="#Example-Overview-1" title="Permalink"></a></h2><p>In the example, the basic Hexagonal 2D is grown to solve 200 variables. The original example remains the same, i.e., a vehicle is driving around in a hexagon and seeing the same bearing+range landmark as it crosses the starting point. At every 20th variable, a solve is invoked. Rather than use <code>solveTree!(fg)</code>, the solve is performed in parts (construction of Bayes tree, solving the graph) to get performance statistics as the graph grows.</p><pre><code class="language-julia">numVariables = 200
+solveEveryNVariables = 20
+lagLength = 30
+
+# Standard Hexagonal example for totalIterations - solve every iterationsPerSolve iterations.
+function runHexagonalExample(fg::G, totalIterations::Int, iterationsPerSolve::Int)::DataFrame where {G &lt;: AbstractDFG}
+    # Add the first pose :x0
+    addVariable!(fg, :x0, Pose2)
+
+    # dummy tree used later for incremental updates
+    tree = wipeBuildNewTree!(fg)
+
+    # Add at a fixed location PriorPose2 to pin :x0 to a starting location
+    addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))
+
+    # Add a landmark l1
+    addVariable!(fg, :l1, Point2, labels=[:LANDMARK])
+
+    # Drive around in a hexagon a number of times
+    solveTimes = DataFrame(GraphSize = [], TimeBuildBayesTree = [], TimeSolveGraph = [])
+    for i in 0:totalIterations
+        psym = Symbol(&quot;x$i&quot;)
+        nsym = Symbol(&quot;x$(i+1)&quot;)
+        @info &quot;Adding pose $nsym...&quot;
+        addVariable!(fg, nsym, Pose2)
+        pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal( [0.1;0.1;0.1].^2 ) )))
+        @info &quot;Adding odometry factor between $psym -&gt; $nsym...&quot;
+        addFactor!(fg, [psym;nsym], pp )
+
+        if i % 6 == 0
+            @info &quot;Creating factor between $psym and l1...&quot;
+            p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+            addFactor!(fg, [psym; :l1], p2br)
+        end
+        if i % iterationsPerSolve == 0 &amp;&amp; i != 0
+            @info &quot;Performing inference!&quot;
+            if getSolverParams(fg).isfixedlag
+                @info &quot;Quasi fixed-lag is enabled (a feature currently in testing)!&quot;
+                fifoFreeze!(fg)
+            end
+            tInfer = @timed tree, smt, hist = solveTree!(fg, tree)
+            graphSize = length([ls(fg)[1]..., ls(fg)[2]...])
+            push!(solveTimes, (graphSize, tInfer[2], tInfer[2]))
+        end
+    end
+    return solveTimes
+end</code></pre><p>Two cases are set up:</p><ul><li>One solving the full graph every time a solve is performed:</li></ul><pre><code class="language-julia"># start with an empty factor graph object
+fg = initfg()
+# DO NOT enable fixed-lag operation
+solverTimesForBatch = runHexagonalExample(fg, numVariables, solveEveryNVariables)</code></pre><ul><li>The other enabling fixed-lag with a window of 20 variables:</li></ul><pre><code class="language-julia">fgFixedLag = initfg()
+fgFixedLag.solverParams.isfixedlag = true
+fgFixedLag.solverParams.qfl = lagLength
+
+solverTimesFixedLag = runHexagonalExample(fgFixedLag, numVariables, solveEveryNVariables)</code></pre><p>The resultant path of the robot can be seen by using RoMEPlotting and is drawn if the visualization lines are uncommented:</p><pre><code class="language-julia">#### Visualization
+
+# Plot the many iterations to see that it succeeded.
+# Batch
+# drawPosesLandms(fg)
+
+# Fixed lag
+# drawPosesLandms(fgFixedLag)</code></pre><p>Lastly, the timing results of both scenarios are merged into a single DataFrame table, exported to CSV, and a summary graph is shown using GadFly.</p><pre><code class="language-julia">using Gadfly
+using Colors
+using CSV
+
+# Make a clean dataset
+rename!(solverTimesForBatch, :TimeBuildBayesTree =&gt; :Batch_BayedBuild, :TimeSolveGraph =&gt; :Batch_SolveGraph);
+rename!(solverTimesFixedLag, :TimeBuildBayesTree =&gt; :FixedLag_BayedBuild, :TimeSolveGraph =&gt; :FixedLag_SolveGraph);
+timingMerged = DataFrames.join(solverTimesForBatch, solverTimesFixedLag, on=:GraphSize)
+CSV.write(&quot;timing_comparison.csv&quot;, timingMerged)
+
+PP = []
+push!(PP, Gadfly.layer(x=timingMerged[:GraphSize], y=timingMerged[:FixedLag_SolveGraph], Geom.path, Theme(default_color=colorant&quot;green&quot;))[1]);
+push!(PP, Gadfly.layer(x=timingMerged[:GraphSize], y=timingMerged[:Batch_SolveGraph], Geom.path, Theme(default_color=colorant&quot;magenta&quot;))[1]);
+
+plt = Gadfly.plot(PP...,
+    Guide.title(&quot;Solving Time vs. Iteration for Fixed-Lag Operation&quot;),
+    Guide.xlabel(&quot;Solving Iteration&quot;),
+    Guide.ylabel(&quot;Solving Time (seconds)&quot;),
+    Guide.manual_color_key(&quot;Legend&quot;, [&quot;fixed&quot;, &quot;batch&quot;], [&quot;green&quot;, &quot;magenta&quot;]))
+Gadfly.draw(PNG(&quot;results_comparison.png&quot;, 12cm, 15cm), plt)</code></pre><h2 id="Results-1"><a class="docs-heading-anchor" href="#Results-1">Results</a><a class="docs-heading-anchor-permalink" href="#Results-1" title="Permalink"></a></h2><p>Preliminary results for the comparison can be seen below. However, this is just a start and we need to perform more testing. At the moment we are working on providing consistent results and further improving performance/flattening the fixed-lag time. It should be noted that the below graph is not to demonstrate the absolute solve time, but rather the relative behavior of full-graph solve vs. fixed-lag.</p><p><img src="../images/fixed_lag_timing.png" alt="Timing comparison of full solve vs. fixed-lag"/></p><blockquote><p><strong>NOTE</strong> Work is underway (aka <a href="https://github.com/JuliaRobotics/IncrementalInference.jl/projects/2">&quot;Project Tree House&quot;</a>) to reduce overhead computations that result in poorer fixed-lag solving times.  We expect the fixed-lag performance to improve in the coming months (Written Nov 2018).  Please file issues if a deeper discussion is required.</p></blockquote><h2 id="Additional-Example-1"><a class="docs-heading-anchor" href="#Additional-Example-1">Additional Example</a><a class="docs-heading-anchor-permalink" href="#Additional-Example-1" title="Permalink"></a></h2><blockquote><p>Work In Progress, but In the mean time see the following examples:</p></blockquote><p>https://github.com/JuliaRobotics/Caesar.jl/blob/master/examples/wheeled/racecar/apriltag<em>and</em>zed_slam.jl</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../basic_hexagonal2d/">« Hexagonal 2D SLAM</a><a class="docs-footer-nextpage" href="../deadreckontether/">Dead Reckon Tether »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Sunday 14 June 2020 23:41">Sunday 14 June 2020</span>. Using Julia version 1.4.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
