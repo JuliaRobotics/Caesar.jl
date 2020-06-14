@@ -1,4 +1,4 @@
-# Adding Dynamic Factors and Variables
+# Adding Velocity (Preintegration)
 
 This tutorial describes how a new factor can be developed, beyond the pre-existing implementation in [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl).  Factors can accept any number of variable dependencies and allow for a wide class of allowable function calls can be used.  Our intention is to make it as easy as possible for users to create their own factor types.
 

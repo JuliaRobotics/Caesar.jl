@@ -2,7 +2,9 @@
 
 !!! note
 
-    This is an experimental feature that is currently being developed. This example provides an overview of how to enable it and the benefits of using fixed-lag solving. The objective is to provide a near-constant solve time for ever-growing graphs by only recalculating the most recent portion. Think of this as a placeholder, as we develop the solution this tutorial will be updated to demonstrate how that is achieved.
+    This feature has recently been updated and the documentation below needs to be updated.  The new interface is greatly simplified from the example below.  The results presented below are also out of date, new performance figures are expected to be faster (2Q2020).  
+
+This example provides an overview of how to enable it and the benefits of using fixed-lag solving. The objective is to provide a near-constant solve time for ever-growing graphs by only recalculating the most recent portion. Think of this as a placeholder, as we develop the solution this tutorial will be updated to demonstrate how that is achieved.
 
 ## Example Code
 

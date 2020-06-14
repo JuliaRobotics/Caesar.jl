@@ -213,7 +213,7 @@ drawGraph(fg, engine="neato")
 The marginal posterior estimates are found by repeating inference over the factor graph, followed drawing all vehicle locations as a contour map:
 
 ```julia
-# solve and show message passing on Bayes (Juntion) tree
+# solve and show message passing on Bayes (Junction) tree
 getSolverParams(fg).drawtree=true
 getSolverParams(fg).showtree=true
 tree, smt, hist = solveTree!(fg)

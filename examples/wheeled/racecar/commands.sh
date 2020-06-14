@@ -154,7 +154,13 @@ killjuliaprocs() {
 }
 
 last8log() {
-  tail -n8 /tmp/caesar/racecar.log | awk '{print $1}' | sed 's/,//g'
+  # tail -n8 /tmp/caesar/racecar.log | awk '{print $1}' | sed 's/,//g'
+  tail -n8 /tmp/caesar/results.log | awk '{print $1}' | sed 's/,//g'
+}
+
+racecarresultslabrun() {
+  # julia -O3 -e "splitpath(\"`cat /tmp/caesar/$ln/readme.txt | head -n2 | tail -n1`\")[end] |> println"
+  julia -O3 -e "using JSON; JSON.parsefile(\"/tmp/caesar/$1/args.json\")[\"folder_name\"] |> println"
 }
 
 copylatesttoconductor() {
@@ -162,26 +168,174 @@ copylatesttoconductor() {
   while read ln; do
     echo "Copy to conductor $ln"
     # get labrun
-    julia -O3 -e "splitpath(\"`cat /tmp/caesar/$ln/readme.txt | head -n2 | tail -n1`\")[end] |> println" > /tmp/caesar/whichresults
-    WHICHRES=`cat /tmp/caesar/whichresults`
+    WHICHRES=`racecarresultslabrun $ln`
+    # racecarresultslabrun $ln > /tmp/caesar/whichresults
+    # WHICHRES=`cat /tmp/caesar/whichresults`
+
     echo $ln > /tmp/caesar/conductor/solves/$WHICHRES.aux
-    cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
-    cp -f /tmp/caesar/$ln/results/results.csv /home/singhk/data/racecar/$WHICHRES/results_$WHICHRES.csv
+    # cp -f /tmp/caesar/$ln/results/results.csv /tmp/caesar/conductor/solves/results_$WHICHRES.csv
+    # cp -f /tmp/caesar/$ln/results/results.csv /home/singhk/data/racecar/$WHICHRES/results_$WHICHRES.csv
+    cp -f /tmp/caesar/$ln/${WHICHRES}_results.json /tmp/caesar/conductor/solves/
+    # cp -f /tmp/caesar/$ln/${WHICHRES}_results.json /home/singhk/data/racecar/$WHICHRES/
+    #also copy the latest image
+    cp -f /tmp/caesar/$ln/*_resolve.pdf /tmp/caesar/conductor/solves/${WHICHRES}_resolve.pdf
+    # LSTIMG=`ls -t /tmp/caesar/$ln/images | head -n20 | grep -v "hist" | head -n1`
+    # cp -f /tmp/caesar/$ln/images/$LSTIMG /tmp/caesar/conductor/solves/img_${WHICHRES}_${LSTIMG}
   done < /tmp/caesar/last8
 }
 
-racecarpynnconductor() {
-  racecarslamfluxall
-  # racecarslampynnall
-  sleep 60
 
+
+getFrac() {
+  A=`julia -O3 -e "(11-$1)/10 |> print"`
+  echo $A
+}
+
+# racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
+# racecarslamrosfluxall --localprocs 8 --remoteprocs 0 --naive_frac `getFrac $i`
+
+racecarslamros() {
+    JULIA_NUM_THREADS=4 julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMono.jl $* --batch_resolve --vis2d
+}
+
+racecarslamrosall() {
+  sleep 00; racecarslamros --folder_name "labrun7" $* &
+  sleep 60; racecarslamros --folder_name "labrun6" $* &
+  sleep 60; racecarslamros --folder_name "labrun8" $*
+  sleep 00; racecarslamros --folder_name "labrun4" $* &
+  sleep 60; racecarslamros --folder_name "labrun2" $* &
+  sleep 60; racecarslamros --folder_name "labrun3" $*
+  sleep 00; racecarslamros --folder_name "labrun5" $* &
+  sleep 60; racecarslamros --folder_name "labrun1" $*
+}
+
+racecarslamrosflux() {
+    JULIA_NUM_THREADS=4 julia -O 3 $CAESAR_EX_DIR/ros/CarFeedMonoFlux.jl $* --batch_resolve --vis2d --savedfg
+}
+
+racecarslamrosfluxall() {
+  sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun6" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun8" $*
+  sleep 00; racecarslamrosflux --folder_name "labrun4" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun2" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun3" $*
+  sleep 00; racecarslamrosflux --folder_name "labrun5" $* &
+  sleep 60; racecarslamrosflux --folder_name "labrun1" $*
+}
+
+racecarslamrosfluxALL() {
+  sleep 00; racecarslamrosflux --folder_name "labrun7" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun6" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun8" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun4" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun2" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun3" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun5" $* &
+  sleep 80; racecarslamrosflux --folder_name "labrun1" $*
+}
+
+
+
+## analysis runs
+
+# racecarslamrosfluxall --localprocs 4 --remoteprocs 7 --imshow --naive_frac 0.9
+# JULIA_NUM_THREADS=2 racecarslamrosfluxALL --localprocs 0 --remoteproc 10 --imshow --naive_frac 1.0 --pose_trigger_distance 0.1
+# racecarslamrosflux --folder_name "labrun7" --localprocs 0 --remoteproc 15 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2 &
+
+# racecarslamrosflux_analysis1() {
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 1.0
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.9
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.8
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.6
+#   racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.5
+# }
+
+delaybashracecarjulias() {
   while [ 0 -lt `getjuliaprocs | wc -l` ]; do
     echo "waiting for julia procs to finish, /tmp/juliaprocs="
     echo `getjuliaprocs`
     getjuliaprocs > /tmp/caesar/juliaprocs
     sleep 30;
   done
+}
+
+
+
+racecarpynnconductor() {
+  racecarslamrosfluxALL $*
+  # racecarslampynnall
+  sleep 60
+
+  delaybashracecarjulias
 
   copylatesttoconductor
 
 }
+
+
+  # racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 1.0;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.9;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.8;  racecarslamrosfluxall --localprocs 2 --remoteprocs 4 --imshow --naive_frac 0.7
+
+# racecarslamrosfluxall --localprocs 6 --remoteprocs 0 --imshow --naive_frac 1.0 --pose_trigger_distance 0.2
+
+# JULIA_NUM_THREADS=50 racecartrainflux --numFGDatasets 4 --epochsFlux 5 --fluxGenerations 20 --rndSkip 5 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20 --ADAM_step 0.1 --loadInitModels "/tmp/caesar/2020-05-11T02:25:53.702/models_10.tar.gz"
+
+# JULIA_NUM_THREADS=50 racecartrainflux --numFGDatasets 4 --epochsFlux 5 --fluxGenerations 10 --rndSkip 50  --rndChord "[1;5;10]" --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20 --ADAM_step 0.1 --loadInitModels "/tmp/caesar/2020-05-11T02:25:53.702/models_10.tar.gz"
+
+# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 8 --epochsFlux 5 --fluxGenerations 10 --rndSkip 5 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.1 --rndChord "[1;5;10]"
+
+## quick test
+#
+
+racecartrainflux() {
+  julia -O 3 $CAESAR_EX_DIR/FluxModelsTraining.jl $*
+}
+
+racecartrainfluxSINGLE() {
+  racecartrainflux --numFGDatasets 1 $*
+}
+
+racecartrainfluxBASIC() {
+  racecartrainfluxSINGLE --epochsFlux 1 --fluxGenerations 2 --rndSkip 10 $*
+}
+
+racecartrainfluxBASIC10cm() {
+  racecartrainfluxBASIC --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" $*
+}
+
+racecartrainfluxQUICKTEST10cm() {
+  JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 1 --epochsFlux 1 --fluxGenerations 1 --rndSkip 1 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.1 --rndChord "[1;5]"
+}
+
+racecartrainfluxLONGERTEST10cm() {
+  JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 1 --epochsFlux 5 --fluxGenerations 50 --rndSkip 3 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 4 --ADAM_step 0.1 --rndChord "[1;5;10]" --loadInitModels "/tmp/caesar/2020-05-11T02:25:53.702/training_15/models_10.tar.gz"
+}
+
+# JULIA_NUM_THREADS=40 racecartrainflux --numFGDatasets 6 --epochsFlux 5 --fluxGenerations 5 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 10 --trainingNumOffset 10000
+
+# JULIA_NUM_THREADS=50 racecartrainflux --numFGDatasets 8 --epochsFlux 5 --fluxGenerations 10 --rndSkip 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt" --localprocs 20  --ADAM_step 0.1 --rndChord "[1;5;10]"
+
+# JULIA_NUM_THREADS=10 racecartrainflux --numFGDatasets 8 --epochsFlux 10 --fluxGenerations 10 --rndSkip 20 --localprocs 10 --fgpathsflux "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt"
+
+
+racecartrainflux10times() {
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+  racecartrainflux
+}
+
+
+
+
+
+
+
+##
