@@ -192,6 +192,15 @@ Unit tests can further be performed for the upstream packages as follows -- **NO
 ...
 ```
 
+## Ahead Of Time Compile RoME.so
+
+In RoME, run the `compileRoME/compileRoMESysimage.jl` script
+
+To use RoME with the newly created sysimage, start julia with:
+```
+julia -O3 -J ~/.julia/dev/RoME/compileRoME/RoMESysimage.so
+```
+
 ## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
 
 Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).
