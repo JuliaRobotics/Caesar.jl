@@ -33,19 +33,17 @@ Packages are already compiled to static objects (`.ji` files), but can also be c
 ### Can Julia be Embedded into C/C++
 Yes, see [the Julia embedding documentation page](https://docs.julialang.org/en/v1/manual/embedding/index.html).
 
-### Why ZMQ Middleware Layer (multilang)?
-
-[Zero Message Queue (ZMQ)](https://zeromq.org/) is a widely used data transport layer used to build various other multiprocess middleware with wide support among other programming languages.
-
 ### ROS Integration
-
 ROS integration is a priority for this project and will accompany the so-called ['prime time'](https://github.com/JuliaRobotics/RoME.jl/issues/147) release of the code.  ROS and ZMQ interfaces are closely related.
-
-> **Note** the present focus (2018Q3-2019Q2) is to stabilize the [ZMQ interface](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#ZMQ-Messaging-Interface-1).
 
 > **Voice** Please add your voice of support or suggestions on [ROS integration here](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
 
 > **WIP** Please see work on an initial PoC (still using PyCall) via our [wiki developer docs here](https://github.com/JuliaRobotics/Caesar.jl/wiki/ROS-PoC).
+
+### Why ZMQ Middleware Layer (multilang)?
+[Zero Message Queue (ZMQ)](https://zeromq.org/) is a widely used data transport layer used to build various other multiprocess middleware with wide support among other programming languages.  Caesar.jl has on been used with a direct ZMQ type link, which is similar to a ROS workflow.  Contributions are welcome for binding ZMQ endpoints for a non-ROS messaging interface.
+
+> **Note** ZMQ work has been happening on and off based on behind the main priority on resolving abstractions with the DistributedFactorGraphs.jl framework.  See ongoing work for [the ZMQ interface](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#ZMQ-Messaging-Interface-1).
 
 ## What is supersolve?
 
