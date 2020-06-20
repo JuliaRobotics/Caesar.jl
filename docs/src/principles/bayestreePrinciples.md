@@ -158,7 +158,7 @@ CSM currently uses the following statusses for each of the cliques during the in
 
 The color legend is currently recorded in an [issue thread here](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/349).
 
-* Blank / white -- uninitialized,
+* Blank / white -- uninitialized or unprocessed,
 * Red -- CPU working on clique's Chapman-Kolmogorov inference (up or down),
 * Light red -- completed upsolve,
 * Tomato -- partial dimension upsolve but finished,
@@ -168,4 +168,6 @@ The color legend is currently recorded in an [issue thread here](https://github.
 * Turquoise -- blocking for on parent for downsolve msgs,
 * Light blue -- completed downsolve,
 * Blue -- fully marginalized clique that will not be updated during upsolve (maybe downsolved),
-* Orange -- recycled clique upsolve solution from previous tree passed into solveTree!
+* Orange -- recycled clique upsolve solution from previous tree passed into `solveTree!`,
+* Gold -- Upward Lock,
+* Tan1 -- Downward Lock.
