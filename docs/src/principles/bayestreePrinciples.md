@@ -169,5 +169,5 @@ The color legend is currently recorded in an [issue thread here](https://github.
 * Light blue -- completed downsolve,
 * Blue -- fully marginalized clique that will not be updated during upsolve (maybe downsolved),
 * Orange -- recycled clique upsolve solution from previous tree passed into `solveTree!`,
-* Gold -- Upward Lock,
-* Tan1 -- Downward Lock.
+* Gold -- Upward lock engaged (to show race conditions) -- not fully annotated yet,
+* Tan1 -- Downward lock engaged (to show race conditions) -- not annotated yet.
