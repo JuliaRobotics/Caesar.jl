@@ -24,11 +24,10 @@ after_success:
 jobs:
   allow_failures:
     - julia: nightly
-    - env: CANARYTEST=true
+    - name: "ALL MASTERS"
   fast_finish: true
   include:
     - name: "ALL MASTERS"
-      env: CANARYTEST=true
       julia: 1.5
       script:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
@@ -38,7 +37,7 @@ jobs:
     - stage: "Documentation"
       julia: 1.4
       script:
-        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(path=pwd(), rev="master")); Pkg.instantiate()'
         - julia --project=docs/ -e 'using Pkg; pkg"add IncrementalInference"; pkg"add RoME"; pkg"add KernelDensityEstimatePlotting"; pkg"add RoMEPlotting#master";'
         - julia --project=docs/ docs/make.jl
       name: "HTML"
