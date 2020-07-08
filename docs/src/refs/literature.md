@@ -62,6 +62,8 @@ Newly created page to list related references and additional literature pertaini
 
 [3.2]  Mohamed, S., Rosca, M., Figurnov, M. and Mnih, A., 2019. [Monte carlo gradient estimation in machine learning. arXiv preprint arXiv:1906.10652](https://arxiv.org/pdf/1906.10652).
 
+[3.3]  Rackauckas, C., Ma, Y., Martensen, J., Warner, C., Zubov, K., Supekar, R., Skinner, D., Ramadhan, A., Edelman, A., ["Universal Differential Equations for Scientific Machine Learning"](https://arxiv.org/abs/2001.04385), Archive online, DOI: 2001.04385.
+
 ### Signal Processing (Beamforming and Channel Deconvolution)
 
 [4.1]  Van Trees, H.L., 2004. Optimum array processing: Part IV of detection, estimation, and modulation theory. John Wiley & Sons.
