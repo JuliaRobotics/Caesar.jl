@@ -24,6 +24,8 @@ Newly created page to list related references and additional literature pertaini
 
 [1.10] Fourie, D., Teran E., A., Kaess, M., and Leonard, J. J., [“Characterizing marginalization and incremental operations on the Bayes tree,”](https://marinerobotics.mit.edu/sites/default/files/WAFR2020_rev38_0.pdf) in International Workshop on Algorithmic Foundations of Robotics (WAFR), 2020, Oulu, Finland, Springer Publishing.
 
+[1.11]  Fourie, D., Rypkema, N., Claassens, S., Vaz Teixeira, P., Fischell, E., and Leonard, J.J., "Towards Real-Time Non-Gaussian SLAM for Underdetermined Navigation", in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), October 2020, Las Vegas, USA.
+
 ### Important References
 
 [2.1]  Kaess, Michael, et al. ["iSAM2: Incremental smoothing and mapping using the Bayes tree"](http://journals.sagepub.com/doi/abs/10.1177/0278364911430419) The International Journal of Robotics Research (2011): 0278364911430419.
