@@ -24,6 +24,9 @@ Julia uses just-in-time compilation ([unless already pre-compiled](https://stack
 
 A short description of Julia's garbage collection is [described in Discourse here](https://discourse.julialang.org/t/details-about-julias-garbage-collector-reference-counting/18021/3).
 
+!!! note
+    Garbage collection can be influenced in a few ways to allow more certainty about operational outcome, see the [Julia Docs Garbage Collection Internal functions](https://docs.julialang.org/en/v1/base/base/#Internals-1) like `enable`, `preserve`, `safepoint`, etc.
+
 ### Using Julia in real-time systems?
 
 See the JuliaCon presentation by [rdeits here](https://www.youtube.com/watch?v=dmWQtI3DFFo).
