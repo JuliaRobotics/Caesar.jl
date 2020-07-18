@@ -20,6 +20,14 @@ Caesar.jl and packages are currently targeting [Julia version](https://julialang
 Julia uses just-in-time compilation ([unless already pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
  which takes additional time the first time a new function is called. Additional calls to a cached function are fast from the second call onwards since the static binary code is now cached and ready for use.
 
+### How does garbage collection work?
+
+A short description of Julia's garbage collection is [described in Discourse here](https://discourse.julialang.org/t/details-about-julias-garbage-collector-reference-counting/18021/3).
+
+### Using Julia in real-time systems?
+
+See the JuliaCon presentation by [rdeits here](https://www.youtube.com/watch?v=dmWQtI3DFFo).
+
 ## Can Caesar.jl be used in other languages beyond Julia? Yes.
 The Caesar.jl project is expressly focused on making this algorithmic code available to [C/Fortran](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/)/[C++](https://juliacomputing.com/blog/2017/12/01/cxx-and-cxxwrap-intro.html)/C#/[Python](https://github.com/JuliaPy/PyCall.jl)/[Java](https://github.com/JuliaInterop/JavaCall.jl)/JS.  Julia itself offers [many additional interops](https://github.com/JuliaInterop).  ZMQ and HTTP/WebSockets are the standardized interfaces of choice, please see [details at the multi-language section](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/)).  Consider opening issues or getting in touch for more information.
 
