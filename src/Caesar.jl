@@ -21,7 +21,7 @@ using
   Statistics,
   LinearAlgebra,
   IncrementalInference,
-  Graphs,
+  # Graphs,
   TransformUtils,
   CoordinateTransformations,
   Rotations,
@@ -33,9 +33,9 @@ using
   ImageMagick,
   ImageCore,
   DocStringExtensions,
-  CloudGraphs, # TODO: will be movedd to DFG
-  Neo4j, # TODO: will be movedd to DFG
-  Mongoc, # TODO: will be movedd to DFG
+  # CloudGraphs, # TODO: will be movedd to DFG
+  # Neo4j, # TODO: will be movedd to DFG
+  # Mongoc, # TODO: will be movedd to DFG
   Unmarshal,
   YAML,
   FFTW
@@ -111,16 +111,16 @@ export
   IterationStatistics,
   VisualizationConfig,
 
-  # multisession utils
-  multisessionquery,
-  parsemultisessionqueryresult!,
-  getLandmOtherSessNeoIDs,
-  getAllLandmarkNeoIDs,
-  getLocalSubGraphMultisession,
-  findExistingMSConstraints,
-  getprpt2kde,
-  rmInstMultisessionPriors!,
-  removeMultisessions!,
+  # # multisession utils
+  # multisessionquery,
+  # parsemultisessionqueryresult!,
+  # getLandmOtherSessNeoIDs,
+  # getAllLandmarkNeoIDs,
+  # getLocalSubGraphMultisession,
+  # findExistingMSConstraints,
+  # getprpt2kde,
+  # rmInstMultisessionPriors!,
+  # removeMultisessions!,
 
   # sas-slam
   CBFFilterConfig,
@@ -159,20 +159,20 @@ include("config/CaesarConfig.jl")
 
 
 # using CloudGraphs
-include("cloudgraphs/SolverStatus.jl")
-include("cloudgraphs/IterationStatistics.jl")
-include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
-include("cloudgraphs/ConvertGeneralSlaminDB.jl")
-include("cloudgraphs/slamindb.jl")
-include("cloudgraphs/MultisessionUtils.jl")
-include("cloudgraphs/FoveationUtils.jl")
+# include("attic/cloudgraphs/SolverStatus.jl")
+# include("attic/cloudgraphs/IterationStatistics.jl")
+# include("attic/cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
+# include("attic/cloudgraphs/ConvertGeneralSlaminDB.jl")
+# include("attic/cloudgraphs/slamindb.jl")
+# include("attic/cloudgraphs/MultisessionUtils.jl")
+# include("attic/cloudgraphs/FoveationUtils.jl")
 
 
 # ZMQ server and endpoints
 include("zmq/ZmqCaesar.jl")
 
 # Multisession operation
-include("multisession/Multisession.jl")
+# include("attic/multisession/Multisession.jl")
 
 # SAS-SLAM
 include("beamforming/czt.jl")

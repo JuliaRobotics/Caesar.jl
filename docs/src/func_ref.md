@@ -81,9 +81,7 @@ deleteVariable!
 doautoinit!
 doCliqUpSolve!
 downGibbsCliqueDensity
-downMsgPassingRecursive
 drawCliqSubgraphUpMocking
-dwnMsg
 fifoFreeze!
 filterHistAllToArray
 findRelatedFromPotential
