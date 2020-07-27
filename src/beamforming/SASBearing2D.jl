@@ -1,5 +1,8 @@
 using DistributedFactorGraphs
 
+import DistributedFactorGraphs: compare
+
+
 mutable struct SASDebug
   beams::Vector{Vector{Float64}}
   azi_smpls::Vector{Float64}
@@ -264,7 +267,6 @@ function convert(::Type{SASBearing2D}, d::PackedSASBearing2D)::SASBearing2D
   return sas2d
 end
 
-import Base.compare
 
 function compare(a::SASBearing2D, b::SASBearing2D)
   TP = true
