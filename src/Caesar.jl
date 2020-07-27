@@ -111,16 +111,16 @@ export
   IterationStatistics,
   VisualizationConfig,
 
-  # multisession utils
-  multisessionquery,
-  parsemultisessionqueryresult!,
-  getLandmOtherSessNeoIDs,
-  getAllLandmarkNeoIDs,
-  getLocalSubGraphMultisession,
-  findExistingMSConstraints,
-  getprpt2kde,
-  rmInstMultisessionPriors!,
-  removeMultisessions!,
+  # # multisession utils
+  # multisessionquery,
+  # parsemultisessionqueryresult!,
+  # getLandmOtherSessNeoIDs,
+  # getAllLandmarkNeoIDs,
+  # getLocalSubGraphMultisession,
+  # findExistingMSConstraints,
+  # getprpt2kde,
+  # rmInstMultisessionPriors!,
+  # removeMultisessions!,
 
   # sas-slam
   CBFFilterConfig,
@@ -172,7 +172,7 @@ include("config/CaesarConfig.jl")
 include("zmq/ZmqCaesar.jl")
 
 # Multisession operation
-include("multisession/Multisession.jl")
+# include("attic/multisession/Multisession.jl")
 
 # SAS-SLAM
 include("beamforming/czt.jl")
