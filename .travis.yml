@@ -24,10 +24,10 @@ after_success:
 jobs:
   allow_failures:
     - julia: nightly
-    - name: "ALL MASTERS"
   fast_finish: true
   include:
-    - name: "ALL MASTERS"
+    - name: "DEV MASTERS"
+      if: NOT branch =~ ^release.*$
       julia: 1.5
       script:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
