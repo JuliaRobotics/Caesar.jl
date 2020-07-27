@@ -159,13 +159,13 @@ include("config/CaesarConfig.jl")
 
 
 # using CloudGraphs
-include("cloudgraphs/SolverStatus.jl")
-include("cloudgraphs/IterationStatistics.jl")
-include("cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
-include("cloudgraphs/ConvertGeneralSlaminDB.jl")
-include("cloudgraphs/slamindb.jl")
-include("cloudgraphs/MultisessionUtils.jl")
-include("cloudgraphs/FoveationUtils.jl")
+include("attic/cloudgraphs/SolverStatus.jl")
+include("attic/cloudgraphs/IterationStatistics.jl")
+include("attic/cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
+include("attic/cloudgraphs/ConvertGeneralSlaminDB.jl")
+include("attic/cloudgraphs/slamindb.jl")
+include("attic/cloudgraphs/MultisessionUtils.jl")
+include("attic/cloudgraphs/FoveationUtils.jl")
 
 
 # ZMQ server and endpoints
