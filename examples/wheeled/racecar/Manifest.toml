@@ -118,7 +118,7 @@ version = "3.0.4"
 
 [[Caesar]]
 deps = ["ApproxManifoldProducts", "CloudGraphs", "Combinatorics", "CoordinateTransformations", "DataStructures", "Dates", "DelimitedFiles", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FFTW", "FileIO", "Graphs", "ImageCore", "ImageMagick", "IncrementalInference", "JLD2", "JSON", "JSON2", "KernelDensityEstimate", "LinearAlgebra", "Mongoc", "NLsolve", "Neo4j", "Pkg", "ProgressMeter", "Reexport", "Requires", "RoME", "Rotations", "Statistics", "Test", "TransformUtils", "UUIDs", "Unmarshal", "YAML", "ZMQ"]
-path = "/home/singhk/.julia/dev/Caesar"
+path = "/home/dehann/.julia/dev/Caesar"
 uuid = "62eebf14-49bc-5f46-9df9-f7b7ef379406"
 version = "0.5.1"
 

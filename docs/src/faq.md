@@ -20,12 +20,23 @@ Caesar.jl and packages are currently targeting [Julia version](https://julialang
 Julia uses just-in-time compilation ([unless already pre-compiled](https://stackoverflow.com/questions/40116045/why-is-julia-taking-a-long-time-on-the-first-call-into-my-module))
  which takes additional time the first time a new function is called. Additional calls to a cached function are fast from the second call onwards since the static binary code is now cached and ready for use.
 
+### How does garbage collection work?
+
+A short description of Julia's garbage collection is [described in Discourse here](https://discourse.julialang.org/t/details-about-julias-garbage-collector-reference-counting/18021/3).
+
+!!! note
+    Garbage collection can be influenced in a few ways to allow more certainty about operational outcome, see the [Julia Docs Garbage Collection Internal functions](https://docs.julialang.org/en/v1/base/base/#Internals-1) like `enable`, `preserve`, `safepoint`, etc.
+
+### Using Julia in real-time systems?
+
+See the JuliaCon presentation by [rdeits here](https://www.youtube.com/watch?v=dmWQtI3DFFo).
+
 ## Can Caesar.jl be used in other languages beyond Julia? Yes.
 The Caesar.jl project is expressly focused on making this algorithmic code available to [C/Fortran](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/)/[C++](https://juliacomputing.com/blog/2017/12/01/cxx-and-cxxwrap-intro.html)/C#/[Python](https://github.com/JuliaPy/PyCall.jl)/[Java](https://github.com/JuliaInterop/JavaCall.jl)/JS.  Julia itself offers [many additional interops](https://github.com/JuliaInterop).  ZMQ and HTTP/WebSockets are the standardized interfaces of choice, please see [details at the multi-language section](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/)).  Consider opening issues or getting in touch for more information.
 
 ### Static, Shared Object `.so` Compilation
 
-Packages are already compiled to static objects (`.ji` files), but can also be compiled to more common `.so` files.  See [this AOT vs JIT compiling blog post](https://juliacomputing.com/blog/2016/02/09/static-julia.html) for a deeper discussion.  Also see [this Julia Binaries Blog](https://medium.com/@sdanisch/compiling-julia-binaries-ddd6d4e0caf4).  See recent dedicated [issue tracker here](https://github.com/JuliaRobotics/RoME.jl/issues/288).
+Packages are already compiled to static objects (`.ji` files), but can also be compiled to more common `.so` files.  See [this AOT vs JIT compiling blog post](https://juliacomputing.com/blog/2016/02/09/static-julia.html) for a deeper discussion.  Also see [this Julia Binaries Blog](https://medium.com/@sdanisch/compiling-julia-binaries-ddd6d4e0caf4).  See recent dedicated [issue tracker here](https://github.com/JuliaRobotics/RoME.jl/issues/288).  Initial work is for system image is [described in the docs here](https://juliarobotics.org/Caesar.jl/latest/installation_environment/#Ahead-Of-Time-Compile-RoME.so-1).
 
 !!! note
     [recent developments announced on discourse.](https://discourse.julialang.org/t/ann-packagecompiler-with-incremental-system-images/20489).  Also see new brute force sysimg work at [Fezzik.jl](https://github.com/TsurHerman/Fezzik).
@@ -33,19 +44,17 @@ Packages are already compiled to static objects (`.ji` files), but can also be c
 ### Can Julia be Embedded into C/C++
 Yes, see [the Julia embedding documentation page](https://docs.julialang.org/en/v1/manual/embedding/index.html).
 
-### Why ZMQ Middleware Layer (multilang)?
-
-[Zero Message Queue (ZMQ)](https://zeromq.org/) is a widely used data transport layer used to build various other multiprocess middleware with wide support among other programming languages.
-
 ### ROS Integration
-
 ROS integration is a priority for this project and will accompany the so-called ['prime time'](https://github.com/JuliaRobotics/RoME.jl/issues/147) release of the code.  ROS and ZMQ interfaces are closely related.
-
-> **Note** the present focus (2018Q3-2019Q2) is to stabilize the [ZMQ interface](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#ZMQ-Messaging-Interface-1).
 
 > **Voice** Please add your voice of support or suggestions on [ROS integration here](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
 
 > **WIP** Please see work on an initial PoC (still using PyCall) via our [wiki developer docs here](https://github.com/JuliaRobotics/Caesar.jl/wiki/ROS-PoC).
+
+### Why ZMQ Middleware Layer (multilang)?
+[Zero Message Queue (ZMQ)](https://zeromq.org/) is a widely used data transport layer used to build various other multiprocess middleware with wide support among other programming languages.  Caesar.jl has on been used with a direct ZMQ type link, which is similar to a ROS workflow.  Contributions are welcome for binding ZMQ endpoints for a non-ROS messaging interface.
+
+> **Note** ZMQ work has been happening on and off based on behind the main priority on resolving abstractions with the DistributedFactorGraphs.jl framework.  See ongoing work for [the ZMQ interface](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/#ZMQ-Messaging-Interface-1).
 
 ## What is supersolve?
 

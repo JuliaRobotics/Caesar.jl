@@ -24,6 +24,8 @@ Newly created page to list related references and additional literature pertaini
 
 [1.10] Fourie, D., Teran E., A., Kaess, M., and Leonard, J. J., [“Characterizing marginalization and incremental operations on the Bayes tree,”](https://marinerobotics.mit.edu/sites/default/files/WAFR2020_rev38_0.pdf) in International Workshop on Algorithmic Foundations of Robotics (WAFR), 2020, Oulu, Finland, Springer Publishing.
 
+[1.11]  Fourie, D., Rypkema, N., Claassens, S., Vaz Teixeira, P., Fischell, E., and Leonard, J.J., "Towards Real-Time Non-Gaussian SLAM for Underdetermined Navigation", in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), October 2020, Las Vegas, USA.
+
 ### Important References
 
 [2.1]  Kaess, Michael, et al. ["iSAM2: Incremental smoothing and mapping using the Bayes tree"](http://journals.sagepub.com/doi/abs/10.1177/0278364911430419) The International Journal of Robotics Research (2011): 0278364911430419.
@@ -59,6 +61,8 @@ Newly created page to list related references and additional literature pertaini
 [3.1]  Duits, Remco, Erik J. Bekkers, and Alexey Mashtakov. ["Fourier Transform on the Homogeneous Space of 3D Positions and Orientations for Exact Solutions to Linear Parabolic and (Hypo-) Elliptic PDEs."](https://www.preprints.org/manuscript/201811.0027/download/final_file) arXiv preprint arXiv:1811.00363 (2018).
 
 [3.2]  Mohamed, S., Rosca, M., Figurnov, M. and Mnih, A., 2019. [Monte carlo gradient estimation in machine learning. arXiv preprint arXiv:1906.10652](https://arxiv.org/pdf/1906.10652).
+
+[3.3]  Rackauckas, C., Ma, Y., Martensen, J., Warner, C., Zubov, K., Supekar, R., Skinner, D., Ramadhan, A., Edelman, A., ["Universal Differential Equations for Scientific Machine Learning"](https://arxiv.org/abs/2001.04385), Archive online, DOI: 2001.04385.
 
 ### Signal Processing (Beamforming and Channel Deconvolution)
 

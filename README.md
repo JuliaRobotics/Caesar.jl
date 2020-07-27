@@ -153,7 +153,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [fsm-build-img]: https://travis-ci.org/JuliaRobotics/FunctionalStateMachine.jl.svg?branch=master
 [fsm-build-url]: https://travis-ci.org/JuliaRobotics/FunctionalStateMachine.jl
 [fsm-url]: http://www.github.com/JuliaRobotics/FunctionalStateMachine.jl
-[fsm-stable]: https://img.shields.io/badge/2019Q2-v0.1.x-green.svg
+[fsm-stable]: https://img.shields.io/badge/2020Q2-v0.2.x-green.svg
 [fsm-milestones]: https://github.com/JuliaRobotics/FunctionalStateMachine.jl/milestones
 [fsm-releases]: https://github.com/JuliaRobotics/FunctionalStateMachine.jl/releases
 
