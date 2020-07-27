@@ -1,6 +1,5 @@
 language: julia
 sudo: required
-dist: trusty
 
 arch:
   - amd64
@@ -40,7 +39,7 @@ jobs:
         - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="Caesar", rev="master")); Pkg.instantiate()'
         - julia --project=docs/ -e 'using Pkg; pkg"add IncrementalInference"; pkg"add RoME"; pkg"add KernelDensityEstimatePlotting"; pkg"add RoMEPlotting#master";'
         - julia --project=docs/ docs/make.jl
-      name: "HTML"
+      name: "HTML Docs"
       after_success: skip
 
 notifications:
