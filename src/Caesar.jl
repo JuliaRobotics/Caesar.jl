@@ -21,7 +21,7 @@ using
   Statistics,
   LinearAlgebra,
   IncrementalInference,
-  Graphs,
+  # Graphs,
   TransformUtils,
   CoordinateTransformations,
   Rotations,
@@ -33,9 +33,9 @@ using
   ImageMagick,
   ImageCore,
   DocStringExtensions,
-  CloudGraphs, # TODO: will be movedd to DFG
-  Neo4j, # TODO: will be movedd to DFG
-  Mongoc, # TODO: will be movedd to DFG
+  # CloudGraphs, # TODO: will be movedd to DFG
+  # Neo4j, # TODO: will be movedd to DFG
+  # Mongoc, # TODO: will be movedd to DFG
   Unmarshal,
   YAML,
   FFTW
@@ -159,13 +159,13 @@ include("config/CaesarConfig.jl")
 
 
 # using CloudGraphs
-include("attic/cloudgraphs/SolverStatus.jl")
-include("attic/cloudgraphs/IterationStatistics.jl")
-include("attic/cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
-include("attic/cloudgraphs/ConvertGeneralSlaminDB.jl")
-include("attic/cloudgraphs/slamindb.jl")
-include("attic/cloudgraphs/MultisessionUtils.jl")
-include("attic/cloudgraphs/FoveationUtils.jl")
+# include("attic/cloudgraphs/SolverStatus.jl")
+# include("attic/cloudgraphs/IterationStatistics.jl")
+# include("attic/cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
+# include("attic/cloudgraphs/ConvertGeneralSlaminDB.jl")
+# include("attic/cloudgraphs/slamindb.jl")
+# include("attic/cloudgraphs/MultisessionUtils.jl")
+# include("attic/cloudgraphs/FoveationUtils.jl")
 
 
 # ZMQ server and endpoints
