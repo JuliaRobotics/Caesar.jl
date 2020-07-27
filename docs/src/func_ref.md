@@ -160,7 +160,6 @@ setCliqAsMarginalized!
 setCliqStatus!
 setDwnMsg!
 setfreeze!
-setTreeCliquesMarginalized!
 setUpMsg!
 setValKDE!
 setVariableInitialized!
