@@ -18,6 +18,10 @@ We've started to organize useful coding templates that are not available elsewhe
 - [Coding Templates Wiki I](http://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Coding-Templates).
 - [Coding Templates Wiki II](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Developers-guide)
 
+## Shortcuts for vscode IDE
+
+[See wiki](https://github.com/JuliaRobotics/Caesar.jl/wiki/Useful-vscode-IDE-shortcuts)
+
 ## Parametric Solve Whiteboard
 
 https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Parametric-Solve-Whiteboard
