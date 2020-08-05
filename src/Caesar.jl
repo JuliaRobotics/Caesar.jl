@@ -113,6 +113,7 @@ include("config/CaesarConfig.jl")
 # include("attic/cloudgraphs/MultisessionUtils.jl")
 # include("attic/cloudgraphs/FoveationUtils.jl")
 
+include("Deprecated.jl")
 
 # ZMQ server and endpoints
 include("zmq/ZmqCaesar.jl")
