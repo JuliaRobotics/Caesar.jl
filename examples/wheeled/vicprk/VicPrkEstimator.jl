@@ -42,7 +42,7 @@ function addLandmarksFactorGraph!(fg::G,
           if lcmode == :mmodal
             println("Adding bimodal factor")
             if !haskey(fg.IDs, lsy)
-              # vlm = projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise, addfactor=false, labels=["LANDMARK";])
+              # vlm = projNewLandm!(fg, string(prevn), lsy, [pfez[2];pfez[1]], lsrNoise, addfactor=false, tags=[:LANDMARK;])
               addMMBRFG!(fg, Symbol.([string(prevn[1]);lsymm;lsy]), [pfez[2];pfez[1]], lsrNoise, w=[0.5;0.5] )
             end
             addMMBRFG!(fg, Symbol.([string(prevn[1]);lsymm;lsy]), [fez[2];fez[1]], lsrNoise, w=[0.5;0.5] )

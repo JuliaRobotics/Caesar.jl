@@ -163,7 +163,7 @@ function buildPrimeLandmarksAndFactors(
             @error "Softtypes don't match for $s1:$sym (got $(typeof(land1.packed.softtype))) and $s2:$sym (got $(typeof(land2.packed.softtype)))"
             continue
         end
-        addVariable!(fg, sym, deepcopy(land1.packed.softtype), labels=["MULTISESSION"; "LANDMARK"; s1; s2; userId; robotId], uid=100000)
+        addVariable!(fg, sym, deepcopy(land1.packed.softtype), tags=[:MULTISESSION; :LANDMARK; Symbol(s1); Symbol(s2); Symbol(userId); Symbol(robotId)], uid=100000)
         # NOTE: Until DFG, all prime variables have exVertexId of 100000
         # Add the environment property
         setnodeproperty(getnode(cloudGraph.neo4j.graph, fg.cgIDs[100000]), "environment", environment)
@@ -200,7 +200,7 @@ function buildPrimeLandmarksAndFactors(
           # How do i create a Point2Point2 or Pose2Pose2 generically.
           newPrimeFactor = Point2Point2(MvNormal(zeros(2), 1e-4*Matrix(LinearAlgebra.I, 2,2) ))
           @warn "Currently would like a factor of type $newFactorType, but hard-coded to create Point2Point2's. Please fix in FederatedSolving.jl!"
-          addFactor!(fg, syms, newPrimeFactor, uid=100001, labels=["FACTOR", "MULTISESSION", userId, robotId, s], autoinit=false)
+          addFactor!(fg, syms, newPrimeFactor, uid=100001, tags=[:FACTOR; :MULTISESSION; Symbol(userId); Symbol(robotId); Symbol(s)], autoinit=false)
           # NOTE: Until DFG, all prime variables have exVertexId of 100000
           # Add the environment property
           setnodeproperty(getnode(cloudGraph.neo4j.graph, fg.cgIDs[100001]), "environment", environment)

@@ -29,15 +29,15 @@ odoCov = diagm([3.0;3.0;0.01].^2)
 
 
 # Some starting position
-v1 = addVariable!(fg, :x1, zeros(3,1), diagm([1.0;1.0;0.1]), N=N,labels=["POSE"])
+v1 = addVariable!(fg, :x1, zeros(3,1), diagm([1.0;1.0;0.1]), N=N,tags=[:POSE])
 initPosePrior = PriorPose2(MvNormal(zeros(3), initCov) )
 f1  = addFactor!(fg,[v1], initPosePrior)
 
 
 ppc = Pose2Pose2(([50.0;0.0;pi/2]')', odoCov, [1.0])
-v2, f2 = addOdoFG!( fg, ppc ,labels=["POSE"] )
+v2, f2 = addOdoFG!( fg, ppc ,tags=[:POSE] )
 
-v3, f3 = addOdoFG!( fg, ppc ,labels=["POSE"] )
+v3, f3 = addOdoFG!( fg, ppc ,tags=[:POSE] )
 
 
 # Some basic graph operations using the database

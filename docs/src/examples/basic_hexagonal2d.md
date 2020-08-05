@@ -86,7 +86,7 @@ Suppose some sensor detected a feature of interest with an associated range and 
 The new variable and measurement can be included into the factor graph as follows:
 ```julia
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 

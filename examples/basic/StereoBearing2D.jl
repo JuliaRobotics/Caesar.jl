@@ -34,17 +34,17 @@ mstd = 0.1
 fg = initfg()
 
 # add two beacons
-addVariable!(fg, :l0, Point2, labels=["BEACON"])
+addVariable!(fg, :l0, Point2, tags=[:BEACON;])
 # addFactor!(fg, [:l0], Prior(MvNormal(l0, lcov)))
 
-addVariable!(fg, :l1, Point2, labels=["BEACON"])
+addVariable!(fg, :l1, Point2, tags=[:BEACON;])
 # addFactor!(fg, [:l1], Prior(MvNormal(l1, lcov)))
 
 addFactor!(fg, [:l0; :l1], Point2Point2(MvNormal(l1-l0, [0.01 0; 0 0.01].^2)))
 
 
 # add unknown pose location
-addVariable!(fg, :x0, Pose2, labels=["POSE"])
+addVariable!(fg, :x0, Pose2, tags=[:POSE;])
 addFactor!(fg, [:x0], PriorPose2(MvNormal(p0, pcov)))
 
 # add two bearing only measurements
@@ -55,7 +55,7 @@ addFactor!(fg, [:x0; :l1], Pose2Point2BearingRange(Normal(m1, mstd), Rayleigh(2.
 
 
 # # add unknown pose location
-# addVariable!(fg, :x1, Pose2, labels=["POSE"])
+# addVariable!(fg, :x1, Pose2, tags=[:POSE;])
 # addFactor!(fg, [:x1], PriorPose2(MvNormal(p1, pcov)))
 #
 # # add two bearing only measurements
