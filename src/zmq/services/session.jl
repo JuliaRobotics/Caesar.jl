@@ -49,6 +49,7 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
     # Right, carrying on...
     factor = nothing
     try
+        # FIXME, use appropriate new DFG method rather than _evalType
         factType = _evalType(factorRequest["factorType"])
         factor = convert(factType, packedFactor)
     catch ex
