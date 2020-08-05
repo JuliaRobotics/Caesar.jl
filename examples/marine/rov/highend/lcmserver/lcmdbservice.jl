@@ -211,7 +211,7 @@ end
 
 function lcmsendpose(lc, vert::Graphs.ExVertex, usrid::Int)
   msg = rome.pose_node_t()
-  # p = getVertKDE(vert)
+  # p = getBelief(vert)
   p = getKDE(vert)
   mv = getKDEfit(p)
   # pme = getKDEMean(vert)

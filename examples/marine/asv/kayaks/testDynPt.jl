@@ -100,7 +100,7 @@ fsym = :l1x1x2x3x4x5f1
 pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
 
 plk=[]
-X1 = getKDEMean(getVertKDE(fg,:x1))
+X1 = getKDEMean(getBelief(fg,:x1))
 push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point))
 tplt = Gadfly.plot(plk...); tplt |> SVG("/tmp/test.svg") ; tplt |> PDF("/tmp/test.pdf")
 

@@ -67,7 +67,7 @@ for i in vps
     dpσ = Matrix(Diagonal([0.1;0.1;0.1;0.1].^2))
     vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
     addFactor!(fg, [poses[i];poses[i+1]], vp, autoinit=false)
-    # manualinit!(fg,poses[i],kde!(rand(MvNormal(dpμ,dpσ),100)))
+    # initManual!(fg,poses[i],kde!(rand(MvNormal(dpμ,dpσ),100)))
 end
 
 # IncrementalInference.doautoinit!(fg,[getVariable(fg,poses[5])])
@@ -88,7 +88,7 @@ tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 plk= [];
 
 for sym in ls(fg) #plotting all syms labeled
-    X1 = getKDEMean(getVertKDE(fg,sym))
+    X1 = getKDEMean(getBelief(fg,sym))
     push!(plk, layer(x=[X1[1];],y=[X1[2];], label=[String(sym);],Geom.point,Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
 end
 
@@ -98,7 +98,7 @@ push!(plk,layer(x=posData[:,1],y=posData[:,2], Geom.point, Theme(default_color=c
 # push!(plk,layer(x=[igt[1];],y=[igt[2];], label=String["Beacon";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"red")));
 #
 # L1 = getVal(getVariable(fg, beacon))
-# K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
+# K1 = plotKDEContour(getBelief(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
 # push!(plk,K1...)
 # push!(plk,Gadfly.Theme(key_position = :none));
 # push!(plk, Coord.cartesian(xmin=-40, xmax=140, ymin=-150, ymax=75,fixed=true))
@@ -117,7 +117,7 @@ fsym = :l1x1x2x3x4x5f1
 pl = plotSASPair(fg, fsym, show=true, filepath="/tmp/testDP_2pp_3vpvp_init.pdf");
 
 plk=[]
-X1 = getKDEMean(getVertKDE(fg,:x1))
+X1 = getKDEMean(getBelief(fg,:x1))
 push!(plk, layer(x=X1[1,:],y=X1[2,:], Geom.point))
 tplt = Gadfly.plot(plk...); tplt |> SVG("/tmp/test.svg") ; tplt |> PDF("/tmp/test.pdf")
 

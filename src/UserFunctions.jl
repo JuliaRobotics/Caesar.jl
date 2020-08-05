@@ -43,7 +43,7 @@ end
 
 
 function projectrbe(fgl::G, from::Symbol, to::Vector{Float64}) where G <: AbstractDFG
-  x1 = getKDEMax(getVertKDE(fgl,from))
+  x1 = getKDEMax(getBelief(fgl,from))
   x2 = to
 
   wTc = SE3(x1[1:3],Euler(x1[4:6]...))
@@ -60,8 +60,8 @@ end
 
 
 function projectrbe(fgl::G, from::Symbol, to::Symbol) where G <: AbstractDFG
-  # x1 = getKDEMax(getVertKDE(fg,from))
-  x2 = getKDEMax(getVertKDE(fgl,to))
+  # x1 = getKDEMax(getBelief(fg,from))
+  x2 = getKDEMax(getBelief(fgl,to))
   return projectrbe(fgl, from, x2[1:3])
 
   # wTc = SE3(x1[1:3],Euler(x1[4:6]...))

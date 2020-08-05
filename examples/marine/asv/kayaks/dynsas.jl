@@ -80,7 +80,7 @@ while pose_counter < totalposes-2
 
         pp = DynPoint2VelocityPrior(MvNormal(dpμ,dpσ))
         addFactor!(fg, [current_symbol;], pp, autoinit=true)
-        # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
+        # initManual!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
    end
 
    #odo factors
@@ -94,7 +94,7 @@ while pose_counter < totalposes-2
        dpσ = Matrix(Diagonal([0.2;0.2;0.2;0.2].^2))
        vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
        addFactor!(fg, [Symbol("x$(pose_counter-1)");current_symbol], vp, autoinit=true)
-       # manualinit!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
+       # initManual!(fg,current_symbol,kde!(rand(MvNormal(dpμ,dpσ),100)))
    end
 
    if sas_gap_counter >= sas_gap
@@ -139,7 +139,7 @@ while pose_counter < totalposes-2
                push!(plk,plotBeaconGT(igt));
                # plotBeaconContours!(plk,fg);
                for mysym in poses[sas_counter]
-                   xData = getKDEMax(getVertKDE(fg,mysym))
+                   xData = getKDEMax(getBelief(getVariable(fg,mysym)))
                    push!(plk, plotPoint(xData,colorIn=colorant"orange"))
                end
                L1pd = predictbelief(fg, :l1,ls(fg, :l1))
@@ -160,23 +160,23 @@ while pose_counter < totalposes-2
            end
 
            if expID == "dock"
-               l1fit = getKDEMean(getVertKDE(fg,:l1))
+               l1fit = getKDEMean(getBelief(getVariable(fg,:l1)))
                meanerror = sqrt((igt[1]-l1fit[1])^2+(igt[2]-l1fit[2])^2)
 
-               l1max = getKDEMax(getVertKDE(fg,:l1))
+               l1max = getKDEMax(getBelief(getVariable(fg,:l1)))
                maxerror = sqrt((igt[1]-l1max[1])^2+(igt[2]-l1max[2])^2)
 
-               mykde = getVertKDE(fg,:l1)
+               mykde = getBelief(getVariable(fg,:l1))
                mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
                kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
            elseif expID == "drift"
-               l1fit = getKDEMean(getVertKDE(fg,:l1))
+               l1fit = getKDEMean(getBelief(getVariable(fg,:l1)))
                meanerror = sqrt((mean(igt[:,1])-l1fit[1])^2+(mean(igt[:,2])-l1fit[2])^2)
 
-               l1max = getKDEMax(getVertKDE(fg,:l1))
+               l1max = getKDEMax(getBelief(getVariable(fg,:l1)))
                maxerror = sqrt((mean(igt[:,1])-l1max[1])^2+(mean(igt[:,2])-l1max[2])^2)
 
-               mykde = getVertKDE(fg,:l1)
+               mykde = getBelief(getVariable(fg,:l1))
                mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
                kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
            end

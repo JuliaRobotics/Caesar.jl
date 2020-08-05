@@ -104,7 +104,7 @@ tree, smt, hist = solveTree!(fg)
 # plk = plotBeaconSolve(fg)
 plk=[];
 for sym in ls(fg) #plotting all syms labeled
-    X1 = getKDEMean(getVertKDE(fg,sym))
+    X1 = getKDEMean(getBelief(getVariable(fg,sym)))
     push!(plk, layer(x=[X1[1];],y=[X1[2];],label=String["$sym";], Geom.point,Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
 end
 # push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))

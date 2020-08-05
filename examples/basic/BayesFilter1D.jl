@@ -24,7 +24,7 @@ function forwardConvolve(X0::Array{Float64,2}, model)
   fg = initfg()
 
   addVariable!(fg, :x0, ContinuousScalar)
-  manualinit!(fg, :x0, X0)
+  initManual!(fg, :x0, X0)
   addVariable!(fg, :x1, ContinuousScalar)
 
   addFactor!(fg, [:x0;:x1], model)

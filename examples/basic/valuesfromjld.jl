@@ -20,12 +20,12 @@ xx,ll = ls(fg)
 fid = open(datadir*"results_$(datetimestamp).csv","w")
 for x in xx
   # @show x,
-  mx = KDE.getKDEMean(getVertKDE(fg, x))
+  mx = KDE.getKDEMean(getBelief(getVariable(fg, x)))
   println(fid, "$x, $(mx[1]), $(mx[2]), $(mx[3]), $(mx[4]), $(mx[5])")
 end
 for x in ll
   # @show x,
-  mx = KDE.getKDEMean(getVertKDE(fg, x))
+  mx = KDE.getKDEMean(getBelief(getVariable(fg, x)))
   println(fid, "$x, $(mx[1]), $(mx[2])")
 end
 close(fid)

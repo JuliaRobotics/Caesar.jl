@@ -32,7 +32,7 @@ addVariable!(fg, beacon, Point2 )
 for i in window
     sym = Symbol("x$i")
     addVariable!(fg, sym, Point2)
-    manualinit!(fg,sym,kde!(rand(MvNormal(dposData[i,:],Diagonal([0.5;0.5].^2)),100)))
+    initManual!(fg,sym,kde!(rand(MvNormal(dposData[i,:],Diagonal([0.5;0.5].^2)),100)))
 end
 
 rtkCov = Matrix(Diagonal([0.1;0.1].^2));

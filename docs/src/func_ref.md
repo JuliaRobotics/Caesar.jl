@@ -106,6 +106,7 @@ getCliqVars
 getCliqVarSingletons
 getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
+getBelief
 getKDE
 getLogPath
 getManifolds
@@ -116,7 +117,6 @@ getTreeCliqsSolverHistories
 getVal
 getVariableDim
 getVariableInferredDim
-getVertKDE
 getUpMsgs
 getDwnMsgs
 hasCliq
@@ -136,7 +136,7 @@ lsf
 lsfPriors
 lsRear
 makeCsmMovie
-manualinit!
+initManual!
 parentCliq
 packFromLocalPotentials!
 predictVariableByFactor

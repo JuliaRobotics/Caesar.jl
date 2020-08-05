@@ -2,7 +2,7 @@
 stuff = IIF.localProduct(fg, :x5)
 stuff[2]
 
-plotKDE([getVertKDE(fg, :x5);stuff[2]], dims=[1;2], levels=3, c=["red";"green";["blue" for i in 1:10]])
+plotKDE([getBelief(fg, :x5);stuff[2]], dims=[1;2], levels=3, c=["red";"green";["blue" for i in 1:10]])
 pts = KDE.getPoints(stuff[2][1])
 Gadfly.plot(x=pts[1,:],y=pts[2,:], Geom.hexbin) |> SVG("/tmp/test.svg", 35cm, 25cm)
 

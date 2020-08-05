@@ -157,7 +157,7 @@ IIF.savejld(fg, file=imgdir*"/racecar_fg_$(currdirtime).jld")
 #
 # fid = open("results.csv","w")
 # for sym in [ls(fg)[1]...;ls(fg)[2]...]
-#   p = getVertKDE(fg, sym)
+#   p = getBelief(fg, sym)
 #   val = string(KDE.getKDEMax(p))
 #   println(fid, "$sym, $(val[2:(end-1)])")
 # end

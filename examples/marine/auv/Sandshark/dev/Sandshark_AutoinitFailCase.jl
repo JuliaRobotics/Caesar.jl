@@ -139,7 +139,7 @@ smt, hist = solveCliq!(fg, tree, :x1)
 ### DEV work below
 
 
-cliq = whichCliq(tree,:x0)
+cliq = getClique(tree,:x0)
 
 getCliqVariableInferredPercent(fg, cliq)
 
@@ -153,7 +153,7 @@ getCliqVariableInferredPercent(fg, cliq)
 ### Pretend solve cliq 2
 
 
-cliq = whichCliq(tree, :x2)
+cliq = getClique(tree, :x2)
 syms = getCliqAllVarSyms(fg, cliq)
 c3sfg = buildSubgraphFromLabels(fg, syms)
 # c2sfg = buildSubgraphFromLabels(fg, syms)
@@ -212,20 +212,20 @@ unlockUpStatus!(getData(prnt))
 
 
 
-fetchCliqSolvableDims(whichCliq(tree, :x4))
-fetchCliqSolvableDims(whichCliq(tree, :x2))
-fetchCliqSolvableDims(whichCliq(tree, :x0))
+fetchCliqSolvableDims(getClique(tree, :x4))
+fetchCliqSolvableDims(getClique(tree, :x2))
+fetchCliqSolvableDims(getClique(tree, :x0))
 
 
 
 
 
 
-prnt = whichCliq(tree, :x1)
+prnt = getClique(tree, :x1)
 getCliqSiblingsPriorityInitOrder(tree, prnt)
 
-getData(whichCliq(tree, :x0)).solvableDims
+getData(getClique(tree, :x0)).solvableDims
 
-fetch(getData(whichCliq(tree, :x0)).solvableDims)
+fetch(getData(getClique(tree, :x0)).solvableDims)
 
 #

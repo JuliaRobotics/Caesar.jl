@@ -141,7 +141,7 @@ pro, = localProduct(sfg, lsym)
 plotKDE(pro)
 lvert = getVert(sfg, lsym, api=localapi)
 setVal!(lvert, getPoints(pro), getBW(pro)[:,1])
-plotKDE(getVertKDE(lvert))
+plotKDE(getBelief(lvert))
 
 plotLocalProduct(sfg, lsym, api=localapi)
 

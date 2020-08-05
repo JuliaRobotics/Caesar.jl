@@ -101,9 +101,9 @@ drawAllBinaryFactorEdges!(vis, backend_config, user_config["session"])
 
 
 
-X1 = getVertKDE(fg, :x1)
+X1 = getBelief(fg, :x1)
 plotKDE(X1, dims=[1;2])
-X2 = getVertKDE(fg, :x2)
+X2 = getBelief(fg, :x2)
 plotKDE(X2, dims=[1;2])
 
 

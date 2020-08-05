@@ -274,7 +274,7 @@ genGifLandm(fg, :l1, IMGS)
 fsym = :x0l0f1
 getData(getVert(fg, fsym,nt=:fnc)).fnc.usrfnc!.Zpose.z.μ
 
-XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
+XX, LL = (KDE.getKDEMax.(IIF.getBelief.(fg, IIF.lsf(fg, fsym)))...)
 @show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
 bear= TU.wrapRad(atan2(-xyt[2],xyt[1]) - XX[3])
 

@@ -104,9 +104,9 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
 
       tfg = initfg()
       addVariable!(tfg, :l1, Point2)
-      manualinit!(tfg,:l1,getKDE(fgl,:l1))
+      initManual!(tfg,:l1,getKDE(fgl,:l1))
       addVariable!(tfg, curvar, Pose2)
-      manualinit!(tfg,curvar,getKDE(fgl,curvar))
+      initManual!(tfg,curvar,getKDE(fgl,curvar))
       addFactor!(tfg, [curvar;:l1], pprDict[ep])
 
       hdl = []
