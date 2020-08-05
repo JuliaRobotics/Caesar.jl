@@ -117,7 +117,7 @@ cv1r = CloudGraphs.get_vertex(fg.cg, x1neoID, false)
 v1r = cloudVertex2ExVertex(cv1r)
 plotKDE(getKDE(v1r))
 
-plotKDE( getVertKDE(fg, :x2) )
+plotKDE( getBelief(fg, :x2) )
 
 
 

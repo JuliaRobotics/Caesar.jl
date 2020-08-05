@@ -34,7 +34,7 @@ visualizeallposes!(vc, fg, drawlandms=false)
 # Evaluate the likelihood of a point on the marginal belief of some variable
 # note the dimensions must match
 function evalLikelihood(fg::G, sym::Symbol, point::Vector{Float64}) where G <: AbstractDFG
-  p = getVertKDE(fg, sym)
+  p = getBelief(fg, sym)
   Ndim(p) == length(point) ? nothing : error("point (dim=$(length(point))) must have same dimension as belief (dim=$(Ndim(p)))")
   evaluateDualTree(p, (point')')[1]
 end
@@ -42,7 +42,7 @@ end
 # Evaluate the likelihood of an Array{2} of points on the marginal belief of some variable
 # note the dimensions must match
 function evalLikelihood(fg::G, sym::Symbol, points::Array{Float64,2}) where G <: AbstractDFG
-  p = getVertKDE(fg, sym)
+  p = getBelief(fg, sym)
   Ndim(p) == size(points,1) ? nothing : error("points (dim=$(size(points,1))) must have same dimension as belief (dim=$(Ndim(p)))")
   evaluateDualTree(p, (points))
 end

@@ -120,9 +120,9 @@ tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree)
 
 using KernelDensityEstimate
-@show x0 = getKDEMax(getVertKDE(fg, :x0))
+@show x0 = getKDEMax(getBelief(fg, :x0))
 # julia> ... = [-0.19441, 0.0187019, 10.0082, 10.0901]
-@show x1 = getKDEMax(getVertKDE(fg, :x1))
+@show x1 = getKDEMax(getBelief(fg, :x1))
  # julia> ... = [19.9072, 19.9765, 10.0418, 10.0797]
 ```
 
@@ -184,16 +184,16 @@ tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree)
 
 # see the output
-@show x0 = getKDEMax(getVertKDE(fg, :x0))
-@show x1 = getKDEMax(getVertKDE(fg, :x1))
-@show x2 = getKDEMax(getVertKDE(fg, :x2))
+@show x0 = getKDEMax(getBelief(getVariable(fg, :x0)))
+@show x1 = getKDEMax(getBelief(getVariable(fg, :x1)))
+@show x2 = getKDEMax(getBelief(getVariable(fg, :x2)))
 ```
 
 Producing output:
 ```
-x0 = getKDEMax(getVertKDE(fg, :x0)) = [0.101503, -0.0273216, 9.86718, 9.91146]
-x1 = getKDEMax(getVertKDE(fg, :x1)) = [10.0087, 9.95139, 10.0622, 10.0195]
-x2 = getKDEMax(getVertKDE(fg, :x2)) = [19.9381, 19.9791, 10.0056, 9.92442]
+x0 = getKDEMax(getBelief(getVariable(fg, :x0))) = [0.101503, -0.0273216, 9.86718, 9.91146]
+x1 = getKDEMax(getBelief(getVariable(fg, :x1))) = [10.0087, 9.95139, 10.0622, 10.0195]
+x2 = getKDEMax(getBelief(getVariable(fg, :x2))) = [19.9381, 19.9791, 10.0056, 9.92442]
 ```
 
 # IncrementalInference.jl Defining Factors (Future API)

@@ -9,7 +9,7 @@ A quick summary of the variables in the factor graph can be retrieved with:
 ls(fg)
 # List factors attached to x0
 ls(fg, :x0)
-# TODO: Provide an overview of getVal, getVert, getBW, getVertKDE, etc.
+# TODO: Provide an overview of getVal, getVert, getBW, getBelief, etc.
 ```
 
 A factor graph object can be visualized using:

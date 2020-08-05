@@ -167,19 +167,19 @@ function setVarKDE(configDict, fg, requestDict)::Dict{String, Any}
 end
 
 function getVarMAPKDE(configDict, fg, requestDict)::Dict{String, Any}
-    map = KDE.getKDEMax(getVertKDE(fg, Symbol(Symbol(requestDict["payload"]))))
+    map = KDE.getKDEMax(getBelief(fg, Symbol(Symbol(requestDict["payload"]))))
     return Dict{String, Any}("MAP" => JSON.parse(JSON.json(map)))
 end
 
 function getVarMAPMax(configDict, fg, requestDict)::Dict{String, Any}
-    # KDE.getKDEMax(getVertKDE(fg, :x0))
+    # KDE.getKDEMax(getBelief(fg, :x0))
   @show requestDict
   # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
   error("Get all KDE modes - Not implemented yet!")
 end
 
 function getVarMAPMean(configDict, fg, requestDict)::Dict{String, Any}
-    map = KDE.getKDEMean(getVertKDE(fg, Symbol(Symbol(requestDict["payload"]))))
+    map = KDE.getKDEMean(getBelief(fg, Symbol(Symbol(requestDict["payload"]))))
     return Dict{String, Any}("MAP" => JSON.parse(JSON.json(map)))
 end
 

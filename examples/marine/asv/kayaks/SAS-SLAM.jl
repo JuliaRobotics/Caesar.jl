@@ -72,13 +72,13 @@ for fitr in 1:nfactors
     beacongt = [17.0499;1.7832];
     push!(PL,layer(x=[beacongt[1];],y=[beacongt[2];],label=String["Beacon Ground Truth";],Geom.point,Geom.label(hide_overlaps=false), order=2));
 
-    l1fit = getKDEMean(getVertKDE(fg,:l1))
+    l1fit = getKDEMean(getBelief(fg,:l1))
     push!(PL,layer(x=[l1fit[1];],y=[l1fit[2];],label=String["KDE Mean";],Geom.point,Geom.label(hide_overlaps=false),order=1));
 
-    l1max = getKDEMax(getVertKDE(fg,:l1))
+    l1max = getKDEMax(getBelief(fg,:l1))
     push!(PL,layer(x=[l1max[1];],y=[l1max[2];],label=String["KDE Max";],Geom.point,Geom.label(hide_overlaps=false),order=1));
 
-    push!(PL, plotKDE(getVertKDE(fg, :l1),levels=4, layers=true)... )
+    push!(PL, plotKDE(getBelief(fg, :l1),levels=4, layers=true)... )
     L1 = getVal(fg, :l1)
     push!(PL, layer(x=L1[1,:],y=L1[2,:], Geom.histogram2d))
 
@@ -123,17 +123,17 @@ push!(PL,layer(x=[beacongt[1];],y=[beacongt[2];],label=String["Beacon Ground Tru
 l1fit = fit(MvNormal,getVal(fg,:l1))
 push!(PL,layer(x=[l1fit.μ[1];],y=[l1fit.μ[2];],label=String["Mean-Fit";],Geom.point,Geom.label(hide_overlaps=false),order=1));
 
-l1max = getKDEMax(getVertKDE(fg,:l1))
+l1max = getKDEMax(getBelief(fg,:l1))
 push!(PL,layer(x=[l1max[1];],y=[l1max[2];],label=String["Max-Fit";],Geom.point,Geom.label(hide_overlaps=false),order=1));
 
-push!(PL, plotKDE(getVertKDE(fg, :l1),levels=4, layers=true)... )
+push!(PL, plotKDE(getBelief(fg, :l1),levels=4, layers=true)... )
 #L1 = getVal(fg, :l1)
 #push!(PL, layer(x=L1[1,:],y=L1[2,:], Geom.histogram2d))
 
 saveBF = Dict()
 for i in 1:nfactors
     #push!(PL,layer(x=nav[i][:,1],y=nav[i][:,2],Geom.point, Geom.path, Theme(default_color=colorant"red")));
-    #push!(PL, plotKDE(getVertKDE(fg, Symbol("x$(i)")),levels=4, layers=true, dimLbls=["",""])... )
+    #push!(PL, plotKDE(getBelief(fg, Symbol("x$(i)")),levels=4, layers=true, dimLbls=["",""])... )
     saveBF[i] = approxConvFwdBFRaw(fg, poses[i], :l1, nav[i][1,:])
 end
 
@@ -161,16 +161,16 @@ allv = collect(1:12)
 lo =[4,7,9,10,11]
 # keep = [1;2;3;5;6;8;12]
 keep = setdiff(allv, lo)
-plotKDE([getVertKDE(fg,:l1);stuff[2][keep]],levels=1,c=["red";["blue" for i in 1:12]])
+plotKDE([getBelief(fg,:l1);stuff[2][keep]],levels=1,c=["red";["blue" for i in 1:12]])
 
 
 something, = predictbelief(fg, :l1, ll[keep])
 
 
-plotKDE([getVertKDE(fg,:l1);kde!(something);stuff[2][keep]],levels=1,c=["red";"cyan";["blue" for i in 1:12]])
+plotKDE([getBelief(fg,:l1);kde!(something);stuff[2][keep]],levels=1,c=["red";"cyan";["blue" for i in 1:12]])
 
 
-plotKDE([getVertKDE(fg,:l1);kde!(something);stuff[2][keep]],levels=1,c=["red";"cyan";["blue" for i in 1:12]], dims=[1])
+plotKDE([getBelief(fg,:l1);kde!(something);stuff[2][keep]],levels=1,c=["red";"cyan";["blue" for i in 1:12]], dims=[1])
 
 
 navfile = datadir*"inav.csv"

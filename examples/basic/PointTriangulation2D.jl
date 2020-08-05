@@ -34,18 +34,18 @@ mstd = 0.05
 fg = initfg()
 
 # add two beacons
-addVariable!(fg, :l0, Point2, labels=["BEACON"])
+addVariable!(fg, :l0, Point2, tags=[:BEACON;])
 addFactor!(fg, [:l0], Prior(MvNormal(l0, lcov)))
 
-addVariable!(fg, :l1, Point2, labels=["BEACON"])
+addVariable!(fg, :l1, Point2, tags=[:BEACON;])
 addFactor!(fg, [:l1], Prior(MvNormal(l1, lcov)))
 
-# addVariable!(fg, :l2, Point2, labels=["BEACON"])
+# addVariable!(fg, :l2, Point2, tags=[:BEACON;])
 # addFactor!(fg, [:l2], Prior(MvNormal(l2, lcov)))
 
 
 # add unknown pose location
-addVariable!(fg, :x0, Pose2, labels=["POSE"])
+addVariable!(fg, :x0, Pose2, tags=[:POSE;])
 
 # add two bearing only measurements
 addFactor!(fg, [:x0; :l0], Pose2Point2Bearing(Normal(m0, mstd)))
@@ -56,7 +56,6 @@ addFactor!(fg, [:x0; :l1], Pose2Point2Bearing(Normal(m1, mstd)))
 # solve the system -- remember first runs are slow (just in time compile code)
 [solveTree!(fg) for i in 1:5]
 
-# getKDEMean(getVertKDE(fg, :x0))
 
 ## Plot values to see result
 

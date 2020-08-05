@@ -232,7 +232,7 @@ visualizeDensityMesh!(vc, fg, :l6)
 
 
 draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
- plotKDE( getVertKDE(fg,:l1), dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
+ plotKDE( getBelief(fg,:l1), dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
 
 
  draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
@@ -240,12 +240,12 @@ draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
 
 
 draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
- plotKDE( getVertKDE(fg,:x6), dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
+ plotKDE( getBelief(fg,:x6), dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
 
 XX = String["x$i" for i in 1:6];
 LL = String["l$i" for i in 1:7];
 [draw(PDF("/home/dehann/Desktop/imgs/$(i).pdf",30cm,20cm),
-  plotKDE( getVertKDE(fg,i), dimLbls=["x";"y";"z";"phi";"the";"psi"]) ) for i in union(XX,LL)];
+  plotKDE( getBelief(fg,i), dimLbls=["x";"y";"z";"phi";"the";"psi"]) ) for i in union(XX,LL)];
 
 
 

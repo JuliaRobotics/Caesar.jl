@@ -224,7 +224,7 @@ j=1;
 for l1 in L
   i=1
   for l2 in L
-    b=getKDEMax(getVertKDE(fg, l1))
+    b=getKDEMax(getBelief(fg, l1))
     c=evalLikelihood(fg, l2 , b)
     if ( c>0.002 && l1!=l2 )
       d+=1

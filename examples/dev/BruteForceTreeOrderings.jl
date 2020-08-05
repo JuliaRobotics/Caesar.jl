@@ -248,7 +248,7 @@ function nnzTreeTotal(tree)
   nnzTot = 0
   for (cliqid, cliq) in tree.cliques
     # afrtl = getCliqFrontalVarIds(tree.cliques[cliqid])[1]
-    # cliq = getCliq(tree, afrtl)
+    # cliq = getClique(tree, afrtl)
     nnzTot += nnzClique(cliq)
   end
   return nnzTot

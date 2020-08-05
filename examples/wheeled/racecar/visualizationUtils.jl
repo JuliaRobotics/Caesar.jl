@@ -136,7 +136,7 @@ function imageFactor(fg, fsym, im, cfg)
   zmeas = getData(getVert(fg, fsym,nt=:fnc)).fnc.usrfnc!.Zpose.z.μ
 
   # @show IIF.lsf(fg, fsym)
-  XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
+  XX, LL = (KDE.getKDEMax.(IIF.getBelief.(fg, IIF.lsf(fg, fsym)))...)
   @show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
   bear= TU.wrapRad(atan2(-xyt[2],xyt[1]) - XX[3])
   # bear = 0.0
@@ -229,7 +229,7 @@ function plotPoseVelAsMax(fg, poserange)
   VV = zeros(len, 2)
 
   i = 0
-  for state in KDE.getKDEMax.(getVertKDE.(fg, xx))
+  for state in KDE.getKDEMax.(getBelief.(fg, xx))
     i += 1
     VV[i,:] = state[4:5]
   end

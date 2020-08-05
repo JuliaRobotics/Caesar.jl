@@ -56,11 +56,11 @@ ANAITER=1
 
 # for sym in lms
 sym = lms[1]
-fv = getVert(fg, sym, nt=:fnc)
-ffv = getData(fv).fnc.usrfnc!
+fv = getFactor(fg, sym)
+ffv = getFactorType(fv) #getData(fv).fnc.usrfnc!
 # plotKDE(ffv.belief)
 
-p = getVertKDE(fg, sym)
+p = getVariable(fg, sym) |> getBelief
 pl = plotKDE([ffv.belief; p], c=["red";"green"], levels=3, legend=["MultiSess"; "Current"], title=string(sym), fill=true)
 
 # run(`mkdir results`)

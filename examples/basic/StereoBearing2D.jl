@@ -76,7 +76,6 @@ drawGraph(fg, show=true)
 # solve the system -- remember first runs are slow (just in time compile code)
 solveTree!(fg)
 
-# getKDEMean(getVertKDE(fg, :x0))
 
 ## Plot values to see result
 

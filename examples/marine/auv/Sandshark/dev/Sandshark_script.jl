@@ -224,7 +224,7 @@ Gadfly.plot(layers...)
 # # STUFF
 # fsym = :x49l1f1
 # const TU = TransformUtils
-# XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
+# XX, LL = (KDE.getKDEMax.(IIF.getBelief.(fg, IIF.lsf(fg, fsym)))...)
 # @show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
 # bear= rad2deg(TU.wrapRad(atan2(-xyt[2],xyt[1]) -XX[3]))
 # b = IncrementalInference.getData(fg, fsym, nt=:fnc).fnc.usrfnc!
@@ -234,7 +234,7 @@ Gadfly.plot(layers...)
 #
 # # SAVE THIS PLOT
 # # epochs = timestamps[11:2:200]
-# g = getVertKDE.(fg, [:l1, :x49])
+# g = getBelief.(fg, [:l1, :x49])
 # m1 = KDE.marginal(g[1], [1;2])
 # m2 = KDE.marginal(g[2], [1;2])
 # norm(diff(KDE.getKDEMax.([m1; m2])))
@@ -288,7 +288,7 @@ Gadfly.plot(layers...)
 
 fsym = :x49l1f1
 const TU = TransformUtils
-XX, LL = (KDE.getKDEMax.(IIF.getVertKDE.(fg, IIF.lsf(fg, fsym)))...)
+XX, LL = (KDE.getKDEMax.(IIF.getBelief.(fg, IIF.lsf(fg, fsym)))...)
 @show xyt = se2vee(SE2(XX[1:3]) \ SE2([LL[1:2];0.0]))
 bear= rad2deg(TU.wrapRad(atan2(-xyt[2],xyt[1]) -XX[3]))
 

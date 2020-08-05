@@ -80,7 +80,7 @@ function drawPosesLandmarksAndOdo(fg::G,
     # idx = 0
     # for idx in 1:length(xx)
     #   ep = epochs[idx]
-    #   theta = getKDEMax(getVertKDE(fg, xx[idx]))
+    #   theta = getKDEMax(getBelief(fg, xx[idx]))
     #   wRr = TU.R(theta[3])
     #   pll = layerBeamPatternRose(ppbrDict[ep].bearing, wTRr=theta[1:2], scale=5.0 , wRr=wRr)
     #   push!(PLL, pll)

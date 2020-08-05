@@ -49,9 +49,6 @@ export
   poseTrigAndAdd!,
   processTreeTrackersUpdates!,
   advOdoByRules,
-  progressExamplePlot,
-  plotPoseDict,
-  plotTrckStep,
   SLAMWrapper,
 
   # servers
@@ -68,59 +65,8 @@ export
   projectrbe,
   hasval,
 
-  # repeats from RoME and IIF
-  # initfg,
-  # addNode!,
-  # addFactor!,
-
-  # CloudGraphs helper functions
-  insertnodefromcv!,
-  checkandinsertedges!,
-  getbinarraymongo,
-  gettopoint,
-  getdotwothree,
-  bin2arr,
-  fetchsubgraph!,
-  getVertNeoIDs!,
-  insertrobotdatafirstpose!,
-  tryunpackalltypes!,
-  fetchrobotdatafirstpose,
-  getExVertexNeoIDs,
-  db2jld,
-
   # Robot Utils
   getRangeKDEMax2D,
-
-  # would be CloudGraphs calls
-  hasBigDataElement,
-  getBigDataElement,
-  removeNeo4jID,
-
-  # solver service SLAMinDB
-  getcredentials,
-  startSlamInDb,
-  runSlamInDbOnSession,
-  slamindb,
-  convertdb,
-  resetconvertdb,
-  getmaxfactorid,
-
-  # webserver
-  SolverStatus,
-  CaesarConfig,
-  IterationStatistics,
-  VisualizationConfig,
-
-  # # multisession utils
-  # multisessionquery,
-  # parsemultisessionqueryresult!,
-  # getLandmOtherSessNeoIDs,
-  # getAllLandmarkNeoIDs,
-  # getLocalSubGraphMultisession,
-  # findExistingMSConstraints,
-  # getprpt2kde,
-  # rmInstMultisessionPriors!,
-  # removeMultisessions!,
 
   # sas-slam
   CBFFilterConfig,

@@ -75,7 +75,7 @@ drawPosesLandms(fg ,spscale=0.5)
 
 
 lbll=:l200050
-cliq = whichCliq(tree, string(lbll))
+cliq = getClique(tree, string(lbll))
 cliqdbg = cliq.attributes["debug"]
 vidx = 1
 for lb in cliqdbg.mcmc[1].lbls

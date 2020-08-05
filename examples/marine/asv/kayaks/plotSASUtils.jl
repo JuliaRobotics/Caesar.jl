@@ -30,7 +30,7 @@ function plotPriors!(plHolderIn,fg)
     for mysym in ls(fg)
         for myfac in ls(fg,mysym)
             if occursin(r"^x\df",string(myfac))
-                xData = getKDEMax(getVertKDE(fg,mysym))
+                xData = getKDEMax(getBelief(fg,mysym))
                 push!(plHolderIn,plotPoint(xData,colorIn=colorant"green2",orderIn=2))
             end
         end
@@ -42,12 +42,12 @@ function pltoPDF(plHolderIn ; savedir::String="/tmp/test.pdf")
 end
 
 function plotBeaconMax(fg)
-    L1 = getKDEMax(getVertKDE(fg, :l1))
+    L1 = getKDEMax(getBelief(fg, :l1))
     return layer(x=[L1[1];],y=[L1[2];], label=String["Beacon Max";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"darkorange",highlight_width = 0pt));
 end
 
 function plotBeaconMean(fg)
-    L1 = getKDEMean(getVertKDE(fg, :l1))
+    L1 = getKDEMean(getBelief(fg, :l1))
     return layer(x=[L1[1];],y=[L1[2];], label=String["Beacon Mean";],Geom.point,Geom.label(hide_overlaps=false), order=2, Theme(default_color=colorant"orangered",highlight_width = 0pt));
 end
 
@@ -57,7 +57,7 @@ function plotBeaconHist(fg)
 end
 
 function plotBeaconContours!(plHolderIn, fg)
-    K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
+    K1 = plotKDEContour(getBelief(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=5,layers=true);
     push!(plHolderIn,K1...)
     push!(plHolderIn,Gadfly.Theme(key_position = :none));
 end
@@ -65,7 +65,7 @@ end
 function plotKDEMaxs!(plHolderIn,fg;regx::Regex=r"x")
     for sym in ls(fg)
         if occursin(regx,string(sym))
-            xData = getKDEMax(getVertKDE(fg,sym))
+            xData = getKDEMax(getBelief(fg,sym))
             push!(plHolderIn, plotPoint(xData))
         end
     end
@@ -74,7 +74,7 @@ end
 function plotKDEMeans!(plHolderIn,fg;regx::Regex=r"x")
     for sym in ls(fg)
         if occursin(regx,string(sym))
-            xData = getKDEMean(getVertKDE(fg,sym))
+            xData = getKDEMean(getBelief(fg,sym))
             push!(plHolderIn, plotPoint(xData))
         end
     end

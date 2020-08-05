@@ -86,7 +86,7 @@ priors = collect(1:16); rtkCov= Matrix(Diagonal([0.1;0.1].^2));
 for i in priors
     pp = PriorPoint2(MvNormal(dposData[i,:], rtkCov))
     addFactor!(fg, [poses[i];], pp, autoinit=false)
-    manualinit!(fg,poses[i],kde!(rand(MvNormal(dposData[i,:],rtkCov),100)))
+    initManual!(fg,poses[i],kde!(rand(MvNormal(dposData[i,:],rtkCov),100)))
 end
 
 # visualization tools for debugging
@@ -107,7 +107,7 @@ tree, smt, hist = solveTree!(fg)
 # plk = plotBeaconSolve(fg)
 plk=[];
 for sym in ls(fg) #plotting all syms labeled
-    X1 = getKDEMean(getVertKDE(fg,sym))
+    X1 = getKDEMean(getBelief(fg,sym))
     push!(plk, layer(x=[X1[1];],y=[X1[2];],label=String["$sym";], Geom.point,Geom.label), Theme(default_color=colorant"red",point_size = 1.5pt,highlight_width = 0pt))
 end
 push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
