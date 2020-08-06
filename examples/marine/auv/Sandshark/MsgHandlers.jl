@@ -59,7 +59,7 @@ function mag_hdlr(channel::String, msgdata::pose_t, dfg::AbstractDFG, dashboard:
         # add the mag measurement as a prior
         @show "add mag"
         magPrior = PartialPriorYawPose2(Normal(mag[2], dashboard[:magNoise]))
-        addFactor!(dfg, corr[1][1][1:1], magPrior, autoinit=false, solvable=1, labels=[:MAGNETOMETER;])
+        addFactor!(dfg, corr[1][1][1:1], magPrior, autoinit=false, solvable=1, tags=[:MAGNETOMETER;])
         # set flag that this has already been added to the factor graph
         mag[3][1] = true
       end

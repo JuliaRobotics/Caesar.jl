@@ -56,7 +56,7 @@ inferOverTreeR!(fg, tree)
 #                           DistributionRequest("Normal", Float64[0; 0.1]),
 #                           DistributionRequest("Normal", Float64[20; 1.0]))
 
-addVariable!(fg, :l1, Point2, labels=["LANDMARK";])
+addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
 
 br = Pose2Point2BearingRange(Normal(0, 0.1), Normal(20, 1.0))
 

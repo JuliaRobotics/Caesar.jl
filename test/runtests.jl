@@ -3,6 +3,8 @@ using Caesar, Caesar.ZmqCaesar
 using IncrementalInference, RoME
 using Test
 
+## See tests in DFG, IIF, and RoME for more complete coverage of features
+
 @testset "ZMQ Interface" begin
     # Unit tests
     include("multilangzmq/callbackCompatibilityTest.jl")
@@ -13,19 +15,4 @@ using Test
     # include("multilangzmq/serverTest.jl")
 end
 
-# println("[TEST] CloudGraphs API calls...")
-# if false
-#   println("[TEST] with CloudGraphs with local DB data layer (multicore)...")
-#   include("fourdoortestcloudgraph.jl")
-#   println("[SUCCESS]")
-# else
-#   @warn "[NOT TESTING] CloudGraphs interface, auth required -- you can enable it here at $(@__FILE__)."
-# end
 
-
-# if false
-#   # using VictoriaParkTypes
-#
-# else
-#   @warn "not running full Victoria park dataset now"
-# end

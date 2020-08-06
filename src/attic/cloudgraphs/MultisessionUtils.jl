@@ -188,7 +188,7 @@ function removeReinsertMultisessionPrior!(fgl::G,
     delete!(exims, sym)
   end
   # add new multisession constraint to the graph
-  addFactor!(fgl, [sym], prp2, labels=["MULTISESSION"], uid=uid)
+  addFactor!(fgl, [sym], prp2, tags=[:MULTISESSION;], uid=uid)
 end
 
 

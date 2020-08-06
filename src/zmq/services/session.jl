@@ -33,7 +33,7 @@ function addVariable(configDict, fg, requestDict)::Dict{String, Any}
 
   @info "Adding variable of type '$(varRequest.variableType)' with id '$(varRequest.label)'..."
 
-  vnext = addVariable!(fg, varLabel, varType, N=(varRequest.N==nothing ? 100 : varRequest.N), solvable=0, labels=Symbol.([varRequest.labels; "VARIABLE"]))
+  vnext = addVariable!(fg, varLabel, varType, N=(varRequest.N==nothing ? 100 : varRequest.N), solvable=0, tags=Symbol.([varRequest.labels; "VARIABLE"]))
   return Dict{String, Any}("status" => "OK", "id" => vnext.label)
 end
 
@@ -49,6 +49,7 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
     # Right, carrying on...
     factor = nothing
     try
+        # FIXME, use appropriate new DFG method rather than _evalType
         factType = _evalType(factorRequest["factorType"])
         factor = convert(factType, packedFactor)
     catch ex
@@ -73,13 +74,13 @@ function addLandmark2D(configDict, fg, requestDict)::Dict{String, Any}
   error("Not implemented yet!")
 end
 
-function addFactorBearingRangeNormal(configDict, fg, requestDict)::Dict{String, Any}
+function addFactorBearingRangeNormal(configDict, fg::AbstractDFG, requestDict)::Dict{String, Any}
   @show requestDict
   # odoFg = Unmarshal.unmarshal(AddOdoFgRequest, requestDict)
   error("Not implemented yet!")
 end
 
-function ls(configDict, fg, requestDict)::Dict{String, Any}
+function ls(configDict, fg::AbstractDFG, requestDict::Dict)::Dict{String, Any}
     @show requestDict
     if !haskey(requestDict, "payload")
         error("The request does not contain a filter in 'payload' field and this is required for the command")
@@ -101,24 +102,19 @@ function ls(configDict, fg, requestDict)::Dict{String, Any}
     return resp
 end
 
-function getNode(configDict, fg, requestDict)::Dict{String, Any}
-    error("Please use getVariable or getFactor, this function is deprecated")
-    # TODO: Build a cleaner contract to return this value.
-    vert = RoME.getVert(fg, Symbol(requestDict["payload"]))
-    return JSON.parse(JSON.json(vert))
-end
-
-function getVariable(configDict, fg, requestDict)::Dict{String, Any}
+function getVariable(configDict, fg::AbstractDFG, requestDict::Dict)::Dict{String, Any}
     variable = DistributedFactorGraphs.getVariable(fg, Symbol(requestDict["payload"]))
-    return JSON.parse(JSON.json(variable))
+    return packVariable(fg, variable)
+    # return JSON.parse(JSON.json(variable))
 end
 
-function getFactor(configDict, fg, requestDict)::Dict{String, Any}
+function getFactor(configDict, fg::AbstractDFG, requestDict::Dict)::Dict{String, Any}
     factor = DistributedFactorGraphs.getFactor(fg, Symbol(requestDict["payload"]))
-    return JSON.parse(JSON.json(factor))
+    return packFactor(fg,factor)
+    # return JSON.parse(JSON.json(factor))
 end
 
-function setSolvable(configDict, fg, requestDict)::Dict{String, Any}
+function setSolvable(configDict, fg::AbstractDFG, requestDict::Dict)::Dict{String, Any}
     if !haskey(requestDict, "payload")
         error("Request must contain a solvableRequest in a field called 'payload'")
     end

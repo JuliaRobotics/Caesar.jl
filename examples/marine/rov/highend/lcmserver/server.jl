@@ -71,7 +71,7 @@ function handle_poses!(slam::SLAMWrapper,
     euler = Euler(q)
 
     node_label = Symbol("x$(id)")
-    xn = addVariable!(slam.fg, node_label, labels=["POSE"], dims=6) # this is an incremental inference call
+    xn = addVariable!(slam.fg, node_label, tags=[:POSE;], dims=6) # this is an incremental inference call
     slam.lastposesym = node_label; # update object
 
     if id == 0

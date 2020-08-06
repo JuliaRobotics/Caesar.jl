@@ -157,7 +157,7 @@ function mergeValuesIntoCloudVert!(fgl::G,
       elem,
       uidl,
       v::Graphs.ExVertex;
-      labels::Vector{T}=String[]  ) where {G <: AbstractDFG, T <: AbstractString}
+      tags::Vector{T}=Symbol[]  ) where {G <: AbstractDFG, T <: AbstractString}
   #
 
   # why am I getting a node again (because we don't have the labels here)?
@@ -177,7 +177,7 @@ function mergeValuesIntoCloudVert!(fgl::G,
   end
 
   # merge CloudVertex
-  cv = mergeCloudVertex!(fgl.cg, v, neoNodeId, alreadyexists, neo4jNode, existlbs, mongos, labels=labels )
+  cv = mergeCloudVertex!(fgl.cg, v, neoNodeId, alreadyexists, neo4jNode, existlbs, mongos, tags=tags )
 
   # update merged vertex to database
   CloudGraphs.update_vertex!(fgl.cg, cv, true)
@@ -274,25 +274,25 @@ function populatenewvariablenodes!(fgl::G, newvertdict::SortedDict; N::Int=100) 
     # @show neoNodeId
     nlbsym = Symbol()
     uidl = 0
-    labels = AbstractString["$(fgl.sessionname)"]
+    tags = Symbol[Symbol("$(fgl.sessionname)")]
     initvals = Array{Float64,2}()
     if elem[:frtend]["t"] == "P"
       uidl = elem[:frtend]["uid"]+1 # TODO -- remove +1 and allow :x0, :l0
       nlbsym = Symbol(string('x', uidl))
       initvals = 0.1*randn(3,N) # TODO -- fix init to proper values
-      push!(labels,"POSE")
+      push!(tags,:POSE)
     elseif elem[:frtend]["t"] == "L"
       @warn "using hack counter for LANDMARKS uid +200000"
       uidl = elem[:frtend]["tag_id"]+200000 # TODO complete hack
       nlbsym = Symbol(string('l', uidl))
       initvals = 0.1*randn(2,N) # Make sure autoinit still works properly
-      push!(labels,"LANDMARK")
+      push!(tags,:LANDMARK)
     end
     if !haskey(fgl.IDs, nlbsym) && nlbsym != Symbol()
       # @show nlbsym, size(initvals)
       # TODO remove initstdev, deprecated
       v = addVariable!(fgl, nlbsym, initvals, 0.01*eye(size(initvals,2)), N=N, solvable=0, uid=uidl,api=localapi)
-      mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, uidl, v, labels=labels)
+      mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, uidl, v, tags=tags)
       println()
     end
   end
@@ -339,7 +339,7 @@ function populatenewfactornodes!(fgl::G, newvertdict::SortedDict, maxfuid::Int) 
       fuid += 1
       vert = addFactor!(fgl, verts, usrfnc, solvable=0, api=localapi, uid=fuid, autoinit=true)
       println("at populatenewfactornodes!, btwn="*elem[:frtend]["btwn"])
-      mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, fuid, vert, labels=["FACTOR";"$(fgl.sessionname)"])
+      mergeValuesIntoCloudVert!(fgl, neoNodeId, elem, fuid, vert, tags=[:FACTOR;Symbol("$(fgl.sessionname)")])
 
       # TODO -- upgrade to add multple variables
       # for vv in verts
