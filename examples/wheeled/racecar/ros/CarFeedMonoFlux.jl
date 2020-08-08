@@ -82,7 +82,13 @@ slam = SLAMWrapperLocal()
 getSolverParams(slam.dfg).drawtree = true
 getSolverParams(slam.dfg).showtree = false
 
-datastore = FileDataStore( joinLogPath(slam.dfg,"bigdata") )
+mkpath(getLogPath(slam.dfg))
+
+# datastore = FolderStore( :default, joinLogPath(slam.dfg,"data") )
+datastore = FolderStore{Vector{UInt8}}(:default_folder_store, joinLogPath(slam.dfg,"data"))
+mkpath(joinLogPath(slam.dfg,"data"))
+addBlobStore!(slam.dfg, datastore)
+
 
 # also store parsed_args used in this case
 fid = open(joinLogPath(slam.dfg,"args.json"),"w")
@@ -139,7 +145,9 @@ addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2
 
 ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
 
+# getSolverParams(slam.dfg).dbg = true
 
+parsed_args["msgloops"] = 5000
 
 ## Run main ROS listener loop
 

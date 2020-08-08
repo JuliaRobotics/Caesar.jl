@@ -7,7 +7,7 @@ end
 
 using LinearAlgebra
 using ImageMagick
-using ImageFeatures, ImageDraw, Images, CoordinateTransformations
+using ImageFeatures, ImageDraw, Images, CoordinateTransformations, Rotations
 using DataStructures
 using ColorTypes, FixedPointNumbers
 using FreeTypeAbstraction # for drawTagID!
@@ -106,7 +106,7 @@ using RoME
 using DataInterpolations
 @everywhere using CuArrays, Flux
 @everywhere using RoME
-@everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils, DataInterpolations
+@everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils, DataInterpolations, Rotations
 
 
 ## Constant parameters
