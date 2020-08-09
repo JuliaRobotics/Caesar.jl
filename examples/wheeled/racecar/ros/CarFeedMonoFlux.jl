@@ -7,6 +7,7 @@ include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 
 # assume in Atom editor (not scripted use)
 if length(ARGS) == 0
+  @info "Using default commands"
   parsed_args["folder_name"] = "labrun2"
   parsed_args["remoteprocs"] = 0
   parsed_args["localprocs"] = 4
@@ -147,11 +148,9 @@ ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
 
 # getSolverParams(slam.dfg).dbg = true
 
-parsed_args["msgloops"] = 5000
-
 ## Run main ROS listener loop
 
-sleep(0.01)  # allow gui some time to setup
+sleep(0.1)  # allow gui some time to setup
 rosloops = 0
 let rosloops = rosloops
 while loop!(bagSubscriber)

@@ -110,10 +110,11 @@ end
 
 
 
-function fetchDataElement(var::DFGVariable, store::FileDataStore, lbl::Symbol)
-    entry = getBigDataEntry(var, lbl)
-    rawData = getBigData(datastore, entry)
-    # raw data is json-encoded; this decoding should happen inside getBigData?
+function fetchDataElement(dfg::AbstractDFG, varsym::Symbol, lbl::Symbol)
+    gde,rawData = getData(dfg, varsym, lbl)
+    # entry = getBigDataEntry(var, lbl)
+    # rawData = getBigData(datastore, entry)
+    # # raw data is json-encoded; this decoding should happen inside getBigData?
     return JSON2.read(IOBuffer(rawData))
 end
 
@@ -133,7 +134,7 @@ function jsonResultsSLAM2D(fec)
       @error "missing data entry :JOYSTICK_CMD_VALS in $ps of length(allvars)=$(length(allvars))"
       continue
     end
-    cmdData = fetchDataElement(getVariable(fec.slam.dfg,ps), fec.datastore, :JOYSTICK_CMD_VALS)
+    cmdData = fetchDataElement(dfg, ps, :JOYSTICK_CMD_VALS)
     # axis: 2:throttle, 4:steering
     cd = Dict{Symbol,Any}(
       :posei => ps,
