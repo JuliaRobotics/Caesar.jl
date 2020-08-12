@@ -81,9 +81,7 @@ deleteVariable!
 doautoinit!
 doCliqUpSolve!
 downGibbsCliqueDensity
-downMsgPassingRecursive
 drawCliqSubgraphUpMocking
-dwnMsg
 fifoFreeze!
 filterHistAllToArray
 findRelatedFromPotential
@@ -108,6 +106,7 @@ getCliqVars
 getCliqVarSingletons
 getCurrentWorkspaceFactors
 getCurrentWorkspaceVariables
+getBelief
 getKDE
 getLogPath
 getManifolds
@@ -118,7 +117,6 @@ getTreeCliqsSolverHistories
 getVal
 getVariableDim
 getVariableInferredDim
-getVertKDE
 getUpMsgs
 getDwnMsgs
 hasCliq
@@ -138,7 +136,7 @@ lsf
 lsfPriors
 lsRear
 makeCsmMovie
-manualinit!
+initManual!
 parentCliq
 packFromLocalPotentials!
 predictVariableByFactor
@@ -160,7 +158,6 @@ setCliqAsMarginalized!
 setCliqStatus!
 setDwnMsg!
 setfreeze!
-setTreeCliquesMarginalized!
 setUpMsg!
 setValKDE!
 setVariableInitialized!

@@ -48,8 +48,8 @@ ensureAllInitialized!(fg)
 
 # calculate the range bearings from each pose to
 
-GTposes = KDE.getKDEMax.(getVertKDE.(fg, ls(fg)[1]))
-GTlandm = KDE.getKDEMax.(getVertKDE.(fg, ls(fg)[2]))
+GTposes = KDE.getKDEMax.(getBelief.(fg, ls(fg)[1]))
+GTlandm = KDE.getKDEMax.(getBelief.(fg, ls(fg)[2]))
 
 brDict = Dict{Symbol, Dict{Symbol,Any}}()
 

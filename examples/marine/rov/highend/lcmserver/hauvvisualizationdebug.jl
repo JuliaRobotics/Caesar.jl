@@ -101,9 +101,9 @@ drawAllBinaryFactorEdges!(vis, backend_config, user_config["session"])
 
 
 
-X1 = getVertKDE(fg, :x1)
+X1 = getBelief(fg, :x1)
 plotKDE(X1, dims=[1;2])
-X2 = getVertKDE(fg, :x2)
+X2 = getBelief(fg, :x2)
 plotKDE(X2, dims=[1;2])
 
 
@@ -170,13 +170,13 @@ N = 100
 fgnew = initfg(cloudgraph=backend_config, sessionname="SESSHAUVCODED")
 
 
-addVariable!(fgnew,:x1,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x1,N=N,tags=[:POSE;], dims=6)
 addFactor!(fgnew,[:x1], PriorPose3(MvNormal(veeEuler(wTx1), 0.0001*eye(6)) ) )
 initVariable!(fgnew, :x1)
 plotKDE(fgnew, :x1, dims=[1;2], title="$(veeEuler(wTx1))")
 
 
-addVariable!(fgnew,:x2,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x2,N=N,tags=[:POSE;], dims=6)
 a,b = MvNormal(zpr2[2:3],0.001*eye(2)), Distributions.Normal(zpr2[1], 0.01)
 addFactor!(fgnew,[:x2], PartialPriorRollPitchZ( a, b ) )
 addFactor!(fgnew,[:x1,:x2], PartialPose3XYYaw(MvNormal(XYH1_2,0.001*eye(3)))  )
@@ -189,7 +189,7 @@ pp, parr, par, lb, infdim = localProduct(fgnew, :x2)
 plotKDE(pp, dims=[6;3], title="$(veeEuler(wTx2))")
 # plotLocalProduct(fgnew, :x2, dims=[6;3], api=localapi)
 
-# addVariable!(fgnew,:x2,N=N,labels=["POSE"], dims=6)
+# addVariable!(fgnew,:x2,N=N,tags=[:POSE;], dims=6)
 # a,b = MvNormal(zpr2[2:3],0.001*eye(2)), Distributions.Normal(zpr2[1], 0.1)
 # addFactor!(fgnew,[:x2], PartialPriorRollPitchZ( a, b ) )
 # addFactor!(fgnew,[:x1,:x2], deepcopy(odo_xyh_12)  )
@@ -197,7 +197,7 @@ plotKDE(pp, dims=[6;3], title="$(veeEuler(wTx2))")
 # plotKDE(fgnew, :x2, dims=[1;2], title="$(veeEuler(wTx2))")
 
 
-# addVariable!(fgnew,:x2,N=N,labels=["POSE"], dims=6)
+# addVariable!(fgnew,:x2,N=N,tags=[:POSE;], dims=6)
 # a,b = MvNormal(zpr2[2:3],0.001*eye(2)), Distributions.Normal(zpr2[1], 0.1)
 # addFactor!(fgnew,[:x2], PartialPriorRollPitchZ( a, b ) )
 # odo = MvNormal( veeEuler(wTx1\wTx2),0.001*eye(6))
@@ -206,7 +206,7 @@ plotKDE(pp, dims=[6;3], title="$(veeEuler(wTx2))")
 # plotKDE(fgnew, :x2, dims=[1;2], title="$(veeEuler(wTx2))")
 
 
-addVariable!(fgnew,:x3,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x3,N=N,tags=[:POSE;], dims=6)
 a,b = MvNormal(zpr3[2:3],0.001*eye(2)), Distributions.Normal(zpr3[1], 0.1)
 addFactor!(fgnew,[:x3], PartialPriorRollPitchZ( a, b ) )
 addFactor!(fgnew,[:x2,:x3], PartialPose3XYYaw(MvNormal(XYH2_3,0.001*eye(3)))  )
@@ -221,7 +221,7 @@ visualizeallposes!(vis, fgnew)
 
 
 
-addVariable!(fgnew,:x4,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x4,N=N,tags=[:POSE;], dims=6)
 a,b = MvNormal(zpr4[2:3],0.001*eye(2)), Distributions.Normal(zpr4[1], 0.1)
 addFactor!(fgnew,[:x4], PartialPriorRollPitchZ( a, b ) )
 addFactor!(fgnew,[:x3,:x4], PartialPose3XYYaw(MvNormal(XYH3_4,0.001*eye(3)))  )
@@ -231,7 +231,7 @@ plotKDE(fgnew, :x4, dims=[1;2], title="$(veeEuler(wTx4))")
 
 
 
-addVariable!(fgnew,:x5,N=N,labels=["POSE"], dims=6)
+addVariable!(fgnew,:x5,N=N,tags=[:POSE;], dims=6)
 a,b = MvNormal(zpr5[2:3],0.001*eye(2)), Distributions.Normal(zpr5[1], 0.1)
 addFactor!(fgnew,[:x5], PartialPriorRollPitchZ( a, b ) )
 addFactor!(fgnew,[:x4,:x5], PartialPose3XYYaw(MvNormal(XYH4_5,0.001*eye(3)))  )

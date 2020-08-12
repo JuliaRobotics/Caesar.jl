@@ -1,7 +1,7 @@
 using Documenter, Caesar
 
 import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
-import IncrementalInference: cliqGibbs, downMsgPassingRecursive, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
+import IncrementalInference: cliqGibbs, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
 import IncrementalInference: initfg, downGibbsCliqueDensity
 
 using KernelDensityEstimatePlotting
@@ -40,6 +40,7 @@ makedocs(
             "Under-defined Trilateration, 2D" => "examples/basic_slamedonut.md",
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
+            "Dead Reckon Tether" => "examples/deadreckontether.md",
         ],
         "Principles" => [
             "Filters vs. Graphs" => "principles/filterCorrespondence.md",

@@ -1,15 +1,45 @@
 # load dfg objects used for training FluxModelsPose2Pose2
 
+## Get user commands
+
+# Populates `parsed_args`
+include(joinpath((@__DIR__),"parsecommands.jl"))
+
+# assume in Atom editor (not scripted use)
+if length(ARGS) == 0
+  parsed_args["fgpathsflux"] = "/tmp/caesar/conductor/fluxtrain/distance10cm_0.txt"
+  parsed_args["numFGDatasets"] =  1
+  parsed_args["epochsFlux"] =  1
+  parsed_args["fluxGenerations"] = 2
+  parsed_args["rndSkip"] = 10
+  parsed_args["ADAM_step"] = 0.1
+end
+
+@assert length(parsed_args["fgpathsflux"]) != 0 "must include a valid --fgpathsflux flag and value."
+
+## load dependencies
+
 # using Revise
-using Random
+using Random, Statistics
+using JSON2
 using CuArrays
 using Flux
 using RoME, IncrementalInference
+using ApproxManifoldProducts
 
 using Cairo, Fontconfig
 using Gadfly, RoMEPlotting
 Gadfly.set_default_plot_size(35cm,20cm)
 
+using Distributed
+addprocs(parsed_args["localprocs"])
+using Cairo, Fontconfig
+using RoMEPlotting
+using Gadfly
+@everywhere using Cairo, Fontconfig
+@everywhere using RoMEPlotting, Gadfly
+
+WP = WorkerPool(setdiff(procs(),[1]))
 
 ## If distributed plotting is being used
 
@@ -111,20 +141,27 @@ function drawInterposePredictions(fg::AbstractDFG;
   end
   # end
 
-  println("waiting on all tasks")
+  println("waiting on all drawing tasks")
+  asyncTasks = []
   for ts in taskList
-    pl,fldr,fn = fetch(ts)
-    @show fn
-    pl |> PDF(joinLogPath(fg,fldr,"$(runNumber)_"*fn),15cm,10cm)
+    newts = @async begin
+      pl,fldr,fn = fetch(ts)
+      @show fn
+      remotecall_fetch(x->Gadfly.draw(PDF(joinLogPath(fg,fldr,"$(runNumber)_"*fn),15cm,10cm), WP, pl) )
+      # pl |> PDF(joinLogPath(fg,fldr,"$(runNumber)_"*fn),15cm,10cm)
+    end
+    push!(asyncTasks, newts)
   end
+  println("waiting on drawing async tasks")
+  (x->fetch(x)).(asyncTasks)
   println("done waiting on tasks")
 
-  unitelist = [["$(runNumber)_pred_$(x).pdf" for x in varList[2:end]]; "$(runNumber)_z_$lstCount.pdf"]
+  unitelist = [["$(runNumber)_pred_$(x).pdf" for x in varList[2:end]]; "../$(runNumber)_z_$lstCount.pdf"]
   workingdir = pwd()
   Base.cd(joinLogPath(fg,"predImgs_$lstCount"))
   run(`pdfunite $unitelist`)
   Base.cd(workingdir)
-  showzpath = joinLogPath(fg,"predImgs_$lstCount","$(runNumber)_z_$lstCount.pdf")
+  showzpath = joinLogPath(fg,"predImgs_$lstCount","..","$(runNumber)_z_$lstCount.pdf")
   # @async run(`evince $showzpath`)
 
 end
@@ -164,26 +201,28 @@ function drawInterposeFromData(fg::AbstractDFG,
   end
 
   println("waiting on all tasks, $(length(taskList))")
-  # asyncTasks = []
+  asyncTasks = []
   for ts in taskList
-    pl, fpath = fetch(ts)
-    @show fpath
-    pl |> PDF(fpath)
-    # gg = (p, f) -> (p |> PDF(f))
-    # ts = @async Distributed.remotecall(gg, WP, pl, fpath)
-    # push!(asyncTasks, ts)
+    newts = @async begin
+      pl, fpath = fetch(ts)
+      @show fpath
+      remotecall_fetch(x->Gadfly.draw(PDF(fpath,15cm,10cm),x), WP, pl)
+    end
+    push!(asyncTasks, newts)
   end
-  # println("waiting on async tasks")
-  # @show (x->fetch(x)).(asyncTasks)
-  # println("done waiting on tasks")
+  println("waiting on async tasks")
+  @show (x->fetch(x)).(asyncTasks)
+  println("done waiting on tasks")
 
-  push!(unitelist, "$(runNumber)_z_$lstCount.pdf")
+  # place unified result in parent directory
+  push!(unitelist, "../$(runNumber)_z_$lstCount.pdf")
   workingdir = pwd()
   Base.cd(joinLogPath(fg,"pred_y_$lstCount"))
   @show pwd()
   run(`pdfunite $unitelist`)
   Base.cd(workingdir)
-  showzpath = joinLogPath(fg,"pred_y_$lstCount","$(runNumber)_z_$lstCount.pdf")
+  # showzpath = joinLogPath(fg,"$(runNumber)_z_$lstCount.pdf")
+  # showzpath = joinLogPath(fg,"pred_y_$lstCount","$(runNumber)_z_$lstCount.pdf")
   # @async run(`evince $showzpath`)
 
   nothing
@@ -195,13 +234,55 @@ end
 # models = NFBs[1].allPredModels |> deepcopy
 # x = nfb.joyVelData
 # y = x1.vals
-function loss(x,y, i, models)
+# i which of N particles/models to evaluate
+# k is the number of interpose segments in this data
+# k+j are intermediate accumulations of longer chords over poses in trajectory
+# cho is the interpose accumulation distance
+function loss(x,y, i, models, chord=[1;5;10], skip=10)
+  len = length(x)
   res = 0
-  for k in 1:length(x)
-    res += sum( [100;1].*(y[k][1:2,i]-models[i](x[k])).^2 )
+
+  # do chord segments start from each pose in data sequence (must be unshuffled)
+  for cho in chord, p in 1:skip:(len-cho), k in p:cho:(len-cho)
+    # can cheat since XY-only odo is linear (can add and subtract linearly).
+      # Accumulate measured (ie SLAM result) outputs Y and
+      # subtract all new predictions (ie NN result)
+    separate = +( ([ y[k+j][1:2,i] - models[i](x[k+j]) for j in 0:(cho-1)])... )
+    # equally weighted square cost (loss) accumulation
+    res += sum( separate.^2 ) # / (len/cho)
   end
-  res/length(x)
+  res
 end
+
+# function lossALMOST(x,y, i, models, chord=[5;])
+#   res = 0
+#   for k in 1:5:length(x)
+#     if k+4 <= length(x)
+#       # individuals
+#       for kk in k:k+4
+#         res += sum( (y[kk][1:2,i] - models[i](x[kk])).^2 )
+#       end
+#
+#       # can cheat since linear
+#       res += sum( (y[k+0][1:2,i] - models[i](x[k+0]) +
+#                    y[k+1][1:2,i] - models[i](x[k+1]) +
+#                    y[k+2][1:2,i] - models[i](x[k+2]) +
+#                    y[k+3][1:2,i] - models[i](x[k+3]) +
+#                    y[k+4][1:2,i] - models[i](x[k+4])
+#                   ).^2
+#                 )
+#     end
+#   end
+#   res/length(x)
+# end
+#
+# function lossOLD(x,y, i, models, chord=[5;])
+#   res = 0
+#   for k in 1:length(x)
+#     res += sum( (y[k][1:2,i]-models[i](x[k])).^2 )
+#   end
+#   res/length(x)
+# end
 
 
 function assembleInterposeData(FG::AbstractVector)
@@ -244,51 +325,132 @@ function assembleInterposeData(FG::AbstractVector)
   return MDATA
 end
 
+function mmdAllModelsData(logpath, iter, MDATA, lModels, N, rndChord, rndSkip)
 
+  LOCKS = ReentrantLock[ReentrantLock() for i in 1:Threads.nthreads()]
+  P = zeros(Float32,Threads.nthreads(),2,100)
+  Q = zeros(Float32,Threads.nthreads(),2,100)
 
+  # don't judge me, it's late -- many distances to find
+  function shakeThatThing!(p, md)
+    # closures:  N, lModels, MDATA, LOCKS, P, Q
+    # need local copies:  i, p, md.
+    res = Float64[0.0]
+    Pl = view(P, Threads.threadid(), :, :)
+    Ql = view(Q, Threads.threadid(), :, :)
+    mdata = MDATA[md]
+    lock(LOCKS[Threads.threadid()])
+    for i in 1:N
+      Pl[1:2,i] .= lModels[i](mdata[1][p])
+    end
+    Ql[1:2,:] .= @view mdata[2][p][1:2,:]
+    AMP.mmd!(res, Pl, Ql, AMP.Euclid2, bw=[0.001])
+    unlock(LOCKS[Threads.threadid()])
+    return md, p, res[1]
+  end
+
+  # res = zeros(1)
+  TASKS = Task[]
+  for md in 1:length(MDATA)
+    mdata = MDATA[md]
+    for p in 1:length(MDATA[md][1])
+      ts = Threads.@spawn shakeThatThing!($p, $md)
+      push!(TASKS, ts)
+    end
+  end
+  # per dataset accumulated mmd
+  MMD = zeros(length(MDATA))
+
+  println("Fetching all mmd data and writing to file, length(TASKS)=$(length(TASKS))")
+  fid = open(joinpath(logpath, "mmd_$iter.txt"), "w")
+  println(fid, "chords=$rndChord")
+  println(fid, "skip=$rndSkip")
+  println(fid, "dataset, factor, mmd")
+  for ts in TASKS
+    md, ps, re = fetch(ts)
+    println(fid, "$md, $ps, $re")
+    MMD[md] += re
+  end
+  close(fid)
+  println("Done iter=$iter mmd data and writing to file")
+  fid = open(joinpath(logpath, "mmd_accumulated_$iter.txt"), "w")
+  fid_ = open(joinpath(logpath, "mmd_accumulated_generations.txt"), "a")
+  println(fid, "chords=$rndChord")
+  println(fid, "skip=$rndSkip")
+  print(fid_, "$iter")
+  for i in 1:length(MMD)
+    println(fid, "$i, $(MMD[i])")
+    print(fid_, ", $(MMD[i])")
+  end
+  println(fid_,"")
+  close(fid)
+  close(fid_)
+  nothing
+end
+
+# train 100 models from 100 particle sets over all data sets in MDATA
+# internal EPOCH loop does not change any hyper parameter other than annealing ADAM slightly.
 # opt = Descent(0.01)
 # opt = Descent(0.001)
 # opt = Momentum(0.01)
+# try find bigger trends by varying chords less frequently
 function trainNewModels(FG::Vector{<:AbstractDFG};
                         iter::Int=0,
                         opt = ADAM(0.1),
-                        EPOCHS=50,
+                        EPOCHS=10,
                         MDATA=assembleInterposeData(FG),
                         loss::Function=loss,
-                        models=nothing)
+                        models=nothing,
+                        N=100,
+                        rndChord=Int[],
+                        rndSkip=-1   )
+
   #
+  rndChord = length(rndChord) != 0 ? rndChord : rand((rand(1:5,1)[1]):(rand(10:50,1)[1]), rand(5:30,1)[1]) |> sort |> unique |> collect
+  rndSkip = rndSkip != -1 ? rndSkip : rand(1:10, 1)[1]
   # get the models from the first FG only (all factors use the same N models)
   fg = FG[1]
   fcList = ls(fg, FluxModelsPose2Pose2) |> sortDFG
   NFBs = (x->getFactorType(fg, x)).(fcList)
 
   # same models are used everywhere, after training make sure to reset the weights for all NN objects, not just those in models
-  lModels = models == nothing ? deepcopy(NFBs[1].allPredModels) : models
+  lModels = models == nothing ? NFBs[1].allPredModels : models
 
   mkpath(joinLogPath(fg,"loss_$iter"))
 
   ## Do training
-  N = 100
 
-  evalcb(n, io=stdout) = println(io, "$n, $(sum([loss(mdata..., n, lModels) for mdata in MDATA]))")
 
-  function wrapTraining!(n::Int, lModels, MDATA, opt, EPOCHS)
+  evalcb(n, io=stdout) = println(io, "$n, $(([loss(mdata..., n, lModels) for mdata in MDATA]))")
+
+  function wrapTraining!(n::Int, lModels)
+    # closures on:  MDATA, opt, EPOCHS
     fid = open(joinLogPath(fg,"loss_$iter","sample_$n.txt"), "w")
-    Flux.@epochs EPOCHS Flux.train!((x,y)->loss(x,y,n, lModels), Flux.params(lModels[n]), MDATA, opt, cb = Flux.throttle(()->evalcb(n, fid), 0.1) )
+    println(fid, "chords=$rndChord")
+    println(fid, "skip=$rndSkip")
+    Flux.@epochs EPOCHS Flux.train!((x,y)->loss(x,y,n,lModels, rndChord, rndSkip),
+                                    Flux.params(lModels[n]),
+                                    MDATA,
+                                    opt,
+                                    cb = Flux.throttle(()->evalcb(n, fid), 0.1)  )
     close(fid)
     nothing
   end
 
   taskList = Task[]
   for n in 1:N
-    ts = Threads.@spawn wrapTraining!($n, lModels, MDATA, opt, EPOCHS)
+    ts = Threads.@spawn wrapTraining!($n, deepcopy(lModels))
     push!(taskList, ts)
   end
   println("Waiting on all training tasks.")
   (x->wait(x)).(taskList)
   println("Done waiting on training tasks.")
 
-  return lModels
+  println("Measure belief errors using mmd for all ")
+  mmdAllModelsData(getLogPath(fg), iter, MDATA, lModels, N, rndChord, rndSkip)
+  println("Finished measuring mmds")
+
+  return lModels, rndChord, rndSkip
 end
 
 
@@ -308,19 +470,60 @@ function updateFluxModelsPose2Pose2All!(fg::AbstractDFG,
 end
 
 
+function geneticAccelerationWithDehomogenization!(models, LMDATA, loss_, rndChord, rndSkip; N=100)
+  @assert N == length(models) "N and number of models need to be the same"
+  # eval loss of all models i
+  ALLVALS = zeros(N)
+  for i in 1:N, md in 1:length(LMDATA)
+    ALLVALS[i] += loss_(LMDATA[md][1], LMDATA[md][2], i, models, rndChord, rndSkip)
+  end
+
+  # get parameter sigma levels
+  ALLTHETA = Vector{Vector{Float32}}(undef, length(models))
+  for i in 1:length(models)
+    ALLTHETA[i], re = Flux.destructure(models[i])
+  end
+  COV = zeros(length(ALLTHETA[1]))
+  MEA = zeros(length(ALLTHETA[1]))
+  for j in 1:length(ALLTHETA[1])
+    thisparam = (x->x[j]).(ALLTHETA)
+    MEA[j] = Statistics.mean(thisparam)
+    COV[j] = Statistics.std(thisparam)
+  end
+
+  # sort best to worst, and pick top 20 to replace bottom 10
+  permloss = sortperm(ALLVALS)
+  for i in (N-9):N
+    θ, re = Flux.destructure(models[permloss[i]])
+    # randomly pick two individuals from best 20
+    ind = (rand(1:20,10) |> unique)[1:2]
+    A, reA = Flux.destructure(models[permloss[ind[1]]])
+    B, reB = Flux.destructure(models[permloss[ind[2]]])
+    sel = (rand(1:length(A),5*length(A)) |> unique)[1:round(Int,length(A)/2)]
+    isel = setdiff(1:length(A), sel)
+
+    θ[sel] .= A[sel]
+    θ[isel] .= B[isel]
+
+    # add some noise to dehomoginize (should do according to sigma levels across θ)
+    θ .+= COV.*randn(Float32, length(θ))
+
+    models[permloss[i]] = re(θ)
+  end
+
+  nothing
+end
+
 
 ## update the models in a factor graph object
 
-fgpaths = [
-  "/tmp/caesar/2020-05-01T04:27:36.467/fg_75_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T04:28:55.212/fg_67_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T04:30:08.258/fg_72_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T04:59:39.114/fg_61_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T05:01:03.337/fg_53_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T05:02:15.57/fg_58_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T05:23:54.609/fg_55_resolve.tar.gz";
-  "/tmp/caesar/2020-05-01T05:25:04.904/fg_55_resolve.tar.gz"
-]
+fid = open(parsed_args["fgpathsflux"],"r")
+fgpaths = readlines(fid)
+close(fid)
+
+
+
+##
 
 maxTr = Ref{Int}()
 maxTr[] = 0
@@ -332,9 +535,20 @@ for fgp in fgpaths
 end
 end
 
+maxTr[] += parsed_args["trainingNumOffset"]
+
 FG = loadFGsFromList(fgpaths, trainingNum=maxTr[])
 
 @show maxTr
+
+## store parameters for later reference
+
+# also store parsed_args used in this case
+for lfg in FG
+  fid = open(joinLogPath(lfg,"args.json"),"w")
+  println(fid, JSON2.write(parsed_args))
+  close(fid)
+end
 
 
 ## final prep
@@ -346,7 +560,7 @@ FG = loadFGsFromList(fgpaths, trainingNum=maxTr[])
 # nfg = IIF.buildSubgraphFromLabels!(FG[1], varList[1:50])
 # drawGraph(nfg, show=true)
 
-FITFG = FG[1:6]
+FITFG = parsed_args["numFGDatasets"] == -1 ? FG[1:end] : FG[1:parsed_args["numFGDatasets"]]
 MDATA=assembleInterposeData(FITFG)
 
 
@@ -354,13 +568,32 @@ MDATA=assembleInterposeData(FITFG)
 fcList = ls(FITFG[1], FluxModelsPose2Pose2) |> sortDFG
 models = getFactorType(FITFG[1], fcList[1]).allPredModels |> deepcopy
 
+# randomize with some noise
 let models=models
 for i in 1:length(models)
   theta, re  = Flux.destructure(models[i])
   theta .= randn(Float32, length(theta))
+  # theta = theta |> collect |> gpu
   models[i] = re(theta)
 end
 end
+
+## load models from file (in case of continuation)
+
+let models=models, FITFG=FITFG
+if 0 < length(parsed_args["loadInitModels"])
+  println("Loading init models from $(parsed_args["loadInitModels"])")
+  mfg = initfg()
+  loadDFG(parsed_args["loadInitModels"], Main, mfg)
+  models .= getFactorType(mfg, lsf(mfg, FluxModelsPose2Pose2)[1]).allPredModels
+  for i in 1:length(FITFG)
+    updateFluxModelsPose2Pose2All!(FITFG[i], models)
+  end
+  println("Done loading init models.")
+end
+end
+
+## draw non-trained init models
 
 let FITFG=FITFG, MDATA=MDATA, models=models
   for i in 1:length(FITFG)
@@ -369,29 +602,59 @@ let FITFG=FITFG, MDATA=MDATA, models=models
   end
 end
 
+# store the new model weights
+println("saving init models data in models_gen_0.tar.gz")
+msfg = buildSubgraph(FITFG[1],[:x0;:x1],1)
+saveDFG(msfg, joinLogPath(FITFG[1],"models_gen_0"))
+
 
 ## loss(MDATA[1][1], MDATA[1][2], 1, models)
 
+
 let FITFG=FITFG, MDATA=MDATA, models=models
-for i in 1:5
+for i in 1:parsed_args["fluxGenerations"]
   LMDATA=[]
   for j in 1:length(MDATA)
-    permlist = shuffle!(1:length(MDATA[j][1]) |> collect)
-    push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
+    # permlist = (1:length(MDATA[j][1]) |> collect)
+    # permlist = shuffle!(1:length(MDATA[j][1]) |> collect)
+    # push!(LMDATA, (MDATA[j][1][permlist], MDATA[j][2][permlist]) )
+    push!(LMDATA, MDATA[j] )
   end
-  newmodels = trainNewModels(FITFG, iter=i, EPOCHS=50, opt=ADAM(0.1/(0.25*i+0.5)), MDATA=LMDATA, loss=loss, models=models)
+  newmodels, rndChord, rndSkip = trainNewModels(FITFG, iter=i, EPOCHS=parsed_args["epochsFlux"], opt=ADAM(parsed_args["ADAM_step"]), MDATA=LMDATA, loss=loss, models=models, N=100, rndSkip=parsed_args["rndSkip"], rndChord=parsed_args["rndChord"]  )
+  # opt=ADAM(parsed_args["ADAM_step"]/(0.25*i+0.75))
+  # replace the active model list
+  models = newmodels
+
   runNum = 0
+  PLOTTASKS = []
   for lfg in FITFG
     runNum += 1
-    updateFluxModelsPose2Pose2All!(lfg, newmodels)
+    updateFluxModelsPose2Pose2All!(lfg, models)
     # drawInterposePredictions(lfg, runNumber=runNum)
-    drawInterposeFromData(lfg, MDATA[runNum], newmodels, i, runNumber=runNum)
+    lfg_, mdata_, models_, i_, runNum_ = deepcopy(lfg), deepcopy(MDATA[runNum]), deepcopy(models), deepcopy(i), deepcopy(runNum)
+    println("going to drawInterposeFromData for runNum=$runNum")
+    ts = @async drawInterposeFromData(lfg_, mdata_, models_, i_, runNumber=runNum_)
+    # drawInterposeFromData(lfg, MDATA[runNum], models, i, runNumber=runNum)
+    push!(PLOTTASKS, ts)
+
+    # store the new model weights
+    msfg = buildSubgraph(lfg_,[:x0;:x1],1)
+    saveDFG(msfg, joinLogPath(lfg,"models_gen_$i"))
   end
+  println("waiting on all plotting tasks to finish")
+  (x->fetch(x)).(PLOTTASKS)
+  println("all plotting tasks have finished")
+
+  # genetic acceleration
+  println("Going for genetic acceleration")
+  geneticAccelerationWithDehomogenization!(models, LMDATA, loss, rndChord, rndSkip, N=100)
 end
 end
+
 
 
 ##
+0
 
 # # Final results
 # for lfg in FITFG
@@ -403,11 +666,6 @@ end
 #
 # loss(x,y, i, models)
 #
-#
-# ## Lets train all models
-#
-#
-# trainNewModels(FG)
 #
 #
 #

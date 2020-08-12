@@ -90,14 +90,11 @@ vc = startdefaultvisualization(draworigin=true)
 
 drawposepoints!(vc, fg, :x8)
 
-getVal(fg, :l200050, api=dlapi)
+getVal(fg, :l200050)
 
 visualizeallposes!(vc, fg, drawlandms=false, drawtype=:fit)
 
-# for lb in [:x1,:x2,:x3,:x4,:x5,:x6,:x7]
-#   @show getKDEMax(getVertKDE(fg, lb))
-# end
-plotKDE(marginal(getKDE(getVert(fg,:l200050,api=dlapi)),[1;2]))
+plotKDE(marginal(getBelief(getVariable(fg,:l200050)),[1;2]))
 
 
 

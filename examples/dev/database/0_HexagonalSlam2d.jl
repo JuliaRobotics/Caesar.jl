@@ -24,7 +24,7 @@ fg = initfg(sessionname=user_config["session"], robotname=addrdict["robotId"], c
 # fg.cg = backend_config
 
 # also add a PriorPose2 to pin the first pose at a fixed location
-addVariable!(fg, :x0, Pose2) # , labels=["POSE"]
+addVariable!(fg, :x0, Pose2) # , tags=[:POSE]
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )
 
 # ls(fg, :x0)
@@ -38,7 +38,7 @@ addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )
 for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
-  addVariable!(fg, nsym, Pose2) # , labels=["VARIABLE";"POSE"]
+  addVariable!(fg, nsym, Pose2) # , tags=[:VARIABLE;:POSE]
   addFactor!(fg, [psym;nsym], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0]), autoinit=true )
   # Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
 end

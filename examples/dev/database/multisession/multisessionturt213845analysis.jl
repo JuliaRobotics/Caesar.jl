@@ -58,11 +58,11 @@ for ANAITER in Int[1;2;3;4;5]
     savejld(fg, file=jldfile)
     for sym in lms
       @show sym
-      fv = getVert(fg, sym, nt=:fnc)
-      ffv = getData(fv).fnc.usrfnc!
+      fv = getFactor(fg, sym, nt=:fnc)
+      ffv = getFactorType(fv) # getData(fv).fnc.usrfnc!
       # plotKDE(ffv.belief)
 
-      p = getVertKDE(fg, sym)
+      p = getBelief(getVariable(fg, sym))
       pl = plotKDE([ffv.belief; p], c=["red";"green"], levels=3, legend=["MultiSess"; "Current"], title=string(sym), fill=true)
 
       filename = string(resultsfolder,"/", session,"_",sym, "_$(ANAITER)")

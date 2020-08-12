@@ -121,13 +121,13 @@ imgc = convert(Array{RGB{N0f8}},img)
 # imgdd = RGB.(imgd,imgd,imgd)
 
 
-# xy = KDE.getKDEMax(getVertKDE(fg, :l1))
+# xy = KDE.getKDEMax(getBelief(fg, :l1))
 
 # imgc = ImageDraw.draw(imgc, CirclePointRadius(48, 256, 2), RGB{N0f8}(1.0,0.0,0.0))
 
 
 for ll in ls(fg)[2]
-  xy = KDE.getKDEMax(getVertKDE(fg, ll))
+  xy = KDE.getKDEMax(getBelief(fg, ll))
   the = atan2(-xy[2],xy[1]) * 180.0/pi
   ran = norm(xy)
 

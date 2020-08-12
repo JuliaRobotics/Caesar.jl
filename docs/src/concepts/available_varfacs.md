@@ -81,7 +81,7 @@ Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:
 ```@docs
 PolarPolar
 Point2Point2
-Point2Point2WorldBearing
+Pose2Point2
 Pose2Point2Bearing
 Pose2Point2BearingRange
 Pose2Point2Range

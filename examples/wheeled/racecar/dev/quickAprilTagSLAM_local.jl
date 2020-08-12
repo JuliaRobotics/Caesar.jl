@@ -48,8 +48,8 @@ tree = wipeBuildNewTree!(fg, drawpdf=true)
 inferOverTree!(fg,tree, N=N)
 
 #
-# plotKDE(getVertKDE(fg, :x0), dims=[1;2])
-# plotKDE(getVertKDE(fg, :x0), dims=[1;2])
+# plotKDE(getBelief(fg, :x0), dims=[1;2])
+# plotKDE(getBelief(fg, :x0), dims=[1;2])
 
 delete!(tag_bag[61], 18)
 delete!(tag_bag[77], 18)
@@ -88,7 +88,7 @@ const KDE = KernelDensityEstimate
 
 fid = open("results.csv","w")
 for sym in [ls(fg)[1]...;ls(fg)[2]...]
-  p = getVertKDE(fg, sym)
+  p = getBelief(fg, sym)
   val = string(KDE.getKDEMax(p))
   println(fid, "$sym, $(val[2:(end-1)])")
 end

@@ -60,21 +60,31 @@ function (rp2::AlignRadarPose2)(res::Vector{Float64},
   res
 end
 
-
 struct PackedAlignRadarPose2 <: PackedInferenceType
-  im1::Vector{Float64}
-  im2::Vector{Float64}
+  im1::Vector{Vector{Float64}}
+  im2::Vector{Vector{Float64}}
   PreSampler::String
   p2p2::PackedPose2Pose2
 end
 
 function convert(::Type{PackedAlignRadarPose2}, arp2::AlignRadarPose2)
   TensorCast.@cast pim1[row][col] := arp2.im1[row,col]
+  TensorCast.@cast pim1[row] := collect(pim1[row])
   TensorCast.@cast pim2[row][col] := arp2.im2[row,col]
-  PackedAlignedRadarPose2(pim1, pim2, string(arp2.PreSampler), convert(PackedPose2Pose2, arp2.p2p2))
+  TensorCast.@cast pim2[row] := collect(pim2[row])
+  PackedAlignRadarPose2(
+    pim1,
+    pim2,
+    string(arp2.PreSampler),
+    convert(PackedPose2Pose2, arp2.p2p2))
 end
+
 function convert(::Type{AlignRadarPose2}, parp2::PackedAlignRadarPose2)
-  TensorCast.@cast im1[row,col] := parp2.pim1[row][col]
-  TensorCast.@cast im2[row,col] := parp2.pim2[row][col]
-  AlignedRadarPose2(im1, im2, extractdistribution(arp2.PreSampler), convert(Pose2Pose2, parp2.p2p2))
+  TensorCast.@cast im1[row,col] := parp2.im1[row][col]
+  TensorCast.@cast im2[row,col] := parp2.im2[row][col]
+  AlignRadarPose2(
+    collect(im1),
+    collect(im2),
+    extractdistribution(parp2.PreSampler),
+    convert(Pose2Pose2, parp2.p2p2))
 end

@@ -10,7 +10,7 @@ using Caesar, IncrementalInference, RoME
 # Evaluate the likelihood of a point on the marginal belief of some variable
 # note the dimensions must match
 function evalLikelihood(fg::G, sym::Symbol, point::Vector{Float64}) where G <: AbstractDFG
-  p = getVertKDE(fg, sym)
+  p = getBelief(fg, sym)
   Ndim(p) == length(point) ? nothing : error("point (dim=$(length(point))) must have same dimension as belief (dim=$(Ndim(p)))")
   evaluateDualTree(p, reshape(point,Ndim(p),1))[1]
 end
@@ -18,7 +18,7 @@ end
 # Evaluate the likelihood of an Array{2} of points on the marginal belief of some variable
 # note the dimensions must match
 function evalLikelihood(fg::G, sym::Symbol, points::Array{Float64,2}) where G <: AbstractDFG
-  p = getVertKDE(fg, sym)
+  p = getBelief(fg, sym)
   Ndim(p) == size(points,1) ? nothing : error("points (dim=$(size(points,1))) must have same dimension as belief (dim=$(Ndim(p)))")
   evaluateDualTree(p, (points))
 end
@@ -87,9 +87,9 @@ draw(PDF("test.pdf",20cm,20cm),pl)
 
 
 :l1
-plotKDE(getVertKDE(fg,:l125))
+plotKDE(getBelief(fg,:l125))
 
-b=getKDEMax(getVertKDE(fg,:l125))
+b=getKDEMax(getBelief(fg,:l125))
 
 evalLikelihood(fg, :l125 , b)
 
@@ -102,7 +102,7 @@ j=1;
 for l1 in L
   i=1
   for l2 in L
-    b=getKDEMax(getVertKDE(fg, l1))
+    b=getKDEMax(getBelief(fg, l1))
     c=evalLikelihood(fg, l2 , b)
     if ( c>0.002 && l1!=l2 )
       d+=1

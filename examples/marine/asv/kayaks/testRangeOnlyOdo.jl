@@ -57,7 +57,7 @@ end
 
 beacon = :l1
 addVariable!(fg, beacon, Point2 )
-# manualinit!(fg,beacon,kde!(rand(MvNormal([0;0],Matrix(Diagonal([7.0;7].^2))),100)))
+# initManual!(fg,beacon,kde!(rand(MvNormal([0;0],Matrix(Diagonal([7.0;7].^2))),100)))
 
 rangewindow = 1:3:wlen
 for i in rangewindow
@@ -85,16 +85,16 @@ drawTree(tree, show=true)
 
 plk= [];
 for sym in poses[end-5:end]  #plot last 5 poses with contour
-    X1 = getKDEMean(getVertKDE(fg,sym))
+    X1 = getKDEMean(getBelief(fg,sym))
     push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Geom.label, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
-    K1 = plotKDEContour(getVertKDE(fg,sym),xlbl="", ylbl="",levels=2,layers=true);
+    K1 = plotKDEContour(getBelief(fg,sym),xlbl="", ylbl="",levels=2,layers=true);
     push!(plk,K1...)
     push!(plk,Gadfly.Theme(key_position = :none));
 end
 for sym in poses #plotting all syms no labels
-    X1 = getKDEMean(getVertKDE(fg,sym))
+    X1 = getKDEMean(getBelief(fg,sym))
     push!(plk, layer(x=[X1[1];],y=[X1[2];], label=["$(sym)";], Geom.point, Theme(default_color=colorant"blue",point_size = 1.5pt,highlight_width = 0pt)))
-    # K1 = plotKDEContour(getVertKDE(fg,sym),xlbl="", ylbl="",levels=2,layers=true);
+    # K1 = plotKDEContour(getBelief(fg,sym),xlbl="", ylbl="",levels=2,layers=true);
     # push!(plk,K1...)
     # push!(plk,Gadfly.Theme(key_position = :none));
 end
@@ -117,9 +117,9 @@ plkplot = Gadfly.plot(plk...); plkplot |> PDF("/tmp/test.pdf");
 # push!(plk,Gadfly.Theme(key_position = :none));
 
 # L1 = getVal(getVariable(fg, beacon))
-# L1 = rand(getVertKDE(fg,:l1),1000)
+# L1 = rand(getBelief(fg,:l1),1000)
 # push!(plk,layer(x=L1[1,:],y=L1[2,:],Geom.histogram2d(xbincount=300, ybincount=300)))
-# K1 = plotKDEContour(getVertKDE(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=6,layers=true);
+# K1 = plotKDEContour(getBelief(fg,:l1),xlbl="X (m)", ylbl="Y (m)",levels=6,layers=true);
 # push!(plk,K1...)
 # push!(plk,Gadfly.Theme(key_position = :none));
 # push!(plk, Guide.xlabel("X (m)"),Guide.ylabel("Y (m)"))
@@ -148,7 +148,7 @@ plotTreeProductDown(fg, tree, :x169, :x170)
 
 
 #
-getCliq(tree, :x169)
+getClique(tree, :x169)
 
 
 # fldr = "2019-09-01T12:25:09.297"
@@ -240,7 +240,7 @@ writeGraphPdf(csfg21bd, show=true)
 
 
 
-getCliq(tree, :x170)
+getClique(tree, :x170)
 
 # what happened in the root
 
@@ -251,8 +251,8 @@ csfg1bd = hist[1][ste][4].cliqSubFg
 plotKDE(csfg31bd, [:x168;:x169;:x170], levels=3)
 
 
-plotKDE(getCliqDownMsgsAfterDownSolve(fg, getCliq(tree,:x170))[:x170], levels=3)
-plotKDE(getCliqDownMsgsAfterDownSolve(fg, getCliq(tree,:x19))[:x170], levels=3)
+plotKDE(getCliqDownMsgsAfterDownSolve(fg, getClique(tree,:x170))[:x170], levels=3)
+plotKDE(getCliqDownMsgsAfterDownSolve(fg, getClique(tree,:x19))[:x170], levels=3)
 
 
 

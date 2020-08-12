@@ -35,17 +35,17 @@ l1 = [0.4841;-0.559/2]
 fg = initfg()
 
 # add two beacons
-addVariable!(fg, :l0, Point2, labels=["BEACON"])
+addVariable!(fg, :l0, Point2, tags=[:BEACON;])
 # addFactor!(fg, [:l0], Prior(MvNormal(l0, lcov)))
 
-addVariable!(fg, :l1, Point2, labels=["BEACON"])
+addVariable!(fg, :l1, Point2, tags=[:BEACON;])
 # addFactor!(fg, [:l1], Prior(MvNormal(l1, lcov)))
 
 addFactor!(fg, [:l0; :l1], Point2Point2(MvNormal(l1-l0, [0.01 0; 0 0.01].^2)))
 
 
 # add unknown pose location
-addVariable!(fg, :x0, Pose2, labels=["POSE"])
+addVariable!(fg, :x0, Pose2, tags=[:POSE;])
 addFactor!(fg, [:x0], PriorPose2(MvNormal(p0, pcov)))
 
 # add two bearing only measurements
@@ -80,15 +80,15 @@ getKDEMax(getKDE(fg, :l1))
 fg = initfg()
 
 # add two beacons
-addVariable!(fg, :l0, Point2, labels=["BEACON"])
+addVariable!(fg, :l0, Point2, tags=[:BEACON;])
 addFactor!(fg, [:l0], Prior(MvNormal(l0, lcov)))
 
-addVariable!(fg, :l1, Point2, labels=["BEACON"])
+addVariable!(fg, :l1, Point2, tags=[:BEACON;])
 addFactor!(fg, [:l1], Prior(MvNormal(l1, lcov)))
 
 
 # add unknown pose location
-addVariable!(fg, :x0, Pose2, labels=["POSE"])
+addVariable!(fg, :x0, Pose2, tags=[:POSE;])
 addFactor!(fg, [:x0], PartialPrior(Normal(0.0, 0.01), (2,)) )
 # addFactor!(fg, [:x0], PartialPrior(Uniform(-1.0, 0.5), (1,)) )
 # addFactor!(fg, [:x0], PriorPose2(MvNormal(p0, pcov)))

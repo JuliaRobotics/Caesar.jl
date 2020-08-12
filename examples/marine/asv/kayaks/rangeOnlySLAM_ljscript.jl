@@ -158,23 +158,23 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     Gadfly.plot(plk...) |> PDF(savefile)
 
     if expID == "dock"
-        l1fit = getKDEMean(getVertKDE(fg,:l1))
+        l1fit = getKDEMean(getBelief(fg,:l1))
         meanerror = sqrt((igt[1]-l1fit[1])^2+(igt[2]-l1fit[2])^2)
 
-        l1max = getKDEMax(getVertKDE(fg,:l1))
+        l1max = getKDEMax(getBelief(fg,:l1))
         maxerror = sqrt((igt[1]-l1max[1])^2+(igt[2]-l1max[2])^2)
 
-        mykde = getVertKDE(fg,:l1)
+        mykde = getBelief(fg,:l1)
         mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
         kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
     elseif expID == "drift"
-        l1fit = getKDEMean(getVertKDE(fg,:l1))
+        l1fit = getKDEMean(getBelief(fg,:l1))
         meanerror = sqrt((mean(igt[:,1])-l1fit[1])^2+(mean(igt[:,2])-l1fit[2])^2)
 
-        l1max = getKDEMax(getVertKDE(fg,:l1))
+        l1max = getKDEMax(getBelief(fg,:l1))
         maxerror = sqrt((mean(igt[:,1])-l1max[1])^2+(mean(igt[:,2])-l1max[2])^2)
 
-        mykde = getVertKDE(fg,:l1)
+        mykde = getBelief(fg,:l1)
         mynorm = kde!(rand(fit(MvNormal,getVal(fg,:l1)),200))
         kld = min(abs(KernelDensityEstimate.kld(mynorm,mykde)),abs(KernelDensityEstimate.kld(mykde,mynorm)))
     end

@@ -27,7 +27,7 @@ function findAddNewLandmarks!(fgl::G, lmoccur::Dict{Symbol, Int}, measurements::
       if !(lm in lmsinfgl)
         # add a new landmark
         println("adding lm=$(lm)")
-        addVariable!(fgl, lm, softtype, labels=["LANDMARK";])
+        addVariable!(fgl, lm, softtype, tags=[:LANDMARK;])
       end
       # @show measurements[landmarknumber(lm)]
     end

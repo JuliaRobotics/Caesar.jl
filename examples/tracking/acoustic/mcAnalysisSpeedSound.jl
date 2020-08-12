@@ -20,14 +20,14 @@ for mc in 1:10, ss in 420:20:420 #270:20:410
     fg = initfg()
 
     # add two beacons
-    addVariable!(fg, :l0, Point2, labels=["BEACON"])
+    addVariable!(fg, :l0, Point2, tags=[:BEACON])
     addFactor!(fg, [:l0], Prior(MvNormal(l0, lcov)))
 
-    addVariable!(fg, :l1, Point2, labels=["BEACON"])
+    addVariable!(fg, :l1, Point2, tags=[:BEACON])
     addFactor!(fg, [:l1], Prior(MvNormal(l1, lcov)))
 
     # add unknown pose location
-    addVariable!(fg, :x0, Pose2, labels=["POSE"])
+    addVariable!(fg, :x0, Pose2, tags=[:POSE])
     addFactor!(fg, [:x0], PartialPrior(Normal(0.0, 0.01), (2,)) )
 
     # add two bearing only measurements
