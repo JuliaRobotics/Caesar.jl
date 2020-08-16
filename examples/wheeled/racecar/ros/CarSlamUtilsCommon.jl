@@ -119,18 +119,18 @@ function fetchDataElement(dfg::AbstractDFG, varsym::Symbol, lbl::Symbol)
 end
 
 
-function jsonResultsSLAM2D(fec)
+function jsonResultsSLAM2D(dfg::AbstractDFG)
   allDicts = []
-  allvars = ls(fec.slam.dfg, r"x\d") |> sortDFG
+  allvars = ls(dfg, r"x\d") |> sortDFG
 
   for vidx in 1:(length(allvars)-1)
     ps = allvars[vidx]
     ns = allvars[vidx+1]
-    if 0 == getPPEDict(getVariable(fec.slam.dfg, ns)) |> length || 0 == getPPEDict(getVariable(fec.slam.dfg, ps)) |> length
+    if 0 == getPPEDict(getVariable(dfg, ns)) |> length || 0 == getPPEDict(getVariable(dfg, ps)) |> length
       continue
     end
     @show "fetchDataElement for $ps"
-    if !hasDataEntry(getVariable(fec.slam.dfg,ps), :JOYSTICK_CMD_VALS)
+    if !hasDataEntry(getVariable(dfg,ps), :JOYSTICK_CMD_VALS)
       @error "missing data entry :JOYSTICK_CMD_VALS in $ps of length(allvars)=$(length(allvars))"
       continue
     end
@@ -142,10 +142,10 @@ function jsonResultsSLAM2D(fec)
       :axis_time => (x->x[2]).(cmdData),
       :axis_throttle => (x->x[3].axis[2]).(cmdData),
       :axis_steer => (x->x[3].axis[4]).(cmdData),
-      :world_posei => getPPE(fec.slam.dfg,ps).suggested,
-      :world_posej => getPPE(fec.slam.dfg,ns).suggested,
-      :ti => getTimestamp(getVariable(fec.slam.dfg, ps)),
-      :tj => getTimestamp(getVariable(fec.slam.dfg, ns)),
+      :world_posei => getPPE(dfg,ps).suggested,
+      :world_posej => getPPE(dfg,ns).suggested,
+      :ti => getTimestamp(getVariable(dfg, ps)),
+      :tj => getTimestamp(getVariable(dfg, ns)),
     )
     DT = (cd[:tj]-cd[:ti]).value*1e-3
     cd[:deltaT] = DT

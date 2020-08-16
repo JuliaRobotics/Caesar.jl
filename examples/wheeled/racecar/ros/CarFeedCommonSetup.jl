@@ -5,8 +5,10 @@ if parsed_args["imshow"]
   using Gtk.ShortNames
 end
 
+using TimeZones
 using LinearAlgebra
 using ImageMagick
+using FileIO
 using ImageFeatures, ImageDraw, Images, CoordinateTransformations, Rotations
 using DataStructures
 using ColorTypes, FixedPointNumbers
@@ -85,8 +87,9 @@ using RobotOS
 
 ## start common processes on local machine
 
-addprocs(parsed_args["localprocs"])
-
+if nprocs() < parsed_args["localprocs"]
+  addprocs(parsed_args["localprocs"])
+end
 
 ## Start processes on remote machines
 
@@ -104,10 +107,12 @@ end
 using CuArrays, Flux
 using RoME
 using DataInterpolations
+using FileIO, ImageMagick
 @everywhere using CuArrays, Flux
 @everywhere using RoME
 @everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils, DataInterpolations, Rotations
-
+@everywhere using TimeZones
+@everywhere using FileIO, ImageMagick
 
 ## Constant parameters
 
