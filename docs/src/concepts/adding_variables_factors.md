@@ -81,27 +81,27 @@ In a trivial example of Pose2:
 ## Creating New Factors
 
 All factors inherit from one of the following types, depending on their function:
-* FunctorSingleton: FunctorSingletons are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a `RoME.Pose2` scenario.
+* AbstractPrior: AbstractPrior are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a `RoME.Pose2` scenario.
   * Requires: A getSample function
-* FunctorPairwiseMinimize: FunctorPairwiseMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.
+* AbstractRelativeFactorMinimize: AbstractRelativeFactorMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.
   * Requires: A getSample function and a residual function definition
   * The minimize suffix specifies that the residual function of this factor will be enforced by numerical minimization (find me the minimum of this function)
-* FunctorPairwise: FunctorPairwise are relative factors that introduce algebraic relationships between two or more variables. They are the same as FunctorPairwiseMinimize, however they use root finding to find the zero crossings (rather than numerical minimization).
+* AbstractRelativeFactor: AbstractRelativeFactor are relative factors that introduce algebraic relationships between two or more variables. They are the same as AbstractRelativeFactorMinimize, however they use root finding to find the zero crossings (rather than numerical minimization).
   * Requires: A getSample function and a residual function definition
 
 How do you decide which to use?
-* If you are creating factors for world-frame information that will be tied to a single variable, inherit from FunctorSingleton
+* If you are creating factors for world-frame information that will be tied to a single variable, inherit from AbstractPrior
   * GPS coordinates should be priors
-* If you are creating factors for local-frame relationships between variables, inherit from FunctorPairwiseMinimize
+* If you are creating factors for local-frame relationships between variables, inherit from AbstractRelativeFactorMinimize
   * Odometry and bearing deltas should be introduced as pairwise factors and should be local frame
-TBD: sUsers **should** start with FunctorPairwiseMinimize, discuss why and when they should promote their factors to FunctorPairwise.
+TBD: sUsers **should** start with AbstractRelativeFactorMinimize, discuss why and when they should promote their factors to AbstractRelativeFactor.
 
-> Note: FunctorPairwiseMinimize does not imply that the overall inference algorithm only minimizes an objective function. The Multi-model iSAM algorithm is built around fixed-point analysis. Minimization is used here to locally enforce the residual function.
+> Note: AbstractRelativeFactorMinimize does not imply that the overall inference algorithm only minimizes an objective function. The Multi-model iSAM algorithm is built around fixed-point analysis. Minimization is used here to locally enforce the residual function.
 
 What you need to build in the new factor:
 * A struct for the factor itself
 * A sampler function to return measurements from the random ditributions
-* If you are building a `FunctorPairwiseMinimize` or a `FunctorPairwise` you need to define a residual function to introduce the relative algebraic relationship between the variables
+* If you are building a `AbstractRelativeFactorMinimize` or a `AbstractRelativeFactor` you need to define a residual function to introduce the relative algebraic relationship between the variables
   * Minimization function should be lower-bounded and smooth
 * A packed type of the factor which must be named Packed[Factor name], and allows the factor to be packed/transmitted/unpacked
 * Serialization and deserialization methods
@@ -115,7 +115,7 @@ An example of this is the `Pose2Point2BearingRange`, which provides a bearing+ra
 ### Pose2Point2BearingRange Struct
 
 ```julia
-mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwise
+mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeFactor
     bearing::B
     range::R
     Pose2Point2BearingRange{B,R}() where {B,R} = new{B,R}()

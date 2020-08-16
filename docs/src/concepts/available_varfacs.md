@@ -44,11 +44,11 @@ You can check for the latest factor types by running the following in your termi
 ```julia
 using RoME, Caesar
 println("- Singletons (priors): ")
-println.(sort(string.(subtypes(IncrementalInference.FunctorSingleton))));
+println.(sort(string.(subtypes(IncrementalInference.AbstractPrior))));
 println("- Pairwise (variable constraints): ")
-println.(sort(string.(subtypes(IncrementalInference.FunctorPairwise))));
+println.(sort(string.(subtypes(IncrementalInference.AbstractRelativeFactor))));
 println("- Pairwise (variable minimization constraints): ")
-println.(sort(string.(subtypes(IncrementalInference.FunctorPairwiseMinimize))));
+println.(sort(string.(subtypes(IncrementalInference.AbstractRelativeFactorMinimize))));
 ```
 
 ### Priors (Absolute Data)

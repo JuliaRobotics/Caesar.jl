@@ -1,5 +1,9 @@
 # Developers Documentation
 
+## High Level Requirements
+
+[Wiki to formalize](https://github.com/JuliaRobotics/Caesar.jl/wiki/High-Level-Requirements) some of the overall objectives.
+
 ## Standardizing the API, verbNoun Definitions:
 
 The API derives from a set of [standard definitions for `verb`s and `Noun`s, please see the developer wiki regarding these definitions](http://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Standard-Definitions-of-API-via-verbs-and-set-theory).

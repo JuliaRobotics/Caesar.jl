@@ -179,7 +179,7 @@ function removeReinsertMultisessionPrior!(fgl::G,
         exims::Dict{Symbol, Int},
         prp2::T,
         sym::Symbol,
-        uid::Int  ) where {G <: AbstractDFG, T <: FunctorSingleton}
+        uid::Int  ) where {G <: AbstractDFG, T <: AbstractPrior}
   #
   # remove previous Multi session constraint on this sym vertex
   if haskey(exims, sym)

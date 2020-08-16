@@ -11,7 +11,7 @@ User scope `Prior`, `LinearOffset`, and `MultiModalOffset` with arbitrary distri
 # import needed to overload IIF.getSample
 import IncrementalInference: getSample
 
-struct Prior{T} <: IncrementalInference.FunctorSingleton where T <: SamplableBelief
+struct Prior{T} <: IncrementalInference.AbstractPrior where T <: SamplableBelief
   z::T
 end
 
@@ -21,7 +21,7 @@ Prior(t::T) where {T <: SamplableBelief} = Prior{T}(t)
 # sampling function
 getSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,:), )
 
-struct LinearOffset{T} <: IncrementalInference.FunctorPairwise where T <: SamplableBelief
+struct LinearOffset{T} <: IncrementalInference.AbstractRelativeFactor where T <: SamplableBelief
   z::T
 end
 getSample(s::LinearOffset, N::Int=1) = (reshape(rand(s.z,N),1,:), )
