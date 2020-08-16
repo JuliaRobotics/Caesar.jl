@@ -42,7 +42,7 @@ import IncrementalInference: getSample
 Work in progress.
 
 ```julia
-mutable struct DynPoint2VelocityPrior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}
+mutable struct DynPoint2VelocityPrior{T} <: IncrementalInference.AbstractPrior where {T <: Distribution}
   z::T
   DynPoint2VelocityPrior{T}() where {T <: Distribution} = new{T}()
   DynPoint2VelocityPrior(z1::T) where {T <: Distribution} = new{T}(z1)

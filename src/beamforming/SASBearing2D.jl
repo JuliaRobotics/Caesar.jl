@@ -41,7 +41,7 @@ mutable struct SASREUSE
 end
 
 
-mutable struct SASBearing2D <: IncrementalInference.FunctorPairwiseMinimize
+mutable struct SASBearing2D <: IncrementalInference.AbstractRelativeFactorMinimize
   cfgTotal::CBFFilterConfig
   cfgLIE::CBFFilterConfig
   waveformsIn::Array{Complex{Float64}}
