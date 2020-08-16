@@ -18,16 +18,6 @@ cd("/somewhere/local/") # optional change to working directory
 fg = loadDFG("myFg.tar.gz") # and load the file, requires IIF v0.15, DFG v0.10
 ```
 
-Once you have a graph, you can visualize the graph as follows (beware though if the fg object is large):
-```julia
-# requires `sudo apt-get install graphviz
-drawGraph(fg, show=true)
-
-# alternative
-using GraphPlot
-plotdfg(fg)
-```
-
 # Querying the FactorGraph
 
 There are a variety of functions to query the factor graph, please refer to [Function Reference](../func_ref.md) for details.
@@ -42,12 +32,19 @@ ls(fg, :x0)
 # TODO: Provide an overview of getVal, getVert, getBW, getBelief, etc.
 ```
 
-A factor graph object can be visualized using:
+Once you have a graph, you can visualize the graph as follows (beware though if the fg object is large):
 ```julia
+# requires `sudo apt-get install graphviz
 drawGraph(fg, show=true)
 ```
 
 By setting `show=true`, the application `evince` will be called to show the `fg.pdf` file that was created using *GraphViz*.  A `GraphPlot.jl` visualization engine is also available.
+```julia
+using GraphPlot
+dfgplot(fg)
+```
+
+For more details, see [the DFG docs on Drawing Graphs](https://juliarobotics.org/DistributedFactorGraphs.jl/latest/DrawingGraphs/#Drawing-Graphs-1).
 
 # Solving Graphs
 
@@ -112,8 +109,13 @@ img = testimage("mandrill")
 imshow(img)
 
 # TODO, convert to Vector{UInt8}
-imgdata = # convert to PNG bytestream
-addData!(fg, :default_folder_store, :x1, :testImage, imgdata, mimeType="image/png", description="mandrill test image"  )
+using ImageMagick, FileIO
+# convert image to PNG bytestream
+io = IOBuffer()
+pngSm = Stream(format"PNG", io)
+save(pngSm, img)  # think FileIO is required for this
+pngBytes = take!(io)
+addData!(fg, :default_folder_store, :x1, :testImage, pngBytes, mimeType="image/png", description="mandrill test image"  )
 ```
 
 ## Retrieving a Data Blob
