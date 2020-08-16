@@ -125,11 +125,13 @@ Data is stored as an `Entry => Blob` relationship, and the entries associated wi
 julia> listDataEntries(fg, :x6)
 1-element Array{Symbol,1}:
  :JOYSTICK_CMD_VALS
+ :testImage
 ```
 
 And retrieved via:
 ```julia
 rawData = getData(fg, :x6, :JOYSTICK_CMD_VALS);
+imgEntry, imgBytes = getData(fg, :x1, :testImage)
 ```
 
 Looking at `rawData` in a bit more detail:
@@ -145,7 +147,15 @@ julia> rawData[2]
 #...
 ```
 
-In this case data was packed as `"application/json/octet-stream"`:
+For `:testImage` the data was packed in a familiar `image/png` and can be converted backto bitmap (array) format:
+```julia
+rgb = ImageMagick.readblob(imgBytes); # automatically detected as PNG format
+
+using ImageView
+imshow(rgb)
+```
+
+In the other case where data was packed as `"application/json/octet-stream"`:
 ```julia
 myData = JSON2.read(IOBuffer(rawData[2]))
 
