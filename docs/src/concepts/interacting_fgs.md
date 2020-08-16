@@ -1,3 +1,33 @@
+# Getting/Building a Factor Graph
+
+## Building a new Graph
+
+The previous [page shows some of the features in building a new factor graph](https://juliarobotics.org/Caesar.jl/latest/concepts/building_graphs/).
+
+Another shortcut to just quickly getting a graph is to use one of the existing canonical graphs (try tab-completion in the REPL):
+```julia
+fg = generateCanonicalFG_Hexagonal()
+```
+
+## Loading an Existing FileDFG
+
+Assuming REPL input:
+```julia
+pwd() # check current working directory
+cd("/somewhere/local/") # optional change to working directory
+fg = loadDFG("myFg.tar.gz") # and load the file, requires IIF v0.15, DFG v0.10
+```
+
+Once you have a graph, you can visualize the graph as follows (beware though if the fg object is large):
+```julia
+# requires `sudo apt-get install graphviz
+drawGraph(fg, show=true)
+
+# alternative
+using GraphPlot
+plotdfg(fg)
+```
+
 # Querying the FactorGraph
 
 There are a variety of functions to query the factor graph, please refer to [Function Reference](../func_ref.md) for details.
@@ -52,4 +82,75 @@ varsyms = ls(fg)
 map(v -> println("$v : $(getKDEMax(getKDE(fg, v)))"), varsyms[1]);
 ```
 
-> Also see built-in function `printgraphmax(fg)` which performs a similar function.
+# Adding A FolderStore
+
+Caesar.jl (with DFG) supports storage and retrieval of larger data blobs by means of various database/datastore technologies.  To get going, you can use a conventional `FolderStore`: 
+```
+getSolverParams(fg).logpath = pwd()
+storeDir = joinLogPath(fg,"data")
+mkpath(storeDir)
+# requires IIF v0.15, DFG v0.10
+datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
+addBlobStore!(fg, datastore)
+```
+
+## Adding Data Blobs
+
+Just showcasing a JSON Dict approach
+```
+using JSON2
+someDict = Dict(:name => "Jane", :data => randn(100))
+addData!(fg, :default_folder_store, :x1, :datalabel, Vector{UInt8}(JSON2.write( someDict )), mimeType="application/json/octet-stream"  )
+# see retrieval example below...
+```
+
+but much more flexibility is also possible
+```julia
+# from https://juliaimages.org/stable/install/
+using TestImages, Images, ImageView
+img = testimage("mandrill")
+imshow(img)
+
+# TODO, convert to Vector{UInt8}
+imgdata = # convert to PNG bytestream
+addData!(fg, :default_folder_store, :x1, :testImage, imgdata, mimeType="image/png", description="mandrill test image"  )
+```
+
+## Retrieving a Data Blob
+
+Data is stored as an `Entry => Blob` relationship, and the entries associated with a variable can be found via
+```julia
+julia> listDataEntries(fg, :x6)
+1-element Array{Symbol,1}:
+ :JOYSTICK_CMD_VALS
+```
+
+And retrieved via:
+```julia
+rawData = getData(fg, :x6, :JOYSTICK_CMD_VALS);
+```
+
+Looking at `rawData` in a bit more detail:
+```julia
+julia> rawData[1]
+BlobStoreEntry(:JOYSTICK_CMD_VALS, UUID("d21fc841-6214-4196-a396-b1d5ef95be49"), :default_folder_store, "deeb3ed0cba6ffd149298de21c361af26a207e565e27a3cd3fa6c807b9aaa44d", "DefaultUser|DefaultRobot|Session_851d81|x6", "", "application/json/octet-stream", TimeZones.ZonedDateTime(2020, 8, 15, 14, 26, 36, 397, tz"UTC-04:00"))
+
+julia> rawData[2]
+3362-element Array{UInt8,1}:
+ 0x5b
+ 0x5b
+ 0x32
+#...
+```
+
+In this case data was packed as `"application/json/octet-stream"`:
+```julia
+myData = JSON2.read(IOBuffer(rawData[2]))
+
+# as example
+julia> myData[1]
+3-element Array{Any,1}:
+                2017
+ 1532558043061497600
+                    (buttons = Any[0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], axis = Any[0, 0.25026196241378784, 0, 0, 0, 0])
+```
