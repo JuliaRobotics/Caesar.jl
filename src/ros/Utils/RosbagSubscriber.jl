@@ -29,12 +29,13 @@ RosbagSubscriber(bagfile::AbstractString;
 #
 
 # loss of accuracy (Julia only Millisecond)
-function nanosecond2datetime(nsT::Int64)
+function nanosecond2zoneddatetime(nsT::Int64)
   nano = nsT % 1_000_000_000
   secs = nsT - (nano % 1_000_000)
   secs /= 1_000_000_000
-  unix2datetime(secs)
+  ZonedDateTime(unix2datetime(secs), localzone())
 end
+@deprecate nanosecond2datetime(x...) nanosecond2zoneddatetime(x...)
 
 function getROSPyMsgTimestamp(msgT::PyObject)
   msgNs = msgT.to_sec()

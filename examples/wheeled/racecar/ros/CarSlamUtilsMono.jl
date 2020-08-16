@@ -12,7 +12,7 @@ include(joinpath(@__DIR__, "CarSlamUtilsCommon.jl"))
 
 # find joystick command segment
 # get all inputs up to this next pose
-function whichJoystickValues(fec, fromT::DateTime, upToTime::DateTime)
+function whichJoystickValues(fec, fromT, upToTime::ZonedDateTime)
   # upToTime = msgTime # getTimestamp(getVariable(fec.slam.dfg,addHist[end]))
   cmdTimes = (x->fec.synchronizer.cmdVal[x][2]).(1:length(fec.synchronizer.cmdVal)) .|> nanosecond2datetime
   addHist = getAddHistory(fec.slam.dfg)
@@ -143,6 +143,8 @@ function updateSLAMMono!(fec::FrontEndContainer,
   end
   # already have a counter
   fec.slam.frameCounter = syncz.camOdo[idxO][1]
+  img = syncz.leftFwdCam[idxO][3]
+  # @assert img isa Array "img is not an array, $(typeof(syncz.leftFwdCam[idxO]))"
 
   # calculate delta odo since last pose
   zTi = fec.slam.helpers.lastPoseOdomBuffer
@@ -179,7 +181,13 @@ function updateSLAMMono!(fec::FrontEndContainer,
   # find joystick values required
   joyVals = whichJoystickValues(fec, prevPoseT, imgTime)
   ## lets store the values while we're here
-  addDataEntry!( fec.slam.dfg, prevpose, fec.datastore, :JOYSTICK_CMD_VALS, "application/json", Vector{UInt8}(JSON2.write( joyVals ))  )
+  addData!( fec.slam.dfg, :default_folder_store, prevpose, :JOYSTICK_CMD_VALS, Vector{UInt8}(JSON2.write( joyVals )), mimeType="application/json/octet-stream" )
+  # addDataEntry!( fec.slam.dfg, prevpose, fec.datastore, :JOYSTICK_CMD_VALS, "application/json", Vector{UInt8}(JSON2.write( joyVals ))  )
+  io = IOBuffer()
+  pngSm = Stream(format"PNG", io)
+  FileIO.save(pngSm, img)  # think FileIO is required for this
+  addData!( fec.slam.dfg, :default_folder_store, prevpose, :KEYFRAME_IMG, take!(io), mimeType="image/png" )
+  
 
   baselineOdo = MvNormal(DX, diagm([0.05; 0.05; 0.3].^2))
   pp = if useFluxModels
@@ -217,7 +225,7 @@ function updateSLAMMono!(fec::FrontEndContainer,
     # pose = homographytopose(tag.H, fx, fy, cx, cy, taglength = 160.)
     pose, err1 = tagOrthogonalIteration(tag, fx, fy, cx, cy, taglength = 0.25)
     cTt = LinearMap(pose[1:3, 1:3])∘Translation((pose[1:3,4])...)
-    bRc = Quat(1/sqrt(2),0,0,-1/sqrt(2))*Quat(1/sqrt(2),-1/sqrt(2),0,0)
+    bRc = Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))*Rotations.Quat(1/sqrt(2),-1/sqrt(2),0,0)
     bTt = LinearMap(bRc) ∘ cTt
     # wTb = LinearMap(zT.R.R) ∘ Translation(zT.t...)
     # wTt = wTb ∘ bTt

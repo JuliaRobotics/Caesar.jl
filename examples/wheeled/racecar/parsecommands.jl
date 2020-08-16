@@ -128,6 +128,9 @@ function parse_commandline()
         "--savedfg"
             help = "Store DFG objects to file"
             action = :store_true
+        "--dbg"
+            help = "Enable debugging flags"
+            action = :store_true
         "--usesimmodels"
             help = "Use sim trained models"
             action = :store_true

@@ -7,6 +7,7 @@ include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 
 # assume in Atom editor (not scripted use)
 if length(ARGS) == 0
+  @info "Using default commands"
   parsed_args["folder_name"] = "labrun2"
   parsed_args["remoteprocs"] = 0
   parsed_args["localprocs"] = 4
@@ -15,6 +16,7 @@ if length(ARGS) == 0
   parsed_args["imshow"] = true
   parsed_args["msgloops"] = 3000
   parsed_args["usesimmodels"] = true
+  parsed_args["dbg"] = true
 end
 
 
@@ -81,8 +83,16 @@ tools = RacecarTools(detector)
 slam = SLAMWrapperLocal()
 getSolverParams(slam.dfg).drawtree = true
 getSolverParams(slam.dfg).showtree = false
+getSolverParams(slam.dfg).useMsgLikelihoods = true
+getSolverParams(slam.dfg).dbg = parsed_args["dbg"]
 
-datastore = FileDataStore( joinLogPath(slam.dfg,"bigdata") )
+mkpath(getLogPath(slam.dfg))
+
+# datastore = FolderStore( :default, joinLogPath(slam.dfg,"data") )
+datastore = FolderStore{Vector{UInt8}}(:default_folder_store, joinLogPath(slam.dfg,"data"))
+mkpath(joinLogPath(slam.dfg,"data"))
+addBlobStore!(slam.dfg, datastore)
+
 
 # also store parsed_args used in this case
 fid = open(joinLogPath(slam.dfg,"args.json"),"w")
@@ -139,11 +149,11 @@ addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2
 
 ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
 
-
+# getSolverParams(slam.dfg).dbg = true
 
 ## Run main ROS listener loop
-
-sleep(0.01)  # allow gui some time to setup
+Gtk.showall(gui["window"])
+sleep(0.1)  # allow gui some time to setup
 rosloops = 0
 let rosloops = rosloops
 while loop!(bagSubscriber)
@@ -174,79 +184,20 @@ sleep(10)
 blockSolvingInProgress(fec.slam)
 
 
-## interpose results
+# save final graph
+saveDFG(slam.dfg, joinLogPath(slam.dfg,"finalGraph"))
 
-allD = jsonResultsSLAM2D(fec)
+# generate the results
+parsed_args["previous"] = getLogPath(slam.dfg)
+include(joinpath(@__DIR__, "CarSlamGenResults.jl"))
 
-allStr = JSON2.write(allD)
-
-fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results_prebatch.json"),"w")
-println(fid, allStr)
-close(fid)
-
-## save the factor graph
-
-if parsed_args["savedfg"]
-  saveDFG(fec.slam.dfg, joinLogPath(fec.slam.dfg, "fg_$(slam.poseCount)_prebatch"))
-end
+#
 
 
-## draw results
-
-if parsed_args["vis2d"]
-
-# drawPoses(slam.dfg, spscale=0.3, drawhist=false)
-pl = drawPosesLandms(fec.slam.dfg, spscale=0.3, drawhist=false)
-pl |> PDF(joinLogPath(fec.slam.dfg,"fg_$(slam.poseCount)_prebatch.pdf"))
-# drawPosesLandms(fg4, spscale=0.3, drawhist=false)
-
-if parsed_args["report_factors"]
-  reportFactors(fec.slam.dfg, Pose2Pose2, show=false)
-end
-
-end
-
-## batch resolve
-
-if parsed_args["batch_resolve"]
-
-# fg2 = deepcopy(fec.slam.dfg)
-
-enableSolveAllNotDRT!(fec.slam.dfg)
-# dontMarginalizeVariablesAll!(fec.slam.dfg)
-# foreach(x->setSolvable!(fec.slam.dfg, x, 1), ls(fec.slam.dfg))
-# foreach(x->setSolvable!(fec.slam.dfg, x, 1), lsf(fec.slam.dfg))
-
-tree, smt, hist = solveTree!(fec.slam.dfg)
-
-if parsed_args["savedfg"]
-  saveDFG(fec.slam.dfg, joinLogPath(fec.slam.dfg, "fg_$(slam.poseCount)_resolve"))
-end
-
-end
-
-## after resolve interpose results
-
-allD = jsonResultsSLAM2D(fec)
-
-allStr = JSON2.write(allD)
-
-fid = open(joinLogPath(fec.slam.dfg, "$(runfile)_results.json"),"w")
-println(fid, allStr)
-close(fid)
-
-
-## draw a second time
-
-
-if parsed_args["batch_resolve"] && parsed_args["vis2d"]
-
-
-pl = drawPosesLandms(fec.slam.dfg, spscale=0.3, drawhist=false)
-pl |> PDF(joinLogPath(slam.dfg,"fg_$(slam.poseCount)_resolve.pdf"))
-
-end
-
+# fg = loadDFG("fg_final_resolve.tar.gz")
+# getSolverParams(fg).logpath = pwd()
+# datastore = FolderStore{Vector{UInt8}}(:default_folder_store, joinLogPath(fg,"data"))
+# addBlobStore!(fg, datastore)
 
 
 #

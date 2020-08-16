@@ -41,7 +41,7 @@ mutable struct SASREUSE
 end
 
 
-mutable struct SASBearing2D <: IncrementalInference.AbstractRelativeFactorMinimize
+mutable struct SASBearing2D <: AbstractRelativeFactorMinimize
   cfgTotal::CBFFilterConfig
   cfgLIE::CBFFilterConfig
   waveformsIn::Array{Complex{Float64}}
@@ -208,7 +208,7 @@ function compare(a::SASDebug,b::SASDebug)
 end
 
 
-mutable struct PackedSASBearing2D <: IncrementalInference.PackedInferenceType
+mutable struct PackedSASBearing2D <: PackedInferenceType
     rangemodel::String
     totalPhones::Int
     wavedataRawV::Vector{Float64}
