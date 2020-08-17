@@ -33,7 +33,9 @@ save(pngSm, img)  # think FileIO is required for this
 pngBytes = take!(io)
 addData!(fg, :default_folder_store, :x1, :testImage, pngBytes, mimeType=&quot;image/png&quot;, description=&quot;mandrill test image&quot;  )</code></pre><h2 id="Retrieving-a-Data-Blob"><a class="docs-heading-anchor" href="#Retrieving-a-Data-Blob">Retrieving a Data Blob</a><a id="Retrieving-a-Data-Blob-1"></a><a class="docs-heading-anchor-permalink" href="#Retrieving-a-Data-Blob" title="Permalink"></a></h2><p>Data is stored as an <code>Entry =&gt; Blob</code> relationship, and the entries associated with a variable can be found via</p><pre><code class="language-julia">julia&gt; listDataEntries(fg, :x6)
 1-element Array{Symbol,1}:
- :JOYSTICK_CMD_VALS</code></pre><p>And retrieved via:</p><pre><code class="language-julia">rawData = getData(fg, :x6, :JOYSTICK_CMD_VALS);</code></pre><p>Looking at <code>rawData</code> in a bit more detail:</p><pre><code class="language-julia">julia&gt; rawData[1]
+ :JOYSTICK_CMD_VALS
+ :testImage</code></pre><p>And retrieved via:</p><pre><code class="language-julia">rawData = getData(fg, :x6, :JOYSTICK_CMD_VALS);
+imgEntry, imgBytes = getData(fg, :x1, :testImage)</code></pre><p>Looking at <code>rawData</code> in a bit more detail:</p><pre><code class="language-julia">julia&gt; rawData[1]
 BlobStoreEntry(:JOYSTICK_CMD_VALS, UUID(&quot;d21fc841-6214-4196-a396-b1d5ef95be49&quot;), :default_folder_store, &quot;deeb3ed0cba6ffd149298de21c361af26a207e565e27a3cd3fa6c807b9aaa44d&quot;, &quot;DefaultUser|DefaultRobot|Session_851d81|x6&quot;, &quot;&quot;, &quot;application/json/octet-stream&quot;, TimeZones.ZonedDateTime(2020, 8, 15, 14, 26, 36, 397, tz&quot;UTC-04:00&quot;))
 
 julia&gt; rawData[2]
@@ -41,11 +43,14 @@ julia&gt; rawData[2]
  0x5b
  0x5b
  0x32
-#...</code></pre><p>In this case data was packed as <code>&quot;application/json/octet-stream&quot;</code>:</p><pre><code class="language-julia">myData = JSON2.read(IOBuffer(rawData[2]))
+#...</code></pre><p>For <code>:testImage</code> the data was packed in a familiar <code>image/png</code> and can be converted backto bitmap (array) format:</p><pre><code class="language-julia">rgb = ImageMagick.readblob(imgBytes); # automatically detected as PNG format
+
+using ImageView
+imshow(rgb)</code></pre><p>In the other case where data was packed as <code>&quot;application/json/octet-stream&quot;</code>:</p><pre><code class="language-julia">myData = JSON2.read(IOBuffer(rawData[2]))
 
 # as example
 julia&gt; myData[1]
 3-element Array{Any,1}:
                 2017
  1532558043061497600
-                    (buttons = Any[0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], axis = Any[0, 0.25026196241378784, 0, 0, 0, 0])</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../building_graphs/">« Building Factor Graphs</a><a class="docs-footer-nextpage" href="../dataassociation/">Data Association »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Sunday 16 August 2020 23:15">Sunday 16 August 2020</span>. Using Julia version 1.4.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+                    (buttons = Any[0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], axis = Any[0, 0.25026196241378784, 0, 0, 0, 0])</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../building_graphs/">« Building Factor Graphs</a><a class="docs-footer-nextpage" href="../dataassociation/">Data Association »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 17 August 2020 00:48">Monday 17 August 2020</span>. Using Julia version 1.4.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
