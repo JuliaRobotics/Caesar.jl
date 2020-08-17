@@ -166,3 +166,22 @@ julia> myData[1]
  1532558043061497600
                     (buttons = Any[0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], axis = Any[0, 0.25026196241378784, 0, 0, 0, 0])
 ```
+
+### Quick Camera Calibration Storage Example
+
+Consider storing camera calibration data inside the factor graph `tar.gz` object for later use:
+```julia
+fx = 341.4563903808594
+fy = 341.4563903808594
+cx = 329.19091796875
+cy = 196.3658447265625
+
+K = [-fx 0  cx;
+      0 fy cy]
+
+# Cheap way to include data as a Blob.  Also see the more hacky `Smalldata` alternative for situations that make sense.
+camCalib = Dict(:size=>size(K), :vecK=>vec(K))
+addData!(dfg,:default_folder_store,:x0,:camCalib,
+         Vector{UInt8}(JSON2.write(camCalib)), mimeType="application/json/octet-stream", 
+         description="reshape(camCalib[:vecK], camCalib[:size]...)") 
+```
