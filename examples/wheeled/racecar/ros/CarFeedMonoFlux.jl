@@ -93,7 +93,6 @@ datastore = FolderStore{Vector{UInt8}}(:default_folder_store, joinLogPath(slam.d
 mkpath(joinLogPath(slam.dfg,"data"))
 addBlobStore!(slam.dfg, datastore)
 
-
 # also store parsed_args used in this case
 fid = open(joinLogPath(slam.dfg,"args.json"),"w")
 println(fid, JSON2.write(parsed_args))
@@ -141,6 +140,13 @@ T0 = nanosecond2datetime(fec.synchronizer.leftFwdCam[1][2])
 
 addVariable!(slam.dfg, :x0, Pose2, timestamp=T0)
 addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2))), timestamp=T0)
+
+
+## store the camera calibration in the first pose
+camCalib = Dict(:size=>size(K), :vecK=>vec(K))
+addData!(slam.dfg,:default_folder_store,:x0,:camCalib,
+         Vector{UInt8}(JSON2.write(camCalib)), mimeType="application/json/octet-stream", 
+         description="reshape(camCalib[:vecK], camCalib[:size]...)") 
 
 
 
