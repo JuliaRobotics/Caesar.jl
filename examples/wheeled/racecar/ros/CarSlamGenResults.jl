@@ -67,7 +67,7 @@ pl |> PDF(joinLogPath(dfg,"fg_final_prebatch.pdf"))
 
 if parsed_args["report_factors"]
   reportFactors(dfg, Pose2Pose2, show=false)
-  reportFactors(dfg, Pose2Pose2, lsf(dfg, r"l"), show=false)
+  reportFactors(dfg, Pose2Pose2, lsf(dfg, r"l"),prefix="LM_", show=false)
 end
 
 end
@@ -92,7 +92,7 @@ end
 # report a second time after the resolve
 if parsed_args["report_factors"]
   reportFactors(dfg, Pose2Pose2, show=false)
-  reportFactors(dfg, Pose2Pose2, lsf(dfg, r"l"), show=false)
+  reportFactors(dfg, Pose2Pose2, lsf(dfg, r"l"),prefix="LM_", show=false)
 end
 
 end

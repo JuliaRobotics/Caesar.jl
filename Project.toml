@@ -73,6 +73,7 @@ julia = "1.4"
 [extras]
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 RobotOS = "22415677-39a4-5241-a37a-00beabbbdae8"
+RoMEPlotting = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
