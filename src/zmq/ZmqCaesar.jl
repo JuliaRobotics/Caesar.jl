@@ -1,4 +1,5 @@
 module ZmqCaesar
+    using Requires
     using ZMQ, JSON
     using Distributions, IncrementalInference, DistributedFactorGraphs, Caesar
     using Unmarshal
@@ -15,7 +16,11 @@ module ZmqCaesar
     include("services/factors/factorSerialization.jl")
     include("services/config.jl")
     include("services/session.jl")
-    include("services/plotting.jl")
     include("services/additional.jl")
     include("services/ZmqServer.jl")
+    
+    # conditional loading for RoMPlotting
+    function __init__()
+        @require RoMEPlotting="238d586b-a4bf-555c-9891-eda6fc5e55a2" include("services/plotting.jl")
+    end
 end

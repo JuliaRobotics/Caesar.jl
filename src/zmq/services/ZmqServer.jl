@@ -62,9 +62,9 @@ function shutdown(zmqServer, request)::Dict{String, Any}
     return Dict{String, Any}("status" => "OK")
 end
 
-function Base.isopen(socket::Socket)
-    return getfield(socket, :data) != C_NULL
-end
+# function Base.isopen(socket::Socket)
+#     return getfield(socket, :data) != C_NULL
+# end
 
 function start(zmqServer::ZmqServer)
     # set up a context for zmq
