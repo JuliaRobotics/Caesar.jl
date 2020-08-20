@@ -139,6 +139,7 @@ function __init__()
       include("ros/Utils/RosbagSubscriber.jl")
     end
   end
+  @require AprilTags="f0fec3d5-a81e-5a6a-8c28-d2b34f3659de" include("images/apriltags.jl")
 end
 
 end
