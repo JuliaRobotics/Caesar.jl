@@ -1,7 +1,7 @@
 
-@info "Loading Caesar related tools since AprilTags package was detected."
+@info "Loading Caesar tools related to AprilTags.jl."
 
-using Images
+# using Images
 
 
 

@@ -95,29 +95,6 @@ end
 
 
 
-## Visualization functions
-
-function showImage(image, tags, K)
-    # Convert image to RGB
-    imageCol = RGB.(image)
-    # draw the tag number for each tag
-    foreach(x->drawTagID!(imageCol, x),tags)
-    #draw color box on tag corners
-    foreach(tag->drawTagBox!(imageCol, tag, width = 2, drawReticle = false), tags)
-    foreach(tag->drawTagAxes!(imageCol,tag, K), tags)
-    imageCol
-end
-
-
-
-function fetchDataElement(dfg::AbstractDFG, varsym::Symbol, lbl::Symbol)
-    gde,rawData = getData(dfg, varsym, lbl)
-    # entry = getBigDataEntry(var, lbl)
-    # rawData = getBigData(datastore, entry)
-    # # raw data is json-encoded; this decoding should happen inside getBigData?
-    return JSON2.read(IOBuffer(rawData))
-end
-
 
 function jsonResultsSLAM2D(dfg::AbstractDFG)
   allDicts = []
@@ -172,18 +149,19 @@ function jsonResultsSLAM2D(dfg::AbstractDFG)
 end
 
 
-# load image (png, jpg, jpeg) from supported a data blob store 
-function fetchDataImage(dfg::AbstractDFG,
-                        varLbl::Symbol,
-                        dataLbl::Symbol,
-                        getDataLambda::Function = (g,vl,dl) -> getData(g,vl,dl),
-                        checkMimeType::Bool=true )
-  #
-  imgEntry, imgBytes = getDataLambda(dfg, varLbl, dataLbl)
-  checkMimeType && (@assert imgEntry.mimeType in ["image/png"; "image/jpg"; "image/jpeg"] "Unknown image format DataBlobEntry.mimeType=$(imgEntry.mimeType)")
-  ImageMagick.readblob(imgBytes)
-end
-fetchDataImage(dfg::AbstractDFG,datastore::AbstractBlobStore,varLbl::Symbol,dataLbl::Symbol,checkMimeType::Bool=true) = fetchDataImage(dfg, varLbl, dataLbl, (g,vl,dl) -> getData(g,datastore,vl,dl) , checkMimeType)
+# # moved into Caesar
+# # load image (png, jpg, jpeg) from supported a data blob store 
+# function fetchDataImage(dfg::AbstractDFG,
+#                         varLbl::Symbol,
+#                         dataLbl::Symbol,
+#                         getDataLambda::Function = (g,vl,dl) -> getData(g,vl,dl),
+#                         checkMimeType::Bool=true )
+#   #
+#   imgEntry, imgBytes = getDataLambda(dfg, varLbl, dataLbl)
+#   checkMimeType && (@assert imgEntry.mimeType in ["image/png"; "image/jpg"; "image/jpeg"] "Unknown image format DataBlobEntry.mimeType=$(imgEntry.mimeType)")
+#   ImageMagick.readblob(imgBytes)
+# end
+# fetchDataImage(dfg::AbstractDFG,datastore::AbstractBlobStore,varLbl::Symbol,dataLbl::Symbol,checkMimeType::Bool=true) = fetchDataImage(dfg, varLbl, dataLbl, (g,vl,dl) -> getData(g,datastore,vl,dl) , checkMimeType)
 
 
 # reproject a bearing range onto (assumed level) image.

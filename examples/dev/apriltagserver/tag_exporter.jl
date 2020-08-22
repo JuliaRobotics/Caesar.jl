@@ -21,6 +21,7 @@ function commands()
   parse_args(ARGS, s)
 end
 
+# use AprilTags.drawTags instead
 function showImage(image, tags)
     # Convert image to RGB
     imageCol = RGB.(image)

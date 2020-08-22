@@ -39,7 +39,6 @@ TransformUtils = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 Unmarshal = "cbff2730-442d-58d7-89d1-8e530c41eb02"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
-ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [compat]
 ApproxManifoldProducts = "^0.1"
@@ -72,10 +71,12 @@ ZMQ = "1"
 julia = "1.4"
 
 [extras]
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 RobotOS = "22415677-39a4-5241-a37a-00beabbbdae8"
 RoMEPlotting = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [targets]
 test = ["Test", "PyCall", "RobotOS"]

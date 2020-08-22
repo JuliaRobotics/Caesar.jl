@@ -10,6 +10,7 @@ using AprilTags
 # @pyimport numpy as np
 # @pyimport cv2
 
+# deprecated, use AprilTags.drawTags instead
 function showImage(image, tags, K)
     # Convert image to RGB
     imageCol = RGB.(image)
