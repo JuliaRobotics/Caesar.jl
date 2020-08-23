@@ -72,6 +72,7 @@ ZMQ = "1"
 julia = "1.4"
 
 [extras]
+AprilTags = "f0fec3d5-a81e-5a6a-8c28-d2b34f3659de"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 RobotOS = "22415677-39a4-5241-a37a-00beabbbdae8"
@@ -80,4 +81,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [targets]
-test = ["Test", "PyCall", "RobotOS"]
+test = ["Test", "PyCall", "RobotOS", "ZMQ", "AprilTags", "Images"]
