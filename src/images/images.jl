@@ -13,8 +13,9 @@ Notes:
 - https://discourse.julialang.org/t/creating-a-video-from-a-stack-of-images/646/8
 """
 function writevideo(fname::AbstractString, 
-                    imgstack::Array{<:Color,3};
-                    overwrite=true, fps::Int=30, options=``)
+                    imgstack::AbstractArray{<:Color,3};
+                    overwrite=true, fps::Int=30, options=``, 
+                    player::AbstractString="" )
   #
   ow = overwrite ? `-y` : `-n`
   h, w, nframes = size(imgstack)
@@ -34,4 +35,16 @@ function writevideo(fname::AbstractString,
       write(out, convert.(RGB{N0f8}, clamp01.(imgstack[:,:,i])))
     end
   end
+  if 0 < length(player)
+    @async run(`$player $fname`)
+  end
+end
+
+function writevideo(fname::AbstractString,
+                    imgs::AbstractVector{<:AbstractArray{<:Color,2}};
+                    overwrite=true, fps::Int=30, options=``, 
+                    player::AbstractString="" )
+  #
+  @cast imgstack[r,c,k] := imgs[k][r,c]
+  writevideo(fname, imgstack, overwrite=overwrite, fps=fps, options=options, player=player)
 end
