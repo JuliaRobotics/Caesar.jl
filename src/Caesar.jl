@@ -35,7 +35,8 @@ using
   Unmarshal,
   YAML,
   FFTW,
-  TimeZones
+  TimeZones,
+  TensorCast
 
 export
   GenericInSituSystem,  # insitu components
