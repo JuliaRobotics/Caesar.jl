@@ -114,13 +114,9 @@ getParent
 getTreeAllFrontalSyms
 getTreeCliqSolveOrderUp
 getTreeCliqsSolverHistories
-getVal
 getVariableDim
 getVariableInferredDim
-getUpMsgs
-getDwnMsgs
-hasCliq
-hasOrphans
+hasClique
 initfg
 initInferTreeUp!
 isCliqMarginalizedFromVars

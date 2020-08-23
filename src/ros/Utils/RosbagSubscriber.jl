@@ -1,4 +1,7 @@
 
+@info "Loading Caesar ROS specific utilities (using RobotOS)."
+
+
 export RosbagSubscriber, loop!, getROSPyMsgTimestamp, nanosecond2datetime
 
 ## Load rosbag file parser
@@ -22,10 +25,10 @@ mutable struct RosbagSubscriber
   # constructors
 end
 RosbagSubscriber(bagfile::AbstractString;
-                 channels::Vector{Symbol}=Symbol[],
-                 callbacks::Dict{Symbol,Function}=Dict{Symbol,Function}(),
-                 readers::Dict{Symbol,PyObject}=Dict{Symbol,PyObject}(),
-                 syncBuffer::Dict{Symbol,Tuple{DateTime, Int}}=Dict{Symbol,Tuple{DateTime, Int}}() ) = RosbagSubscriber(bagfile,channels,callbacks,readers,syncBuffer, :null, (unix2datetime(0),0))
+                  channels::Vector{Symbol}=Symbol[],
+                  callbacks::Dict{Symbol,Function}=Dict{Symbol,Function}(),
+                  readers::Dict{Symbol,PyObject}=Dict{Symbol,PyObject}(),
+                  syncBuffer::Dict{Symbol,Tuple{DateTime, Int}}=Dict{Symbol,Tuple{DateTime, Int}}() ) = RosbagSubscriber(bagfile,channels,callbacks,readers,syncBuffer, :null, (unix2datetime(0),0))
 #
 
 # loss of accuracy (Julia only Millisecond)
