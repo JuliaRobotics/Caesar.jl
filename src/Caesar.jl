@@ -21,7 +21,6 @@ using
   Statistics,
   LinearAlgebra,
   IncrementalInference,
-  # Graphs,
   TransformUtils,
   CoordinateTransformations,
   Rotations,
@@ -30,16 +29,14 @@ using
   FileIO,
   DataStructures,
   ProgressMeter,
-  ImageMagick,
+  ImageMagick, # figure out who else is using this and move to requires
   ImageCore,
   DocStringExtensions,
-  # CloudGraphs, # TODO: will be movedd to DFG
-  # Neo4j, # TODO: will be movedd to DFG
-  # Mongoc, # TODO: will be movedd to DFG
   Unmarshal,
   YAML,
   FFTW,
-  TimeZones
+  TimeZones,
+  TensorCast
 
 export
   GenericInSituSystem,  # insitu components
@@ -55,11 +52,6 @@ export
   # servers
   tcpStringSLAMServer,
   tcpStringBRTrackingServer,
-
-  # save and load data
-  saveSlam, # TODO deprecate
-  loadSlam, # TODO deprecate
-  haselement,
 
   # user functions
   identitypose6fg,
@@ -84,7 +76,6 @@ export
   reset!,
   prepMF,
   loadConfigFile,
-  prepareRangeModel,
   prepareSAS2DFactor,
   wrapRad,
   phaseShiftSingle!,
@@ -93,7 +84,7 @@ export
 
 
 
-NothingUnion{T} = Union{Nothing, T}
+const NothingUnion{T} = Union{Nothing, T}
 
 include("BearingRangeTrackingServer.jl")
 
@@ -105,19 +96,8 @@ include("UserFunctions.jl")
 include("config/CaesarConfig.jl")
 
 
-# using CloudGraphs
-# include("attic/cloudgraphs/SolverStatus.jl")
-# include("attic/cloudgraphs/IterationStatistics.jl")
-# include("attic/cloudgraphs/CloudGraphIntegration.jl") # Work in progress code
-# include("attic/cloudgraphs/ConvertGeneralSlaminDB.jl")
-# include("attic/cloudgraphs/slamindb.jl")
-# include("attic/cloudgraphs/MultisessionUtils.jl")
-# include("attic/cloudgraphs/FoveationUtils.jl")
-
 include("Deprecated.jl")
 
-# ZMQ server and endpoints
-include("zmq/ZmqCaesar.jl")
 
 # Multisession operation
 # include("attic/multisession/Multisession.jl")
@@ -131,14 +111,16 @@ include("beamforming/SASUtils.jl")
 
 # conditional loading for ROS
 function __init__()
+  # ZMQ server and endpoints
+  @require ZMQ="c2297ded-f4af-51ae-bb23-16f91089e4e1" include("zmq/ZmqCaesar.jl")
   @require PyCall="438e738f-606a-5dbb-bf0a-cddfbfd45ab0" begin
     @info "Loading Caesar PyCall specific utilities (using PyCall)."
     @eval using .PyCall
-    @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" begin
-      @info "Loading Caesar ROS specific utilities (using RobotOS)."
-      include("ros/Utils/RosbagSubscriber.jl")
-    end
+    @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("ros/Utils/RosbagSubscriber.jl")
   end
+  @require AprilTags="f0fec3d5-a81e-5a6a-8c28-d2b34f3659de" include("images/apriltags.jl")
+  @require ImageMagick="6218d12a-5da1-5696-b52f-db25d2ecc6d1" include("images/imagedata.jl")
+  @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" include("images/images.jl")
 end
 
 end

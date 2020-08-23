@@ -272,7 +272,7 @@ function drawLatestImage(fec::FrontEndContainer; syncList=[:leftFwdCam;])
   tagsL = detector(fec.synchronizer.leftFwdCam[idxL][3] |> collect)
 
   # @show poses = (T->homographytopose(T.H, fx, fy, cx, cy, taglength = 160.)).(tagsL)
-  imgLt = showImage(fec.synchronizer.leftFwdCam[idxL][3], tagsL, K)
+  imgLt = AprilTags.drawTags(fec.synchronizer.leftFwdCam[idxL][3], K, tagsL) # showImage
 
   # imgL = syncImgs[:left][idxL][2] .|> Gray
   # imgR = syncImgs[:right][idxR][2] .|> Gray

@@ -65,8 +65,8 @@ function drawLatestImagePair(syncImgs)
   tagsR = detector(syncImgs[:right][idxR][2])
 
   # @show poses = (T->homographytopose(T.H, fx, fy, cx, cy, taglength = 160.)).(tagsL)
-  imgLt = showImage(syncImgs[:left][idxL][2], tagsL, K)
-  imgRt = showImage(syncImgs[:right][idxR][2], tagsR, K)
+  imgLt = AprilTags.drawTags(syncImgs[:left][idxL][2], K, tagsL)  # showImage
+  imgRt = AprilTags.drawTags(syncImgs[:right][idxR][2], K, tagsR)  # showImage
 
   # imgL = syncImgs[:left][idxL][2] .|> Gray
   # imgR = syncImgs[:right][idxR][2] .|> Gray
