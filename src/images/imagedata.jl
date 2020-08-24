@@ -8,6 +8,18 @@ export fetchDataImage
 
 `Data: Entry => Blob` helper function to load images stored in standard (png, jpg, jpeg) format from supported a DFG data blob store.
 
+Example
+```julia
+# Skip if AbstractBlobStore is already set up
+  ## if a FolderStore already exists (assumed inside `getLogPath(fg)`)
+  storeDir = joinLogPath(fg,"data")
+  datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
+  addBlobStore!(fg, datastore)
+
+# Fetch the image
+img = fetchDataImage(fg, :x4, :KEYFRAME_IMG)
+```
+
 Notes
 - https://juliarobotics.org/Caesar.jl/latest/concepts/interacting_fgs/#Retrieving-a-Data-Blob
 """
