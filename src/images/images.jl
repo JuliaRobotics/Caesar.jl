@@ -13,7 +13,7 @@ Notes:
 - https://discourse.julialang.org/t/creating-a-video-from-a-stack-of-images/646/8
 """
 function writevideo(fname::AbstractString, 
-                    imgstack::AbstractArray{<:Color,3};
+                    imgstack::AbstractArray{<:Colorant,3};
                     overwrite=true, fps::Int=30, options=``, 
                     player::AbstractString="" )
   #
@@ -41,7 +41,7 @@ function writevideo(fname::AbstractString,
 end
 
 function writevideo(fname::AbstractString,
-                    imgs::AbstractVector{<:AbstractArray{<:Color,2}};
+                    imgs::AbstractVector{<:AbstractArray{<:Colorant,2}};
                     overwrite=true, fps::Int=30, options=``, 
                     player::AbstractString="" )
   #
