@@ -16,12 +16,40 @@ Gaussian error models in measurement or data cues will only be Gaussian (normall
 
 This section discusses the various concepts in the Caesar framework.
 
-The initial steps in constructing and solving graphs can be found in [Building and Solving Graphs](building_graphs.md).
+## Loading Packages with Multicore
+
+The Julia is a high-performance, parallel processing enable programming language from the ground up.  Caesar.jl utilizes features from native Julia which supports at least four styles of multiprocessing: i) separate memory multi-process; ii) shared memory multi-threading; iii) asynchronous shared-memory (forced-atomic) co-routines; and iv) multi-architecture such as JuliaGPU.  As of Julia 1.4, the most reliable method of loading all code into all contexts (for multi-processor speedup) is as follows.
+
+Make sure the environment variable `JULIA_NUM_THREADS` is set as default or per call, anywhere between 1 and 50 and recommended to use 4 as starting point.
+```julia
+JULIA_NUM_THREADS=6 julia -O3
+
+# load the required packages into procid()==1
+using Flux, RoME, Caesar, RoMEPlotting
+
+# then start more processes
+using Distributed
+addprocs(8) # note this yields 6*8=40 possible processing threads
+
+# now make sure all code is loaded everywhere (for separate memory cases)
+@everywhere using Flux, RoME, Caesar
+```
+
+It might also be convenient to warm up some of the Just-In-Time compiling:
+```julia
+# solve a few graphs etc, to get majority of solve code compiled before running a robot.
+[warmUpSolverJIT() for i in 1:3];
+```
+
+The best way to avoid compile time (when not developing) is to use the established Julia "first time to plot" approach based on PackageCompiler.jl, and more details are provided at [Ahead of Time compiling](https://juliarobotics.org/Caesar.jl/latest/installation_environment/#Ahead-Of-Time-Compile-RoME.so), and a few common questions might be answered via [FAQ here](https://juliarobotics.org/Caesar.jl/latest/faq/#Static,-Shared-Object-.so-Compilation).
+
+## Building Factor Graphs
+
+The initial steps in constructing and solving graphs will be discussed in the upcoming documentation page [Building and Solving Graphs](building_graphs.md).
+
+## A Few Examples
 
 We also recommend reviewing the various examples available in the [Examples section](../examples/examples.md).
-
-## Visualization
-Caesar supports various visualizations and plots by using Arena, RoMEPlotting, and Director. This is discussed in [Visualization with Arena.jl and RoMEPlotting.jl](arena_visualizations.md)
 
 ## Extending Caesar
 The variables and factors in Caesar should be sufficient for the majority of robotic applications, however Caesar allows users to extend the framework without changing the core code. This is discussed in [Creating New Variables and Factors](adding_variables_factors.md).
@@ -30,3 +58,7 @@ The variables and factors in Caesar should be sufficient for the majority of rob
 Caesar supports both in-memory solving (really fast, but for moderately-sized graphs) as well as database-driven solving (think massive graphs and multiple sessions). This is still under development/being refactored, and is discussed in [Common Data Persistence and Inference](database_interactions.md).
 
 Although Caesar is Julia-based, it provides multi-language support with a ZMQ interface. This is discussed in [Caesar Multi-Language Support](multilang.md).
+
+# Visualization
+
+Caesar supports various visualizations and plots by using Arena, RoMEPlotting, and Director. This is discussed in [Visualization with Arena.jl and RoMEPlotting.jl](arena_visualizations.md)
