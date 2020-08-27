@@ -18,11 +18,23 @@ This section discusses the various concepts in the Caesar framework.
 
 ## Loading Packages with Multicore
 
+!!! note
+    Keywords: parallel processing, multi-threading, multi-process
+
 The Julia is a high-performance, parallel processing enable programming language from the ground up.  Caesar.jl utilizes features from native Julia which supports at least four styles of multiprocessing: i) separate memory multi-process; ii) shared memory multi-threading; iii) asynchronous shared-memory (forced-atomic) co-routines; and iv) multi-architecture such as JuliaGPU.  As of Julia 1.4, the most reliable method of loading all code into all contexts (for multi-processor speedup) is as follows.
 
 Make sure the environment variable `JULIA_NUM_THREADS` is set as default or per call, anywhere between 1 and 50 and recommended to use 4 as starting point.
 ```julia
 JULIA_NUM_THREADS=6 julia -O3
+   _       _ _(_)_     |  Documentation: https://docs.julialang.org
+  (_)     | (_) (_)    |
+   _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
+  | | | | | | |/ _` |  |
+  | | |_| | | | (_| |  |  Version 1.5.0 (2020-08-01)
+ _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
+|__/                   |
+
+julia>
 
 # load the required packages into procid()==1
 using Flux, RoME, Caesar, RoMEPlotting
