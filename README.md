@@ -63,7 +63,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
 [build-tag]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.5
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
-[caesar-stable]: https://img.shields.io/badge/2020Q1-v0.5.x-green.svg
+[caesar-stable]: https://img.shields.io/badge/2020Q3-v0.6.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://caesarjl.slack.com
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
@@ -75,7 +75,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
 [r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.5
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2020Q3-v0.8.x-green.svg
+[r-stable]: https://img.shields.io/badge/2020Q3-v0.9.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
@@ -144,7 +144,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [amp-build-img]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl.svg?branch=master
 [amp-build-url]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
-[amp-stable]: https://img.shields.io/badge/2019Q3-v0.1.x-green.svg
+[amp-stable]: https://img.shields.io/badge/2020Q2-v0.1.x-green.svg
 [amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
 [amp-releases]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/releases
 
