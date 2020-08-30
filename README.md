@@ -32,14 +32,6 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [~~Graphs.jl~~][graphs-url] | [![][gjl-stable]][gjl-releases] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] | n/a |
 | [~~CloudGraphs.jl~~][cloudgraphs-url] | ![][cg-stable] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] | [![][mst-shield2]][dfg-milestones] |
 
-# Get Involved and Code of Conduct
-
-This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the slack channel, Julia Discourse, or Github issues to get in touch.
-
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/JuliaRobotics/Caesar.jl.svg)](https://starchart.cc/JuliaRobotics/Caesar.jl)
-
 # Contributors
 
 We are grateful for many, many contributions within the Julia package ecosystem -- see the [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of upstream packages and contributions.
@@ -56,6 +48,15 @@ Consider citing our work:
 ```
 
 Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently done by @dehann who can be contacted for more details.
+
+# Get Involved and Code of Conduct
+
+This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the slack channel, Julia Discourse, or Github issues to get in touch.
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/JuliaRobotics/Caesar.jl.svg)](https://starchart.cc/JuliaRobotics/Caesar.jl)
+
 
 [docs-shield]: https://img.shields.io/badge/docs-latest-blue.svg
 [caesar-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
