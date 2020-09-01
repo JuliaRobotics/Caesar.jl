@@ -43,12 +43,12 @@ makedocs(
             "Dead Reckon Tether" => "examples/deadreckontether.md",
         ],
         "Principles" => [
+            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
             "Filters vs. Graphs" => "principles/filterCorrespondence.md",
             "Generic Convolutions" => "principles/approxConvDensities.md",
             "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
             "Bayes (Junction) tree" => "principles/bayestreePrinciples.md",
             "Advanced Bayes Tree Topics" => "principles/initializingOnBayesTree.md",
-            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
         ],
         "How to Expand?" => [
             "Custom Variables and Factors" => "concepts/adding_variables_factors.md",
