@@ -5,17 +5,18 @@ using Caesar, RoME, Images
 
 fg = generateCanonicalFG_Hexagonal(graphinit=false)
 
-getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
 getSolverParams(fg).treeinit = true
-getSolverParams(fg).dbg = true
 getSolverParams(fg).graphinit = false
+
+# getSolverParams(fg).drawtree = true
+# getSolverParams(fg).showtree = true
+# getSolverParams(fg).dbg = true
 
 
 tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg));
 
 
-printCliqHistorySequential(hist)
+printCliqHistorySequential(hists)
 
 # also see dbg logs at this path for more info
 @show getLogPath(fg)
