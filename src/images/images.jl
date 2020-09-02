@@ -130,11 +130,13 @@ function csmAnimateSideBySide(tree::BayesTree,
                               frames::Int=100,
                               interval::Int=2,
                               fps::Int=5,
-                              rmfirst::Bool=true,
+                              rmfirst::Bool=true, 
+                              fsmColors::Dict{Symbol,String}=Dict{Symbol,String}(),
+                              defaultColor::AbstractString="lightpink",
                               folderpath::AbstractString="/tmp/caesar/csmCompound/",
                               show::Bool=false  ) where T <: AbstractVector
   #
-  csmAnimate(tree, autohists, interval=interval, frames=frames, rmfirst=rmfirst, folderpath=folderpath)
+  csmAnimate(tree, autohists, interval=interval, frames=frames, rmfirst=rmfirst, folderpath=folderpath, fsmColors=fsmColors, defaultColor=defaultColor )
   csmAnimationJoinImgs(folderpath)
 
   @info "reruns of `csmAnimate` will by default clear $folderpath and thereby remove any previous work done in that folder (including previously generated videos)."
