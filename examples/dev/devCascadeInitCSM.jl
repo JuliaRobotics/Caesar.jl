@@ -22,7 +22,7 @@ printCliqHistorySequential(hists)
 @show getLogPath(fg)
 
 
-csmAnimateSideBySide(tree, hists, show=true) # , draw_more_cb=csmTreeAni)
+csmAnimateSideBySide(tree, hists, fsmColors=Dict(:x4=>"red",:x0=>"lightblue"), show=true)
 
 
 # fps = 5
