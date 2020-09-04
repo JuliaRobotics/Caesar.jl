@@ -120,6 +120,7 @@ run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/both_%d.png -c:v libtheora -vf fps=
 DevNotes
 - Likely possible to use `writevideo` or something similar.
 - `folderpath` not fully populated everywhere so likely not working properly yet (help requested pls)
+- `tree` not strictly needed, since `autohists` already has the tree structure stored inside it.
 
 Related
 
