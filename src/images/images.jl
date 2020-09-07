@@ -82,14 +82,21 @@ function csmAnimationJoinImgs(folderpath::AbstractString = "/tmp/caesar/csmCompo
                               nrLt::Int = filter(x->occursin(ext,x),filter(x->occursin(leftname,x), files)) |> length,
                               nrRt::Int = filter(x->occursin(ext,x),filter(x->occursin(rightname,x), files)) |> length  )
   #
-  # loop over all image pairs
-  allFrames = 1:minimum([nrRt,nrLt])
-  @showprogress "Side by side $(allFrames[end]) images" for idx in allFrames
+  # internal thread helper function
+  function threadImageSideBySide(idx)
     iml = load(joinpath(folderpath,"$(leftname)$idx.$ext"))
     imr = load(joinpath(folderpath,"$(rightname)$idx.$ext"))
     imb = imhcatPretty(iml, imr)
     # save new side by side image
     save(joinpath(folderpath,"$(bothname)$idx.$ext"), imb)
+  end
+
+  # loop over all image pairs
+  allFrames = 1:minimum([nrRt,nrLt])
+  THRDS = Vector{Task}(undef, allFrames[end])
+  @showprogress "Joining side by side $(allFrames[end]) images" for idx in allFrames
+    # threading still only single CPU, ImageMagick might lock library to single file read and write.
+    threadImageSideBySide(idx)
   end
   joinpath(folderpath,"$(bothname)$(allFrames[end]).$ext")
 end
@@ -121,6 +128,7 @@ DevNotes
 - Likely possible to use `writevideo` or something similar.
 - `folderpath` not fully populated everywhere so likely not working properly yet (help requested pls)
 - `tree` not strictly needed, since `autohists` already has the tree structure stored inside it.
+- use `dpi` to set quality and speed.
 
 Related
 
@@ -130,20 +138,46 @@ function csmAnimateSideBySide(tree::BayesTree,
                               autohists::Dict{Int, T};
                               frames::Int=100,
                               interval::Int=2,
-                              fps::Int=5,
+                              dpi::Int=100,
                               rmfirst::Bool=true, 
                               fsmColors::Dict{Symbol,String}=Dict{Symbol,String}(),
-                              defaultColor::AbstractString="lightpink",
+                              defaultColor::AbstractString="gray",
                               folderpath::AbstractString="/tmp/caesar/csmCompound/",
-                              show::Bool=false  ) where T <: AbstractVector
+                              encode::Bool=false,
+                              fps::Int=5,
+                              nvenc::Bool=false,
+                              BITRATE = 2000,
+                              show::Bool=false   ) where T <: AbstractVector
   #
-  csmAnimate(tree, autohists, interval=interval, frames=frames, rmfirst=rmfirst, folderpath=folderpath, fsmColors=fsmColors, defaultColor=defaultColor )
+  csmAnimate( tree, 
+              autohists, 
+              interval=interval, 
+              frames=frames, 
+              dpi=dpi, 
+              rmfirst=rmfirst, 
+              folderpath=folderpath, 
+              fsmColors=fsmColors, 
+              defaultColor=defaultColor )
+  #
   csmAnimationJoinImgs(folderpath)
 
+  # vid export to logpath
+  firstkey = collect(keys(autohists))[1]
+  logpath = joinLogPath(autohists[firstkey][1][4].dfg, "csmAnimate")
+
   @info "reruns of `csmAnimate` will by default clear $folderpath and thereby remove any previous work done in that folder (including previously generated videos)."
-  if show
-    run(`ffmpeg -r 10 -i /tmp/caesar/csmCompound/both_%d.png -c:v libtheora -vf fps=$fps -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`)
-    @async run(`totem /tmp/caesar/csmCompound/out.ogv`)
+  if encode
+    cmd = if !nvenc
+      # known to work properly with resolution and image size
+      # `ffmpeg -r 10 -i /tmp/caesar/csmCompound/both_%d.png -c:v libtheora -vf fps=$fps -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`
+      `ffmpeg -r 10 -i $folderpath/both_%d.png -c:v libtheora -vf fps=$fps -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 $logpath.ogv`
+    else
+      # something about this particular call order preserves the input image resolution
+      # `ffmpeg -r 10 -i /tmp/caesar/csmCompound/both_%d.png -c:v h264_nvenc -preset medium -b:v $(BITRATE)k -bufsize $(BITRATE*2)k -profile:v high -bf 3 -rc-lookahead 20 -vsync 0 -vf fps=$fps -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -pix_fmt yuv420p /tmp/caesar/csmCompound/out.mp4`
+      `ffmpeg -r 10 -i $folderpath/both_%d.png -c:v h264_nvenc -preset slow -b:v $(BITRATE)k -bufsize $(BITRATE*2)k -profile:v high -rc vbr_hq -cq 1 -bf 3 -vsync 0 -pix_fmt yuv420p -vf fps=$fps -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" $logpath.mp4`
+    end
+    run(cmd)
+    show && @async run(nvenc ? `totem $logpath.mp4` : `totem $logpath.ogv`)
   end
 end
 

@@ -7,22 +7,31 @@ fg = generateCanonicalFG_Hexagonal(graphinit=false)
 
 getSolverParams(fg).treeinit = true
 getSolverParams(fg).graphinit = false
-
-# getSolverParams(fg).drawtree = true
-# getSolverParams(fg).showtree = true
-# getSolverParams(fg).dbg = true
+getSolverParams(fg).limititers = 100
 
 
-tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg));
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
+getSolverParams(fg).dbg = true
 
 
-printCliqHistorySequential(hists)
+tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg), verbose=true);
+
+
+fid = open(joinLogPath(fg, "csm.log"),"w")
+printCliqHistorySequential(hists, nothing, fid)
+close(fid)
+printCliqHistorySequential(hists,(1,11))
+
+
 
 # also see dbg logs at this path for more info
 @show getLogPath(fg)
 
 
-csmAnimateSideBySide(tree, hists, fsmColors=Dict(:x4=>"red",:x0=>"lightblue"), show=true)
+csmAnimateSideBySide(tree, hists, encode=true, show=true, nvenc=true)
+
+
 
 
 # fps = 5
