@@ -143,6 +143,7 @@ function csmAnimateSideBySide(tree::BayesTree,
                               fsmColors::Dict{Symbol,String}=Dict{Symbol,String}(),
                               defaultColor::AbstractString="gray",
                               folderpath::AbstractString="/tmp/caesar/csmCompound/",
+                              videopath = joinLogPath(autohists[collect(keys(autohists))[1]][1][4].dfg, "csmAnimate_"*string(Dates.now())),
                               encode::Bool=false,
                               fps::Int=5,
                               nvenc::Bool=false,
@@ -161,24 +162,26 @@ function csmAnimateSideBySide(tree::BayesTree,
   #
   csmAnimationJoinImgs(folderpath)
 
-  # vid export to logpath
-  firstkey = collect(keys(autohists))[1]
-  logpath = joinLogPath(autohists[firstkey][1][4].dfg, "csmAnimate")
+  # vid export to videopath
+  # firstkey = collect(keys(autohists))[1]
 
   @info "reruns of `csmAnimate` will by default clear $folderpath and thereby remove any previous work done in that folder (including previously generated videos)."
   if encode
     cmd = if !nvenc
       # known to work properly with resolution and image size
       # `ffmpeg -r 10 -i /tmp/caesar/csmCompound/both_%d.png -c:v libtheora -vf fps=$fps -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 /tmp/caesar/csmCompound/out.ogv`
-      `ffmpeg -r 10 -i $folderpath/both_%d.png -c:v libtheora -vf fps=$fps -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 $logpath.ogv`
+      `ffmpeg -r 10 -i $folderpath/both_%d.png -c:v libtheora -vf fps=$fps -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -q 10 $videopath.ogv`
     else
       # something about this particular call order preserves the input image resolution
       # `ffmpeg -r 10 -i /tmp/caesar/csmCompound/both_%d.png -c:v h264_nvenc -preset medium -b:v $(BITRATE)k -bufsize $(BITRATE*2)k -profile:v high -bf 3 -rc-lookahead 20 -vsync 0 -vf fps=$fps -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -pix_fmt yuv420p /tmp/caesar/csmCompound/out.mp4`
-      `ffmpeg -r 10 -i $folderpath/both_%d.png -c:v h264_nvenc -preset slow -b:v $(BITRATE)k -bufsize $(BITRATE*2)k -profile:v high -rc vbr_hq -cq 1 -bf 3 -vsync 0 -pix_fmt yuv420p -vf fps=$fps -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" $logpath.mp4`
+      `ffmpeg -r 10 -i $folderpath/both_%d.png -c:v h264_nvenc -preset slow -b:v $(BITRATE)k -bufsize $(BITRATE*2)k -profile:v high -rc vbr_hq -cq 1 -bf 3 -vsync 0 -pix_fmt yuv420p -vf fps=$fps -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" $videopath.mp4`
     end
     run(cmd)
-    show && @async run(nvenc ? `totem $logpath.mp4` : `totem $logpath.ogv`)
+    show && @async run(nvenc ? `totem $videopath.mp4` : `totem $videopath.ogv`)
   end
+
+  @info videopath
+  return videopath
 end
 
 
