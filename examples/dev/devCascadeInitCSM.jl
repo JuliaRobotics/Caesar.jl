@@ -12,7 +12,8 @@ getSolverParams(fg).limititers = 100
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
-getSolverParams(fg).dbg = true
+# getSolverParams(fg).drawtreerate = 0.25
+# getSolverParams(fg).dbg = true
 
 
 tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg), verbose=true);
@@ -21,15 +22,25 @@ tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg), verbose=true);
 fid = open(joinLogPath(fg, "csm.log"),"w")
 printCliqHistorySequential(hists, nothing, fid)
 close(fid)
-printCliqHistorySequential(hists,(2,40))
 
+
+# printCliqHistorySequential(hists)
+
+
+printCliqHistorySequential(hists, 1=>7:9)
+printCliqHistorySequential(hists, 2=>40:45)
+printCliqHistorySequential(hists, 1=>10)
+printCliqHistorySequential(hists, 2=>46)
+printCliqHistorySequential(hists, 1=>11:15)
+
+# printCliqHistorySequential(hists, [1,4,6]=>11:15)
 
 
 # also see dbg logs at this path for more info
-@show getLogPath(fg)
+# @show getLogPath(fg)
 
 
-csmAnimateSideBySide(tree, hists, encode=true, show=true, nvenc=true)
+csmAnimateSideBySide(tree, hists, encode=true, nvenc=true, show=true)
 
 
 
