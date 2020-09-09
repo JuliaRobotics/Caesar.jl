@@ -21,7 +21,7 @@ tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg), verbose=true);
 fid = open(joinLogPath(fg, "csm.log"),"w")
 printCliqHistorySequential(hists, nothing, fid)
 close(fid)
-printCliqHistorySequential(hists,(1,11))
+printCliqHistorySequential(hists,(2,40))
 
 
 

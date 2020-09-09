@@ -53,12 +53,11 @@ addVariable!
 addFactor!
 approxCliqMarginalUp!
 approxConv
-areCliqChildrenNeedDownMsg
 areCliqVariablesAllMarginalized
 assignTreeHistory!
 asyncTreeInferUp!
 attemptTreeSimilarClique
-blockCliqUntilChildrenHaveUpStatus
+fetchChildrenStatusUp
 buildSubgraphFromLabels
 buildTreeFromOrdering!
 buildCliqSubgraphDown
