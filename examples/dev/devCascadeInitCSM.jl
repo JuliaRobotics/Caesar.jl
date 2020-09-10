@@ -25,15 +25,11 @@ close(fid)
 
 
 # printCliqHistorySequential(hists)
-
-
-printCliqHistorySequential(hists, 1=>7:9)
-printCliqHistorySequential(hists, 2=>40:45)
-printCliqHistorySequential(hists, 1=>10)
-printCliqHistorySequential(hists, 2=>46)
-printCliqHistorySequential(hists, 1=>11:15)
-
+# printCliqHistorySequential(hists, 1=>10)
 # printCliqHistorySequential(hists, [1,4,6]=>11:15)
+
+printCliqHistorySequential(hists, [1=>10:15; 2=>45:52])
+
 
 
 # also see dbg logs at this path for more info
