@@ -40,7 +40,7 @@ function csmHexDelayTest(injectDelayBefore)
   didFail = 0 < ((smt .|> x->x.state == :failed) |> sum)
 
   fid = open(joinLogPath(fg,"didFail.log"), "w")
-  println(fid, "did the solve work, $didFail")
+  println(fid, "did the solve fail, $didFail")
   close(fid)
 
   # async case
