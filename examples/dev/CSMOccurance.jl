@@ -4,7 +4,7 @@ using Caesar
 
 
 ## Read all test lines from file
-fid = open("/tmp/caesar/dbgCSMHexDelayMatrix.log","r")
+fid = open("/tmp/caesar/dbgCSMHexDelayMatrix2.log","r")
 lines = readlines(fid)
 close(fid)
 
@@ -32,10 +32,10 @@ maskFalse = passedStr .|> px->split(px, '=')[2] == "false"
 ## True case
 
 csmCounterTrue, trxTrue = calcCSMOccurancesFolders(resultFolder[maskTrue])
-maxOccuranTrue = calcCSMOccuranceMax(csmCounterTrue)
+maxOccuranTrue = calcCSMOccuranceMax(csmCounterTrue, percentage=false)
 
-open("/tmp/caesar/maxOccTrue.txt","w") do io
-  printCSMOccuranceMax(maxOccuranTrue, fid=io)
+open("/tmp/caesar/maxOccTrueTEST.txt","w") do io
+  printCSMOccuranceMax(maxOccuranTrue, fid=io, percentage=false)
 end
 
 
@@ -44,7 +44,7 @@ end
 csmCounterFalse, trxFalse = calcCSMOccurancesFolders(resultFolder[maskFalse])
 maxOccuranFalse = calcCSMOccuranceMax(csmCounterFalse)
 
-open("/tmp/caesar/maxOccFalse.txt","w") do io
+open("/tmp/caesar/maxOccFalseTEST.txt","w") do io
   printCSMOccuranceMax(maxOccuranFalse, fid=io)
 end
 
@@ -53,14 +53,26 @@ end
 
 using JSON
 
-fst = 
 
-open("/tmp/caesar/trxTrue.json", "w") do io
+
+open("/tmp/caesar/trxTrue2.json", "w") do io
   println(io, JSON.json(trxTrue))
 end
 
-open("/tmp/caesar/trxFalse.json", "w") do io
+open("/tmp/caesar/trxFalse2.json", "w") do io
   println(io, JSON.json(trxFalse))
 end
+
+
+
+
+
+## dev
+
+csmCounterTrue[1][1]
+
+
+
+
 
 #

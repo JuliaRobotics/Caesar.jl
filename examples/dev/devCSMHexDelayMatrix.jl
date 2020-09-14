@@ -32,7 +32,6 @@ using Pkg
 
 
 allCSMFunctions = [
-  exitStateMachine,
   doCliqDownSolve_StateMachine,
   cleanupAfterDownSolve_StateMachine,
   specialCaseRootDownSolve_StateMachine,
@@ -68,6 +67,7 @@ allCSMFunctions = [
   checkChildrenAllUpRecycled_StateMachine,
   testCliqCanIncremtUpdate_StateMachine!,
   testCliqCanRecycled_StateMachine,
+  exitStateMachine,
 ]
 
 
@@ -83,7 +83,7 @@ for csmDlyFnc in allCSMFunctions, cliqId in 1:6
 
   fg, didFail = csmHexDelayTest(injectDelayBefore)
 
-  fid = open("/tmp/caesar/dbgCSMHexDelayMatrix.log","a")
+  fid = open("/tmp/caesar/dbgCSMHexDelayMatrix2.log","a")
   println(fid,getLogPath(fg), " -- solve_passed=$(!didFail), ", injectDelayBefore)
   close(fid)
 

@@ -1,6 +1,7 @@
 # develop cascade tree init
 
-using Caesar, RoME, Images
+# using Caesar, RoME, Images
+using Caesar, RoME
 
 
 fg = generateCanonicalFG_Hexagonal(graphinit=false)
@@ -10,10 +11,10 @@ getSolverParams(fg).graphinit = false
 getSolverParams(fg).limititers = 100
 
 getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
+# getSolverParams(fg).showtree = true
 # getSolverParams(fg).drawtreerate = 0.25
 # getSolverParams(fg).dbg = true
-# getSolverParams(fg).async = true
+getSolverParams(fg).async = true
 
 # limitcliqs = [:x0=>8;:x4=>11;:l1=>12;:x1=>12;:x5=>50;:x3=>50]
 # limitcliqs = [:x0=>8;:x4=>11;:l1=>13;:x1=>13;:x5=>50;:x3=>50]
@@ -21,61 +22,49 @@ getSolverParams(fg).showtree = true
 # limitcliqs = [:x0=>9;:x4=>21;:l1=>21;:x1=>21;:x5=>50;:x3=>50] # doesn' break
 # limitcliqs = [:x0=>8;:x4=>12;:l1=>21;:x1=>21;:x5=>50;:x3=>50] # breaks
 # limitcliqs = [:x0=>8;:x4=>12;:l1=>21;:x1=>21;:x5=>50;:x3=>50] # breaks
-limitcliqs = [:x0=>8;:x4=>13;:l1=>21;:x1=>21;:x5=>60;:x3=>60] # 50 # doesnt break, blocks
-limitcliqs = [:x0=>8;:x4=>11;:l1=>22;:x1=>22;:x5=>60;:x3=>60] #?
+# limitcliqs = [:x0=>8;:x4=>13;:l1=>21;:x1=>21;:x5=>60;:x3=>60] # 50 # doesnt break, blocks
+
 # injectDelayBefore=[2=>(testCliqCanRecycled_StateMachine=>5); ] # step 8
-injectDelayBefore=[5=>(testCliqCanRecycled_StateMachine=>5); ]
+# injectDelayBefore=[5=>(testCliqCanRecycled_StateMachine=>5); ]
+# injectDelayBefore=[6=>(towardUpOrDwnSolve_StateMachine=>10); ]
 # injectDelayBefore = nothing
 
-## everything in csm2
-# testCliqCanRecycled_StateMachine
-# testCliqCanIncremtUpdate_StateMachine!
-# isCliqUpSolved_StateMachine
-# buildCliqSubgraph_StateMachine
-# canCliqMargSkipUpSolve_StateMachine
-# blockUntilChildrenHaveStatus_StateMachine
-# trafficRedirectConsolidate459_StateMachine
-# checkIfCliqNullBlock_StateMachine
-# doesParentNeedDwn_StateMachine
-# determineCliqNeedDownMsg_StateMachine
-# slowIfChildrenNotUpSolved_StateMachine
 
-## first steps in csm5
-# testCliqCanRecycled_StateMachine
-# testCliqCanIncremtUpdate_StateMachine!
-# isCliqUpSolved_StateMachine
-# buildCliqSubgraph_StateMachine
-# canCliqMargSkipUpSolve_StateMachine
-# blockUntilChildrenHaveStatus_StateMachine
-# trafficRedirectConsolidate459_StateMachine
-# checkIfCliqNullBlock_StateMachine
-# doesParentNeedDwn_StateMachine
-# determineCliqNeedDownMsg_StateMachine
-# towardUpOrDwnSolve_StateMachine
 
-# mkpath(getLogPath(fg))
-# verbosefid = open(joinLogPath(fg, "csmVerbose.log"),"w")
+mkpath(getLogPath(fg))
+verbosefid = open(joinLogPath(fg, "csmVerbose.log"),"w")
 # verbosefid = stdout
-tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg), timeout=40, verbose=false) # , verbosefid=verbosefid, injectDelayBefore=injectDelayBefore ) #, limititercliqs=limitcliqs);
+tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg), verbose=true, verbosefid=verbosefid ) #, timeout=40 , injectDelayBefore=injectDelayBefore ) #, limititercliqs=limitcliqs);
+
 
 flush(verbosefid)
 close(verbosefid)
+# for .async = true (because .drawTree=true)
+schedule(smt[7], InterruptException(), error=true)
+
+open(joinLogPath(fg, "csmLogicalReconstruct.log"),"w") do io
+  IIF.reconstructCSMHistoryLogical(getLogPath(fg), fid=io)
+end
 
 # async case
 fetchCliqHistoryAll!(smt, hists)
 
-fid = open(joinLogPath(fg, "csmSequ.log"),"w")
-printCliqHistorySequential(hists, nothing, fid)
-close(fid)
+open(joinLogPath(fg, "csmSequ.log"),"w") do fid
+  printCliqHistorySequential(hists, nothing, fid)
+end
 
-fid = open(joinLogPath(fg, "csmLogi.log"),"w")
-printCSMHistoryLogical(hists, fid)
-close(fid)
+open(joinLogPath(fg, "csmLogi.log"),"w") do fid
+  printCSMHistoryLogical(hists, fid)
+end
+
+
 
 # printCliqHistorySequential(hists)
 # printCliqHistorySequential(hists, 1=>10)
 # printCliqHistorySequential(hists, [1,4,6]=>11:15)
 # printCliqHistorySequential(hists, [1=>9:16; 2=>20:34; 4=>29:34])
+
+printCliqHistorySequential(hists, [5=>12:21;6=>12:21])
 
 printCSMHistoryLogical(hists)
 
@@ -115,6 +104,45 @@ fnc_ = fnc_(hist_)
 fnc_ = fnc_(hist_)
 fnc_ = fnc_(hist_)
 
+
+
+
+## dev
+
+
+open(joinLogPath(fg, "csmLogicalReconstruct.log"),"w") do io
+  IIF.reconstructCSMHistoryLogical(getLogPath(fg), fid=io)
+end
+
+
+
+
+
+## everything in csm2
+# testCliqCanRecycled_StateMachine
+# testCliqCanIncremtUpdate_StateMachine!
+# isCliqUpSolved_StateMachine
+# buildCliqSubgraph_StateMachine
+# canCliqMargSkipUpSolve_StateMachine
+# blockUntilChildrenHaveStatus_StateMachine
+# trafficRedirectConsolidate459_StateMachine
+# checkIfCliqNullBlock_StateMachine
+# doesParentNeedDwn_StateMachine
+# determineCliqNeedDownMsg_StateMachine
+# slowIfChildrenNotUpSolved_StateMachine
+
+## first steps in csm5
+# testCliqCanRecycled_StateMachine
+# testCliqCanIncremtUpdate_StateMachine!
+# isCliqUpSolved_StateMachine
+# buildCliqSubgraph_StateMachine
+# canCliqMargSkipUpSolve_StateMachine
+# blockUntilChildrenHaveStatus_StateMachine
+# trafficRedirectConsolidate459_StateMachine
+# checkIfCliqNullBlock_StateMachine
+# doesParentNeedDwn_StateMachine
+# determineCliqNeedDownMsg_StateMachine
+# towardUpOrDwnSolve_StateMachine
 
 
 #
