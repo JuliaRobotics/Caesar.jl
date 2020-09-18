@@ -5,27 +5,27 @@ using Pkg
 
 
 ## everything in csm2
-# testCliqCanRecycled_StateMachine
-# testCliqCanIncremtUpdate_StateMachine!
+# canCliqMargRecycle_StateMachine
+# canCliqIncrRecycle_StateMachine
 # isCliqUpSolved_StateMachine
 # buildCliqSubgraph_StateMachine
 # canCliqMargSkipUpSolve_StateMachine
 # blockUntilChildrenHaveStatus_StateMachine
 # trafficRedirectConsolidate459_StateMachine
-# checkIfCliqNullBlock_StateMachine
+# maybeNeedDwnMsg_StateMachine
 # doesParentNeedDwn_StateMachine
 # determineCliqNeedDownMsg_StateMachine
 # slowIfChildrenNotUpSolved_StateMachine
 
 ## first steps in csm5
-# testCliqCanRecycled_StateMachine
-# testCliqCanIncremtUpdate_StateMachine!
+# canCliqMargRecycle_StateMachine
+# canCliqIncrRecycle_StateMachine
 # isCliqUpSolved_StateMachine
 # buildCliqSubgraph_StateMachine
 # canCliqMargSkipUpSolve_StateMachine
 # blockUntilChildrenHaveStatus_StateMachine
 # trafficRedirectConsolidate459_StateMachine
-# checkIfCliqNullBlock_StateMachine
+# maybeNeedDwnMsg_StateMachine
 # doesParentNeedDwn_StateMachine
 # determineCliqNeedDownMsg_StateMachine
 # towardUpOrDwnSolve_StateMachine
@@ -36,25 +36,25 @@ allCSMFunctions = [
   cleanupAfterDownSolve_StateMachine,
   specialCaseRootDownSolve_StateMachine,
   canCliqDownSolve_StateMachine,
-  finishCliqSolveCheck_StateMachine,
-  mustInitUpCliq_StateMachine,
+  checkUpsolveFinished_StateMachine,
+  prepInitUp_StateMachine,
   doCliqUpSolveInitialized_StateMachine,
   rmUpLikeliSaveSubFg_StateMachine,
-  somebodyLovesMe_StateMachine,
+  wipRedirect459Dwn_StateMachine,
   waitChangeOnParentCondition_StateMachine,
   slowOnPrntAsChildrNeedDwn_StateMachine,
   towardUpOrDwnSolve_StateMachine,
   canCliqMargSkipUpSolve_StateMachine,
   attemptDownInit_StateMachine,
   rmMsgLikelihoodsAfterDwn_StateMachine,
-  blockUntilSiblingsStatus_StateMachine,
+  blockSiblingStatus_StateMachine,
   slowIfChildrenNotUpSolved_StateMachine,
   blockUntilChildrenHaveStatus_StateMachine,
   dwnInitSiblingWaitOrder_StateMachine,
   collectDwnInitMsgFromParent_StateMachine,
   trafficRedirectConsolidate459_StateMachine,
   doAllSiblingsNeedDwn_StateMachine,
-  checkIfCliqNullBlock_StateMachine,
+  maybeNeedDwnMsg_StateMachine,
   determineCliqNeedDownMsg_StateMachine,
   doAnyChildrenNeedDwn_StateMachine,
   decideUpMsgOrInit_StateMachine,
@@ -65,8 +65,8 @@ allCSMFunctions = [
   buildCliqSubgraphForDown_StateMachine,
   isCliqUpSolved_StateMachine,
   checkChildrenAllUpRecycled_StateMachine,
-  testCliqCanIncremtUpdate_StateMachine!,
-  testCliqCanRecycled_StateMachine,
+  canCliqIncrRecycle_StateMachine,
+  canCliqMargRecycle_StateMachine,
   exitStateMachine,
 ]
 

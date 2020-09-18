@@ -15,7 +15,7 @@ function csmHexDelayTest(injectDelayBefore)
   # limitcliqs = [:x0=>8;:x4=>12;:l1=>21;:x1=>21;:x5=>50;:x3=>50] # breaks
   # limitcliqs = [:x0=>8;:x4=>13;:l1=>21;:x1=>21;:x5=>60;:x3=>60] # 50 # doesnt break, blocks
 
-  # injectDelayBefore=[5=>(testCliqCanRecycled_StateMachine=>5); ]
+  # injectDelayBefore=[5=>(canCliqMargRecycle_StateMachine=>5); ]
   # injectDelayBefore = nothing
 
   mkpath(getLogPath(fg))
