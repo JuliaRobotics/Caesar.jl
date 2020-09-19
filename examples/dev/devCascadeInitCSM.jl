@@ -70,6 +70,7 @@ printCSMHistoryLogical(hists)
 # @show getLogPath(fg)
 
 
+using Images
 csmAnimateSideBySide(tree, hists, encode=true, nvenc=true, show=true)
 
 
