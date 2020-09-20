@@ -4,6 +4,15 @@
 
 A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reducing the barrier of entry for sensor/data fusion tasks, including Simultaneous Localization and Mapping (SLAM).
 
+# NOTICE Gadfly#master
+
+Note current installation requires the latest Gadfly to overcome a Type Piracy problem that occurred in ImageCore.jl.  The following installation will fix the recent (but transient) Pkg compat problems:
+```julia
+julia> ] # to activate package manager
+(@v1.5) pkg> add Gadfly#master
+(@v1.5) pkg> add IncrementalInference RoME Caesar
+```
+
 # Weblink Info
 
 Click on the badges to follow web url links:
