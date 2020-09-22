@@ -1,5 +1,7 @@
 ## BEFORE RUNNING THIS SCRIPT, MAKE SURE ros is in the environment
 
+# cd("examples/wheeled/racecar/ros")
+
 ## Get user commands
 
 # Populates `parsed_args`
@@ -9,12 +11,12 @@ include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 if length(ARGS) == 0
   @info "Using default commands"
   parsed_args["folder_name"] = "labrun2"
-  parsed_args["remoteprocs"] = 0
+  parsed_args["remoteprocs"] = 8
   parsed_args["localprocs"] = 4
   parsed_args["vis2d"] = true
   parsed_args["vis3d"] = false
   parsed_args["imshow"] = true
-  parsed_args["msgloops"] = 3000
+  parsed_args["msgloops"] = 5000
   parsed_args["usesimmodels"] = true
   parsed_args["dbg"] = true
 end
@@ -118,9 +120,9 @@ bagSubscriber(joysticktopic, joystickHdlr, fec)
 # (x)->JlOdoPredictorPoint2(x, allModels)
 
 defaultFixedLagOnTree!(slam.dfg, 50, limitfixeddown=true)
-# getSolverParams(slam.dfg).dbg = true
-getSolverParams(slam.dfg).drawtree = true
-getSolverParams(slam.dfg).showtree = false
+getSolverParams(slam.dfg).dbg = false
+# getSolverParams(slam.dfg).drawtree = true
+# getSolverParams(slam.dfg).showtree = false
 
 
 ##
@@ -158,8 +160,11 @@ ST = manageSolveTree!(slam.dfg, slam.solveSettings, dbg=false)
 # getSolverParams(slam.dfg).dbg = true
 
 ## Run main ROS listener loop
-Gtk.showall(gui["window"])
-sleep(0.1)  # allow gui some time to setup
+if parsed_args["imshow"]
+  Gtk.showall(gui["window"])
+  sleep(0.1)  # allow gui some time to setup
+end
+
 rosloops = 0
 let rosloops = rosloops
 while loop!(bagSubscriber)
@@ -170,6 +175,7 @@ while loop!(bagSubscriber)
     break
   end
   # delay progress for whatever reason
+  # @show "blcok progress"
   blockProgress(slam) # required to prevent duplicate solves occuring at the same time
 end
 end
