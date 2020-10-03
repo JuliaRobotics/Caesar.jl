@@ -37,6 +37,7 @@ jobs:
       after_success: skip
   allow_failures:
     - julia: nightly
+    - stage: "Documentation"
   fast_finish: true
 
 after_success:
