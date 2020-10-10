@@ -208,5 +208,5 @@ mdlBytes = take!(io)
 
 addData!(dfg,:default_folder_store,:x0,:nnModel,
          mdlBytes, mimeType="application/bson/octet-stream", 
-         description="pb=PipeBuffer(IOBuffer(mdlBytes)); BSON.@load pb") 
+         description="pb=PipeBuffer(rawdata[2]); BSON.@load pb model") 
 ```
