@@ -16,6 +16,10 @@ These are [more hardy developer docs](http://juliarobotics.org/DistributedFactor
 
 More developer zone material will be added here in the future, but for the time being check out the [Caesar Wiki](http://github.com/JuliaRobotics/Caesar.jl/wiki/Data-Design-for-Caesar-RoME-IIF).
 
+## Tree and CSM References
+
+Major upgrades to how the tree and CSM works [is tracked in IIF issue 889](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/889).
+
 ## Coding Templates
 
 We've started to organize useful coding templates that are not available elsewhere (such as [JuliaDocs](http://docs.julialang.org/en/v1/)) in a more local developers 

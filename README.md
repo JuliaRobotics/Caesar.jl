@@ -4,6 +4,15 @@
 
 A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reducing the barrier of entry for sensor/data fusion tasks, including Simultaneous Localization and Mapping (SLAM).
 
+# NOTICE Gadfly#master
+
+Note current installation requires the latest Gadfly to overcome a Type Piracy problem that occurred in ImageCore.jl.  The following installation will fix the recent (but transient) Pkg compat problems:
+```julia
+julia> ] # to activate package manager
+(@v1.5) pkg> add Gadfly#master
+(@v1.5) pkg> add IncrementalInference RoME Caesar
+```
+
 # Weblink Info
 
 Click on the badges to follow web url links:
@@ -32,10 +41,6 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [~~Graphs.jl~~][graphs-url] | [![][gjl-stable]][gjl-releases] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] | n/a |
 | [~~CloudGraphs.jl~~][cloudgraphs-url] | ![][cg-stable] | [![Build Status][cloudgraphs-build-img]][cloudgraphs-build-url] | [![codecov.io][cloudgraphs-cov-img]][cloudgraphs-cov-url] | [![][mst-shield2]][dfg-milestones] |
 
-# Get Involved and Code of Conduct
-
-This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the slack channel, Julia Discourse, or Github issues to get in touch.
-
 # Contributors
 
 We are grateful for many, many contributions within the Julia package ecosystem -- see the [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of upstream packages and contributions.
@@ -44,7 +49,7 @@ Consider citing our work:
 
 ```
 @misc{caesarjl,
-  author = "Contributors and Packages",
+  author = "Contributors and Dependencies",
   title =  "Caesar.jl",
   year =   2020,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
@@ -52,6 +57,15 @@ Consider citing our work:
 ```
 
 Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently done by @dehann who can be contacted for more details.
+
+# Get Involved and Code of Conduct
+
+This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the slack channel, Julia Discourse, or Github issues to get in touch.
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/JuliaRobotics/Caesar.jl.svg)](https://starchart.cc/JuliaRobotics/Caesar.jl)
+
 
 [docs-shield]: https://img.shields.io/badge/docs-latest-blue.svg
 [caesar-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
@@ -63,7 +77,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
 [build-tag]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.5
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
-[caesar-stable]: https://img.shields.io/badge/2020Q1-v0.5.x-green.svg
+[caesar-stable]: https://img.shields.io/badge/2020Q3-v0.6.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://caesarjl.slack.com
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
@@ -75,7 +89,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
 [r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.5
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2020Q3-v0.8.x-green.svg
+[r-stable]: https://img.shields.io/badge/2020Q3-v0.9.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
@@ -144,7 +158,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [amp-build-img]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl.svg?branch=master
 [amp-build-url]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
-[amp-stable]: https://img.shields.io/badge/2019Q3-v0.1.x-green.svg
+[amp-stable]: https://img.shields.io/badge/2020Q2-v0.1.x-green.svg
 [amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
 [amp-releases]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/releases
 

@@ -185,3 +185,28 @@ addData!(dfg,:default_folder_store,:x0,:camCalib,
          Vector{UInt8}(JSON2.write(camCalib)), mimeType="application/json/octet-stream", 
          description="reshape(camCalib[:vecK], camCalib[:size]...)") 
 ```
+
+
+## Working with Binary Data (BSON)
+
+Sometime it's useful to store binary data.  Let's combine the example of storing a Flux.jl Neural Network object using [the existing BSON approach](http://fluxml.ai/Flux.jl/stable/saving/#).  Also [see BSON wrangling snippets here](https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Coding-Templates#bson-iobuffer-and-base64).
+
+!!! note
+    We will store binary data as Base64 encoded string to avoid other framing problems.  See [Julia Docs on Base64](https://docs.julialang.org/en/v1/stdlib/Base64/#Base64.Base64EncodePipe)
+
+```julia
+# the object you wish to store as binary
+model = Chain(Dense(5,2), Dense(2,3))
+
+io = IOBuffer()
+
+# using BSON
+BSON.@save io model
+
+# get base64 binary
+mdlBytes = take!(io)
+
+addData!(dfg,:default_folder_store,:x0,:nnModel,
+         mdlBytes, mimeType="application/bson/octet-stream", 
+         description="BSON.@load PipeBuffer(readBytes) model") 
+```

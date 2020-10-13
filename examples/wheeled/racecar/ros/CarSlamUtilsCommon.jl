@@ -150,9 +150,48 @@ end
 
 
 
+## Gadfly to video
+
+# not working yet, see DFG #641
+function plotSLAM2DSolveKeys(dfg::AbstractDFG,
+                            pattern::Regex=r"default_\d+";
+                            xmin=nothing, xmax=nothing, ymin=nothing, ymax=nothing,
+                            contour=false )
+  #
+  kys = listSolveKeys(dfg, pattern) |> collect |> sortDFG
+  kys .|> x -> plotSLAM2D(dfg, solveKey=x, contour=contour, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+end
+
+
+function makeVideoFromData(fname::AbstractString,
+                          dfg::AbstractDFG,
+                          dataLabel::Symbol,
+                          varSym::AbstractVector{Symbol}=ls(dfg, tags=[:POSE;]);
+                          fps::Int=30,
+                          options=`` )
+  #
+  imgs = fetchDataImage.(dfg, varSym, dataLabel)
+  writevideo(fname, imgs, fps=fps, options=options)
+end
+
 # reproject a bearing range onto (assumed level) image.
 
 
 
+## sequence of localProduct plots to monitor progression of a solve
+
+
+# kys = filter(x->!(x in [:graphinit;:default]), listSolveKeys(fg) |> collect |>sortDFG)
+
+# PL = kys .|> x->plotSLAM2D(fg, solveKey=x, xmin=-8,xmax=6,ymin=-4,ymax=8, contour=false);
+
+# PL = kys .|> x->plotLocalProduct(fg, :x7, solveKey=x, dims=[1;2]);
+# coo = Coord.Cartesian(xmin=-8,xmax=6,ymin=-4,ymax=6)
+
+# PL .|> x->(x.coord=coo);
+
+# PLi = convert.(Matrix{RGB}, PL);
+
+# writevideo("/tmp/slam2d__.avi", PLi, fps=5)
 
 #

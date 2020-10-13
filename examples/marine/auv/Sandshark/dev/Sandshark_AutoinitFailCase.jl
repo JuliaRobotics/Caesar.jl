@@ -165,7 +165,7 @@ dfg = fg
 prnt = getParent(tree, cliq)[1]
 
 # take atomic lock when waiting for down ward information
-lockUpStatus!(getData(prnt))
+# lockUpStatus!(getData(prnt))
 
 dwinmsgs = prepCliqInitMsgsDown!(dfg, tree, prnt, logger=ConsoleLogger()) # cliqSubFg
 dwnkeys = collect(keys(dwinmsgs))
@@ -201,8 +201,8 @@ end
 deleteMsgFactors!(c3sfg, msgfcts)
 
 # unlock
-@info "8a, attemptCliqInitD., unlockUpStatus!"
-unlockUpStatus!(getData(prnt))
+# @info "8a, attemptCliqInitD., unlockUpStatus!"
+# unlockUpStatus!(getData(prnt))
 
 
 
