@@ -10,7 +10,7 @@ The [non-Gaussian/multimodal section in the docs](https://juliarobotics.org/Caes
 
 ## Why Julia
 The [JuliaLang](https://julialang.org/) and ([JuliaPro](https://juliacomputing.com/)) is an open-source Just-In-Time (JIT) & optionally precompiled, strongly-typed, and high-performance programming language.
-The algorithmic code is implemented in Julia for many reasons, such as agile development, high level syntax, performance, type safety, multiple dispatch replacement for [object oriented](https://invenia.github.io/blog/2019/10/30/julialang-features-part-1/), parallel computing, dynamic development, cross compilable (with gcc and clang) and foundational cross-platform ([LLVM](http:///www.llvm.org)) technologies.  
+The algorithmic code is implemented in Julia for many reasons, such as agile development, high level syntax, performance, type safety, multiple dispatch replacement for [object oriented](https://invenia.github.io/blog/2019/10/30/julialang-features-part-1/) which exhibits [several emergent properties](https://invenia.github.io/blog/2019/11/06/julialang-features-part-2/), parallel computing, dynamic development, cross compilable (with gcc and clang) and foundational cross-platform ([LLVM](http:///www.llvm.org)) technologies.  
 See [JuliaCon2018 highlights video](https://www.youtube.com/watch?v=baR02tlea5Y).  Julia can be thought of as either {C+, Mex (done right), [or as a modern Fortran replacement](https://arstechnica.com/science/2020/10/the-unreasonable-effectiveness-of-the-julia-programming-language/)}.
 
 ### Current Julia version?
