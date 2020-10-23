@@ -224,8 +224,8 @@ fetchCliqSolvableDims(getClique(tree, :x0))
 prnt = getClique(tree, :x1)
 getCliqSiblingsPriorityInitOrder(tree, prnt)
 
-getData(getClique(tree, :x0)).solvableDims
+# getData(getClique(tree, :x0)).solvableDims
 
-fetch(getData(getClique(tree, :x0)).solvableDims)
+# fetch(getData(getClique(tree, :x0)).solvableDims)
 
 #

@@ -30,7 +30,8 @@ function fetchDataImage(dfg::AbstractDFG,
                         checkMimeType::Bool=true )
 #
   imgEntry, imgBytes = getDataLambda(dfg, varLbl, dataLbl)
-  checkMimeType && (@assert imgEntry.mimeType in ["image/png"; "image/jpg"; "image/jpeg"] "Unknown image format DataBlobEntry.mimeType=$(imgEntry.mimeType)")
+  allowList = ["image/png"; "image/jpg"; "image/jpeg"]
+  checkMimeType && (@assert imgEntry.mimeType in allowList "Should we allow image format DataBlobEntry.mimeType=$(imgEntry.mimeType), current allowList=$allowList")
   ImageMagick.readblob(imgBytes)
 end
 fetchDataImage(dfg::AbstractDFG,datastore::AbstractBlobStore,varLbl::Symbol,dataLbl::Symbol,checkMimeType::Bool=true) = fetchDataImage(dfg, varLbl, dataLbl, (g,vl,dl) -> getData(g,datastore,vl,dl) , checkMimeType)

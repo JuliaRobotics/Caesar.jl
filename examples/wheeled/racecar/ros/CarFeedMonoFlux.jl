@@ -1,6 +1,6 @@
 ## BEFORE RUNNING THIS SCRIPT, MAKE SURE ros is in the environment
 
-# cd("examples/wheeled/racecar/ros")
+cd(ENV["HOME"]*"/.julia/dev/Caesar/examples/wheeled/racecar/ros")
 
 ## Get user commands
 
@@ -11,7 +11,7 @@ include(joinpath(dirname(@__DIR__),"parsecommands.jl"))
 if length(ARGS) == 0
   @info "Using default commands"
   parsed_args["folder_name"] = "labrun2"
-  parsed_args["remoteprocs"] = 8
+  parsed_args["remoteprocs"] = 0
   parsed_args["localprocs"] = 4
   parsed_args["vis2d"] = true
   parsed_args["vis3d"] = false
@@ -57,9 +57,9 @@ allModels = []
 for i in 0:99
 # /home/dehann/data/racecar/results/conductor/models/retrained_network_weights0
   if parsed_args["usesimmodels"]
-    push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/sim_models/sim_network_weights$i") )
+    push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/sim_models/sim_network_weights$i", pad=true) )
   else
-    push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i") )
+    push!(allModels, loadPose2OdoNNModelIntoFlux(ENV["HOME"]*"/data/racecar/results/conductor/models/retrained_network_weights$i", pad=true) )
   end
 end
 

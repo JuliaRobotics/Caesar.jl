@@ -68,7 +68,7 @@ The [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInf
 
     Note in a factor graph sense, the flow of time is captured in the structure of the graph and a requirement of the IncrementalInference system is that factors can be resolved towards any variable, given current estimates on all other variables connected to that factor.  Furthermore, this forwards or backwards resolving/convolution through a factor should adhere to the Kolmogorov Criterion of reversibility to ensure that detailed balance is maintained in the overall marginal posterior solutions.
 
-The IncrementalInference (IIF) package provides a few generic conditional likelihood functions such as `LinearConditional` or `MixtureLinearConditional` which we will use in this illustration.  
+The IncrementalInference (IIF) package provides a few generic conditional likelihood functions such as `LinearRelative` or `MixtureRelative` which we will use in this illustration.  
 
 !!! note
 
