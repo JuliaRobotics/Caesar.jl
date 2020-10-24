@@ -80,6 +80,20 @@ for i in 1:10
 end
 ```
 
+#### [OPTIONAL] Understanding Internal Factor Naming Convention
+
+The factor name used by Caesar is automatically generated from 
+```julia
+addFactor!(fg, [:x0; :x1],...)
+```
+will create a factor with name `:x0x1f1`
+
+When you were to add a another factor betweem `:x0`, `:x1`:
+```julia
+addFactor!(fg, [:x0; :x1],...)
+```
+will create a second factor with the name `:x0x1f2`.
+
 ### When to Instantiate Poses (i.e. new Variables in Factor Graph)
 
 Consider a robot traversing some area while exploring, localizing, and wanting to find strong loop-closure features for consistent mapping.  The creation of new poses and landmark variables is a trade-off in computational complexity and marginalization errors made during factor graph construction.  Common triggers for new poses are:
