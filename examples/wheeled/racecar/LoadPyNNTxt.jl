@@ -16,9 +16,9 @@ end
 
 
 # convenience function to load specific model format from tensorflow
-function loadPose2OdoNNModelIntoFlux(dest::AbstractString)
+function loadPose2OdoNNModelIntoFlux(dest::AbstractString; pad::Bool=false)
   weights = loadPyNNTxt(dest::AbstractString)
-  buildPose2OdoNN_01_FromWeights(weights)
+  buildPose2OdoNN_01_FromWeights(weights, pad=pad)
 end
 
 

@@ -95,7 +95,7 @@ By forcing the initialization of `:x1` and plotting its belief estimate,
 ensureAllInitialized!(fg)
 plotKDE(fg, [:x0, :x1])
 ```
-the predicted influence of the `P(Z| X1 - X0) = LinearConditional(Normal(10, 1))` is shown by the red trace.
+the predicted influence of the `P(Z| X1 - X0) = LinearRelative(Normal(10, 1))` is shown by the red trace.
 ```@raw html
 <p align="center">
 <img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/src/assets/tutorials/ContinuousScalar/plx01.png" width="360" border="0" />
@@ -103,10 +103,10 @@ the predicted influence of the `P(Z| X1 - X0) = LinearConditional(Normal(10, 1))
 ```
 The red trace (predicted belief of `:x1`) is noting more than the approximated convolution of the current marginal belief of `:x0` with the conditional belief described by `P(Z | X1 - X0)`.
 
-Another `ContinuousScalar` variable `:x2` is 'connected' to `:x1` through a more complicated `MixtureLinearConditional` likelihood function.
+Another `ContinuousScalar` variable `:x2` is 'connected' to `:x1` through a more complicated `MixtureRelative` likelihood function.
 ```julia
 addVariable!(fg, :x2, ContinuousScalar)
-mmo = MixtureLinearConditional([Rayleigh(3); Uniform(30,55)], Categorical([0.4; 0.6]))
+mmo = MixtureRelative(LinearRelative, (hypo1=Rayleigh(3), hypo2=Uniform(30,55)), [0.4; 0.6])
 addFactor!(fg, [:x1, :x2], mmo)
 ```
 ```@raw html

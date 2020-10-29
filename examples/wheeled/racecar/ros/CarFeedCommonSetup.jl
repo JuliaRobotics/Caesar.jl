@@ -14,11 +14,12 @@ using DataStructures
 using ColorTypes, FixedPointNumbers
 using FreeTypeAbstraction # for drawTagID!
 using AprilTags
+using BSON
 using JSON2
 using Dates
 using DataInterpolations
 
-using CuArrays
+# using CuArrays
 using Flux
 using RoME
 using Caesar
@@ -104,11 +105,13 @@ end
 
 ## Load solver libraries everywhere
 
-using CuArrays, Flux
+using Flux
 using RoME
 using DataInterpolations
 using FileIO, ImageMagick
-@everywhere using CuArrays, Flux
+using BSON
+@everywhere using BSON
+@everywhere using Flux
 @everywhere using RoME
 @everywhere using IncrementalInference, DistributedFactorGraphs, TransformUtils, DataInterpolations, Rotations
 @everywhere using TimeZones

@@ -6,6 +6,7 @@
 
 export writevideo
 export imhcatPretty, csmAnimationJoinImgs, csmAnimateSideBySide
+export makeVideoFromData
 
 """
     $SIGNATURES
@@ -182,6 +183,38 @@ function csmAnimateSideBySide(tree::BayesTree,
 
   @info videopath
   return videopath
+end
+
+
+
+
+
+"""
+    $SIGNATURES
+
+Helper function to assemble `Entry=>Data` into a video file.
+
+Example
+
+```julia
+# fg object with datastore containing images on subset of variables, e.g. :HEADPOSE
+
+makeVideoFromData("/tmp/test.avi", fg, :LEFT_CAMERA, ls(fg, tags=[:HEADPOSE;]))
+```
+
+Related
+
+fetchDataImage
+"""
+function makeVideoFromData( fname::AbstractString,
+                            dfg::AbstractDFG,
+                            dataLabel::Symbol,
+                            varSym::AbstractVector{Symbol}=ls(dfg, tags=[:POSE;]) |> sortDFG;
+                            fps::Int=30,
+                            options=`` )
+  #
+  imgs = fetchDataImage.(dfg, varSym, dataLabel)
+  writevideo(fname, imgs, fps=fps, options=options)
 end
 
 
