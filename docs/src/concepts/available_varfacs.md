@@ -57,7 +57,6 @@ Defaults in IncrementalInference.jl:
 ```@docs
 Prior
 PartialPrior
-MixturePrior
 ```
 
 Some of the most common priors (unary factors) in Caesar.jl/RoME.jl include:
@@ -73,8 +72,7 @@ PriorPose3
 
 Defaults in IncrementalInference.jl:
 ```@docs
-LinearConditional
-MixtureLinearConditional
+LinearRelative
 ```
 
 Existing n-ary factors in Caesar.jl/RoME.jl/IIF.jl include:

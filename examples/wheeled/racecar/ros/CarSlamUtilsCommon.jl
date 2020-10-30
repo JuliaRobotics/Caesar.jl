@@ -22,12 +22,12 @@ struct SynchronizeCarMono <: SynchronizingBuffer
   cmdVal::CircularBuffer{Tuple{Int, Int64, Any}}
 end
 
-SynchronizeCarMono(len::Int=30;
-                   syncList::Vector=Symbol[],
-                   leftFwdCam=CircularBuffer{Tuple{Int, Int, Any}}(len),
-                   rightFwdCam=CircularBuffer{Tuple{Int, Int, Any}}(len),
-                   camOdo=CircularBuffer{Tuple{Int, Int, Any}}(len),
-                   cmdVal=CircularBuffer{Tuple{Int, Int, Any}}(len) ) = SynchronizeCarMono(syncList,leftFwdCam,rightFwdCam,camOdo,cmdVal)
+SynchronizeCarMono( len::Int=30;
+                    syncList::Vector=Symbol[],
+                    leftFwdCam=CircularBuffer{Tuple{Int, Int, Any}}(len),
+                    rightFwdCam=CircularBuffer{Tuple{Int, Int, Any}}(len),
+                    camOdo=CircularBuffer{Tuple{Int, Int, Any}}(len),
+                    cmdVal=CircularBuffer{Tuple{Int, Int, Any}}(len) ) = SynchronizeCarMono(syncList,leftFwdCam,rightFwdCam,camOdo,cmdVal)
 #
 
 struct RacecarTools
@@ -52,9 +52,9 @@ FrontEndContainer(s::SLAMWrapperLocal,m::M,t::T,a::A,d) where {M, T, A} = FrontE
 ## data management functions
 
 # function getSyncLatestPair(syncHdlrs::Dict; weirdOffset::Dict=Dict())::Tuple
-function findSyncLatestIdx(syncz::SynchronizingBuffer;
-                           weirdOffset::Dict=Dict(),
-                           syncList::Vector{Symbol}=syncz.syncList)
+function findSyncLatestIdx( syncz::SynchronizingBuffer;
+                            weirdOffset::Dict=Dict(),
+                            syncList::Vector{Symbol}=syncz.syncList)
   # get all sequence numbers
   len = length(syncList)
   if len == 1
@@ -152,27 +152,7 @@ end
 
 ## Gadfly to video
 
-# not working yet, see DFG #641
-function plotSLAM2DSolveKeys(dfg::AbstractDFG,
-                            pattern::Regex=r"default_\d+";
-                            xmin=nothing, xmax=nothing, ymin=nothing, ymax=nothing,
-                            contour=false )
-  #
-  kys = listSolveKeys(dfg, pattern) |> collect |> sortDFG
-  kys .|> x -> plotSLAM2D(dfg, solveKey=x, contour=contour, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
-end
 
-
-function makeVideoFromData(fname::AbstractString,
-                          dfg::AbstractDFG,
-                          dataLabel::Symbol,
-                          varSym::AbstractVector{Symbol}=ls(dfg, tags=[:POSE;]);
-                          fps::Int=30,
-                          options=`` )
-  #
-  imgs = fetchDataImage.(dfg, varSym, dataLabel)
-  writevideo(fname, imgs, fps=fps, options=options)
-end
 
 # reproject a bearing range onto (assumed level) image.
 

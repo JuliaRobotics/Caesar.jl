@@ -170,7 +170,7 @@ updateFGBT!
 updateTreeCliquesAsMarginalizedFromVars!
 upGibbsCliqueDensity
 upMsg
-wipeBuildNewTree!
+resetBuildTree!
 writeGraphPdf
 resetVariableAllInitializations!
 ```
