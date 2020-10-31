@@ -70,14 +70,14 @@ user@...$ julia -e "println(\"...testing...\")"
 
 ```@raw html
 <p align="center">
-<img src="https://user-images.githubusercontent.com/6412556/97769200-444fdf80-1aff-11eb-8ca4-dc6d7a3830fd.png" width="480" border="0" />
+<img src="https://user-images.githubusercontent.com/6412556/97769200-444fdf80-1aff-11eb-8ca4-dc6d7a3830fd.png" width="800" border="0" />
 </p>
 ```
 
-In VSCode, open the command pallette by pressing `Ctrl + Shift + p`.  There are a wealth of tips and tricks on how to use VSCode.  See [this JuliaCon presentation for as a general introduction into 'piece-by-piece' code execution and much much more](https://www.youtube.com/watch?v=IdhnP00Y1Ks).  Working in one of the Julia IDEs like VS Code or Atom should feel something like this (Gif borrowed from [DiffEqFlux.jl](https://github.com/SciML/DiffEqFlux.jl)):
+In VSCode, open the command pallette by pressing `Ctrl + Shift + p`.  There are a wealth of tips and tricks on how to use VSCode.  See [this JuliaCon presentation for as a general introduction into 'piece-by-piece' code execution and much much more](https://www.youtube.com/watch?v=IdhnP00Y1Ks).  Working in one of the Julia IDEs like VS Code or Juno should feel something like this (Gif borrowed from [DiffEqFlux.jl](https://github.com/SciML/DiffEqFlux.jl)):
 ```@raw html
 <p align="center">
-<img src="https://user-images.githubusercontent.com/1814174/88589293-e8207f80-d026-11ea-86e2-8a3feb8252ca.gif" width="480" border="0" />
+<img src="https://user-images.githubusercontent.com/1814174/88589293-e8207f80-d026-11ea-86e2-8a3feb8252ca.gif" width="800" border="0" />
 </p>
 ```
 
