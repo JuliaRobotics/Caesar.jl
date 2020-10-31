@@ -25,11 +25,11 @@ The easiest method is---via the terminal---to [download the desired](https://jul
 cd ~
 mkdir -p .julia
 cd .julia
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.3/julia-1.3.1-linux-x86_64.tar.gz
-tar -xvf julia-1.3.1-linux-x86_64.tar.gz
-rm julia-1.3.1-linux-x86_64.tar.gz
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.2-linux-x86_64.tar.gz
+tar -xvf julia-1.5.2-linux-x86_64.tar.gz
+rm julia-1.5.2-linux-x86_64.tar.gz
 cd /usr/local/bin
-sudo ln -s ~/.julia/julia-1.3.1/bin/julia julia
+sudo ln -s ~/.julia/julia-1.5.2/bin/julia julia
 ```
 !!! note
     Feel free to modify this setup as you see fit.
@@ -64,36 +64,19 @@ user@...$ julia -e "println(\"...testing...\")"
     When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.  For example, search for 'julialang workflow tips' or 'julialang performance tips'.
     Also, see [FAQ - Why are first runs slow?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Just-In-Time-Compiling-(i.e.-why-are-first-runs-slow?)-1), which is due to Just-In-Time/Pre compiling and caching.
 
-## Setup Juno IDE Environment
+## Setup VSCode IDE Environment
 
-[Juno IDE](http://junolab.org/) allows for interactive development of Julia code by extending the [Atom text editor](https://atom.io/) with a few packages.
-Download and install Atom as instructed on the website, or via command line:
+[VSCode IDE](https://www.julia-vscode.org/) allows for interactive development of Julia code using the Julia Extension.  After installing and running VSCode, install the Julia Language Support Extension:
 
-```
-mkdir -p ~/Downloads/atom
-cd ~/Downloads/atom
-wget https://atom.io/download/deb -q --show-progress
-sudo dpkg -i deb
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/97769200-444fdf80-1aff-11eb-8ca4-dc6d7a3830fd.png" width="480" border="0" />
+</p>
 ```
 
-After installing and running Atom, you can choose to either install `uber-juno` package [in one go](https://github.com/JunoLab/uber-juno/blob/master/setup.md) or install the three associated packages individually.
-In Atom, open the command pallette by pressing `Ctrl + Shft + p` and typing `settings`.
-Go to the `install` tab, search for and install either
-```
-uber-juno
-```
-or the individual packages directly:
-```
-ink
-julia-client
-julia-language
-latex-completions
-```
+In VSCode, open the command pallette by pressing `Ctrl + Shift + p`.  There are a wealth of tips and tricks on how to use VSCode.  See [this JuliaCon presentation for as a general introduction into 'piece-by-piece' code execution and much much more](https://www.youtube.com/watch?v=IdhnP00Y1Ks).
 
-!!! note
-    Some situations have required the user separately installing the `Atom.jl` Julia package via command line (if Juno does not automatically install Atom.jl for you).  Atom.jl can then be installed with Julia's package manager and `add Atom` — see below.
-
-There are a variety of useful packages in Atom, such as `minimap` and `minimap-git`.  Julia packages are independent of the Atom packages and installed via the Julia `Pkg` Package.
+There are a variety of useful packages in VSCode, such as `GitLens`, `LiveShare`, and `Todo Browser` as just a few highlights.  These *VSCode Extensions* are independent of the already vast JuliaLang Package Ecosystem (see [JuliaObserver.com](https://juliaobserver.com/)).
 
 ## Julia Packages
 
@@ -102,95 +85,81 @@ To install a Julia package, simply open a `julia` REPL (equally the julia REPL i
 
 ```julia
 ] # activate Pkg manager
-(v1.3) pkg> add Caesar
+(v1.5) pkg> add Caesar
 ```
 
 These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaRegistries/General](http://github.com/JuliaRegistries/General).
 Unregistered latest packages can also be installed with using only the `Pkg.develop` function:
 
 ```julia
-# Just using Caesar URL as an example --  Caesar is already on JuliaRegistries/General
-using Pkg
-Pkg.develop(PackageSpec(url="https://github.com/JuliaRobotics/Caesar.jl.git"))
+# Caesar is registered on JuliaRegistries/General
+julia> ]
+(v1.5) pkg> add Caesar
 ```
 
-Unless you change the default environment variable `JULIA_PKG_DIR`, all packages (git repos) are cloned/installed to `~/.julia`.
-You can work with the packages as regular git repositories there.
+See [Pkg.jl](https://github.com/JuliaLang/Pkg.jl) for details and features regarding package management, development, version control, virtual environments and much more.
 
+## Install Visualization Tools
 
-### Install Visualization Tools
+### RoMEPlotting.jl for 2D plots
 
 RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
 ```julia
-(v1.2) pkg> add RoMEPlotting
-
-# separately
-(v1.2) pkg> add Arena#master
-```
-
-!!! note
-    Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
-
-## Install Visualization Utils (e.g. Arena.jl)
-
-3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
-Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
-
-Arena.jl can be installed with the following steps:
-```julia
-]
-add Arena
-```
-
-of the latest development version:
-```julia
-(v1.0) pkg> add Arena#master
-```
-
-## RoMEPlotting.jl for 2D plots
-
-Previous versions of libraries required the following Linux system packages be installed:
-```bash
-sudo apt-get install libfontconfig1
-sudo apt-get install gettext
-sudo apt-get install libcairo2
-sudo apt-get install libpango1.0-0  # or libpango1.0-1
+(v1.5) pkg> add RoMEPlotting
 ```
 
 !!! note
     As of 1Q2020 it is likely that most systems won’t require a system install of libpango or even libcairo.
+    Previous versions of libraries required the following Linux system packages be installed:
+    ```bash
+    sudo apt-get install libfontconfig1
+    sudo apt-get install gettext
+    sudo apt-get install libcairo2
+    sudo apt-get install libpango1.0-0  # or libpango1.0-1
+    ```
 
-Please install the latest RoMEPlotting using Package manager as follows:
-```
-$ julia
-julia> ] # to get package manager
-(v1.2) pkg> add RoMEPlotting
-```
+### Install 3D Visualization Utils (e.g. Arena.jl)
 
-Alternatively, the `dev` command --- i.e. `(v1.2) pkg> dev RoMEPlotting` --- will clone the RoMEPlotting.jl git repository to your local `.julia/dev/RoMEPlotting` folder.
+3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
+Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
 
-## The "I Know Julia" Installation (TL;DR)
+!!! note
+    Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
 
-### Install Inference Tools
-
-Add Caesar to your Julia packages, you can install the metadata registered package 'Caesar' in Julia 1.0 with:
+Install the latest `master` branch version with
 ```julia
-julia> ] # to enable package manager
-(v1.0) pkg> add Caesar
+(v1.5) pkg> add Arena#master
 ```
+
+## Running Unit Tests Locally
 
 Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
 ```julia
 # the multimodal incremental smoothing and mapping solver
-(v1.2) pkg> test IncrementalInference
+(v1.5) pkg> test IncrementalInference
 ...
 # robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
-(v1.2) pkg> test RoME
+(v1.5) pkg> test RoME
 ...
 # umbrella framework with interaction tools and more -- allows stand alone and server based solving
-(v1.2) pkg> test Caesar
+(v1.5) pkg> test Caesar
 ...
 ```
+
+## Install Repos for Development
+
+Alternatively, the `dev` command:
+```julia
+(v1.5) pkg> dev https://github.com/JuliaRobotics/Caesar.jl
+```
+
+!!! warn
+    Development packages are NOT managed by Pkg.jl, so you have to manage this Git repo manually.  Development packages can usually be found at, e.g. `Caesar`
+    ```
+    ~/.julia/dev/Caesar
+    ```
+
+If you'd like to modify or contribute then feel free to fork the specific repo from JuliaRobotics, complete the work on branches in the fork as is normal with a Git workflow and then submit a PR back upstream.  We try to keep PRs small, specific to a task and preempt large changes by first merging smaller non-breaking changes and finally do a small switch over PR.  We also follow a backport onto `release/vX.X` branch strategy with common `master` as the development lobby that builds successfully 99.999% of the time.
 
 ## Ahead Of Time Compile RoME.so
 
