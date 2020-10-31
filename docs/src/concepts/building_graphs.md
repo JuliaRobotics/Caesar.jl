@@ -81,7 +81,7 @@ using RoME
 using IncrementalInference
 ```
 
-### Requires.jl for Optional Packge Loading
+### Requires.jl for Optional Package Loading
 
 Many of these packages have additional features that are not included by default.  For example, the [Flux.jl](https://fluxml.ai/Flux.jl/stable/) machine learning package will introduce several additional features when loaded, e.g.:
 ```julia
@@ -144,7 +144,7 @@ Factors are algebraic relationships between variables based on data cues such as
 ### Priors
 ```julia
 # Add at a fixed location Prior to pin :x0 to a starting location (0,0,pi/6.0)
-addFactor!(fg, [:x0], IIF.Prior( MvNormal([0; 0; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))
+addFactor!(fg, [:x0], PriorPose2( MvNormal([0; 0; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))
 ```
 
 ### Factors Between Variables
@@ -171,7 +171,14 @@ addFactor!(fg, [:x0; :x1],...)
 ```
 will create a second factor with the name `:x0x1f2`.
 
-### When to Instantiate Poses (i.e. new Variables in Factor Graph)
+### Adding Tags
+
+It is possible to add `tags` to variables and factors that make later graph management tasks easier, e.g.:
+```julia
+addVariable!(fg, :l7_3, Pose2, tags=[:APRILTAG; :LANDMARK])
+```
+
+## When to Instantiate Poses (i.e. new Variables in Factor Graph)
 
 Consider a robot traversing some area while exploring, localizing, and wanting to find strong loop-closure features for consistent mapping.  The creation of new poses and landmark variables is a trade-off in computational complexity and marginalization errors made during factor graph construction.  Common triggers for new poses are:
 - Time-based trigger (eg. new pose a second or 5 minutes if stationary)
