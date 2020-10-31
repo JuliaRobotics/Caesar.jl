@@ -25,9 +25,10 @@ makedocs(
         "Getting Started" => [
             "Initial Concepts" => "concepts/concepts.md",
             "Building Factor Graphs" => "concepts/building_graphs.md",
-            "Interacting w/ Factor Graphs" => "concepts/interacting_fgs.md",
-            "Data Association" => "concepts/dataassociation.md",
-            "Available Variables/Factors" => "concepts/available_varfacs.md",
+            "Solving and Interacting" => "concepts/interacting_fgs.md",
+            "Multi-Modal/Hypothesis" => "concepts/dataassociation.md",
+            "Internal Variables/Factors" => "concepts/available_varfacs.md",
+            "Entry=>Data Blob" => "concepts/entry_data.md",
             "Plotting (2D)" => "concepts/2d_plotting.md",
             "Multi-Language Support" => "concepts/multilang.md",
             "Cloud Server/Database" => "concepts/database_interactions.md",
