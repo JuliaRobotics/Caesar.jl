@@ -9,9 +9,9 @@ Depth = 3
 
 ### RoMEPlotting
 ```@docs
-drawLandms
-drawPoses
-drawPosesLandms
+plotSLAM2DLandmarks
+plotSLAM2DPoses
+plotSLAM2D
 plotKDE
 plotPose
 plotProductVsKDE
