@@ -10,31 +10,29 @@ The following sections discuss the steps required to construct a graph and solve
 
 ## What are Variables and Factors
 
-Factor graphs are bipartite, i.e. variables and factors.  In practice we use "nodes" to represent both variables and factors with edges between.  In future, we will remove the wording "node" from anything Factor Graph usage/abstraction related (only vars and factors).  Nodes and edges will be used as terminology for actually storing the data on some graph storage/process foundation technology.
+Factor graphs are bipartite, i.e. variables and factors.  The terminology of nodes and edges is reserved for actually storing the data on some graph-based technology.
 
-Even more meta -- factors are "variables" that have already been observed and are now stochastically "fixed".  Waving hands over the fact that a factors encode both the algebraic model AND the observed measurement values.
-
-Variables in the factor graph have not been observed, but we want to back them out from the observed values and algebra relating them all.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the algebra already connecting them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):
+Variables in the factor graph have not been observed, but we want to back them out given the observed values and algebra defining the structure between all observations.  Mathematically speaking, factors are actually "observed variables" that are stochastically "fixed".  Waving hands over the fact that factors encode both the algebraic model AND the observed measurement values.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the known algebraic model that might connect them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):
 
 ```math
-P(\Theta | Z)  =  P(Z | \Theta) P(\Theta)
+P(\Theta | Z)  \propto  P(Z | \Theta) P(\Theta)
 ```
 
-where Theta represents all variables and Z represents all measurements or data, and
+This unnormalized "Bayes rule" is a consequence of two ideas, namely the [probabilistic chain rule](https://en.wikipedia.org/wiki/Chain_rule_%28probability%29) where Theta represents all variables and Z represents all measurements or data
 
 ```math
 P(\Theta , Z) = P(Z | \Theta) P(\Theta)
 ```
 
-or
+or similarly,
 
 ```math
 P(\Theta, Z) = P(\Theta | Z) P(Z).
 ```
 
-You'll notice the first looks like "Bayes rule" and we take `` P(Z) `` as a constant (the uncorrelated assumption).
+Second, the uncorrelated measurement process assumption implies that `` P(Z) `` constant given the algebraic model.
 
-## Familiarize with Canonical Factor Graphs
+## Familiar Canonical Factor Graphs
 
 Starting with a shortcut to just quickly getting a small predefined *canonical* graph containing a few variables and factors can be done with (try tab-completion in the REPL):
 ```julia
@@ -44,7 +42,7 @@ fg = generateCanonicalFG_Hexagonal()
 fg = generateCanonicalFG_Circle()
 ```
 
-Any one of these *generate* functions should produce a standard factor graph object that is useful for orientation, testing, learning, or validation.  You can generate any of these factor graphs at any time, for example when quickly wanting to test some idea midway through building a more sophisiticated `fg`, you might just want to quickly do:
+Any one of these function *generate* a standard factor graph object that is useful for orientation, testing, learning, or validation.  You can generate any of these factor graphs at any time, for example when quickly wanting to test some idea midway through building a more sophisiticated `fg`, you might just want to quickly do:
 ```julia
 fg_ = generateCanonicalFG_Hexagonal()
 ```
