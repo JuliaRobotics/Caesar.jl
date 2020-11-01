@@ -29,6 +29,7 @@ makedocs(
             "Multi-Modal/Hypothesis" => "concepts/dataassociation.md",
             "Internal Variables/Factors" => "concepts/available_varfacs.md",
             "Entry=>Data Blob" => "concepts/entry_data.md",
+            "Flux (NN) Factors" => "concepts/flux_factors.md",
             "Plotting (2D)" => "concepts/2d_plotting.md",
             "Multi-Language Support" => "concepts/multilang.md",
             "Cloud Server/Database" => "concepts/database_interactions.md",

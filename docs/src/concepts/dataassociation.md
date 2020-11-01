@@ -14,12 +14,71 @@ Consider the following canonical illustrations regarding feature selection on so
 </p>
 ```
 
-## Modeling Multihypothesis
+## Multihypothesis
 
-The `addFactor!` function offers the `multihypo=[1;0.6;0.3;0.1;1]` keyword option, where the user can convert any one variable of an arbitrary factor into a fractional list of probabilities -- e.g. a three variable factor now has triple association uncertainty on the middle variable.  A more classical binary multihypothesis example is illustated in the multimodal (non-Gaussian) factor graph below:
+Consider for example a regular three variable factor `[:pose;:landmark;:calib]` that due to some decision has a triple association uncertainty about the middle variable.  This *fractional certainty* can easily be modelled via:
+```julia
+addFactor!(fg, [:p10, :l1_a,:l1_b,:l1_c, :c], PoseLandmCalib, multihypo=[1; 0.6;0.3;0.1; 1])
+```
+Therefore, the user can "fragment" certainty about one variable using any arbitrary n-ary factor.  The 100% certain variables are indicated as `1`, while the remaining uncertainties regarding the uncertain data association decision is grouped as positive factions that sum to `1`, in this example `0.6,0.3,0.1`.  These fractions represent the confidence about the associations to either `:l1_a,:l1_b,:l1_c`.
+
+A more classical binary multihypothesis example is illustated in the multimodal (non-Gaussian) factor graph below:
 
 ```@raw html
 <p align="center">
 <img src="https://user-images.githubusercontent.com/6412556/76276833-dfe5c480-627e-11ea-9d84-2df1e1138bbf.png" width="640" border="0" />
 </p>
 ```
+
+## Mixture Models
+
+`Mixture` is a different kind of multi-modal modeling where different hypotheses of the measurement itself is unknown.  It is possible to also model uncertain data associations as a `Mixture(Prior,...)` but this is a feature of factor graph modeling and not generalizable to n-ary factors.  See the [familiar RobotFourDoor.jl as example](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/c9a69ee4cdd3868019ac53b14dba9690d80ec3fa/examples/RobotFourDoor.jl#L18-L20).
+
+A mixture can be created from any existing prior or relative likelihood factor, for example:
+```julia
+mlr = Mixture(LinearRelative, 
+              (correlator=AliasingScalarSampler(...), naive=Normal(0.5,5)),
+              [0.6;0.4])
+
+addFactor!(fg, [:x0;:x1], mlr)
+```
+
+## Raw Correlator Probability (Matched Filter)
+
+Realistic measurement processes are based on physical process observations such as wave function [interferometry](https://en.wikipedia.org/wiki/Interferometry) or [matched filtering correlation](https://en.wikipedia.org/wiki/Matched_filter).  This style of measurement is common in RADAR and SONAR systems, and can be directly incorporated in Caesar.jl since the measurement likelihood models need not be parametric.  There the raw correlator output from a sensor measurement can be directly modelled and included as part of the factor algebriac likelihood probability function:
+```julia
+# Building a samplable likelihood, using softmax to convert intensity-energy into a pseudo-probability
+rangeLikeli = AliasingScalarSampler(rangeIndex, Flux.softmax(correlatorIntensity))
+
+# or alternatively with existing samples similar to a what a particle filter would have done
+rangeLikeli = manikde!(probPoints, Euclid{1})
+
+# add the relative algebra, and remember you can construct your own highly non-linear factor
+rangeFct = Pose2Point2Range(rangeLikeli)
+
+addFactor!(fg, [:x8, :beacon_8])
+```
+
+Also recognize that other features like `multihypo=` and `Mixture` readily be combined with object like this `rangeFct` shown above.  These tricks are all possible due to the multiple dispatch magic of JuliaLang, more explicitly the following is code will all return true:
+```julia
+IIF.AliasingScalarSampler <: IIF.SamplableBelief
+IIF.Mixture <: IIF.SamplableBelief
+KDE.BallTreeDensity <: IIF.SamplableBelief
+Distribution.Rayleigh <: IIF.SamplableBelief
+Distribution.Uniform <: IIF.SamplableBelief
+Distribution.MvNormal <: IIF.SamplableBelief
+```
+
+One of the more exotic examples is to natively represent Synthetic Aperture Sonar (SAS) as a deeply non-Gaussian factor in the factor graph.  See [an example here](https://juliarobotics.org/Caesar.jl/latest/examples/examples/#Synthetic-Aperture-Sonar-SLAM).  Also see the full AUV stack using a single reference beacon and [bespoke correlator ranging example](https://juliarobotics.org/Caesar.jl/latest/examples/examples/#Towards-Real-Time-Underwater-Acoustic-Navigation).
+
+# Null Hypothesis
+
+Sometimes there is basic uncertainty about whether a measurement is at all valid.  Note that the above examples (`multihypo` and `Mixture`) still accept that a certain association definitely exists.  Null hypothesis implies that a factor might be completely bogus and should be ignored.  The underlying mechanics of this approach is not entirely straight forward since removing factors in essence change the structure of the graph.  That said, IncrementalInference.jl employs a reasonable stand-in solution that does not require changing the graph structure and can simply be included for any factor:
+```julia
+addFactor!(fg, [:x7;:l13], Pose2Point2Range(...), nullhypo=0.1)
+```
+
+This keyword indicates to the solver that there is a 10% chance that this factor is no-good.
+
+!!! note
+    [An entirely separate page is reserved for incorporating Flux neural network models into Caesar.jl](flux_factors.md) as highly plastic and trainable (i.e. learnable) factors.
