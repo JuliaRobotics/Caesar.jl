@@ -27,7 +27,8 @@ The Caesar framework offers these and other features:
 * Local in-memory solving on the device as well as database-driven centralized solving (micro-service architecture);
 * Natively support Fixed-lag (out-marginalization) for continuous operation as well as off-line batch solving;
 * Natively supports Dead Reckon Tethering;
-* Natively supports Federated multi-session/agent solving.
+* Natively supports Federated multi-session/agent solving;
+* Native support for `Entry=>Data` blobs [for storing large format data](https://juliarobotics.org/Caesar.jl/latest/concepts/entry_data/).
 
 # The Caesar Framework
 
