@@ -16,6 +16,9 @@ datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir)
 addBlobStore!(fg, datastore)
 ```
 
+!!! note
+    This example places the `data` folder in the `.logpath` location which defaults to `/tmp/caesar/UNIQUEDATETIME`. This is not a long term storage location since `/tmp` is periodically cleared by the operating system. Note that the `data` folder can be used in combination with [loading and saving factor graph objects](https://juliarobotics.org/Caesar.jl/latest/concepts/interacting_fgs/#Saving-and-Loading).
+
 ## Adding Data Blobs
 
 Just showcasing a JSON Dict approach
@@ -26,7 +29,7 @@ addData!(fg, :default_folder_store, :x1, :datalabel, Vector{UInt8}(JSON2.write( 
 # see retrieval example below...
 ```
 
-but much more flexibility is also possible
+This approach allows the maximum flexibility, for example it is also possible to do:
 ```julia
 # from https://juliaimages.org/stable/install/
 using TestImages, Images, ImageView
