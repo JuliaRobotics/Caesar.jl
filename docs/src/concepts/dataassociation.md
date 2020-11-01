@@ -32,13 +32,15 @@ A more classical binary multihypothesis example is illustated in the multimodal 
 
 ## Mixture Models
 
-`Mixture` is a different kind of multi-modal modeling where different hypotheses of the measurement itself is unknown.  It is possible to also model uncertain data associations as a `Mixture(Prior,...)` but this is a feature of factor graph modeling and not generalizable to n-ary factors.  See the [familiar RobotFourDoor.jl as example](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/c9a69ee4cdd3868019ac53b14dba9690d80ec3fa/examples/RobotFourDoor.jl#L18-L20).
+`Mixture` is a different kind of multi-modal modeling where different hypotheses of the measurement itself is unknown.  It is possible to also model uncertain data associations as a `Mixture(Prior,...)` but this is a feature of factor graph modeling something different than data association uncertainty in n-ary factors: e.g. it is possible to use `Mixture` together with `multihypo=` and be sure to take the time to understand the different and how these concepts interact.  The Caesar.jl solution is more general than simply allocating different mixtures to different association decisions.  All these elements together can create quite the multi-modal soup.  A practical example from SLAM is a robot loop-closure where an object similar to prior exploration is observed.  The measurement observation is one thing (can maybe be a `Mixture`) and the association of this "measurement" with this or that variable is a multihypothesis selection.
+
+See the [familiar RobotFourDoor.jl as example as a highly simplified case using priors where these elements effectively all the same thing](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/c9a69ee4cdd3868019ac53b14dba9690d80ec3fa/examples/RobotFourDoor.jl#L18-L20).  Again, `Mixture` is something different than `multihypo=` and the two can be used together.
 
 A mixture can be created from any existing prior or relative likelihood factor, for example:
 ```julia
 mlr = Mixture(LinearRelative, 
-              (correlator=AliasingScalarSampler(...), naive=Normal(0.5,5)),
-              [0.6;0.4])
+              (correlator=AliasingScalarSampler(...), naive=Normal(0.5,5), lucky=Uniform(0,10)),
+              [0.5;0.4;0.1])
 
 addFactor!(fg, [:x0;:x1], mlr)
 ```
