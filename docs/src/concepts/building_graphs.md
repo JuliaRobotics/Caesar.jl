@@ -34,68 +34,6 @@ P(\Theta, Z) = P(\Theta | Z) P(Z).
 
 You'll notice the first looks like "Bayes rule" and we take `` P(Z) `` as a constant (the uncorrelated assumption).
 
-# Julia and Help
-
-The first thing in Julia is learning how to get the Help Documentation for a function, or finding any function in the first place.  When launching the REPL in a terminal or and IDE like VS Code (see link for documtation website):
-```bash
-$ julia -O3
-               _
-   _       _ _(_)_     |  Documentation: https://docs.julialang.org
-  (_)     | (_) (_)    |
-   _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
-  | | | | | | |/ _` |  |
-  | | |_| | | | (_| |  |  Version 1.5.2 (2020-09-23)
- _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
-|__/                   |
-```
-
-The `-O 3` is for level 3 code compilation optimization and is a useful habit for slightly faster execution, but slightly slower first run just-in-time compilation of any new function.
-
-To get help with a function, just start with the `?` character followed by the function name, e.g.:
-```julia
-?sin
-# help?> sin
-search: sin sinh sind sinc sinpi sincos sincosd SingleThreaded SingularException asin using isinf asinh asind isinteger isinteractive
-
-  sin(x)
-
-  Compute sine of x, where x is in radians.
-
-  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  sin(A::AbstractMatrix)
-
-  Compute the matrix...
-```
-
-## Loading Packages
-
-Assuming you just loaded an empty REPL, or at the start of a script, or working inside the VSCode IDE, the first thing to do is load the necessary Julia packages.  Caesar.jl is an umbrella package potentially covering over 100 Julia Packages.  For this reason the particular parts of the code are broken up amongst more focussed *vertical purpose* library packages.  Usually for Robotics either `Caesar` or less expansive `RoME` will do.  Other non-Geometric sensor processing applications might build in the MM-iSAMv2, Bayes tree, and DistributedFactorGraph libraries.  Any of these packages can be loaded as follows:
-
-```julia
-# umbrella containing most functional packages including RoME
-using Caesar
-# contains the IncrementalInference and other geometric manifold packages
-using RoME
-# contains among others DistributedFactorGraphs.jl and ApproxManifoldProducts.jl
-using IncrementalInference
-```
-
-### Requires.jl for Optional Package Loading
-
-Many of these packages have additional features that are not included by default.  For example, the [Flux.jl](https://fluxml.ai/Flux.jl/stable/) machine learning package will introduce several additional features when loaded, e.g.:
-```julia
-julia> using Flux, RoME
-
-[ Info: IncrementalInference is adding Flux related functionality.
-[ Info: RoME is adding Flux related functionality.
-```
-
-For completeness, so too with packages like `Images.jl`, `RobotOS.jl`, and others:
-```julia
-using Caesar, Images
-```
-
 ## Familiarize with Canonical Factor Graphs
 
 Starting with a shortcut to just quickly getting a small predefined *canonical* graph containing a few variables and factors can be done with (try tab-completion in the REPL):
