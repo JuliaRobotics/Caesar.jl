@@ -1,16 +1,16 @@
 # Caesar Concepts
 
-A factor graph is a bipartite representation where variables (denoted by larger nodes) are interconnected by a set of factors (smaller nodes) that represent some algebraic interaction between the variables.  Factors must adhere to the limits of probabilistic models -- for example conditional likelihoods (between multiple variables) or priors (unary to one variable).  A more heterogeneous factor graph example is shown below, and a broader discussion [here (author disclosure)](https://darchive.mblwhoilibrary.org/bitstream/handle/1912/9305/Fourie_thesis.pdf?sequence=1):
+A factor graph is a bipartite representation where variables (denoted by larger nodes) are interconnected by a set of factors (smaller nodes) that represent some algebraic interaction between the variables.  Factors must adhere to the limits of probabilistic models -- for example conditional likelihoods (between multiple variables) or priors (unary to one variable).  A more heterogeneous factor graph example is shown below, see a broader discussion [in realted literature here](https://juliarobotics.org/Caesar.jl/latest/refs/literature/):
 
 ![factorgraphexample](https://user-images.githubusercontent.com/6412556/41196136-e5b05f98-6c07-11e8-8f26-7318e5085cc0.png).
 
 # Why/Where does non-Gaussian data come from?
 
-Gaussian error models in measurement or data cues will only be Gaussian (normally distributed) if all physics/decisions/systematic-errors/calibration/etc. has a correct algebraic model in every single circumstance.  Caesar.jl and mm-iSAM is heavily focussed on state-estimation from a plethora of heterogenous data.  Four major categories of non-Gaussian errors have thus far been considered:
+Gaussian error models in measurement or data cues will only be Gaussian (normally distributed) if all physics/decisions/systematic-errors/calibration/etc. has a correct algebraic model in all circumstances.  Caesar.jl and MM-iSAMv2 is heavily focussed on state-estimation from a plethora of heterogenous data that may not yet have perfect algebraic models.  Four major categories of non-Gaussian errors have thus far been considered:
 - Uncertain decisions (a.k.a. data association), such as a robot trying to decide if a navigation loop-closure can be deduced from a repeat observation of a similar object or measurement from current and past data.  These issues are commonly also referred to as multi-hypothesis.
-- Under-determined or under-defined systems where there are more variables than constraining measurements to fully define the system as a single mode---a.k.a solution ambiguity.  For example, in 2D consider two range measurements resulting in two possible locations through trilateration.
+- Underdetermined or underdefined systems where there are more variables than constraining measurements to fully define the system as a single mode---a.k.a solution ambiguity.  For example, in 2D consider two range measurements resulting in two possible locations through trilateration.
 - Nonlinearity.  For example in 2D, consider a Pose2 odometry where the orientation is uncertain:  The resulting belief of where a next pose might be (convolution with odometry factor) results in a banana shape curve, even though the entire process is driven by assumed Gaussian belief.
-- Physics of the measurement process.  Many, if not all measurement processes exhibit non-Gaussian behaviour.  For example, acoustic/radio time-of-flight measurements, using either pulse-train or matched filtering, result in an "energy intensity" over time/distance of what the range to a scattering-target/source might be--i.e. highly non-Gaussian.
+- Physics of the measurement process.  Many measurement processes exhibit non-Gaussian behaviour.  For example, acoustic/radio time-of-flight measurements, using either pulse-train or matched filtering, result in an "energy intensity" over time/distance of what the range to a scattering-target/source might be--i.e. highly non-Gaussian.
 
 # Getting Started with Caesar
 
@@ -18,7 +18,7 @@ This section discusses the various concepts in the Caesar framework.
 
 ## Julia and Help
 
-The first thing in Julia is learning how to get the Help Documentation for a function, or finding any function in the first place.  When launching the REPL in a terminal or and IDE like VS Code (see link for documtation website):
+When launching the REPL in a terminal or and IDE like VS Code (see link for documtation website):
 ```bash
 $ julia -O3
                _
