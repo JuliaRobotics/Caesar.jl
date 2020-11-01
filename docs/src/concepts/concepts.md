@@ -83,7 +83,7 @@ using Caesar, Images
 !!! note
     Keywords: parallel processing, multi-threading, multi-process
 
-The Julia allows [high-performance, parallel processing from the ground up](https://docs.julialang.org/en/v1/manual/parallel-computing/).  Depending on configuration, Caesar.jl can utilizes any of four styles of multiprocessing: i) separate memory multi-process; ii) shared memory multi-threading; iii) asynchronous shared-memory (forced-atomic) co-routines; and iv) multi-architecture such as JuliaGPU.  As of Julia 1.4, the most reliable method of loading all code into all contexts (for multi-processor speedup) is as follows.
+Julia allows [high-performance, parallel processing from the ground up](https://docs.julialang.org/en/v1/manual/parallel-computing/).  Depending on the configuration, Caesar.jl can utilize a combination of four styles of multiprocessing: i) separate memory multi-process; ii) shared memory multi-threading; iii) asynchronous shared-memory (forced-atomic) co-routines; and iv) multi-architecture such as JuliaGPU.  As of Julia 1.4, the most reliable method of loading all code into all contexts (for multi-processor speedup) is as follows.
 
 ### Multithreading and Multiprocessing
 
