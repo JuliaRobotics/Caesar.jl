@@ -52,22 +52,6 @@ Sometimes it is useful to make a deepcopy of a segment of the factor graph for s
 sfg = buildSubgraph(fg, [:x1;:x2;:l7], 1)
 ```
 
-### Drawing the Factor Graph
-
-Once you have a graph, you can visualize the graph as follows (beware though if the fg object is large):
-```julia
-# requires `sudo apt-get install graphviz
-drawGraph(fg, show=true)
-```
-
-By setting `show=true`, the application `evince` will be called to show the `fg.pdf` file that was created using *GraphViz*.  A `GraphPlot.jl` visualization engine is also available.
-```julia
-using GraphPlot
-dfgplot(fg)
-```
-
-For more details, see [the DFG docs on Drawing Graphs](https://juliarobotics.org/DistributedFactorGraphs.jl/latest/DrawingGraphs/#Drawing-Graphs-1).
-
 # Solving Graphs
 
 When you have built the graph, you can call the solver to perform inference with the following:

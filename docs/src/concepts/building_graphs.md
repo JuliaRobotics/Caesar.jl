@@ -8,30 +8,6 @@ The following sections discuss the steps required to construct a graph and solve
 * Solving the Graph
 * Informing the Solver About Ready Data
 
-## What are Variables and Factors
-
-Factor graphs are bipartite, i.e. variables and factors.  The terminology of nodes and edges is reserved for actually storing the data on some graph-based technology.
-
-Variables in the factor graph have not been observed, but we want to back them out given the observed values and algebra defining the structure between all observations.  Mathematically speaking, factors are actually "observed variables" that are stochastically "fixed".  Waving hands over the fact that factors encode both the algebraic model AND the observed measurement values.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the known algebraic model that might connect them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):
-
-```math
-P(\Theta | Z)  \propto  P(Z | \Theta) P(\Theta)
-```
-
-This unnormalized "Bayes rule" is a consequence of two ideas, namely the [probabilistic chain rule](https://en.wikipedia.org/wiki/Chain_rule_%28probability%29) where Theta represents all variables and Z represents all measurements or data
-
-```math
-P(\Theta , Z) = P(Z | \Theta) P(\Theta)
-```
-
-or similarly,
-
-```math
-P(\Theta, Z) = P(\Theta | Z) P(Z).
-```
-
-Second, the uncorrelated measurement process assumption implies that `` P(Z) `` constant given the algebraic model.
-
 ## Familiar Canonical Factor Graphs
 
 Starting with a shortcut to just quickly getting a small predefined *canonical* graph containing a few variables and factors can be done with (try tab-completion in the REPL):
@@ -113,6 +89,22 @@ It is possible to add `tags` to variables and factors that make later graph mana
 ```julia
 addVariable!(fg, :l7_3, Pose2, tags=[:APRILTAG; :LANDMARK])
 ```
+
+### Drawing the Factor Graph
+
+Once you have a graph, you can visualize the graph as follows (beware though if the fg object is large):
+```julia
+# requires `sudo apt-get install graphviz
+drawGraph(fg, show=true)
+```
+
+By setting `show=true`, the application `evince` will be called to show the `fg.pdf` file that was created using *GraphViz*.  A `GraphPlot.jl` visualization engine is also available.
+```julia
+using GraphPlot
+dfgplot(fg)
+```
+
+For more details, see [the DFG docs on Drawing Graphs](https://juliarobotics.org/DistributedFactorGraphs.jl/latest/DrawingGraphs/#Drawing-Graphs-1).
 
 ## When to Instantiate Poses (i.e. new Variables in Factor Graph)
 

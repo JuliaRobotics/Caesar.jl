@@ -12,6 +12,30 @@ Gaussian error models in measurement or data cues will only be Gaussian (normall
 - Nonlinearity.  For example in 2D, consider a Pose2 odometry where the orientation is uncertain:  The resulting belief of where a next pose might be (convolution with odometry factor) results in a banana shape curve, even though the entire process is driven by assumed Gaussian belief.
 - Physics of the measurement process.  Many measurement processes exhibit non-Gaussian behaviour.  For example, acoustic/radio time-of-flight measurements, using either pulse-train or matched filtering, result in an "energy intensity" over time/distance of what the range to a scattering-target/source might be--i.e. highly non-Gaussian.
 
+## What are Variables and Factors
+
+Factor graphs are bipartite, i.e. variables and factors.  The terminology of nodes and edges is reserved for actually storing the data on some graph-based technology.
+
+Variables in the factor graph have not been observed, but we want to back them out given the observed values and algebra defining the structure between all observations.  Mathematically speaking, factors are actually "observed variables" that are stochastically "fixed".  Waving hands over the fact that factors encode both the algebraic model AND the observed measurement values.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the known algebraic model that might connect them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):
+
+```math
+P(\Theta | Z)  \propto  P(Z | \Theta) P(\Theta)
+```
+
+This unnormalized "Bayes rule" is a consequence of two ideas, namely the [probabilistic chain rule](https://en.wikipedia.org/wiki/Chain_rule_%28probability%29) where Theta represents all variables and Z represents all measurements or data
+
+```math
+P(\Theta , Z) = P(Z | \Theta) P(\Theta)
+```
+
+or similarly,
+
+```math
+P(\Theta, Z) = P(\Theta | Z) P(Z).
+```
+
+Second, the uncorrelated measurement process assumption implies that `` P(Z) `` constant given the algebraic model.
+
 # Getting Started with Caesar
 
 This section discusses the various concepts in the Caesar framework.
@@ -112,7 +136,6 @@ It might also be convenient to warm up some of the Just-In-Time compiling:
 ```
 
 The best way to avoid compile time (when not developing) is to use the established Julia "first time to plot" approach based on PackageCompiler.jl, and more details are provided at [Ahead of Time compiling](https://juliarobotics.org/Caesar.jl/latest/installation_environment/#Ahead-Of-Time-Compile-RoME.so), and a few common questions might be answered via [FAQ here](https://juliarobotics.org/Caesar.jl/latest/faq/#Static,-Shared-Object-.so-Compilation).
-
 
 The next section describes the initial steps in constructing and solving graphs will be discussed in the upcoming documentation page [Building and Solving Graphs](building_graphs.md).  We also recommend reviewing the various examples available in the [Examples section](../examples/examples.md).  The variables and factors in Caesar should be sufficient for the majority of robotic applications, however Caesar allows users to extend the framework without changing the core code. This is discussed in [Creating New Variables and Factors](adding_variables_factors.md).  Caesar supports both in-memory solving (fast, for moderately-sized graphs) as well as [shared data persistence and inference](database_interactions.md) for massive graphs, multiple sessions, and multiple agents.
 
