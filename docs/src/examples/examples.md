@@ -2,7 +2,16 @@
 
 The following examples demonstrate the conceptual operation of Caesar, highlighting specific features of the framework and its use.
 
-### Continuous Scalar
+## Continuous Scalar
+
+### Calculating a Square Root (Underdetermined)
+
+Probably the most minimal example that illustrates how factor graphs represent a mathematical framework is a reworking of the classic square root calculation.
+
+!!! note
+    WIP, a combined type-definion and square root script is [available as an example script](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/master/examples/SquareRootTypes.jl).  We're working to present the example without having to define any types. 
+
+### Continuous Scalar with Mixtures
 
 This abstract [continuous scalar example](basic_continuousscalar.md) illustrates how [`IncrementalInference.jl`](http://www.github.com/JuliaRobotics/IncrementalInference.jl) enables algebraic relations between stochastic variables, and how a final posterior belief estimate is calculated from several pieces of information.
 

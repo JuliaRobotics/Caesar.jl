@@ -18,26 +18,19 @@ addOdoFG!
 ### IncrementalInference
 ```@docs
 approxCliqMarginalUp!
-approxConv
 areCliqVariablesAllMarginalized
 asyncTreeInferUp!
 attemptTreeSimilarClique
 fetchChildrenStatusUp
-buildTreeFromOrdering!
 childCliqs
 cliqGibbs
 cliqHistFilterTransitions
 cliqInitSolveUpByStateMachine!
 csmAnimate
 cycleInitByVarOrder!
-decodefg
-deleteFactor!
-deleteVariable!
 doautoinit!
 downGibbsCliqueDensity
 drawCliqSubgraphUpMocking
-drawGraph
-drawTree
 fifoFreeze!
 filterHistAllToArray
 findRelatedFromPotential

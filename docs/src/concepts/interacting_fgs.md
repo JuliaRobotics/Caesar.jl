@@ -45,6 +45,20 @@ or using the `tags`:
 lsf(fg, tags=[:APRILTAGS;])
 ```
 
+Variables:
+```julia
+unsorted = intersect(ls(fg, r"x"), ls(fg, Pose2))  # by regex
+
+# sorting
+sorted = sortDFG(unsorted)  # deprecated name sortVarNested(unsorted)
+```
+
+Factors:
+```julia
+unsorted = lsf(fg)
+unsorted = ls(fg, Pose2Point2BearingRange)
+```
+
 ```@docs
 ls
 lsf

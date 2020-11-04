@@ -45,6 +45,12 @@ mlr = Mixture(LinearRelative,
 addFactor!(fg, [:x0;:x1], mlr)
 ```
 
+See a example with [Defining A Mixture Relative on ContinuousScalar](@ref) for more details.
+
+```@docs
+Mixture
+```
+
 ## Raw Correlator Probability (Matched Filter)
 
 Realistic measurement processes are based on physical process observations such as wave function [interferometry](https://en.wikipedia.org/wiki/Interferometry) or [matched filtering correlation](https://en.wikipedia.org/wiki/Matched_filter).  This style of measurement is common in RADAR and SONAR systems, and can be directly incorporated in Caesar.jl since the measurement likelihood models need not be parametric.  There the raw correlator output from a sensor measurement can be directly modelled and included as part of the factor algebriac likelihood probability function:

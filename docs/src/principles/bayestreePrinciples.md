@@ -26,15 +26,64 @@ Trees and factor graphs are separated in the implementation, allowing the user t
 using IncrementalInference # RoME or Caesar will work too
 
 ## construct a distributed factor graph object
-fg = initfg()
+fg = generateCanonicalFG_Kaess()
 # add variables and factors
 # ...
 
 ## build the tree
-tree = wipeBuildNewTree!(fg)
+tree = resetBuildTree!(fg)
 ```
 
 The temporary values are `wiped` from the distributed factor graph object `fg<:AbstractDFG` and a new tree is constructed.  This `wipeBuildNewTree!` call can be repeated as many times the user desires and results should be consistent for the same factor graph structure (regardless of numerical values contained within).
+
+## Variable Ordering
+
+### Getting the AMD Variable Ordering
+
+The variable ordering is described as a `::Vector{Symbol}`.  Note the automated methods can be varied between AMD, CCOLAMD, and others.
+```julia
+# get the automated variable elimination order
+vo = getEliminationOrder(fg)
+```
+
+It is also possible to manually define the Variable Ordering
+```julia
+vo = [:x1; :l3; :x2; ...]
+```
+
+And then reset the factor graph and build a new tree
+```julia
+resetBuildTreeFromOrder!(fg, vo)
+```
+
+```@docs
+buildTreeFromOrdering!
+```
+
+!!! note
+    a list of variables or factors can be obtained through the `ls` and related functions, see [Querying the FactorGraph](@ref).
+
+
+## Interfacing with the MM-iSAMv2 Solver
+
+The following parmaters (set before calling `solveTree!`) will show the solution progress on the tree visualization:
+```julia
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
+
+# asybc process will now draw and show the tree in linux
+tree, smt, hist = solveTree!(fg)
+```
+
+!!! note
+    See the [Solving Graphs](@ref) section for more details on the solver.
+
+### Get the Elimination Order Used
+
+The solver internally uses [`resetBuildTree!`](@ref) which sometimes requires the user extract the variable elimination order after the fact.  This can be done with:
+```@docs
+getEliminationOrder
+```
 
 ## Visualizing
 
@@ -44,6 +93,10 @@ IncrementalInference.jl includes functions for visualizing the Bayes tree, and u
 
 ```julia
 drawTree(tree, show=true) # , filepath="/tmp/caesar/mytree.pdf"
+```
+
+```@docs
+drawTree
 ```
 
 ### Latex Tikz (Optional)
@@ -62,6 +115,7 @@ import IncrementalInference: generateTexTree
 
 generateTexTree(tree)
 ```
+
 An example Bayes (Junction) tree representation obtained through `generateTexTree(tree)` for the sample factor graph shown above can be seen in the following image.
 
 ```@raw html
@@ -80,66 +134,6 @@ spyCliqMat(tree, :x1) # provided by IncrementalInference
 
 #or embedded in graphviz
 drawTree(tree, imgs=true, show=true)
-```
-
-## Variable Ordering
-
-### Getting the AMD Variable Ordering
-
-The variable ordering is described as a `::Vector{Symbol}`.
-```julia
-vo = getEliminationOrder(fg)
-tree = buildTreeFromOrdering!(fg, vo)
-```
-The temporary elimination values in `fg` can be reset with (currently rather aggressive):
-```julia
-resetFactorGraphNewTree!(fg)
-```
-
-These steps are combined in a wrapper function:
-```julia
-resetBuildTreeFromOrder!(fg, vo)
-```
-
-### Manipulating the Variable Ordering
-
-```julia
-vo = [:x1; :l3; :x2; ...]
-```
-
-> **Note** that a list of variables or factors can be obtained through the `ls` and related functions:
-
-Variables:
-```julia
-unsorted = ls(fg)
-unsorted = ls(fg, Pose2) # by variable type
-unsorted = ls(fg, r"x")  # by regex
-unsorted = intersect(ls(fg, r"x"), ls(fg, Pose2))  # by regex
-
-# sorting
-sorted = sortDFG(unsorted)  # deprecated name sortVarNested(unsorted)
-```
-
-Factors:
-```julia
-unsorted = lsf(fg)
-unsorted = ls(fg, Pose2Point2BearingRange)
-```
-
-## Interfacing with 'mmisam' Solver
-
-The regular solver used in IIF is:
-```julia
-tree, smt, hist = solveTree!(fg)
-```
-where a new tree is constructed internally.  In order to recycle computations from a previous tree, the following interface can be used:
-```julia
-tree, smt, hist = solveTree!(fg, tree)
-```
-which will replace the `tree` object pointer to the new tree object after solution.  The following parmaters (set before calling `solveTree!`) will show the solution progress on the tree visualization:
-```julia
-getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
 ```
 
 ## Clique State Machine
