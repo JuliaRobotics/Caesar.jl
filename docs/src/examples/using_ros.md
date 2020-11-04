@@ -106,7 +106,7 @@ stopManageSolveTree!(robotslam)
 ## Run the ROS Loop
 
 Once everything is set up as you need, it's easy to loop over all the traffic in the bagfile (one message at a time):
-```juila
+```julia
 maxloops = 1000
 rosloops = 0
 while loop!(bagSubscriber)

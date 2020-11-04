@@ -45,15 +45,13 @@ The [hexagonal fixed-lag](interm_fixedlag_hexagonal.md) example shows how tree b
 
 ### An Underdetermined Solution (a.k.a. SLAM-e-donut)
 
-This tutorial describes (unforced multimodality) a range-only system where there are always more variable dimensions than range measurements made.
+This tutorial describes (unforced multimodality) a range-only system where there are always more variable dimensions than range measurements made, see [Underdeterminied Example here](basic_slamedonut.md)
 The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point -- other examples show inference results where highly non-Gaussian error distributions are used.
 
 Multi-modal range only example ([click here or image for full Vimeo](http://vimeo.com/190052649)):   
 ```@raw html
 <a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="640" border="0" /></a>
 ```
-
-[Multi-Modal Under-Constrained Example](basic_slamedonut.md)
 
 ### Towards Real-Time Underwater Acoustic Navigation
 
@@ -68,7 +66,6 @@ Click on image ([or this link to Vimeo](http://vimeo.com/396532767)) for a video
 
 This example presents a novel multimodal solution to an otherwise intractible multihypothesis SLAM problem.  This work spans the entire Victoria Park dataset, and resolves a solution over roughly 10000 variable dimensions with 2^1700 (yes to teh power 1700) theoretically possible modes.  At the time of first solution in 2016, a full batch solution took around 3 hours to compute on a very spartan early implementation.
 
-<!-- <p align="center"> -->
 ```@raw html
 <img src="https://user-images.githubusercontent.com/6412556/76264526-fc233a80-6259-11ea-98aa-192d40f504f4.gif" width="480" border="0" />
 </p>
@@ -106,7 +103,7 @@ Intersection of ambiguous elevation angle from planar SONAR sensor:
 ```@raw html
 <a href="http://vimeo.com/198237738" target="_blank"><img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/rovasfm02.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 ```
-Bi-modal belief   
+Bi-modal belief
 
 ```@raw html
 <a href="http://vimeo.com/198872855" target="_blank"><img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/imgs/rovyaw90.gif" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
