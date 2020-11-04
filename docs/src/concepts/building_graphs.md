@@ -54,6 +54,14 @@ addVariable!
 deleteVariable!
 ```
 
+### Initializing Variables
+
+The MM-iSAMv2 algorithm uses one of two approaches to automatically initialize variables.  The `initManual!` function can be used if you wish to overwrite or pre-empt this initialization.
+
+```@docs
+initManual!
+```
+
 ## Factors
 
 Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute (pre-resolved) GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a [`IIF.Prior`](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/#IncrementalInference.Prior) belief is add to `x0` (using the [`addFactor`](https://www.juliarobotics.org/Caesar.jl/latest/func_ref/#DistributedFactorGraphs.addFactor!) call) as a normal distribution centered around `[0,0,0]`.
