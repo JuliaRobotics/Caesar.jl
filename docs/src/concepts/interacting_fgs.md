@@ -45,6 +45,12 @@ or using the `tags`:
 lsf(fg, tags=[:APRILTAGS;])
 ```
 
+```@docs
+ls
+lsf
+lsfPriors
+```
+
 ### Extracting a Subgraph
 
 Sometimes it is useful to make a deepcopy of a segment of the factor graph for some purpose:
@@ -62,6 +68,10 @@ tree, smt, hist = solveTree!(fg)
 ```
 
 The returned Bayes (Junction) `tree` object is described in more detail on [a dedicated documentation page](https://juliarobotics.org/Caesar.jl/latest/principles/bayestreePrinciples/), while `smt` and `hist` return values most closely relate to development and debug outputs which can be ignored during general use.  Should an error occur during, the exception information is easily accessible in the `smt` object (as well as file logs which default to `/tmp/caesar/`).
+
+```@docs
+solveTree!
+```
 
 ## Using Incremental Updates (Clique Recycling I)
 

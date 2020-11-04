@@ -49,9 +49,17 @@ end
 
 Variables contain a label, a data type (e.g. in 2D `RoME.Point2` or `RoME.Pose2`). Note that variables are solved - i.e. they are the product, what you wish to calculate when the solver runs - so you don't provide any measurements when creating them.
 
+```@docs
+addVariable!
+```
+
 ## Factors
 
 Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute (pre-resolved) GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a [`IIF.Prior`](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/#IncrementalInference.Prior) belief is add to `x0` (using the [`addFactor`](https://www.juliarobotics.org/Caesar.jl/latest/func_ref/#DistributedFactorGraphs.addFactor!) call) as a normal distribution centered around `[0,0,0]`.
+
+```@docs
+addFactor!
+```
 
 ### Priors
 ```julia

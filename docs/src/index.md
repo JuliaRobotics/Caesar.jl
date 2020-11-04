@@ -4,7 +4,8 @@
 </p>
 ```
 
-Click here to go to the Caesar.jl Github repo: [![source](https://img.shields.io/badge/source-code-yellow.svg)](https://github.com/JuliaRobotics/Caesar.jl)
+Click here to go to the Caesar.jl Github repo:
+[![source](https://img.shields.io/badge/source-code-yellow.svg)](https://github.com/JuliaRobotics/Caesar.jl)
 
 ## Introduction
 Caesar is an open-source robotic software stack for combining heterogeneous and ambiguous data streams.  The focus is predominantly on geometric/spatial estimation tasks related to simultaneous localization and mapping (SLAM), but this software is also highly extensible and well suited to a variety of estimation/filtering-type tasks — especially in non-Gaussian/multimodal settings.  Caesar.jl addresses numerous issues that arise in prior SLAM solutions: solving under-defined systems, inference with non-Gaussian measurements, standard features for natively handling ambiguous data association and multi-hypotheses, simplifying bespoke factor development, centralized (or peer-to-peer distributed) factor-graph persistence with databases and cloud infrastructure, federated multi-session/agent reduction.  Caesar.jl originates from research work in navigation systems, see the [literature reference page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more information.
