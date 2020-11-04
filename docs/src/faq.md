@@ -45,11 +45,8 @@ Packages are already compiled to static objects (`.ji` files), but can also be c
 Yes, see [the Julia embedding documentation page](https://docs.julialang.org/en/v1/manual/embedding/index.html).
 
 ### ROS Integration
-ROS integration is a priority for this project and will accompany the so-called ['prime time'](https://github.com/JuliaRobotics/RoME.jl/issues/147) release of the code.  ROS and ZMQ interfaces are closely related.
 
-> **Voice** Please add your voice of support or suggestions on [ROS integration here](https://github.com/JuliaRobotics/Caesar.jl/issues/227).
-
-> **WIP** Please see work on an initial PoC (still using PyCall) via our [wiki developer docs here](https://github.com/JuliaRobotics/Caesar.jl/wiki/ROS-PoC).
+ROS and ZMQ interfaces are closely related.  Please see the [ROS Integration Page](examples/using_ros.md) for details on using ROS with Caesar.jl.
 
 ### Why ZMQ Middleware Layer (multilang)?
 [Zero Message Queue (ZMQ)](https://zeromq.org/) is a widely used data transport layer used to build various other multiprocess middleware with wide support among other programming languages.  Caesar.jl has on been used with a direct ZMQ type link, which is similar to a ROS workflow.  Contributions are welcome for binding ZMQ endpoints for a non-ROS messaging interface.

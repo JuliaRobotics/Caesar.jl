@@ -34,7 +34,11 @@ fg = generateCanonicalFG_Kaess()
 tree = resetBuildTree!(fg)
 ```
 
-The temporary values are `wiped` from the distributed factor graph object `fg<:AbstractDFG` and a new tree is constructed.  This `wipeBuildNewTree!` call can be repeated as many times the user desires and results should be consistent for the same factor graph structure (regardless of numerical values contained within).
+The temporary values are `reset` from the distributed factor graph object `fg<:AbstractDFG` and a new tree is constructed.  This `resetBuildTree!` call can be repeated as many times the user desires and results should be consistent for the same factor graph structure (regardless of numerical values contained within).
+
+```@docs
+resetBuildTree!
+```
 
 ## Variable Ordering
 
@@ -53,7 +57,7 @@ vo = [:x1; :l3; :x2; ...]
 
 And then reset the factor graph and build a new tree
 ```julia
-resetBuildTreeFromOrder!(fg, vo)
+buildTreeFromOrdering!(fg, vo)
 ```
 
 ```@docs

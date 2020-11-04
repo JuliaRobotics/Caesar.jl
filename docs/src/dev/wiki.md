@@ -34,10 +34,6 @@ We've started to organize useful coding templates that are not available elsewhe
 
 https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Parametric-Solve-Whiteboard
 
-## PoC Work on ROS Setup
-
-Early ROS workflow has now been integrated for more standard (SLAM-style) front-end development in the RoME.jl package, however, early work required some debugging for ROS environment setup which is maintained no [a wiki here](http://github.com/JuliaRobotics/Caesar.jl/wiki/ROS-PoC).
-
 ## Early PoC work on Tree based Initialization
 
 https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Tree-Based-Initialization
