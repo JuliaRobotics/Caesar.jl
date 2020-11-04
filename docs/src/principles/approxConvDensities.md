@@ -117,6 +117,10 @@ pts = approxConv(fg, :x0x1f1, :x1)
 
 The `approxConv` function call reads as a operation on `fg` which won't influence any values of parameter list (common Julia exclamation mark convention) and must use the first factor `:x0x1f1` to resolve a convolution on target variable `:x1`.  Implicitly, this result is based on the current estimate contained in `:x0`.  The value of `pts` is a `:;Array{Float64,2}` where the rows represent the different dimensions (1-D in this case) and the columns are each of the different samples drawn from the intermediate posterior (i.e. convolution result).  
 
+```@docs
+approxConv
+```
+
 IIF currently uses kernel density estimation to convert discrete samples into a smooth function estimate -- more details can be found on the function [approximation principles page here](http://www.juliarobotics.org/Caesar.jl/latest/principles/functionApprox/).  The sample set can be converted into an on-manifold functional object as follows:
 
 ```julia

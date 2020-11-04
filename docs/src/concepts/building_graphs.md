@@ -51,6 +51,7 @@ Variables contain a label, a data type (e.g. in 2D `RoME.Point2` or `RoME.Pose2`
 
 ```@docs
 addVariable!
+deleteVariable!
 ```
 
 ## Factors
@@ -59,6 +60,7 @@ Factors are algebraic relationships between variables based on data cues such as
 
 ```@docs
 addFactor!
+deleteFactor!
 ```
 
 ### Priors
@@ -110,6 +112,10 @@ By setting `show=true`, the application `evince` will be called to show the `fg.
 ```julia
 using GraphPlot
 dfgplot(fg)
+```
+
+```@docs
+drawGraph
 ```
 
 For more details, see [the DFG docs on Drawing Graphs](https://juliarobotics.org/DistributedFactorGraphs.jl/latest/DrawingGraphs/#Drawing-Graphs-1).

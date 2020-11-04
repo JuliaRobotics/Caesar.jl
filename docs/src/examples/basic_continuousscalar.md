@@ -19,7 +19,7 @@ using IncrementalInference
 
 Guidelines for developing your own functions are discussed here in [Adding Variables and Factors](../concepts/adding_variables_factors.md), and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package [RoME.jl](http://www.github.com/dehann/RoME.jl).
 
-The next step is to describe the inference problem with a graphical model of type `IncrementalInference.FactorGraph`.
+The next step is to describe the inference problem with a graphical model with any of the existing concrete types that inherit from  `<: AbstractDFG`.
 The first step is to create an empty factor graph object and start populating it with variable nodes.
 The variable nodes are identified by `Symbol`s, namely `:x0, :x1, :x2, :x3`.
 ```julia
@@ -38,8 +38,7 @@ This unary factor is taken as a `Distributions.Normal` distribution with zero me
 `Graphviz` can be used to visualize the factor graph structure, although the package is not installed by default -- `$ sudo apt-get install graphviz`.
 Furthermore, the `writeGraphPdf` member definition is given at the end of this tutorial, which allows the user to store the graph image in graphviz supported image types.
 ```julia
-writeGraphPdf(fg)
-# writeGraphPdf(fg, file="fgx01.pdf") # file="fgx01.png"
+drawGraph(fg, show=true)
 ```
 The two node factor graph is shown in the image below.
 ```@raw html
@@ -58,11 +57,11 @@ Since no other variable nodes have been 'connected to' (or depend) on `:x0` and 
 By delaying initialization of a new variable (say `:x0`) until a second newer uninitialized variable (say `:x1`) depends on `:x0`, the `IncrementalInference` algorithms hope to then initialize `:x0` with the more information from previous and surrounding variables and factors.
 Also note that initialization of variables is a local operation based only on the neighboring nodes -- global inference will over the entire graph is shows later in this tutorial.
 
-By adding `:x1` and connecting it through the `LinearConditional` and `Normal` distributed factor, the automatic initialization of `:x0` is triggered.
+By adding `:x1` and connecting it through the `LinearRelative` and `Normal` distributed factor, the automatic initialization of `:x0` is triggered.
 ```julia
 addVariable!(fg, :x1, ContinuousScalar)
 # P(Z | :x1 - :x0 ) where Z ~ Normal(10,1)
-addFactor!(fg, [:x0, :x1], LinearConditional(Normal(10.0,1)))
+addFactor!(fg, [:x0, :x1], LinearRelative(Normal(10.0,1)))
 @show isInitialized(fg, :x0) # true
 ```
 Note that the automatic initialization of `:x0` is aware that `:x1` is not initialized and therefore only used the `Prior(Normal(0,1))` unary factor to initialize the marginal belief estimate for `:x0`.
@@ -103,10 +102,14 @@ the predicted influence of the `P(Z| X1 - X0) = LinearRelative(Normal(10, 1))` i
 ```
 The red trace (predicted belief of `:x1`) is noting more than the approximated convolution of the current marginal belief of `:x0` with the conditional belief described by `P(Z | X1 - X0)`.
 
+### Defining A Mixture Relative on ContinuousScalar
+
 Another `ContinuousScalar` variable `:x2` is 'connected' to `:x1` through a more complicated `MixtureRelative` likelihood function.
 ```julia
 addVariable!(fg, :x2, ContinuousScalar)
-mmo = MixtureRelative(LinearRelative, (hypo1=Rayleigh(3), hypo2=Uniform(30,55)), [0.4; 0.6])
+mmo = Mixture(LinearRelative, 
+              (hypo1=Rayleigh(3), hypo2=Uniform(30,55)), 
+              [0.4; 0.6])
 addFactor!(fg, [:x1, :x2], mmo)
 ```
 ```@raw html
@@ -131,10 +134,10 @@ plotKDE(fg, [:x0, :x1, :x2])
 </p>
 ```
 
-Adding one more variable `:x3` through another `LinearConditional(Normal(-50,1))`
+Adding one more variable `:x3` through another `LinearRelative(Normal(-50,1))`
 ```julia
 addVariable!(fg, :x3, ContinuousScalar)
-addFactor!(fg, [:x2, :x3], LinearConditional(Normal(-50, 1)))
+addFactor!(fg, [:x2, :x3], LinearRelative(Normal(-50, 1)))
 ```
 expands the factor graph to to four variables and four factors.
 ```@raw html
@@ -158,11 +161,11 @@ Global inference over the entire factor graph has still not occurred, and will a
 Only by introducing more information into the factor graph can inference extract more precise marginal belief estimates for each of the variables.
 A final piece of information added to this graph is a factor directly relating `:x3` with `:x0`.
 ```julia
-addFactor!(fg, [:x3, :x0], LinearConditional(Normal(40, 1)))
+addFactor!(fg, [:x3, :x0], LinearRelative(Normal(40, 1)))
 ```
 Pay close attention to what this last factor means in terms of the probability density traces shown in the previous figure.
 The blue trace for `:x3` has two major modes, one that overlaps with `:x0, :x1` near 0 and a second mode further to the left at -40.
-The last factor introduces a shift `LinearConditional(Normal(40,1))` which essentially aligns the left most mode of `:x3` back onto `:x0`.
+The last factor introduces a shift `LinearRelative(Normal(40,1))` which essentially aligns the left most mode of `:x3` back onto `:x0`.
 ```@raw html
 <p align="center">
 <img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/src/assets/tutorials/ContinuousScalar/fgx0123c.png" width="480" border="0" />
