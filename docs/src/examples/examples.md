@@ -8,8 +8,14 @@ The following examples demonstrate the conceptual operation of Caesar, highlight
 
 Probably the most minimal example that illustrates how factor graphs represent a mathematical framework is a reworking of the classic square root calculation.
 
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/98160784-b2542800-1eac-11eb-81ca-4997a8a7b25c.png" width="480" border="0" />
+</p>
+```
+
 !!! note
-    WIP, a combined type-definion and square root script is [available as an example script](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/master/examples/SquareRootTypes.jl).  We're working to present the example without having to define any types. 
+    WIP, a combined type-definion and square root script is [available as an example script](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/master/examples/SquareRootTypes.jl).  We're working to present the example without having to define any types.
 
 ### Continuous Scalar with Mixtures
 
@@ -62,39 +68,36 @@ Click on image ([or this link to Vimeo](http://vimeo.com/396532767)) for a video
 
 This example presents a novel multimodal solution to an otherwise intractible multihypothesis SLAM problem.  This work spans the entire Victoria Park dataset, and resolves a solution over roughly 10000 variable dimensions with 2^1700 (yes to teh power 1700) theoretically possible modes.  At the time of first solution in 2016, a full batch solution took around 3 hours to compute on a very spartan early implementation.
 
+<!-- <p align="center"> -->
 ```@raw html
-<p align="center">
 <img src="https://user-images.githubusercontent.com/6412556/76264526-fc233a80-6259-11ea-98aa-192d40f504f4.gif" width="480" border="0" />
 </p>
 ```
-See reference for more details:
->  [1.1] Fourie, D., Leonard, J., Kaess, M.: "A Nonparametric Belief Solution to the Bayes Tree" IEEE/RSJ Intl. Conf. on Intelligent Robots and Systems (IROS), (2016).
 
-Further documentation in progress, in the mean time please see the [`addFactor!(..., multihypo=[1.0; 0.5;0.5])`]() feature for fractional multi-hypothesis assignments.  Similarly for trinary or higher multi-hypotheses.
-*Docs Under Construction...*
+The fractional multi-hypothesis assignments `addFactor!(..., multihypo=[1.0; 0.5;0.5])`.  The [Multihypothesis](@ref) Section discusses this feature in more detail.  Similarly for tri-nary or higher multi-hypotheses.
 
 ### Probabilistic Data Association (Uncertain loop closures)
 
-Example where the standard multihypothesis `addFactor!(.., multihypo=[1.0;0.5;0.5])` interface is used.  This is from the Kitti driving dataset.  [Video here](https://www.youtube.com/watch?v=9hEonD8KDrs).
+Example where the standard multihypothesis `addFactor!(.., multihypo=[1.0;0.5;0.5])` interface is used.  This is from the Kitti driving dataset.  [Video here](https://www.youtube.com/watch?v=9hEonD8KDrs).  The [Multihypothesis](@ref) Section discusses this feature in more detail.
 
 ```@raw html
 <a href="https://www.youtube.com/watch?v=9hEonD8KDrs" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/53611733-9065b680-3b9d-11e9-8b0f-cb292a25fbb3.png" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 ```
 
-See reference for more details:
->  Doherty, K., Fourie, D., Leonard, J.: "Multimodal Semantic SLAM with Probabilistic Data Association", Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
-
 ### Synthetic Aperture Sonar SLAM
 
-The full functional (approximate sum-product) inference approach can be used to natively imbed single hydrophone acoustic waveform data into highly non-Gaussian SAS factors--that implicitly perform beamforming/micro-location---for a simultaneous localization and mapping solution ([image links to video](https://www.youtube.com/watch?v=_RfXLQ67N4o)):
+The full functional (approximate sum-product) inference approach can be used to natively imbed single hydrophone acoustic waveform data into highly non-Gaussian SAS factors--that implicitly perform beamforming/micro-location---for a simultaneous localization and mapping solution ([image links to video](https://www.youtube.com/watch?v=_RfXLQ67N4o)).  See the [Raw Correlator Probability (Matched Filter)](@ref) Section for more details.
 
 ```@raw html
 <a href="https://www.youtube.com/watch?v=_RfXLQ67N4o" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/52547229-3048d500-2d94-11e9-8a46-811316a45283.png" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>
 ```
 
-See reference for more details:
+### Marine Surface Vehicle with ROS
 
-> Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: "Non-Gaussian SLAM utilizing Synthetic Aperture Sonar", Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
+- New marine surface vehicle code tutorial using ROS.
+
+!!! note
+    See [initial example here](https://github.com/JuliaRobotics/Caesar.jl/tree/master/examples/marine/asv/rex), and native ROS support section here.
 
 ### Simulated Ambiguous SONAR in 3D
 
@@ -117,12 +120,6 @@ Multi-session [Turtlebot](http://www.turtlebot.com/) example of the second floor
 ```
 
 See [the multisession information page](https://juliarobotics.org/Caesar.jl/latest/concepts/multisession/) for more details, as well as academic work:
-
-> Fourie, D., Claassens, S., Pillai, S., Mata, R., Leonard, J.: ["SLAMinDB: Centralized graph databases for mobile robotics"](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf), IEEE International Conference on Robotics and Automation (ICRA), Singapore, 2017.
-
-## Coming Soon
-
-- New marine surface vehicle code tutorial using ROS.
 
 
 ## More Examples

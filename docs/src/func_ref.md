@@ -25,7 +25,6 @@ cliqHistFilterTransitions
 csmAnimate
 cycleInitByVarOrder!
 doautoinit!
-downGibbsCliqueDensity
 drawCliqSubgraphUpMocking
 fifoFreeze!
 filterHistAllToArray

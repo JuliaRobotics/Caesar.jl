@@ -12,6 +12,7 @@ using RoMEPlotting
 # until namespaces are properly figured out
 using DistributedFactorGraphs
 import DistributedFactorGraphs: showFactor, showVariable
+import DistributedFactorGraphs: deleteVariable!
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
@@ -36,13 +37,14 @@ makedocs(
             "Cloud Server/Database" => "concepts/database_interactions.md",
             "Multi-session/agent Solving" => "concepts/multisession.md",
             "Visualization (3D)" => "concepts/arena_visualizations.md",
-        ],
+            ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
             "ContinuousScalar as 1D Example" => "examples/basic_continuousscalar.md",
             "Under-defined Trilateration, 2D" => "examples/basic_slamedonut.md",
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
+            "ROS Middleware" => "examples/using_ros.md",
             "Dead Reckon Tether" => "examples/deadreckontether.md",
         ],
         "Principles" => [
