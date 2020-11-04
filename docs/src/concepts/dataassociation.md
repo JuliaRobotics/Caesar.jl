@@ -64,10 +64,10 @@ rangeLikeli = manikde!(probPoints, Euclid{1})
 # add the relative algebra, and remember you can construct your own highly non-linear factor
 rangeFct = Pose2Point2Range(rangeLikeli)
 
-addFactor!(fg, [:x8, :beacon_8])
+addFactor!(fg, [:x8, :beacon_8], rangeFct)
 ```
 
-Also recognize that other features like `multihypo=` and `Mixture` readily be combined with object like this `rangeFct` shown above.  These tricks are all possible due to the multiple dispatch magic of JuliaLang, more explicitly the following is code will all return true:
+Also recognize that other features like `multihypo=` and [`Mixture`](@ref) readily be combined with object like this `rangeFct` shown above.  These tricks are all possible due to the multiple dispatch magic of JuliaLang, more explicitly the following is code will all return true:
 ```julia
 IIF.AliasingScalarSampler <: IIF.SamplableBelief
 IIF.Mixture <: IIF.SamplableBelief
@@ -77,7 +77,7 @@ Distribution.Uniform <: IIF.SamplableBelief
 Distribution.MvNormal <: IIF.SamplableBelief
 ```
 
-One of the more exotic examples is to natively represent Synthetic Aperture Sonar (SAS) as a deeply non-Gaussian factor in the factor graph.  See [an example here](https://juliarobotics.org/Caesar.jl/latest/examples/examples/#Synthetic-Aperture-Sonar-SLAM).  Also see the full AUV stack using a single reference beacon and [bespoke correlator ranging example](https://juliarobotics.org/Caesar.jl/latest/examples/examples/#Towards-Real-Time-Underwater-Acoustic-Navigation).
+One of the more exotic examples is to natively represent Synthetic Aperture Sonar (SAS) as a deeply non-Gaussian factor in the factor graph.  See [Synthetic Aperture Sonar SLAM](@ref).  Also see the full AUV stack using a single reference beacon and [Towards Real-Time Underwater Acoustic Navigation](@ref).
 
 # Null Hypothesis
 
