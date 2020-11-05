@@ -52,8 +52,8 @@ function myHandler(msgdata, slam_::SLAMWrapperLocal)
   @show "myHandler", msgdata[2].header.seq
 
   # do stuff
-  # slam.dfg.addVariable!(...)
-  # slam.dfg.addFactor!(...)
+  # addVariable!(slam.dfg, ...)
+  # addFactor!(slam.dfg, ...)
   #, etc.
 
   nothing
