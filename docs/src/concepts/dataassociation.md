@@ -67,6 +67,8 @@ rangeFct = Pose2Point2Range(rangeLikeli)
 addFactor!(fg, [:x8, :beacon_8], rangeFct)
 ```
 
+### Various SamplableBelief Distribution Types
+
 Also recognize that other features like `multihypo=` and [`Mixture`](@ref) readily be combined with object like this `rangeFct` shown above.  These tricks are all possible due to the multiple dispatch magic of JuliaLang, more explicitly the following is code will all return true:
 ```julia
 IIF.AliasingScalarSampler <: IIF.SamplableBelief
