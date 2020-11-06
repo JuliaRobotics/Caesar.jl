@@ -5,6 +5,9 @@ Since 2020, Caesar.jl has native support for ROS via the [RobotOS.jl](https://gi
 !!! warning
     Note that ROS neotic has switched to Python3 exclusively, and at the time of writing this page we were usinng Python2.7.  See the ROS Wiki here: https://wiki.ros.org/UsingPython3
 
+!!! note
+    See ongoing RobotOS.jl discussion on building a direct C++ interface and skipping PyCall.jl entirely: https://github.com/jdlangs/RobotOS.jl/issues/59
+
 ## Load the ROS Environment Variables
 
 The first thing to ensure is that the ROS environment is loaded in the bash environment before launching Julia, see ["1.5 Environment setup at ros.org"](https://wiki.ros.org/noetic/Installation/Ubuntu), something similar to:
