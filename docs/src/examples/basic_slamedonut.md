@@ -1,14 +1,23 @@
 # Range only SLAM, Singular -- i.e. "Under-Constrained"
 
+Keywords: underdetermined, under-constrained, range-only, singular
+
 This tutorial describes a range-only system where there are always more variable dimensions than range measurements made.
 The error distribution over ranges could be nearly anything, but are restricted to Gaussian-only in this example to illustrate an alternative point -- other examples show inference results where highly non-Gaussian error distributions are used.
-A file version of this example is provided in [RoME/examples here](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/RangesExample.jl). The one pre-baked result of this of this singular range-only illustration can be seen in this video:  Multi-modal range only example ([click here or image for full Vimeo](http://vimeo.com/190052649)),
+
+## Presentation Style Discussion
+
+A presentation discussion of this example is available here:
+```@rawhtml
+<iframe src="https://player.vimeo.com/video/474897929#t=4m42s" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+<p><a href="https://vimeo.com/474897929">Towards Real-Time Non-Gaussian SLAM</a> from <a href="https://vimeo.com/user35117400">Dehann</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
+```
+
+A script to recreate this example is provided [in RoME/examples here](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/RangesExample.jl). This singular range-only illustration is also shown in an ([older video here or click image for full image](http://vimeo.com/190052649)):
 
 ```@raw html
 <a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="640" border="0" /></a>
 ```
-
-This example is also available as a script [here in RoME.jl](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/RangesExample.jl).
 
 ## Quick Install
 
@@ -82,13 +91,10 @@ addVariable!(fg, :l2, Point2)
 addVariable!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
-addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], Matrix{Float64}(LinearAlgebra.I,2,2))) )
-addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], Matrix{Float64}(LinearAlgebra.I,2,2))) )
+addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], diagm(ones(2)))) )
+addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], diagm(ones(2)))) )
 ```
-The `PriorPoint2` is assumed to be a multivariate normal distribution of covariance `Matrix(LinearAlgebra.I,2,2)`, as well as a weighting factor of `[1.0]`.
-
-
-**NOTE** API changed to `PriorPoint2(::T) where T <: SamplableBelief = PriorPoint2{T}` to accept distribution objects and discard (standard in `RoME v0.1.5` -- see [issue 72 here](https://github.com/JuliaRobotics/RoME.jl/issues/72)).
+The `PriorPoint2` is assumed to be a multivariate normal distribution of covariance `diagm(ones(2))`. Note the API `PriorPoint2(::T) where T <: SamplableBelief = PriorPoint2{T}` to accept distribution objects, discussed further in subsection [Various SamplableBelief Distribution Types](@ref).
 
 ## Adding Range Measurements Between Variables
 
@@ -96,7 +102,7 @@ Next we connect the three range measurements from the vehicle location `:l0` to 
 ```julia
 # first range measurement
 rhoZ1 = norm(GTl[:l1]-GTp[:l100])
-ppr = Point2Point2Range( Normal(rhoZ1, 2.0) )
+ppr = Point2Point2Range( Normal(rhoZ1, 2) )
 addFactor!(fg, [:l100;:l1], ppr)
 
 # second range measurement
