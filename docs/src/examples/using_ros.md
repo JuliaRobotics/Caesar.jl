@@ -2,6 +2,8 @@
 
 Since 2020, Caesar.jl has native support for ROS via the [RobotOS.jl](https://github.com/jdlangs/RobotOS.jl) package.  
 
+!!! warning
+    Note that ROS neotic has switched to Python3 exclusively, and at the time of writing this page we were usinng Python2.7.  See the ROS Wiki here: https://wiki.ros.org/UsingPython3
 
 ## Load the ROS Environment Variables
 
