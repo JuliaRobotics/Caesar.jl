@@ -9,14 +9,15 @@ The error distribution over ranges could be nearly anything, but are restricted 
 
 A presentation discussion of this example is available here:
 ```@raw html
-<iframe src="https://player.vimeo.com/video/474897929#t=4m42s" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+<iframe src="https://player.vimeo.com/video/474897929#t=4m42s" width="800" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 <p><a href="https://vimeo.com/474897929">Towards Real-Time Non-Gaussian SLAM</a> from <a href="https://vimeo.com/user35117400">Dehann</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
 ```
 
-A script to recreate this example is provided [in RoME/examples here](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/RangesExample.jl). This singular range-only illustration is also shown in an ([older video here or click image for full image](http://vimeo.com/190052649)):
+A script to recreate this example is provided [in RoME/examples here](https://github.com/JuliaRobotics/RoME.jl/blob/master/examples/RangesExample.jl). This singular range-only illustration:
 
 ```@raw html
-<a href="http://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="640" border="0" /></a>
+<iframe src="https://player.vimeo.com/video/190052649" width="800" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+<p><a href="https://vimeo.com/190052649">Multi-modal iSAM range and distance only example</a> from <a href="https://vimeo.com/user35117400">Dehann</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
 ```
 
 ## Quick Install
