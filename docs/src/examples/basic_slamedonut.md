@@ -8,7 +8,7 @@ The error distribution over ranges could be nearly anything, but are restricted 
 ## Presentation Style Discussion
 
 A presentation discussion of this example is available here:
-```@rawhtml
+```@raw html
 <iframe src="https://player.vimeo.com/video/474897929#t=4m42s" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 <p><a href="https://vimeo.com/474897929">Towards Real-Time Non-Gaussian SLAM</a> from <a href="https://vimeo.com/user35117400">Dehann</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
 ```
