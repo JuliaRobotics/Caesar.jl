@@ -100,13 +100,19 @@ See tools such as
 ST = manageSolveTree!(robotslam.dfg, robotslam.solveSettings, dbg=false)
 ```
 
+```@docs
+manageSolveTree!
+```
+
 for solving a factor graph while the middleware processes are modifying the graph, while documentation is being completed see the code here:
 https://github.com/JuliaRobotics/RoME.jl/blob/a662d45e22ae4db2b6ee20410b00b75361294545/src/Slam.jl#L175-L288
 
-To stop the SLAM manager you can just use:
-```julia
-stopManageSolveTree!(robotslam)
+To stop or trigger a new solve in the SLAM manager you can just use either of these
+```@docs
+stopManageSolveTree!
+triggerSolve!
 ```
+
 
 ## Run the ROS Loop
 

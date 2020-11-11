@@ -63,6 +63,7 @@ unsorted = ls(fg, Pose2Point2BearingRange)
 ls
 lsf
 lsfPriors
+sortDFG
 ```
 
 ### Extracting a Subgraph
@@ -118,6 +119,10 @@ This object is currently a Kernel Density which contains kernels at specific poi
 X0pts = getPoints(X0)
 ```
 
+```@docs
+getBelief
+```
+
 ## Parametric Point Estimates (PPE)
 
 Since Caesar.jl is build around the each variable state being estimated as a total marginal posterior belief, it is often useful to get the equivalent parametric point estimate from the belief.  Many of these computations are already done by the inference library and avalable via the various `getPPE` methods, e.g.:
@@ -139,4 +144,32 @@ pts = rand(X0, 200)
 These kernel density belief objects can be constructed from points as follows:
 ```julia
 X0_ = manikde!(pts, Pose2)
+```
+
+## Logging Output (Unique Folder)
+
+Each new factor graph is designated a unique folder in `/tmp/caesar`.  This is usaully used for debugging or large scale test analysis.  Sometimes it may be useful for the user to also use this temporary location.  The location is stored in the `SolverParams`:
+```julia
+getSolverParams(fg).logpath
+```
+
+The functions of interest are:
+```@docs
+getLogPath
+joinLogPath
+```
+
+!!! note
+    A useful tip for doing large scale processing might be to reduce amount of write operations to a solid-state drive by simplying adding a symbolic link to a USB drive or SDCard, perhaps similar to this:
+    ```bash
+    cd /tmp
+    mkdir -p /media/MYFLASHDRIVE/caesae
+    ln -s /media/MYFLASHDRIVE/caesar caesar
+    ```
+
+## Other Useful Functions
+
+```@docs
+getFactorDim
+getManifolds
 ```
