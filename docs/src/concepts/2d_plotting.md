@@ -12,7 +12,7 @@ The major 2D plotting functions between `RoMEPlotting.jl` and `KernelDensityEsti
 - [`plotSLAM2D`](@ref),
 - [`plotSLAM2DPoses`](@ref),
 - [`plotSLAM2DLandmarks`](@ref),
-- [`plotKDE` / `plot`](@ref).
+- [`plotKDE`](@ref) / `plot`.
 
 A simple usage example:
 
