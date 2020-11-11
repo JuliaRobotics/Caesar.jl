@@ -9,11 +9,10 @@ Once the graph has been built, 2D plot visualizations are provided by [RoMEPlott
 ## Quick Start
 
 The major 2D plotting functions between `RoMEPlotting.jl` and `KernelDensityEstimatePlotting.jl`:
-- `plotSLAM2D`,
-- `plotPoses`,
-- `plotLandms`,
-- `plotSubmaps`,
-- `plotKDE` / `plot`.
+- [`plotSLAM2D`](@ref),
+- [`plotSLAM2DPoses`](@ref),
+- [`plotSLAM2DLandmarks`](@ref),
+- [`plotKDE` / `plot`](@ref).
 
 A simple usage example:
 
@@ -38,11 +37,15 @@ This simplest example for visualizing a 2D robot trajectory---such as first runn
 # ...
 
 using RoMEPlotting
+using Gadfly
+# VSCode/Juno can set plot to be opened in a browser tab instead, and this will change the default plot size
+# Gadfly.set_default_plot_size(35cm, 30cm)
 
+# generate a slam2d plot
 pl = plotSLAM2D(fg)
 
-# For scripting use-cases you can export the image
-Gadfly.draw(PDF("/tmp/test.pdf", 20cm, 10cm),pl)  # or PNG(...)
+# For scripting use-cases you can also export the image
+pl |> PDF("/tmp/test.pdf", 20cm, 10cm)  # or PNG, SVG
 ```
 
 ![test](https://user-images.githubusercontent.com/6412556/69353457-6cd82400-0c76-11ea-905c-8f435faa6b11.png)
@@ -74,7 +77,7 @@ plX0 = plotKDE(fg, :x0, dims=[1;2])
 The contour density relates to the distribution of marginal samples as seen with this [Gadfly.jl package](http://gadflyjl.org/stable/) histogram comparison.
 
 ```julia
-pl1 = drawPoses(fg, to=0);
+pl1 = plotSLAM2DPoses(fg, to=0);
 X0 = getBelief(fg, :x0) |> getPoints;
 pl2 = Gadfly.plot(x=X0[1,:],y=X0[2,:], Geom.hexbin);
 plH = hstack(pl1, pl2)
@@ -86,7 +89,6 @@ plH = hstack(pl1, pl2)
 ![testh](https://user-images.githubusercontent.com/6412556/42533539-2c8571e8-8458-11e8-86f6-39d1e5c94242.png)
 
 !!! note
-
     Red and Green lines represent Port and Starboard direction of `Pose2`, respectively.
 
 Multiple beliefs can be plotted at the same time, while setting `levels=4` rather than the default value:
