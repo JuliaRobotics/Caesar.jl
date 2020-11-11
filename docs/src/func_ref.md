@@ -43,10 +43,6 @@ getCliqSeparatorVarIds
 getCliqSiblings
 getCliqVarIdsPriors
 getCliqVarSingletons
-getBelief
-getKDE
-getLogPath
-getManifolds
 getParent
 getTreeAllFrontalSyms
 getVariableDim

@@ -111,7 +111,7 @@ fc
 
 Profile.clear()
 
-@profile pts = evalFactor2(fg, fc, vid)
+@profile pts = evalFactor(fg, fc, vid)
 plotKDE(kde!(pts[1:2,:]))
 
 

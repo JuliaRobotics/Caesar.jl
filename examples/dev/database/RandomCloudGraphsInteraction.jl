@@ -19,9 +19,9 @@ fg = initfg(sessionname=session, cloudgraph=cloudGraph)
 fullLocalGraphCopy!(fg)
 
 @show usrf = getData(fg.g.vertices[100003]).fnc.usrfnc!
-pts = evalFactor2(fg, fg.g.vertices[100003], fg.IDs[:l15])
+pts = evalFactor(fg, fg.g.vertices[100003], fg.IDs[:l15])
 
-pts = evalFactor2(fg, fg.g.vertices[100003], fg.IDs[:x4])
+pts = evalFactor(fg, fg.g.vertices[100003], fg.IDs[:x4])
 
 
 v = getVert(fg, :x4, api=dlapi)

@@ -18,3 +18,10 @@ See the related functions while this documentation is being expanded:
 - `accumulateFactorMeans`
 - `duplicateToStandardFactorVariable`
 
+```@docs
+duplicateToStandardFactorVariable
+accumulateDiscreteLocalFrame!
+accumulateFactorMeans
+MutablePose2Pose2Gaussian
+```
+

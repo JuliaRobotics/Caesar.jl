@@ -3,93 +3,185 @@
 Once the graph has been built, 2D plot visualizations are provided by [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) and [KernelDensityEstimatePlotting.jl](http://www.github.com/JuliaRobotics/KernelDensityEstimatePlotting.jl).  These visualizations tools are readily modifiable to highlight various aspects of mobile platform navigation.
 
 !!! note
-
     Plotting packages [can be installed separately](https://juliarobotics.org/Caesar.jl/latest/installation_environment/#RoMEPlotting.jl-for-2D-plots-1).
 
-## Quick Start
 
 The major 2D plotting functions between `RoMEPlotting.jl` and `KernelDensityEstimatePlotting.jl`:
 - [`plotSLAM2D`](@ref),
 - [`plotSLAM2DPoses`](@ref),
 - [`plotSLAM2DLandmarks`](@ref),
 - [`plotKDE`](@ref) / `plot`.
+- [`plotLocalProduct`](@ref)
+- `PDF`, `PNG`, `SVG`
+- `hstack`, `vstack`
 
-A simple usage example:
-
-```julia
-using RoMEPlotting
-
-plotPoses(fg)
-# If you have landmarks, you can instead call
-# plotSLAM2D(fg)
-
-# Draw the KDE for x0
-plotKDE(fg, :x0)
-# Draw the KDE's for x0 and x1
-plotKDE(fg, [:x0, :x1])
-```
-
-## Hexagonal 2D SLAM example visualization
+## Example Plot SLAM 2D
 
 This simplest example for visualizing a 2D robot trajectory---such as first running [the Hexagonal 2D SLAM example](http://www.juliarobotics.org/Caesar.jl/latest/tut_hexagonal2d.html)---
-```julia
-# Assuming some fg<:AbstractDFG has been loaded/constructed
-# ...
 
-using RoMEPlotting
+Assuming some `fg<:AbstractDFG` has been loaded/constructed:
+```julia
+# load the plotting functionality
+using RoME, RoMEPlotting
+
+# generate some factor graph with numerical values
+fg = generateCanonicalFG_Hexagonal()
+solveTree!(fg)
+
+# or fg = loadDFG("somepath")
+
+# slam2D plot
+pl = plotSLAM2D(fg, drawhist=true, drawPoints=false)
+```
+
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/69353457-6cd82400-0c76-11ea-905c-8f435faa6b11.png" width="800" border="0" />
+</p>
+```
+
+```@docs
+plotSLAM2D
+```
+
+### Plot Covariance Ellipse and Points
+
+While the Caesar.jl framework is focussed on non-Gaussian inference, it is frequently desirable to relate the results to a more familiar covariance ellipse, and native support for this exists:
+```julia
+plotSLAM2D(fg, contour=false, drawEllipse=true, drawPoints=true)
+```
+
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/98863019-c4e2da00-2435-11eb-8e50-4a34cc8de2d7.png" width="800" border="0" />
+</p>
+```
+
+### Plot Poses or Landmarks
+
+Lower down utility functions are used to plot poses and landmarks separately before joining the Gadfly layers.
+
+```@docs
+plotSLAM2DPoses
+plotSLAM2DLandmarks
+```
+
+## Plot Belief Density Contour
+
+`KernelDensityEstimatePlotting` (as used in `RoMEPlotting`) provides an interface to visualize belief densities as counter plots.  Something basic might be to just show all plane pairs of this variable marginal belief:
+```julia
+# Draw the KDE for x0
+plotKDE(fg, :x0)
+```
+
+Plotting the marginal density over say variables `(x,y)` in a [`Pose2`](@ref) would be:
+```julia
+plotKDE(fg, :x1, dims=[1;2])
+```
+
+The following example better shows some of features (via [Gadfly.jl](http://gadflyjl.org/stable/)):
+```julia
+# Draw the (x,y) marginal estimated belief contour for :x0, :x2, and Lx4
+pl = plotKDE(fg, [:x0; :x2; :x4], c=["red";"green";"blue"], levels=2, dims=[1;2])
+
+# add a few fun layers
+pl3 = plotSLAM2DPoses(fg, regexPoses=r"x\d", from=3, to=3, contour=false, drawEllipse=true)
+pl5 = plotSLAM2DPoses(fg, regexPoses=r"x\d", from=5, to=5, contour=false, drawEllipse=true, drawPoints=false)
+pl_ = plotSLAM2DPoses(fg, contour=false, drawPoints=false, dyadScale=0.001, to=5)
+union!(pl.layers, pl3.layers)
+union!(pl.layers, pl5.layers)
+union!(pl.layers, pl_.layers)
+
+# change the plotting coordinates
+pl.coord = Coord.Cartesian(xmin=-10,xmax=20, ymin=-1, ymax=25)
+
+# save the plot to SVG and giving dedicated (although optional) sizing
+pl |> SVG("/tmp/test.svg", 25cm, 15cm)
+
+# also display the plot live
+pl
+```
+
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/98865698-c910f680-2439-11eb-8adf-e50ec37eacc2.png" width="800" border="0" />
+</p>
+```
+
+See function documentation for more details on API features
+```@docs
+plotKDE
+```
+
+#### Save Plot to Image
+
+VSCode/Juno can set plot to be opened in a browser tab instead.  For scripting use-cases you can also export the image:
+```julia
 using Gadfly
-# VSCode/Juno can set plot to be opened in a browser tab instead, and this will change the default plot size
+# can change the default plot size
 # Gadfly.set_default_plot_size(35cm, 30cm)
 
-# generate a slam2d plot
-pl = plotSLAM2D(fg)
-
-# For scripting use-cases you can also export the image
 pl |> PDF("/tmp/test.pdf", 20cm, 10cm)  # or PNG, SVG
 ```
 
-![test](https://user-images.githubusercontent.com/6412556/69353457-6cd82400-0c76-11ea-905c-8f435faa6b11.png)
+#### Save Plot Object To File
 
-## Density Contour Map
-
-`KernelDensityEstimatePlotting` (as used in `RoMEPlotting`) provides an interface to visualize belief densities as counter plots.
-The following basic example shows some of features of the API, where `plotKDE(..., dims=[1;2])` implies the marginal over variables `(x,y)`:
-
+It is also possible to store the whole plot container to file using [`JLD2.jl`](https://github.com/JuliaIO/JLD2.jl):
 ```julia
-using RoME, Distributions
-using RoMEPlotting
+JLD2.@save "/tmp/myplot.jld2" pl
 
-fg = initfg()
-addVariable!(fg, :x0, Pose2)
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), diagm([1;1;1.0]))))
-addVariable!(fg, :x1, Pose2)
-addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10.0;0;0], diagm([1;1;1.0]))))
-
-ensureAllInitialized!(fg)
-
-# plot one contour density
-plX0 = plotKDE(fg, :x0, dims=[1;2])
-# using Gadfly; Gadfly.draw(PNG("/tmp/testX0.png",20cm,10cm),plX0)
+# and loading elsewhere
+JLD2.@load "/tmp/myplot.jld2" pl
 ```
 
-![test](https://user-images.githubusercontent.com/6412556/42532654-93f9a87e-8455-11e8-9dc7-b00f73f1321a.png)
+#### Interactive Plots, Zoom, Pan (Gadfly.jl)
 
-The contour density relates to the distribution of marginal samples as seen with this [Gadfly.jl package](http://gadflyjl.org/stable/) histogram comparison.
-
-```julia
-pl1 = plotSLAM2DPoses(fg, to=0);
-X0 = getBelief(fg, :x0) |> getPoints;
-pl2 = Gadfly.plot(x=X0[1,:],y=X0[2,:], Geom.hexbin);
-plH = hstack(pl1, pl2)
-
-# convert to file
-# p1H |> PNG("/tmp/testH.png")
-```
-
-![testh](https://user-images.githubusercontent.com/6412556/42533539-2c8571e8-8458-11e8-86f6-39d1e5c94242.png)
+See the following two discussions on Interactive 2D plots:
+- [Interactivity](http://gadflyjl.org/stable/tutorial/#Interactivity-1)
+- [Interactive-SVGs](http://gadflyjl.org/stable/man/backends/#Interactive-SVGs-1)
 
 !!! note
-    Red and Green lines represent Port and Starboard direction of `Pose2`, respectively.
+    Red and Green dyad lines represent the visualization-only assumption of X-forward and Y-left direction of `Pose2`.  The inference and manifold libraries surrounding Caesar.jl are agnostic to any particular choice of reference frame alignment, such as north east down (NED) or forward left up (common in mobile robotics).
+
+!!! note
+    Also see [Gadfly.jl](http://gadflyjl.org/stable/) notes about `hstack` and `vstack` to combine plots side by side or vertically.
+
+### Plot Pose Individually
+
+It is also possible to plot the belief density of a [`Pose2`](@ref) on-manifold:
+```julia
+plotPose(fg, :x6)
+```
+
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/98864183-7f271100-2437-11eb-8422-8ed49c1186b9.png" width="800" border="0" />
+</p>
+```
+
+### Debug With Local Graph Product Plot
+
+One useful function is to check that data in the factor graph makes sense.  While the full inference algorithm uses a Bayes (Junction) tree to assemble marginal belief estimates in an efficient manner, it is often useful for a straight forward graph based sanity check.  The [`plotLocalProduct`](@ref) projects through [`approxConv`](@ref) each of the factors connected to the target variable and plots the result.  This example looks at the loop-closure point around `:x0`, which is also pinned down by the only prior in the canonical Hexagonal factor graph.
+```julia
+@show ls(fg, :x0);
+# ls(fg, :x0) = [:x0f1, :x0x1f1, :x0l1f1]
+
+pl = plotLocalProduct(fg, :x0, dims=[1;2], levels=1)
+```
+
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/98868152-b00a4480-243d-11eb-83fe-8630d64355ee.png" width="800" border="0" />
+</p>
+```
+
+While perhaps a little cluttered to read at first, this figure shows that a new calculation local to only the factor graph `prod` in greem matches well with the existing value `curr` in red in the `fg` from the earlier `solveTree!` call.  These values are close to the prior prediction `:x0f1` in blue (fairly trivial case), while the odometry `:x0x1f1` and landmark sighting projection `:x0l1f1` are also well in agreement.
+
+```@docs
+plotLocalProduct
+```
+
+### More Detail About Density Plotting
 
 Multiple beliefs can be plotted at the same time, while setting `levels=4` rather than the default value:
 
@@ -99,7 +191,11 @@ plX1 = plotKDE(fg, [:x0; :x1], dims=[1;2], levels=4)
 # plX1 |> PNG("/tmp/testX1.png")
 ```
 
-![testx1](https://user-images.githubusercontent.com/6412556/42532963-656cef56-8456-11e8-9636-42592c0d148c.png)
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/42532963-656cef56-8456-11e8-9636-42592c0d148c.png" width="800" border="0" />
+</p>
+```
 
 One dimensional (such as `Θ`) or a stack of all plane projections is also available:
 
@@ -109,14 +205,22 @@ plTh = plotKDE(fg, [:x0; :x1], dims=[3], levels=4)
 # plTh |> PNG("/tmp/testTh.png")
 ```
 
-![testth](https://user-images.githubusercontent.com/6412556/42533188-2dee90c4-8457-11e8-9844-0ef57fba1c82.png)
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/42533188-2dee90c4-8457-11e8-9844-0ef57fba1c82.png" width="800" border="0" />
+</p>
+```
 
 ```julia
 plAll = plotKDE(fg, [:x0; :x1], levels=3)
 # plAll |> PNG("/tmp/testX1.png",20cm,15cm)
 ```
 
-![testall](https://user-images.githubusercontent.com/6412556/42533225-42ddaf9c-8457-11e8-8b0d-b1f3695d8b00.png)
+```@raw html
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6412556/42533225-42ddaf9c-8457-11e8-8b0d-b1f3695d8b00.png" width="800" border="0" />
+</p>
+```
 
 !!! note
 
@@ -124,8 +228,3 @@ plAll = plotKDE(fg, [:x0; :x1], levels=3)
 
 Please see [KernelDensityEstimatePlotting package source](https://github.com/JuliaRobotics/KernelDensityEstimatePlotting.jl) for more features.
 
-## Interactive Gadfly.jl Plots
-
-See the following two discussions on Interactive 2D plots:
-- [Interactivity](http://gadflyjl.org/stable/tutorial/#Interactivity-1)
-- [Interactive-SVGs](http://gadflyjl.org/stable/man/backends/#Interactive-SVGs-1)
