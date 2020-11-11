@@ -5,15 +5,15 @@ Once the graph has been built, 2D plot visualizations are provided by [RoMEPlott
 !!! note
     Plotting packages [can be installed separately](https://juliarobotics.org/Caesar.jl/latest/installation_environment/#RoMEPlotting.jl-for-2D-plots-1).
 
-
 The major 2D plotting functions between `RoMEPlotting.jl` and `KernelDensityEstimatePlotting.jl`:
 - [`plotSLAM2D`](@ref),
 - [`plotSLAM2DPoses`](@ref),
 - [`plotSLAM2DLandmarks`](@ref),
-- [`plotKDE`](@ref) / `plot`.
-- [`plotLocalProduct`](@ref)
-- `PDF`, `PNG`, `SVG`
-- `hstack`, `vstack`
+- [`plotPose`](@ref),
+- [`plotKDE`](@ref) / `plot`,
+- [`plotLocalProduct`](@ref),
+- `PDF`, `PNG`, `SVG`,
+- `hstack`, `vstack`.
 
 ## Example Plot SLAM 2D
 
@@ -157,6 +157,10 @@ plotPose(fg, :x6)
 <p align="center">
 <img src="https://user-images.githubusercontent.com/6412556/98864183-7f271100-2437-11eb-8422-8ed49c1186b9.png" width="800" border="0" />
 </p>
+```
+
+```@docs
+plotPose
 ```
 
 ### Debug With Local Graph Product Plot
