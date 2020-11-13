@@ -7,10 +7,19 @@ Assuming some factor graph object has been constructed by hand or automation, it
 saveDFG("/somewhere/myfg", fg)
 ```
 
+```@docs
+saveDFG
+```
+
 Similarly in the same or a new Julia context, you can load a factor graph object
 ```julia
 # using Caesar
 fg_ = loadDFG("/somwhere/myfg")
+```
+
+```@docs
+loadDFG
+loadDFG!
 ```
 
 !!! note
@@ -19,11 +28,13 @@ fg_ = loadDFG("/somwhere/myfg")
     fg2 = deepcopy(fg)
     ```
 
+### Adding an `Entry=>Data` Blob store
+
 A later part of the documentation will show [how to include a `Entry=>Data` blob store](https://juliarobotics.org/Caesar.jl/latest/concepts/entry_data/).
 
 ## Querying the FactorGraph
 
-There are a variety of functions to query the factor graph, please refer to [Function Reference](../func_ref.md) for details.
+### List Variables:
 
 A quick summary of the variables in the factor graph can be retrieved with:
 
@@ -40,31 +51,40 @@ It is possible to filter the listing with `Regex` string:
 ls(fg, r"x\d")
 ```
 
-or using the `tags`:
-```julia
-lsf(fg, tags=[:APRILTAGS;])
+```@docs
+ls
 ```
 
-Variables:
 ```julia
 unsorted = intersect(ls(fg, r"x"), ls(fg, Pose2))  # by regex
 
-# sorting
-sorted = sortDFG(unsorted)  # deprecated name sortVarNested(unsorted)
+# sorting in most natural way (as defined by DFG)
+sorted = sortDFG(unsorted)
 ```
 
-Factors:
+```@docs
+sortDFG
+```
+
+### List Factors:
+
 ```julia
 unsorted = lsf(fg)
 unsorted = ls(fg, Pose2Point2BearingRange)
 ```
 
+or using the `tags` (works for variables too):
+```julia
+lsf(fg, tags=[:APRILTAGS;])
+```
+
 ```@docs
-ls
 lsf
 lsfPriors
-sortDFG
 ```
+
+There are a variety of functions to query the factor graph, please refer to [Function Reference](../func_ref.md) for details and note that many functions still need to be added to this documentation.
+
 
 ### Extracting a Subgraph
 
@@ -104,7 +124,7 @@ defaultFixedLagOnTree!(fg, 50, limitfixeddown=true)
 
 This call will keep the latest 50 variables fluid for inference during Bayes tree inference.  The keyword `limitfixeddown=true` in this case will also prevent downward message passing on the Bayes tree from propagating into the out-marginalized branches on the tree.  A later page in this documentation will discuss how the inference algorithm and Bayes tree aspects are put together.
 
-# Getting Results
+# Extracting Belief Results (and PPE)
 
 Once you have solved the graph, you can review the full marginal with:
 
@@ -125,8 +145,9 @@ getBelief
 
 ## Parametric Point Estimates (PPE)
 
-Since Caesar.jl is build around the each variable state being estimated as a total marginal posterior belief, it is often useful to get the equivalent parametric point estimate from the belief.  Many of these computations are already done by the inference library and avalable via the various `getPPE` methods, e.g.:
+Since Caesar.jl is build around the each variable state being estimated as a total marginal posterior belief, it is often useful to get the equivalent parametric point estimate from the belief.  Many of these computations are already done by the inference library and avalable via the various [`getPPE`](@ref) methods, e.g.:
 ```julia
+getPPE(fg, :l3)
 getPPESuggested(fg, :l5)
 ```
 
@@ -160,10 +181,10 @@ joinLogPath
 ```
 
 !!! note
-    A useful tip for doing large scale processing might be to reduce amount of write operations to a solid-state drive by simplying adding a symbolic link to a USB drive or SDCard, perhaps similar to this:
+    A useful tip for doing large scale processing might be to reduce amount of write operations to a solid-state drive that will be written to default location `/tmp/caesar` by simplying adding a symbolic link to a USB drive or SDCard, perhaps similar to:
     ```bash
     cd /tmp
-    mkdir -p /media/MYFLASHDRIVE/caesae
+    mkdir -p /media/MYFLASHDRIVE/caesar
     ln -s /media/MYFLASHDRIVE/caesar caesar
     ```
 

@@ -1,7 +1,10 @@
 # Creating New Variables and Factors
 In most scenarios, the existing variables and factors should be sufficient for most robotics applications. Caesar however, is extensible and allows you to easily incorporate your own variable and factor types for specialized applications.
 
-## Considerations
+!!! note
+    Follow [JuliaRobotics/IncrementalInference.jl#1025](http://www.github.com/JuliaRobotics/IncrementalInference.jl#1025) for a reworking of `FactorMetadata` as a major piece of internal consolidation to simplify both this factor creation process, as well as many ohter library features.
+
+## New Variable/Factor Considerations
 A couple of important points:
 * You **do not need to** modify/fork/edit internal Caesar/RoME/IncrementalInference source code to introduce new variable and factor types!
 * As long as the factors exist in the working space when the solver is run, the factors are automatically used -- this is possible due to Julia's [multiple dispatch design](https://docs.julialang.org/en/v1/manual/methods/index.html)
@@ -66,6 +69,11 @@ drawPoses(fg)
 
 ## Creating New Variables
 
+A handy macro can help define new variables:
+```@docs
+@defVariable
+```
+
 All variables have to derive from `IncrementalInference.InferenceVariable`.
 
 What you need to build in the variable:
@@ -78,10 +86,13 @@ In a trivial example of Pose2:
 * Our dimensions would then be 3: X, Y, theta
 * The labels for Pose2 could be "POSE"
 
+!!! note
+    See [RoME.jl#244](http://www.github.com/JuliaRobotics/RoME.jl/issues/244) regarding plans to fundamentally integrate with [Manifolds.jl](http://www.github.com/JuliaManifolds/Manifolds.jl)
+
 ## Creating New Factors
 
 All factors inherit from one of the following types, depending on their function:
-* AbstractPrior: AbstractPrior are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a `RoME.Pose2` scenario.
+* AbstractPrior: AbstractPrior are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a [`Pose2`](@ref) scenario.
   * Requires: A getSample function
 * AbstractRelativeFactorMinimize: AbstractRelativeFactorMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.
   * Requires: A getSample function and a residual function definition
@@ -101,16 +112,21 @@ TBD: sUsers **should** start with AbstractRelativeFactorMinimize, discuss why an
 What you need to build in the new factor:
 * A struct for the factor itself
 * A sampler function to return measurements from the random ditributions
-* If you are building a `AbstractRelativeFactorMinimize` or a `AbstractRelativeFactor` you need to define a residual function to introduce the relative algebraic relationship between the variables
+* If you are building a [`AbstractRelativeMinimize`](@ref) or a [`AbstractRelativeRoots`](@ref) you need to define a residual function to introduce the relative algebraic relationship between the variables
   * Minimization function should be lower-bounded and smooth
 * A packed type of the factor which must be named Packed[Factor name], and allows the factor to be packed/transmitted/unpacked
 * Serialization and deserialization methods
   * These are convert functions that pack and unpack the factor (which may be highly complex) into serialization-compatible formats
-  * As the factors are mostly comprised of distributions (of type `SamplableBelief`), functions are provided to pack and unpack the distributions:
-    * Packing: To convert from a `SamplableBelief` to a string, use `string(::SamplableBelief)::String`
+  * As the factors are mostly comprised of distributions (of type [`SamplableBelief`](@ref)), functions are provided to pack and unpack the distributions:
+    * Packing: To convert from a [`SamplableBelief`](@ref) to a string, use `string(::SamplableBelief)::String`
     * Unpacking: To convert from string back to a `SamplableBelief`, use `extractdistribution(::String)::SamplableBelief`  
 
-An example of this is the `Pose2Point2BearingRange`, which provides a bearing+range relationship between a 2D pose and a 2D point.
+An example of this is the [`Pose2Point2BearingRange`](@ref), which provides a bearing+range relationship between a 2D pose and a 2D point.
+
+```@docs
+AbstractRelativeMinimize
+AbstractRelativeRoots
+```
 
 ### Pose2Point2BearingRange Struct
 
@@ -195,9 +211,10 @@ An example of these tests can be seen for the trivial case shown in the example 
 
 As above, as long as you bring your factors into the workspace, you should be able to use them in your experimental setup.
 
-You can validate this with the existence check code in [Building and Solving Graphs](https://www.juliarobotics.org/Caesar.jl/latest/concepts/building_graphs/).
+You can validate this with the existence check code in [Building and Solving Graphs](@ref).
 
-> Note: This has been made available as `IncrementalInference.getCurrentWorkspaceVariables()` and `IncrementalInference.getCurrentWorkspaceFactors()`in IncrementalInference v0.4.4.
+!!! note
+    This has been made available as `IncrementalInference.getCurrentWorkspaceVariables()` and `IncrementalInference.getCurrentWorkspaceFactors()`.
 
-## Contributing to Community
-We really appreciate any contributions, so if you have developed variables and factors that may be useful to the community, please write up an issue in [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl) with a link to your repo and a short description of the use-case(s).
+## Contributing back to the Community
+Consider contributioning back, so if you have developed variables and factors that may be useful to the community, please write up an issue in [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl) or submit a PR to the relavent repo.  Note also that work is ongoing to simplify and consolidate the code structure given all previously known feature requests and requirements.

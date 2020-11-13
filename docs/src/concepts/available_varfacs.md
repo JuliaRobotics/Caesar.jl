@@ -8,11 +8,14 @@ subtypes(IncrementalInference.InferenceVariable)
 IncrementalInference.getCurrentWorkspaceVariables()
 ```
 
+!!! note
+    More variables and factors exists, but are not yet included in the standard library.  It is fairly straight forward to build your own out-of-library factors, see page [Creating New Variables and Factors](@ref) for more details.
+
 Default variables in IncrementalInference
 
 ```@docs
 ContinuousScalar
-ContinuousMultivariate
+ContinuousEuclid
 ```
 
 ### 2D Variables
@@ -34,7 +37,6 @@ InertialPose3
 ```
 
 !!! note
-
     Please open an issue with [JuliaRobotics/RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) for specific requests, problems, or suggestions.  Contributions are also welcome.  There might be more variable types in Caesar/RoME/IIF not yet documented here.
 
 # Factors in Caesar.jl
