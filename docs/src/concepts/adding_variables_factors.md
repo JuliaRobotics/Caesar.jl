@@ -213,7 +213,8 @@ As above, as long as you bring your factors into the workspace, you should be ab
 
 You can validate this with the existence check code in [Building and Solving Graphs](@ref).
 
-> Note: This has been made available as `IncrementalInference.getCurrentWorkspaceVariables()` and `IncrementalInference.getCurrentWorkspaceFactors()`in IncrementalInference v0.4.4.
+!!! note
+    This has been made available as `IncrementalInference.getCurrentWorkspaceVariables()` and `IncrementalInference.getCurrentWorkspaceFactors()`.
 
 ## Contributing back to the Community
 Consider contributioning back, so if you have developed variables and factors that may be useful to the community, please write up an issue in [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl) or submit a PR to the relavent repo.  Note also that work is ongoing to simplify and consolidate the code structure given all previously known feature requests and requirements.
