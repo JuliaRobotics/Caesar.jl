@@ -15,7 +15,7 @@ import DistributedFactorGraphs: showFactor, showVariable
 import DistributedFactorGraphs: deleteVariable!
 
 makedocs(
-    modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting],
+    modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting, DistributedFactorGraphs],
     format = Documenter.HTML(),
     sitename = "Caesar.jl",
     pages = Any[
@@ -67,8 +67,7 @@ makedocs(
             "References" => "refs/literature.md"
         ],
         "Function Reference" => [
-            "Caesar's Reference" => "func_ref.md",
-            "Visualization Reference" => "vis_func_ref.md",
+            "Caesar's Reference" => "func_ref.md"
         ]
     ]
     # html_prettyurls = !("local" in ARGS),

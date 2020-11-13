@@ -34,6 +34,10 @@ The first step is to model the data (using the most appropriate *factors*) among
 fg = initfg()
 ```
 
+```@docs
+initfg
+```
+
 ## Variables
 
 Variables (a.k.a. poses or states in navigation lingo) are created with the `addVariable!` fucntion call.
@@ -64,7 +68,7 @@ initManual!
 
 ## Factors
 
-Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute (pre-resolved) GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a [`IIF.Prior`](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/#IncrementalInference.Prior) belief is add to `x0` (using the [`addFactor`](https://www.juliarobotics.org/Caesar.jl/latest/func_ref/#DistributedFactorGraphs.addFactor!) call) as a normal distribution centered around `[0,0,0]`.
+Factors are algebraic relationships between variables based on data cues such as sensor measurements. Examples of factors are absolute (pre-resolved) GPS readings (unary factors/priors) and odometry changes between pose variables. All factors encode a stochastic measurement (measurement + error), such as below, where a generic [`Prior`](@ref) belief is add to `x0` (using the [`addFactor!`](@ref) call) as a normal distribution centered around `[0,0,0]`.
 
 ```@docs
 addFactor!

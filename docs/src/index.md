@@ -23,13 +23,13 @@ The Caesar framework offers these and other features:
 * Distributed Factor Graph representation deeply-coupled with an on-Manifold probabilistic algebra language;
 * Localization using [MM-iSAMv2](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/#Related-Literature-1)
   * Multi-core inference supporting `Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc`.
-* Native multi-modal (hypothesis) representation in the factor-graph,
+* Native multi-modal (hypothesis) representation in the factor-graph, see [Data Association and Hypotheses](@ref):
   * Multi-modal and non-parametric representation of constraints;
   * Gaussian distributions are but one of the many representations of measurement error;
-  * Simple, extensible framework for creation of new factor types.
+* Out-of-library extendable for [Creating New Variables and Factors](@ref);
 * Natively supports legacy Gaussian parametric and max-mixtures solutions;
 * Local in-memory solving on the device as well as database-driven centralized solving (micro-service architecture);
-* Natively support Fixed-lag (out-marginalization) for continuous operation as well as off-line batch solving;
+* Natively support *Clique Recycling* (i.e. fixed-lag out-marginalization) for continuous operation as well as off-line batch solving, see more at [Using Incremental Updates (Clique Recycling I)](@ref);
 * Natively supports [Dead Reckon Tethering](examples/deadreckontether.md);
 * Natively supports Federated multi-session/agent solving;
 * Native support for `Entry=>Data` blobs [for storing large format data](https://juliarobotics.org/Caesar.jl/latest/concepts/entry_data/).

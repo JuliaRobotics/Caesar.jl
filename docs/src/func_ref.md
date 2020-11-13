@@ -1,4 +1,4 @@
-## Function Reference
+# Additional Function Reference
 
 ```@contents
 Pages = [
@@ -7,7 +7,7 @@ Pages = [
 Depth = 3
 ```
 
-### RoME
+## RoME
 
 ```@docs
 getRangeKDEMax2D
@@ -15,7 +15,7 @@ initFactorGraph!
 addOdoFG!
 ```
 
-### IncrementalInference
+## IncrementalInference
 ```@docs
 approxCliqMarginalUp!
 areCliqVariablesAllMarginalized
@@ -48,7 +48,6 @@ getTreeAllFrontalSyms
 getVariableDim
 getVariableInferredDim
 hasClique
-initfg
 isInitialized
 isMarginalized
 isTreeSolved
