@@ -6,44 +6,50 @@ built with RExFeed.jl
 using DistributedFactorGraphs
 using IncrementalInference, RoME
 using JSON2
+using LinearAlgebra
 
 # Where to fetch data
 dfgDataFolder = ENV["HOME"]*"/data/rex";
+# dfgDataFolder = "/tmp/rex"
 
 # Load the graph
-fg = initfg()
-loadDFG("$dfgDataFolder/fullsweep.tar.gz.tar.gz", IncrementalInference, fg);
+fg = loadDFG("$dfgDataFolder/dfg")
+
+# add the datastore locations
+ds = FolderStore{Vector{UInt8}}(:radar, "$dfgDataFolder/data/radar")
+addBlobStore!(fg, ds)
+
+ds = FolderStore{Vector{UInt8}}(:gps_fix, "$dfgDataFolder/data/gps")
+addBlobStore!(fg, ds)
+
+ds = FolderStore{Vector{UInt8}}(:lidar, "$dfgDataFolder/data/lidar")
+addBlobStore!(fg, ds)
+
 
 
 # Check what's in it
 ls(fg)
 lsf(fg)  # there should be no factors the first time a session is loaded
 
-# How about bigdata entries?
-count(v -> :RADAR in getBigDataKeys(v), getVariables(fg));
+# How about radar data entries?
+count(v -> :RADAR in listDataEntries(v), getVariables(fg));
 
 # may be too intense as it is fetching ALL data too?
-allRadarVariables = filter(v -> :RADAR in getBigDataKeys(v), getVariables(fg));
+allRadarVariables = filter(v -> :RADAR in listDataEntries(v), getVariables(fg));
 
-# sort variables by timestamp (deprecated in DFG 0.6.0)
-import Base.isless
 
-function isless(a::DFGVariable, b::DFGVariable)
-    return isless(a.timestamp,b.timestamp)
-end
-allRadarVariables = sort(allRadarVariables)
+allRadarVariables = sortDFG(allRadarVariables)
 
-function fetchRadarMsg(var::DFGVariable, store::FileDataStore)
-    entry = getBigDataEntry(var, :RADAR)
-    rawData = getBigData(datastore, entry)
+function fetchRadarMsg(var::DFGVariable)
+    entry,rawData = getData(fg, var.label, :RADAR)
     # raw data is json-encoded; this decoding should happen inside getBigData?
     return JSON2.read(IOBuffer(rawData))
 end
 
-datastore = FileDataStore("$dfgDataFolder/bigdata")
-msg = fetchRadarMsg(allRadarVariables[1], datastore)
+msg = fetchRadarMsg(allRadarVariables[1])
 
-function azimuth(msg::NamedTuple)
+# function azimuth(msg::NamedTuple)
+function azimuth(msg)
     """
     Assemble azimuth vector
 
@@ -65,14 +71,14 @@ function azimuth(msg::NamedTuple)
         a = range(msg.angle_start, msg.angle_end, length=msg.n)
     end
 
-    @show a
+    # @show a
     a = deg2rad.(Vector(a))   # to radians
     a[a.>pi]=a[a.>pi].-(2*pi) # normalize to [-pi,pi)
 
     return (a)
 end
 
-function nearest(v::Vector{Float64}, q::Float64)::Int64
+function nearest(v::Vector{<:Real}, q::Real)::Int64
     return findmin(abs.(v.-q))[2]
 end
 
@@ -142,7 +148,7 @@ function tocartsector(ping_polar::Array{Any,2},r::Vector{Float64}, a::Vector{Flo
     return ping_cart
 end
 
-function tocart(ping_polar::Array{Any,2},r::Vector{Float64}, a::Vector{Float64}, res::Float64 )
+function tocart(ping_polar::Array{Any,2},r::Vector{<:Real}, a::Vector{<:Real}, res::Real )
     """
     res - resolution, in m/px
     """
@@ -172,7 +178,8 @@ function tocart(ping_polar::Array{Any,2},r::Vector{Float64}, a::Vector{Float64},
     return ping_cart
 end
 
-function assembleping(msg::NamedTuple, resolution::Float64)
+# function assembleping(msg::NamedTuple, resolution::Float64)
+function assembleping(msg, resolution::Float64)
     """
     Assemble polar and cartesian pings from radar message.
     """
@@ -191,17 +198,38 @@ function assembleping(msg::NamedTuple, resolution::Float64)
     return (ping_polar, ping_cart)
 end
 
-# Now let's extract the radar sector measurement
-fg = initfg()
-loadDFG("$dfgDataFolder/fullsweep.tar.gz.tar.gz", IncrementalInference, fg);
+# msg = alldata[1]
+# (polar, cart) = assembleping(msg, 2.0);
+# fullsweep = round.(UInt8, cart./255)
+# imi = imshow(fullsweep)
 
-
+# for i = 1:20
+#     @sync begin
+#         @async begin
+#             println(i)
+#             if mod(i, 10) == 0
+#                 fullsweep .&= 0x00
+#             end
+#             # sleep(0.1)
+#         end
+#         @async begin
+#             msg = alldata[i]
+#             # set resolution to 1m/px
+#             (polar, cart) = assembleping(msg, 2.0);
+#             fullsweep .|= round.(UInt8, cart./255)
+#             imshow!(imi["gui"]["canvas"], fullsweep) 
+   
+#         end
+#     end
+# end
 
 # set resolution to 1m/px
 (polar, cart) = assembleping(msg, 1.0);
 
+
 using ImageMagick
-using Images, ImageView, ImageFiltering
+using Images, ImageView
+using ImageFiltering
 imshow(polar)
 imshow(cart)
 
@@ -219,7 +247,7 @@ last_angle = 0.
 sweep = 0;
 
 for  i in 1:length(allRadarVariables)
-    msg = fetchRadarMsg(allRadarVariables[i], datastore)
+    msg = fetchRadarMsg(allRadarVariables[i])
 
     delta_angle = msg.angle_increment
     # TODO: check upper bound; may have valid but coarse sectors
@@ -246,12 +274,7 @@ for  i in 1:length(allRadarVariables)
         save(joinpath(output_dir,fname),UInt8.(clamp.(fullsweep,0,255)))
 
         # add full sweep to last variable
-        # Make a big data entry in the graph
-        element = GeneralBigDataEntry(fg, allRadarVariables[i], :RADARSWEEP, mimeType="application/json")
-        # Set it in the store
-        addBigData!(datastore, element, Vector{UInt8}(JSON2.write(fullsweep)))
-        # Add the entry to the graph
-        addBigDataEntry!(allRadarVariables[i], element)
+        ade,adb = addData!(fg, :radar, allRadarVariables[i].label, :RADARSWEEP, Vector{UInt8}(JSON2.write(fullsweep)), mimeType="application/json")
 
         # reset sweep
         fullsweep = zeros(size(cart))

@@ -36,7 +36,8 @@ using RoME
 using DistributedFactorGraphs
 
 using JSON2
-using DocStringExtensions
+using DistributedFactorGraphs.DocStringExtensions
+using Dates
 
 # /gps/fix              10255 msgs    : sensor_msgs/NavSatFix
 # /gps/nmea_sentence    51275 msgs    : nmea_msgs/Sentence
@@ -66,11 +67,11 @@ end
     $(SIGNATURES)
 Update the system state variable if the timestamp has changed (increment variable)
 """
-function updateVariableIfNeeded(fg::G, systemstate::SystemState, newtimestamp::Float64)::Nothing where {G <: AbstractDFG, D <: AbstractDataStore}
+function updateVariableIfNeeded(fg::AbstractDFG, systemstate::SystemState, newtimestamp::Float64)
     # Make a new variable if so.
-    if systemstate.curtimestamp == -1000 || systemstate.cur_variable == nothing || systemstate.curtimestamp < newtimestamp
+    if systemstate.curtimestamp == -1000 || systemstate.cur_variable === nothing || systemstate.curtimestamp < newtimestamp
         systemstate.curtimestamp = newtimestamp
-        systemstate.cur_variable = addVariable!(fg, Symbol("x$(systemstate.var_index)"), Pose2)
+        systemstate.cur_variable = addVariable!(fg, Symbol("x$(systemstate.var_index)"), Pose2, timestamp = unix2datetime(newtimestamp))
         systemstate.var_index += 1
         systemstate.lidar_scan_index = 0
     end
@@ -82,18 +83,20 @@ end
 
 Message callback for /radar_0.
 """
-function handleRadar!(msg::seagrant_msgs.msg.radar, fg::G, datastore::D, systemstate::SystemState) where {G <: AbstractDFG, D <: AbstractDataStore}
+function handleRadar!(msg::seagrant_msgs.msg.radar, fg::AbstractDFG, systemstate::SystemState)
+    @info "handleRadar" maxlog=10
+
+    # if systemstate.cur_variable === nothing
+    #     return nothing
+    # end
     # Update the variable if needed
     timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/1.0e9
     updateVariableIfNeeded(fg, systemstate, timestamp)
     @info "[$timestamp] RADAR sample on $(systemstate.cur_variable.label)"
 
-    # Make a big data entry in the graph - use JSON2 to just write this (really really verbosely)
-    element = GeneralBigDataEntry(fg, systemstate.cur_variable, :RADAR, mimeType="application/json")
-    # # Set it in the store
-    addBigData!(datastore, element, Vector{UInt8}(JSON2.write(msg)))
-    # # Add the entry to the graph
-    addBigDataEntry!(systemstate.cur_variable, element)
+    # Make a data entry in the graph - use JSON2 to just write this (really really verbosely)
+    ade,adb = addData!(fg, :radar, systemstate.cur_variable.label, :RADAR, Vector{UInt8}(JSON2.write(msg)))
+   
 end
 
 """
@@ -101,20 +104,19 @@ end
 
 Message callback for Radar pings. Adds a variable to the factor graph and appends the scan as a bigdata element.
 """
-function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::G, datastore::D, systemstate::SystemState) where {G <: AbstractDFG, D <: AbstractDataStore}
-    if systemstate.cur_variable == nothing
+function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDFG, systemstate::SystemState)
+    @info "handleRadarPointcloud" maxlog=10
+
+    if systemstate.cur_variable === nothing
         # Keyed by the radar, skip if we don't have a variable yet.
         return nothing
     end
     timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/1.0e9
     @info "[$timestamp] RADAR pointcloud sample on $(systemstate.cur_variable.label)"
 
-    # Make a big data entry in the graph
-    element = GeneralBigDataEntry(fg, systemstate.cur_variable, :RADARPC, mimeType="/radar_pointcloud_0;dataformat=Float32*[[X,Y,Z]]*12")
-    # Set it in the store
-    addBigData!(datastore, element, msg.data)
-    # Add the entry to the graph
-    addBigDataEntry!(systemstate.cur_variable, element)
+    # Make a data entry in the graph
+    ade,adb = addData!(fg, :radar, systemstate.cur_variable.label, :RADARPC, Vector{UInt8}(JSON2.write(msg)),  mimeType="/radar_pointcloud_0;dataformat=Float32*[[X,Y,Z]]*12")
+
 end
 
 """
@@ -123,9 +125,10 @@ end
 Message callback for LIDAR point clouds. Adds a variable to the factor graph and appends the scan as a bigdata element.
 Note that we're just appending all the LIDAR scans to the variables because we are keying by RADAR.
 """
-function handleLidar!(msg::sensor_msgs.msg.PointCloud2, fg::G, datastore::D, systemstate::SystemState) where {G <: AbstractDFG, D <: AbstractDataStore}
+function handleLidar!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDFG, systemstate::SystemState)
+    @info "handleLidar" maxlog=10
     # Compare systemstate and add the LIDAR scans if we want to.
-    if systemstate.cur_variable == nothing
+    if systemstate.cur_variable === nothing
         return nothing
     end
     timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/1.0e9
@@ -137,13 +140,10 @@ function handleLidar!(msg::sensor_msgs.msg.PointCloud2, fg::G, datastore::D, sys
         return nothing
     end
 
-    # Make a big data entry in the graph
-    element = GeneralBigDataEntry(fg, systemstate.cur_variable, Symbol("LIDAR$(systemstate.lidar_scan_index)"), mimeType="/velodyne_points;dataformat=Float32*[[X,Y,Z]]*32")
-    # Set it in the store
+    # Make a data entry in the graph
+    ade,adb = addData!(fg, :lidar, systemstate.cur_variable.label, Symbol("LIDAR$(systemstate.lidar_scan_index)"), Vector{UInt8}(JSON2.write(msg)), mimeType="/velodyne_points;dataformat=Float32*[[X,Y,Z]]*32")
+
     # NOTE: If JSON, then do this to get to Vector{UInt8} - # byteData = Vector{UInt8}(JSON2.write(xyzLidarF32))
-    addBigData!(datastore, element, msg.data)
-    # Add the entry to the graph
-    addBigDataEntry!(systemstate.cur_variable, element)
 
     # Increment LIDAR scan count for this timestamp
     systemstate.lidar_scan_index += 1
@@ -154,20 +154,24 @@ end
 
 Message callback for Radar pings. Adds a variable to the factor graph and appends the scan as a bigdata element.
 """
-function handleGPS!(msg::sensor_msgs.msg.NavSatFix, fg::G, datastore::D, systemstate::SystemState) where {G <: AbstractDFG, D <: AbstractDataStore}
-    if systemstate.cur_variable == nothing
+function handleGPS!(msg::sensor_msgs.msg.NavSatFix, fg::AbstractDFG, systemstate::SystemState)
+    @info "handleGPS" maxlog=10
+    if systemstate.cur_variable === nothing
         # Keyed by the radar, skip if we don't have a variable yet.
         return nothing
     end
-    timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/1.0e9
+    timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/10^9
+    # Update the variable if needed
+    # updateVariableIfNeeded(fg, systemstate, timestamp)
     @info "[$timestamp] GPS sample on $(systemstate.cur_variable.label)"
+    
+    if :GPS in listDataEntries(fg, systemstate.cur_variable.label)
+        @warn "GPS sample on $(systemstate.cur_variable.label) already exist, dropping"
+        return nothing 
+    end
 
-    # Make a big data entry in the graph
-    element = GeneralBigDataEntry(fg, systemstate.cur_variable, :GPS, mimeType="application/json")
-    # Set it in the store
-    addBigData!(datastore, element, Vector{UInt8}(JSON2.write(msg)))
-    # Add the entry to the graph
-    addBigDataEntry!(systemstate.cur_variable, element)
+    ade,adb = addData!(fg, :gps_fix, systemstate.cur_variable.label, :GPS, Vector{UInt8}(JSON2.write(msg)),  mimeType="application/json")
+
 end
 
 function main()
@@ -179,17 +183,27 @@ function main()
 
     # Initialization
     fg = initfg()
-    datastore = FileDataStore("$dfg_datafolder/bigdata")
+
+    ds = FolderStore{Vector{UInt8}}(:radar, "$dfg_datafolder/data/radar")
+    addBlobStore!(fg, ds)
+
+    ds = FolderStore{Vector{UInt8}}(:gps_fix, "$dfg_datafolder/data/gps")
+    addBlobStore!(fg, ds)
+
+    # add if you want lidar also 
+    ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
+    addBlobStore!(fg, ds)
+
     # System state
     systemstate = SystemState()
 
 
     # Enable and disable as needed.
     # Skipping LIDAR because those are huge...
-    radar_sub = Subscriber{seagrant_msgs.msg.radar}("/radar_0", handleRadar!, (fg,datastore,systemstate,), queue_size = 10)
-    # radarpc_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/radar_pointcloud0", handleRadarPointcloud!, (fg,datastore,systemstate,), queue_size = 10)
-    # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", handleLidar!, (fg,datastore,systemstate,), queue_size = 10)
-    gps_sub = Subscriber{sensor_msgs.msg.NavSatFix}("/gps/fix", handleGPS!, (fg,datastore,systemstate,), queue_size = 10)
+    radar_sub = Subscriber{seagrant_msgs.msg.radar}("/radar_0", handleRadar!, (fg, systemstate), queue_size = 10)
+    # radarpc_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/radar_pointcloud0", handleRadarPointcloud!, (fg, systemstate), queue_size = 10)
+    # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", handleLidar!, (fg,systemstate), queue_size = 10)
+    gps_sub = Subscriber{sensor_msgs.msg.NavSatFix}("/gps/fix", handleGPS!, (fg, systemstate), queue_size = 10)
 
     @info "subscribers have been set up; entering main loop"
     loop_rate = Rate(20.0)
@@ -206,3 +220,20 @@ function main()
 end
 
 main()
+
+
+## after the graph is saved it can be loaded and the datastores retrieved
+
+dfg_datafolder = "/tmp/rex"
+
+fg = loadDFG("$dfg_datafolder/dfg")
+
+ds = FolderStore{Vector{UInt8}}(:radar, "$dfg_datafolder/data/radar")
+addBlobStore!(fg, ds)
+
+ds = FolderStore{Vector{UInt8}}(:gps_fix, "$dfg_datafolder/data/gps")
+addBlobStore!(fg, ds)
+
+# add if you want lidar also 
+ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
+addBlobStore!(fg, ds)
