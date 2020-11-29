@@ -36,7 +36,7 @@ end
 
 function getSample(pat4c::Pose2AprilTag4Corners{T}, N::Int=1) where T
 
-  return (rand(pat4c.Zij, N), )
+  return (getSample(pat4c.Zij, N), )
 end
 
 
@@ -71,7 +71,7 @@ function convert( ::Type{<:PackedInferenceType},
 end
 
 
-function convert( ::Type{<:AbstractRelative}, 
+function convert( ::Type{<:DFG.AbstractRelative}, 
                   obj::PackedPose2AprilTag4Corners)
   #
   cv = obj.corners
