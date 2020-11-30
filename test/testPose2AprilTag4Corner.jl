@@ -1,7 +1,7 @@
 
 using Test
 using Caesar
-
+using AprilTags
 
 ##
 
@@ -9,6 +9,21 @@ using Caesar
 @testset "test Pose2AprilTag4Corners" begin
 
 ##
+
+tag_id = 0
+arr = [
+  0.5533489436587586;
+  -0.14817352826667163;
+  5.505868642129518;
+  -0.19093946817093482;
+  0.5594280845251081;
+  3.275940643894491;
+  -0.0006414676297225159;
+  -0.0009483559382987803;
+  0.023125003286657522;
+]
+
+homog = reshape(arr, 3, 3)
 
 # pixel values
 x1 = 210.54965209961784
@@ -20,10 +35,19 @@ y2 = 169.23143005371946
 y3 = 107.78357696534272
 y4 = 117.63999176024579
 
+
 corners = ((x1,y1),(x2,y2),(x3,y3),(x4,y4))
+
+##
+
+pose = tagOrthogonalIteration(corners,homog,200.0,200.0,180.0,120.0,taglength=0.035)
+
+
+##
 
 # test construction of factor
 apt4 = Pose2AprilTag4Corners(corners)
+
 
 ## test adding to a graph
 fg = generateCanonicalFG_ZeroPose2()

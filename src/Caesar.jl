@@ -102,8 +102,6 @@ include("Deprecated.jl")
 # Multisession operation
 # include("attic/multisession/Multisession.jl")
 
-include("Pose2AprilTag4Corners.jl")
-
 # SAS-SLAM
 include("beamforming/czt.jl")
 include("beamforming/CBF.jl")
