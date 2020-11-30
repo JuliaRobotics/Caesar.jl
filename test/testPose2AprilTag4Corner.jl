@@ -65,7 +65,7 @@ meas = freshSamples(apt4,2)
 
 
 
-pts = approxConv(fg, ls(fg,:tag17)[1], :tag17)
+pts = approxConv(fg, DFG.ls(fg,:tag17)[1], :tag17)
 
 
 ## test packing of factor
