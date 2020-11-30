@@ -42,6 +42,7 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
 ApproxManifoldProducts = "^0.1"
+AprilTags = "0.7.5"
 Combinatorics = "^0.7, 0.8, 0.9, 1"
 CoordinateTransformations = "0.5, 0.6"
 DataStructures = "0.16, 0.17, 0.18"
