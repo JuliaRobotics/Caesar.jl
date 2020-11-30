@@ -1,11 +1,13 @@
 # 
 
+using LinearAlgebra
+
 import Base: convert
 import IncrementalInference: getSample
 
 
 export Pose2AprilTag4Corners, PackedPose2AprilTag4Corners
-
+export _defaultCameraCalib
 
 """
     $TYPEDEF
@@ -18,19 +20,55 @@ Notes
 struct Pose2AprilTag4Corners{T <: SamplableBelief} <: AbstractRelativeRoots
   # 4 corners as detected by AprilTags
   corners::NTuple{4,Tuple{Float64,Float64}}
+  # homography matrix
+  homography::Matrix{Float64}
+  # camera calibration
+  K::Matrix{Float64}
   # internally computed relative factor between binary variables-- from camera to tag in camera or body frame
   Zij::Pose2Pose2{T}
 end
 
+"""
+    $SIGNATURES
 
-function Pose2AprilTag4Corners(corners::NTuple{4,Tuple{Float64,Float64}}=((0.0,0.0),(1.0,0.0),(0.0,1.0),(1.0,1.0)))
+A default camera calibration matrix, useful for reference and quick tests.
+
+Notes
+- Hartley, Zisserman, Multiple View Geometry, p.157
+"""
+function _defaultCameraCalib(;fx::Real = 524.040,
+                              fy::Real = 524.040,
+                              cy::Real = 319.254,
+                              cx::Real = 251.227,
+                              s::Real  = 0.0)
+  #
+  K = [fx s  cx;
+        0 fy cy;
+        0 0  1.0]
+  #
+  return K
+end
+
+function Pose2AprilTag4Corners(;corners::NTuple{4,Tuple{Float64,Float64}}=((0.0,0.0),(1.0,0.0),(0.0,1.0),(1.0,1.0)),
+                                homography::AbstractMatrix{<:Real}=diagm(ones(3)),
+                                fx::Real = 524.040,
+                                fy::Real = 524.040,
+                                cy::Real = 319.254,
+                                cx::Real = 251.227,
+                                s::Real  = 0.0
+                                K::AbstractMatrix{<:Real}=_defaultCameraCalib(fx=fx,
+                                                                              fy=fy,
+                                                                              cy=cy,
+                                                                              cx=cx,
+                                                                              s=s) )
   # calculate the transform
+  # ...
 
   # make a relative Pose2Pose factor
   p2p2 = Pose2Pose2(MvNormal([20;0;0.0], diagm(0.001*ones(3))))
 
   #
-  return Pose2AprilTag4Corners(corners, p2p2)
+  return Pose2AprilTag4Corners(corners, homography, K, p2p2)
 end
 
 
