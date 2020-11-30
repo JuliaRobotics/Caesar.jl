@@ -31,6 +31,19 @@ addVariable!(fg, :tag17, Pose2)
 
 atf = addFactor!(fg, [:x0;:tag17], apt4)
 
+
+meas = freshSamples(apt4,2)
+
+@test  meas isa Tuple
+@test  meas[1] isa Array
+
+##
+
+
+
+pts = approxConv(fg, ls(fg,:tag17)[1], :tag17)
+
+
 ## test packing of factor
 pf = DFG.packFactor(fg, atf)
 uf = DFG.unpackFactor(fg, pf)

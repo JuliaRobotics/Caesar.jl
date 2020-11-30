@@ -36,7 +36,7 @@ end
 
 function getSample(pat4c::Pose2AprilTag4Corners{T}, N::Int=1) where T
 
-  return (getSample(pat4c.Zij, N), )
+  return getSample(pat4c.Zij, N)
 end
 
 
