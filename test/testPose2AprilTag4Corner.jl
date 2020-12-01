@@ -101,10 +101,25 @@ uf4 = getFactorType(uf)
 
 
 
+
 ## test factor graph solution
 
 
 solveTree!(fg);
+
+
+## test saving to file and back
+
+saveDFG("/tmp/atagtest", fg)
+fg_ = loadDFG("/tmp/atagtest")
+Base.rm("/tmp/atagtest.tar.gz")
+
+uf4_ = getFactorType(fg_, DFG.ls(fg_, :tag17)[1])
+
+@test norm( apt4.homography - uf4_.homography ) < 1e-6
+@test norm( apt4.K - uf4_.K ) < 1e-6
+@test norm( apt4.taglength - uf4_.taglength ) < 1e-6
+@test apt4.id == uf4_.id 
 
 
 ## Test deconvolution
@@ -114,14 +129,41 @@ meas = approxDeconv(fg, DFG.ls(fg, :tag17)[1])
 @test sum(Statistics.mean(meas[1] - meas[2], dims=2) .< [0.1, 0.1, 0.1]) == 3
 
 
-## test preimage search
+## test preimage search ("SLAM-wise calibration")
+
+
+# in reality we'd do this over section of the graph for each sample
+# FIXME this must be moved up into IncrementalInference
+function _solveFactorPreimage(fct::Union{<:AbstractPrior, <:AbstractRelative}, 
+                              meas_::AbstractVector{<:Real}; 
+                              method=BFGS(),
+                              regularize::Real=0 )
+  #
+
+  minObj = 0 == regularize ? (x) -> fct.preimage[1](meas_, x) : (x) -> fct.preimage[1](meas_, x) + regularize*sum((x-fct.preimage[2]).^2)
+
+  residual = Optim.optimize(minObj, fct.preimage[2], method )
+  residual.minimizer
+end
+
 
 fct = getFactorType(fg, :x0tag17f1)
 
-# in reality we'd do this over section of the graph for each sample
-residual = Optim.optimize((x) -> fct.preimage[1](meas[1][:,1], x), fct.preimage[2], BFGS())
+preImgs = zeros(5,10)
 
-@test sum((residual.minimizer - fct.preimage[2] .|> abs) .< [50;50;50;50;1]) == 5
+
+for i in 1:10
+  println("finding preimage $i") 
+  preImgs[:,i] .= _solveFactorPreimage(fct, meas[1][:,i], regularize=0.001)
+
+  # residual = Optim.optimize((x) -> fct.preimage[1](meas[1][:,i], x), fct.preimage[2], BFGS())
+  # store sample
+  # preImgs[:,i] .= residual.minimizer
+end
+
+@show means = Statistics.mean(preImgs, dims=2)[:]
+@show preimgSolve = means - fct.preimage[2]
+@test sum(abs.(preimgSolve) .< [10;10;10;10;1]) == 5
 
 ##
 

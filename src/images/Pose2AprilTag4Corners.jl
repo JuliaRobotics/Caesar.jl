@@ -8,7 +8,10 @@ import IncrementalInference: getSample
 
 
 export Pose2AprilTag4Corners, PackedPose2AprilTag4Corners
-export _defaultCameraCalib
+
+# suppressing but listing some internal functions
+# export _defaultCameraCalib, _AprilTagToPose2
+
 
 """
     $TYPEDEF
@@ -43,7 +46,7 @@ struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: AbstractRel
   # tag id
   id::Int
   # internally computed relative factor between binary variables-- from camera to tag in camera or body frame
-  Zij::Pose2Pose2{T}
+  Zij::RoME.Pose2Pose2{T}
 
   # experimental development work for preimage parameter searching
   preimage::Tuple{F, Vector{Float64}}
@@ -109,7 +112,8 @@ function Pose2AprilTag4Corners(;corners::_CornerVecTuple=((0.0,0.0),(1.0,0.0),(0
                                                                               cx=cx,
                                                                               s=s),
                                 id::Int=-1,
-                                taglength::Real=0.25 )
+                                taglength::Real=0.25,
+                                covariance::Matrix{<:Real}=diagm([0.1;0.1;0.1].^2) )
   #
   # make standard tuple
   corners_ = if corners isa Tuple
@@ -124,9 +128,9 @@ function Pose2AprilTag4Corners(;corners::_CornerVecTuple=((0.0,0.0),(1.0,0.0),(0
   x0 = [K[1,1], K[2,2], K[1,3], K[2,3], taglength]
   Dtag = _AprilTagToPose2(corners, homography, x0...)
   # println("$(tag.id), $(ld[3]), $(round.(Dtag, digits=3))")
-  p2l2 = Pose2Pose2(MvNormal(Dtag,diagm([0.1;0.1;0.1].^2)))
+  p2l2 = Pose2Pose2(MvNormal(Dtag, covariance))
 
-  # preimage nlsolve function
+  # preimage optimize function
   preImgFnc = (y, x) -> sum( (y - _AprilTagToPose2(corners_, homography, x...)).^2 )
 
   #
@@ -135,15 +139,13 @@ end
 
 
 
-function getSample(pat4c::Pose2AprilTag4Corners, N::Int=1)
-
-  return getSample(pat4c.Zij, N)
-end
 
 
-# just a pass through
+# just pass through sample and factor evaluations
+
+getSample(pat4c::Pose2AprilTag4Corners, N::Int=1) = getSample(pat4c.Zij, N)
+
 (pat4c::Pose2AprilTag4Corners)(x...) = pat4c.Zij(x...)
-
 
 
 ## serialization
