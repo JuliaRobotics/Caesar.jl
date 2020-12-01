@@ -46,7 +46,7 @@ pose = tagOrthogonalIteration(corners,homog,200.0,200.0,180.0,120.0,taglength=0.
 ##
 
 # test construction of factor
-apt4 = Pose2AprilTag4Corners(corners)
+apt4 = Pose2AprilTag4Corners(corners=corners, homography=homog, cx=180, cy=120, fx=300, fy=300)
 
 
 ## test adding to a graph
@@ -69,6 +69,7 @@ pts = approxConv(fg, DFG.ls(fg,:tag17)[1], :tag17)
 
 
 ## test packing of factor
+
 pf = DFG.packFactor(fg, atf)
 uf = DFG.unpackFactor(fg, pf)
 
@@ -84,7 +85,17 @@ uf4 = getFactorType(uf)
 @test isapprox(apt4.corners[3][2], uf4.corners[3][2], atol=1e-12)
 @test isapprox(apt4.corners[4][2], uf4.corners[4][2], atol=1e-12)
 
-#
+@test norm( apt4.homography - uf4.homography ) < 1e-6
+
+@test norm( apt4.K - uf4.K ) < 1e-6
+
+@test norm( apt4.taglength - uf4.taglength ) < 1e-6
+
+@test apt4.id == uf4.id 
+
+
+
+##
 
 
 
