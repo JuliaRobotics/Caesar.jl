@@ -19,12 +19,19 @@ Notes
 - An assumption about camera or body frame is made, please open an issue at Caesar.jl for guidance on building more options.
 - Helper constructor uses `fx,fy,cx,cy,s` to build `K`, 
   - setting `K` will overrule `fx,fy,cx,cy,s`.
+- Finding preimage from deconv measurement sample `idx` in place of MvNormal mean:
+  - `measPts = approxDeconv(dfg, fct)`
+  - `obj = (x) -> fct.preimage[1](deconvMeasSol[idx], x)`
+  - `result = Optim.optimize(obj, fct.preimage[2], BFGS())` and
+
+DevNotes
+- TODO IIF will get plumbing to combine many of preimage `obj` terms into single calibration search
 
 Related
 
 `AprilTags.detect`, `PackedPose2AprilTag4Corners`
 """
-struct Pose2AprilTag4Corners{T <: SamplableBelief} <: AbstractRelativeRoots
+struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: AbstractRelativeRoots
   # 4 corners as detected by AprilTags
   corners::NTuple{4,Tuple{Float64,Float64}}
   # homography matrix
@@ -37,6 +44,9 @@ struct Pose2AprilTag4Corners{T <: SamplableBelief} <: AbstractRelativeRoots
   id::Int
   # internally computed relative factor between binary variables-- from camera to tag in camera or body frame
   Zij::Pose2Pose2{T}
+
+  # experimental development work for preimage parameter searching
+  preimage::Tuple{F, Vector{Float64}}
 end
 
 """
@@ -64,7 +74,29 @@ function _defaultCameraCalib(;fx::Real = 524.040,
   return K
 end
 
-function Pose2AprilTag4Corners(;corners::NTuple{4,Tuple{Float64,Float64}}=((0.0,0.0),(1.0,0.0),(0.0,1.0),(1.0,1.0)),
+function _AprilTagToPose2(corners, 
+                          homography::AbstractMatrix{<:Real}, 
+                          fx_::Real, 
+                          fy_::Real, 
+                          cx_::Real, 
+                          cy_::Real, 
+                          taglength_::Real)
+  #
+  pose, err1 = AprilTags.tagOrthogonalIteration(corners,homography, fx_, fy_, cx_, cy_, taglength = taglength_)
+  cTt = LinearMap(pose[1:3, 1:3])∘Translation((pose[1:3,4])...)
+  bRc = Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))*Rotations.Quat(1/sqrt(2),-1/sqrt(2),0,0)
+  bTt = LinearMap(bRc) ∘ cTt
+  # wTb = LinearMap(zT.R.R) ∘ Translation(zT.t...)
+  # wTt = wTb ∘ bTt
+  
+  ld = LinearAlgebra.cross(bTt.linear*[0;0;1], [0;0;1])
+  theta = atan(ld[2],ld[1])
+  [bTt.translation[1:2,];theta]
+end
+
+const _CornerVecTuple = Union{NTuple{4,Tuple{Float64,Float64}}, Vector{Tuple{Float64,Float64}}}
+
+function Pose2AprilTag4Corners(;corners::_CornerVecTuple=((0.0,0.0),(1.0,0.0),(0.0,1.0),(1.0,1.0)),
                                 homography::AbstractMatrix{<:Real}=diagm(ones(3)),
                                 fx::Real=524.040,
                                 fy::Real=fx,
@@ -79,28 +111,31 @@ function Pose2AprilTag4Corners(;corners::NTuple{4,Tuple{Float64,Float64}}=((0.0,
                                 id::Int=-1,
                                 taglength::Real=0.25 )
   #
+  # make standard tuple
+  corners_ = if corners isa Tuple
+    corners
+  else
+    c = corners
+    ((c[1][1],c[1][2]),(c[2][1],c[2][2]),(c[3][1],c[3][2]),(c[4][1],c[4][2]))
+  end
+
   # calculate the transform
-  fx_, fy_, cx_, cy_ = K[1,1], K[2,2], K[1,3], K[2,3]
-  pose, err1 = tagOrthogonalIteration(corners,homography, fx_, fy_, cx_, cy_, taglength = taglength)
-
-  cTt = LinearMap(pose[1:3, 1:3])∘Translation((pose[1:3,4])...)
-  bRc = Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))*Rotations.Quat(1/sqrt(2),-1/sqrt(2),0,0)
-  bTt = LinearMap(bRc) ∘ cTt
-  # wTb = LinearMap(zT.R.R) ∘ Translation(zT.t...)
-  # wTt = wTb ∘ bTt
-
-  ld = LinearAlgebra.cross(bTt.linear*[0;0;1], [0;0;1])
-  theta = atan(ld[2],ld[1])
-  Dtag = [bTt.translation[1:2,];theta]
+  # fx_, fy_, cx_, cy_ = K[1,1], K[2,2], K[1,3], K[2,3]
+  x0 = [K[1,1], K[2,2], K[1,3], K[2,3], taglength]
+  Dtag = _AprilTagToPose2(corners, homography, x0...)
   # println("$(tag.id), $(ld[3]), $(round.(Dtag, digits=3))")
   p2l2 = Pose2Pose2(MvNormal(Dtag,diagm([0.1;0.1;0.1].^2)))
 
+  # preimage nlsolve function
+  preImgFnc = (y, x) -> sum( (y - _AprilTagToPose2(corners_, homography, x...)).^2 )
+
   #
-  return Pose2AprilTag4Corners(corners, homography, K, taglength, id, p2l2)
+  return Pose2AprilTag4Corners(corners_, homography, K, taglength, id, p2l2, (preImgFnc, x0))
 end
 
 
-function getSample(pat4c::Pose2AprilTag4Corners{T}, N::Int=1) where T
+
+function getSample(pat4c::Pose2AprilTag4Corners, N::Int=1)
 
   return getSample(pat4c.Zij, N)
 end
@@ -114,6 +149,9 @@ end
 ## serialization
 
 struct PackedPose2AprilTag4Corners <: PackedInferenceType
+  # format of serialized data
+  mimeType::String
+  # corners, as detected by AprilTags library
   corners::Vector{Float64}
   # homography matrix
   homography::Vector{Float64}
@@ -123,8 +161,6 @@ struct PackedPose2AprilTag4Corners <: PackedInferenceType
   taglength::Float64
   # tag id
   id::Int
-  # expected to be used in the future
-  mimeType::String
 end
 
 
@@ -141,12 +177,12 @@ function convert( ::Type{<:PackedInferenceType},
   corVec[7] = obj.corners[4][1]
   corVec[8] = obj.corners[4][2]
 
-  return PackedPose2AprilTag4Corners( corVec, 
+  return PackedPose2AprilTag4Corners( "/application/JuliaLang/PackedPose2AprilTag4Corners",
+                                      corVec, 
                                       obj.homography[:],
                                       obj.K[:],
                                       obj.taglength,
-                                      obj.id,
-                                      "/application/PackedPose2AprilTag4Corners")
+                                      obj.id )
 end
 
 
