@@ -2,6 +2,9 @@
 using Test
 using Caesar
 using AprilTags
+using Optim
+using Statistics
+
 
 ##
 
@@ -50,6 +53,7 @@ apt4 = Pose2AprilTag4Corners(corners=corners, homography=homog, cx=180, cy=120, 
 
 
 ## test adding to a graph
+
 fg = generateCanonicalFG_ZeroPose2()
 addVariable!(fg, :tag17, Pose2)
 
@@ -64,8 +68,10 @@ meas = freshSamples(apt4,2)
 ##
 
 
-
 pts = approxConv(fg, DFG.ls(fg,:tag17)[1], :tag17)
+
+@test size(pts,1) == 3
+@test 1 < size(pts,2)
 
 
 ## test packing of factor
@@ -95,8 +101,29 @@ uf4 = getFactorType(uf)
 
 
 
-##
+## test factor graph solution
 
+
+solveTree!(fg);
+
+
+## Test deconvolution
+
+meas = approxDeconv(fg, DFG.ls(fg, :tag17)[1])
+
+@test sum(Statistics.mean(meas[1] - meas[2], dims=2) .< [0.1, 0.1, 0.1]) == 3
+
+
+## test preimage search
+
+fct = getFactorType(fg, :x0tag17f1)
+
+# in reality we'd do this over section of the graph for each sample
+residual = Optim.optimize((x) -> fct.preimage[1](meas[1][:,1], x), fct.preimage[2], BFGS())
+
+@test sum((residual.minimizer - fct.preimage[2] .|> abs) .< [50;50;50;50;1]) == 5
+
+##
 
 
 end
