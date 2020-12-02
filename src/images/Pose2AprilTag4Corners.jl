@@ -77,6 +77,15 @@ function _defaultCameraCalib(;fx::Real = 524.040,
   return K
 end
 
+
+"""
+    $SIGNATURES
+
+Notes
+- assume body frame is xyz <==> fwd-lft-up
+- assume AprilTags pose is xyz <==> rht-dwn-fwd
+- FIXME, validate that: camera frame is xyz <==> row-col-bck <==> u-v-bck  <==> dwn-rht-bck
+"""
 function _AprilTagToPose2(corners, 
                           homography::AbstractMatrix{<:Real}, 
                           fx_::Real, 
@@ -87,24 +96,26 @@ function _AprilTagToPose2(corners,
   #
   pose, err1 = AprilTags.tagOrthogonalIteration(corners,homography, fx_, fy_, cx_, cy_, taglength = taglength_)
   cTt = LinearMap(pose[1:3, 1:3])∘Translation((pose[1:3,4])...)
+  # camera to body rotation, 
   bRc = Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))*Rotations.Quat(1/sqrt(2),-1/sqrt(2),0,0)
+  # for tag in camera frame transform
   bTt = LinearMap(bRc) ∘ cTt
-  # wTb = LinearMap(zT.R.R) ∘ Translation(zT.t...)
-  # wTt = wTb ∘ bTt
+    # wTb = LinearMap(zT.R.R) ∘ Translation(zT.t...)
+    # wTt = wTb ∘ bTt
   
   ld = LinearAlgebra.cross(bTt.linear*[0;0;1], [0;0;1])
   theta = atan(ld[2],ld[1])
   [bTt.translation[1:2,];theta]
 end
 
-const _CornerVecTuple = Union{NTuple{4,Tuple{Float64,Float64}}, Vector{Tuple{Float64,Float64}}}
+const _CornerVecTuple = Union{NTuple{4,Tuple{Float64,Float64}}, Vector{Tuple{Float64,Float64}}, Vector{Vector{Float64}}}
 
 function Pose2AprilTag4Corners(;corners::_CornerVecTuple=((0.0,0.0),(1.0,0.0),(0.0,1.0),(1.0,1.0)),
                                 homography::AbstractMatrix{<:Real}=diagm(ones(3)),
                                 fx::Real=524.040,
                                 fy::Real=fx,
-                                cy::Real=319.254,
                                 cx::Real=251.227,
+                                cy::Real=319.254,
                                 s::Real =0.0,
                                 K::AbstractMatrix{<:Real}=_defaultCameraCalib(fx=fx,
                                                                               fy=fy,
@@ -198,7 +209,7 @@ function convert( ::Type{<:DFG.AbstractRelative},
                                 homography=reshape(obj.homography,:,3), 
                                 K=reshape(obj.K,3,3),
                                 taglength=obj.taglength,
-                                id=obj.id )
+                                id=obj.id  )
 end
 
 
