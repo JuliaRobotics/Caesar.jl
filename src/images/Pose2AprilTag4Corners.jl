@@ -2,6 +2,7 @@
 
 using LinearAlgebra
 using Rotations, CoordinateTransformations
+using TransformUtils
 
 import Base: convert
 import IncrementalInference: getSample
@@ -23,8 +24,9 @@ Notes
 - Helper constructor uses `fx,fy,cx,cy,s` to build `K`, 
   - setting `K` will overrule `fx,fy,cx,cy,s`.
 - Finding preimage from deconv measurement sample `idx` in place of MvNormal mean:
-  - `measPts = approxDeconv(dfg, fct)`
-  - `obj = (x) -> fct.preimage[1](deconvMeasSol[idx], x)`
+  - `pred, _ = approxDeconv(dfg, fct)`
+  - `fct.preimage[1](pred[idx], [fx, fy, cx, cy, taglength])`
+  - `obj = (fcxy) -> fct.preimage[1](pred[:,idx], fcxy)`
   - `result = Optim.optimize(obj, fct.preimage[2], BFGS())` and
 
 DevNotes
@@ -81,10 +83,12 @@ end
 """
     $SIGNATURES
 
+Standardizing a function to convert a regular AprilTags.jl sighting into Pose2 format
+
 Notes
 - assume body frame is xyz <==> fwd-lft-up
 - assume AprilTags pose is xyz <==> rht-dwn-fwd
-- FIXME, validate that: camera frame is xyz <==> row-col-bck <==> u-v-bck  <==> dwn-rht-bck
+- assum camera frame is xyz <==> row-col-bck <==> u-v-bck  <==> dwn-rht-bck
 """
 function _AprilTagToPose2(corners, 
                           homography::AbstractMatrix{<:Real}, 
@@ -94,17 +98,18 @@ function _AprilTagToPose2(corners,
                           cy_::Real, 
                           taglength_::Real)
   #
-  pose, err1 = AprilTags.tagOrthogonalIteration(corners,homography, fx_, fy_, cx_, cy_, taglength = taglength_)
-  cTt = LinearMap(pose[1:3, 1:3])∘Translation((pose[1:3,4])...)
-  # camera to body rotation, 
-  bRc = Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))*Rotations.Quat(1/sqrt(2),-1/sqrt(2),0,0)
-  # for tag in camera frame transform
-  bTt = LinearMap(bRc) ∘ cTt
-    # wTb = LinearMap(zT.R.R) ∘ Translation(zT.t...)
-    # wTt = wTb ∘ bTt
+  # pose <==> cTt
+  pose, err1 = AprilTags.tagOrthogonalIteration(corners, homography, fx_, fy_, cx_, cy_, taglength=taglength_)
+  cVt = Translation((pose[1:3,4])...)
+  # bRc = bRy * yRc 
+  bRc = Rotations.Quat(1/sqrt(2),0,1/sqrt(2),0) * Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))
+  # for tag in body frame == bTt
+  bTt = LinearMap(bRc) ∘ cVt
   
-  ld = LinearAlgebra.cross(bTt.linear*[0;0;1], [0;0;1])
-  theta = atan(ld[2],ld[1])
+  # also extract the relative yaw between body and tag 
+  ld = LinearAlgebra.cross(bTt.linear*pose[1:3,1:3]*[0;0;1], [0;0;1])
+  theta = TU.wrapRad(atan(ld[2],ld[1]) + pi/2)
+  
   [bTt.translation[1:2,];theta]
 end
 

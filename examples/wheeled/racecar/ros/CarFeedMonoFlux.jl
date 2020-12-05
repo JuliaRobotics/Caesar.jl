@@ -143,8 +143,10 @@ T0 = nanosecond2datetime(fec.synchronizer.leftFwdCam[1][2])
 addVariable!(slam.dfg, :x0, Pose2, timestamp=T0)
 addFactor!(slam.dfg, [:x0], PriorPose2(MvNormal(zeros(3),diagm([0.1,0.1,0.01].^2))), timestamp=T0)
 
+# must wait here till loop! finishes
 
 ## store the camera calibration in the first pose
+
 camCalib = Dict(:size=>size(K), :vecK=>vec(K))
 addData!(slam.dfg,:default_folder_store,:x0,:camCalib,
          Vector{UInt8}(JSON2.write(camCalib)), mimeType="application/json/octet-stream", 
@@ -187,7 +189,7 @@ stopManageSolveTree!(slam)
 
 parsed_args["vis3d"] ? delete!(vis) : nothing
 
-# wiat for previous and then ensure all data is solved at least once
+# wait for previous and then ensure all data is solved at least once
 @info "CarFeedMono.jl is waiting on penultimate trigger solve to finalize."
 blockSolvingInProgress(fec.slam)
 checkSolveStrideTrigger!(fec.slam, force=true)
