@@ -1,9 +1,12 @@
 module ZmqCaesar
     using Requires
-    using ZMQ, JSON
+    using ZMQ
+    using JSON
     using Distributions, IncrementalInference, DistributedFactorGraphs, Caesar
     using Unmarshal
     using Dates
+
+    # import ZMQ: ls
 
     include("models/distributions.jl")
     include("models/factors.jl")

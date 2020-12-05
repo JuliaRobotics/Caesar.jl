@@ -16,4 +16,6 @@ using Test
     # include("multilangzmq/serverTest.jl")
 end
 
+include("testPose2AprilTag4Corner.jl")
+
 

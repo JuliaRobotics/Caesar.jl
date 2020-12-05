@@ -111,7 +111,9 @@ function jsonResultsSLAM2D(dfg::AbstractDFG)
       @error "missing data entry :JOYSTICK_CMD_VALS in $ps of length(allvars)=$(length(allvars))"
       continue
     end
-    cmdData = fetchDataElement(dfg, ps, :JOYSTICK_CMD_VALS)
+    _,cmdData = getData(dfg, ps, :JOYSTICK_CMD_VALS)
+    # cmdData = fetchDataElement(dfg, ps, :JOYSTICK_CMD_VALS)
+
     # axis: 2:throttle, 4:steering
     cd = Dict{Symbol,Any}(
       :posei => ps,

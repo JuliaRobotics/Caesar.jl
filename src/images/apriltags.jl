@@ -1,8 +1,9 @@
 
-@info "Loading Caesar tools related to AprilTags.jl."
+@info "Caesar is loading tools related to AprilTags.jl."
 
-# using Images
+using .AprilTags
 
+include("Pose2AprilTag4Corners.jl")
 
 
 #
