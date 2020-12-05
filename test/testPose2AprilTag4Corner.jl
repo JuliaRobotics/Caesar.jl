@@ -5,6 +5,7 @@ using AprilTags
 using Optim
 using Statistics
 
+import DistributedFactorGraphs: AbstractRelative
 
 ##
 
