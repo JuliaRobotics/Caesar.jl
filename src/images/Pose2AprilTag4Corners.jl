@@ -9,6 +9,7 @@ import IncrementalInference: getSample
 
 
 export Pose2AprilTag4Corners, PackedPose2AprilTag4Corners
+export generateCostAprilTagsPreimageCalib
 
 # suppressing but listing some internal functions
 # export _defaultCameraCalib, _AprilTagToPose2
@@ -218,6 +219,56 @@ function convert( ::Type{<:DFG.AbstractRelative},
 end
 
 
+
+
+## calibrate via preimage
+
+# from the docs
+# - `pred, _ = approxDeconv(dfg, fct)`
+# - `fct.preimage[1](pred[:,idx], [fx, fy, cx, cy, taglength])`
+# - `obj = (fcxy) -> fct.preimage[1](pred[:,idx], fcxy)`
+# - `obj2 = (fcx) -> obj([fcx[1]; fcx[1]; fcx[2]; cy; taglength])`
+# - `result = Optim.optimize(obj, fct.preimage[2], BFGS())` and
+function generateCostAprilTagsPreimageCalib(dfg::AbstractDFG,
+                                            fsyms::Vector{Symbol}=lsf(dfg, Pose2AprilTag4Corners );
+                                            idx::Int = 1, # the sample number
+                                            cx::Real=240,
+                                            cy::Real=320,
+                                            fx::Real=500,
+                                            fy::Real=fx,
+                                            taglength::Real=0.172,
+                                            args::Function = (x)->[x[1]; x[1]; cx; x[2]; taglength]  )
+  #
+  # fcxy = [fx, fy, cx, cy, 0.172]
+
+  # temporary memory containers for all the different lambda functions
+  fcts = []
+  objs = []
+  obj2s = []
+  preds = []
+  
+  for i in 1:length(fsyms)
+    fsym = fsyms[i]
+    pred, _ = approxDeconv(dfg, fsym)
+    push!(preds, pred)
+    fct = getFactorType(dfg, fsym)
+    push!(fcts, fct)
+    # fct.preimage[1](pred[:,idx], fcxy)
+    obj = (fcxy) -> fcts[i].preimage[1](preds[i][:,idx], fcxy)
+    push!(objs, deepcopy(obj))
+    # use keyword args mapping on which parameter should be optimized
+    obj2 = (fcx) -> objs[i](args(fcx))
+    push!(obj2s, deepcopy(obj2))
+  end
+  
+  # set up the cummulative cost over all functions in `obj2s` 
+  cost = x->((f->f(x)).(obj2s) |> sum)
+
+  # test the function is working
+  # @show cost([fx; cy])
+
+  return cost
+end
 
 
 #
