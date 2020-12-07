@@ -154,19 +154,21 @@ CSM currently uses the following statusses for each of the cliques during the in
 
 ### Bayes Tree Legend (from IIF)
 
-The color legend is currently recorded in an [issue thread here](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/349).
+The color legend for the refactored CSM from [issue](https://github.com/JuliaRobotics/IncrementalInference.jl/issues/1007).
 
 * Blank / white -- uninitialized or unprocessed,
-* Orange -- recycled clique upsolve solution from previous tree passed into `solveTree!`,
+* Orange -- recycled clique upsolve solution from previous tree passed into `solveTree!` -- TODO,
 * Blue -- fully marginalized clique that will not be updated during upsolve (maybe downsolved),
 * Light blue -- completed downsolve,
-* Turquoise -- blocking for on parent for downsolve msgs,
-* Purple -- blocking on autoinit for more parent/sibling derived down msgs,
-* Green -- trying to initialize,
+* Green -- trying to up initialize,
+* Darkgreen -- `initUp` some could up init,
+* Lightgreen -- `initUp` no aditional variables could up init,
+* Olive -- trying to down initialize,
+* Seagreen -- `initUp` some could down init,
+* Khaki -- `initUp` no aditional variables could down init,
 * Brown -- initialized but not solved yet (likely child cliques that depend on downward autoinit msgs),
-* Coral -- Init not complete and should wait on init down message,
 * Light red -- completed upsolve,
 * Tomato -- partial dimension upsolve but finished,
-* Red -- CPU working on clique's Chapman-Kolmogorov inference (up or down),
-* Gold -- Upward lock engaged (to show race conditions) -- not fully annotated yet,
-* Tan1 -- Downward lock engaged (to show race conditions) -- not annotated yet.
+* Red -- CPU working on clique's Chapman-Kolmogorov inference (up),
+* Maroon -- CPU working on clique's Chapman-Kolmogorov inference (down),
+* Red -- If finished cliques in red are in `ERROR_STATUS`
