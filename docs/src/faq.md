@@ -90,6 +90,7 @@ https://stackoverflow.com/questions/53548681/how-to-enable-debugging-messages-in
 Julia Images.jl follows the common ``::Array` column-major---i.e. vertical-major---index convention
   - That is `img[vertical, horizontal]`
   - See https://evizero.github.io/Augmentor.jl/images/#Vertical-Major-vs-Horizontal-Major-1 for more details.
+  - Also, https://juliaimages.org/latest/pkgs/axes/#Names-and-locations
 
 ## How does JSON-Schema work?
 
