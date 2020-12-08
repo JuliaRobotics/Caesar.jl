@@ -5,6 +5,10 @@ using AprilTags
 using Optim
 using Statistics
 
+using FileIO
+
+# using ImageView
+
 import DistributedFactorGraphs: AbstractRelative
 
 ##
@@ -102,7 +106,6 @@ uf4 = getFactorType(uf)
 
 
 
-
 ## test factor graph solution
 
 
@@ -165,6 +168,99 @@ end
 @show means = Statistics.mean(preImgs, dims=2)[:]
 @show preimgSolve = means - fct.preimage[2]
 @test sum(abs.(preimgSolve) .< [10;10;10;10;1]) == 5
+
+##
+
+
+end
+
+
+
+##
+
+@testset "test Pose2AprilTag4Corners conventions" begin
+
+##
+
+calibfile = joinpath(dirname(dirname(pathof(AprilTags))),"data/CameraCalibration/taggridphoto.jpg")
+
+cimg = load(calibfile)
+
+# imshow(cimg)
+
+detector = AprilTagDetector()
+tags = deepcopy(detector(cimg))
+freeDetector!(detector)
+
+
+# nearby calibration
+fx = 3370.4878918701756 + 5
+fy = 3352.8348099534364 + 5
+cx = 2005.641610450976  + 5
+cy = 1494.8282013012076 + 5
+# the physical size of the tag
+taglength = 0.0315
+
+
+##
+
+
+ARR = Pose2AprilTag4Corners.(tags, fx=fx, fy=fy, cx=cx, cy=cy, taglength=taglength)
+
+# make sure the detections are in the same order as the tag ids
+@test ((n->(ARR[n].id == n)).(1:length(ARR)) |> sum) == length(ARR)
+
+##
+
+# check a tag on the left is actually on the left according to 
+# body frame: fwd-lft-up <==> x-y-z
+# distance x should show the tag roughly 42cm ahead of the camera body frame
+@test 0.4 < ARR[3].Zij.z.μ[1] < 0.5
+@test 0.2 < ARR[3].Zij.z.μ[2]
+@test abs(ARR[3].Zij.z.μ[3]) < 0.1
+
+# tag on the right should be on the right
+@test 0.4 < ARR[38].Zij.z.μ[1] < 0.5
+@test ARR[38].Zij.z.μ[2] < -0.2
+@test abs(ARR[38].Zij.z.μ[3]) < 0.1
+
+# check a tag in the center should be near the center
+@test 0.4 < ARR[18].Zij.z.μ[1] < 0.5
+@test abs(ARR[18].Zij.z.μ[2]) < 0.1
+@test abs(ARR[18].Zij.z.μ[3]) < 0.1
+
+# check vertical-only displacement
+@test 0.4 < ARR[1].Zij.z.μ[1] < 0.5
+@test 0.15 < ARR[1].Zij.z.μ[2] < 0.3
+@test abs(ARR[1].Zij.z.μ[3]) < 0.1
+
+@test 0.4 < ARR[5].Zij.z.μ[1] < 0.5
+@test 0.15 < ARR[5].Zij.z.μ[2] < 0.3
+@test abs(ARR[5].Zij.z.μ[3]) < 0.1
+
+
+## check the grid calibration cost function is working
+
+
+IMGS = Vector{typeof(cimg)}()
+push!(IMGS, cimg)
+
+tags_ = Vector{AprilTag}[]
+push!(tags_, tags)
+
+obj = (fx, fy, cx, cy) -> AprilTags.calcCalibResidualAprilTags!( IMGS, tags_, taglength=taglength, fx=fx, fy=fy, cx=cx, cy=cy )[1]
+obj_ = (fcxy) -> obj(fcxy...)
+
+##
+
+# check that it works
+obj_([fx, fy, cx, cy])
+
+##
+
+# start with any available parameters, this is a limited run just to confirm the code is functional
+# for a full calibration run, the solver should be allowed to perform many more iterations
+result = optimize(obj_, [fx; fy ;cx ;cy ], BFGS(), Optim.Options(iterations = 5) )
 
 ##
 

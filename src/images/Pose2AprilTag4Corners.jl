@@ -114,14 +114,14 @@ function _AprilTagToPose2(corners,
   [bTt.translation[1:2,];theta]
 end
 
-const _CornerVecTuple = Union{NTuple{4,Tuple{Float64,Float64}}, Vector{Tuple{Float64,Float64}}, Vector{Vector{Float64}}}
+const _CornerVecTuple = Union{NTuple{4,Tuple{Float64,Float64}}, <:AbstractVector{Tuple{Float64,Float64}}, <:AbstractVector{<:AbstractVector{<:Real}}}
 
 function Pose2AprilTag4Corners(;corners::_CornerVecTuple=((0.0,0.0),(1.0,0.0),(0.0,1.0),(1.0,1.0)),
                                 homography::AbstractMatrix{<:Real}=diagm(ones(3)),
-                                fx::Real=524.040,
-                                fy::Real=fx,
-                                cx::Real=251.227,
-                                cy::Real=319.254,
+                                f_height::Real=300.0,
+                                f_width::Real=f_height,
+                                c_height::Real=240.0,
+                                c_width::Real=320.0,
                                 s::Real =0.0,
                                 K::AbstractMatrix{<:Real}=_defaultCameraCalib(fx=fx,
                                                                               fy=fy,
@@ -155,7 +155,37 @@ function Pose2AprilTag4Corners(;corners::_CornerVecTuple=((0.0,0.0),(1.0,0.0),(0
 end
 
 
+function Pose2AprilTag4Corners( tag::AprilTag;
+                                corners::_CornerVecTuple=tag.p,
+                                homography::AbstractMatrix{<:Real}=tag.H,
+                                fx::Real=300.0,
+                                fy::Real=fx,
+                                cx::Real=240.0,
+                                cy::Real=320.0,
+                                s::Real =0.0,
+                                K::AbstractMatrix{<:Real}=_defaultCameraCalib(fx=fx,
+                                                                              fy=fy,
+                                                                              cy=cy,
+                                                                              cx=cx,
+                                                                              s=s),
+                                id::Int=tag.id,
+                                taglength::Real=0.25,
+                                covariance::Matrix{<:Real}=diagm([0.1;0.1;0.1].^2) )
+  #
+  # this is a lazy construction helper for direct use in Julia
 
+  Pose2AprilTag4Corners(;corners=corners,
+                        homography=homography,
+                        fx=fx,
+                        fy=fy,
+                        cx=cx,
+                        cy=cy,
+                        s =s,
+                        K=K,
+                        id=id,
+                        taglength=taglength,
+                        covariance=covariance )
+end
 
 
 # just pass through sample and factor evaluations
@@ -269,6 +299,8 @@ function generateCostAprilTagsPreimageCalib(dfg::AbstractDFG,
 
   return cost
 end
+
+
 
 
 #
