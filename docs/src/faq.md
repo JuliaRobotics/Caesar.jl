@@ -85,7 +85,7 @@ end # let block
 
 https://stackoverflow.com/questions/53548681/how-to-enable-debugging-messages-in-juno-julia-editor
 
-## Julia Images.jl Image Axis Convention
+## Julia Images.jl Axis Convention
 
 Julia Images.jl follows the common ``::Array` column-major---i.e. vertical-major---index convention
   - That is `img[vertical, horizontal]`
