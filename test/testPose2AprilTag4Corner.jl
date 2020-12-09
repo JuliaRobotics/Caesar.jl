@@ -48,13 +48,16 @@ corners = ((x1,y1),(x2,y2),(x3,y3),(x4,y4))
 
 ##
 
-pose = tagOrthogonalIteration(corners,homog,200.0,200.0,180.0,120.0,taglength=0.035)
+f_w, c_w, c_h = 200.0, 180.0, 120.0
+f_h = f_w
+
+pose = tagOrthogonalIteration(corners,homog, f_w, f_h, c_w, c_h, taglength=0.035)
 
 
 ##
 
 # test construction of factor
-apt4 = Pose2AprilTag4Corners(corners=corners, homography=homog, c_width=180, c_height=120, f_width=300, f_height=300)
+apt4 = Pose2AprilTag4Corners(corners=corners, homography=homog, f_width=f_w, c_width=c_w, c_height=c_h)
 
 
 ## test adding to a graph
@@ -103,7 +106,6 @@ uf4 = getFactorType(uf)
 @test norm( apt4.taglength - uf4.taglength ) < 1e-6
 
 @test apt4.id == uf4.id 
-
 
 
 ## test factor graph solution
