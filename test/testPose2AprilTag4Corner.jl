@@ -54,7 +54,7 @@ pose = tagOrthogonalIteration(corners,homog,200.0,200.0,180.0,120.0,taglength=0.
 ##
 
 # test construction of factor
-apt4 = Pose2AprilTag4Corners(corners=corners, homography=homog, cx=180, cy=120, fx=300, fy=300)
+apt4 = Pose2AprilTag4Corners(corners=corners, homography=homog, c_width=180, c_height=120, f_width=300, f_height=300)
 
 
 ## test adding to a graph
@@ -194,10 +194,10 @@ freeDetector!(detector)
 
 
 # nearby calibration
-fx = 3370.4878918701756 + 5
-fy = 3352.8348099534364 + 5
-cx = 2005.641610450976  + 5
-cy = 1494.8282013012076 + 5
+f_width = 3370.4878918701756 + 5
+f_height = 3352.8348099534364 + 5
+c_width = 2005.641610450976  + 5
+c_height = 1494.8282013012076 + 5
 # the physical size of the tag
 taglength = 0.0315
 
@@ -205,7 +205,7 @@ taglength = 0.0315
 ##
 
 
-ARR = Pose2AprilTag4Corners.(tags, fx=fx, fy=fy, cx=cx, cy=cy, taglength=taglength)
+ARR = Pose2AprilTag4Corners.(tags, f_width=f_width, f_height=f_height, c_width=c_width, c_height=c_height, taglength=taglength)
 
 # make sure the detections are in the same order as the tag ids
 @test ((n->(ARR[n].id == n)).(1:length(ARR)) |> sum) == length(ARR)
@@ -238,34 +238,37 @@ ARR = Pose2AprilTag4Corners.(tags, fx=fx, fy=fy, cx=cx, cy=cy, taglength=tagleng
 @test 0.15 < ARR[5].Zij.z.μ[2] < 0.3
 @test abs(ARR[5].Zij.z.μ[3]) < 0.1
 
+##
+
+end
+
+
+
 
 ## check the grid calibration cost function is working
+## NOTICE this test has moved up into AprilTags.jl itself
 
+# IMGS = Vector{typeof(cimg)}()
+# push!(IMGS, cimg)
 
-IMGS = Vector{typeof(cimg)}()
-push!(IMGS, cimg)
+# tags_ = Vector{AprilTag}[]
+# push!(tags_, tags)
 
-tags_ = Vector{AprilTag}[]
-push!(tags_, tags)
-
-obj = (fx, fy, cx, cy) -> AprilTags.calcCalibResidualAprilTags!( IMGS, tags_, taglength=taglength, fx=fx, fy=fy, cx=cx, cy=cy )[1]
-obj_ = (fcxy) -> obj(fcxy...)
+# obj = (f_width, f_height, c_width, c_height) -> AprilTags.calcCalibResidualAprilTags!( IMGS, tags_, taglength=taglength, f_width=f_width, f_height=f_height, c_width=c_width, c_height=c_height )[1]
+# obj_ = (fcwh) -> obj(fcwh...)
 
 ##
 
 # check that it works
-obj_([fx, fy, cx, cy])
+# obj_([f_width, f_height, c_width, c_height])
 
 ##
 
 # start with any available parameters, this is a limited run just to confirm the code is functional
 # for a full calibration run, the solver should be allowed to perform many more iterations
-result = optimize(obj_, [fx; fy ;cx ;cy ], BFGS(), Optim.Options(iterations = 5) )
+# result = optimize(obj_, [f_width; f_height ;c_width ;c_height ], BFGS(), Optim.Options(iterations = 5) )
 
 ##
-
-
-end
 
 
 #
