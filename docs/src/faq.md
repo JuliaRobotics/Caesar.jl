@@ -85,6 +85,13 @@ end # let block
 
 https://stackoverflow.com/questions/53548681/how-to-enable-debugging-messages-in-juno-julia-editor
 
+## Julia Images.jl Axis Convention
+
+Julia Images.jl follows the common ``::Array` column-major---i.e. vertical-major---index convention
+  - That is `img[vertical, horizontal]`
+  - See https://evizero.github.io/Augmentor.jl/images/#Vertical-Major-vs-Horizontal-Major-1 for more details.
+  - Also, https://juliaimages.org/latest/pkgs/axes/#Names-and-locations
+
 ## How does JSON-Schema work?
 
 Caesar.jl intends to follow [json-schema.org](http://www.json-schema.org), see [step-by-step guide here](https://json-schema.org/learn/getting-started-step-by-step.html).
