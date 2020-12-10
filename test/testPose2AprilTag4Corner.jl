@@ -240,6 +240,18 @@ ARR = Pose2AprilTag4Corners.(tags, f_width=f_width, f_height=f_height, c_width=c
 @test 0.15 < ARR[5].Zij.z.μ[2] < 0.3
 @test abs(ARR[5].Zij.z.μ[3]) < 0.1
 
+
+## drawing test to ensure the functions are working
+
+
+for tag in tags
+  apt4 = Pose2AprilTag4Corners(corners=tag.p, homography=tag.H, f_width=f_width, c_width=c_width, c_height=c_height)
+  drawBearingLinesAprilTags!( cimg, apt4,
+                              f_width=f_width, c_width=c_width, taglength=taglength);
+  #
+end
+
+
 ##
 
 end
