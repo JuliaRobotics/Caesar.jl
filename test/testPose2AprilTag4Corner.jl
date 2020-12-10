@@ -5,6 +5,10 @@ using AprilTags
 using Optim
 using Statistics
 
+using FileIO
+
+# using ImageView
+
 import DistributedFactorGraphs: AbstractRelative
 
 ##
@@ -44,13 +48,16 @@ corners = ((x1,y1),(x2,y2),(x3,y3),(x4,y4))
 
 ##
 
-pose = tagOrthogonalIteration(corners,homog,200.0,200.0,180.0,120.0,taglength=0.035)
+f_w, c_w, c_h = 200.0, 180.0, 120.0
+f_h = f_w
+
+pose = tagOrthogonalIteration(corners,homog, f_w, f_h, c_w, c_h, taglength=0.035)
 
 
 ##
 
 # test construction of factor
-apt4 = Pose2AprilTag4Corners(corners=corners, homography=homog, cx=180, cy=120, fx=300, fy=300)
+apt4 = Pose2AprilTag4Corners(corners=corners, homography=homog, f_width=f_w, c_width=c_w, c_height=c_h)
 
 
 ## test adding to a graph
@@ -99,8 +106,6 @@ uf4 = getFactorType(uf)
 @test norm( apt4.taglength - uf4.taglength ) < 1e-6
 
 @test apt4.id == uf4.id 
-
-
 
 
 ## test factor graph solution
@@ -170,6 +175,114 @@ end
 
 
 end
+
+
+
+##
+
+@testset "test Pose2AprilTag4Corners conventions" begin
+
+##
+
+calibfile = joinpath(dirname(dirname(pathof(AprilTags))),"data/CameraCalibration/taggridphoto.jpg")
+
+cimg = load(calibfile)
+
+# imshow(cimg)
+
+detector = AprilTagDetector()
+tags = deepcopy(detector(cimg))
+freeDetector!(detector)
+
+
+# nearby calibration
+f_width = 3370.4878918701756 + 5
+f_height = 3352.8348099534364 + 5
+c_width = 2005.641610450976  + 5
+c_height = 1494.8282013012076 + 5
+# the physical size of the tag
+taglength = 0.0315
+
+
+##
+
+
+ARR = Pose2AprilTag4Corners.(tags, f_width=f_width, f_height=f_height, c_width=c_width, c_height=c_height, taglength=taglength)
+
+# make sure the detections are in the same order as the tag ids
+@test ((n->(ARR[n].id == n)).(1:length(ARR)) |> sum) == length(ARR)
+
+##
+
+# check a tag on the left is actually on the left according to 
+# body frame: fwd-lft-up <==> x-y-z
+# distance x should show the tag roughly 42cm ahead of the camera body frame
+@test 0.4 < ARR[3].Zij.z.μ[1] < 0.5
+@test 0.2 < ARR[3].Zij.z.μ[2]
+@test abs(ARR[3].Zij.z.μ[3]) < 0.1
+
+# tag on the right should be on the right
+@test 0.4 < ARR[38].Zij.z.μ[1] < 0.5
+@test ARR[38].Zij.z.μ[2] < -0.2
+@test abs(ARR[38].Zij.z.μ[3]) < 0.1
+
+# check a tag in the center should be near the center
+@test 0.4 < ARR[18].Zij.z.μ[1] < 0.5
+@test abs(ARR[18].Zij.z.μ[2]) < 0.1
+@test abs(ARR[18].Zij.z.μ[3]) < 0.1
+
+# check vertical-only displacement
+@test 0.4 < ARR[1].Zij.z.μ[1] < 0.5
+@test 0.15 < ARR[1].Zij.z.μ[2] < 0.3
+@test abs(ARR[1].Zij.z.μ[3]) < 0.1
+
+@test 0.4 < ARR[5].Zij.z.μ[1] < 0.5
+@test 0.15 < ARR[5].Zij.z.μ[2] < 0.3
+@test abs(ARR[5].Zij.z.μ[3]) < 0.1
+
+
+## drawing test to ensure the functions are working
+
+
+for tag in tags
+  apt4 = Pose2AprilTag4Corners(corners=tag.p, homography=tag.H, f_width=f_width, c_width=c_width, c_height=c_height)
+  drawBearingLinesAprilTags!( cimg, apt4,
+                              f_width=f_width, c_width=c_width, taglength=taglength);
+  #
+end
+
+
+##
+
+end
+
+
+
+
+## check the grid calibration cost function is working
+## NOTICE this test has moved up into AprilTags.jl itself
+
+# IMGS = Vector{typeof(cimg)}()
+# push!(IMGS, cimg)
+
+# tags_ = Vector{AprilTag}[]
+# push!(tags_, tags)
+
+# obj = (f_width, f_height, c_width, c_height) -> AprilTags.calcCalibResidualAprilTags!( IMGS, tags_, taglength=taglength, f_width=f_width, f_height=f_height, c_width=c_width, c_height=c_height )[1]
+# obj_ = (fcwh) -> obj(fcwh...)
+
+##
+
+# check that it works
+# obj_([f_width, f_height, c_width, c_height])
+
+##
+
+# start with any available parameters, this is a limited run just to confirm the code is functional
+# for a full calibration run, the solver should be allowed to perform many more iterations
+# result = optimize(obj_, [f_width; f_height ;c_width ;c_height ], BFGS(), Optim.Options(iterations = 5) )
+
+##
 
 
 #

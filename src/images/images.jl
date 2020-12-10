@@ -135,7 +135,7 @@ Related
 
 IIF.csmAnimate, Caesar.writevideo
 """
-function csmAnimateSideBySide(tree::BayesTree,
+function csmAnimateSideBySide(tree::AbstractBayesTree,
                               autohists::Dict{Int, T};
                               frames::Int=100,
                               interval::Int=2,
