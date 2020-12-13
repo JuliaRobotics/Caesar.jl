@@ -60,11 +60,11 @@ vo = [:x1; :l3; :x2; ...]
 
 And then reset the factor graph and build a new tree
 ```julia
-buildTreeFromOrdering!(fg, vo)
+resetBuildTreeFromOrder!(fg, vo)
 ```
 
 ```@docs
-buildTreeFromOrdering!
+resetBuildTreeFromOrder!
 ```
 
 !!! note
