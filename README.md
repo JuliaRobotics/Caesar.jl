@@ -8,9 +8,9 @@ A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reduci
 
 Click on the badges to follow web url links:
 
-| Stable | Dev | Documentation | Public Slack |
-|:------:|:----------------:|:-------------:|:-----:|
-| [![Build Status][build-tag]][build-url] | [![Build Status][build-img]][build-url] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
+| Stable v0.6 | Stable v0.7 | Dev | Documentation | Public Slack |
+|:------:|:------:|:----------------:|:-------------:|:-----:|
+| [![Build Status][build-v0.6]][build-url] | [![Build Status][build-v0.7]][build-url] | [![Build Status][build-img]][build-url] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
 
 # Bleeding-edge Development Status
@@ -65,9 +65,10 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
 [build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
-[build-tag]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.6
+[build-v0.6]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.6
+[build-v0.7]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.7
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
-[caesar-stable]: https://img.shields.io/badge/2020Q4-v0.6.x-green.svg
+[caesar-stable]: https://img.shields.io/badge/2020Q4-v0.7.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://caesarjl.slack.com
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
@@ -79,7 +80,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
 [r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.9
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2020Q4-v0.9.x-green.svg
+[r-stable]: https://img.shields.io/badge/2020Q4-v0.10.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
@@ -89,7 +90,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [iif-build-v016]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.16
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
-[iif-stable]: https://img.shields.io/badge/2020Q4-v0.16.x-green.svg
+[iif-stable]: https://img.shields.io/badge/2020Q4-v0.18.x-green.svg
 [iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
 [iif-releases]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
 
@@ -139,7 +140,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
 [dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2020Q4-v0.10.x-green.svg
+[dfg-stable]: https://img.shields.io/badge/2020Q4-v0.11.x-green.svg
 [dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones
 [dfg-releases]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
 
@@ -166,6 +167,6 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [rp-cov-url]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl?branch=master
 [rp-build-img]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl.svg?branch=master
 [rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
-[rp-stable]: https://img.shields.io/badge/2020Q4-v0.4.x-green.svg
+[rp-stable]: https://img.shields.io/badge/2020Q4-v0.5.x-green.svg
 [rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones
 [rp-releases]: https://github.com/JuliaRobotics/RoMEPlotting.jl/releases
