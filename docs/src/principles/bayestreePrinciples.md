@@ -20,6 +20,9 @@ The procedure for obtaining the Bayes (Junction) tree is outlined in the figure 
 
 ## Constructing a Tree
 
+!!! note
+    A visual illustration of factor graph to Bayes net to Bayes tree can be [found in this PDF](https://github.com/JuliaRobotics/IncrementalInference.jl/files/3929194/hex-slam.pdf) 
+
 Trees and factor graphs are separated in the implementation, allowing the user to construct multiple different trees from one factor graph except for a few temporary values in the factor graph.
 
 ```julia
