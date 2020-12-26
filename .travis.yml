@@ -24,14 +24,19 @@ jobs:
       julia: 1.5
       script:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-        - julia -e 'using Pkg; pkg"add DistributedFactorGraphs#master"; pkg"add IncrementalInference#master"; pkg"add RoME#master";'
+        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
+        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master"))'
+        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs", rev="master"))'
         - julia --check-bounds=yes -e 'using Pkg; Pkg.test("Caesar"; coverage=false)'
       after_success: skip
     - stage: "Documentation"
       julia: 1.5
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="Caesar", rev="master")); Pkg.instantiate()'
-        - julia --project=docs/ -e 'using Pkg; pkg"add IncrementalInference"; pkg"add RoME"; pkg"add KernelDensityEstimatePlotting"; pkg"add RoMEPlotting#master";'
+        - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
+        - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
+        - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
+        - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master"))'
         - julia --project=docs/ docs/make.jl
       name: "HTML Docs"
       after_success: skip
