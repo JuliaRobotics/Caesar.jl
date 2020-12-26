@@ -24,7 +24,7 @@ jobs:
       julia: 1.5
       script:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-        - julia -e 'using Pkg; pkg"add DistributedFactorGraphs#master"; pkg"add IncrementalInference#master"; pkg"add RoME#master";'
+        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs", rev="master")); Pkg.add(PackageSpec(name="IncrementalInference", rev="master")); Pkg.add(PackageSpec(name="RoME", rev="master")); Pkg.instantiate()'
         - julia --check-bounds=yes -e 'using Pkg; Pkg.test("Caesar"; coverage=false)'
       after_success: skip
     - stage: "Documentation"
