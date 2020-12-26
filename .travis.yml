@@ -33,7 +33,10 @@ jobs:
       julia: 1.5
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="Caesar", rev="master")); Pkg.instantiate()'
-        - julia --project=docs/ -e 'using Pkg; pkg"add IncrementalInference"; pkg"add RoME"; pkg"add KernelDensityEstimatePlotting"; pkg"add RoMEPlotting#master";'
+        - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
+        - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
+        - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
+        - julia --project=docs/ -e 'using Pkg; pkg"add(PackageSpec(name="IncrementalInference", rev="master"))'
         - julia --project=docs/ docs/make.jl
       name: "HTML Docs"
       after_success: skip
