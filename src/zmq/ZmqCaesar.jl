@@ -4,6 +4,7 @@ module ZmqCaesar
     using Distributions, IncrementalInference, DistributedFactorGraphs, Caesar
     using Unmarshal
     using Dates
+    using DocStringExtensions
 
     include("models/distributions.jl")
     include("models/factors.jl")
