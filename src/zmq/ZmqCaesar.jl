@@ -5,6 +5,7 @@ module ZmqCaesar
     using Distributions, IncrementalInference, DistributedFactorGraphs, Caesar
     using Unmarshal
     using Dates
+    using DocStringExtensions
 
     # import ZMQ: ls
 
