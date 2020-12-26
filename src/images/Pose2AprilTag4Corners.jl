@@ -55,7 +55,7 @@ fg = generateCanonicalFG_ZeroPose2()
 
 # use a construction helper to add factors to all the tags
 for tag in tags
-  tagSym = Symbol("tag$(tag.id)")
+  tagSym = Symbol("tag\$(tag.id)")
   exists(fg, tagSym) ? nothing : addVariable!(fg, tagSym, Pose2)
   pat = Pose2AprilTag4Corners(corners=tag.p, homography=tag.H, taglength=taglength)
   addFactor!(fg, [:x0; tagSym], pat)
