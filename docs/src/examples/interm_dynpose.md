@@ -52,6 +52,9 @@ getSample(dp2v::DynPoint2VelocityPrior, N::Int=1) = (rand(dp2v.z,N), )
 
 ### `DynPoint2DynPoint2` (preintegration)
 
+!!! warning
+    `::IIF.FactorMetadata` is being refactored and improved.  Some of the content below is out of date.  See IIF #1025 for details. (1Q2021)
+
 The basic idea is that change in position is composed of three components (originating from double integration of Newton's second law):
 
 ![deltapositionplus](https://user-images.githubusercontent.com/6412556/40951449-05bdfed8-6845-11e8-8c4f-31fd92523819.gif)

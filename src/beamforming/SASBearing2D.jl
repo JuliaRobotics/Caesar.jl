@@ -41,7 +41,7 @@ mutable struct SASREUSE
 end
 
 
-mutable struct SASBearing2D <: AbstractRelativeFactorMinimize
+mutable struct SASBearing2D <: AbstractRelativeMinimize
   cfgTotal::CBFFilterConfig
   cfgLIE::CBFFilterConfig
   waveformsIn::Array{Complex{Float64}}
