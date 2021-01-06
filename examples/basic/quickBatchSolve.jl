@@ -23,7 +23,9 @@ factrs = setdiff(lsf(fg), lsf(fg, r"drt"))
 ensureAllInitialized!(fg)
 
 getSolverParams(fg).drawtree = true
-@time solveTree!(fg, maxparallel=1000);
+getSolverParams(fg).maxincidence = 1000
+
+@time solveTree!(fg);
 
 savepath = splitpath(ARGS[1])
 savename = split(savepath[end], '.')[1]

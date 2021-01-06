@@ -70,10 +70,11 @@ end
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = false
 getSolverParams(fg).dbg = true
+getSolverParams(fg).maxincidence = 200
 
 
 ensureAllInitialized!(fg)
-tree, smt, hist = solveTree!(fg, maxparallel=200, recordcliqs=[:x19;:x169;:x166;:x134;:x171])
+tree, smt, hist = solveTree!(fg, recordcliqs=[:x19;:x169;:x166;:x134;:x171])
 
 
 fetchCliqTaskHistoryAll!(smt, hist)
@@ -137,8 +138,6 @@ Gadfly.plot(x=out,Geom.histogram,Coord.cartesian(xmin=0, xmax=100, ymin=0, ymax=
 
 using RoMEPlotting
 
-# tree = wipeBuildNewTree!(fg, maxparallel=200)
-# spyCliqMat(tree, :x169)
 
 drawTree(tree, show=true)
 

@@ -203,6 +203,8 @@ tree1 = wipeBuildNewTree!(fg1)
 # getSolverParams(fg1).isfixedlag = true
 # getSolverParams(fg1).qfl = 20
 
+getSolverParams(fg1).maxincidence = 200
+
 # first solve and initialization
 getSolverParams(fg1).drawtree = true
 # getSolverParams(fg).showtree = false
@@ -226,7 +228,7 @@ for STEP in 0:10:50
     global storeLast
 
     runEpochs!(fg1, epochs, STEP, index1, acousticRate=3)
-    poses = sortVarNested(ls(fg1, r"x"))
+    poses = sortDFG(ls(fg1, r"x"))
 
     if STEP-laglength >= 0
         @show poses[1], poses[end], poses[end-laglength]
@@ -239,7 +241,7 @@ for STEP in 0:10:50
 
     drawGraph(fg1, filepath=joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_.pdf"))
     saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_before"))
-    @time tree1, smt, hist = solveTree!(fg1, tree1, maxparallel=200)
+    @time tree1, smt, hist = solveTree!(fg1, tree1)
     saveDFG(fg1, joinpath(getSolverParams(fg1).logpath, "graphs", "fg_$(STEP)_after"))
 
     pla = drawPosesLandmarksAndOdo(fg1, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)

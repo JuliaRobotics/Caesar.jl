@@ -226,10 +226,18 @@ end
 
 # just pass through sample and factor evaluations
 
-getSample(pat4c::Pose2AprilTag4Corners, N::Int=1) = getSample(pat4c.Zij, N)
+getSample(pat4c::CalcFactor{<:Pose2AprilTag4Corners}, N::Int=1) = (rand(pat4c.factor.Zij.z, N), )
 
-(pat4c::Pose2AprilTag4Corners)(x...) = pat4c.Zij(x...)
-
+function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(res::AbstractVector{<:Real},
+                                                      z,
+                                                      wxi,
+                                                      wxj)
+  #
+  wXjhat = SE2(wxi)*SE2(z)
+  jXjhat = SE2(wxj) \ wXjhat
+  se2vee!(res, jXjhat)
+  nothing
+end
 
 ## serialization
 

@@ -81,16 +81,17 @@ getSolverParams(fg).async = true
 getSolverParams(fg).multiproc = false
 getSolverParams(fg).upsolve = true
 getSolverParams(fg).downsolve = false
+getSolverParams(fg).maxincidence = 100
 
 
 # writeGraphPdf(fg, show=true)
 
 ensureAllInitialized!(fg)
 
-tree, smt, hist = solveTree!(fg, maxparallel=100)
+tree, smt, hist = solveTree!(fg0)
 drawTree(tree,filepath = "/tmp/caesar/bt.pdf", show=true, imgs=false)
 # fg2 = deepcopy(fg)
-# tree, smt, hist = solveTree!(fg,tree,maxparallel=100)
+# tree, smt, hist = solveTree!(fg,tree)
 
 # plotSASDefault(fg,expID, posData, igt, dposData, datadir=allpaths[1],savedir="/tmp/caesar/plotsas.pdf");
 # # plotSASDefault(fg,expID, posData,igt,dposData, datadir=allpaths[1], savedir="/tmp/caesar/test.pdf")
@@ -312,21 +313,22 @@ getSolverParams(fg).async = true
 getSolverParams(fg).multiproc = false
 getSolverParams(fg).upsolve = true
 getSolverParams(fg).downsolve = false
+getSolverParams(fg).maxincidence = 100
 
 
 # writeGraphPdf(fg, show=true)
 
 # ensureAllInitialized!(fg)
 
-tree, smt, hist = solveTree!(fg, maxparallel=100)
+tree, smt, hist = solveTree!(fg)
 
 
-plotKDE(fg, reverse(sortVarNested(ls(fg, r"x"))), levels=1)
+plotKDE(fg, reverse(sortDFG(ls(fg, r"x"))), levels=1)
 
 getSolverParams(fg).upsolve = false
 getSolverParams(fg).downsolve = true
 
-tree, smt, hist = solveTree!(fg, maxparallel=100)
+tree, smt, hist = solveTree!(fg)
 
 
 

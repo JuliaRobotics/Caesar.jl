@@ -21,7 +21,7 @@ Prior(t::T) where {T <: SamplableBelief} = Prior{T}(t)
 # sampling function
 getSample(s::Prior, N::Int=1) = (reshape(rand(s.z,N),1,:), )
 
-struct LinearOffset{T} <: IncrementalInference.AbstractRelativeFactor where T <: SamplableBelief
+struct LinearOffset{T <: SamplableBelief} <: IncrementalInference.AbstractRelativeRoots
   z::T
 end
 getSample(s::LinearOffset, N::Int=1) = (reshape(rand(s.z,N),1,:), )

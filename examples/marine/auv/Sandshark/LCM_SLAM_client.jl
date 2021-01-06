@@ -256,7 +256,8 @@ end
 
 dontMarginalizeVariablesAll!(fg)
 setSolvable!(getVariable(fg, :drt_ref), 0)
-tree, smt, hist = solveTree!(fg, maxparallel=1000)
+getSolverParams(fg).maxincidence = 1000
+tree, smt, hist = solveTree!(fg)
 
 saveDFG(fg, joinpath(getLogPath(fg),"fg_batchsolve") )
 

@@ -34,13 +34,13 @@ fg = generateCanonicalFG_Kaess()
 # ...
 
 ## build the tree
-tree = resetBuildTree!(fg)
+tree = buildTreeReset!(fg)
 ```
 
-The temporary values are `reset` from the distributed factor graph object `fg<:AbstractDFG` and a new tree is constructed.  This `resetBuildTree!` call can be repeated as many times the user desires and results should be consistent for the same factor graph structure (regardless of numerical values contained within).
+The temporary values are `reset` from the distributed factor graph object `fg<:AbstractDFG` and a new tree is constructed.  This `buildTreeReset!` call can be repeated as many times the user desires and results should be consistent for the same factor graph structure (regardless of numerical values contained within).
 
 ```@docs
-resetBuildTree!
+buildTreeReset!
 ```
 
 ## Variable Ordering
@@ -60,11 +60,7 @@ vo = [:x1; :l3; :x2; ...]
 
 And then reset the factor graph and build a new tree
 ```julia
-resetBuildTreeFromOrder!(fg, vo)
-```
-
-```@docs
-resetBuildTreeFromOrder!
+buildTreeReset!(fg, vo)
 ```
 
 !!! note
@@ -87,7 +83,7 @@ tree, smt, hist = solveTree!(fg)
 
 ### Get the Elimination Order Used
 
-The solver internally uses [`resetBuildTree!`](@ref) which sometimes requires the user extract the variable elimination order after the fact.  This can be done with:
+The solver internally uses [`buildTreeReset!`](@ref) which sometimes requires the user extract the variable elimination order after the fact.  This can be done with:
 ```@docs
 getEliminationOrder
 ```

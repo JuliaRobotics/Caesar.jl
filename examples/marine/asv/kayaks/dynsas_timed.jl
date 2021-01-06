@@ -52,9 +52,11 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
     cfgd=loadConfigFile(cfgFile)
 
     fg = initfg();
+    getSolverParams(fg).maxincidence = 400
+
     beacon = :l1
     addVariable!(fg, beacon, Point2 )
-    tree = emptyBayesTree();
+    tree = BayesTree();
 
     pose_counter = 1
     sas_counter = 1
@@ -123,9 +125,9 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
                println("Solving at SAS-F: $(sas_counter), Pos: $(pose_counter) \n");
                if sas_counter > 1
-                   @time tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
+                   @time tree, smt, hist = solveTree!(fg,tree)
                else
-                   @time tree, smt, hist = solveTree!(fg, maxparallel=400)
+                   @time tree, smt, hist = solveTree!(fg)
                end
 
                # writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")

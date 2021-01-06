@@ -52,6 +52,7 @@ cfgFile = joinpath(ENV["HOME"],"data","sas","SAS2D.yaml")
 cfgd=loadConfigFile(cfgFile)
 
 fg = initfg();
+getSolverParams(fg).maxincidence = 400
 beacon = :l1
 addVariable!(fg, beacon, Point2 )
 tree = emptyBayesTree();
@@ -124,9 +125,9 @@ while pose_counter < totalposes-2
            setValKDE!(fg,lstpose,XXkde);
 
            if sas_counter > 1
-               tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
+               tree, smt, hist = solveTree!(fg,tree)
            else
-               tree, smt, hist = solveTree!(fg, maxparallel=400)
+               tree, smt, hist = solveTree!(fg)
            end
 
            writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")

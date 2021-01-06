@@ -46,9 +46,11 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
     cfgd=loadConfigFile(cfgFile)
 
     fg = initfg();
+    getSolverParams(fg).maxincidence = 1000
+
     beacon = :l1
     addVariable!(fg, beacon, Point2 )
-    tree = emptyBayesTree();
+    tree = BayesTree();
 
     pose_counter = 1
     sas_counter = 1
@@ -114,9 +116,9 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
                setValKDE!(fg,lstpose,XXkde);
 
                if sas_counter > 1
-                   tree, smt, hist = solveTree!(fg,tree, maxparallel=400)
+                   tree, smt, hist = solveTree!(fg,tree)
                else
-                   tree, smt, hist = solveTree!(fg, maxparallel=400)
+                   tree, smt, hist = solveTree!(fg)
                end
 
                writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")

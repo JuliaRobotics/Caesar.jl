@@ -212,6 +212,7 @@ getSolverParams(fg).logpath = resultsdir
 getSolverParams(fg).multiproc=multiproc
 getSolverParams(fg).drawtree=drawtree
 getSolverParams(fg).showtree=false
+getSolverParams(fg).maxincidence = 500
 prev_psid = 0
 
 # load from previous file
@@ -266,7 +267,7 @@ for psid in (prev_psid+1):1:maxlen
   if psid % BB == 0 || psid == maxlen
     saveDFG(fg, resultsdir*"/racecar_fg_$(psym)_presolve")
     # , drawpdf=true, show=show, N=N, recursive=true
-    tree, smt, hist = solveTree!(fg, tree, maxparallel=500)
+    tree, smt, hist = solveTree!(fg, tree)
   end
 
   # T1 = remotecall(saveDFG, WP, fg, resultsdir*"/racecar_fg_$(psym)")
@@ -292,7 +293,7 @@ if batchResolve
   dontMarginalizeVariablesAll!(fg)
   foreach(x->setSolvable!(fg, x, 1), setdiff(ls(fg),ls(fg,r"drt")))
   foreach(x->setSolvable!(fg, x, 1), setdiff(lsf(fg),lsf(fg,r"drt")))
-  tree = solveTree!(fg, maxparallel=1000)
+  tree = solveTree!(fg)
 end
 saveDFG(fg, resultsdir*"/racecar_fg_final")
 
