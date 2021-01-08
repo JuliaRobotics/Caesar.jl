@@ -1,12 +1,6 @@
 # Data Association and Hypotheses
 
-Ambiguous data and processing often produce complicated data association situations.  In SLAM, loop-closures are a major source of concern when developing autonomous subsystems or behaviors.  In conventional parametric Gaussian-only systems an incorrect loop-closure can occur unpredictably cause highly unstable numerical solutions.  The mm-iSAM algorithm was conceived to directly address these (and other related) issues by changing the fundamental manner in which the statistical inference is performed (see literature section for links).
-
-Data association applies well beyond just loop-closure, including but not limited to navigation-affordance matching and discrepancy detection, and indicates the versatility of the IncrementalInference.jl standardized `multihypo` interface.  Note that much more is possible, however, the so-called single-fraction multihypo approach already yields significant benefits and simplicity.
-
-## Illustration
-
-Consider the following canonical illustrations regarding feature selection on some domain (say landmarks in geometry space):
+Ambiguous data and processing often produce complicated data association situations.  In SLAM, loop-closures are a major source of concern when developing autonomous subsystems or behaviors. To illustrate this point, consider the two scenarios depicted below:
 
 ```@raw html
 <p align="center">
@@ -14,13 +8,17 @@ Consider the following canonical illustrations regarding feature selection on so
 </p>
 ```
 
+In conventional parametric Gaussian-only systems an incorrect loop-closure can occur, resulting in highly unstable numerical solutions. The mm-iSAM algorithm was conceived to directly address these (and other related) issues by changing the fundamental manner in which the statistical inference is performed.
+
+The data association problem applies well beyond just loop-closures including (but not limited to) navigation-affordance matching and discrepancy detection, and indicates the versatility of the IncrementalInference.jl standardized `multihypo` interface.  Note that much more is possible, however, the so-called single-fraction multihypo approach already yields significant benefits and simplicity.
+
 ## Multihypothesis
 
 Consider for example a regular three variable factor `[:pose;:landmark;:calib]` that due to some decision has a triple association uncertainty about the middle variable.  This *fractional certainty* can easily be modelled via:
 ```julia
 addFactor!(fg, [:p10, :l1_a,:l1_b,:l1_c, :c], PoseLandmCalib, multihypo=[1; 0.6;0.3;0.1; 1])
 ```
-Therefore, the user can "fragment" certainty about one variable using any arbitrary n-ary factor.  The 100% certain variables are indicated as `1`, while the remaining uncertainties regarding the uncertain data association decision is grouped as positive factions that sum to `1`, in this example `0.6,0.3,0.1`.  These fractions represent the confidence about the associations to either `:l1_a,:l1_b,:l1_c`.
+Therefore, the user can "partition" certainty about one variable using any arbitrary n-ary factor.  The 100% certain variables are indicated as `1`, while the remaining uncertainties regarding the uncertain data association decision are grouped as positive fractions that sum to `1`. In this example, the values `0.6,0.3,0.1` represent the confidence about the association between `:p10` and  either of `:l1_a,:l1_b,:l1_c`.
 
 A more classical binary multihypothesis example is illustated in the multimodal (non-Gaussian) factor graph below:
 
@@ -32,7 +30,7 @@ A more classical binary multihypothesis example is illustated in the multimodal 
 
 ## Mixture Models
 
-`Mixture` is a different kind of multi-modal modeling where different hypotheses of the measurement itself is unknown.  It is possible to also model uncertain data associations as a `Mixture(Prior,...)` but this is a feature of factor graph modeling something different than data association uncertainty in n-ary factors: e.g. it is possible to use `Mixture` together with `multihypo=` and be sure to take the time to understand the different and how these concepts interact.  The Caesar.jl solution is more general than simply allocating different mixtures to different association decisions.  All these elements together can create quite the multi-modal soup.  A practical example from SLAM is a robot loop-closure where an object similar to prior exploration is observed.  The measurement observation is one thing (can maybe be a `Mixture`) and the association of this "measurement" with this or that variable is a multihypothesis selection.
+`Mixture` is a different kind of multi-modal modeling where different hypotheses of the measurement itself are unknown.  It is possible to also model uncertain data associations as a `Mixture(Prior,...)` but this is a feature of factor graph modeling something different than data association uncertainty in n-ary factors: e.g. it is possible to use `Mixture` together with `multihypo=` and be sure to take the time to understand the different and how these concepts interact. The Caesar.jl solution is more general than simply allocating different mixtures to different association decisions.  All these elements together can create quite the multi-modal soup.  A practical example from SLAM is a loop-closure where a robot observes an object similar to one previously seen.  The measurement observation is one thing (can maybe be a `Mixture`) and the association of this "measurement" with this or that variable is a multihypothesis selection.
 
 See the [familiar RobotFourDoor.jl as example as a highly simplified case using priors where these elements effectively all the same thing](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/c9a69ee4cdd3868019ac53b14dba9690d80ec3fa/examples/RobotFourDoor.jl#L18-L20).  Again, `Mixture` is something different than `multihypo=` and the two can be used together.
 
@@ -83,12 +81,13 @@ One of the more exotic examples is to natively represent Synthetic Aperture Sona
 
 # Null Hypothesis
 
-Sometimes there is basic uncertainty about whether a measurement is at all valid.  Note that the above examples (`multihypo` and `Mixture`) still accept that a certain association definitely exists.  Null hypothesis implies that a factor might be completely bogus and should be ignored.  The underlying mechanics of this approach is not entirely straight forward since removing factors in essence change the structure of the graph.  That said, IncrementalInference.jl employs a reasonable stand-in solution that does not require changing the graph structure and can simply be included for any factor:
+Sometimes there is basic uncertainty about whether a measurement is at all valid.  Note that the above examples (`multihypo` and `Mixture`) still accept that a certain association definitely exists. A null hypothesis models the situation in which a factor might be completely bogus, in which case it should be ignored.  The underlying mechanics of this approach are not entirely straightforward since removing one or more factors essentially changes the structure of the graph.  That said, IncrementalInference.jl employs a reasonable stand-in solution that does not require changing the graph structure and can simply be included for any factor.
+
 ```julia
 addFactor!(fg, [:x7;:l13], Pose2Point2Range(...), nullhypo=0.1)
 ```
 
-This keyword indicates to the solver that there is a 10% chance that this factor is no-good.
+This keyword indicates to the solver that there is a 10% chance that this factor is not valid.
 
 !!! note
     [An entirely separate page is reserved for incorporating Flux neural network models into Caesar.jl](flux_factors.md) as highly plastic and trainable (i.e. learnable) factors.
