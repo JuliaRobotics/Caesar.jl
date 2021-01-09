@@ -8,9 +8,9 @@ A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reduci
 
 Click on the badges to follow web url links:
 
-| Stable v0.6 | Stable v0.7 | Dev | Documentation | Public Slack |
+| Stable v0.7 | Stable v0.8 | Dev | Documentation | Public Slack |
 |:------:|:------:|:----------------:|:-------------:|:-----:|
-| [![Build Status][build-v0.6]][build-url] | [![Build Status][build-v0.7]][build-url] | [![Build Status][build-img]][build-url] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
+| [![Build Status][build-v0.7]][build-url] | [![Build Status][build-v0.8]][build-url] | [![Build Status][build-img]][build-url] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
 
 # Bleeding-edge Development Status
@@ -27,8 +27,8 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
 | [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
 | [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
-| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
 | [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | n/a |
+| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
 | [~~Graphs.jl~~][graphs-url] | [![][gjl-stable]][gjl-releases] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] | n/a |
 
 # Contributors
@@ -65,10 +65,10 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
 [build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
-[build-v0.6]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.6
+[build-v0.8]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.8
 [build-v0.7]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.7
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
-[caesar-stable]: https://img.shields.io/badge/2020Q4-v0.7.x-green.svg
+[caesar-stable]: https://img.shields.io/badge/2021Q1-v0.8.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://caesarjl.slack.com
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
@@ -80,17 +80,17 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
 [r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.9
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2020Q4-v0.11.x-green.svg
+[r-stable]: https://img.shields.io/badge/2021Q1-v0.12.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
 [iif-cov-img]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl/coverage.svg?branch=master
 [iif-cov-url]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl?branch=master
 [iif-build-img]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=master
-[iif-build-v016]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.16
+[iif-build-v020]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.20
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
-[iif-stable]: https://img.shields.io/badge/2020Q4-v0.18.x-green.svg
+[iif-stable]: https://img.shields.io/badge/2021Q1-v0.20.x-green.svg
 [iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
 [iif-releases]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
 
@@ -167,6 +167,6 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [rp-cov-url]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl?branch=master
 [rp-build-img]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl.svg?branch=master
 [rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
-[rp-stable]: https://img.shields.io/badge/2020Q4-v0.5.x-green.svg
+[rp-stable]: https://img.shields.io/badge/2021Q1-v0.5.x-green.svg
 [rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones
 [rp-releases]: https://github.com/JuliaRobotics/RoMEPlotting.jl/releases
