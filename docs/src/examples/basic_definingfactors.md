@@ -264,8 +264,8 @@ What you need to build in the new factor:
 * Serialization and deserialization methods
   * These are convert functions that pack and unpack the factor (which may be highly complex) into serialization-compatible formats
   * As the factors are mostly comprised of distributions (of type [`SamplableBelief`](@ref)), functions are provided to pack and unpack the distributions:
-    * Packing: To convert from a [`SamplableBelief`](@ref) to a string, use `string(::SamplableBelief)::String`
-    * Unpacking: To convert from string back to a `SamplableBelief`, use `extractdistribution(::String)::SamplableBelief`  
+    * Packing: To convert from a [`SamplableBelief`](@ref) to a serializable obhect, use `convert(PackedSamplableBelief, ::SamplableBelief)`
+    * Unpacking: To convert from string back to a `SamplableBelief`, use `convert(SamplableBelief, ::PackedSamplableBelief)`  
 
 An example of this is the [`Pose2Point2BearingRange`](@ref), which provides a bearing+range relationship between a 2D pose and a 2D point.
 
