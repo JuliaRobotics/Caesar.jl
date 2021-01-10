@@ -1,9 +1,6 @@
 # Creating New Variables and Factors
 In most scenarios, the existing variables and factors should be sufficient for most robotics applications. Caesar however, is extensible and allows you to easily incorporate your own variable and factor types for specialized applications.
 
-!!! note
-    Follow [JuliaRobotics/IncrementalInference.jl#1025](http://www.github.com/JuliaRobotics/IncrementalInference.jl#1025) for a reworking of `FactorMetadata` as a major piece of internal consolidation to simplify both this factor creation process, as well as many ohter library features.
-
 ## New Variable/Factor Considerations
 A couple of important points:
 * You **do not need to** modify/fork/edit internal Caesar/RoME/IncrementalInference source code to introduce new variable and factor types!
