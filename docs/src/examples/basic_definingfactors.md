@@ -101,7 +101,7 @@ This example is on `<:AbstractRelativeRoots`.  First, lets create the factor as 
 struct MyFactor{T <: SamplableBelief} <: IIF.AbstractRelativeRoots
   Z::T
 end
-getSample(cfo::CalcFactor{<:MyFactor}, N::Int=1) = (reshape(rand(cfo.factor.z,N),1,N), )
+getSample(cfo::CalcFactor{<:MyFactor}, N::Int=1) = (reshape(rand(cfo.factor.Z,N) ,1,N), )
 
 function (cfo::CalcFactor{<:MyFactor})( res::AbstractVector{<:Real},
                                         measurement_z,
