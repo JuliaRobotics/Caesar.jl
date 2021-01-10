@@ -1,6 +1,6 @@
 # Defining New Factors
 
-Julia's type inference allows overloading of member functions outside a module.  Therefore new factors can be defined at any time.  To better illustrate, in this example we will add new factors into the `Main` context **after** construction of the the factor graph has already begun.
+Julia's type inference allows overloading of member functions outside a module.  Therefore new factors can be defined at any time.  To better illustrate, in this example we will add new factors into the `Main` context **after** construction of the factor graph has already begun.
 
 ```julia
 using IncrementalInference
