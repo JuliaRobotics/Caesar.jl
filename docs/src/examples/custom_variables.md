@@ -1,7 +1,7 @@
 
 ## Creating New Variables
 
-A handy macro can help define new variables which shows a Pose2 example with 3 degrees of freesom: `X, Y, theta`:
+A handy macro can help define new variables which shows a Pose2 example with 3 degrees of freedom: `X, Y, theta`:
 ```@docs
 @defVariable
 ```
