@@ -201,17 +201,18 @@ OtherFactor(z) = OtherFactor(z, [MyInplaceMem(0) for i in 1:Threads.nthreads()])
 
 ## [OPTIONAL] Standardized Serialization
 
-To take advantage of features like `DFG.saveDFG` and `DFG.loadDFG` a user specified type should be able to serialize via JSON standards.  The decision was taken to require bespoke factor types to always be converted into a JSON friendly `struct` which must be prefixed as type name with `PackedPrior{T}`.   Similarly, the user must also overload `Base.convert` as follows:
+To take advantage of features like `DFG.saveDFG` and `DFG.loadDFG` a user specified type should be able to serialize via JSON standards.  The decision was taken to require bespoke factor types to always be converted into a JSON friendly `struct` which must be prefixed as type name with `PackedMyPrior{T}`.   Similarly, the user must also overload `Base.convert` as follows:
 ```julia
 # necessary for overloading Base.convert
 import Base: convert
 
-struct PackedPrior <: PackedInferenceType
+struct PackedMyPrior <: PackedInferenceType
   z::String
 end
 
-convert(::Type{PackedPrior}, pr::Prior{<:SamplableBelief}) = PackedPrior(convert(PackedSamplableBelief, pr.z))
-convert(::Type{Prior{T}}, pr::PackedPrior) where {T <: SamplableBelief} = Prior{T}(IIF.convert(SamplableBelief, pr.z))
+# IIF provides convert methods for `SamplableBelief` types
+convert(::Type{PackedMyPrior}, pr::MyPrior{<:SamplableBelief}) = PackedMyPrior(convert(PackedSamplableBelief, pr.z))
+convert(::Type{MyPrior}, pr::PackedMyPrior) = MyPrior(IIF.convert(SamplableBelief, pr.z))
 ```
 
 Now you should be able to `saveDFG` and `loadDFG` your own factor graph types to Caesar.jl / FileDFG standard `.tar.gz` format.
