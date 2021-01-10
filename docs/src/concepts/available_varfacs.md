@@ -15,7 +15,7 @@ Default variables in IncrementalInference
 
 ```@docs
 ContinuousScalar
-ContinuousEuclid
+ContinuousEuclid{N}
 ```
 
 ### 2D Variables
@@ -70,7 +70,7 @@ PriorPoint3
 PriorPose3
 ```
 
-### Conditional Likelihoods (Relative Data)
+### Relative Likelihoods (Relative Data)
 
 Defaults in IncrementalInference.jl:
 ```@docs
