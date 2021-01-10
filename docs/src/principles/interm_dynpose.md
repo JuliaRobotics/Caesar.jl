@@ -8,6 +8,10 @@ A smaller example in two dimensions where we wish to estimate the velocity of so
 
 ![dynpoint2fg](https://user-images.githubusercontent.com/6412556/40951628-caf1d332-6845-11e8-9710-9f6fcd92a8ca.png)
 
+
+!!! warning
+    Text below is outdated (2021Q1) and needs to be updated for changes `softtype-->variableType` and `CalcFactor`.
+
 ### Brief on Variable Node `softtypes`
 
 Variable nodes retain meta data (so called "soft types") describing the type of variable.  Common VariableNode types are `RoME.Point2D`, `RoME.Pose3D`.  VariableNode soft types are passed during construction of the factor graph, for example:

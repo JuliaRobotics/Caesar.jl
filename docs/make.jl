@@ -57,12 +57,13 @@ makedocs(
         ],
         "How to Expand?" => [
             "Custom Variables and Factors" => "concepts/adding_variables_factors.md",
-            "Creating Variables and Factors" => "examples/basic_definingfactors.md",
-            "Creating DynPose Factor" => "examples/interm_dynpose.md"
+            "Creating Variables" => "examples/custom_variables.md",
+            "Creating Factors" => "examples/basic_definingfactors.md",
         ],
         "Developer Zone" => [
-            "Wiki Pointers" => "dev/wiki.md"
-        ],
+            "Wiki Pointers" => "dev/wiki.md",
+            "Creating DynPose Factor" => "examples/interm_dynpose.md",
+            ],
         "Literature" => [
             "References" => "refs/literature.md"
         ],
