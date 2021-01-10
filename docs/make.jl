@@ -56,13 +56,14 @@ makedocs(
             "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
         ],
         "How to Expand?" => [
-            "Custom Variables and Factors" => "concepts/adding_variables_factors.md",
+            "Custom Variables and Factors" => "examples/adding_variables_factors.md",
             "Creating Variables" => "examples/custom_variables.md",
             "Creating Factors" => "examples/basic_definingfactors.md",
         ],
         "Developer Zone" => [
             "Wiki Pointers" => "dev/wiki.md",
-            "Creating DynPose Factor" => "examples/interm_dynpose.md",
+            "Creating DynPose Factor" => "principles/interm_dynpose.md",
+            "Known Issue List" => "dev/known_issues.md",
             ],
         "Literature" => [
             "References" => "refs/literature.md"
