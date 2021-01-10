@@ -10,8 +10,11 @@ Click on the badges to follow web url links:
 
 | Stable v0.7 | Stable v0.8 | Dev | Documentation | Public Slack |
 |:------:|:------:|:----------------:|:-------------:|:-----:|
-| [![Build Status][build-v0.7]][build-url] | [![Build Status][build-v0.8]][build-url] | [![Build Status][build-img]][build-url] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
+| [![Build Status][build-v0.7]][build-url] | [![Build Status][build-v0.8]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
+## Get Involved and Code of Conduct
+
+This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the Slack channel, Julia Discourse, or Github issues to get in touch.
 
 # Bleeding-edge Development Status
 
@@ -41,21 +44,19 @@ Consider citing our work:
 @misc{caesarjl,
   author = "Contributors and Dependencies",
   title =  "Caesar.jl",
-  year =   2020,
+  year =   2021,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
 
 Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently done by @dehann who can be contacted for more details.
 
-# Get Involved and Code of Conduct
-
-This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the slack channel, Julia Discourse, or Github issues to get in touch.
-
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/JuliaRobotics/Caesar.jl.svg)](https://starchart.cc/JuliaRobotics/Caesar.jl)
 
+[colp-badge]: https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet
+[colprac]: https://github.com/SciML/ColPrac
 
 [docs-shield]: https://img.shields.io/badge/docs-latest-blue.svg
 [caesar-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
