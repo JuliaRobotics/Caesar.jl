@@ -207,12 +207,12 @@ To take advantage of features like `DFG.saveDFG` and `DFG.loadDFG` a user specif
 import Base: convert
 
 struct PackedMyPrior <: PackedInferenceType
-  z::String
+  Z::String
 end
 
 # IIF provides convert methods for `SamplableBelief` types
-convert(::Type{PackedMyPrior}, pr::MyPrior{<:SamplableBelief}) = PackedMyPrior(convert(PackedSamplableBelief, pr.z))
-convert(::Type{MyPrior}, pr::PackedMyPrior) = MyPrior(IIF.convert(SamplableBelief, pr.z))
+convert(::Type{PackedMyPrior}, pr::MyPrior{<:SamplableBelief}) = PackedMyPrior(convert(PackedSamplableBelief, pr.Z))
+convert(::Type{MyPrior}, pr::PackedMyPrior) = MyPrior(IIF.convert(SamplableBelief, pr.Z))
 ```
 
 Now you should be able to `saveDFG` and `loadDFG` your own factor graph types to Caesar.jl / FileDFG standard `.tar.gz` format.
@@ -226,8 +226,7 @@ addFactor!(fg, [:x0], MyPrior(Normal()))
 saveDFG("/tmp/myfg", fg)
 
 # test loading the .tar.gz (extension optional)
-fg2 = initfg()
-loadDFG("/tmp/myfg", fg2)
+fg2 = loadDFG("/tmp/myfg")
 
 # list the contents
 ls(fg2), lsf(fg2)
