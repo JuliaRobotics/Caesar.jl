@@ -53,7 +53,7 @@ Note the following critical aspects that allows IIF to use the new definition:
 
 IIF internally uses the number of rows in the first element of the `getSample` return tuple (i.e. the matrix) to extract the measurement dimension for this factor.  In this case it is 1 dimensional.
 
-To recap, the `getSample` function for this factor type returns a measurement which is of type `::Tuple{::Matrix{Float64}}`.
+To recap, the new `getSample` function in this example factor returns a measurement which is of type `::Tuple{::Matrix{Float64}}`.  The `::Tuple` is slightly clunky but was borne out of necessity to allow for versatility when multiple values from sampling are used during residual function evaluation.  Previous uses  include cases such as `::Tuple{<:Matrix, <:Vector, <:Function}`.
 
 ### Ready to Use
 
@@ -81,7 +81,7 @@ Later we will see how to ensure these new factors can be properly serialized to 
 
 ### What is `CalcFactor`
 
-The `CalcFactor` part is part of the IIF interface to all factors.  It contains metadata and other important bits of information that are useful in a wide swath of applications.  As work requires more interesting features from the code base, it is likely that the `cfo::CalcFactor` object will contain such data.  If not, please open an issue with Caesar.jl so that the necessary options may be added.
+`CalcFactor` is part of the `IIF` interface to all factors.  It contains metadata and other important bits of information that are useful in a wide swath of applications.  As work requires more interesting features from the code base, it is likely that the `cfo::CalcFactor` object will contain such data.  If not, please open an issue with Caesar.jl so that the necessary options may be added.
 
 The `cfo` object contains the field `.factor::T` which is the type of the user factor being used, e.g. `myprior` from above example.  That is `cfo.factor::MyPrior`.  This is why `getSample` is using `rand(cfo.factor.Z)`.
 
