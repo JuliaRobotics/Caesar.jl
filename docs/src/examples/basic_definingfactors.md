@@ -144,7 +144,10 @@ function (cfo::CalcFactor{<:OtherFactor})(res::AbstractVector{<:Real},
   
   # the broadcast operators with automatically vectorize
   res[1:2] .= z .- (x1[1:2] .- x1[1:2])
-  nothing
+  res .^= 2 # square on 1 and 2 directions
+  res[1] += res[2] # sum the squares
+  res[2] = 0.0 # clean up
+  return res[1] # AbstractRelativeMinimize requires the objective value to be returned
 end
 ```
 
