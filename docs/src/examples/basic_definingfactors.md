@@ -108,7 +108,7 @@ function (cfo::CalcFactor{<:MyFactor})( res::AbstractVector{<:Real},
                                         x1,
                                         x2  )
   #
-  res[1] = measurement_z - (x1[1] - x1[1])
+  res[1] = measurement_z - (x2[1] - x1[1])
   nothing
 end
 ```
