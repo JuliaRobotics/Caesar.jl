@@ -9,7 +9,7 @@ The Caesar framework is not limited to direct Julia use. The following Github pr
 * ZMQ Interface
   * C/C++:
     * [Graff Cpp](https://github.com/MarineRoboticsGroup/graff_cpp)
-    * [Caesar LCM](http://github.com/pvazteixeira/  caesar-lcm)
+    * [Caesar LCM](http://github.com/pvazteixeira/caesar-lcm)
   * Python:
     * [GraffSDK.py](https://github.com/nicrip/graff_py)
 
@@ -17,7 +17,7 @@ Contributions are welcome! If you are developing an extension we would like to h
 
 ## ZMQ Messaging Interface
 
-Caesar.jl has a ZMQ messaging interface ([interested can see code here  here](https://github.com/JuliaRobotics/Caesar.jl/blob/master/src/zmq/ZmqCaesar.jl)) that allows users to interact with the solver code base in a variety of ways.  The messaging interface is not meant to replace static `.so` library file compilation--see below---but rather a more versatile and flexible development strategy.
+Caesar.jl has a ZMQ messaging interface ([interested can see code here](https://github.com/JuliaRobotics/Caesar.jl/blob/master/src/zmq/ZmqCaesar.jl)) that allows users to interact with the solver code base in a variety of ways.  The messaging interface is not meant to replace static `.so` library file compilation--see below---but rather provide a more versatile and flexible development strategy.
 
 The current known interface implementations to Caesar.jl are:
 - C/C++ [GraffCPP](https://github.com/MarineRoboticsGroup/graff_cpp),
