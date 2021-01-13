@@ -53,6 +53,9 @@ Note the following critical aspects that allows IIF to use the new definition:
 
 IIF internally uses the number of rows in the first element of the `getSample` return tuple (i.e. the matrix) to extract the measurement dimension for this factor.  In this case it is 1 dimensional.
 
+!!! note
+    `getSample` works similar for factors below.  If the measurement dimension is 2D (i.e. `zDim=2`) then you should not use `reshape(..., 1,N)` which would force the samples into a 1 row matrix.  The `reshape(.., 1,N)` in the above example is added as convenient way to convert from the `rand` return value a `::Array{Float64,1}` to the required `::Array{Float64,2}` type.
+
 To recap, the new `getSample` function in this example factor returns a measurement which is of type `::Tuple{::Matrix{Float64}}`.  The `::Tuple` is slightly clunky but was borne out of necessity to allow for versatility when multiple values from sampling are used during residual function evaluation.  Previous uses  include cases such as `::Tuple{<:Matrix, <:Vector, <:Function}`.
 
 ### Ready to Use
