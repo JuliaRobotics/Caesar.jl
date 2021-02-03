@@ -121,8 +121,12 @@ The selection of `<:AbstractRelativeRoots`, akin to earlier `<:AbstractPrior`, i
 
 Important aspects to note, `<:AbstractRelativeRoots` requires all elements `length(res)` (the factor measurement dimension) to have a feasible zero crossing solution.  A two dimensional system will solve for variables where both `res[1]==0` and `res[2]`.
 
-!!! warn
+!!! warning
     The values of vector `res` should be updated.  The reference to which memory `res` is pointing should be left alone -- i.e. this is good `res[1:2] = my2dresidual`, but this is bad `res = my2dresidual`.
+
+!!! note
+    Measurements and variables passed in to the factor residual function do not have the same type as when constructing the factor graph.  It is recommended to leave these incoming types unrestricted.  If you must define the types, these either are (or will be) of element type relating to the manifold on which the measurement or variable beliefs reside.  Probably a vector or manifolds type.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work for you.
+
 ### Two Dimension Minimize Example
 
 The second type is `<:AbstractRelativeMinimize` which simply minimizes the return value of the user factor (must also be applied in `res[1]`).  This type is useful for partial constraint situations where the residual function is always gauranteed to have zero crossings in all dimensions and the problem is converted into a minimization problem instead:
