@@ -20,11 +20,11 @@ Overview of related functions while this documentation is being expanded:
 
 ## DRT Construct
 
-The idea is that the fastest tracking method is to update a single value based on sensor data.  Perhaps more values can be propagated as a non-Gaussian prediction, depending on allowable compute resources -- for that see [`approxConv`](@ref).  Some specialized plumbing has been built to facilitate single value propagation.  
+The idea is that the dead reckong tracking method is to update a single value based on high-rate sensor data.  Perhaps 'particles' values can be propagated as a non-Gaussian prediction, depending on allowable compute resources, and for that see [`approxConv`](@ref).  Some specialized plumbing has been built to facilitate rapid single value propagation using the factor graph.  
 
 ### Suppress w/ `solvable`
 
-The construct uses regular [`addVariable!`](@ref) and [`addFactor!`](@ref) calls but with a few tweaks.  The first is that some variables and factors should not be incorporated with the regular [`solveTree!`](@ref) call and can be achieved on a per node bases, e.g.:
+The construct uses regular [`addVariable!`](@ref) and [`addFactor!`](@ref) calls but with a few tweaks.  The first is that some variables and factors should not be incorporated with the regular [`solveTree!`](@ref) call and can be achieved on a per node basis, e.g.:
 ```julia
 fg = initfg()
 
@@ -65,7 +65,7 @@ Using the latest available inference result `fg[:x0]`, the `drt0` factor can be 
 predictDRT0 = accumulateFactorMeans(fg, [:x0drt0f1;])
 ```
 
-Note also a convenience function to use this infrastructure for integrating odometry as well as any other DRT operations.  Imagine a robot is driving from pose position 0 to 1, then the final pose trigger value in factor `drt0` is the same value required to instantiate a new factor graph `Pose2Pose2`, and hence:
+Note also a convenience function uses similar plumbing for integrating odometry as well as any other DRT operations.  Imagine a robot is driving from pose position 0 to 1, then the final pose trigger value in factor `drt0` is the same value required to instantiate a new factor graph `Pose2Pose2`, and hence:
 ```julia
 # add new regular rigid transform (odometry) factor between pose variables 
 duplicateToStandardFactorVariable(Pose2Pose2, drt0, fg, :x0, :x1)
