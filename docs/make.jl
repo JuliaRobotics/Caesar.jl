@@ -1,7 +1,7 @@
 using Documenter, Caesar
 using RoME
 
-import IncrementalInference: fmcmc!, localProduct, productpartials!, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
+import IncrementalInference: fmcmc!, localProduct, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
 import IncrementalInference: initfg, downGibbsCliqueDensity
 
@@ -64,6 +64,7 @@ makedocs(
             "Wiki Pointers" => "dev/wiki.md",
             "Creating DynPose Factor" => "principles/interm_dynpose.md",
             "Known Issue List" => "dev/known_issues.md",
+            "Internal Functions" => "dev/internal_fncs.md",
             ],
         "Literature" => [
             "References" => "refs/literature.md"
