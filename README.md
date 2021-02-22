@@ -8,9 +8,9 @@ A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reduci
 
 Click on the badges to follow web url links:
 
-| Stable v0.7 | Stable v0.8 | Dev | Documentation | Public Slack |
+| Stable v0.8 | Stable v0.9 | Dev | Documentation | Public Slack |
 |:------:|:------:|:----------------:|:-------------:|:-----:|
-| [![Build Status][build-v0.7]][build-url] | [![Build Status][build-v0.8]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
+| [![Build Status][build-v0.8]][build-url] | [![Build Status][build-v0.9]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
 ## Get Involved and Code of Conduct
 
@@ -67,7 +67,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
 [build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
 [build-v0.8]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.8
-[build-v0.7]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.7
+[build-v0.9]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.9
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
 [caesar-stable]: https://img.shields.io/badge/2021Q1-v0.8.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
