@@ -67,8 +67,8 @@ addVariable!(fg, :tag17, Pose2)
 
 atf = addFactor!(fg, [:x0;:tag17], apt4)
 
-meas = freshSamples(IIF._getCCW(atf),2)
-# meas = freshSamples(fg, DFG.getLabel(atf),2)
+meas = sampleFactor(IIF._getCCW(atf),2)
+# meas = sampleFactor(fg, DFG.getLabel(atf),2)
 
 @test  meas isa Tuple
 @test  meas[1] isa Array
