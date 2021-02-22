@@ -28,6 +28,8 @@ addVariable!(fg, :x1, Pose2)
 jvd = zeros(25,4)
 pp = FluxModelsPose2Pose2(allModels, jvd, mvnNaive, 0.5)
 
+##
+
 addFactor!(fg, [:x0;:x1], pp)
 
 

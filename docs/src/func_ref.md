@@ -57,7 +57,6 @@ makeCsmMovie
 parentCliq
 predictVariableByFactor
 printCliqHistorySummary
-productpartials!
 prodmultiplefullpartials
 prodmultipleonefullpartials
 resetBuildTreeFromOrder!
