@@ -56,9 +56,10 @@ mutable struct SASBearing2D <: AbstractRelativeMinimize
   debugging::Bool
 
   SASBearing2D() = new()
-  # SASBearing2D(z1) = new(z1)
+  # SASBearing2D(z1) = new(z1){Float64,2}
 end
-function getSample(sas2d::SASBearing2D, N::Int=1)
+function getSample(cfo::CalcFactor{<:SASBearing2D}, N::Int=1)
+  sas2d = cfo.factor
   # TODO bring the solvefor index tp getSample function
   if isa(sas2d.rangemodel, Distributions.Rayleigh)
     return (reshape(rand(sas2d.rangemodel, N),1,N), )
@@ -70,17 +71,17 @@ end
 
 function forwardsas(sas2d::SASBearing2D,
                     thread_data::SASREUSE,
-                    res::Vector{Float64},
+                    res::AbstractVector{<:Real},
                     idx::Int,
-                    meas::Tuple,
-                    L1::Array{Float64,2},
+                    meas,
+                    L1,
                     XX...)
   # dx, dy, azi = 0.0, 0.0, 0.0
   # thread_data = sas2d.threadreuse[Threads.threadid()]
 
   if thread_data.hackazi[1][1] != idx
     for i in 1:length(XX)
-      thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[1][1:2,idx]
+      thread_data.arrayPos[i,1:2] = XX[i][1:2]-XX[1][1:2]
     end
     constructCBFFilter2D!(sas2d.cfgTotal, thread_data.arrayPos, thread_data.CBFFull,thread_data.sourceXY, thread_data.BFtemp)
 
@@ -103,27 +104,29 @@ function forwardsas(sas2d::SASBearing2D,
     end
   end
 
-  dx, dy = L1[1,idx]-XX[1][1,idx] ,  L1[2,idx]-XX[1][2,idx]
+  dx, dy = L1[1]-XX[1][1] ,  L1[2]-XX[1][2]
   res[1] = (thread_data.hackazi[2][1] - atan(dy, dx))^2 +
-           (meas[1][idx] - norm([dx; dy]))^2
+            (meas[1] - norm([dx; dy]))^2
   nothing
 end
 
-function (sas2d::SASBearing2D)(
-            res::Array{Float64},
-            userdata::FactorMetadata,
-            idx::Int,
-            meas::Tuple,
-            L1::Array{Float64,2},
-            XX...  )
-
+function (cfo::CalcFactor{<:SASBearing2D})( meas,
+                                            L1,
+                                            XX...  )
+  #
+  sas2d = cfo.factor
+  userdata = cfo.metadata
+  idx = cfo._sampleIdx
+  #
   dx, dy, azi = 0.0, 0.0, 0.0
   thread_data = sas2d.threadreuse[Threads.threadid()]
+  res = [0.0;]
 
   if string(userdata.solvefor)[1] == 'l'
     # Solving all poses to Landmark
     # Reference the filter positions locally (first element)
 
+    # looks like res is ignored later, but used in this function??
     forwardsas(sas2d, thread_data, res, idx,meas,L1,XX...)
 
   else
@@ -139,11 +142,11 @@ function (sas2d::SASBearing2D)(
       # Reference first or second element
       for i in 1:length(XX)
         if thread_data.looelement==1
-            thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[2][1:2,idx]
-            dx, dy = L1[1,idx]-XX[2][1,idx] ,  L1[2,idx]-XX[2][2,idx]
+            thread_data.arrayPos[i,1:2] = XX[i][1:2]-XX[2][1:2]
+            dx, dy = L1[1]-XX[2][1] ,  L1[2]-XX[2][2]
         else
-            thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[1][1:2,idx]
-            dx, dy = L1[1,idx]-XX[1][1,idx] ,  L1[2,idx]-XX[1][2,idx]
+            thread_data.arrayPos[i,1:2] = XX[i][1:2]-XX[1][1:2]
+            dx, dy = L1[1]-XX[1][1] ,  L1[2]-XX[1][2]
         end
       end
 
@@ -161,11 +164,11 @@ function (sas2d::SASBearing2D)(
     # Reference first or second element
     for i in 1:length(XX)
       if thread_data.looelement==1
-          thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[2][1:2,idx]
-          dx, dy = L1[1,idx]-XX[2][1,idx] ,  L1[2,idx]-XX[2][2,idx]
+          thread_data.arrayPos[i,1:2] = XX[i][1:2]-XX[2][1:2]
+          dx, dy = L1[1]-XX[2][1] ,  L1[2]-XX[2][2]
       else
-          thread_data.arrayPos[i,1:2] = XX[i][1:2,idx]-XX[1][1:2,idx]
-          dx, dy = L1[1,idx]-XX[1][1,idx] ,  L1[2,idx]-XX[1][2,idx]
+          thread_data.arrayPos[i,1:2] = XX[i][1:2]-XX[1][1:2]
+          dx, dy = L1[1]-XX[1][1] ,  L1[2]-XX[1][2]
       end
     end
 
@@ -200,7 +203,7 @@ function reset!(dbg::SASDebug)
   nothing
 end
 
-function compare(a::SASDebug,b::SASDebug)
+function DFG.compare(a::SASDebug,b::SASDebug)
   TP = true
   TP = TP && a.beams == b.beams
   TP = TP && a.azi_smpls == b.azi_smpls
@@ -208,7 +211,7 @@ function compare(a::SASDebug,b::SASDebug)
 end
 
 
-mutable struct PackedSASBearing2D <: PackedInferenceType
+mutable struct PackedSASBearing2D <: DFG.AbstractPackedFactor
     rangemodel::String
     totalPhones::Int
     wavedataRawV::Vector{Float64}
@@ -227,7 +230,7 @@ end
 # Safest to just do it here to guarantee it's done.
 import Base.convert
 
-function convert(::Type{PackedSASBearing2D}, d::SASBearing2D)::PackedSASBearing2D
+function convert(::Type{<:PackedSASBearing2D}, d::SASBearing2D)
   # range model is vector, packing it cleanly
   rangeString = ""
   if typeof(d.rangemodel) == Vector{AliasingScalarSampler}
@@ -268,7 +271,7 @@ function convert(::Type{SASBearing2D}, d::PackedSASBearing2D)::SASBearing2D
 end
 
 
-function compare(a::SASBearing2D, b::SASBearing2D)
+function DFG.compare(a::SASBearing2D, b::SASBearing2D)
   TP = true
   TP &= compare(a.cfgTotal, b.cfgTotal)               # CBFFilterConfig
   @debug "cfgTotal: $(compare(a.cfgTotal, b.cfgTotal))"

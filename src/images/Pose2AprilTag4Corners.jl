@@ -228,20 +228,18 @@ end
 
 getSample(pat4c::CalcFactor{<:Pose2AprilTag4Corners}, N::Int=1) = (rand(pat4c.factor.Zij.z, N), )
 
-function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(res::AbstractVector{<:Real},
-                                                      z,
+function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(z,
                                                       wxi,
                                                       wxj)
   #
   wXjhat = SE2(wxi)*SE2(z)
   jXjhat = SE2(wxj) \ wXjhat
-  se2vee!(res, jXjhat)
-  nothing
+  se2vee(jXjhat)
 end
 
 ## serialization
 
-struct PackedPose2AprilTag4Corners <: PackedInferenceType
+struct PackedPose2AprilTag4Corners <: AbstractPackedFactor
   # format of serialized data
   mimeType::String
   # corners, as detected by AprilTags library
