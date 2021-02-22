@@ -41,7 +41,7 @@ The [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl) package is an "umbre
 
 > [FAQ: Why use Julia?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Why-Julia-1)
 
-## RoME.jl/IncrementalInference.jl/ApproxManifoldProducts.jl
+## AMP / IIF / RoME
 
 Robot motion estimate ([RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl)) can operate in the conventional SLAM manner, using local memory (dictionaries), or alternatively distribute over a persisted [`DistributedFactorGraph.jl`](http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl) through common serialization and graph storage/database technologies, [see this article as example](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) [1.3].  
 A variety of 2D plotting, 3D visualization, serialization, middleware, and analysis tools come standard as provided by the associated packages.  RoME.jl combines reference frame transformations and robotics SLAM tool around the back-end solver provides by [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl).
