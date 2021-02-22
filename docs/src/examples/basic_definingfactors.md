@@ -106,26 +106,29 @@ struct MyFactor{T <: SamplableBelief} <: IIF.AbstractRelativeRoots
 end
 getSample(cfo::CalcFactor{<:MyFactor}, N::Int=1) = (reshape(rand(cfo.factor.Z,N) ,1,N), )
 
-function (cfo::CalcFactor{<:MyFactor})( res::AbstractVector{<:Real},
-                                        measurement_z,
+function (cfo::CalcFactor{<:MyFactor})( measurement_z,
                                         x1,
                                         x2  )
   #
-  res[1] = measurement_z - (x2[1] - x1[1])
-  nothing
+  res = measurement_z - (x2[1] - x1[1])
+  return res
 end
 ```
 
 
 The selection of `<:AbstractRelativeRoots`, akin to earlier `<:AbstractPrior`, instructs IIF to find the roots of the provided residual function.  That is the one dimensional residual function, `res[1] = measurement - prediction`, is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.
 
-Important aspects to note, `<:AbstractRelativeRoots` requires all elements `length(res)` (the factor measurement dimension) to have a feasible zero crossing solution.  A two dimensional system will solve for variables where both `res[1]==0` and `res[2]`.
+Important aspects to note, `<:AbstractRelativeRoots` requires all elements `length(res)` (the factor measurement dimension) to have a feasible zero crossing solution.  A two dimensional system will solve for variables where both `res[1]==0` and `res[2]==0`.
 
-!!! warn
-    The values of vector `res` should be updated.  The reference to which memory `res` is pointing should be left alone -- i.e. this is good `res[1:2] = my2dresidual`, but this is bad `res = my2dresidual`.
+!!! note
+    As of IncrementalInference v0.21, CalcResidual no longer takes a residual as input parameter and should return residual, see IIF#467.
+
+!!! note
+    Measurements and variables passed in to the factor residual function do not have the same type as when constructing the factor graph.  It is recommended to leave these incoming types unrestricted.  If you must define the types, these either are (or will be) of element type relating to the manifold on which the measurement or variable beliefs reside.  Probably a vector or manifolds type.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work for you. The 
+
 ### Two Dimension Minimize Example
 
-The second type is `<:AbstractRelativeMinimize` which simply minimizes the return value of the user factor (must also be applied in `res[1]`).  This type is useful for partial constraint situations where the residual function is always gauranteed to have zero crossings in all dimensions and the problem is converted into a minimization problem instead:
+The second type is `<:AbstractRelativeMinimize` which simply minimizes the residual vector of the user factor. This type is useful for partial constraint situations where the residual function is not gauranteed to have zero crossings in all dimensions and the problem is converted into a minimization problem instead:
 ```julia
 struct OtherFactor{T <: SamplableBelief} <: IIF.AbstractRelativeMinimize
   Z::T             # assuming something 2 dimensional
@@ -146,11 +149,8 @@ function (cfo::CalcFactor{<:OtherFactor})(res::AbstractVector{<:Real},
   # not doing anything with `cfo.factor.userdata` either
   
   # the broadcast operators with automatically vectorize
-  res[1:2] .= z .- (x1[1:2] .- x1[1:2])
-  res .^= 2 # square on 1 and 2 directions
-  res[1] += res[2] # sum the squares
-  res[2] = 0.0 # clean up
-  return res[1] # AbstractRelativeMinimize requires the objective value to be returned
+  res = z .- (x1[1:2] .- x1[1:2])
+  return res
 end
 ```
 
@@ -238,6 +238,9 @@ fg2 = loadDFG("/tmp/myfg")
 ls(fg2), lsf(fg2)
 # should see :x0 and :x0f1 listed
 ```
+
+### Factors supporting a Parametric Solution
+See the [parametric solve section](@ref parametric_factors)
 
 ## Summary
 

@@ -81,7 +81,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
 [r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.9
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2021Q1-v0.12.x-green.svg
+[r-stable]: https://img.shields.io/badge/2021Q1-v0.13.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
@@ -91,7 +91,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [iif-build-v020]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.20
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
-[iif-stable]: https://img.shields.io/badge/2021Q1-v0.20.x-green.svg
+[iif-stable]: https://img.shields.io/badge/2021Q1-v0.21.x-green.svg
 [iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
 [iif-releases]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
 
@@ -150,7 +150,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [amp-build-img]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl.svg?branch=master
 [amp-build-url]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
-[amp-stable]: https://img.shields.io/badge/2020Q2-v0.1.x-green.svg
+[amp-stable]: https://img.shields.io/badge/2021Q1-v0.2.x-green.svg
 [amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
 [amp-releases]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/releases
 
@@ -168,6 +168,6 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [rp-cov-url]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl?branch=master
 [rp-build-img]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl.svg?branch=master
 [rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
-[rp-stable]: https://img.shields.io/badge/2021Q1-v0.5.x-green.svg
+[rp-stable]: https://img.shields.io/badge/2021Q1-v0.6.x-green.svg
 [rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones
 [rp-releases]: https://github.com/JuliaRobotics/RoMEPlotting.jl/releases
