@@ -5,7 +5,7 @@
 
 ```@docs
 solveFactorGraphParametric
-solveFactorGraphParametric!
+IncrementalInference.solveFactorGraphParametric!
 ```
 
 ## [Defining Factors to Support a Parametric Solution (Experimental)](@id parametric_factors)
@@ -16,7 +16,7 @@ Factor that supports a parametric solution, with supported distributions (such a
 ### `getParametricMeasurement`
 
 ```@docs
-getParametricMeasurement
+IncrementalInference.getParametricMeasurement
 ```
 
 `getParametricMeasurement` defaults to looking for a supported distribution in field `.Z` followed by `.z`. Therefore, if the factor uses this fieldname, `getParametricMeasurement` does not need to be extended.
