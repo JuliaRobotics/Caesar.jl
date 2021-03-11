@@ -7,6 +7,8 @@ using DataInterpolations       # handles the terrain
 using Distributions
 using ImageFiltering
 using Plots
+using Gadfly, Colors
+using Statistics
 using Caesar, RoME
 using DSP
 gr()
@@ -15,18 +17,20 @@ gr()
 # load dem (18x18km span)
 img = load(joinpath(dirname(dirname(pathof(Caesar))), "examples/dev/scalar/dem.png")) .|> Gray
 h = 1e3*Float64.( @view img[512,:])
+
+## Size of the map
 # x = range(-9000,9000,length = length(h))
 x = range(-100,100,length = length(h))
 terrain = LinearInterpolation(h, x)
-plot(terrain)
+Plots.plot(terrain)
 
 ## Measurement likelihood
-function measurementLikelihood( meas_model::SamplableBelief,
-                                terrain::LinearInterpolation)
-    # meas_model = Normal(y, sigma_y)
-    l = pdf.(meas_model, terrain.u)
-    return l./sum(l)
-end
+# function measurementLikelihood( meas_model::SamplableBelief,
+#                                 terrain::LinearInterpolation)
+#     # meas_model = Normal(y, sigma_y)
+#     l = pdf.(meas_model, terrain.u)
+#     return l./sum(l)
+# end
 
 ##
 function propagate(prior, model)
@@ -63,6 +67,38 @@ struct ScalarFieldSequenceFactor1D <: IIF.AbstractPrior
   scalarSequence::Vector{Float64} #sample value (elevation meas)
 end
 
+##
+
+global lasttimeisacharm
+
+# assumes map and template are on equivalent grid
+# this function does not care for where/what the grid is
+# Note: result will assum base pose is first in sequence
+# for each i
+#   energy[i] = sum( (map[i:(i+length(template))] - template).^2 )
+# density = exp.(-energy)     # Woodward
+function _mySSDCorr(map, template)
+    global lasttimeisacharm
+    len = length(template)
+    mnm = Statistics.mean(map)
+    map_ = [map; mnm*ones(len-1)]
+    # adaptive = sum((template).^2)
+    density = zeros(length(map))
+    for i in 1:length(map)
+        density[i] = -sum( (map_[i:(i+len-1)] .- template).^2 )
+    end
+    adaptive = abs(maximum(density))
+
+    density ./= adaptive
+    density .= exp.(density)
+    density ./= sum(density)
+    lasttimeisacharm = density
+    # density ./= sum(exp.(density))
+    return density
+end
+
+
+
 function IIF.getSample(s::CalcFactor{<:ScalarFieldSequenceFactor1D}, N::Int=1)
     # locality if desired from current variable estimate, 
     # X0 = getBelief(s.metadata.fullvariables[1]) # to consider only local map info
@@ -75,17 +111,26 @@ function IIF.getSample(s::CalcFactor{<:ScalarFieldSequenceFactor1D}, N::Int=1)
     # assumptions:
     # - terrain.t is equally spaced
     # - s.factor.gridSequence increases monotonically
-    measurement= LinearInterpolation(s.factor.scalarSequence,s.factor.gridSequence)
+    # s.factor.gridSequence is the sequence of odometry estimates at which
+    #  the elevation measurements (s.factor.scalarSequence) were taken
+    measurement = LinearInterpolation(s.factor.scalarSequence,s.factor.gridSequence)
     dx = diff(terrain.t)[1]
-    template = measurement.(0:dx:s.factor.gridSequence[end])
+    template = measurement.(s.factor.gridSequence[1]:dx:s.factor.gridSequence[end])
+
+    intensity_ = _mySSDCorr([terrain.u;], template)
     
-    intensity_ = xcorr([terrain.u;], template, padmode=:none)
-    chop_ = length(template)-1
-    intensity = intensity_[chop_:(end-chop_)]
+        # intensity_ = xcorr([terrain.u;], template, padmode=:none)
+        # chop_ = round(Int, length(template)/2)
+        # intensity = intensity_[chop_:(end-chop_)]
+        # # force equal length
+        # while length(intensity) < length(terrain.t)
+        #     push!(intensity, 0)
+        # end
+        # intensity = intensity[1:length(terrain.t)]
 
     # AliasingSS only works for 1D at this time
     # NOTE, if you stray out of region of support, things blow up!
-    bss = AliasingScalarSampler(terrain.t, intensity)
+    bss = AliasingScalarSampler([terrain.t;], intensity_)
     
     return (reshape(rand(bss,N),1,N),)
 end
@@ -95,6 +140,9 @@ end
 # function (s::CalcFactor{<:ScalarFieldSequenceFactor1D})(likelihoodSample, pose)
 #     return likelihoodSample - pose
 # end
+
+
+
 
 ##
 
@@ -108,34 +156,87 @@ addVariable!(fg, :x0, ContinuousEuclid{1})
 # add terrain to factor graph
 # addConstant!(fg, :em, ScalarField1D(dem))
 
+# number of interpose measurements (will get upsampled to the grid size!)
+seq_length = 10
+
 # simulate for a few poses
 xt = -70
-delta = 2 # pose increment
-sigma_x = 1.0 # odometry measurement uncertainty
+delta = 1 # pose increment
+sigma_x = 0.1 # odometry measurement uncertainty
 sigma_y = 1.0 # elevation measurement uncertainty
 
+xt_seq = zeros(0)
+yt_seq = zeros(0)
+x_seq = zeros(0)  
+y_seq = zeros(0)
+
 for i=1:10
-    x_seq = zeros(0)  # reset measurement sequence
+    xt_seq = zeros(0)
+    yt_seq = zeros(0)
+    x_seq = zeros(0)  
     y_seq = zeros(0)
+
+    # build up sequence
     for j=1:seq_length
-        xt = xt + delta   # true position
+        xt = xt + delta         # true position
         yt = terrain(xt)  # true elevation
 
+        append!(xt_seq,xt)
+        append!(yt_seq,yt)
+
         # append to sequence
-        append!(x_seq, xt + sigma_x*randn(1))
-        append!(y_seq, yt + sigma_y*randn(1))
+        append!(x_seq, xt .+ sigma_x*randn(1))
+        append!(y_seq, yt .+ sigma_y*randn(1))
     end
 
     addVariable!(fg, Symbol("x$(i)"), ContinuousEuclid{1}) # BoundedEuclid{1}
 
     # add propagation
-    addFactor!(fg, [Symbol("x$j") for k in (i-1):i], LinearRelative(Normal(delta*seq_length, 5)),graphinit=false)
+    fctlbls = [Symbol("x$j") for j = (i-1):i]
+    addFactor!(fg, fctlbls, LinearRelative(Normal(delta*seq_length, 5)),graphinit=false)
 
-    em = ScalarFieldSequenceFactor1D( x_seq-x_seq[1], y_seq ) # sigma_y
+    # grid, scalar
+    em = ScalarFieldSequenceFactor1D( x_seq , y_seq )  # .- x_seq[1]
+
     # addFactor!(fg, [:terrain, Symbol("y$(i-1)")], em)
     # the hacky version
     addFactor!(fg, [Symbol("x$(i)");], em, graphinit=false)
 end
+
+
+## test the correlator prior
+
+# eval the sampler at first prior
+
+PL = []
+for lb in (ls(fg) |> sortDFG)[2:end]
+    pts = approxConv(fg, Symbol(lb, "f1"), lb)
+    prop = kde!(pts)
+    pl = plotKDE(prop)
+
+    pl2 = Gadfly.plot(
+        Gadfly.layer(x=terrain.t, y=terrain.u, Geom.line, Theme(default_color=colorant"red")),
+        Gadfly.layer(x=xt_seq,y=yt_seq, Geom.line, Theme(default_color=colorant"green")),
+        Gadfly.layer(x=x_seq, y=y_seq, Geom.line, Theme(default_color=colorant"blue"))
+    )
+
+    push!(PL, vstack(pl, pl2))
+end
+
+##
+
+PL[10]
+
+##
+
+
+## plot true and measured values (last sequence only)
+plot(terrain.t, terrain.u)
+plot!(xt_seq,yt_seq)
+plot!(x_seq,y_seq)
+
+# plot sample correlator output
+
 
 
 ## talk some solving
