@@ -14,6 +14,7 @@ using Distributions
 using Statistics
 using Caesar, RoME
 using Gadfly, Colors
+using Cairo
 using RoMEPlotting
 using Plots
 
@@ -51,11 +52,14 @@ end
 #   energy[i] = sum( (map[i:(i+length(template))] - template).^2 )
 # density = exp.(-energy)     # Woodward
 function _mySSDCorr(map, template)
+
+    maplen = length(map)
     len = length(template)
+    
     mnm = Statistics.mean(map)
     map_ = [map; mnm*ones(len-1)]
-    density = zeros(length(map))
-    for i in 1:length(map)
+    density = zeros(maplen)
+    for i in 1:maplen
         density[i] = -sum( (map_[i:(i+len-1)] .- template).^2 )
     end
     adaptive = abs(maximum(density))
@@ -82,10 +86,15 @@ function IIF.getSample(s::CalcFactor{<:ScalarFieldSequenceFactor1D}, N::Int=1)
     # s.factor.gridSequence is the sequence of odometry estimates at which
     #  the elevation measurements (s.factor.scalarSequence) were taken
     measurement = LinearInterpolation(s.factor.scalarSequence,s.factor.gridSequence)
-    dx = diff(terrain.t)[1]
-    template = measurement.(s.factor.gridSequence[1]:dx:s.factor.gridSequence[end])
 
-    intensity_ = _mySSDCorr([terrain.u;], template)
+    upsample = 1 # avoid quantization effects from gridded sequence/terrain data
+    dx = diff(terrain.t)[1]/upsample
+    template = measurement.(s.factor.gridSequence[1]:dx:s.factor.gridSequence[end])
+    map_ = [terrain.u;]
+    map2_grid = range(terrain.t[1],terrain.t[end],length=upsample*length(map_))
+    map2 = terrain.(map2_grid)
+
+    intensity_ = _mySSDCorr(map2, template)
     
         # intensity_ = xcorr([terrain.u;], template, padmode=:none)
         # chop_ = round(Int, length(template)/2)
@@ -96,11 +105,16 @@ function IIF.getSample(s::CalcFactor{<:ScalarFieldSequenceFactor1D}, N::Int=1)
         # end
         # intensity = intensity[1:length(terrain.t)]
 
+        
     # AliasingSS only works for 1D at this time
     # NOTE, if you stray out of region of support, things blow up!
-    bss = AliasingScalarSampler([terrain.t;], intensity_)
-    
-    return (reshape(rand(bss,N),1,N),)
+    bss = AliasingScalarSampler([map2_grid;], intensity_) # [terrain.t;]
+        
+    # buffer with kde for continuous sampling (not grid spaced)
+    stagedsmpls = rand(bss,N)
+    smpls = rand(kde!(stagedsmpls, [3*dx;]),N)
+
+    return (reshape(smpls,1,N),)
 end
 
 # # keep track of IIF #1051
@@ -131,8 +145,6 @@ delta = 1       # pose increment
 sigma_x = 0.1   # odometry measurement uncertainty
 sigma_y = 1.0   # elevation measurement uncertainty
 
-
-
 fg = initfg() # create empty factor graph
 # getSolverParams(fg).inflation = 3.0
 
@@ -147,6 +159,7 @@ yt_seq = zeros(0)
 x_seq = zeros(0)  
 y_seq = zeros(0)
 for i=1:10
+    @show i
     xt_seq = zeros(0)
     yt_seq = zeros(0)
     x_seq = zeros(0)  
@@ -176,6 +189,7 @@ for i=1:10
 
     # addFactor!(fg, [:terrain, Symbol("y$(i-1)")], em)        # The Right Way (TM)
     addFactor!(fg, [Symbol("x$(i)");], em, graphinit=false) # the hacky version
+    @info "i=$i, ends"
 end
 
 
@@ -195,15 +209,14 @@ for lb in (ls(fg) |> sortDFG)[2:end]
     push!(PL, vstack(pl, pl2))
 end
 
-PL[10]
+PL[1]
 
 
 ## Solve 
-
 getSolverParams(fg).graphinit = false
-getSolverParams(fg).treeinit = true # still experimental, treeinit
+getSolverParams(fg).treeinit = true   # still experimental, treeinit
 
-solveTree!(fg)
+tree, _, = solveTree!(fg);
 
 ## Show results
 
