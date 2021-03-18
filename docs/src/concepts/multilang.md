@@ -3,6 +3,9 @@
 ## Multilanguage Interops: Caesar SDKs and APIs
 The Caesar framework is not limited to direct Julia use. The following Github projects provide access to features of Caesar in their language:
 
+!!! note
+    21Q1, a new multilanguage interface is under development and will replace and consolidate the previous methods listed below.
+
 * Julia Web interface:
   * [GraffSDK.jl](https://github.com/GearsAD/GraffSDK.jl)
 
@@ -12,8 +15,9 @@ The Caesar framework is not limited to direct Julia use. The following Github pr
     * [Caesar LCM](http://github.com/pvazteixeira/caesar-lcm)
   * Python:
     * [GraffSDK.py](https://github.com/nicrip/graff_py)
+    * [Synchrony_py](https://github.com/nicrip/SynchronySDK_py)
 
-Contributions are welcome! If you are developing an extension we would like to help, please feel free to contact us (details below).
+Please contact info@navability.io for more information.
 
 ## ZMQ Messaging Interface
 
