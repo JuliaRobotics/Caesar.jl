@@ -42,7 +42,7 @@ Unmarshal = "cbff2730-442d-58d7-89d1-8e530c41eb02"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
-ApproxManifoldProducts = "0.1, 0.2"
+ApproxManifoldProducts = "0.1, 0.2, 0.3"
 AprilTags = "0.8, 0.9"
 Combinatorics = "0.7, 0.8, 0.9, 1"
 CoordinateTransformations = "0.5, 0.6"
