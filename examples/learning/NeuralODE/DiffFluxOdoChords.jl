@@ -78,7 +78,7 @@ whichVelIdx = ones(Int, 100)
 measSeq = collect(1:100)
 
 setNaiveFracAll!(fg, 1.0)
-meas = freshSamples(fg, :x0x1f1, 100)
+meas = sampleFactor(fg, :x0x1f1, 100)
 setNaiveFracAll!(fg, 0.0)
 for fs in fsyms, idx in 1:100
   fill!(whichVelIdx,1)
@@ -113,7 +113,7 @@ for from in vsyms[1:end-1]
       for fs in fsyms
         intermTo = getVariableOrder(fg, fs)[end]
         setNaiveFracAll!(fg, 1.0)
-        meas = freshSamples(fg, fs, 1)
+        meas = sampleFactor(fg, fs, 1)
         setNaiveFracAll!(fg, 0.0)
         for idx in 1:100
           # fill!(whichVelIdx,1) # only if doing all 100
