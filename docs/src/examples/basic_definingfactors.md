@@ -99,7 +99,7 @@ The `cfo` object contains the field `.factor::T` which is the type of the user f
 
 Previously we looked at adding a prior.  This section demonstrates the first of two `<:AbstractRelative` factor types.  These are factors that introduce only relative information between variables in the factor graph.
 
-This example is on `<:AbstractRelativeRoots`.  First, lets create the factor as before 
+This example is on `<:IIF.AbstractRelativeRoots`.  First, lets create the factor as before 
 ```julia
 struct MyFactor{T <: SamplableBelief} <: IIF.AbstractRelativeRoots
   Z::T
@@ -116,9 +116,9 @@ end
 ```
 
 
-The selection of `<:AbstractRelativeRoots`, akin to earlier `<:AbstractPrior`, instructs IIF to find the roots of the provided residual function.  That is the one dimensional residual function, `res[1] = measurement - prediction`, is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.
+The selection of `<:IIF.AbstractRelativeRoots`, akin to earlier `<:AbstractPrior`, instructs IIF to find the roots of the provided residual function.  That is the one dimensional residual function, `res[1] = measurement - prediction`, is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.
 
-Important aspects to note, `<:AbstractRelativeRoots` requires all elements `length(res)` (the factor measurement dimension) to have a feasible zero crossing solution.  A two dimensional system will solve for variables where both `res[1]==0` and `res[2]==0`.
+Important aspects to note, `<:IIF.AbstractRelativeRoots` requires all elements `length(res)` (the factor measurement dimension) to have a feasible zero crossing solution.  A two dimensional system will solve for variables where both `res[1]==0` and `res[2]==0`.
 
 !!! note
     As of IncrementalInference v0.21, CalcResidual no longer takes a residual as input parameter and should return residual, see IIF#467.
@@ -128,7 +128,7 @@ Important aspects to note, `<:AbstractRelativeRoots` requires all elements `leng
 
 ### Two Dimension Minimize Example
 
-The second type is `<:AbstractRelativeMinimize` which simply minimizes the residual vector of the user factor. This type is useful for partial constraint situations where the residual function is not gauranteed to have zero crossings in all dimensions and the problem is converted into a minimization problem instead:
+The second type is `<:IIF.AbstractRelativeMinimize` which simply minimizes the residual vector of the user factor. This type is useful for partial constraint situations where the residual function is not gauranteed to have zero crossings in all dimensions and the problem is converted into a minimization problem instead:
 ```julia
 struct OtherFactor{T <: SamplableBelief} <: IIF.AbstractRelativeMinimize
   Z::T             # assuming something 2 dimensional
@@ -171,7 +171,7 @@ MyMagnetoPrior(z) = MyMagnetoPrior(z, (3,))
 getSample(cfo::CalcFactor{<:MyMagnetoPrior}, N::Int=1) = (reshape(rand(cfo.factor.Z,N),1,N),)
 ```
 
-Similarly for `<:AbstractRelativeMinimize`, and note that the Roots version currently does not support the `.partial` option.
+Similarly for `<:IIF.AbstractRelativeMinimize`, and note that the Roots version currently does not support the `.partial` option.
 
 ### Metadata
 
@@ -247,26 +247,26 @@ See the [parametric solve section](@ref parametric_factors)
 All factors inherit from one of the following types, depending on their function:
 * AbstractPrior: AbstractPrior are priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a [`Pose2`](@ref) scenario.
   * Requires: A getSample function
-* AbstractRelativeMinimize: AbstractRelativeMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.
+* IIF.AbstractRelativeMinimize: IIF.AbstractRelativeMinimize are relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.
   * Requires: A getSample function and a residual function definition
   * The minimize suffix specifies that the residual function of this factor will be enforced by numerical minimization (find me the minimum of this function)
-* AbstractRelativeRoots: AbstractRelativeRoots are relative factors that introduce algebraic relationships between two or more variables. They are the same as AbstractRelativeMinimize, however they use root finding to find the zero crossings (rather than numerical minimization).
+* IIF.AbstractRelativeRoots: IIF.AbstractRelativeRoots are relative factors that introduce algebraic relationships between two or more variables. They are the same as IIF.AbstractRelativeMinimize, however they use root finding to find the zero crossings (rather than numerical minimization).
   * Requires: A getSample function and a residual function definition
 
 How do you decide which to use?
 * If you are creating factors for world-frame information that will be tied to a single variable, inherit from `<:AbstractPrior`
   * GPS coordinates should be priors
-* If you are creating factors for local-frame relationships between variables, inherit from AbstractRelativeMinimize
+* If you are creating factors for local-frame relationships between variables, inherit from IIF.AbstractRelativeMinimize
   * Odometry and bearing deltas should be introduced as pairwise factors and should be local frame
-TBD: Users should start with AbstractRelativeMinimize, discuss why and when they should promote their factors to AbstractRelativeRoots.
+TBD: Users should start with IIF.AbstractRelativeMinimize, discuss why and when they should promote their factors to IIF.AbstractRelativeRoots.
 
 !!! note
-    AbstractRelativeMinimize does not imply that the overall inference algorithm only minimizes an objective function. The Multi-model iSAM algorithm is built around fixed-point analysis. Minimization is used here to locally enforce the residual function.
+    IIF.AbstractRelativeMinimize does not imply that the overall inference algorithm only minimizes an objective function. The Multi-model iSAM algorithm is built around fixed-point analysis. Minimization is used here to locally enforce the residual function.
 
 What you need to build in the new factor:
 * A struct for the factor itself
 * A sampler function to return measurements from the random ditributions
-* If you are building a [`AbstractRelativeMinimize`](@ref) or a [`AbstractRelativeRoots`](@ref) you need to define a residual function to introduce the relative algebraic relationship between the variables
+* If you are building a [`IIF.AbstractRelativeMinimize`](@ref) or a [`IIF.AbstractRelativeRoots`](@ref) you need to define a residual function to introduce the relative algebraic relationship between the variables
   * Minimization function should be lower-bounded and smooth
 * A packed type of the factor which must be named Packed[Factor name], and allows the factor to be packed/transmitted/unpacked
 * Serialization and deserialization methods
@@ -278,6 +278,6 @@ What you need to build in the new factor:
 An example of this is the [`Pose2Point2BearingRange`](@ref), which provides a bearing+range relationship between a 2D pose and a 2D point.
 
 ```@docs
-AbstractRelativeMinimize
-AbstractRelativeRoots
+IIF.AbstractRelativeMinimize
+IIF.AbstractRelativeRoots
 ```

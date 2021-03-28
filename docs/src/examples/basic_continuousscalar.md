@@ -17,7 +17,7 @@ using IncrementalInference
 # using Distributions # automatically reexported by IncrementalInference
 ```
 
-Guidelines for developing your own functions are discussed here in [Adding Variables and Factors](../concepts/adding_variables_factors.md), and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package [RoME.jl](http://www.github.com/dehann/RoME.jl).
+Guidelines for developing your own functions are discussed here in [Adding Variables and Factors](../examples/adding_variables_factors.md), and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package [RoME.jl](http://www.github.com/dehann/RoME.jl).
 
 The next step is to describe the inference problem with a graphical model with any of the existing concrete types that inherit from  `<: AbstractDFG`.
 The first step is to create an empty factor graph object and start populating it with variable nodes.
@@ -36,7 +36,7 @@ Factor graphs are bipartite graphs with `factors` that act as mathematical struc
 After adding node `:x0`, a singleton factor of type `Prior` (which was defined by the user earlier) is 'connected to' variable node `:x0`.
 This unary factor is taken as a `Distributions.Normal` distribution with zero mean and a standard devitation of `1`.
 `Graphviz` can be used to visualize the factor graph structure, although the package is not installed by default -- `$ sudo apt-get install graphviz`.
-Furthermore, the `writeGraphPdf` member definition is given at the end of this tutorial, which allows the user to store the graph image in graphviz supported image types.
+Furthermore, the [`drawGraph`](@ref) member definition is given at the end of this tutorial, which allows the user to store the graph image in graphviz supported image types.
 ```julia
 drawGraph(fg, show=true)
 ```
