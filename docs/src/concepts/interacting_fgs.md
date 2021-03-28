@@ -153,6 +153,11 @@ getPPESuggested(fg, :l5)
 
 There are values for mean, max, or hybrid combinations.
 
+```@docs
+getPPE
+calcPPE
+```
+
 ## Getting Many Marginal Samples
 
 It is also possible to sample the above belief objects for more samples:

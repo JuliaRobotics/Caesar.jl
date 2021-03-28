@@ -126,7 +126,16 @@ hatX1 = manikde!(pts, ContinuousScalar)
 
 The functional object `X1` is now ready for other operations such as function evaluation or product computations discussed on [another principles page](http://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/).  The `ContinuousScalar` manifold is just the real line in Euclidean space, internally denoted as single element tuple `(:Euclid,)`.
 
-## A Handy ZMQ interface to Generic Convolutions
+## `approxDeconv`
+
+Analogous to a 'forward' convolution calculation, we can similarly approximate the inverse:
+```@docs
+approxDeconv
+```
+
+This feature is not yet as feature rich as the `approxConv` function, and also requires further work to improve the consistency of the calculation -- but none the less exists and is useful in many applications.
+
+## ZMQ Interface [WORK IN PROGRESS]
 
 > **NOTE** WIP on expanding ZMQ interface:
 
