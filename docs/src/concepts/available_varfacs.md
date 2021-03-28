@@ -102,4 +102,4 @@ Pose3Pose3XYYaw
 
 # Extending Caesar with New Variables and Factors
 
-A question that frequently arises is how to design custom variables and factors to solve a specific type of graph. One strength of Caesar is the ability to incorporate new variables and factors at will. Please refer to [Adding Factors](adding_variables_factors.md) for more information on creating your own factors.
+A question that frequently arises is how to design custom variables and factors to solve a specific type of graph. One strength of Caesar is the ability to incorporate new variables and factors at will. Please refer to [Adding Factors](../examples/adding_variables_factors.md) for more information on creating your own factors.

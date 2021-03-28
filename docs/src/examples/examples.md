@@ -132,4 +132,4 @@ Caesar can be extended with new variables and factors without changing the core 
 
 ### Adding Factors - DynPose Factor
 
-[Intermediate Example: Adding Dynamic Factors and Variables](interm_dynpose.md)
+[Intermediate Example: Adding Dynamic Factors and Variables](../principles/interm_dynpose.md)

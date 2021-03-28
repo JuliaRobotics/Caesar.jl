@@ -50,6 +50,6 @@ end
 The factor is evaluated in a cost function using the Mahalanobis distance and the measurement should therefore match the residual returned.  
 
 ### Optimization
-[`solveGraphParametric!`](@ref) uses Optim.jl. The factors that are supported should have a gradient and Hessian available/exists and therefore it makes use of `TwiceDifferentiable`. Full control of Optim's setup is possible with keyword arguments.  
+[`IncrementalInference.solveGraphParametric!`](@ref) uses Optim.jl. The factors that are supported should have a gradient and Hessian available/exists and therefore it makes use of `TwiceDifferentiable`. Full control of Optim's setup is possible with keyword arguments.  
 
 
