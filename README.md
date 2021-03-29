@@ -49,7 +49,7 @@ Consider citing our work:
 }
 ```
 
-Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently done by [NavAbility](http://www.navability.io) who can be contacted at (info@navability.io) for more details.
+Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.navability.io) who can be contacted at (info@navability.io) for more details.
 
 ## Stargazers over time
 
