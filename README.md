@@ -8,9 +8,9 @@ A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reduci
 
 Click on the badges to follow web url links:
 
-| Stable v0.8 | Stable v0.9 | Dev | Documentation | Public Slack |
+| Stable v0.9 | Stable v0.10 | Dev | Documentation | Public Slack |
 |:------:|:------:|:----------------:|:-------------:|:-----:|
-| [![Build Status][build-v0.8]][build-url] | [![Build Status][build-v0.9]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
+| [![Build Status][build-v0.9]][build-url] | [![Build Status][build-v0.10]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
 ## Get Involved and Code of Conduct
 
@@ -66,10 +66,10 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
 [build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
-[build-v0.8]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.8
+[build-v0.10]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.10
 [build-v0.9]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.9
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
-[caesar-stable]: https://img.shields.io/badge/2021Q1-v0.8.x-green.svg
+[caesar-stable]: https://img.shields.io/badge/2021Q1-v0.10.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://caesarjl.slack.com
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
@@ -79,19 +79,19 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [r-cov-img]: https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master
 [r-cov-url]: https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
-[r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.9
+[r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.14
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2021Q1-v0.13.x-green.svg
+[r-stable]: https://img.shields.io/badge/2021Q1-v0.14.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
 [iif-cov-img]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl/coverage.svg?branch=master
 [iif-cov-url]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl?branch=master
 [iif-build-img]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=master
-[iif-build-v020]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.20
+[iif-build-v020]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.23
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
-[iif-stable]: https://img.shields.io/badge/2021Q1-v0.21.x-green.svg
+[iif-stable]: https://img.shields.io/badge/2021Q1-v0.23.x-green.svg
 [iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
 [iif-releases]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
 
@@ -141,7 +141,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
 [dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2020Q4-v0.11.x-green.svg
+[dfg-stable]: https://img.shields.io/badge/2021Q1-v0.13.x-green.svg
 [dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones
 [dfg-releases]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
 
@@ -150,7 +150,7 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [amp-build-img]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl.svg?branch=master
 [amp-build-url]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
-[amp-stable]: https://img.shields.io/badge/2021Q1-v0.2.x-green.svg
+[amp-stable]: https://img.shields.io/badge/2021Q1-v0.3.x-green.svg
 [amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
 [amp-releases]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/releases
 
