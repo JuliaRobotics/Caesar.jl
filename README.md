@@ -49,7 +49,7 @@ Consider citing our work:
 }
 ```
 
-Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently done by @dehann who can be contacted for more details.
+Administration of the Caesar/RoME/IncrementalInference/Arena packages is currently done by [NavAbility](http://www.navability.io) who can be contacted at (info@navability.io) for more details.
 
 ## Stargazers over time
 
@@ -79,9 +79,9 @@ Administration of the Caesar/RoME/IncrementalInference/Arena packages is current
 [r-cov-img]: https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master
 [r-cov-url]: https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
-[r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.14
+[r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.15
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2021Q1-v0.14.x-green.svg
+[r-stable]: https://img.shields.io/badge/2021Q1-v0.15.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
