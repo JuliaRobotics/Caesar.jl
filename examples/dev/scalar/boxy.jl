@@ -3,13 +3,14 @@ Proof of concept of 2D localization against a scalar field.
 In this example we use a sequence of 1D measurements and a known map with a
 correlator-like approach to localize.
 
-2021-03-24
+2021-03-24,31
 =#
 
 using Images, FileIO           # load elevation from PNG
 using ImageFiltering
 using DSP
 using DataInterpolations       # handles the terrain
+using Interpolations
 using Distributions
 using Statistics
 using Caesar, RoME
@@ -25,7 +26,12 @@ using Plots
 
 # load dem (18x18km span)
 img = load(joinpath(dirname(dirname(pathof(Caesar))), "examples/dev/scalar/dem.png")) .|> Gray
-h = 1e3*Float64.( @view img[512,:])
+img = Float64.(channelview(img)[1,:,:])
+# interpolant object for querying
+x = range(-9e3, 9e3, length = size(img)[1]) # North
+y = range(-9e3, 9e3, length = size(img)[2]) # East
+dem = LinearInterpolation((x,y), img)
+
 
 # not to scale on DEM image, but sequence correlation approach does not matter
 terrE_ = 1e3*Float64.(@view img[200,:])
