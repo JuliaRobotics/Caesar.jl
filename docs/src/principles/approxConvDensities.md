@@ -57,7 +57,6 @@ Or minimization of "low dimension" equations ([source code here](https://github.
 The factor noise term can be any samplable belief (a.k.a. [`IIF.SamplableBelief`](https://github.com/JuliaRobotics/IncrementalInference.jl/blob/2b9f1c3d03e796bc24fbcc622329769dadd94288/src/DefaultNodeTypes.jl#L3)), either through algebraic modeling, or (**critically**) directly from the sensor measurement that is driven by the underlying physics process.  Parametric factors ([Distributions.jl](https://github.com/JuliaStats/Distributions.jl)) or direct physical measurement noise can be used via `AliasingScalarSampler` or `KernelDensityEstimate`.
 
 !!! note
-
     Also see [[1.2], Chap. 5, Approximate Convolutions](https://juliarobotics.org/Caesar.jl/latest/refs/literature/#Direct-References-1) for more details.
 
 ### Illustrated Calculation in Julia
@@ -65,19 +64,16 @@ The factor noise term can be any samplable belief (a.k.a. [`IIF.SamplableBelief`
 The [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl) package provides a generic interface for estimating the convolution of full functional objects given some user specified residual or cost function.  The residual/cost function is then used, with the help of non-linear gradient decent, to project/resolve a set of particles for any one variable associated with a any factor.  In the binary variable factor case, such as the odometry tutorial, either pose X2 will be resolved from X1 using the user supplied likelihood residual function, or visa versa for X1 from X2.  
 
 !!! note
-
     Note in a factor graph sense, the flow of time is captured in the structure of the graph and a requirement of the IncrementalInference system is that factors can be resolved towards any variable, given current estimates on all other variables connected to that factor.  Furthermore, this forwards or backwards resolving/convolution through a factor should adhere to the Kolmogorov Criterion of reversibility to ensure that detailed balance is maintained in the overall marginal posterior solutions.
 
 The IncrementalInference (IIF) package provides a few generic conditional likelihood functions such as `LinearRelative` or `MixtureRelative` which we will use in this illustration.  
 
 !!! note
-
-    Note that the [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) package provides many more factors that are useful to robotics applications.  For a listing of current factors see [this docs page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs.md), details on developing [your own factors on this page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/adding_variables_factors.md).  One of the clear design objectives of the IIF package was to allow easier user extension of arbitrary residual functions that allows for vast capacity to represent non-Gaussian stochastic processes.
+    Note that the [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) package provides many more factors that are useful to robotics applications.  For a listing of current factors see [this docs page](../concepts/available_varfacs.md), details on developing [your own factors on this page](http://www.juliarobotics.org/Caesar.jl/latest/concepts/adding_variables_factors.md).  One of the clear design objectives of the IIF package was to allow easier user extension of arbitrary residual functions that allows for vast capacity to represent non-Gaussian stochastic processes.
 
 Consider a robot traveling in one dimension, progressing along the x-axis at varying speed.  Lets assume pose locations are determined by a constant delta-time rule of say one pose every second, named `X0`, `X1`, `X2`, and so on.
 
 !!! note
-
     Note the bread-crum discretization of the trajectory history by means of poses can later be used to allow estimation of previously unknown mapping parameters simultaneous to the ongoing localization problem.
 
 Lets a few basic factor graph operations to develop the desired convolutions:
@@ -130,7 +126,16 @@ hatX1 = manikde!(pts, ContinuousScalar)
 
 The functional object `X1` is now ready for other operations such as function evaluation or product computations discussed on [another principles page](http://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/).  The `ContinuousScalar` manifold is just the real line in Euclidean space, internally denoted as single element tuple `(:Euclid,)`.
 
-## A Handy ZMQ interface to Generic Convolutions
+## `approxDeconv`
+
+Analogous to a 'forward' convolution calculation, we can similarly approximate the inverse:
+```@docs
+approxDeconv
+```
+
+This feature is not yet as feature rich as the `approxConv` function, and also requires further work to improve the consistency of the calculation -- but none the less exists and is useful in many applications.
+
+## ZMQ Interface [WORK IN PROGRESS]
 
 > **NOTE** WIP on expanding ZMQ interface:
 

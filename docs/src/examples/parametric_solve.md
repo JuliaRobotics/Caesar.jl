@@ -1,27 +1,31 @@
 
 # Parametric Solve (Experimental)
 
-## Batch 
+Note that parametric solve (i.e. conventional Gaussians) is currently supported as an experimental feature which might appear more buggy.  Familiar parametric methods should become fully integrated and we invite comments or contributions from the community.  A great deal of effort has gone into finding the best abstractions to support multiple factor graph solving strategies.
+
+## Batch Parametric
 
 ```@docs
-solveFactorGraphParametric
-IncrementalInference.solveFactorGraphParametric!
+solveGraphParametric
+IncrementalInference.solveGraphParametric!
 ```
 
 ## [Defining Factors to Support a Parametric Solution (Experimental)](@id parametric_factors)
 
-Factor that supports a parametric solution, with supported distributions (such as `Normal` and `MvNormal`), can be used in a parametric batch solver `solveFactorGraphParametric`. 
+Factor that supports a parametric solution, with supported distributions (such as `Normal` and `MvNormal`), can be used in a parametric batch solver `solveGraphParametric`. 
 
 
 ### `getParametricMeasurement`
+
+Parameteric calculations require the mean and covariance from Gaussian measurement functions (factors) using the function
 
 ```@docs
 IncrementalInference.getParametricMeasurement
 ```
 
-`getParametricMeasurement` defaults to looking for a supported distribution in field `.Z` followed by `.z`. Therefore, if the factor uses this fieldname, `getParametricMeasurement` does not need to be extended.
+`getParametricMeasurement` defaults to looking for a supported distribution in field `.Z` followed by `.z`. Therefore, if the factor uses this fieldname, `getParametricMeasurement` does not need to be extended.  You can extend by simply implementing, for example, your own `IncrementalInference.getParametricMeasurement(f::OtherFactor) = m.density`.
 
-For example the `Z` field will be used by default in `MyFactor` from above.
+For this example, the `Z` field will automatically be detected used by default for `MyFactor` from above.
 
 ```julia
 struct MyFactor{T <: SamplableBelief} <: IIF.AbstractRelativeRoots
@@ -43,9 +47,9 @@ end
 ```
 
 ### The Factor
-The factor is evaluated in a cost function using the Mahalanobis distance and the measurement should therefore match the residual returned.  
+The factor is evaluated in a cost function using the [Mahalanobis distance](https://en.wikipedia.org/wiki/Mahalanobis_distance) and the measurement should therefore match the residual returned.  
 
 ### Optimization
-[`solveFactorGraphParametric`](@ref) uses Optim.jl. The factors that are supported should have a gradient and Hessian available/exists and therefore it makes use of `TwiceDifferentiable`. Full control of Optim's setup is possible with keyword arguments.  
+[`IncrementalInference.solveGraphParametric!`](@ref) uses Optim.jl. The factors that are supported should have a gradient and Hessian available/exists and therefore it makes use of `TwiceDifferentiable`. Full control of Optim's setup is possible with keyword arguments.  
 
 

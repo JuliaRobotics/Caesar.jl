@@ -13,7 +13,7 @@ addons:
     - hdf5-tools
 
 julia:
-  - 1.5
+  - 1.6
   - nightly
 
 
@@ -21,7 +21,7 @@ jobs:
   include:
     - name: "DEV MASTERS"
       if: NOT branch =~ ^release.*$
-      julia: 1.5
+      julia: 1.6
       script:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
@@ -30,7 +30,7 @@ jobs:
         - julia --check-bounds=yes -e 'using Pkg; Pkg.test("Caesar"; coverage=false)'
       after_success: skip
     - stage: "Documentation"
-      julia: 1.5
+      julia: 1.6
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="Caesar", rev="master")); Pkg.instantiate()'
         - julia --project=docs/ -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'

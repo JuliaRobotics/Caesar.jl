@@ -4,6 +4,7 @@ using RoME
 import IncrementalInference: fmcmc!, localProduct, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
 import IncrementalInference: initfg, downGibbsCliqueDensity
+import IncrementalInference: solveGraphParametric, solveGraphParametric!
 
 using KernelDensityEstimatePlotting
 # import KernelDensityEstimatePlotting: plotKDE
@@ -36,7 +37,8 @@ makedocs(
             "Multi-Language Support" => "concepts/multilang.md",
             "Cloud Server/Database" => "concepts/database_interactions.md",
             "Multi-session/agent Solving" => "concepts/multisession.md",
-            "Visualization (3D)" => "concepts/arena_visualizations.md",
+            "Parametric Solve (EXP)" => "examples/parametric_solve.md",
+            "Visualization (3D)" => "concepts/arena_visualizations.md",            
             ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
