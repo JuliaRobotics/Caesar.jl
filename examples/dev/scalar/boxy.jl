@@ -9,7 +9,7 @@ correlator-like approach to localize.
 using Images, FileIO           # load elevation from PNG
 using ImageFiltering
 using DSP
-using DataInterpolations       # handles the terrain
+# using DataInterpolations       # handles the terrain
 using Interpolations
 using Distributions
 using Statistics
@@ -18,6 +18,9 @@ using Gadfly, Colors
 using Cairo
 using RoMEPlotting
 using Plots
+# using ImageView
+
+Gadfly.set_default_plot_size(35cm,25cm)
 
 
 ## Case 4.
@@ -26,20 +29,21 @@ using Plots
 
 # load dem (18x18km span)
 img = load(joinpath(dirname(dirname(pathof(Caesar))), "examples/dev/scalar/dem.png")) .|> Gray
-img = Float64.(channelview(img)[1,:,:])
+img = Float64.(img)
+# imshow(img)
 # interpolant object for querying
 x = range(-9e3, 9e3, length = size(img)[1]) # North
 y = range(-9e3, 9e3, length = size(img)[2]) # East
-dem = LinearInterpolation((x,y), img)
+dem = Interpolations.LinearInterpolation((x,y), img)
 
 
 # not to scale on DEM image, but sequence correlation approach does not matter
 terrE_ = 1e3*Float64.(@view img[200,:])
 terrW_ = 1e3*Float64.(@view img[300,:])
-x = range(-100, 100, length = length(terrE))
+x = range(-100, 100, length = length(terrE_))
 
-global terrE = LinearInterpolation(terrE_, x)
-global terrW = LinearInterpolation(terrW_, x)
+global terrE = Interpolations.LinearInterpolation(x, terrE_)
+global terrW = Interpolations.LinearInterpolation(x, terrW_)
 
 
 function driveLeg(x0, terrain, v, units)
@@ -51,14 +55,16 @@ function driveLeg(x0, terrain, v, units)
     for i=1:units
         x.append(x[end]+v)
         xm.append(x[end]+ randn(2,1)) # noisy position
-         
+        
         z.append( terrain(x[end]))  # not quite as it isn't 2d interp
-        zm.append (z + sigma_z*randn(1))
+        zm.append(z + sigma_z*randn(1))
     end
 
     # return pose, measurements (valid measured, )
 end
 
+
+##
 
 
 # 1. This is the (constant) scalar field the elevation measurements refer to
@@ -77,8 +83,8 @@ end
 # addFactor!(fg, [:x1, :topography], ScalarFieldSequenceFactorNorthSouth(x,y))
 struct ScalarFieldSequenceFactorNorthSouth{T} <: IIF.AbstractRelativeMinimize
   # FIXME: objective is to <: IIF.AbstractRelativeConstant (final name TBD)
-  gridSequence::Vector{Float64} # sample location (odometry)
-  scalarSequence::Vector{Float64} #sample value (elevation meas)
+  prevSequence::Vector{Float64} # sample location (odometry)
+  nextSequence::Vector{Float64} # sample value (elevation meas)
   partial::T
 end
 
@@ -92,6 +98,7 @@ end
 # for each i
 #   energy[i] = sum( (map[i:(i+length(template))] - template).^2 )
 # density = exp.(-energy)     # Woodward
+# returns vector the size of length(map)
 function _mySSDCorr(map, template)
 
     maplen = length(map)
@@ -100,8 +107,8 @@ function _mySSDCorr(map, template)
     mnm = Statistics.mean(map)
     map_ = [map; mnm*ones(len-1)]
     density = zeros(maplen)
-    for i in 1:maplen
-        density[i] = -sum( (map_[i:(i+len-1)] .- template).^2 )
+    for i in 1:maplen      
+      density[i] = -sum( (map_[i:(i+len-1)] .- template).^2 )
     end
     adaptive = abs(maximum(density))
 
@@ -118,7 +125,7 @@ function IIF.getSample(s::CalcFactor{<:ScalarFieldSequenceFactorNorthSouth}, N::
 
   # assuming user addConstant!(fg, :terrain, ScalarField1D(dem))
 
-  global terrain # should come from s.constants[:terrain] ?????
+  # global terrain # should come from s.constants[:terrain] ?????
 
   # ensure equal spacing as terrain
   # assumptions:
@@ -126,16 +133,16 @@ function IIF.getSample(s::CalcFactor{<:ScalarFieldSequenceFactorNorthSouth}, N::
   # - s.factor.gridSequence increases monotonically
   # s.factor.gridSequence is the sequence of odometry estimates at which
   #  the elevation measurements (s.factor.scalarSequence) were taken
-  measurement = LinearInterpolation(s.factor.scalarSequence,s.factor.gridSequence)
+    # measurement = LinearInterpolation(s.factor.scalarSequence,s.factor.gridSequence)
 
-  upsample = 1 # avoid quantization effects from gridded sequence/terrain data
-  dx = diff(terrain.t)[1]/upsample
-  template = measurement.(s.factor.gridSequence[1]:dx:s.factor.gridSequence[end])
-  map_ = [terrain.u;]
-  map2_grid = range(terrain.t[1],terrain.t[end],length=upsample*length(map_))
-  map2 = terrain.(map2_grid)
+    # upsample = 1 # avoid quantization effects from gridded sequence/terrain data
+    # dx = diff(terrain.t)[1]/upsample
+    # template = measurement.(s.factor.gridSequence[1]:dx:s.factor.gridSequence[end])
+    # map_ = [terrain.u;]
+    # map2_grid = range(terrain.t[1],terrain.t[end],length=upsample*length(map_))
+    # map2 = terrain.(map2_grid)
 
-  intensity_ = _mySSDCorr(map2, template)
+  intensity_ = _mySSDCorr(prevSequence, nextSequence )
   
   
   # AliasingSS only works for 1D at this time
@@ -152,16 +159,18 @@ end
 
 ##
 
-nextPose(ps::Base.RefValue{Symbol}; pattern=r"x") = Symbol("x",match(r"\d+", string(ps[])).match |> x->(parse(Int,x)+1))
+nextPose(ps::Symbol; pattern=r"x") = Symbol("x",match(r"\d+", string(ps)).match |> x->(parse(Int,x)+1))
 
 # drive clockwise, x is North, y is East (NED convention).
 # boxes start bottom left, spine of boxy helix is on x-axis
 function driveOneBox!(fg, 
                       terrain; 
-                      lastPose=sortDFG(ls(fg, tags=[:POSE]))[end] ) 
+                      lastPose=sortDFG(ls(fg, tags=[:POSE]))[end],
+                      start = 0.0, 
+                      NS = 15,
+                      EW = 15  )
   #
-  NS = 15
-  EW = 15img = load(joinpath(dirname(dirname(pathof(Caesar))), "examples/dev/scalar/dem.png")) .|> Gray
+  img = load(joinpath(dirname(dirname(pathof(Caesar))), "examples/dev/scalar/dem.png")) .|> Gray
   h = 1e3*Float64.( @view img[512,:])
   runback = 2/3
   
@@ -170,22 +179,10 @@ function driveOneBox!(fg,
   addVariable!(fg, newPose, Point2, tags=[:POSE;:NORTHING])
   # constrain variable in Y (east/west)
   addFactor!(fg, [newPose;], PartialPrior(Normal(0.0, 0.1),(2,)))
+  # add odometry constraint
   p2p = Point2Point2(MvNormal([NS; 0.0], [1.0; 1.0]))
   addFactor!(fg, [lastPose; newPose], p2p, tags=[:ODOMETRY;:NORTHING])
   lastPose = newPose
-
-  # get pose four poses back
-  # get terrain sequence between (newPose - NW) up to (newPose)
-  # curr_seq = 
-  # prev_seq = 
-  # # compute SSDcorr wrt sequence 4 poses before
-  # # add PartialLinearRelative between the two 
-  # intensity = _mySSDCorr(curr_seq, prev_seq)
-  plr = ScalarFieldSequenceFactorNorthSouth(x_seq, z_seq, (1,))
-  # plr = PartialLinearRelative(grid, AliasingScalarSampler(intensity))
-  addFactor!(fg, [prevPose newPose], plr, tags=[:TERRAIN,:MATCH])
-
-
 
   # drive East EW units
   newPose = nextPose(lastPose)
@@ -213,6 +210,42 @@ function driveOneBox!(fg,
   p2p = Point2Point2(MvNormal([0.0; -EW], [1.0; 1.0]))
   addFactor!(fg, [lastPose; newPose], p2p, tags=[:ODOMETRY;:WESTING])
   lastPose = newPose
+
+  # cop out early on first run, or debug
+  dofactor ? nothing : (return nothing)
+
+  # Assume adding factors back to PREVIOUS boxy 
+  # EAST SIDE
+
+  # build odometry+elevation measurement sequence 
+  # (curr_seq: x4 to x5; prev_seq: x0 to x1 => constraint x0 & x4
+  # m4: minus four (previous leg); 0: current leg
+  x_seq_m4 = LinRange(start,start+NS,100) # assumed 100 measurements per leg
+  z_seq_m4 = terrW_.(x_seq_m4)
+  # x_seq_m4_ = deepcopy(x_seq_m4) # + noise
+
+  _thirdfwd = (1-runback)*NS
+  x_seq0 = LinRange(start+_thirdfwd, start+_thirdfwd+NS, 100) # assumed 100 measurements per leg
+  z_seq0 = terrW_.(x_seq0)
+  # x_seq0_ = deepcopy(x_seq0) # + noise
+
+  # correlate z_seq0 against z_seq_m4
+  intensity = _mySSDCorr(z_seq0, z_seq_m4)
+
+  # get pose four poses back
+  # get terrain sequence between (newPose - NW) up to (newPose)
+  # curr_seq = terrE(curr_x_seq)
+  # prev_seq = terrE(prev_x_seq)
+  # # compute SSDcorr wrt sequence 4 poses before
+  # # add PartialLinearRelative between the two 
+  # intensity = _mySSDCorr(curr_seq, prev_seq)
+  
+  plr = ScalarFieldSequenceFactorNorthSouth(x_seq_, z_seq, (1,))
+  addFactor!(fg, [:x0; :x4], plr, tags=[:TERRAIN,:MATCH])
+      # plr = ScalarFieldSequenceFactorNorthSouth(x_seq, z_seq, (1,))
+      # # # plr = PartialLinearRelative(grid, AliasingScalarSampler(intensity))
+      # addFactor!(fg, [prevPose newPose], plr, tags=[:TERRAIN,:MATCH])
+
 
   nothing
 end
@@ -242,15 +275,21 @@ end
 ## build the poses
 
 fg = initfg()
+NS = 15
 
 addVariable!(fg, :x0, Point2, tags=[:POSE;])
 addFactor!(fg, [:x0;], PriorPoint2(MvNormal([0;0.0], [0.01;0.01])))
 
-driveOneBox!(fg, nothing)
-plr = PartialLinearRelative(bel, (1,))
-plr = PartialLinearRelative(bel, (1,))
+driveOneBox!(fg, nothing, start=0.0, NS=NS)
 
-driveOneBox!(fg, nothing)
+
+
+##
+
+# plr = PartialLinearRelative(bel, (1,))
+# plr = PartialLinearRelative(bel, (1,))
+
+driveOneBox!(fg, nothing, start=NS, NS=NS)
 
 
 bel = Normal(10,1.0)
@@ -263,7 +302,7 @@ plr = PartialLinearRelative(bel, (1,))
 
 ##
 
-
+# driveOneBox!(fg, nothing, start=2*NS, NS=NS)
 
 
 
