@@ -90,6 +90,8 @@ struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: AbstractRel
   preimage::Tuple{F, Vector{Float64}}
 end
 
+getManifold(::IIF.InstanceType{<:Pose2AprilTag4Corners}) = SE2E2_Manifold
+
 """
     $SIGNATURES
 

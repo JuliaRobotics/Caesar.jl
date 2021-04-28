@@ -58,6 +58,10 @@ mutable struct SASBearing2D <: AbstractRelativeMinimize
   SASBearing2D() = new()
   # SASBearing2D(z1) = new(z1){Float64,2}
 end
+
+# untested manifold use
+getManifold(::SASBearing2D) = BearingRange_Manifold
+
 function getSample(cfo::CalcFactor{<:SASBearing2D}, N::Int=1)
   sas2d = cfo.factor
   # TODO bring the solvefor index tp getSample function
@@ -68,6 +72,7 @@ function getSample(cfo::CalcFactor{<:SASBearing2D}, N::Int=1)
     return (reshape(rand(sas2d.rangemodel[1], N), 1,N), )
   end
 end
+
 
 function forwardsas(sas2d::SASBearing2D,
                     thread_data::SASREUSE,
