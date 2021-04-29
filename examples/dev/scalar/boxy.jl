@@ -1,4 +1,13 @@
 
+# The plan, duh duh duuuuh!... 
+# - close out boxy with early results?
+# - Start down path of exper 5, which is circular, w/ low res prior (?)
+
+
+
+
+##
+
 #= 
 Proof of concept of 2D localization against a scalar field.
 In this example we use a sequence of 1D measurements and a known map with a
@@ -24,13 +33,17 @@ using JSON2
 
 Gadfly.set_default_plot_size(35cm,25cm)
 
+prjPath = dirname(dirname(pathof(Caesar)))
+
+# this includes Sequences module
+include( joinpath(prjPath, "examples","dev","scalar","Sequences.jl") )
 
 ## Case 4.
 # Square helix northward, with overlapping east/west segments - mapping
 # no prior map
 
 # load dem (18x18km span)
-img = load(joinpath(dirname(dirname(pathof(Caesar))), "examples/dev/scalar/dem.png")) .|> Gray
+img = load(joinpath(prjPath, "examples","dev","scalar","dem.png")) .|> Gray
 img = Float64.(img)
 # imshow(img)
 # interpolant object for querying
@@ -48,117 +61,7 @@ global terrE = Interpolations.LinearInterpolation(x, terrE_)
 global terrW = Interpolations.LinearInterpolation(x, terrW_)
 
 
-function driveLeg(x0, terrain, v, units)
-    x = zeros(2,0)
-    xm = zeros(2,0)
-    z = zeros(0)
-    zm = zeros(0)
-
-    for i=1:units
-        x.append(x[end]+v)
-        xm.append(x[end]+ randn(2,1)) # noisy position
-        
-        z.append( terrain(x[end]))  # not quite as it isn't 2d interp
-        zm.append(z + sigma_z*randn(1))
-    end
-
-    # return pose, measurements (valid measured, )
-end
-
-
-
-
-# 1. This is the (constant) scalar field the elevation measurements refer to
-#
-# struct ScalarField1D
-#     # scalar field over one variable f:R->R (i.e. h= f(x))
-#     # [a special case of ScalarField, h = f(·)]
-#     # ...
-# end
-
-# 2. This is the actual scalar measurement sequence factor
-# It takes two arguments: 
-#  - the elevation measurement sequence, and 
-#  - the odometry estimate at each elevation measurement
-#
-# addFactor!(fg, [:x1, :topography], ScalarFieldSequenceFactorNorthSouth(x,y))
-struct ScalarFieldSequenceFactorNorthSouth{T} <: IIF.AbstractRelativeMinimize
-  # FIXME: objective is to <: IIF.AbstractRelativeConstant (final name TBD)
-  prevSequence::Vector{Float64} # sample location (odometry)
-  nextSequence::Vector{Float64} # sample value (elevation meas)
-  partial::T
-end
-
-
-# 3. Objective/fitness function evaluating match between a map and a template for different displacement values 
-# This is used within the factor to generate the likelihood over the terrain
-#
-# NOTE: this function assumes map and template are on an equivalent grid 
-# this function does not care for where/what the grid is
-# NOTE: result will assume base pose is first in sequence
-# for each i
-#   energy[i] = sum( (map[i:(i+length(template))] - template).^2 )
-# density = exp.(-energy)     # Woodward
-# returns vector the size of length(map)
-function _mySSDCorr(map, template)
-
-    maplen = length(map)
-    len = length(template)
-    
-    mnm = Statistics.mean(map)
-    map_ = [map; mnm*ones(len-1)]
-    density = zeros(maplen)
-    for i in 1:maplen      
-      density[i] = -sum( (map_[i:(i+len-1)] .- template).^2 )
-    end
-    adaptive = abs(maximum(density))
-
-    density ./= adaptive
-    density .= exp.(density)
-    density ./= sum(density)
-    return density
-end
-
-
-function IIF.getSample(s::CalcFactor{<:ScalarFieldSequenceFactorNorthSouth}, N::Int=1)
-  # locality if desired from current variable estimate, 
-  # X0 = getBelief(s.metadata.fullvariables[1]) # to consider only local map info
-
-  # assuming user addConstant!(fg, :terrain, ScalarField1D(dem))
-
-  # global terrain # should come from s.constants[:terrain] ?????
-
-  # ensure equal spacing as terrain
-  # assumptions:
-  # - terrain.t is equally spaced
-  # - s.factor.gridSequence increases monotonically
-  # s.factor.gridSequence is the sequence of odometry estimates at which
-  #  the elevation measurements (s.factor.scalarSequence) were taken
-    # measurement = LinearInterpolation(s.factor.scalarSequence,s.factor.gridSequence)
-
-    # upsample = 1 # avoid quantization effects from gridded sequence/terrain data
-    # dx = diff(terrain.t)[1]/upsample
-    # template = measurement.(s.factor.gridSequence[1]:dx:s.factor.gridSequence[end])
-    # map_ = [terrain.u;]
-    # map2_grid = range(terrain.t[1],terrain.t[end],length=upsample*length(map_))
-    # map2 = terrain.(map2_grid)
-
-  intensity_ = _mySSDCorr(prevSequence, nextSequence )
-  
-  
-  # AliasingSS only works for 1D at this time
-  # NOTE, if you stray out of region of support, things blow up!
-  bss = AliasingScalarSampler([map2_grid;], intensity_) # [terrain.t;]
-      
-  # buffer with kde for continuous sampling (not grid spaced)
-  stagedsmpls = rand(bss,N)
-  smpls = rand(kde!(stagedsmpls, [3*dx;]),N)
-
-  return (reshape(smpls,1,N),)
-end
-
-
-
+##
 
 function driveLeg!( fg, 
                     startingPose, 
@@ -197,42 +100,73 @@ function driveLeg!( fg,
   
   return newPose
 end
+# function driveLeg(x0, terrain, v, units)
+#   x = zeros(2,0)
+#   xm = zeros(2,0)
+#   z = zeros(0)
+#   zm = zeros(0)
 
+#   for i=1:units
+#       x.append(x[end]+v)
+#       xm.append(x[end]+ randn(2,1)) # noisy position
+      
+#       z.append( terrain(x[end]))  # not quite as it isn't 2d interp
+#       zm.append(z + sigma_z*randn(1))
+#   end
+
+#   # return pose, measurements (valid measured, )
+# end
 
 
 # matchLeg!(fg, [:x1, :x5], :NORTH)
 # matchLeg!(fg, [:x3, :x7], :SOUTH)
 function matchLeg!( fg::AbstractDFG,
-                    legs, 
+                    legs::AbstractVector{Symbol}, 
                     direction::Symbol;
                     dofactor::Bool=false)
   # 
   # ls(fg, tags=[:NORTH])
 
   dataEntry, dataBytes = getData(fg, legs[1], :elevationSequences)
-  myData_a = JSON2.read(IOBuffer(dataBytes))
+  myData_a = JSON2.read(IOBuffer(dataBytes), Dict{Symbol, Vector{Float64}})
 
   dataEntry, dataBytes = getData(fg, legs[2], :elevationSequences)
-  myData_b = JSON2.read(IOBuffer(dataBytes))
+  myData_b = JSON2.read(IOBuffer(dataBytes), Dict{Symbol, Vector{Float64}})
 
+
+  xseq_a = myData_a[:x_seq]
   zseq_a = myData_a[:z_seq]
+
+  xseq_b = myData_b[:x_seq]
   zseq_b = myData_b[:z_seq]
 
   # correlate z_seq0 against z_seq_m4
 
+  s_a  = Sequences.MeasurementSequence(xseq_a, zseq_a)
+  s_b = Sequences.MeasurementSequence(xseq_b.-xseq_b[1], zseq_b)
   # FIXME ON FIRE dont have odo ground truth
   # see also: [x,i] = ssdcorr((x,z)_a, (x,z)_b)
-  x_seq = collect( LinRange(0,15,101)[1:100] )
-  intensity = _mySSDCorr(zseq_a, zseq_b)
 
-  bel = AliasingScalarSampler(x_seq, intensity)
+  # closure on a unique correlator with s_a and s_b
+  _ssdCorr(x) = Sequences.ssd(s_a, Sequences.displace(s_b,x))
+
+  qr = collect(LinRange(-10.0,10.0,10001)) #range over which to compute ssd
+  intensity = _ssdCorr.(qr)
+  k = abs(maximum(intensity))
+  pv = intensity./k
+  pv = exp.(-pv)
+  pv ./= sum(pv)
+
+  # intensity = _mySSDCorr(zseq_a, zseq_b)
+
+  bel = AliasingScalarSampler(qr, pv)
   plr = PartialLinearRelative(bel, (1,))
 
   f_ = if dofactor
     addFactor!(fg, legs, plr, tags=[:TERRAIN,:MATCH,direction])
   end
 
-  return (x_seq, intensity), f_
+  return (qr, pv), f_
 end
 
 
@@ -273,40 +207,7 @@ function driveOneBox!(fg;
   start_y = start_y - EW
 
   # cop-out early on first run, or debug
-  docorr ? nothing : (return nothing)
-
-  # Assume adding factors back to PREVIOUS boxy 
-  # EAST SIDE
-
-  # build odometry+elevation measurement sequence 
-  # (curr_seq: x4 to x5; prev_seq: x0 to x1 => constraint x0 & x4
-  # m4: minus four (previous leg); 0: current leg
-  x_seq_m4 = LinRange(start,start+NS,100) # assumed 100 measurements per leg
-  z_seq_m4 = terrW_.(x_seq_m4)
-  # x_seq_m4_ = deepcopy(x_seq_m4) # + noise
-
-  _thirdfwd = (1-runback)*NS
-  x_seq0 = LinRange(start+_thirdfwd, start+_thirdfwd+NS, 100) # assumed 100 measurements per leg
-  z_seq0 = terrW_.(x_seq0)
-  # x_seq0_ = deepcopy(x_seq0) # + noise
-
-  # correlate z_seq0 against z_seq_m4
-  intensity = _mySSDCorr(z_seq0, z_seq_m4)
-
-  # get pose four poses back
-  # get terrain sequence between (newPose - NW) up to (newPose)
-  # curr_seq = terrE(curr_x_seq)
-  # prev_seq = terrE(prev_x_seq)
-  # # compute SSDcorr wrt sequence 4 poses before
-  # # add PartialLinearRelative between the two 
-  # intensity = _mySSDCorr(curr_seq, prev_seq)
-  
-  plr = ScalarFieldSequenceFactorNorthSouth(x_seq_, z_seq, (1,))
-  addFactor!(fg, [:x0; :x4], plr, tags=[:TERRAIN,:MATCH])
-      # plr = ScalarFieldSequenceFactorNorthSouth(x_seq, z_seq, (1,))
-      # # # plr = PartialLinearRelative(grid, AliasingScalarSampler(intensity))
-      # addFactor!(fg, [prevPose newPose], plr, tags=[:TERRAIN,:MATCH])
-
+  # docorr ? nothing : (return nothing)
 
   nothing
 end
@@ -367,12 +268,15 @@ driveOneBox!(fg, runback=runback, start=[0.0;0], NS=NS, docorr=false)
 driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
 
 
+##
+
 xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, dofactor=false)
 
 xsq, f_ = matchLeg!(fg, [:x3, :x7],:SOUTH, dofactor=false)
 
 ## ## TEMPORARY CORRELATION DEV
 
+Gadfly.plot(x=xsq[1], y=xsq[2], Geom.line)
 
 
 
