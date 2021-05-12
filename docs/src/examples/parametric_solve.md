@@ -10,6 +10,12 @@ solveGraphParametric
 IncrementalInference.solveGraphParametric!
 ```
 
+Initializing the parametric solve from existing values can be done with the help of:
+
+```@docs
+initParametricFrom!
+```
+
 ## [Defining Factors to Support a Parametric Solution (Experimental)](@id parametric_factors)
 
 Factor that supports a parametric solution, with supported distributions (such as `Normal` and `MvNormal`), can be used in a parametric batch solver `solveGraphParametric`. 
