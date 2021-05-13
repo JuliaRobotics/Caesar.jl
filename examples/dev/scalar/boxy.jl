@@ -72,7 +72,7 @@ function driveLeg!( fg,
   # fg - factor graph object
   # startingPose
   # start - 
-  # v - displacement vector (e.g. [NS; 0.0] for direction= :north)
+  # v - displacement vector (e.g. [NS; 0.0] for direction= :north) ASSUMES ONE ELEMENT ALWAYS ZERO
   # terr - terrain vector (1D interpolant object)
   # direction - direction symbol (:north,:south,:east,:west)
 
@@ -88,13 +88,15 @@ function driveLeg!( fg,
   # generate odometry and measurement data for this leg
   # avert your eyes: this assumes v is axis-aligned
   # To pay this technical debt: generate a 2D linspace and use it to query a 2D DEM interpolant
-  x_seq = LinRange(start, start + maximum(v), 100) # assumed 100 measurements per leg
+  x_seq = LinRange(start, start + sum(v), 100) # assumed 100 measurements per leg
 
   z_seq = terr.(x_seq)
   # add noise to x_seq (odometry) and z_seq (meas noise)
   x_seq_n = 0.01*randn(100)
   z_seq_n = 1.0*randn(100)
   
+  @assert !isapprox( Statistics.median(diff(x_seq)), 0, atol=1e-6) "why is x_seq[1:5]=$(x_seq[1:5])"
+
   someDict = Dict(:x_seq => x_seq, :z_seq => z_seq, :x_seq_n => x_seq_n, :z_seq_n => z_seq_n)
   addData!(fg, :default_folder_store, newPose, :elevationSequences, Vector{UInt8}(JSON2.write( someDict )), mimeType="application/json/octet-stream"  )
   
@@ -123,7 +125,9 @@ end
 function matchLeg!( fg::AbstractDFG,
                     legs::AbstractVector{Symbol}, 
                     direction::Symbol;
-                    dofactor::Bool=false)
+                    dofactor::Bool=false,
+                    odoPredictedAlign::Real=0,
+                    kappa::Real=2)
   # 
   # ls(fg, tags=[:NORTH])
 
@@ -141,21 +145,30 @@ function matchLeg!( fg::AbstractDFG,
   zseq_b = myData_b[:z_seq]
 
   # correlate z_seq0 against z_seq_m4
-
-  s_a  = Sequences.MeasurementSequence(xseq_a, zseq_a)
-  s_b = Sequences.MeasurementSequence(xseq_b.-xseq_b[1], zseq_b)
+  s_a = Sequences.MeasurementSequence(xseq_a.-xseq_a[1], zseq_a) # full relative
+  s_b = Sequences.MeasurementSequence(xseq_b.-xseq_b[1] .- odoPredictedAlign, zseq_b)
   # FIXME ON FIRE dont have odo ground truth
   # see also: [x,i] = ssdcorr((x,z)_a, (x,z)_b)
 
   # closure on a unique correlator with s_a and s_b
   _ssdCorr(x) = Sequences.ssd(s_a, Sequences.displace(s_b,x))
 
-  qr = collect(LinRange(-10.0,10.0,10001)) #range over which to compute ssd
+  # qr is the range of displacements over which to compute the  SSD
+  qr = collect(LinRange(-10.0,10.0,1001)) 
   intensity = _ssdCorr.(qr)
+  # @assert length(intensity) == length(qr)
+  # strip nans when no overlap
+  mask::BitVector = isnan.(intensity) # .|> x->xor(x, true)
+  intensity[mask] .= maximum(intensity[xor.(mask, true)]) #intensity[mask]
   k = abs(maximum(intensity))
-  pv = intensity./k
+  pv = intensity./k  # normalize
   pv = exp.(-pv)
-  pv ./= sum(pv)
+  w = DSP.Windows.tukey(length(intensity), 0.25)
+  pv .*= w
+  pv .^= kappa
+  # hand fix, to emphasize peaks
+
+  # pv ./= sum(pv) # sum to 1, already in AliasingScalarSampler
 
   # intensity = _mySSDCorr(zseq_a, zseq_b)
 
@@ -270,9 +283,9 @@ driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
 
 ##
 
-xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, dofactor=false)
+xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=-2.5, dofactor=false)
 
-xsq, f_ = matchLeg!(fg, [:x3, :x7],:SOUTH, dofactor=false)
+xsq, f_ = matchLeg!(fg, [:x3, :x7],:SOUTH, odoPredictedAlign=-3, dofactor=false)
 
 ## ## TEMPORARY CORRELATION DEV
 
@@ -298,6 +311,7 @@ addFactor!(fg, [:x0; :x4], plr, tags=[:TERRAIN,:MATCH])
     # plr = ScalarFieldSequenceFactorNorthSouth(x_seq, z_seq, (1,))
     # # # plr = PartialLinearRelative(grid, AliasingScalarSampler(intensity))
     # addFactor!(fg, [prevPose newPose], plr, tags=[:TERRAIN,:MATCH])
+
 
 
 
