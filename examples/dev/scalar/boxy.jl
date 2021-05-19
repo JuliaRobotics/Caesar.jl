@@ -2,16 +2,15 @@
 # The plan, duh duh duuuuh!... 
 # - close out boxy with early results?
 # - Start down path of exper 5, which is circular, w/ low res prior (?)
-
-
-
-
 ##
 
 #= 
 Proof of concept of 2D localization against a scalar field.
 In this example we use a sequence of 1D measurements and a known map with a
 correlator-like approach to localize.
+
+Case 4: Square helix northward, with overlapping east/west segments 
+no prior map
 
 2021-03-24,31
 =#
@@ -32,15 +31,16 @@ using JSON2
 # using ImageView
 
 Gadfly.set_default_plot_size(35cm,25cm)
+st=style( major_label_font="CMU Serif",
+          minor_label_font="CMU Serif",
+          major_label_font_size=20pt,
+          minor_label_font_size=20pt)
+
 
 prjPath = dirname(dirname(pathof(Caesar)))
-
 # this includes Sequences module
 include( joinpath(prjPath, "examples","dev","scalar","Sequences.jl") )
 
-## Case 4.
-# Square helix northward, with overlapping east/west segments - mapping
-# no prior map
 
 # load dem (18x18km span)
 img = load(joinpath(prjPath, "examples","dev","scalar","dem.png")) .|> Gray
@@ -60,8 +60,6 @@ x = range(-100, 100, length = length(terrE_))
 global terrE = Interpolations.LinearInterpolation(x, terrE_)
 global terrW = Interpolations.LinearInterpolation(x, terrW_)
 
-
-##
 
 function driveLeg!( fg, 
                     startingPose, 
@@ -145,8 +143,8 @@ function matchLeg!( fg::AbstractDFG,
   zseq_b = myData_b[:z_seq]
 
   # correlate z_seq0 against z_seq_m4
-  s_a = Sequences.MeasurementSequence(xseq_a.-xseq_a[1], zseq_a) # full relative
-  s_b = Sequences.MeasurementSequence(xseq_b.-xseq_b[1] .- odoPredictedAlign, zseq_b)
+  s_a = Sequences.MeasurementSequence(xseq_a, zseq_a) # full relative
+  s_b = Sequences.MeasurementSequence(xseq_b .- odoPredictedAlign, zseq_b)
   # FIXME ON FIRE dont have odo ground truth
   # see also: [x,i] = ssdcorr((x,z)_a, (x,z)_b)
 
@@ -247,7 +245,6 @@ end
 
 (s::CalcFactor{<:PartialLinearRelative})(z, x1, x2) = z .- (x2 .- x1)
 
-## build the poses
 
 # trajectory parameters
 NS = 15
@@ -270,28 +267,24 @@ addBlobStore!(fg, datastore)
 addVariable!(fg, :x0, Point2, tags=[:POSE;])
 addFactor!(fg, [:x0;], PriorPoint2(MvNormal([0;0.0], [0.01;0.01])))
 
-
 # drive first box, no correlations
 driveOneBox!(fg, runback=runback, start=[0.0;0], NS=NS, docorr=false)
-
-# plr = PartialLinearRelative(bel, (1,))
-# plr = PartialLinearRelative(bel, (1,))
 
 # drive second box, implement correlation externally
 driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
 
 
 ##
+# 1st match: north-bound legs on first and second loop
+xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=0, dofactor=false)
+p=Gadfly.plot(st)
+push!(p,layer(x=xsq[1], y=xsq[2], Geom.line))
 
-xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=-2.5, dofactor=false)
 
+# 2nd match: south-bound legs on first and second loop
 xsq, f_ = matchLeg!(fg, [:x3, :x7],:SOUTH, odoPredictedAlign=-3, dofactor=false)
 
 ## ## TEMPORARY CORRELATION DEV
-
-Gadfly.plot(x=xsq[1], y=xsq[2], Geom.line)
-
-
 
 
 # addFactor!(fg, legs, plr, tags=[:TERRAIN, :MATCH])
@@ -333,13 +326,4 @@ plr = PartialLinearRelative(bel, (1,))
 
 
 
-
 ##
-
-
-
-
-##
-
-
-#
