@@ -66,7 +66,8 @@ function driveLeg!( fg,
                     start,                    
                     v,
                     terr,
-                    direction::Symbol)
+                    direction::Symbol;
+                    trueY::Real=0.0)
   # fg - factor graph object
   # startingPose
   # start - 
@@ -78,7 +79,7 @@ function driveLeg!( fg,
   newPose = nextPose(startingPose)
   addVariable!(fg, newPose, Point2, tags=[:POSE,direction])
 
-  addFactor!(fg, [newPose;], PartialPrior(Normal(0.1, 0.1),(2,)))
+  addFactor!(fg, [newPose;], PartialPrior(Normal(trueY, 0.1),(2,)))
 
   p2p = Point2Point2(MvNormal(v, [1.0; 1.0]))
   addFactor!(fg, [startingPose; newPose], p2p, tags=[:ODOMETRY; direction])
@@ -96,7 +97,7 @@ function driveLeg!( fg,
   @assert !isapprox( Statistics.median(diff(x_seq)), 0, atol=1e-6) "why is x_seq[1:5]=$(x_seq[1:5])"
 
   someDict = Dict(:x_seq => x_seq, :z_seq => z_seq, :x_seq_n => x_seq_n, :z_seq_n => z_seq_n)
-  addData!(fg, :default_folder_store, newPose, :elevationSequences, Vector{UInt8}(JSON2.write( someDict )), mimeType="application/json/octet-stream"  )
+  addData!(fg, :default_folder_store, startingPose, :elevationSequences, Vector{UInt8}(JSON2.write( someDict )), mimeType="application/json/octet-stream"  )
   
   return newPose
 end
@@ -202,19 +203,19 @@ function driveOneBox!(fg;
   start_x, start_y = (start...,)
   
   # drive North NS units (northbound uses west slice)
-  lastPose = driveLeg!(fg, lastPose, start_x, [NS;0.0] ,terrW, :NORTH)
+  lastPose = driveLeg!(fg, lastPose, start_x, [NS;0.0] ,terrW, :NORTH, trueY=0.0)
   start_x = start_x+NS
 
   # drive East EW units (terrain does not matter here)
-  lastPose = driveLeg!(fg, lastPose, start_y ,[0.0; EW], terrW, :EAST)
+  lastPose = driveLeg!(fg, lastPose, start_y ,[0.0; EW], terrW, :EAST, trueY=15.0)
   start_y = start_y + EW
   
   # drive South 0.7NS units
-  lastPose = driveLeg!(fg, lastPose, start_x, [-runback*NS;0.0],terrE, :SOUTH)
+  lastPose = driveLeg!(fg, lastPose, start_x, [-runback*NS;0.0],terrE, :SOUTH, trueY=15.0)
   start_x = start_x - runback*NS
 
   # drive West EW units (terrain does not matter here)
-  lastPose = driveLeg!(fg, lastPose, start_y, [0.0; -EW], terrE, :WEST)
+  lastPose = driveLeg!(fg, lastPose, start_y, [0.0; -EW], terrE, :WEST, trueY=0.0)
   start_y = start_y - EW
 
   # cop-out early on first run, or debug
@@ -276,18 +277,29 @@ driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
 
 ##
 # 1st match: north-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=0, dofactor=false)
-p=Gadfly.plot(st)
-push!(p,layer(x=xsq[1], y=xsq[2], Geom.line))
+xsq, f_ = matchLeg!(fg, [:x0, :x4],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+# xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+# p=Gadfly.plot(st)
+# push!(p,layer(x=xsq[1], y=xsq[2], Geom.line))
 
 
 # 2nd match: south-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x3, :x7],:SOUTH, odoPredictedAlign=-3, dofactor=false)
-
-## ## TEMPORARY CORRELATION DEV
+xsq, f_ = matchLeg!(fg, [:x2, :x6],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true)
 
 
-# addFactor!(fg, legs, plr, tags=[:TERRAIN, :MATCH])
+
+## TEMPORARY CORRELATION DEV
+
+
+tree, _, _ = solveTree!(fg)
+
+
+##
+
+
+plotKDE(fg, [:x0;:x1;:x2;:x3;:x4], levels=1)
+
+
 
 ##
 
