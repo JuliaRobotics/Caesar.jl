@@ -172,7 +172,7 @@ function matchLeg!( fg::AbstractDFG,
   # intensity = _mySSDCorr(zseq_a, zseq_b)
 
   bel = AliasingScalarSampler(qr, pv)
-  plr = PartialLinearRelative(bel, (1,))
+  plr = Point2Point2Northing(bel, (1,))
 
   f_ = if dofactor
     addFactor!(fg, legs, plr, tags=[:TERRAIN,:MATCH,direction])
@@ -228,23 +228,23 @@ end
 ##
 
 """
-    PartialLinearRelative
+    Point2Point2Northing
 
 IIF will deal with partials, 
 
 DevNotes
 - FIXME ongoing (2021Q2), see #1206, likely also #1010
 """
-struct PartialLinearRelative{B <: IIF.SamplableBelief, T <: Tuple} <: IIF.AbstractRelativeMinimize
+struct Point2Point2Northing{B <: IIF.SamplableBelief, T <: Tuple} <: IIF.AbstractRelativeMinimize
   Z::B
   partial::T # which dimension the partial applies to 
 end
 
-function IIF.getSample(s::CalcFactor{<:PartialLinearRelative}, N::Int=1)
+function IIF.getSample(s::CalcFactor{<:Point2Point2Northing}, N::Int=1)
   return ( reshape(rand(s.factor.Z,N),1,N), )
 end
 
-(s::CalcFactor{<:PartialLinearRelative})(z, x1, x2) = z .- (x2 .- x1)
+(s::CalcFactor{<:Point2Point2Northing})(z, x1, x2) = z .- (x2[1] - x1[1])
 
 
 # trajectory parameters
@@ -287,6 +287,12 @@ xsq, f_ = matchLeg!(fg, [:x0, :x4],:NORTH, odoPredictedAlign=0, kappa=3, dofacto
 xsq, f_ = matchLeg!(fg, [:x2, :x6],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true)
 
 
+##
+
+pts = approxConv(fg, :x0x4f1, :x4)
+
+# should peak at +5 to make the relative factor represent the change between x0 dn x4
+Gadfly.plot(x=pts[1,:], Geom.histogram)
 
 ## TEMPORARY CORRELATION DEV
 
@@ -308,13 +314,13 @@ plotKDE(fg, [:x0;:x1;:x2;:x3;:x4], levels=1)
 # curr_seq = terrE(curr_x_seq)
 # prev_seq = terrE(prev_x_seq)
 # # compute SSDcorr wrt sequence 4 poses before
-# # add PartialLinearRelative between the two 
+# # add Point2Point2Northing between the two 
 # intensity = _mySSDCorr(curr_seq, prev_seq)
 
 plr = ScalarFieldSequenceFactorNorthSouth(x_seq_, z_seq, (1,))
 addFactor!(fg, [:x0; :x4], plr, tags=[:TERRAIN,:MATCH])
     # plr = ScalarFieldSequenceFactorNorthSouth(x_seq, z_seq, (1,))
-    # # # plr = PartialLinearRelative(grid, AliasingScalarSampler(intensity))
+    # # # plr = Point2Point2Northing(grid, AliasingScalarSampler(intensity))
     # addFactor!(fg, [prevPose newPose], plr, tags=[:TERRAIN,:MATCH])
 
 
@@ -334,7 +340,7 @@ addFactor!(fg, [:x0; :x4], plr, tags=[:TERRAIN,:MATCH])
 bel = Normal(10,1.0)
 bel = AliasingScalarSampler(..., ...)
 
-plr = PartialLinearRelative(bel, (1,))
+plr = Point2Point2Northing(bel, (1,))
 
 
 
