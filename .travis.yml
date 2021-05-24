@@ -7,6 +7,9 @@ arch:
 os:
   - linux
 
+env:
+  - JULIA_PKG_SERVER=""
+
 addons:
   apt:
     packages:
@@ -16,10 +19,9 @@ julia:
   - 1.6
   - nightly
 
-
 jobs:
   include:
-    - name: "DEV MASTERS"
+    - name: "Upstream Dev"
       if: NOT branch =~ ^release.*$
       julia: 1.6
       script:
