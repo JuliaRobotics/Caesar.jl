@@ -10,6 +10,8 @@ jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
+    env:
+      JULIA_PKG_SERVER: ""
     strategy:
       fail-fast: false
       matrix:
@@ -49,8 +51,10 @@ jobs:
 
   test-masters:
     #if: github.ref != 'refs/heads/release**'
-    name: This and Masters
+    name: Upstream Dev
     runs-on: ubuntu-latest
+    env:
+      JULIA_PKG_SERVER: ""
     steps:
       - uses: actions/checkout@v2
 
@@ -74,7 +78,7 @@ jobs:
           git config --global user.name Tester
           git config --global user.email te@st.er
       
-      - name: Run tests on masters
+      - name: Run tests on Upstream Dev
         run: |
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="RoME",rev="master"));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference",rev="master"));'
