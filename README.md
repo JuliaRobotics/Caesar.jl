@@ -29,10 +29,10 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
 | [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
-| [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
 | [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | n/a |
+| [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | -- |
 | [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
-| [~~Graphs.jl~~][graphs-url] | [![][gjl-stable]][gjl-releases] | [![Build Status][graphs-build-img]][graphs-build-url] | [![codecov.io][graphs-cov-img]][graphs-cov-url] | n/a |
+| [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
 
 # Contributors
 
@@ -69,7 +69,7 @@ Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.nav
 [build-v0.10]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.10
 [build-v0.9]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.9
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
-[caesar-stable]: https://img.shields.io/badge/2021Q1-v0.10.x-green.svg
+[caesar-stable]: https://img.shields.io/badge/2021Q2-v0.10.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://caesarjl.slack.com
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
@@ -81,7 +81,7 @@ Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.nav
 [r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
 [r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.15
 [r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2021Q1-v0.15.x-green.svg
+[r-stable]: https://img.shields.io/badge/2021Q2-v0.15.x-green.svg
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
@@ -91,7 +91,7 @@ Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.nav
 [iif-build-v020]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.23
 [iif-build-url]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
-[iif-stable]: https://img.shields.io/badge/2021Q1-v0.23.x-green.svg
+[iif-stable]: https://img.shields.io/badge/2021Q2-v0.24.x-green.svg
 [iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
 [iif-releases]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
 
@@ -109,7 +109,7 @@ Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.nav
 [tf-build-img]: https://travis-ci.org/dehann/TransformUtils.jl.svg?branch=master
 [tf-build-url]: https://travis-ci.org/dehann/TransformUtils.jl
 [tf-url]: http://www.github.com/dehann/TransformUtils.jl
-[tf-stable]: https://img.shields.io/badge/2018Q4-v0.2.x-green.svg
+[tf-stable]: https://img.shields.io/badge/2021Q2-v0.2.x-green.svg
 [tf-milestones]: https://github.com/JuliaRobotics/TransformUtils.jl/milestones
 [tf-releases]: https://github.com/JuliaRobotics/TransformUtils.jl/releases
 
@@ -120,13 +120,13 @@ Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.nav
 [dvis-build-url]: https://travis-ci.org/rdeits/DrakeVisualizer.jl
 [dvis-url]: http://www.github.com/rdeits/DrakeVisualizer.jl -->
 
-[graphs-cov-img]: https://codecov.io/github/JuliaAttic/Graphs.jl/coverage.svg?branch=master
-[graphs-cov-url]: https://codecov.io/github/JuliaAttic/Graphs.jl?branch=master
-[graphs-build-img]: https://travis-ci.org/JuliaAttic/Graphs.jl.svg?branch=master
-[graphs-build-url]: https://travis-ci.org/JuliaAttic/Graphs.jl
-[graphs-url]: http://www.github.com/JuliaAttic/Graphs.jl
-[gjl-stable]: https://img.shields.io/badge/2019Q2-v0.10.x-green.svg
-[gjl-releases]: https://github.com/JuliaAttic/Graphs.jl/releases
+[mani-cov-img]: http://codecov.io/github/JuliaManifolds/Manifolds.jl/coverage.svg?branch=master
+[mani-cov-url]: https://codecov.io/gh/JuliaManifolds/Manifolds.jl/
+[mani-build-img]: https://github.com/JuliaManifolds/Manifolds.jl/workflows/CI/badge.svg
+[mani-build-url]: https://github.com/JuliaManifolds/Manifolds.jl/actions?query=workflow%3ACI+branch%3Amaster
+[mani-url]: http://www.github.com/JuliaManifolds/Manifolds.jl
+[mani-stable]: https://img.shields.io/badge/2021Q2-v0.5.x-green.svg
+[mani-releases]: https://github.com/JuliaManifolds/Manifolds.jl/releases
 
 [lgraphs-cov-img]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl/coverage.svg?branch=master
 [lgraphs-cov-url]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl?branch=master
@@ -141,7 +141,7 @@ Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.nav
 [dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
 [dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2021Q1-v0.13.x-green.svg
+[dfg-stable]: https://img.shields.io/badge/2021Q2-v0.14.x-green.svg
 [dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones
 [dfg-releases]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
 
@@ -150,7 +150,7 @@ Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.nav
 [amp-build-img]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl.svg?branch=master
 [amp-build-url]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
-[amp-stable]: https://img.shields.io/badge/2021Q1-v0.3.x-green.svg
+[amp-stable]: https://img.shields.io/badge/2021Q2-v0.3.x-green.svg
 [amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
 [amp-releases]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/releases
 
@@ -168,6 +168,6 @@ Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.nav
 [rp-cov-url]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl?branch=master
 [rp-build-img]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl.svg?branch=master
 [rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
-[rp-stable]: https://img.shields.io/badge/2021Q1-v0.7.x-green.svg
+[rp-stable]: https://img.shields.io/badge/2021Q2-v0.7.x-green.svg
 [rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones
 [rp-releases]: https://github.com/JuliaRobotics/RoMEPlotting.jl/releases
