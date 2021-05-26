@@ -25,11 +25,11 @@ The easiest method is---via the terminal---to [download the desired](https://jul
 cd ~
 mkdir -p .julia
 cd .julia
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.2-linux-x86_64.tar.gz
-tar -xvf julia-1.5.2-linux-x86_64.tar.gz
-rm julia-1.5.2-linux-x86_64.tar.gz
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.1-linux-x86_64.tar.gz
+tar -xvf julia-1.6.1-linux-x86_64.tar.gz
+rm julia-1.6.1-linux-x86_64.tar.gz
 cd /usr/local/bin
-sudo ln -s ~/.julia/julia-1.5.2/bin/julia julia
+sudo ln -s ~/.julia/julia-1.6.1/bin/julia julia
 ```
 !!! note
     Feel free to modify this setup as you see fit.
@@ -86,11 +86,11 @@ There are a variety of useful packages in VSCode, such as `GitLens`, `LiveShare`
 ## Julia Packages
 
 The philosophy around Julia packages are discussed at length in the [Julia core documentation](https://docs.julialang.org/en/stable/manual/packages/), where each Julia package relates to a git repository likely found on [Github.com](http://www.github.com).
-To install a Julia package, simply open a `julia` REPL (equally the julia REPL in Atom/Juno) and type:
+To install a Julia package, simply open a `julia` REPL (equally the Julia REPL in VSCode) and type:
 
 ```julia
 ] # activate Pkg manager
-(v1.5) pkg> add Caesar
+(v1.6) pkg> add Caesar
 ```
 
 These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaRegistries/General](http://github.com/JuliaRegistries/General).
@@ -99,55 +99,28 @@ Unregistered latest packages can also be installed with using only the `Pkg.deve
 ```julia
 # Caesar is registered on JuliaRegistries/General
 julia> ]
-(v1.5) pkg> add Caesar
+(v1.6) pkg> add Caesar
+(v1.6) pkg> add Caesar#some-branch
+(v1.6) pkg> add Caesar@v0.10.0
+
+# or alternatively your own local fork (just using old link as example)
+(v1.6) pkg> add https://github.com/dehann/Caesar.jl
 ```
 
 See [Pkg.jl](https://github.com/JuliaLang/Pkg.jl) for details and features regarding package management, development, version control, virtual environments and much more.
-
-## Install Visualization Tools
-
-### RoMEPlotting.jl for 2D plots
-
-RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
-```julia
-(v1.5) pkg> add RoMEPlotting
-```
-
-!!! note
-    As of 1Q2020 it is likely that most systems won’t require a system install of libpango or even libcairo.
-    Previous versions of libraries required the following Linux system packages be installed:
-    ```bash
-    sudo apt-get install libfontconfig1
-    sudo apt-get install gettext
-    sudo apt-get install libcairo2
-    sudo apt-get install libpango1.0-0  # or libpango1.0-1
-    ```
-
-### Install 3D Visualization Utils (e.g. Arena.jl)
-
-3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
-Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
-
-!!! note
-    Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
-
-Install the latest `master` branch version with
-```julia
-(v1.5) pkg> add Arena#master
-```
 
 ## Running Unit Tests Locally
 
 Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
 ```julia
 # the multimodal incremental smoothing and mapping solver
-(v1.5) pkg> test IncrementalInference
+(v1.6) pkg> test IncrementalInference
 ...
 # robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
-(v1.5) pkg> test RoME
+(v1.6) pkg> test RoME
 ...
 # umbrella framework with interaction tools and more -- allows stand alone and server based solving
-(v1.5) pkg> test Caesar
+(v1.6) pkg> test Caesar
 ...
 ```
 
@@ -155,7 +128,7 @@ Unit tests can further be performed for the upstream packages as follows -- **NO
 
 Alternatively, the `dev` command:
 ```julia
-(v1.5) pkg> dev https://github.com/JuliaRobotics/Caesar.jl
+(v1.6) pkg> dev https://github.com/JuliaRobotics/Caesar.jl
 ```
 
 !!! warn
@@ -175,11 +148,35 @@ To use RoME with the newly created sysimage, start julia with:
 julia -O3 -J ~/.julia/dev/RoME/compileRoME/RoMESysimage.so
 ```
 
-## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
 
-Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).
+## 2D Plotting, RoMEPlotting.jl
+
+RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
+```julia
+(v1.6) pkg> add RoMEPlotting
+```
 
 ## Contributing, Issues, or Comments
 
 Please feel free to open [issues with Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl/issues) or even Fork and Pull Request as required.
 General conversations or comments can be made in the [Caesar Gist](https://gist.github.com/dehann/537f8a2eb9cc24d8bbd35ae92cb4d2d2).
+
+
+## Features To Be Restored In Future
+
+### Install 3D Visualization Utils (e.g. Arena.jl)
+
+3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
+Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
+
+!!! note
+    Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
+
+Install the latest `master` branch version with
+```julia
+(v1.5) pkg> add Arena#master
+```
+
+## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
+
+Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).
