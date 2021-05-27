@@ -144,8 +144,8 @@ function matchLeg!( fg::AbstractDFG,
   zseq_b = myData_b[:z_seq]
 
   # correlate z_seq0 against z_seq_m4
-  s_a = Sequences.MeasurementSequence(xseq_a, zseq_a) # full relative
-  s_b = Sequences.MeasurementSequence(xseq_b .- odoPredictedAlign, zseq_b)
+  s_a = Sequences.MeasurementSequence(xseq_a .- xseq_a[1], zseq_a) # full relative
+  s_b = Sequences.MeasurementSequence(xseq_b .- xseq_b[1] .- odoPredictedAlign, zseq_b)
   # FIXME ON FIRE dont have odo ground truth
   # see also: [x,i] = ssdcorr((x,z)_a, (x,z)_b)
 
@@ -274,6 +274,14 @@ driveOneBox!(fg, runback=runback, start=[0.0;0], NS=NS, docorr=false)
 # drive second box, implement correlation externally
 driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
 
+# drive second box, implement correlation externally
+driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
+
+# drive second box, implement correlation externally
+driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
+
+
+
 
 ##
 # 1st match: north-bound legs on first and second loop
@@ -282,10 +290,25 @@ xsq, f_ = matchLeg!(fg, [:x0, :x4],:NORTH, odoPredictedAlign=0, kappa=3, dofacto
 # p=Gadfly.plot(st)
 # push!(p,layer(x=xsq[1], y=xsq[2], Geom.line))
 
-
 # 2nd match: south-bound legs on first and second loop
 xsq, f_ = matchLeg!(fg, [:x2, :x6],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true)
 
+
+
+# 1st match: north-bound legs on first and second loop
+xsq, f_ = matchLeg!(fg, [:x4, :x8],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+# xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+# p=Gadfly.plot(st)
+# push!(p,layer(x=xsq[1], y=xsq[2], Geom.line))
+
+# 2nd match: south-bound legs on first and second loop
+xsq, f_ = matchLeg!(fg, [:x6, :x10],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+
+
+xsq, f_ = matchLeg!(fg, [:x8, :x12],  :NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+xsq, f_ = matchLeg!(fg, [:x10, :x14], :SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+
+# xsq, f_ = matchLeg!(fg, [:x12, :x16],  :NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
 
 ##
 
@@ -304,7 +327,10 @@ tree, _, _ = solveTree!(fg)
 
 
 plotKDE(fg, [:x0;:x1;:x2;:x3;:x4], levels=1)
+plotKDE(fg, [:x4;:x5;:x6;:x7;:x8], levels=1)
 
+plotKDE(fg, [:x8;:x9;:x10;:x11;:x12], levels=1)
+plotKDE(fg, [:x12;:x13;:x14;:x15;:x16], levels=1)
 
 
 ##
