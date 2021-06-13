@@ -4,6 +4,7 @@ module Caesar
 import Distributions: Normal
 import RoME: getRangeKDEMax2D
 import IncrementalInference: getSample, initfg
+import DistributedFactorGraphs: getManifold
 
 using Reexport
 using Requires
