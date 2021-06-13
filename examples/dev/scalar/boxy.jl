@@ -1,9 +1,4 @@
 
-# The plan, duh duh duuuuh!... 
-# - close out boxy with early results?
-# - Start down path of exper 5, which is circular, w/ low res prior (?)
-##
-
 #= 
 Proof of concept of 2D localization against a scalar field.
 In this example we use a sequence of 1D measurements and a known map with a
