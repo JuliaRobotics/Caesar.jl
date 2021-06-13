@@ -157,7 +157,7 @@ end
 
 ##
 
-nextPose(ps::Symbol; pattern=r"x") = Symbol("x",match(r"\d+", string(ps)).match |> x->(parse(Int,x)+1))
+nextPose(ps::Symbol; pattern=r"x") = Symbol(pattern.pattern, match(r"\d+", string(ps)).match |> x->(parse(Int,x)+1))
 
 
 
