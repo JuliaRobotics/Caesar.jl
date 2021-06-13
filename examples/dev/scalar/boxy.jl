@@ -61,30 +61,18 @@ global terrE = Interpolations.LinearInterpolation(x, terrE_)
 global terrW = Interpolations.LinearInterpolation(x, terrW_)
 
 
-function driveLeg!( fg, 
-                    startingPose, 
-                    start,                    
-                    v,
-                    terr,
-                    direction::Symbol;
-                    trueY::Real=0.0)
-  # fg - factor graph object
-  # startingPose
-  # start - 
-  # v - displacement vector (e.g. [NS; 0.0] for direction= :north) ASSUMES ONE ELEMENT ALWAYS ZERO
-  # terr - terrain vector (1D interpolant object)
-  # direction - direction symbol (:north,:south,:east,:west)
+# callback to structure sequences
+function callbackSequenceScalar_ex4(fg::AbstractDFG, lastpose::Symbol, start, v )
+  global terrE, terrW
 
-  # add end pose of the leg
-  newPose = nextPose(startingPose)
-  addVariable!(fg, newPose, Point2, tags=[:POSE,direction])
+  tags = getVariable(fg, lastpose).tags
 
-  addFactor!(fg, [newPose;], PartialPrior(Normal(trueY, 0.1),(2,)))
+  terr = if :NORTH in tags || :EAST in tags
+    terrW
+  elseif :SOUTH in tags || :WEST in tags
+    terrE
+  end
 
-  p2p = Point2Point2(MvNormal(v, [1.0; 1.0]))
-  addFactor!(fg, [startingPose; newPose], p2p, tags=[:ODOMETRY; direction])
-
-  # generate odometry and measurement data for this leg
   # avert your eyes: this assumes v is axis-aligned
   # To pay this technical debt: generate a 2D linspace and use it to query a 2D DEM interpolant
   x_seq = LinRange(start, start + sum(v), 100) # assumed 100 measurements per leg
@@ -97,26 +85,11 @@ function driveLeg!( fg,
   @assert !isapprox( Statistics.median(diff(x_seq)), 0, atol=1e-6) "why is x_seq[1:5]=$(x_seq[1:5])"
 
   someDict = Dict(:x_seq => x_seq, :z_seq => z_seq, :x_seq_n => x_seq_n, :z_seq_n => z_seq_n)
-  addData!(fg, :default_folder_store, startingPose, :elevationSequences, Vector{UInt8}(JSON2.write( someDict )), mimeType="application/json/octet-stream"  )
+  addData!(fg, :default_folder_store, lastpose, :elevationSequences, Vector{UInt8}(JSON2.write( someDict )), mimeType="application/json/octet-stream"  )
   
-  return newPose
+  nothing
 end
-# function driveLeg(x0, terrain, v, units)
-#   x = zeros(2,0)
-#   xm = zeros(2,0)
-#   z = zeros(0)
-#   zm = zeros(0)
 
-#   for i=1:units
-#       x.append(x[end]+v)
-#       xm.append(x[end]+ randn(2,1)) # noisy position
-      
-#       z.append( terrain(x[end]))  # not quite as it isn't 2d interp
-#       zm.append(z + sigma_z*randn(1))
-#   end
-
-#   # return pose, measurements (valid measured, )
-# end
 
 
 # matchLeg!(fg, [:x1, :x5], :NORTH)
@@ -186,6 +159,68 @@ end
 
 nextPose(ps::Symbol; pattern=r"x") = Symbol("x",match(r"\d+", string(ps)).match |> x->(parse(Int,x)+1))
 
+
+
+
+
+function driveLeg!( fg, 
+                    lastpose, 
+                    start,                    
+                    v,
+                    # terr,
+                    direction::Symbol;
+                    trueY::Real=0.0,
+                    graphinit::Bool=true,
+                    postpose_cb::Function=(fg_,latestpose)->() )
+  # fg - factor graph object
+  # lastpose
+  # start - 
+  # v - displacement vector (e.g. [NS; 0.0] for direction= :north) ASSUMES ONE ELEMENT ALWAYS ZERO
+  # terr - terrain vector (1D interpolant object)
+  # direction - direction symbol (:north,:south,:east,:west)
+
+  # generate odometry and measurement data for this leg
+  # cb = (g,lp) -> callbackSequenceScalar_ex4(g, lp, start, v )
+
+
+  # add end pose of the leg
+  newPose = nextPose(lastPose)
+  
+  p2p = Point2Point2(MvNormal(v, [1.0; 1.0]))
+  v_n = RoME._addPoseCanonical!(fg, lastPose, -1, p2p, genLabel=newPose, srcType=Point2
+                                graphinit=false, variableTags=[:ODOMETRY; direction], 
+                                postpose_cb=postpose_cb, overridePPE=[start+v[1]; trueY] )
+  #
+
+  # addVariable!(fg, newPose, Point2, tags=[:POSE,direction])
+  addFactor!(fg, [newPose;], PartialPrior(Normal(trueY, 0.1),(2,)), graphinit=graphinit)
+
+  # p2p = Point2Point2(MvNormal(v, [1.0; 1.0]))
+  # addFactor!(fg, [lastPose; newPose], p2p, tags=[:ODOMETRY; direction])
+
+  # # generate odometry and measurement data for this leg
+  # callbackSequenceScalar_ex4(fg, lastPose, start, v )
+
+  return newPose
+end
+# function driveLeg(x0, terrain, v, units)
+#   x = zeros(2,0)
+#   xm = zeros(2,0)
+#   z = zeros(0)
+#   zm = zeros(0)
+
+#   for i=1:units
+#       x.append(x[end]+v)
+#       xm.append(x[end]+ randn(2,1)) # noisy position
+      
+#       z.append( terrain(x[end]))  # not quite as it isn't 2d interp
+#       zm.append(z + sigma_z*randn(1))
+#   end
+
+#   # return pose, measurements (valid measured, )
+# end
+
+
 # drive clockwise, x is North, y is East (NED convention).
 # boxes start bottom left, spine of boxy helix is on x-axis
 function driveOneBox!(fg;
@@ -203,19 +238,35 @@ function driveOneBox!(fg;
   start_x, start_y = (start...,)
   
   # drive North NS units (northbound uses west slice)
-  lastPose = driveLeg!(fg, lastPose, start_x, [NS;0.0] ,terrW, :NORTH, trueY=0.0)
+  v = [NS;0.0]
+  lastPose = driveLeg!(fg, lastPose, start_x, v, :NORTH, trueY=0.0, 
+                        postpose_cb=(g,lp) -> callbackSequenceScalar_ex4(g, lp, start_x, v ) ) 
+  # ,terrW
+  #
   start_x = start_x+NS
 
   # drive East EW units (terrain does not matter here)
-  lastPose = driveLeg!(fg, lastPose, start_y ,[0.0; EW], terrW, :EAST, trueY=15.0)
+  v = [0.0; EW]
+  lastPose = driveLeg!(fg, lastPose, start_y ,[0.0; EW], :EAST, trueY=15.0,
+                        postpose_cb=(g,lp) -> callbackSequenceScalar_ex4(g, lp, start_y, v ) )
+  # ,terrW
+  #
   start_y = start_y + EW
   
   # drive South 0.7NS units
-  lastPose = driveLeg!(fg, lastPose, start_x, [-runback*NS;0.0],terrE, :SOUTH, trueY=15.0)
+  v = [-runback*NS;0.0]
+  lastPose = driveLeg!(fg, lastPose, start_x, v, :SOUTH, trueY=15.0,
+                        postpose_cb=(g,lp) -> callbackSequenceScalar_ex4(g, lp, start_x, v ) )
+  # ,terrE
+  #
   start_x = start_x - runback*NS
 
   # drive West EW units (terrain does not matter here)
-  lastPose = driveLeg!(fg, lastPose, start_y, [0.0; -EW], terrE, :WEST, trueY=0.0)
+  v = [0.0; -EW]
+  lastPose = driveLeg!(fg, lastPose, start_y, v, :WEST, trueY=0.0,
+                        postpose_cb=(g,lp) -> callbackSequenceScalar_ex4(g, lp, start_y, v ) )
+  # ,terrE
+  #
   start_y = start_y - EW
 
   # cop-out early on first run, or debug
