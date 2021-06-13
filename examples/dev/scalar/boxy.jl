@@ -187,7 +187,7 @@ function driveLeg!( fg,
   newPose = nextPose(lastPose)
   
   p2p = Point2Point2(MvNormal(v, [1.0; 1.0]))
-  v_n = RoME._addPoseCanonical!(fg, lastPose, -1, p2p, genLabel=newPose, srcType=Point2
+  v_n = RoME._addPoseCanonical!(fg, lastPose, -1, p2p, genLabel=newPose, srcType=Point2,
                                 graphinit=false, variableTags=[:ODOMETRY; direction], 
                                 postpose_cb=postpose_cb, overridePPE=[start+v[1]; trueY] )
   #
