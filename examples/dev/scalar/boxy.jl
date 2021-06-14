@@ -56,6 +56,8 @@ global terrE = Interpolations.LinearInterpolation(x, terrE_)
 global terrW = Interpolations.LinearInterpolation(x, terrW_)
 
 
+##
+
 # callback to structure sequences
 function callbackSequenceScalar_ex4(fg::AbstractDFG, lastpose::Symbol, start, v )
   global terrE, terrW
@@ -159,7 +161,7 @@ nextPose(ps::Symbol; pattern=r"x") = Symbol(pattern.pattern, match(r"\d+", strin
 
 
 function driveLeg!( fg, 
-                    lastpose, 
+                    lastPose, 
                     start,                    
                     v,
                     # terr,
@@ -183,7 +185,7 @@ function driveLeg!( fg,
   
   p2p = Point2Point2(MvNormal(v, [1.0; 1.0]))
   v_n = RoME._addPoseCanonical!(fg, lastPose, -1, p2p, genLabel=newPose, srcType=Point2,
-                                graphinit=false, variableTags=[:ODOMETRY; direction], 
+                                graphinit=false, variableTags=[:ODOMETRY; :POSE; direction], 
                                 postpose_cb=postpose_cb, overridePPE=[start+v[1]; trueY] )
   #
 
@@ -292,6 +294,7 @@ end
 
 (s::CalcFactor{<:Point2Point2Northing})(z, x1, x2) = z .- (x2[1] - x1[1])
 
+##
 
 # trajectory parameters
 NS = 15
@@ -311,8 +314,7 @@ addBlobStore!(fg, datastore)
 ##
 
 # actually start adding nodes 
-addVariable!(fg, :x0, Point2, tags=[:POSE;])
-addFactor!(fg, [:x0;], PriorPoint2(MvNormal([0;0.0], [0.01;0.01])))
+generateCanonicalFG_ZeroPose(fg=fg, varType=Point2, variableTags=[:POSE;])
 
 # drive first box, no correlations
 driveOneBox!(fg, runback=runback, start=[0.0;0], NS=NS, docorr=false)
@@ -330,29 +332,30 @@ driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
 
 
 ##
+
 # 1st match: north-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x0, :x4],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+xsq, f_ = matchLeg!(fg, [:x0, :x4],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=false);
 # xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
 # p=Gadfly.plot(st)
 # push!(p,layer(x=xsq[1], y=xsq[2], Geom.line))
 
 # 2nd match: south-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x2, :x6],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+xsq, f_ = matchLeg!(fg, [:x2, :x6],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true);
 
 
 
 # 1st match: north-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x4, :x8],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+xsq, f_ = matchLeg!(fg, [:x4, :x8],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true);
 # xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
 # p=Gadfly.plot(st)
 # push!(p,layer(x=xsq[1], y=xsq[2], Geom.line))
 
 # 2nd match: south-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x6, :x10],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+xsq, f_ = matchLeg!(fg, [:x6, :x10],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true);
 
 
-xsq, f_ = matchLeg!(fg, [:x8, :x12],  :NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
-xsq, f_ = matchLeg!(fg, [:x10, :x14], :SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+xsq, f_ = matchLeg!(fg, [:x8, :x12],  :NORTH, odoPredictedAlign=0, kappa=3, dofactor=true);
+xsq, f_ = matchLeg!(fg, [:x10, :x14], :SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true);
 
 # xsq, f_ = matchLeg!(fg, [:x12, :x16],  :NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
 
