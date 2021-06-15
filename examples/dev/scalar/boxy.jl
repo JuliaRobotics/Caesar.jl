@@ -55,42 +55,33 @@ x = range(-100, 100, length = length(terrE_))
 global terrE = Interpolations.LinearInterpolation(x, terrE_)
 global terrW = Interpolations.LinearInterpolation(x, terrW_)
 
+##
+
+
+"""
+    Point2Point2Northing
+
+IIF will deal with partials, 
+
+DevNotes
+- FIXME ongoing (2021Q2), see #1206, likely also #1010
+"""
+struct Point2Point2Northing{B <: IIF.SamplableBelief, T <: Tuple} <: IIF.AbstractRelativeMinimize
+  Z::B
+  partial::T # which dimension the partial applies to 
+end
+
+function IIF.getSample(s::CalcFactor{<:Point2Point2Northing}, N::Int=1)
+  return ( reshape(rand(s.factor.Z,N),1,N), )
+end
+
+(s::CalcFactor{<:Point2Point2Northing})(z, x1, x2) = z .- (x2[1] - x1[1])
+
 
 ##
 
-# callback to structure sequences
-function callbackSequenceScalar_ex4(fg::AbstractDFG, lastpose::Symbol, start, v )
-  global terrE, terrW
-
-  tags = getVariable(fg, lastpose).tags
-
-  terr = if :NORTH in tags || :EAST in tags
-    terrW
-  elseif :SOUTH in tags || :WEST in tags
-    terrE
-  end
-
-  # avert your eyes: this assumes v is axis-aligned
-  # To pay this technical debt: generate a 2D linspace and use it to query a 2D DEM interpolant
-  x_seq = LinRange(start, start + sum(v), 100) # assumed 100 measurements per leg
-
-  z_seq = terr.(x_seq)
-  # add noise to x_seq (odometry) and z_seq (meas noise)
-  x_seq_n = 0.01*randn(100)
-  z_seq_n = 1.0*randn(100)
-  
-  @assert !isapprox( Statistics.median(diff(x_seq)), 0, atol=1e-6) "why is x_seq[1:5]=$(x_seq[1:5])"
-
-  someDict = Dict(:x_seq => x_seq, :z_seq => z_seq, :x_seq_n => x_seq_n, :z_seq_n => z_seq_n)
-  addData!(fg, :default_folder_store, lastpose, :elevationSequences, Vector{UInt8}(JSON2.write( someDict )), mimeType="application/json/octet-stream"  )
-  
-  nothing
-end
-
-
-
-# matchLeg!(fg, [:x1, :x5], :NORTH)
-# matchLeg!(fg, [:x3, :x7], :SOUTH)
+# matchLeg!(fg, [:x1, :x5], :POSITIVE_X)
+# matchLeg!(fg, [:x3, :x7], :NEGATIVE_X)
 function matchLeg!( fg::AbstractDFG,
                     legs::AbstractVector{Symbol}, 
                     direction::Symbol;
@@ -98,7 +89,6 @@ function matchLeg!( fg::AbstractDFG,
                     odoPredictedAlign::Real=0,
                     kappa::Real=2)
   # 
-  # ls(fg, tags=[:NORTH])
 
   dataEntry, dataBytes = getData(fg, legs[1], :elevationSequences)
   myData_a = JSON2.read(IOBuffer(dataBytes), Dict{Symbol, Vector{Float64}})
@@ -152,153 +142,80 @@ function matchLeg!( fg::AbstractDFG,
 end
 
 
+
 ##
 
-nextPose(ps::Symbol; pattern=r"x") = Symbol(pattern.pattern, match(r"\d+", string(ps)).match |> x->(parse(Int,x)+1))
 
 
-
-
-
-function driveLeg!( fg, 
-                    lastPose, 
-                    start,                    
-                    v,
-                    # terr,
-                    direction::Symbol;
-                    trueY::Real=0.0,
-                    graphinit::Bool=true,
-                    postpose_cb::Function=(fg_,latestpose)->() )
-  # fg - factor graph object
-  # lastpose
-  # start - 
-  # v - displacement vector (e.g. [NS; 0.0] for direction= :north) ASSUMES ONE ELEMENT ALWAYS ZERO
-  # terr - terrain vector (1D interpolant object)
-  # direction - direction symbol (:north,:south,:east,:west)
-
-  # generate odometry and measurement data for this leg
-  # cb = (g,lp) -> callbackSequenceScalar_ex4(g, lp, start, v )
-
-
-  # add end pose of the leg
-  newPose = nextPose(lastPose)
+# callback to structure sequences
+function newcallback_ex4(fg::AbstractDFG, lastPose::Symbol)
+  # temp workaround for terrain interpolators
   
-  p2p = Point2Point2(MvNormal(v, [1.0; 1.0]))
-  v_n = RoME._addPoseCanonical!(fg, lastPose, -1, p2p, genLabel=newPose, srcType=Point2,
-                                graphinit=false, variableTags=[:ODOMETRY; :POSE; direction], 
-                                postpose_cb=postpose_cb, overridePPE=[start+v[1]; trueY] )
-  #
-
-  # addVariable!(fg, newPose, Point2, tags=[:POSE,direction])
-  addFactor!(fg, [newPose;], PartialPrior(Normal(trueY, 0.1),(2,)), graphinit=graphinit)
-
-  # p2p = Point2Point2(MvNormal(v, [1.0; 1.0]))
-  # addFactor!(fg, [lastPose; newPose], p2p, tags=[:ODOMETRY; direction])
-
-  # # generate odometry and measurement data for this leg
-  # callbackSequenceScalar_ex4(fg, lastPose, start, v )
-
-  return newPose
-end
-# function driveLeg(x0, terrain, v, units)
-#   x = zeros(2,0)
-#   xm = zeros(2,0)
-#   z = zeros(0)
-#   zm = zeros(0)
-
-#   for i=1:units
-#       x.append(x[end]+v)
-#       xm.append(x[end]+ randn(2,1)) # noisy position
-      
-#       z.append( terrain(x[end]))  # not quite as it isn't 2d interp
-#       zm.append(z + sigma_z*randn(1))
-#   end
-
-#   # return pose, measurements (valid measured, )
-# end
-
-
-# drive clockwise, x is North, y is East (NED convention).
-# boxes start bottom left, spine of boxy helix is on x-axis
-function driveOneBox!(fg;
-                      lastPose=sortDFG(ls(fg, tags=[:POSE]))[end],
-                      start = [0.0;0.0],
-                      runback = 2/3,
-                      NS = 15,
-                      EW = 15,
-                      docorr::Bool=false  )
-  #
-  global terrE, terrW
-  #
-  img = load(joinpath(dirname(dirname(pathof(Caesar))), "examples/dev/scalar/dem.png")) .|> Gray
-  h = 1e3*Float64.( @view img[512,:])
-  start_x, start_y = (start...,)
+  @show lastPose
+  @show tags = getVariable(fg, lastPose).tags
+  @show prevPose = incrSuffix(lastPose, -1)
   
-  # drive North NS units (northbound uses west slice)
-  v = [NS;0.0]
-  lastPose = driveLeg!(fg, lastPose, start_x, v, :NORTH, trueY=0.0, 
-                        postpose_cb=(g,lp) -> callbackSequenceScalar_ex4(g, lp, start_x, v ) ) 
-  # ,terrW
-  #
-  start_x = start_x+NS
-
-  # drive East EW units (terrain does not matter here)
-  v = [0.0; EW]
-  lastPose = driveLeg!(fg, lastPose, start_y ,[0.0; EW], :EAST, trueY=15.0,
-                        postpose_cb=(g,lp) -> callbackSequenceScalar_ex4(g, lp, start_y, v ) )
-  # ,terrW
-  #
-  start_y = start_y + EW
+  # don't do anything extra on first pose :x0
+  if lastPose == :x0
+    return nothing
+  end
   
-  # drive South 0.7NS units
-  v = [-runback*NS;0.0]
-  lastPose = driveLeg!(fg, lastPose, start_x, v, :SOUTH, trueY=15.0,
-                        postpose_cb=(g,lp) -> callbackSequenceScalar_ex4(g, lp, start_x, v ) )
-  # ,terrE
-  #
-  start_x = start_x - runback*NS
+  # true location of poses in world
+  simPos = getPPE(fg, lastPose, :simulated).suggested
+  # generate xseq and zseq using this and previous pose data
+  simPosPrev = getPPE(fg, prevPose, :simulated).suggested
+  # linear for Point2Point2
+  @show simOdo = simPos - simPosPrev
+  
+  # add a partial prior in Y if no full prior
+  if 0 == length( intersect(ls(fg, lastPose), lsf(fg, PriorPoint2)) )
+    pp = PartialPrior(Normal(simPos[2], 0.1),(2,))
+    @info "adding partial prior on simulated y position" lastPose simPos[2] 
+    addFactor!(fg, [lastPose;], pp, graphinit=false, tags=[:EX4_PARTIALPRIOR_Y])
+  end
+  
+  
+  # assumed 100 measurements per leg
+  Nseq = 100
+  
+  # avert your eyes: this assumes v is axis-aligned
+  # To pay this technical debt: generate a 2D linspace and use it to query a 2D DEM interpolant
+  terr, x_seq = if abs(simOdo[2]) < abs(simOdo[1])
+    global terrW
+    # assume north south
+    xs = LinRange(simPos[1], simPosPrev[1], Nseq)
+    terrW, xs
+  elseif abs(simOdo[1]) < abs(simOdo[2])
+    global terrE
+    # assume east west
+    xs = LinRange(simPos[2], simPosPrev[2], Nseq)
+    terrE, xs
+  end
 
-  # drive West EW units (terrain does not matter here)
-  v = [0.0; -EW]
-  lastPose = driveLeg!(fg, lastPose, start_y, v, :WEST, trueY=0.0,
-                        postpose_cb=(g,lp) -> callbackSequenceScalar_ex4(g, lp, start_y, v ) )
-  # ,terrE
-  #
-  start_y = start_y - EW
+  z_seq = terr.(x_seq)
+  # add noise to x_seq (odometry) and z_seq (meas noise)
+  x_seq_n = 0.01*randn(Nseq)
+  z_seq_n = 1.0*randn(Nseq)
+  
+  @assert !isapprox( Statistics.median(diff(x_seq)), 0, atol=1e-6) "why is x_seq[1:5]=$(x_seq[1:5])"
 
-  # cop-out early on first run, or debug
-  # docorr ? nothing : (return nothing)
+  someDict = Dict(:x_seq => x_seq, :z_seq => z_seq, :x_seq_n => x_seq_n, :z_seq_n => z_seq_n)
+  addData!( fg, :default_folder_store, lastPose, :elevationSequences, 
+            Vector{UInt8}(JSON2.write( someDict )), 
+            mimeType="application/json/octet-stream"  )
+  #
 
   nothing
 end
 
 
-##
 
-"""
-    Point2Point2Northing
-
-IIF will deal with partials, 
-
-DevNotes
-- FIXME ongoing (2021Q2), see #1206, likely also #1010
-"""
-struct Point2Point2Northing{B <: IIF.SamplableBelief, T <: Tuple} <: IIF.AbstractRelativeMinimize
-  Z::B
-  partial::T # which dimension the partial applies to 
-end
-
-function IIF.getSample(s::CalcFactor{<:Point2Point2Northing}, N::Int=1)
-  return ( reshape(rand(s.factor.Z,N),1,N), )
-end
-
-(s::CalcFactor{<:Point2Point2Northing})(z, x1, x2) = z .- (x2[1] - x1[1])
 
 ##
 
 # trajectory parameters
 NS = 15
-runback = 2/3
+skew_x = 2/3
 
 # setup the factor graph
 fg = initfg()
@@ -311,53 +228,41 @@ datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir)
 addBlobStore!(fg, datastore)
 
 
+
 ##
 
-# actually start adding nodes 
-generateCanonicalFG_ZeroPose(fg=fg, varType=Point2, variableTags=[:POSE;])
-
-# drive first box, no correlations
-driveOneBox!(fg, runback=runback, start=[0.0;0], NS=NS, docorr=false)
-
-# drive second box, implement correlation externally
-driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
-
-# drive second box, implement correlation externally
-driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
-
-# drive second box, implement correlation externally
-driveOneBox!(fg, runback=runback, start=[(1-runback)*NS;0], NS=NS, docorr=false)
-
+# drive the first box, no correlations
+RoME.generateCanonicalFG_Boxes2D!(8, dfg=fg, skew_x=skew_x, postpose_cb=newcallback_ex4)
 
 
 
 ##
 
 # 1st match: north-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x0, :x4],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=false);
+xsq, f_ = matchLeg!(fg, [:x0, :x4], :POSITIVE_X, odoPredictedAlign=0, kappa=3, dofactor=false);
 # xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
 # p=Gadfly.plot(st)
 # push!(p,layer(x=xsq[1], y=xsq[2], Geom.line))
 
 # 2nd match: south-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x2, :x6],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true);
+xsq, f_ = matchLeg!(fg, [:x2, :x6], :NEGATIVE_X, odoPredictedAlign=0, kappa=3, dofactor=true);
 
 
 
 # 1st match: north-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x4, :x8],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true);
-# xsq, f_ = matchLeg!(fg, [:x1, :x5],:NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+xsq, f_ = matchLeg!(fg, [:x4, :x8],:POSITIVE_X, odoPredictedAlign=0, kappa=3, dofactor=true);
+# xsq, f_ = matchLeg!(fg, [:x1, :x5],:POSITIVE_X, odoPredictedAlign=0, kappa=3, dofactor=true)
 # p=Gadfly.plot(st)
 # push!(p,layer(x=xsq[1], y=xsq[2], Geom.line))
 
 # 2nd match: south-bound legs on first and second loop
-xsq, f_ = matchLeg!(fg, [:x6, :x10],:SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true);
+xsq, f_ = matchLeg!(fg, [:x6, :x10],:NEGATIVE_X, odoPredictedAlign=0, kappa=3, dofactor=true);
 
 
-xsq, f_ = matchLeg!(fg, [:x8, :x12],  :NORTH, odoPredictedAlign=0, kappa=3, dofactor=true);
-xsq, f_ = matchLeg!(fg, [:x10, :x14], :SOUTH, odoPredictedAlign=0, kappa=3, dofactor=true);
+xsq, f_ = matchLeg!(fg, [:x8, :x12],  :POSITIVE_X, odoPredictedAlign=0, kappa=3, dofactor=true);
+xsq, f_ = matchLeg!(fg, [:x10, :x14], :NEGATIVE_X, odoPredictedAlign=0, kappa=3, dofactor=true);
 
-# xsq, f_ = matchLeg!(fg, [:x12, :x16],  :NORTH, odoPredictedAlign=0, kappa=3, dofactor=true)
+# xsq, f_ = matchLeg!(fg, [:x12, :x16],  :POSITIVE_X, odoPredictedAlign=0, kappa=3, dofactor=true)
 
 ##
 
@@ -401,21 +306,6 @@ addFactor!(fg, [:x0; :x4], plr, tags=[:TERRAIN,:MATCH])
 
 
 
-
-
-
-## ## TEMPORARY
-
-
-##
-
-
-
-
-bel = Normal(10,1.0)
-bel = AliasingScalarSampler(..., ...)
-
-plr = Point2Point2Northing(bel, (1,))
 
 
 
