@@ -27,7 +27,7 @@ function loadDEM!(  fg::AbstractDFG,
                     y::Vector)
 
     for i in 1:length(x)
-        for j in length(y)
+        for j in 1:length(y)
             s = Symbol("pt$(i)_$(j)") 
             addVariable!(fg, s, Point3)
         
@@ -35,7 +35,25 @@ function loadDEM!(  fg::AbstractDFG,
             addFactor!(fg,[s], f, graphinit=false)
         end
     end
+
+    # TODO smoothness constraints
+
     nothing
+end
+
+
+function getTM(dem::Matrix)
+    # get z transition samples over x and y
+    # NOTE: this works over a regular grid, so take care when using
+    # with non-uniformly spaced points
+    s = size(dem)
+    dc = img[2:(s[1]-1), 2:(s[2]-1)]
+    
+    dx1 = dc - img[1:(s[1]-2), 2:(s[2]-1)]
+    dx2 = dc - img[3:s[1],     2:(s[2]-1)]
+    dy1 = dc - img[2:(s[1]-1), 1:(s[1]-2)]
+    dy2 = dc - img[2:(s[1]-1), 3:s[2]]
+    [[dx1[:];dx2[:]],[dy1[:];dy2[:]]]
 end
 
 fg = initfg()
