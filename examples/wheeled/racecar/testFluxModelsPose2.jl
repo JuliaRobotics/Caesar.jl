@@ -19,7 +19,7 @@ end
 ##
 
 # start with a basic factor graph
-fg = generateCanonicalFG_ZeroPose2()
+fg = generateCanonicalFG_ZeroPose(varType=Pose2)
 
 mvnNaive = MvNormal(zeros(3), diagm([1.0;1.0;0.01]))
 

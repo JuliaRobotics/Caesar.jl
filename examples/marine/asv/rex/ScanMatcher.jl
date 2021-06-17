@@ -102,7 +102,7 @@ endsweep = 10
 graphinit = false
 
 # newfg = initfg()
-newfg = generateCanonicalFG_ZeroPose2()
+newfg = generateCanonicalFG_ZeroPose(varType=Pose2)
 for i in 1:(endsweep-startsweep)
     addVariable!(newfg, Symbol("x$i"), Pose2, solvable=1)
 end

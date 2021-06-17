@@ -71,7 +71,7 @@ allTags = deepcopy(detector.(imgs))
 
 ## init the factor graph
 
-fg = generateCanonicalFG_ZeroPose2()
+fg = generateCanonicalFG_ZeroPose(varType=Pose2)
 
 getSolverParams(fg).useMsgLikelihoods = true
 
