@@ -70,6 +70,10 @@ Newly created page to list related references and additional literature pertaini
 
 [3.4]  Boumal, Nicolas. [An introduction to optimization on smooth manifolds. Available online](http://sma.epfl.ch/~nboumal/book/index.html), May, 2020.
 
+[3.5]  [Relationship between the Hessianand Covariance Matrix forGaussian Random Variables, John Wiley & Sons](https://onlinelibrary.wiley.com/doi/pdf/10.1002/9780470824566.app1)
+
+[3.6]. Pennec, Xavier. [Intrinsic Statistics on Riemannian Manifolds: Basic Tools for Geometric Measurements, HAL Archive](https://hal.inria.fr/inria-00614994/PDF/Pennec.JMIV06.pdf), 2011, Inria, France.
+
 ### Signal Processing (Beamforming and Channel Deconvolution)
 
 [4.1]  Van Trees, H.L., 2004. Optimum array processing: Part IV of detection, estimation, and modulation theory. John Wiley & Sons.
