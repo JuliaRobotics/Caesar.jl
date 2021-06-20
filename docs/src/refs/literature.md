@@ -70,7 +70,7 @@ Newly created page to list related references and additional literature pertaini
 
 [3.4]  Boumal, Nicolas. [An introduction to optimization on smooth manifolds. Available online](http://sma.epfl.ch/~nboumal/book/index.html), May, 2020.
 
-[3.5]  [Relationship between covariance and the Hessian, John Wiley & Sons](https://onlinelibrary.wiley.com/doi/pdf/10.1002/9780470824566.app1)
+[3.5]  [Relationship between the Hessianand Covariance Matrix forGaussian Random Variables, John Wiley & Sons](https://onlinelibrary.wiley.com/doi/pdf/10.1002/9780470824566.app1)
 
 ### Signal Processing (Beamforming and Channel Deconvolution)
 
