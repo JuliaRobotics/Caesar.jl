@@ -4,6 +4,7 @@ Load a DEM as a Point3 set in a factor graph
 
 using Images
 using FileIO
+using Interpolations
 using Caesar
 using RoME
 using RoME: MeanMaxPPE
@@ -59,10 +60,10 @@ function loadDEM!(  fg::AbstractDFG,
             simPPE = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
             setPPE!(pt, refKey, typeof(simPPE), simPPE)
             
-            # Regular grid triangulation
-            # add factor to (i-1,j) 
-            # add factor to (i, j-1)
-            # add factor to (i-1, j-1)
+            # Regular grid triangulation:
+            #  add factor to (i-1,j)     |
+            #  add factor to (i, j-1)    -
+            #  add factor to (i-1, j-1)  \
 
             # no edges to prev row on first row
             if i>1
@@ -94,8 +95,13 @@ end
 
 ## Testing 
 
-# 0. init empty FG 
+# 0. init empty FG w/ datastore
 fg = initfg()
+storeDir = joinLogPath(fg,"data")
+mkpath(storeDir)
+datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
+addBlobStore!(fg, datastore)
+
 
 # 1. load DEM
 # 27.622065 seconds (6.64 M allocations: 25.847 GiB, 6.26% gc time)
@@ -122,6 +128,23 @@ plot(
     layer(x=_xy[:,1],y=_xy[:,2], Geom.path)
 )
 
-# 3. 
+# 3. simulate elevation measurements
+dem = Interpolations.LinearInterpolation((x,y), img) # interpolated DEM
+elevation(p) = dem[getPPE(fg, p, :simulated).suggested[1:2]'...]
+
+poses = ls(fg, r"x\d+") |> sortDFG
+
+# fetch interpolated elevation at ground truth position 
+
+for p in poses
+    e = elevation(p) 
+    # add to variable
+
+end
+
+# 4a. add pairwise constraints between poses and points
+
+# 4b. add pairwise constraints between poses (cross-over)
+
 
 
