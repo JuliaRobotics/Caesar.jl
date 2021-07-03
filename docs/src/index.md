@@ -9,13 +9,21 @@ Click here to go to the Caesar.jl Github repo:
 [![source](https://img.shields.io/badge/source-code-yellow.svg)](https://github.com/JuliaRobotics/Caesar.jl)
 
 ## Introduction
-Caesar is an open-source robotic software stack for combining heterogeneous and ambiguous data streams.  The focus is predominantly on geometric/spatial estimation tasks related to simultaneous localization and mapping (SLAM), but this software is also highly extensible and well suited to a variety of estimation/filtering-type tasks — especially in non-Gaussian/multimodal settings.  Caesar.jl addresses numerous issues that arise in prior SLAM solutions: solving under-defined systems, inference with non-Gaussian measurements, standard features for natively handling ambiguous data association and multi-hypotheses, simplifying bespoke factor development, centralized (or peer-to-peer distributed) factor-graph persistence with databases and cloud infrastructure, federated multi-session/agent reduction.  Caesar.jl originates from research work in navigation systems, see the [literature reference page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more information.
+Caesar is an open-source robotic software stack aimed at localization and mapping for robotics, using non-Gaussian graphical model state-estimation techniques.  Ths factor graph method is well suited to combining heterogeneous and ambiguous sonsor data streams.  The focus is predominantly on geometric/spatial/semantic estimation tasks related to simultaneous localization and mapping (SLAM).  The software is also highly extensible and well suited to a variety of estimation/filtering-type tasks — especially in non-Gaussian/multimodal settings.  
 
-[NavAbility](https://www.navability.io/) administers the Caesar/RoME/IncrementalInference packages, please contact info@navability.io for more details.
+Caesar.jl addresses numerous issues that arise in prior SLAM solutions, including: 
+- solving under-defined systems, 
+- inference with non-Gaussian measurements, 
+- standard features for natively handling ambiguous data association and multi-hypotheses, 
+- simplifying bespoke factor development, 
+- centralized (or peer-to-peer distributed) factor-graph persistence, 
+- federated multi-session/agent reduction, and many more.  
 
-## Focus Area
+Caesar.jl is community orientef and originates from research work at MIT, see the [literature reference page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more information.
 
-This project focuses on the open development of a stable, reliable, verified, user-friendly, and growing library that is well suited to various data-fusion / state-estimation aspects of robotics and autonomy in [non-Gaussian/multi-modal](https://juliarobotics.org/Caesar.jl/latest/concepts/concepts/#Why/Where-does-non-Gaussian-data-come-from?-1) data processing.
+[NavAbility](https://www.navability.io/) administers the Caesar/RoME/IncrementalInference packages, please contact [info@navability.io](https://navability.io/contact/) for more details.
+
+Ongoing work on this project focuses on the open development of a stable, reliable, verified, user-friendly, and growing library that is well suited to various data-fusion / state-estimation aspects of robotics and autonomy in [non-Gaussian/multi-modal](https://juliarobotics.org/Caesar.jl/latest/concepts/concepts/#Why/Where-does-non-Gaussian-data-come-from?-1) data processing.
 
 ## A Few Highlights
 
@@ -80,9 +88,9 @@ We are grateful for many, many contributions within the Julia package ecosystem 
 Consider citing our work:
 ```
 @misc{caesarjl,
-  author = "Contributors and Packages",
-  title =  "Caesar.jl",
-  year =   2020,
+  author = "Contributors and Dependencies",
+  title =  "Caesar.jl, v0.10",
+  year =   2021,
   url =    "https://github.com/JuliaRobotics/Caesar.jl"
 }
 ```
