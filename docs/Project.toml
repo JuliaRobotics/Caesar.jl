@@ -38,7 +38,7 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [compat]
-ApproxManifoldProducts = "≥ 0.0.3"
+ApproxManifoldProducts = "≥ 0.3"
 Combinatorics = "0.7, 1"
 CoordinateTransformations = "≥ 0.5"
 DataStructures = "≥ 0.15"
