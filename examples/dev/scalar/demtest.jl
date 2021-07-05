@@ -43,7 +43,7 @@ addBlobStore!(fg, datastore)
 
 ##
 
-# 1. load DEM
+# 1. load DEM into the factor graph
 # point uncertainty - 2.5m horizontal, 1m vertical
 # horizontal uncertainty chosen so that 3sigma is approx half the resolution
 sigma = diagm([2.5, 2.5, 1.0])
@@ -71,7 +71,7 @@ function cb(fg_, lastpose)
   
   # create prior
   hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e)
-  pr = PriorPoint2(hmd)
+  pr = PartialPrior(hmd, (1,2))
   addFactor!(fg_, [lastpose], pr, tags=[:DEM;], graphinit=false)
   nothing
 end
@@ -79,8 +79,8 @@ end
 
 ##
 
-@time generateCanonicalFG_Helix2DSlew!(5, posesperturn=30, radius=500, dfg=fg, graphinit=false, slew_y=2/3, postpose_cb=cb)
-
+@time generateCanonicalFG_Helix2DSlew!(10, posesperturn=30, radius=500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
+deleteFactor!(fg, :x0f1)
 
 ##
 
