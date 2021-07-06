@@ -9,7 +9,7 @@ export buildDEMSimulated, loadDEM!
 """
 Loads a sample DEM (as if simulated) on a regular grid... Its the Grand Canyon, 18x18km, 17m
 """
-function buildDEMSimulated(scale=1, N=100, flip_xy=true)
+function buildDEMSimulated(scale=1, N=100; flip_xy=true)
     img_ = load(joinpath(dirname(dirname(pathof(Caesar))), "examples","dev","scalar","dem.png")) .|> Gray
     img_ = scale.*Float64.(img_)
 
