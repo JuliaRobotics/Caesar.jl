@@ -34,33 +34,10 @@ using .CommonUtils
 
 
 # # load dem (18x18km span, ~17m/px)
-x, y, img = buildDEMSimulated(1, 100) 
+x, y, img = buildDEMSimulated(1, 100, flip_xy=false) 
 
 # imshow(img)
 
-
-## Testing 
-
-# 0. init empty FG w/ datastore
-fg = initfg()
-storeDir = joinLogPath(fg,"data")
-mkpath(storeDir)
-datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
-addBlobStore!(fg, datastore)
-
-
-##
-
-# 1. load DEM into the factor graph
-# point uncertainty - 2.5m horizontal, 1m vertical
-# horizontal uncertainty chosen so that 3sigma is approx half the resolution
-sigma = diagm([2.5, 2.5, 1.0])
-@time loadDEM!(fg, img, (x), (y), meshEdgeSigma=sigma);
-
-
-##
-
-# 2. generate trajectory 
 # modify to generate elevation measurements (data/smallData as in Boxy) and priors
 
 dem = Interpolations.LinearInterpolation((x,y), img) # interpolated DEM
@@ -79,15 +56,37 @@ function cb(fg_, lastpose)
   
   # create prior
   hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e)
-  pr = PartialPrior(hmd, (1,2))
+  pr = PartialPriorPassThrough(hmd, (1,2))
   addFactor!(fg_, [lastpose], pr, tags=[:DEM;], graphinit=false, nullhypo=0.1)
   nothing
 end
 
 
+## Testing 
+
+# 0. init empty FG w/ datastore
+fg = initfg()
+storeDir = joinLogPath(fg,"data")
+mkpath(storeDir)
+datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
+addBlobStore!(fg, datastore)
+
+
 ##
 
-@time generateCanonicalFG_Helix2DSlew!(100, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
+# 1. load DEM into the factor graph
+# point uncertainty - 2.5m horizontal, 1m vertical
+# horizontal uncertainty chosen so that 3sigma is approx half the resolution
+if false
+  sigma = diagm([2.5, 2.5, 1.0])
+  @time loadDEM!(fg, img, (x), (y), meshEdgeSigma=sigma);
+end
+
+##
+
+# 2. generate trajectory 
+
+@time generateCanonicalFG_Helix2DSlew!(30, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
 deleteFactor!(fg, :x0f1)
 
 getSolverParams(fg).graphinit = false
@@ -102,6 +101,21 @@ tree, _, = solveTree!(fg)
 # repeatCSMStep!(hists[3],6)
 
 ##
+
+mkdir("/tmp/caesar/results")
+mkdir("/tmp/caesar/results/scalar")
+# starting from 1, solve a total of LAST+STEP-1 number of times, plotting after each STEP number of solves
+STEP, LAST = 5, 41
+for (a,z) in [(i%STEP,i+STEP-1) for i in 1:STEP:LAST]
+  for _ in a:z
+    solveTree!(fg, storeOld=true);
+  end
+  plotSLAM2D(fg, drawContour=false, drawEllipse=true) |> PDF("/tmp/caesar/results/scalar/h1500_150_01nh_$(z).pdf",20cm,20cm)
+end
+
+##
+
+plotSLAM2D(fg, solveKey=:simulated, drawContour=false, drawPoints=false, drawEllipse=false)
 
 
 ##
