@@ -12,8 +12,16 @@ using RoME: MeanMaxPPE
 using ProgressMeter
 
 using TensorCast
+using RoMEPlotting
 using Gadfly
 Gadfly.set_default_plot_size(35cm, 25cm)
+
+## only run this if planning big solves
+
+using Distributed
+addprocs(20);
+using Caesar
+@everywhere using Caesar
 
 ##
 
@@ -72,18 +80,31 @@ function cb(fg_, lastpose)
   # create prior
   hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e)
   pr = PartialPrior(hmd, (1,2))
-  addFactor!(fg_, [lastpose], pr, tags=[:DEM;], graphinit=false)
+  addFactor!(fg_, [lastpose], pr, tags=[:DEM;], graphinit=false, nullhypo=0.1)
   nothing
 end
 
 
 ##
 
-@time generateCanonicalFG_Helix2DSlew!(10, posesperturn=30, radius=500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
+@time generateCanonicalFG_Helix2DSlew!(100, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
 deleteFactor!(fg, :x0f1)
+
+getSolverParams(fg).graphinit = false
+getSolverParams(fg).treeinit = true
 
 ##
 
+tree, _, = solveTree!(fg)
+
+# smtasks = Task[]
+# tree, _, = solveTree!(fg; smtasks, recordcliqs=ls(fg))
+# repeatCSMStep!(hists[3],6)
+
+##
+
+
+##
 
 # check: query variables
 getPPE(fg, :x0, :simulated).suggested

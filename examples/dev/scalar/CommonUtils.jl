@@ -9,13 +9,23 @@ export buildDEMSimulated, loadDEM!
 """
 Loads a sample DEM (as if simulated) on a regular grid... Its the Grand Canyon, 18x18km, 17m
 """
-function buildDEMSimulated(scale=1, N=100)
-    img = load(joinpath(dirname(dirname(pathof(Caesar))), "examples","dev","scalar","dem.png")) .|> Gray
-    img = scale.*Float64.(img)
+function buildDEMSimulated(scale=1, N=100, flip_xy=true)
+    img_ = load(joinpath(dirname(dirname(pathof(Caesar))), "examples","dev","scalar","dem.png")) .|> Gray
+    img_ = scale.*Float64.(img_)
+
+    # flip image so x-axis in plot is North and y-axis is West (ie img[-north,west], because top left is 0,0)
+    img = if flip_xy
+        img = collect(img_')
+        reverse(img, dims=2)
+    else
+        img_
+    end
+
     N_ = minimum([N; size(img)...])
     img = img[1:N_, 1:N_]
     x = range(-9e3, 9e3, length = size(img,1)) # North
     y = range(-9e3, 9e3, length = size(img,2)) # East
+
     return (x, y, img)
 end
 
