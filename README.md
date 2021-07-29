@@ -12,9 +12,8 @@ Click on the badges to follow web url links:
 |:------:|:------:|:----------------:|:-------------:|:-----:|
 | [![Build Status][build-v0.9]][build-url] | [![Build Status][build-v0.10]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
-## Get Involved and Code of Conduct
-
-This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the Slack channel, Julia Discourse, or Github issues to get in touch.
+Also find factor graph solver DOI at:
+[![doi-img]][doi-url]
 
 # Bleeding-edge Development Status
 
@@ -41,19 +40,27 @@ We are grateful for many, many contributions within the Julia package ecosystem 
 Consider citing our work:
 
 ```
-@misc{caesarjl,
-  author = "Contributors and Dependencies",
-  title =  "Caesar.jl",
-  year =   2021,
-  url =    "https://github.com/JuliaRobotics/Caesar.jl"
+@online{Caesarjl2021,
+ author =        {{P}ackage {C}ontributors and {E}cosystem},
+ title =         {Caesar.jl, v0.10.2},
+ year =          {2021},
+ doi=            {Solver DOI: 10.5281/zenodo.5146222}, 
+ note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
 }
 ```
 
 Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.navability.io) who can be contacted at (info@navability.io) for more details.
 
+## Get Involved and Code of Conduct
+
+This project adheres to the [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md), and invites contributions or comments from the community.  Use the Slack channel, Julia Discourse, or Github issues to get in touch.
+
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/JuliaRobotics/Caesar.jl.svg)](https://starchart.cc/JuliaRobotics/Caesar.jl)
+
+[doi-img]: https://zenodo.org/badge/55802838.svg
+[doi-url]: https://zenodo.org/badge/latestdoi/55802838
 
 [colp-badge]: https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet
 [colprac]: https://github.com/SciML/ColPrac
