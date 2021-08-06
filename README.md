@@ -78,7 +78,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
 [caesar-stable]: https://img.shields.io/badge/2021Q2-v0.10.x-green.svg
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
-[caesar-slack]: https://caesarjl.slack.com
+[caesar-slack]: https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
 [caesar-releases]: https://github.com/JuliaRobotics/Caesar.jl/releases
 
