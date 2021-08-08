@@ -55,7 +55,7 @@ function cb(fg_, lastpose)
   # generate noisy measurement
   
   # create prior
-  hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e)
+  hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e, N=1000)
   pr = PartialPriorPassThrough(hmd, (1,2))
   addFactor!(fg_, [lastpose], pr, tags=[:DEM;], graphinit=false, nullhypo=0.1)
   nothing
@@ -86,19 +86,31 @@ end
 
 # 2. generate trajectory 
 
-@time generateCanonicalFG_Helix2DSlew!(30, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
+@time generateCanonicalFG_Helix2DSlew!(20, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
 deleteFactor!(fg, :x0f1)
 
+# ensure specific solve settings
+getSolverParams(fg).useMsgLikelihoods = false
 getSolverParams(fg).graphinit = false
 getSolverParams(fg).treeinit = true
 
-##
 
-tree, _, = solveTree!(fg)
+## for debugging
+
+# getSolverParams(fg).drawtree = true
+# getSolverParams(fg).showtree = true
+
+# doautoinit!(fg, :x1)
+# initAll!(fg)
 
 # smtasks = Task[]
 # tree, _, = solveTree!(fg; smtasks, recordcliqs=ls(fg))
 # repeatCSMStep!(hists[3],6)
+
+##
+
+smtasks = Task[];
+tree, _, = solveTree!(fg; smtasks)
 
 ##
 
@@ -110,7 +122,7 @@ for (a,z) in [(i%STEP,i+STEP-1) for i in 1:STEP:LAST]
   for _ in a:z
     solveTree!(fg, storeOld=true);
   end
-  plotSLAM2D(fg, drawContour=false, drawEllipse=true) |> PDF("/tmp/caesar/results/scalar/h1500_150_01nh_$(z).pdf",20cm,20cm)
+  plotSLAM2D(fg, drawContour=false, drawPoints=false, drawEllipse=true) |> PDF("/tmp/caesar/results/scalar/h1500_150_01nh_$(z).pdf",20cm,20cm)
 end
 
 ##
