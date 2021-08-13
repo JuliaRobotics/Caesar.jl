@@ -12,6 +12,7 @@ using RoME: MeanMaxPPE
 using ProgressMeter
 
 using TensorCast
+using Cairo
 using RoMEPlotting
 using Gadfly
 Gadfly.set_default_plot_size(35cm, 25cm)
@@ -19,7 +20,7 @@ Gadfly.set_default_plot_size(35cm, 25cm)
 ## only run this if planning big solves
 
 using Distributed
-addprocs(20);
+addprocs(5);
 using Caesar
 @everywhere using Caesar
 
@@ -55,7 +56,7 @@ function cb(fg_, lastpose)
   # generate noisy measurement
   
   # create prior
-  hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e, N=1000)
+  hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e, N=10000)
   pr = PartialPriorPassThrough(hmd, (1,2))
   addFactor!(fg_, [lastpose], pr, tags=[:DEM;], graphinit=false, nullhypo=0.1)
   nothing
@@ -70,6 +71,9 @@ storeDir = joinLogPath(fg,"data")
 mkpath(storeDir)
 datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
 addBlobStore!(fg, datastore)
+
+# new feature, going to temporarily disable as WIP
+getSolverParams(fg).attemptGradients = false
 
 
 ##
@@ -86,7 +90,7 @@ end
 
 # 2. generate trajectory 
 
-@time generateCanonicalFG_Helix2DSlew!(20, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
+@time generateCanonicalFG_Helix2DSlew!(50, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
 deleteFactor!(fg, :x0f1)
 
 # ensure specific solve settings
@@ -110,7 +114,7 @@ getSolverParams(fg).treeinit = true
 ##
 
 smtasks = Task[];
-tree, _, = solveTree!(fg; smtasks)
+@time tree, _, = solveTree!(fg; smtasks, verbose=true);
 
 ##
 
@@ -127,8 +131,12 @@ end
 
 ##
 
-plotSLAM2D(fg, solveKey=:simulated, drawContour=false, drawPoints=false, drawEllipse=false)
+pl_ = plotSLAM2D(fg, solveKey=:simulated, drawContour=false, drawPoints=false, drawEllipse=false, manualColor="black", drawTriads=false)
+pl1 = plotSLAM2D(fg, solveKey=:default, drawContour=false, drawPoints=false, drawEllipse=false)
 
+union!(pl1.layers, pl_.layers)
+
+pl1
 
 ##
 
