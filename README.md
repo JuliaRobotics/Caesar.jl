@@ -8,7 +8,7 @@ A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reduci
 
 Click on the badges to follow web url links:
 
-| Stable v0.9 | Stable v0.10 | Dev | Documentation | Public Slack |
+| Stable v0.9 | Stable v0.10 | Dev | Documentation | caesarjl.slack.com |
 |:------:|:------:|:----------------:|:-------------:|:-----:|
 | [![Build Status][build-v0.9]][build-url] | [![Build Status][build-v0.10]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
@@ -77,7 +77,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [build-v0.9]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.9
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
 [caesar-stable]: https://img.shields.io/badge/2021Q2-v0.10.x-green.svg
-[caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
+[caesar-slack-badge]: https://img.shields.io/badge/Invite-Slack-green.svg?style=popout
 [caesar-slack]: https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
 [caesar-releases]: https://github.com/JuliaRobotics/Caesar.jl/releases
