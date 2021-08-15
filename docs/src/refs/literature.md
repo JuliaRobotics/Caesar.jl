@@ -24,7 +24,7 @@ Newly created page to list related references and additional literature pertaini
 
 [1.10] Fourie, D., Teran E., A., Kaess, M., and Leonard, J. J., [“Characterizing marginalization and incremental operations on the Bayes tree,”](https://marinerobotics.mit.edu/sites/default/files/WAFR2020_rev38_0.pdf) in International Workshop on Algorithmic Foundations of Robotics (WAFR), 2020, Oulu, Finland, Springer Publishing.
 
-[1.11] Fourie, D., Rypkema, N., Claassens, S., Vaz Teixeira, P., Fischell, E., and Leonard, J.J., ["Towards Real-Time Non-Gaussian SLAM for Underdetermined Navigation"](https://ieeexplore.ieee.org/iel7/9340668/9340635/09341490.pdf?casa_token=nkCOAUyXR3cAAAAA:CfHWNPf46FuDwYvd4bf6hl7bhlooXr7Yv0Cux4Gbby1qT5jXosOiadOqBKKXzjc-73MYS1xy), in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), October 2020, Las Vegas, USA.
+[1.11] Fourie, D., Rypkema, N., Claassens, S., Vaz Teixeira, P., Fischell, E., and Leonard, J.J., ["Towards Real-Time Non-Gaussian SLAM for Underdetermined Navigation"](http://ras.papercept.net/images/temp/IROS/files/2648.pdf), in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), October 2020, Las Vegas, USA.
 
 [1.12] Terblance, J., Claassens, S., Fourie, D., "Multimodal Navigation-Affordance Matching for SLAM", in IEEE 17th International Conference on Automation Science and Engineering (CASE), August 2021, Lyon, France.
 
