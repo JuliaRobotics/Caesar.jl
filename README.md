@@ -4,6 +4,8 @@
 
 A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reducing the barrier of entry for sensor/data fusion tasks, including Simultaneous Localization and Mapping (SLAM).
 
+Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.navability.io), and can be contacted at (info@navability.io) or via the Slack badge link below.
+
 # Weblink Info
 
 Click on the badges to follow web url links:
@@ -48,8 +50,6 @@ Consider citing our work:
  note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
 }
 ```
-
-Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.navability.io) who can be contacted at (info@navability.io) for more details.
 
 ## Get Involved and Code of Conduct
 
