@@ -49,7 +49,7 @@ Consider citing our work:
 }
 ```
 
-Administration of the Caesar.jl ecosystem is done by [NavAbility](http://www.navability.io), and can be contacted at (info@navability.io) or via the Slack badge link above.
+Administration and support of the Caesar.jl ecosystem is done by [NavAbility](http://www.navability.io), and can be contacted at (info@navability.io) or via the Slack badge link above.
 
 ## Get Involved and Code of Conduct
 
