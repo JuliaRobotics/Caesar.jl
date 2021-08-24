@@ -8,9 +8,9 @@ A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reduci
 
 Click on the badges to follow web url links:
 
-| Stable v0.9 | Stable v0.10 | Dev | Documentation | caesarjl.slack.com |
-|:------:|:------:|:----------------:|:-------------:|:-----:|
-| [![Build Status][build-v0.9]][build-url] | [![Build Status][build-v0.10]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
+| Stable v0.10 | Dev | Documentation | caesarjl.slack.com |
+|:------:|:----------------:|:-------------:|:-----:|
+| [![Build Status][build-v0.10]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
 Also find factor graph solver DOI at:
 [![doi-img]][doi-url]
