@@ -26,7 +26,7 @@ Newly created page to list related references and additional literature pertaini
 
 [1.11] Fourie, D., Rypkema, N., Claassens, S., Vaz Teixeira, P., Fischell, E., and Leonard, J.J., ["Towards Real-Time Non-Gaussian SLAM for Underdetermined Navigation"](http://ras.papercept.net/images/temp/IROS/files/2648.pdf), in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), October 2020, Las Vegas, USA.
 
-[1.12] Terblance, J., Claassens, S., Fourie, D., "Multimodal Navigation-Affordance Matching for SLAM", in IEEE 17th International Conference on Automation Science and Engineering (CASE), August 2021, Lyon, France.
+[1.12] J. Terblanche, S. Claassens and D. Fourie, ["Multimodal Navigation-Affordance Matching for SLAM,"](http://www.navability.io/wp-content/uploads/2021/08/NavAbility_RAL2021_preprint.pdf) in IEEE Robotics and Automation Letters, vol. 6, no. 4, pp. 7728-7735, Oct. 2021, doi: 10.1109/LRA.2021.3098788.  Also presented at, IEEE 17th International Conference on Automation Science and Engineering, August 2021, Lyon, France.
 
 ### Important References
 
