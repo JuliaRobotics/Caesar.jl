@@ -61,7 +61,7 @@ When multiple numerical values/solutions exists for the (or nearly) same factor 
 Julia wants you to be specific about `global` variables, and variables packed in a development script at top level are created as globals.  Globals can be accessed using the `global varname` at the start of the context.  When writing for loops (using Julia versions 0.7 through 1.3) stricter rules on global scoping applied.  The purest way to ensure scope of variables are properly managed in the REPL or Juno script Main context is using the `let` syntax (not required post Julia 1.4).
 ```julia
 fg = ...
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 ...
 # and then a loop here:
 let tree=tree, fg=fg
@@ -70,7 +70,7 @@ for i 2:100
    # add variables and stuff
    ...
    # want to solve again
-   tree, smt, hist = solveTree!(fg, tree)
+   tree = solveTree!(fg, tree)
    ...
    # more stuff
 end

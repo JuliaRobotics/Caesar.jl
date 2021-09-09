@@ -170,7 +170,7 @@ getSolverParams(fg).drawtree=true
 getSolverParams(fg).showtree=true
 # getSolverParams(fg).dbg=true
 # getSolverParams(fg).async=false
-tree, smt, hist = solveTree!(fg);
+tree = solveTree!(fg);
 pl = drawPosesLandms(fg, drawhist=true, contour=false)
 addMaptoPlot!(pl)
 pl.coord = Coord.Cartesian(xmin=100, xmax=450, ymin=600, ymax=850)
@@ -282,7 +282,7 @@ drawGraph(fg)
 # drawPosesLandms(fg)
 # getSolverParams(fg).drawtree=true
 # getSolverParams(fg).showtree=true
-tree, smt, hist = solveTree!(fg);
+tree = solveTree!(fg);
 
 pl = drawPosesLandms(fg, drawhist=true, contour=false)
 addMaptoPlot!(pl)
@@ -344,8 +344,8 @@ addFactor!(fg, [:x5, :x6], Pose2Pose2(MvNormal(x5x6_pp[1], Matrix(Diagonal(x5x6_
 # drawPosesLandms(fg)
 # getSolverParams(fg).drawtree=true
 # getSolverParams(fg).showtree=true
-tree, smt, hist = solveTree!(fg);
-# tree, smt, hist = solveTree!(fg, tree);
+tree = solveTree!(fg);
+# tree = solveTree!(fg, tree);
 pl = drawPosesLandms(fg, drawhist=true, contour=false)
 addMaptoPlot!(pl)
 # pl |> PDF(ENV["HOME"]*"/Downloads/explore2.pdf")
@@ -396,8 +396,8 @@ addFactor!(fg, [:x7, :x8], Pose2Pose2(MvNormal(x7x8_pp[1], Matrix(Diagonal(x7x8_
 
 
 # getSolverParams(fg).async = false
-# tree, smt, hist = solveTree!(fg, tree);
-tree, smt, hist = solveTree!(fg);
+# tree = solveTree!(fg, tree);
+tree = solveTree!(fg);
 
 
 pl = drawPosesLandms(fg, drawhist=true, contour=false)

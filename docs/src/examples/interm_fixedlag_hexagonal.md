@@ -59,7 +59,7 @@ function runHexagonalExample(fg::G, totalIterations::Int, iterationsPerSolve::In
                 @info "Quasi fixed-lag is enabled (a feature currently in testing)!"
                 fifoFreeze!(fg)
             end
-            tInfer = @timed tree, smt, hist = solveTree!(fg, tree)
+            tInfer = @timed tree = solveTree!(fg, tree)
             graphSize = length([ls(fg)[1]..., ls(fg)[2]...])
             push!(solveTimes, (graphSize, tInfer[2], tInfer[2]))
         end

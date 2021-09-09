@@ -48,7 +48,7 @@ include(joinpath(dirname(@__FILE__),"BuildFactorGraph.jl"))
 getSolverParams(fg).drawtree=false
 getSolverParams(fg).showtree=false
 getSolverParams(fg).N=N
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 # savejld(fg, file="fg100_rstd10_sol3.jld2")

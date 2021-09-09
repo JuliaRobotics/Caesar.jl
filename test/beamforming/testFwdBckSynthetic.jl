@@ -47,7 +47,7 @@ writeGraphPdf(fg, engine="fdp")
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = false
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 # drawTree(tree, show=true)
 

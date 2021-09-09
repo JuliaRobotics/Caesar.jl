@@ -81,7 +81,7 @@ getSolverParams(fg).drawtree = true
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 
 

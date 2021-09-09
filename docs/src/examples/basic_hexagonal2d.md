@@ -56,7 +56,7 @@ You should see the program `evince` open with this visual:
 Let's run the multimodal-incremental smoothing and mapping (mm-iSAM) solver against this `fg` object:
 ```julia
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 ```
 This will take a couple of seconds (including first time compiling for all Julia processes).  If you wanted to see the Bayes tree operations during solving, set the following parameters before calling the solver:
 ```julia
@@ -111,7 +111,7 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x6; :l1], p2br2)
 
 # solve
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 # redraw
 pl = drawPosesLandms(fg)

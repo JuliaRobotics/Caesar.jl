@@ -177,7 +177,7 @@ By doing global inference, the new information obtained in `:x3` will be equally
 
 Global inference is achieved with local computation using two function calls, as follows.
 ```julia
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 # and visualization
 plotKDE(fg, [:x0, :x1, :x2, :x3])

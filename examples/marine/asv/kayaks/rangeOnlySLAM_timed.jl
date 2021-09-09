@@ -73,10 +73,10 @@ function main(expID::String, rangegap::Int, wstart::Int, wend::Int, trialID::Int
     getSolverParams(fg).maxincidence = 400
 
 
-    tree, smt, hist = solveTree!(fg)
+    tree = solveTree!(fg)
     println("Ended Script with $(rangecounter) range factors \n")
 
-    # tree, smt, hist = solveTree!(fg)
+    # tree = solveTree!(fg)
     # drawTree(tree, filepath=scriptHeader*"bt.pdf")
 
     # plotSASDefault(fg,expID, posData,igt,dposData,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")

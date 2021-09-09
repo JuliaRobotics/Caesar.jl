@@ -113,9 +113,8 @@ Example
 -------
 
 ```julia
-
 fg = generateCanonicalFG_Hexagonal()
-tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 # now generate all the video frames at default `folderpath=/tmp/caesar/csmCompound/`
 csmAnimateSideBySide(tree, hists)

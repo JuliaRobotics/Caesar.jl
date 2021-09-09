@@ -58,7 +58,7 @@ dontSolve = setdiff(ls(fg), vars)
 
 getSolverParams(fg).drawtree=true
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 ##

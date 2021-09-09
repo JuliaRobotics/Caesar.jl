@@ -16,7 +16,7 @@ addFactor!(fg, [:x1;:l1], Pose2Point2BearingRange(Normal(-pi/4,0.01),Normal(1.0,
 
 drawGraph(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 using RoMEPlotting

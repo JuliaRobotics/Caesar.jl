@@ -83,7 +83,7 @@ enableSolveAllNotDRT!(dfg)
 # foreach(x->setSolvable!(dfg, x, 1), ls(dfg))
 # foreach(x->setSolvable!(dfg, x, 1), lsf(dfg))
 
-tree, smt, hist = solveTree!(dfg, storeOld=true)
+tree = solveTree!(dfg, storeOld=true)
 
 if parsed_args["savedfg"]
   saveDFG(dfg, joinLogPath(dfg, "fg_final_resolve"))

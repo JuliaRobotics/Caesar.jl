@@ -151,7 +151,7 @@ delete!(vis)
 
 
 
-# tree, smt, hist = solveTree!(slam.dfg)
+# tree = solveTree!(slam.dfg)
 
 using RoMEPlotting, Gadfly
 Gadfly.set_default_plot_size(35cm, 20cm)
