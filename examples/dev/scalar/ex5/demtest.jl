@@ -10,6 +10,7 @@ using Caesar
 using RoME
 using RoME: MeanMaxPPE
 using ProgressMeter
+using TensorCast
 
 using TensorCast
 using Cairo
@@ -35,25 +36,37 @@ using .CommonUtils
 
 
 # # load dem (18x18km span, ~17m/px)
-x, y, img = buildDEMSimulated(1, 100, flip_xy=false) 
+x, y, img_ = buildDEMSimulated(1, 100, x_is_north=false)
+
+img = reverse(img_, dims=1)
 
 # imshow(img)
 
-# modify to generate elevation measurements (data/smallData as in Boxy) and priors
+
+## modify to generate elevation measurements (data/smallData as in Boxy) and priors
 
 dem = Interpolations.LinearInterpolation((x,y), img) # interpolated DEM
 elevation(p) = dem[getPPE(fg, p, :simulated).suggested[1:2]'...]
 sigma_e = 1e-3 # elevation measurement uncertainty
 
+## test buildDEMSimulated
+
+im = (j->((i->dem[i,j]).(x))).(y);
+@cast im_[i,j] := im[j][i];
+@assert norm(im_ - img) < 1e-10
+
+##
+
+
 function cb(fg_, lastpose)
   global dem, img
-
-  @info "Callback for DEM heatmap priors" lastpose ls(fg_, lastpose)
-
+  
+  
   # query DEM at ground truth
   z_e = elevation(lastpose)
-
+  
   # generate noisy measurement
+  @info "Callback for DEM heatmap priors" lastpose ls(fg_, lastpose) z_e
   
   # create prior
   hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e, N=10000, sigma_scale=1)
@@ -90,7 +103,7 @@ end
 
 # 2. generate trajectory 
 
-@time generateCanonicalFG_Helix2DSlew!(100, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
+@time generateCanonicalFG_Helix2DSlew!(30, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
 deleteFactor!(fg, :x0f1)
 
 # ensure specific solve settings
@@ -141,6 +154,16 @@ pl1 = plotSLAM2D(fg, solveKey=:default, drawContour=false, drawPoints=false, dra
 union!(pl1.layers, pl_.layers);
 
 pl1
+
+
+##
+
+pl_ = plotSLAM2D(fg, solveKey=:simulated, x_off=9000, y_off=9000, scale=100/18000, drawContour=false, drawPoints=false, drawEllipse=false, manualColor="black", drawTriads=false);
+pl_m = Gadfly.spy(reverse(img',dims=1))
+
+union!(pl_.layers, pl_m.layers)
+
+pl_
 
 ##
 

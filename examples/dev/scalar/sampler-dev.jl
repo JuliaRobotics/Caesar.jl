@@ -14,77 +14,20 @@ using UnicodePlots
 # using Gadfly
 # Gadfly.set_default_plot_size(35cm, 25cm)
 
+using TensorCast
+
+##
 
 prjPath = dirname(dirname(pathof(Caesar)))
 include( joinpath(prjPath, "examples","dev","scalar","CommonUtils.jl") )
+using .CommonUtils
 
 
 ##
 
-# function getLevelSetSigma(  data::AbstractMatrix{<:Real},
-#                             level::Real,
-#                             sigma::Real,
-#                             x_grid::AbstractVector{<:Real}, 
-#                             y_grid::AbstractVector{<:Real};
-#                             sigma_scale::Real=3  )
-#     """
-#     Get the grid positions at the specified height (within the provided spreads)
-#     """
-#     # make Gaussian
-#     roi = data .- level
-#     roi .^= 2
-#     roi .*= 0.5*(1/(sigma_scale*sigma))^2
+x, y, dem = buildDEMSimulated(1, 100, x_is_north=true) 
 
-#     # truncate at sigma_scale*sigma
-#     mask = roi .< 1
-
-#     idx2d = findall(mask)  # 2D indices
-#     pos = (v->[x_grid[v[1]],y_grid[v[2]]]).(idx2d)
-#     weights = (v->roi[v[1],v[2]]).(idx2d)
-#     weights ./= sum(weights)
-
-#     # recast to the appropriate shape
-#     @cast kp[i,j] := pos[j][i]
-#     collect(kp), weights
-# end
-
-# function fitKDE(support,
-#                 weights,
-#                 x_grid::AbstractVector{<:Real}, 
-#                 y_grid::AbstractVector{<:Real};
-#                 bw_factor::Real=0.7  )
-#     #
-#     # 1. set the bandwidth 
-#     x_spacing = Statistics.mean(diff(x_grid))
-#     y_spacing = Statistics.mean(diff(y_grid))
-#     kernel_ = bw_factor*0.5*(x_spacing + y_spacing) # 70% of the average spacing
-#     kernel_bw = [kernel_; kernel_]                  # same bw in x and y
-#     # fit KDE
-#     kde!(support, kernel_bw, weights)
-# end
-
-# function sampleHeatmap( data::AbstractMatrix{<:Real}, 
-#                         x, 
-#                         y, 
-#                         level, 
-#                         sigma=0.01, 
-#                         N::Int=10000 )
-#     #
-#     support, weights = getLevelSetSigma(data, level, sigma, x, y)
-#     P = fitKDE(support, weights, x, y)
-#     sample(P, N)[1]
-# end
-
-##
-
-
-
-
-##
-
-x, y, dem = CommonUtils.getSampleDEM()
-
-# imshow(dem)
+imshow(dem)
 
 
 ##
@@ -99,7 +42,8 @@ hmd = HeatmapDensityRegular(dem, (x,y), 0.5, 0.001)
 
 ##
 
-pts = rand(hmd, 10000)
+M = TranslationGroup(2)
+pts_ = [sampleTangent(M, hmd) for _ in 1:10000]
 
 
 # pseudo code
@@ -107,6 +51,8 @@ pts = rand(hmd, 10000)
 
 
 ##
+
+@cast pts[i,j] := pts_[j][i]
 
 imscatter(img) = scatterplot(img[2,:], -img[1,:])
 imdensity(img) = densityplot(img[2,:], -img[1,:])
