@@ -9,7 +9,11 @@ export buildDEMSimulated, loadDEM!
 """
 Loads a sample DEM (as if simulated) on a regular grid... Its the Grand Canyon, 18x18km, 17m
 """
-function buildDEMSimulated(scale=1, N=100; x_is_north=true)
+function buildDEMSimulated( scale=1, N=100; 
+                            x_is_north=true,
+                            x_min::Real=-9000, x_max::Real=9000,
+                            y_min::Real=-9000, y_max::Real=9000)
+    #
     img_ = load(joinpath(dirname(dirname(pathof(Caesar))), "examples","dev","scalar","dem.png")) .|> Gray
     img_ = scale.*Float64.(img_)
 
@@ -24,8 +28,8 @@ function buildDEMSimulated(scale=1, N=100; x_is_north=true)
         img
     end
 
-    x = range(-9e3, 9e3, length = size(_img_,1)) # North
-    y = range(-9e3, 9e3, length = size(_img_,2)) # East
+    x = range(x_min, x_max, length = size(_img_,1)) # North
+    y = range(y_min, y_max, length = size(_img_,2)) # East
 
     return (x, y, _img_)
 end

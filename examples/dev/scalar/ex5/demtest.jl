@@ -36,9 +36,11 @@ using .CommonUtils
 
 
 # # load dem (18x18km span, ~17m/px)
-x, y, img_ = buildDEMSimulated(1, 100, x_is_north=false)
+x_min, x_max = -9000, 9000
+y_min, y_max = -9000, 9000
+x, y, img = buildDEMSimulated(1, 100, x_is_north=true, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
 
-img = reverse(img_, dims=1)
+# img = reverse(img_, dims=1)
 
 # imshow(img)
 
@@ -148,18 +150,18 @@ end
 
 ##
 
-pl_ = plotSLAM2D(fg, solveKey=:simulated, drawContour=false, drawPoints=false, drawEllipse=false, manualColor="black", drawTriads=false);
-pl1 = plotSLAM2D(fg, solveKey=:default, drawContour=false, drawPoints=false, drawEllipse=false);
+# pl_ = plotSLAM2D(fg, solveKey=:simulated, drawContour=false, drawPoints=false, drawEllipse=false, manualColor="black", drawTriads=false);
+# pl1 = plotSLAM2D(fg, solveKey=:default, drawContour=false, drawPoints=false, drawEllipse=false);
 
-union!(pl1.layers, pl_.layers);
+# union!(pl1.layers, pl_.layers);
 
-pl1
+# pl1
 
 
 ##
 
-pl_ = plotSLAM2D(fg, solveKey=:simulated, x_off=9000, y_off=9000, scale=100/18000, drawContour=false, drawPoints=false, drawEllipse=false, manualColor="black", drawTriads=false);
-pl_m = Gadfly.spy(reverse(img',dims=1))
+pl_ = plotSLAM2D(fg, solveKey=:simulated, x_off=-x_min, y_off=-y_min, scale=100/(x_max-x_min), drawContour=false, drawPoints=false, drawEllipse=false, manualColor="black", drawTriads=false)
+pl_m = Gadfly.spy(reverse(img,dims=1))
 
 union!(pl_.layers, pl_m.layers)
 
