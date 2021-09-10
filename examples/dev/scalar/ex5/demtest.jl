@@ -105,7 +105,8 @@ end
 
 # 2. generate trajectory 
 
-@time generateCanonicalFG_Helix2DSlew!(30, posesperturn=30, radius=1500, dfg=fg, graphinit=false, postpose_cb=cb) # , slew_y=2/3
+μ0 = [-7000;3000.0;pi/2]
+@time generateCanonicalFG_Helix2DSlew!(100, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) # , slew_y=2/3
 deleteFactor!(fg, :x0f1)
 
 # ensure specific solve settings
@@ -160,14 +161,47 @@ end
 
 ##
 
-pl_ = plotSLAM2D(fg, solveKey=:simulated, x_off=-x_min, y_off=-y_min, scale=100/(x_max-x_min), drawContour=false, drawPoints=false, drawEllipse=false, manualColor="black", drawTriads=false)
+# function plotSLAM2D_Scalar(fg, img)
+pl_ = plotSLAM2D(fg, solveKey=:simulated, 
+                    x_off=-x_min, y_off=-y_min, 
+                    scale=100/(x_max-x_min), 
+                    drawContour=false, drawPoints=false, drawEllipse=false, 
+                    manualColor="black", drawTriads=false)
+#
+
 pl_m = Gadfly.spy(reverse(img,dims=1))
 
 union!(pl_.layers, pl_m.layers)
 
 pl_
 
+# end
+
 ##
+
+plotSLAM2D_Scalar(fg, img)
+
+##
+
+## redraw z_e level to see if index orders are right
+
+
+
+locs = (x->getPPE(fg[x], :simulated).suggested[1:2]).(sortDFG(ls(fg)))
+# PartialPriorPassThrough type, with a HeatmapDensityRegular
+z_es = (x->getFactorType(fg[x]).Z.level).(sortDFG(lsf(fg, tags=[:DEM;])))
+
+
+@cast locs_[j,i] := locs[j][i]
+
+Gadfly.plot(x=locs_[:,1], y=locs_[:,2], color=z_es)
+
+
+
+
+##
+
+
 
 # check: query variables
 getPPE(fg, :x0, :simulated).suggested
