@@ -38,9 +38,10 @@ using .CommonUtils
 # # load dem (18x18km span, ~17m/px)
 x_min, x_max = -9000, 9000
 y_min, y_max = -9000, 9000
-x, y, img = buildDEMSimulated(1, 100, x_is_north=true, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-
-# img = reverse(img_, dims=1)
+# north is regular map image up
+x, y, img_ = buildDEMSimulated(1, 100, x_is_north=false, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+# flip so north is down along with Images.jl [i,j] --> (x,y)
+img = reverse(img_, dims=1)
 
 # imshow(img)
 
@@ -105,8 +106,8 @@ end
 
 # 2. generate trajectory 
 
-μ0 = [-7000;3000.0;pi/2]
-@time generateCanonicalFG_Helix2DSlew!(100, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) # , slew_y=2/3
+μ0 = [-9000;0000.0;pi/2]
+@time generateCanonicalFG_Helix2DSlew!(700, posesperturn=70, radius=7000, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb, slew_x=1/20)
 deleteFactor!(fg, :x0f1)
 
 # ensure specific solve settings
@@ -166,20 +167,16 @@ pl_ = plotSLAM2D(fg, solveKey=:simulated,
                     x_off=-x_min, y_off=-y_min, 
                     scale=100/(x_max-x_min), 
                     drawContour=false, drawPoints=false, drawEllipse=false, 
-                    manualColor="black", drawTriads=false)
+                    manualColor="black", drawTriads=false);
 #
 
-pl_m = Gadfly.spy(reverse(img,dims=1))
-
-union!(pl_.layers, pl_m.layers)
-
-pl_
-
-# end
+# IGNORE VIZ OF THIS PLOT SINCE SPY INTERNALLY DOES A TRANSPOSE FROM [i,j]' --> (x,y) 
+pl_m = Gadfly.spy(img')
 
 ##
 
-plotSLAM2D_Scalar(fg, img)
+union!(pl_.layers, pl_m.layers); pl_
+
 
 ##
 
