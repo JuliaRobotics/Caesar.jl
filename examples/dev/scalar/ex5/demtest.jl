@@ -17,13 +17,16 @@ using Cairo
 using RoMEPlotting
 using Gadfly
 Gadfly.set_default_plot_size(35cm, 25cm)
+using ImageMagick
 
 ## only run this if planning big solves
 
 using Distributed
-addprocs(5);
-using Caesar
+addprocs(10);
+using Caesar, RoMEPlotting, Cairo
 @everywhere using Caesar
+@everywhere using Cairo, RoMEPlotting
+@everywhere Gadfly.set_default_plot_size(35cm,25cm)
 
 ##
 
@@ -50,7 +53,7 @@ img = reverse(img_, dims=1)
 
 dem = Interpolations.LinearInterpolation((x,y), img) # interpolated DEM
 elevation(p) = dem[getPPE(fg, p, :simulated).suggested[1:2]'...]
-sigma_e = 1e-3 # elevation measurement uncertainty
+sigma_e = 0.01 # elevation measurement uncertainty
 
 ## test buildDEMSimulated
 
@@ -106,8 +109,8 @@ end
 
 # 2. generate trajectory 
 
-μ0 = [-9000;0000.0;pi/2]
-@time generateCanonicalFG_Helix2DSlew!(700, posesperturn=70, radius=7000, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb, slew_x=1/20)
+μ0 = [-7000;-2000.0;pi/2]
+@time generateCanonicalFG_Helix2DSlew!(50, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) #, slew_x=1/20)
 deleteFactor!(fg, :x0f1)
 
 # ensure specific solve settings
@@ -196,8 +199,64 @@ Gadfly.plot(x=locs_[:,1], y=locs_[:,2], color=z_es)
 
 
 
+## check getLevelSetSigma
+
+kp, weights, _roi = IIF.getLevelSetSigma(img, z_es[50], sigma_e, x, y)
+
+Gadfly.plot(x=kp[1,:],y=kp[2,:], color=weights, Geom.Geom.point)
+
+# imshow(st[3])
+
+## plot some of the ROIs
+
+function plotHMSLevel(fg::AbstractDFG, 
+                      lbl::Symbol; 
+                      coord=Coord.cartesian(xmin=-9000, xmax=9000, ymin=-9000,ymax=9000)  )
+  #
+  loc = getPPE(fg, lbl, :simulated).suggested
+  plp = plot( x=[loc[1]], y=[loc[2];], 
+              Geom.point, 
+              Guide.title(string(lbl)), 
+              Theme(default_color=colorant"purple") )
+  #
+  fct = intersect(ls(fg, lbl), lsf(fg, tags=[:DEM;]))[1]
+  plk = getFactorType(fg[fct]).Z.densityFnc |> plotKDE;
+  
+  #
+  union!(plp.layers, plk.layers); 
+  plp.coord = coord
+  plp
+end
+
+pl = plotHMSLevel(fg, :x47);
+
+im = convert(Matrix{RGB}, pl);
+# io = IOBuffer()
+# stre = draw(PNG(io), pl)
+
+# imshow(im)
+
 ##
 
+vars = ls(fg) |> sortDFG
+len = length(vars)
+_PL = Vector{Any}(undef, length(ls(fg)))
+
+#
+pool = WorkerPool(procs()[2:end])
+for (i,lb) in enumerate(vars)
+  # Threads.@spawn begin
+    im = plotHMSLevel(fg, lb)
+    _PL[i] = remotecall(convert, pool, Matrix{RGB}, im)
+    @show i
+    nothing
+  # end
+end
+PL = fetch.(_PL)
+
+Caesar.writevideo("/tmp/test.avi", PL, fps=5)
+
+##
 
 
 # check: query variables
