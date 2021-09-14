@@ -22,7 +22,7 @@ Newly created page to list related references and additional literature pertaini
 
 [1.9] Koolen, T. and Deits, R., 2019. Julia for robotics: Simulation and real-time control in a high-level programming language. IEEE, Intl. Conference on Robotics and Automation, ICRA (2019).
 
-[1.10] Fourie, D., Teran E., A., Kaess, M., and Leonard, J. J., [“Characterizing marginalization and incremental operations on the Bayes tree,”](https://marinerobotics.mit.edu/sites/default/files/WAFR2020_rev38_0.pdf) in International Workshop on Algorithmic Foundations of Robotics (WAFR), 2020, Oulu, Finland, Springer Publishing.
+[1.10] Fourie, D., Espinoza, A. T., Kaess, M., and Leonard, J. J., [“Characterizing marginalization and incremental operations on the Bayes tree,”](https://marinerobotics.mit.edu/sites/default/files/WAFR2020_rev38_0.pdf) in International Workshop on Algorithmic Foundations of Robotics (WAFR), 2020, Oulu, Finland, Springer Publishing.
 
 [1.11] Fourie, D., Rypkema, N., Claassens, S., Vaz Teixeira, P., Fischell, E., and Leonard, J.J., ["Towards Real-Time Non-Gaussian SLAM for Underdetermined Navigation"](http://ras.papercept.net/images/temp/IROS/files/2648.pdf), in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), October 2020, Las Vegas, USA.
 
