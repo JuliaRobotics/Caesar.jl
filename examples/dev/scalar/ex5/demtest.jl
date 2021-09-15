@@ -22,18 +22,59 @@ using ImageMagick
 ## only run this if planning big solves
 
 using Distributed
-addprocs(10);
-using Caesar, RoMEPlotting, Cairo
+# localprocs
+# addprocs(10);
+
+##
+
+if true
+  machines = []
+  allmc = split(ENV["JL_CLUSTER_HY"], ';')
+  for mc in allmc
+    push!(machines, (mc,20))
+  end
+  prc_rmt = addprocs(machines)
+end
+
+##
+
+using Caesar, Cairo, RoMEPlotting
 @everywhere using Caesar
 @everywhere using Cairo, RoMEPlotting
 @everywhere Gadfly.set_default_plot_size(35cm,25cm)
 
+
+function plotToVideo_Distributed( pltfnc::Function, 
+                                  args::Union{<:AbstractVector, <:Tuple}; 
+                                  pool = WorkerPool(procs()[2:end]),
+                                  videofile::AbstractString="/tmp/test.avi" )
+  # prep locations for image results
+  len = length(args)
+  _PL = Vector{Any}(undef, len)
+  #
+  pool = WorkerPool(procs()[2:end])
+  for (i,lb) in enumerate(args)
+    # Threads.@spawn begin
+      im = pltfnc(lb)
+      _PL[i] = remotecall(convert, pool, Matrix{RGB}, im)
+      @show i
+      nothing
+    # end
+  end
+  # fetch the remote results
+  PL = fetch.(_PL)
+
+  Caesar.writevideo(videofile, PL, fps=5)
+
+  PL, videofile
+end
+
 ##
 
-prjPath = dirname(dirname(pathof(Caesar)))
+@everywhere prjPath = dirname(dirname(pathof(Caesar)))
 
-include(joinpath(prjPath,"examples/dev/scalar/CommonUtils.jl"))
-using .CommonUtils
+@everywhere include(joinpath(prjPath,"examples/dev/scalar/CommonUtils.jl"))
+@everywhere using .CommonUtils
 
 ##
 
@@ -66,7 +107,6 @@ im = (j->((i->dem[i,j]).(x))).(y);
 
 function cb(fg_, lastpose)
   global dem, img
-  
   
   # query DEM at ground truth
   z_e = elevation(lastpose)
@@ -110,7 +150,7 @@ end
 # 2. generate trajectory 
 
 μ0 = [-7000;-2000.0;pi/2]
-@time generateCanonicalFG_Helix2DSlew!(50, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) #, slew_x=1/20)
+@time generateCanonicalFG_Helix2DSlew!(100, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) #, slew_x=1/20)
 deleteFactor!(fg, :x0f1)
 
 # ensure specific solve settings
@@ -133,34 +173,32 @@ getSolverParams(fg).treeinit = true
 
 ##
 
-for i in 1:50
+getSolverParams(fg).useMsgLikelihoods = true
+
+for i in 1:30
 
 smtasks = Task[];
-tree, _, = solveTree!(fg; storeOld=true, verbose=true , smtasks ); 
+tree = solveTree!(fg; storeOld=true, verbose=true , smtasks ); 
 
 end
 
 ##
 
-mkdir("/tmp/caesar/results")
-mkdir("/tmp/caesar/results/scalar")
-# starting from 1, solve a total of LAST+STEP-1 number of times, plotting after each STEP number of solves
-STEP, LAST = 5, 41
-for (a,z) in [(i%STEP,i+STEP-1) for i in 1:STEP:LAST]
-  for _ in a:z
-    solveTree!(fg, storeOld=true);
-  end
-  plotSLAM2D(fg, drawContour=false, drawPoints=false, drawEllipse=true) |> PDF("/tmp/caesar/results/scalar/h1500_150_01nh_$(z).pdf",20cm,20cm)
-end
+# mkdir("/tmp/caesar/results")
+# mkdir("/tmp/caesar/results/scalar")
+# # starting from 1, solve a total of LAST+STEP-1 number of times, plotting after each STEP number of solves
+# STEP, LAST = 5, 41
+# for (a,z) in [(i%STEP,i+STEP-1) for i in 1:STEP:LAST]
+#   for _ in a:z
+#     solveTree!(fg, storeOld=true);
+#   end
+#   plotSLAM2D(fg, drawContour=false, drawPoints=false, drawEllipse=true) |> PDF("/tmp/caesar/results/scalar/h1500_150_01nh_$(z).pdf",20cm,20cm)
+# end
+
 
 ##
 
-# pl_ = plotSLAM2D(fg, solveKey=:simulated, drawContour=false, drawPoints=false, drawEllipse=false, manualColor="black", drawTriads=false);
-# pl1 = plotSLAM2D(fg, solveKey=:default, drawContour=false, drawPoints=false, drawEllipse=false);
-
-# union!(pl1.layers, pl_.layers);
-
-# pl1
+plotSLAM2D_KeyAndSim(fg)
 
 
 ##
@@ -185,18 +223,12 @@ union!(pl_.layers, pl_m.layers); pl_
 
 ## redraw z_e level to see if index orders are right
 
-
-
 locs = (x->getPPE(fg[x], :simulated).suggested[1:2]).(sortDFG(ls(fg)))
 # PartialPriorPassThrough type, with a HeatmapDensityRegular
 z_es = (x->getFactorType(fg[x]).Z.level).(sortDFG(lsf(fg, tags=[:DEM;])))
-
-
 @cast locs_[j,i] := locs[j][i]
 
 Gadfly.plot(x=locs_[:,1], y=locs_[:,2], color=z_es)
-
-
 
 
 ## check getLevelSetSigma
@@ -207,26 +239,7 @@ Gadfly.plot(x=kp[1,:],y=kp[2,:], color=weights, Geom.Geom.point)
 
 # imshow(st[3])
 
-## plot some of the ROIs
-
-function plotHMSLevel(fg::AbstractDFG, 
-                      lbl::Symbol; 
-                      coord=Coord.cartesian(xmin=-9000, xmax=9000, ymin=-9000,ymax=9000)  )
-  #
-  loc = getPPE(fg, lbl, :simulated).suggested
-  plp = plot( x=[loc[1]], y=[loc[2];], 
-              Geom.point, 
-              Guide.title(string(lbl)), 
-              Theme(default_color=colorant"purple") )
-  #
-  fct = intersect(ls(fg, lbl), lsf(fg, tags=[:DEM;]))[1]
-  plk = getFactorType(fg[fct]).Z.densityFnc |> plotKDE;
-  
-  #
-  union!(plp.layers, plk.layers); 
-  plp.coord = coord
-  plp
-end
+##
 
 pl = plotHMSLevel(fg, :x47);
 
@@ -239,30 +252,24 @@ im = convert(Matrix{RGB}, pl);
 ##
 
 vars = ls(fg) |> sortDFG
-len = length(vars)
-_PL = Vector{Any}(undef, length(ls(fg)))
-
-#
-pool = WorkerPool(procs()[2:end])
-for (i,lb) in enumerate(vars)
-  # Threads.@spawn begin
-    im = plotHMSLevel(fg, lb)
-    _PL[i] = remotecall(convert, pool, Matrix{RGB}, im)
-    @show i
-    nothing
-  # end
-end
-PL = fetch.(_PL)
-
-Caesar.writevideo("/tmp/test.avi", PL, fps=5)
+st = plotToVideo_Distributed( x->plotHMSLevel(fg, x), vars );
 
 ##
 
+sks = listSolveKeys(fg) |> collect |> sortDFG
+sks = [setdiff(sks, [:default]); :default]
+
+# PL = plotSLAM2D_KeyAndSim(fg);
+
+##
+
+st = plotToVideo_Distributed( x->plotSLAM2D_KeyAndSim(fg, x), sks);
+
+##
 
 # check: query variables
 getPPE(fg, :x0, :simulated).suggested
 getPPE(fg, :pt50_50, :simulated).suggested
-
 
 # check: fetch and plot pose variables
 
@@ -298,7 +305,10 @@ end
 
 
 
-## ## DEV TESTING BELOW
+## ================================================================================================ 
+## DEV TESTING BELOW
+## ================================================================================================ 
+
 
 using ImageView
 using UnicodePlots
