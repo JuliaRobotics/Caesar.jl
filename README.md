@@ -21,17 +21,17 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 
 | **Major Dependencies**  |  **Stable**     |  **Dev (master)**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
-| Caesar.jl | [![][caesar-stable]][caesar-releases] | [![Build Status][build-img]][build-url] | [![codecov.io][cov-img]][cov-url] | [![][mst-shield]][caesar-milestones] |
+| Caesar.jl | [![][caesar-stable]][caesar-releases] | [![Build Status][build-img]][build-url] | umbrella | [![][mst-shield]][caesar-milestones] |
 | [RoME.jl][rome-url] | [![][r-stable]][r-releases] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] | [![][mst-shield]][r-milestones] |
 | [IncrementalInference.jl][iif-url] | [![][iif-stable]][iif-releases] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
 | [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
-| [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | n/a |
-| [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | -- |
-| [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | -- |
-| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
+| [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | upstream |
+| [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | upstream |
+| [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | upstream |
+| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | deprecating |
 | [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
 
 # Contributors
