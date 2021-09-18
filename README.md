@@ -30,6 +30,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
 | [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | n/a |
 | [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | -- |
+| [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | -- |
 | [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | -- |
 | [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
 
@@ -157,9 +158,19 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [amp-build-img]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl.svg?branch=master
 [amp-build-url]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
-[amp-stable]: https://img.shields.io/badge/2021Q2-v0.3.x-green.svg
+[amp-stable]: https://img.shields.io/badge/2021Q3-v0.4.x-green.svg
 [amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
 [amp-releases]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/releases
+
+[optim-cov-img]: http://codecov.io/github/JuliaNLSolvers/Optim.jl/coverage.svg?branch=master
+[optim-cov-url]: https://codecov.io/gh/JuliaNLSolvers/Optim.jl/
+[optim-build-img]: https://github.com/JuliaNLSolvers/Optim.jl/actions/workflows/linux.yml/badge.svg
+[optim-img-windows]: https://github.com/JuliaNLSolvers/Optim.jl/actions/workflows/windows.yml/badge.svg
+[optim-build-url]: https://github.com/JuliaNLSolvers/Optim.jl/actions/workflows/linux.yml
+[optim-build-windows]: https://github.com/JuliaNLSolvers/Optim.jl/actions/workflows/windows.yml
+[optim-url]: http://www.github.com/JuliaNLSolvers/Optim.jl
+[optim-stable]: https://img.shields.io/badge/2021Q3-v1.4.x-green.svg
+[optim-releases]: https://github.com/JuliaNLSolvers/Optim.jl/releases
 
 [fsm-cov-img]: https://codecov.io/github/JuliaRobotics/FunctionalStateMachine.jl/coverage.svg?branch=master
 [fsm-cov-url]: https://codecov.io/github/JuliaRobotics/FunctionalStateMachine.jl?branch=master
