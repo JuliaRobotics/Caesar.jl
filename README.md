@@ -155,8 +155,8 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 
 [amp-cov-img]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl/coverage.svg?branch=master
 [amp-cov-url]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl?branch=master
-[amp-build-img]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl.svg?branch=master
-[amp-build-url]: https://travis-ci.org/JuliaRobotics/ApproxManifoldProducts.jl
+[amp-build-img]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/actions/workflows/ci.yml/badge.svg
+[amp-build-url]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/actions/workflows/ci.yml
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-stable]: https://img.shields.io/badge/2021Q3-v0.4.x-green.svg
 [amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
