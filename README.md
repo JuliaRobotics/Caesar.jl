@@ -21,7 +21,7 @@ Also find factor graph solver DOI at:
 
 Code changes are currently tracked via Github's integrated Milestone/Issues/PR system -- click on the badges below to follow links into hightlights of the ecosystem.
 
-| **Major Dependencies**  |  **Stable**     |  **Dev (master)**   |  **Test Coverage**  |  **Changes**  |
+| **Major Dependencies**  |  **Stable**     |  **Dev (main)**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
 | Caesar.jl | [![][caesar-stable]][caesar-releases] | [![Build Status][build-img]][build-url] | umbrella | [![][mst-shield]][caesar-milestones] |
 | [RoME.jl][rome-url] | [![][r-stable]][r-releases] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] | [![][mst-shield]][r-milestones] |
