@@ -94,7 +94,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
 [iif-build-img]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml/badge.svg
-[iff-build-url]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml
+[iif-build-url]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml
 [iif-cov-img]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl/coverage.svg?branch=master
 [iif-cov-url]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl?branch=master
 [iif-build-v020]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.23
