@@ -4,7 +4,7 @@
 
 A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reducing the barrier of entry for sensor/data fusion tasks, including Simultaneous Localization and Mapping (SLAM).
 
-[NavAbility.io](http://www.navability.io) helps with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io) or via the Slack badge-link below.
+[NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io) or via the Slack badge-link below.
 
 # Weblink Info
 
