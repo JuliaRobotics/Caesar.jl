@@ -1,6 +1,6 @@
 ```@raw html
 <p align="center">
-<img src="https://user-images.githubusercontent.com/6412556/47298402-ace95500-d5e5-11e8-8607-593525445d14.png" width="480" border="0" />
+<img src="https://user-images.githubusercontent.com/6412556/134777705-acda768e-884b-4de6-b307-aac6d09b9c81.png" width="480" border="0" />
 </p>
 ```
 
