@@ -23,7 +23,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 
 | **Major Dependencies**  |  **Stable**     |  **Dev (main)**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
-| Caesar.jl | [![][caesar-stable]][caesar-releases] | [![Build Status][build-img]][build-url] | umbrella | [![][mst-shield]][caesar-milestones] |
+| Caesar.jl | [![version][cjl-stbl-img]][caesar-releases] | [![Build Status][build-img]][build-url] | umbrella | [![][mst-shield]][caesar-milestones] |
 | [RoME.jl][rome-url] | [![][r-stable]][r-releases] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] | [![][mst-shield]][r-milestones] |
 | [IncrementalInference.jl][iif-url] | [![][iif-stable]][iif-releases] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
@@ -38,10 +38,9 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 
 # Contributors
 
-We are grateful for many, many contributions within the Julia package ecosystem -- see the [`Project.toml`](https://github.com/JuliaRobotics/Caesar.jl/blob/master/Project.toml) files for a far reaching list of upstream packages and contributions.
+We are grateful for many, many contributions within the Julia package ecosystem -- see the [Juliahub.com page](https://juliahub.com/ui/Packages/Caesar/BNbRm/0.10.2?t=1) for the upstream package dependencies.
 
 Consider citing our work:
-
 ```
 @online{Caesarjl2021,
  author =        {{P}ackage {C}ontributors and {E}cosystem},
@@ -77,7 +76,9 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [build-v0.10]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.10
 [build-v0.9]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.9
 [build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
-[caesar-stable]: https://img.shields.io/badge/2021Q2-v0.10.x-green.svg
+
+[cjl-stbl-img]: https://juliahub.com/docs/Caesar/version.svg
+[cjl-stbl-url]: https://juliahub.com/ui/Packages/Caesar/BNbRm
 [caesar-slack-badge]: https://img.shields.io/badge/Invite-Slack-green.svg?style=popout
 [caesar-slack]: https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw
 [caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
