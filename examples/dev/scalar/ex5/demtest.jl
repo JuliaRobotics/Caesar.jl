@@ -23,7 +23,7 @@ using ImageMagick
 
 using Distributed
 # localprocs
-# addprocs(10);
+# addprocs(5);
 
 ##
 
@@ -44,30 +44,7 @@ using Caesar, Cairo, RoMEPlotting
 @everywhere Gadfly.set_default_plot_size(35cm,25cm)
 
 
-function plotToVideo_Distributed( pltfnc::Function, 
-                                  args::Union{<:AbstractVector, <:Tuple}; 
-                                  pool = WorkerPool(procs()[2:end]),
-                                  videofile::AbstractString="/tmp/test.avi" )
-  # prep locations for image results
-  len = length(args)
-  _PL = Vector{Any}(undef, len)
-  #
-  pool = WorkerPool(procs()[2:end])
-  for (i,lb) in enumerate(args)
-    # Threads.@spawn begin
-      im = pltfnc(lb)
-      _PL[i] = remotecall(convert, pool, Matrix{RGB}, im)
-      @show i
-      nothing
-    # end
-  end
-  # fetch the remote results
-  PL = fetch.(_PL)
 
-  Caesar.writevideo(videofile, PL, fps=5)
-
-  PL, videofile
-end
 
 ##
 
@@ -154,10 +131,16 @@ end
 deleteFactor!(fg, :x0f1)
 
 # ensure specific solve settings
-getSolverParams(fg).useMsgLikelihoods = false
+getSolverParams(fg).useMsgLikelihoods = true
 getSolverParams(fg).graphinit = false
 getSolverParams(fg).treeinit = true
 
+
+## optional prior at start
+
+mu0 = getPPE(fg, :x0, :simulated).suggested
+pr0 = PriorPose2(MvNormal(mu0, 0.01.*[1;1;1;]))
+addFactor!(fg, [:x0], pr0)
 
 ## for debugging
 
@@ -173,12 +156,11 @@ getSolverParams(fg).treeinit = true
 
 ##
 
-getSolverParams(fg).useMsgLikelihoods = true
 
-for i in 1:30
+for i in 1:10
 
 smtasks = Task[];
-tree = solveTree!(fg; storeOld=true, verbose=true , smtasks ); 
+tree = solveTree!(fg; storeOld=true , smtasks ); 
 
 end
 
