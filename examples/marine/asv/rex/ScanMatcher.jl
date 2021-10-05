@@ -8,23 +8,31 @@ using IncrementalInference, RoME
 using JSON2
 
 # Where to fetch data
-dfgDataFolder = joinpath(ENV["HOME"],"data","seagrant","rex")
-datastore = FileDataStore("$dfgDataFolder/bigdata")
-# Load the graph
-fg = initfg()
+dfgDataFolder = ENV["HOME"]*"/data/rex";
+# dfgDataFolder = "/tmp/rex"
 
-# Reformat the data.
-loadDFG!(fg, "$dfgDataFolder/fullsweep_updated.tar.gz");
+# Load the graph
+fg = loadDFG("$dfgDataFolder/dfg")
+
+# add the datastore locations
+ds = FolderStore{Vector{UInt8}}(:radar, "$dfgDataFolder/data/radar")
+addBlobStore!(fg, ds)
+
+ds = FolderStore{Vector{UInt8}}(:gps_fix, "$dfgDataFolder/data/gps")
+addBlobStore!(fg, ds)
+
+ds = FolderStore{Vector{UInt8}}(:lidar, "$dfgDataFolder/data/lidar")
+addBlobStore!(fg, ds)
 
 # fetch variables containing a full sweep
-allSweepVariables = filter(v -> :RADARSWEEP in getBigDataKeys(v), getVariables(fg)) |> sortDFG
+allSweepVariables = filter(v -> :RADARSWEEP in listDataEntries(v), getVariables(fg)) |> sortDFG
+
 fsvars = allSweepVariables .|> getLabel
 
 # helper function to retrieve the radar sweep for a given variable
-function fetchSweep(var::DFGVariable, store::FileDataStore)
-    entry = getBigDataEntry(var, :RADARSWEEP)
-    rawData = getBigData(datastore, entry)
-    # raw data is json-encoded; this decoding should happen inside getBigData?
+function fetchSweep(varlabel::Symbol)
+
+    entry,rawData = getData(fg, varlabel, :RADARSWEEP)
     rawdata = Vector{Float64}(JSON2.read(IOBuffer(rawData)))
     n = Int(sqrt(length(rawdata)))
     sweep = reshape(rawdata,(n,n))
@@ -32,7 +40,7 @@ function fetchSweep(var::DFGVariable, store::FileDataStore)
 end
 
 # fetch all radar pings
-sweeps = map(v -> fetchSweep(getVariable(fg, v), datastore), fsvars)
+sweeps = fetchSweep.(fsvars);
 using Images, ImageView
 # Filter the images
 kg = Kernel.gaussian(7)

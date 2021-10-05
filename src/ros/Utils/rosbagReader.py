@@ -18,7 +18,7 @@ class RosbagParser:
 
     def get_next_message(self):
         if (self.idx < self.topic_size):
-            topic, msg, time = self.bag_contents.next()
+            topic, msg, time = next(self.bag_contents)
             self.idx += 1
             return topic, msg, time
         else:
