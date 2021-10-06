@@ -60,9 +60,7 @@ using Caesar, Cairo, RoMEPlotting
 x_min, x_max = -9000, 9000
 y_min, y_max = -9000, 9000
 # north is regular map image up
-x, y, img_ = buildDEMSimulated(1, 100, x_is_north=false, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-# flip so north is down along with Images.jl [i,j] --> (x,y)
-img = reverse(img_, dims=1)
+x, y, img = RoME.generateField_CanyonDEM(1, 100, x_is_north=false, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
 
 # imshow(img)
 
@@ -127,7 +125,7 @@ end
 # 2. generate trajectory 
 
 μ0 = [-7000;-2000.0;pi/2]
-@time generateCanonicalFG_Helix2DSlew!(100, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) #, slew_x=1/20)
+@time generateCanonicalFG_Helix2DSlew!(11, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) #, slew_x=1/20)
 deleteFactor!(fg, :x0f1)
 
 # ensure specific solve settings
@@ -180,7 +178,7 @@ end
 
 ##
 
-plotSLAM2D_KeyAndSim(fg)
+plotSLAM2D_KeyAndRef(fg)
 
 
 ##
