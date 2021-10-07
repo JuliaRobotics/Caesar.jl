@@ -74,7 +74,7 @@ addFactor!(fg, [:x0; :l1], ppr )
 # dfgplot(fg)
 
 ## Perform inference
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 e_time = time_ns()
 elapsed = (e_time - s_time)/10^9
 append!(timing, elapsed)
@@ -115,7 +115,7 @@ addFactor!(fg, [Symbol("x$(i)"); :l1], ppr )
 
 ##
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 e_time = time_ns()
 elapsed = (e_time - s_time)/10^9
@@ -150,8 +150,8 @@ addFactor!(fg, [Symbol("x$(i)"); :l2], ppr )
 ##
 
 
-tree, smt, hist = solveTree!(fg, tree)
-# tree, smt, hist = solveTree!(fg; smtasks, recordcliqs=ls(fg))
+tree = solveTree!(fg, tree)
+# tree = solveTree!(fg; smtasks, recordcliqs=ls(fg))
 
 e_time = time_ns()
 elapsed = (e_time - s_time)/10^9
@@ -182,7 +182,7 @@ addFactor!(fg, [Symbol("x$(i-1)"); Symbol("x$(i)")], pp )
 addFactor!(fg, [Symbol("x$(i)"); :l2], ppr )
 
 ##
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 e_time = time_ns()
 elapsed = (e_time - s_time)/10^9
 append!(timing, elapsed)
@@ -211,7 +211,7 @@ addFactor!(fg, [Symbol("x$(i-1)"); Symbol("x$(i)")], pp )
 addFactor!(fg, [Symbol("x$(i)"); Symbol("l2")], ppr )
 
 ##
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 e_time = time_ns()
 elapsed = (e_time - s_time)/10^9
 append!(timing, elapsed)
@@ -241,7 +241,7 @@ addFactor!(fg, [Symbol("x$(i-1)"); Symbol("x$(i)")], pp )
 addFactor!(fg, [Symbol("x$(i)"); Symbol("l1")], ppr )
 
 ##
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 e_time = time_ns()
 elapsed = (e_time - s_time)/10^9
 append!(timing, elapsed)

@@ -92,7 +92,7 @@ getSolverParams(fg).drawtree = true
 # getSolverParams(fg).showtree = false
 
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 # drawGraph(fg)
 
@@ -133,7 +133,7 @@ plotKDE([ppbrDict[epochs[21]].range; ppbrDict[epochs[22]].range; ppbrDict[epochs
 
 writeGraphPdf(fg, engine="dot")
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 drawPosesLandms(fg)
 

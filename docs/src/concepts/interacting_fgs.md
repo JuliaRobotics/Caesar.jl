@@ -99,7 +99,7 @@ When you have built the graph, you can call the solver to perform inference with
 
 ```julia
 # Perform inference
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 ```
 
 The returned Bayes (Junction) `tree` object is described in more detail on [a dedicated documentation page](https://juliarobotics.org/Caesar.jl/latest/principles/bayestreePrinciples/), while `smt` and `hist` return values most closely relate to development and debug outputs which can be ignored during general use.  Should an error occur during, the exception information is easily accessible in the `smt` object (as well as file logs which default to `/tmp/caesar/`).
@@ -112,7 +112,7 @@ solveTree!
 
 One of the major features of the MM-iSAMv2 algorithm (implemented by [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl)) is reducing computational load by recycling and marginalizing different (usually older) parts of the factor graph.  In order to utilize the benefits of recycing, the previous Bayes (Junction) tree should also be provided as input (see fixed-lag examples for more details):
 ```julia
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 ```
 
 ## Using Clique out-marginalization (Clique Recycling II)

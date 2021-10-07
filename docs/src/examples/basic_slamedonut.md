@@ -130,7 +130,7 @@ drawGraph(fg) # show the factor graph
 
 At this point we can call the solver start interpreting the first results:
 ```julia
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 ```
 
 The factor graph figure above showed the structure between variables and factors.
@@ -223,7 +223,7 @@ The marginal posterior estimates are found by repeating inference over the facto
 # solve and show message passing on Bayes (Junction) tree
 getSolverParams(fg).drawtree=true
 getSolverParams(fg).showtree=true
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 # draw all vehicle locations
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:2], dims=[1;2])
@@ -246,7 +246,7 @@ The two "free" beacons/landmarks `:l3,:l4` still have several modes each, implyi
 vehicle_drives_to!(fg, :l103, GTp, GTl)
 vehicle_drives_to!(fg, :l104, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2])
 # Gadfly.draw(PDF("/tmp/testL100_104.pdf", 20cm, 10cm),pl)
@@ -260,17 +260,17 @@ Moving up to position `:l104` still shows strong multiodality in the vehicle pos
 vehicle_drives_to!(fg, :l105, GTp, GTl)
 vehicle_drives_to!(fg, :l106, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 vehicle_drives_to!(fg, :l107, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 vehicle_drives_to!(fg, :l108, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 2:8], dims=[1;2], levels=6)
@@ -283,13 +283,13 @@ Next we see a strong return to a single dominant mode in all vehicle position es
 vehicle_drives_to!(fg, :l109, GTp, GTl)
 vehicle_drives_to!(fg, :l110, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 vehicle_drives_to!(fg, :l111, GTp, GTl)
 vehicle_drives_to!(fg, :l112, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 7:12], dims=[1;2])

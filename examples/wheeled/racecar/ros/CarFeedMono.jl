@@ -184,7 +184,7 @@ dontMarginalizeVariablesAll!(fec.slam.dfg)
 foreach(x->setSolvable!(fec.slam.dfg, x, 1), ls(fec.slam.dfg))
 foreach(x->setSolvable!(fec.slam.dfg, x, 1), lsf(fec.slam.dfg))
 
-tree, smt, hist = solveTree!(fec.slam.dfg)
+tree = solveTree!(fec.slam.dfg)
 
 saveDFG(fec.slam.dfg, joinLogPath(fec.slam.dfg, "fg_$(slam.poseCount)_resolve"))
 

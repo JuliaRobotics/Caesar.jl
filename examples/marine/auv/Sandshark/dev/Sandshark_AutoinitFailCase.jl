@@ -89,7 +89,7 @@ getSolverParams(fg).multiproc = false
 getSolverParams(fg).limititers = 30
 
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 
 drawPosesLandms(fg, meanmax=:max)

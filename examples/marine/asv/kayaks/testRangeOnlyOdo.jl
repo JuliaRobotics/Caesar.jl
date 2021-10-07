@@ -74,7 +74,7 @@ getSolverParams(fg).maxincidence = 200
 
 
 ensureAllInitialized!(fg)
-tree, smt, hist = solveTree!(fg, recordcliqs=[:x19;:x169;:x166;:x134;:x171])
+tree = solveTree!(fg, recordcliqs=[:x19;:x169;:x166;:x134;:x171])
 
 
 fetchCliqTaskHistoryAll!(smt, hist)
@@ -178,7 +178,7 @@ sfg31bd = buildSubgraphFromLabels(fg31bd, [:x167;:x168;:x169;:x170])
 writeGraphPdf(sfg31bd, show=true)
 
 
-tree31s, smt31s, hist31s = solveTree!(sfg31bd)
+tree31s = solveTree!(sfg31bd)
 
 drawTree(tree, show=true, imgs=false)
 

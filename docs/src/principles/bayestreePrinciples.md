@@ -75,7 +75,7 @@ getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 
 # asybc process will now draw and show the tree in linux
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 ```
 
 !!! note

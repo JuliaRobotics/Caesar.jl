@@ -78,10 +78,10 @@ getSolverParams(fg).multiproc = true
 getSolverParams(fg).downsolve = true
 getSolverParams(fg).maxincidence = 100
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 drawTree(tree,filepath = "/tmp/test.pdf")
 # fg2 = deepcopy(fg)
-# tree, smt, hist = solveTree!(fg,tree)
+# tree = solveTree!(fg,tree)
 
 # plotSASDefault(fg,expID, posData,igt,datadir=allpaths[1],savedir=scriptHeader*"SASdefault.pdf")
 plotSASDefault(fg,expID, posData,igt,dposData, datadir=allpaths[1], savedir="/tmp/caesar/test.pdf")

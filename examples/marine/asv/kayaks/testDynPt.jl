@@ -85,7 +85,7 @@ getSolverParams(fg).showtree = true
 # getSolverParams(fg).downsolve
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 printCliqHistorySummary(tree,:x5)
 drawTree(tree)

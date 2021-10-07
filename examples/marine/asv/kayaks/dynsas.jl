@@ -125,9 +125,9 @@ while pose_counter < totalposes-2
            setValKDE!(fg,lstpose,XXkde);
 
            if sas_counter > 1
-               tree, smt, hist = solveTree!(fg,tree)
+               tree = solveTree!(fg,tree)
            else
-               tree, smt, hist = solveTree!(fg)
+               tree = solveTree!(fg)
            end
 
            writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")

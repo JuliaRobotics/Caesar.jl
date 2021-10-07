@@ -337,7 +337,7 @@ plotLocalProduct(dfg, :x100)
 
 getSolverParams(dfg).dbg = true
 
-tree, smt, hist = solveTree!(dfg, recordcliqs=ls(dfg))
+tree = solveTree!(dfg, recordcliqs=ls(dfg))
 
 
 plotSandsharkFromDFG(dfg)

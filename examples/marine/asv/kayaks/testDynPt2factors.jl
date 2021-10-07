@@ -95,7 +95,7 @@ getSolverParams(fg).drawtree = true
 getSolverParams(fg).limititers=200
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 drawTree(tree, filepath="/media/data1/data/kayaks/testbt.pdf")
 

@@ -30,7 +30,7 @@ getSolverParams(fg).async = true
 mkpath(getLogPath(fg))
 verbosefid = open(joinLogPath(fg, "csmVerbose.log"),"w")
 # verbosefid = stdout
-tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg), verbose=true, verbosefid=verbosefid, timeout=50 ) #, timeout=40 , injectDelayBefore=injectDelayBefore ) #, limititercliqs=limitcliqs);
+tree = solveTree!(fg, recordcliqs=ls(fg), verbose=true, verbosefid=verbosefid, timeout=50 ) #, timeout=40 , injectDelayBefore=injectDelayBefore ) #, limititercliqs=limitcliqs);
 
 
 flush(verbosefid)
