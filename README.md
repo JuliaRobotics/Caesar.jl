@@ -21,11 +21,11 @@ Also find factor graph solver DOI at:
 
 Code changes are currently tracked via Github's integrated Milestone/Issues/PR system -- click on the badges below to follow links into hightlights of the ecosystem.
 
-| **Major Dependencies**  |  **Stable**     |  **Dev (main)**   |  **Test Coverage**  |  **Changes**  |
+| **Major Dependencies**  |  **Stable Release**     |  **Dev Branch**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
-| Caesar.jl | [![version][cjl-stbl-img]][caesar-releases] | [![Build Status][build-img]][build-url] | umbrella | [![][mst-shield]][caesar-milestones] |
+| Caesar.jl | [![version][cjl-stbl-img]][caesar-releases] | [![Build Status][build-img]][build-url] | -*umbrella pkg*- | [![][mst-shield]][caesar-milestones] |
+| [IncrementalInference.jl][iif-url] | [![][iif-ver-img]][iif-rel-url] | [![Build Status][iif-ci-dev-img]][iif-ci-dev-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [RoME.jl][rome-url] | [![][r-stable]][r-releases] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] | [![][mst-shield]][r-milestones] |
-| [IncrementalInference.jl][iif-url] | [![][iif-stable]][iif-releases] | [![Build Status][iif-build-img]][iif-build-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
@@ -94,15 +94,17 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 
-[iif-build-img]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml/badge.svg
-[iif-build-url]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml
+<!-- variables duplicated in IncrementalInference.jl README -->
+[iif-ci-dev-img]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml/badge.svg
+[iif-ci-dev-url]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml
+[iif-ci-stb-img]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml/badge.svg?branch=release%2Fv0.25
+[iif-ci-stb-url]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml
+[iif-ver-img]: https://juliahub.com/docs/IncrementalInference/version.svg
+[iif-rel-url]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
+[iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
 [iif-cov-img]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl/coverage.svg?branch=master
 [iif-cov-url]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl?branch=master
-[iif-build-v020]: https://travis-ci.org/JuliaRobotics/IncrementalInference.jl.svg?branch=release/v0.23
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
-[iif-stable]: https://img.shields.io/badge/2021Q2-v0.24.x-green.svg
-[iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
-[iif-releases]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
 
 [kde-cov-img]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl/coverage.svg?branch=master
 [kde-cov-url]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl?branch=master

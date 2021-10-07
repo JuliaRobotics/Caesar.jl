@@ -141,7 +141,7 @@ smt, hist = solveCliq!(fg, tree, :x1)
 
 cliq = getClique(tree,:x0)
 
-getCliqVariableInferredPercent(fg, cliq)
+# getCliqVariableInferredPercent(fg, cliq)
 
 
 
@@ -178,7 +178,7 @@ msgfcts = addMsgFactors!(c3sfg, dwinmsgs)
 @info "8a, attemptCliqInitD., dwinmsgs=$(dwnkeys)"
 
 # DEVidea
-sdims = getCliqVariableMoreInitDims(c3sfg, cliq)
+# sdims = getCliqVariableMoreInitDims(c3sfg, cliq) # removed after IIF v0.25
 updateCliqSolvableDims!(cliq, sdims)
 
 # determine if more info is needed for partial
