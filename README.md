@@ -24,8 +24,8 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | **Major Dependencies**  |  **Stable Release**     |  **Dev Branch**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
 | Caesar.jl | [![version][cjl-stbl-img]][caesar-releases] | [![Build Status][build-img]][build-url] | -*umbrella pkg*- | [![][mst-shield]][caesar-milestones] |
-| [IncrementalInference.jl][iif-url] | [![][iif-ver-img]][iif-rel-url] | [![Build Status][iif-ci-dev-img]][iif-ci-dev-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [RoME.jl][rome-url] | [![][r-stable]][r-releases] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] | [![][mst-shield]][r-milestones] |
+| [IncrementalInference.jl][iif-url] | [![][iif-ver-img]][iif-rel-url] | [![Build Status][iif-ci-dev-img]][iif-ci-dev-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
