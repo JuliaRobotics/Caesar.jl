@@ -23,8 +23,8 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 
 | **Major Dependencies**  |  **Stable Release**     |  **Dev Branch**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
-| Caesar.jl | [![version][cjl-stbl-img]][caesar-releases] | [![Build Status][build-img]][build-url] | -*umbrella pkg*- | [![][mst-shield]][caesar-milestones] |
-| [RoME.jl][rome-url] | [![][r-stable]][r-releases] | [![Build Status][r-build-img]][r-build-url] | [![codecov.io][r-cov-img]][r-cov-url] | [![][mst-shield]][r-milestones] |
+| Caesar.jl | [![version][cjl-stbl-img]][caesarjl-releases] | [![Build Status][build-img]][build-url] | -*umbrella pkg*- | [![][mst-shield]][caesarjl-milestones] |
+| [RoME.jl][rjl-url] | [![][rjl-ver-img]][rjl-releases] | [![Build Status][rjl-ci-dev-img]][rjl-ci-dev-url] | [![codecov.io][rjl-cov-img]][rjl-cov-url] | [![][mst-shield]][rjl-milestones] |
 | [IncrementalInference.jl][iif-url] | [![][iif-ver-img]][iif-rel-url] | [![Build Status][iif-ci-dev-img]][iif-ci-dev-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
@@ -81,18 +81,19 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [cjl-stbl-url]: https://juliahub.com/ui/Packages/Caesar/BNbRm
 [caesar-slack-badge]: https://img.shields.io/badge/Invite-Slack-green.svg?style=popout
 [caesar-slack]: https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw
-[caesar-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
-[caesar-releases]: https://github.com/JuliaRobotics/Caesar.jl/releases
+[caesarjl-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
+[caesarjl-releases]: https://github.com/JuliaRobotics/Caesar.jl/releases
 
-[rome-url]: http://www.github.com/JuliaRobotics/RoME.jl
-[r-cov-img]: https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master
-[r-cov-url]: https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master
-[r-build-img]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master
-[r-build-v05]: https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.15
-[r-build-url]: https://travis-ci.org/JuliaRobotics/RoME.jl
-[r-stable]: https://img.shields.io/badge/2021Q2-v0.15.x-green.svg
-[r-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
-[r-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
+<!-- md variables duplicated in RoME.jl README -->
+[rjl-url]: http://www.github.com/JuliaRobotics/RoME.jl
+[rjl-cov-img]: https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master
+[rjl-cov-url]: https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master
+[rjl-ci-dev-img]: https://github.com/JuliaRobotics/RoME.jl/actions/workflows/ci.yml/badge.svg
+[rjl-ci-dev-url]: https://github.com/JuliaRobotics/RoME.jl/actions/workflows/ci.yml
+[rjl-ver-img]: https://juliahub.com/docs/RoME/version.svg
+[rjl-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
+[rjl-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
+[rjl-juliahub]: https://juliahub.com/ui/Packages/RoME/VVxXB
 
 <!-- variables duplicated in IncrementalInference.jl README -->
 [iif-ci-dev-img]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml/badge.svg
