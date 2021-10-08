@@ -10,9 +10,9 @@ A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reduci
 
 Click on the badges to follow web url links:
 
-| Stable v0.10 | Dev | Documentation | caesarjl.slack.com |
+| Stable CI | Dev CI | Documentation | caesarjl.slack.com |
 |:------:|:----------------:|:-------------:|:-----:|
-| [![Build Status][build-v0.10]][build-url] | [![Build Status][build-img]][build-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
+| [![Build Status][cjl-ci-stb-img]][cjl-ci-stb-url] | [![Build Status][cjl-ci-dev-img]][cjl-ci-dev-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
 
 Also find factor graph solver DOI at:
 [![doi-img]][doi-url]
@@ -23,7 +23,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 
 | **Major Dependencies**  |  **Stable Release**     |  **Dev Branch**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
-| Caesar.jl | [![version][cjl-stbl-img]][caesarjl-releases] | [![Build Status][build-img]][build-url] | -*umbrella pkg*- | [![][mst-shield]][caesarjl-milestones] |
+| Caesar.jl | [![version][cjl-stbl-img]][caesarjl-releases] | [![Build Status][cjl-ci-dev-img]][cjl-ci-dev-url] | -*umbrella pkg*- | [![][mst-shield]][caesarjl-milestones] |
 | [RoME.jl][rjl-url] | [![][rjl-ver-img]][rjl-releases] | [![Build Status][rjl-ci-dev-img]][rjl-ci-dev-url] | [![codecov.io][rjl-cov-img]][rjl-cov-url] | [![][mst-shield]][rjl-milestones] |
 | [IncrementalInference.jl][iif-url] | [![][iif-ver-img]][iif-rel-url] | [![Build Status][iif-ci-dev-img]][iif-ci-dev-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
@@ -70,12 +70,13 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [mst-shield]: https://img.shields.io/badge/-milestones-blueviolet
 [mst-shield2]: https://img.shields.io/badge/-milestones-lightgrey
 
-[cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
-[cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
-[build-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=master
-[build-v0.10]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.10
-[build-v0.9]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.9
-[build-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
+[cjl-cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
+[cjl-cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
+[cjl-ci-dev-img]: https://github.com/JuliaRobotics/Caesar.jl/actions/workflows/ci.yml/badge.svg
+[cjl-ci-dev-url]: https://github.com/JuliaRobotics/Caesar.jl/actions/workflows/ci.yml
+[cjl-ci-stb-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.10
+[cjl-ci-stb-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
+
 
 [cjl-stbl-img]: https://juliahub.com/docs/Caesar/version.svg
 [cjl-stbl-url]: https://juliahub.com/ui/Packages/Caesar/BNbRm
@@ -162,7 +163,8 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [amp-build-img]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/actions/workflows/ci.yml/badge.svg
 [amp-build-url]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/actions/workflows/ci.yml
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
-[amp-stable]: https://img.shields.io/badge/2021Q3-v0.4.x-green.svg
+[amp-stable]: https://juliahub.com/docs/ApproxManifoldProducts/version.svg
+[amp-ver-jhub]: https://juliahub.com/ui/Packages/ApproxManifoldProducts/FDvCH
 [amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
 [amp-releases]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/releases
 
