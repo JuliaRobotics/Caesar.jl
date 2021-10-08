@@ -44,7 +44,7 @@ Consider citing our work:
 ```
 @online{Caesarjl2021,
  author =        {{P}ackage {C}ontributors and {E}cosystem},
- title =         {Caesar.jl, v0.10.2},
+ title =         {Caesar.jl, v0.11.0},
  year =          {2021},
  doi=            {Solver DOI: 10.5281/zenodo.5146222}, 
  note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
