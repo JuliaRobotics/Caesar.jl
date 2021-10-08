@@ -143,10 +143,11 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 
 [lgraphs-cov-img]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl/coverage.svg?branch=master
 [lgraphs-cov-url]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl?branch=master
-[lgraphs-build-img]: https://travis-ci.org/JuliaGraphs/LightGraphs.jl.svg?branch=master
-[lgraphs-build-url]: https://travis-ci.org/JuliaGraphs/LightGraphs.jl
+[lgraphs-build-img]: https://github.com/sbromberger/LightGraphs.jl/actions/workflows/ci.yml/badge.svg
+[lgraphs-build-url]: https://github.com/sbromberger/LightGraphs.jl/actions/workflows/ci.yml
 [lgraphs-url]: http://www.github.com/JuliaGraphs/LightGraphs.jl
-[lgjl-stable]: https://img.shields.io/badge/2019Q3-v1.3.x-green.svg
+[lgjl-stable]: https://juliahub.com/docs/LightGraphs/version.svg
+[lgjl-ver-jhub]: https://juliahub.com/ui/Packages/LightGraphs/Xm08G
 [lgjl-releases]: https://github.com/JuliaGraphs/LightGraphs.jl/releases
 
 [dfg-cov-img]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl/coverage.svg?branch=master
