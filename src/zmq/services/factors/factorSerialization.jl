@@ -30,7 +30,7 @@ function convert(::Type{PriorPose2}, prior::Dict{String, Any})
     # Genericize to any packed type next.
     z = prior["measurement"][1]
     z = convert(_evalType(z["distType"]), z)
-    return Prior(z)
+    return PriorPose2(z)
 end
 
 """
@@ -40,7 +40,7 @@ function convert(::Type{PriorPose3}, prior::Dict{String, Any})
     # Genericize to any packed type next.
     z = prior["measurement"][1]
     z = convert(_evalType(z["distType"]), z)
-    return Prior(z)
+    return PriorPose3(z)
 end
 
 """
