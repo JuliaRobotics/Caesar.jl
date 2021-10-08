@@ -1,12 +1,6 @@
 # 
 
 
-# using LinearAlgebra
-# using Rotations, CoordinateTransformations
-# using TransformUtils
-
-# import Base: convert
-# import IncrementalInference: getSample
 
 export Pose2AprilTag4Corners, PackedPose2AprilTag4Corners
 export generateCostAprilTagsPreimageCalib
@@ -90,7 +84,7 @@ struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: AbstractRel
   preimage::Tuple{F, Vector{Float64}}
 end
 
-getManifold(::IIF.InstanceType{<:Pose2AprilTag4Corners}) = SE2E2_Manifold
+getManifold(::IIF.InstanceType{<:Pose2AprilTag4Corners}) = getManifold(Pose2Pose2) # SE2E2_Manifold
 
 """
     $SIGNATURES
@@ -228,15 +222,30 @@ end
 
 # just pass through sample and factor evaluations
 
-getSample(pat4c::CalcFactor{<:Pose2AprilTag4Corners}, N::Int=1) = (rand(pat4c.factor.Zij.z, N), )
-
-function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(z,
-                                                      wxi,
-                                                      wxj)
+function getSample( pat4c::CalcFactor{<:Pose2AprilTag4Corners} )
   #
-  wXjhat = SE2(wxi)*SE2(z)
-  jXjhat = SE2(wxj) \ wXjhat
-  se2vee(jXjhat)
+  M = getManifold(pat4c.factor.Zij.z)
+  ϵ = getPointIdentity(Pose2)
+
+  X = sampleTangent(M, pat4c.factor.Zij.z, ϵ)
+  return X
+end
+
+function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(X,
+                                                      p,
+                                                      q)
+  #
+
+  @assert X isa ProductRepr "Pose2AprilTag4Corners expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
+  M = getManifold(pat4c.factor.Zij.z)
+  q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
+  #TODO allocalte for vee! see Manifolds #412, fix for AD
+  Xc = zeros(3)
+  vee!(M, Xc, q, log(M, q, q̂))
+  return Xc
+  # wXjhat = SE2(wxi)*SE2(z)
+  # jXjhat = SE2(wxj) \ wXjhat
+  # se2vee(jXjhat)
 end
 
 ## serialization

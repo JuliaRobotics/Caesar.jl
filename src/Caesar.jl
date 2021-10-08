@@ -10,6 +10,8 @@ using Reexport
 using Requires
 using Dates
 
+using Manifolds
+
 @reexport using RoME
 @reexport using IncrementalInference
 @reexport using KernelDensityEstimate
