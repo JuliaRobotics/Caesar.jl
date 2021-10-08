@@ -35,7 +35,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | *upstream* |
 | [Images.jl][ijl-url] | [![][ijl-ver-stb-img]][ijl-ver-stb-url] | [![Build Status][ijl-action-img]][ijl-action-url] | [![][ijl-codecov-img]][ijl-codecov-url] | *upstream* |
 | [AprilTags.jl][apt-url] | [![][apt-ver-img]][apt-ver-url] | [![CI][apt-ci-dev-img]][apt-ci-dev-img] | [![][apt-cov-img]][apt-cov-url] | [![][mst-shield]][apt-milestones] |
-| [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
+| [RoMEPlotting.jl][rp-url] | [![][rp-ver-img]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
 | [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | *deprecating* |
 
 # Contributors
@@ -193,9 +193,9 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [rp-url]: http://www.github.com/JuliaRobotics/RoMEPlotting.jl
 [rp-cov-img]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl/coverage.svg?branch=master
 [rp-cov-url]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl?branch=master
-[rp-build-img]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl.svg?branch=master
-[rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
-[rp-stable]: https://img.shields.io/badge/2021Q2-v0.7.x-green.svg
+[rp-build-img]: https://github.com/JuliaRobotics/RoMEPlotting.jl/actions/workflows/ci.yml/badge.svg
+[rp-build-url]: https://github.com/JuliaRobotics/RoMEPlotting.jl/actions/workflows/ci.yml
+[rp-ver-img]: https://juliahub.com/docs/RoMEPlotting/version.svg
 [rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones
 [rp-releases]: https://github.com/JuliaRobotics/RoMEPlotting.jl/releases
 
