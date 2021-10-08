@@ -10,10 +10,14 @@ using Reexport
 using Requires
 using Dates
 
+using Manifolds
+
 @reexport using RoME
 @reexport using IncrementalInference
 @reexport using KernelDensityEstimate
 @reexport using Distributions
+
+import Rotations as _Rotations
 
 using
   Pkg,
@@ -24,7 +28,6 @@ using
   IncrementalInference,
   TransformUtils,
   CoordinateTransformations,
-  Rotations,
   JSON,
   JSON2,
   FileIO,

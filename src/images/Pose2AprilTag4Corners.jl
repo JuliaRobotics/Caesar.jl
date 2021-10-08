@@ -1,12 +1,6 @@
 # 
 
 
-# using LinearAlgebra
-# using Rotations, CoordinateTransformations
-# using TransformUtils
-
-# import Base: convert
-# import IncrementalInference: getSample
 
 export Pose2AprilTag4Corners, PackedPose2AprilTag4Corners
 export generateCostAprilTagsPreimageCalib
@@ -72,7 +66,7 @@ Related
 
 `AprilTags.detect`, `PackedPose2AprilTag4Corners`, [`generateCostAprilTagsPreimageCalib`](@ref)
 """
-struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: AbstractRelativeRoots
+struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: IIF.AbstractManifoldMinimize
   # 4 corners as detected by AprilTags
   corners::NTuple{4,Tuple{Float64,Float64}}
   # homography matrix
@@ -90,7 +84,7 @@ struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: AbstractRel
   preimage::Tuple{F, Vector{Float64}}
 end
 
-getManifold(::IIF.InstanceType{<:Pose2AprilTag4Corners}) = SE2E2_Manifold
+getManifold(::IIF.InstanceType{<:Pose2AprilTag4Corners}) = getManifold(Pose2Pose2) # SE2E2_Manifold
 
 """
     $SIGNATURES
@@ -141,7 +135,7 @@ function _AprilTagToPose2(corners,
   pose, err1 = AprilTags.tagOrthogonalIteration(corners, homography, f_width, f_height, c_width, c_height, taglength=taglength_)
   cVt = Translation((pose[1:3,4])...)
   # bRc = bRy * yRc 
-  bRc = Rotations.Quat(1/sqrt(2),0,1/sqrt(2),0) * Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))
+  bRc = _Rotations.Quat(1/sqrt(2),0,1/sqrt(2),0) * _Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))
   # for tag in body frame == bTt
   bTt = LinearMap(bRc) ∘ cVt
   
@@ -149,7 +143,11 @@ function _AprilTagToPose2(corners,
   ld = LinearAlgebra.cross(bTt.linear*pose[1:3,1:3]*[0;0;1], [0;0;1])
   theta = TU.wrapRad(atan(ld[2],ld[1]) + pi/2)
   
-  [bTt.translation[1:2,];theta]
+  M = getManifold(Pose2Pose2)
+  e0 = identity_element(M)
+
+  # create a tangent vector of the measurement
+  hat( M, e0, [bTt.translation[1:2,];theta] )
 end
 
 const _CornerVecTuple = Union{NTuple{4,Tuple{Float64,Float64}}, <:AbstractVector{Tuple{Float64,Float64}}, <:AbstractVector{<:AbstractVector{<:Real}}}
@@ -183,10 +181,14 @@ function Pose2AprilTag4Corners(;corners::_CornerVecTuple=((0.0,0.0),(1.0,0.0),(0
   x0 = [K[1,1], K[2,2], K[1,3], K[2,3], taglength]
   Dtag = _AprilTagToPose2(corners, homography, x0...)
   # println("$(tag.id), $(ld[3]), $(round.(Dtag, digits=3))")
-  p2l2 = Pose2Pose2(MvNormal(Dtag, covariance))
+  M = SpecialEuclidean(2)
+  e0 = identity_element(M)
+  p2l2 = Pose2Pose2(MvNormal(vee(M,e0,Dtag), covariance))
 
   # preimage optimize function
-  preImgFnc = (y, x) -> sum( (y - _AprilTagToPose2(corners_, homography, x...)).^2 )
+  ## TODO not the greatest use of Manifolds.jl, can do better
+  preImgFnc = (y, x) -> sum( vee(M, e0, y - _AprilTagToPose2(corners_, homography, x...)).^2 )
+  # preImgFnc = (y, x) -> sum( (y - _AprilTagToPose2(corners_, homography, x...)).^2 )
 
   #
   return Pose2AprilTag4Corners(corners_, homography, K, taglength, id, p2l2, (preImgFnc, x0))
@@ -228,15 +230,30 @@ end
 
 # just pass through sample and factor evaluations
 
-getSample(pat4c::CalcFactor{<:Pose2AprilTag4Corners}, N::Int=1) = (rand(pat4c.factor.Zij.z, N), )
-
-function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(z,
-                                                      wxi,
-                                                      wxj)
+function getSample( pat4c::CalcFactor{<:Pose2AprilTag4Corners} )
   #
-  wXjhat = SE2(wxi)*SE2(z)
-  jXjhat = SE2(wxj) \ wXjhat
-  se2vee(jXjhat)
+  M = getManifold(pat4c.factor.Zij)
+  ϵ = getPointIdentity(Pose2)
+
+  X = sampleTangent(M, pat4c.factor.Zij.z, ϵ)
+  return X
+end
+
+function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(X,
+                                                      p,
+                                                      q)
+  #
+
+  @assert X isa ProductRepr "Pose2AprilTag4Corners expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
+  M = getManifold(pat4c.factor.Zij)
+  q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
+  #TODO allocalte for vee! see Manifolds #412, fix for AD
+  Xc = zeros(3)
+  vee!(M, Xc, q, log(M, q, q̂))
+  return Xc
+  # wXjhat = SE2(wxi)*SE2(z)
+  # jXjhat = SE2(wxj) \ wXjhat
+  # se2vee(jXjhat)
 end
 
 ## serialization
