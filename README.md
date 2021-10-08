@@ -30,11 +30,13 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
 | [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
-| [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | upstream |
-| [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | upstream |
-| [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | upstream |
-| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | deprecating |
-| [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
+| [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | *upstream* |
+| [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | *upstream* |
+| [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | *upstream* |
+| [Images.jl][ijl-url] | [![][ijl-ver-stb-img]][ijl-ver-stb-url] | [![Build Status][ijl-action-img]][ijl-action-url] | [![][ijl-codecov-img]][ijl-codecov-url] | *upstream* |
+| [AprilTags.jl][apt-url] | [![][apt-ver-img]][apt-ver-url] | [![CI][apt-ci-dev-img]][apt-ci-dev-img] | [![][apt-cov-img]][apt-cov-url] | [![][mst-shield]][apt-milestones] |
+| [RoMEPlotting.jl][rp-url] | [![][rp-ver-img]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
+| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | *deprecating* |
 
 # Contributors
 
@@ -44,7 +46,7 @@ Consider citing our work:
 ```
 @online{Caesarjl2021,
  author =        {{P}ackage {C}ontributors and {E}cosystem},
- title =         {Caesar.jl, v0.10.2},
+ title =         {Caesar.jl, v0.11.0},
  year =          {2021},
  doi=            {Solver DOI: 10.5281/zenodo.5146222}, 
  note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
@@ -191,8 +193,28 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [rp-url]: http://www.github.com/JuliaRobotics/RoMEPlotting.jl
 [rp-cov-img]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl/coverage.svg?branch=master
 [rp-cov-url]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl?branch=master
-[rp-build-img]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl.svg?branch=master
-[rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
-[rp-stable]: https://img.shields.io/badge/2021Q2-v0.7.x-green.svg
+[rp-build-img]: https://github.com/JuliaRobotics/RoMEPlotting.jl/actions/workflows/ci.yml/badge.svg
+[rp-build-url]: https://github.com/JuliaRobotics/RoMEPlotting.jl/actions/workflows/ci.yml
+[rp-ver-img]: https://juliahub.com/docs/RoMEPlotting/version.svg
 [rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones
 [rp-releases]: https://github.com/JuliaRobotics/RoMEPlotting.jl/releases
+
+[ijl-url]: https://github.com/JuliaImages/Images.jl
+[ijl-pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/I/Images.svg
+[ijl-pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
+[ijl-action-img]: https://github.com/JuliaImages/Images.jl/workflows/Unit%20test/badge.svg
+[ijl-action-url]: https://github.com/JuliaImages/Images.jl/actions
+[ijl-codecov-img]: https://codecov.io/github/JuliaImages/Images.jl/coverage.svg?branch=master
+[ijl-codecov-url]: https://codecov.io/github/JuliaImages/Images.jl?branch=master
+[ijl-ver-stb-img]: https://juliahub.com/docs/Images/version.svg
+[ijl-ver-stb-url]: https://github.com/JuliaImages/Images.jl/releases
+
+<!-- AprilTags.jl -->
+[apt-url]: https://github.com/JuliaRobotics/AprilTags.jl
+[apt-ver-img]: https://juliahub.com/docs/AprilTags/version.svg
+[apt-ver-url]: https://github.com/JuliaRobotics/AprilTags.jl/releases
+[apt-ci-dev-img]: https://travis-ci.org/JuliaRobotics/AprilTags.jl.svg?branch=master
+[apt-ci-dev-url]: https://travis-ci.org/JuliaRobotics/AprilTags.jl
+[apt-cov-img]: http://codecov.io/github/JuliaRobotics/AprilTags.jl/coverage.svg?branch=master
+[apt-cov-url]: http://codecov.io/github/JuliaRobotics/AprilTags.jl?branch=master
+[apt-milestones]: https://github.com/JuliaRobotics/AprilTags.jl/milestones

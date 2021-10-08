@@ -87,11 +87,12 @@ We are grateful for many, many contributions within the Julia package ecosystem 
 
 Consider citing our work:
 ```
-@misc{caesarjl,
-  author = "Contributors and Dependencies",
-  title =  "Caesar.jl, v0.10",
-  year =   2021,
-  url =    "https://github.com/JuliaRobotics/Caesar.jl"
+@online{Caesarjl2021,
+ author =        {{P}ackage {C}ontributors and {E}cosystem},
+ title =         {Caesar.jl, v0.11.0},
+ year =          {2021},
+ doi=            {Solver DOI: 10.5281/zenodo.5146222}, 
+ note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
 }
 ```
 
