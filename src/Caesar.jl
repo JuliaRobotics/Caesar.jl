@@ -17,6 +17,8 @@ using Manifolds
 @reexport using KernelDensityEstimate
 @reexport using Distributions
 
+import Rotations as _Rotations
+
 using
   Pkg,
   DelimitedFiles,
@@ -26,7 +28,6 @@ using
   IncrementalInference,
   TransformUtils,
   CoordinateTransformations,
-  Rotations,
   JSON,
   JSON2,
   FileIO,

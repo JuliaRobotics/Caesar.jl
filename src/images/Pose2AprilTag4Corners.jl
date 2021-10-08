@@ -66,7 +66,7 @@ Related
 
 `AprilTags.detect`, `PackedPose2AprilTag4Corners`, [`generateCostAprilTagsPreimageCalib`](@ref)
 """
-struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: AbstractRelativeRoots
+struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: IIF.AbstractManifoldMinimize
   # 4 corners as detected by AprilTags
   corners::NTuple{4,Tuple{Float64,Float64}}
   # homography matrix
@@ -135,7 +135,7 @@ function _AprilTagToPose2(corners,
   pose, err1 = AprilTags.tagOrthogonalIteration(corners, homography, f_width, f_height, c_width, c_height, taglength=taglength_)
   cVt = Translation((pose[1:3,4])...)
   # bRc = bRy * yRc 
-  bRc = Rotations.Quat(1/sqrt(2),0,1/sqrt(2),0) * Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))
+  bRc = _Rotations.Quat(1/sqrt(2),0,1/sqrt(2),0) * _Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))
   # for tag in body frame == bTt
   bTt = LinearMap(bRc) ∘ cVt
   
@@ -224,7 +224,7 @@ end
 
 function getSample( pat4c::CalcFactor{<:Pose2AprilTag4Corners} )
   #
-  M = getManifold(pat4c.factor.Zij.z)
+  M = getManifold(pat4c.factor.Zij)
   ϵ = getPointIdentity(Pose2)
 
   X = sampleTangent(M, pat4c.factor.Zij.z, ϵ)
@@ -237,7 +237,7 @@ function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(X,
   #
 
   @assert X isa ProductRepr "Pose2AprilTag4Corners expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
-  M = getManifold(pat4c.factor.Zij.z)
+  M = getManifold(pat4c.factor.Zij)
   q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
   #TODO allocalte for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
