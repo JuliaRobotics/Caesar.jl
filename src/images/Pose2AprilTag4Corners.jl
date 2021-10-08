@@ -143,7 +143,11 @@ function _AprilTagToPose2(corners,
   ld = LinearAlgebra.cross(bTt.linear*pose[1:3,1:3]*[0;0;1], [0;0;1])
   theta = TU.wrapRad(atan(ld[2],ld[1]) + pi/2)
   
-  [bTt.translation[1:2,];theta]
+  M = getManifold(Pose2Pose2)
+  e0 = identity_element(M)
+
+  # create a tangent vector of the measurement
+  hat( M, e0, [bTt.translation[1:2,];theta] )
 end
 
 const _CornerVecTuple = Union{NTuple{4,Tuple{Float64,Float64}}, <:AbstractVector{Tuple{Float64,Float64}}, <:AbstractVector{<:AbstractVector{<:Real}}}
@@ -177,10 +181,14 @@ function Pose2AprilTag4Corners(;corners::_CornerVecTuple=((0.0,0.0),(1.0,0.0),(0
   x0 = [K[1,1], K[2,2], K[1,3], K[2,3], taglength]
   Dtag = _AprilTagToPose2(corners, homography, x0...)
   # println("$(tag.id), $(ld[3]), $(round.(Dtag, digits=3))")
-  p2l2 = Pose2Pose2(MvNormal(Dtag, covariance))
+  M = SpecialEuclidean(2)
+  e0 = identity_element(M)
+  p2l2 = Pose2Pose2(MvNormal(vee(M,e0,Dtag), covariance))
 
   # preimage optimize function
-  preImgFnc = (y, x) -> sum( (y - _AprilTagToPose2(corners_, homography, x...)).^2 )
+  ## TODO not the greatest use of Manifolds.jl, can do better
+  preImgFnc = (y, x) -> sum( vee(M, e0, y - _AprilTagToPose2(corners_, homography, x...)).^2 )
+  # preImgFnc = (y, x) -> sum( (y - _AprilTagToPose2(corners_, homography, x...)).^2 )
 
   #
   return Pose2AprilTag4Corners(corners_, homography, K, taglength, id, p2l2, (preImgFnc, x0))

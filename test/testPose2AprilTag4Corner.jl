@@ -72,8 +72,8 @@ meas = sampleFactor(IIF._getCCW(atf),2)
 # meas = sampleFactor(fg, DFG.getLabel(atf),2)
 
 @error "restore type checking for AprilTags4Corners Factor"
-# @test  meas isa Tuple
-# @test  meas[1] isa Array
+@test  meas isa Vector
+@test  meas[1] isa ProductRepr # TBD likely to change to new Manifolds.jl type
 
 ##
 
@@ -148,7 +148,7 @@ meas_ = exp.(Ref(M), Ref(identity_element(M)), meas)
 # in reality we'd do this over section of the graph for each sample
 # FIXME this must be moved up into IncrementalInference
 function _solveFactorPreimage(fct::Union{<:AbstractPrior, <:AbstractRelative}, 
-                              meas_::AbstractVector{<:Real}; 
+                              meas_; # this is a SpecialEuclidean(2) tangent vector type, ProductRepr or newer 
                               method=BFGS(),
                               regularize::Real=0 )
   #
@@ -167,7 +167,7 @@ preImgs = zeros(5,10)
 
 for i in 1:10
   println("finding preimage $i") 
-  preImgs[:,i] .= _solveFactorPreimage(fct, meas[1][:,i], regularize=0.001)
+  preImgs[:,i] .= _solveFactorPreimage(fct, pred[i], regularize=0.001)
 
   # residual = Optim.optimize((x) -> fct.preimage[1](meas[1][:,i], x), fct.preimage[2], BFGS())
   # store sample
