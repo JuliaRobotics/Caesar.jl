@@ -5,6 +5,7 @@ using Caesar, Caesar.ZmqCaesar
 using Distributions, RoME, IncrementalInference
 using Unmarshal
 
+##
 # @testset "ZMQ Integration Test (Hexagonal Solver)" begin
 
 addOdo2DJson = "{\n  \"covariance\": [\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ],\n    [\n      0.1,\n      0.0,\n      0.1\n    ]\n  ],\n  \"measurement\": [\n    10.0,\n    0.0,\n    1.0471975511965976\n  ],\n  \"robot_id\": \"Hexagonal\",\n  \"session_id\": \"cjz002\",\n  \"type\": \"addOdometry2D\"\n}";
@@ -33,7 +34,7 @@ lsCmd = Dict{String, Any}("request" => "ls", "payload" => JSON.parse(JSON.json(l
 # Add a prior factor
 dist = Dict{String, Any}("distType" => "MvNormal", "mean" => Array{Float64}(undef,3), "cov" => [1.0,0,0,0,1.0,0,0,0,1.0])
 factor = Dict{String, Any}("measurement" => [dist])
-priorFactCmd = Dict{String, Any}("request" => "addFactor", "payload" => JSON.parse(JSON.json(FactorRequest(["x0"], "Prior", factor))))
+priorFactCmd = Dict{String, Any}("request" => "addFactor", "payload" => JSON.parse(JSON.json(FactorRequest(["x0"], "PriorPose2", factor))))
 @test sendCmd(config, fg, priorFactCmd) == "{\"status\":\"OK\",\"id\":\"x0f1\"}"
 
 @test sendCmd(config, fg, lsCmd) == "{\"variables\":[{\"factors\":[\"x0f1\"],\"id\":\"x0\"}]}"
@@ -50,7 +51,7 @@ for i in 1:6
 
     # Now adding odo factor
     factor = Dict{String, Any}("measurement" => [odo])
-    @show odoFactCmd = Dict{String, Any}("request" => "addFactor", "payload" => JSON.parse(JSON.json(FactorRequest(["x$(i-1)", "x$i"], "Pose2Pose2", factor))))
+    odoFactCmd = Dict{String, Any}("request" => "addFactor", "payload" => JSON.parse(JSON.json(FactorRequest(["x$(i-1)", "x$i"], "Pose2Pose2", factor))))
     @test sendCmd(config, fg, odoFactCmd) == "{\"status\":\"OK\",\"id\":\"x$(i-1)x$(i)f1\"}"
 end
 
