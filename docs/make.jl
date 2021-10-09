@@ -66,6 +66,7 @@ makedocs(
             "Custom Variables and Factors" => "examples/adding_variables_factors.md",
             "Creating Variables" => "examples/custom_variables.md",
             "Creating Factors" => "examples/basic_definingfactors.md",
+            "More Functions" => "func_ref.md",
         ],
         "Principles" => [
             "Filters vs. Graphs" => "principles/filterCorrespondence.md",
@@ -84,9 +85,6 @@ makedocs(
         "Literature" => [
             "References" => "refs/literature.md"
         ],
-        "Function Reference" => [
-            "Caesar's Reference" => "func_ref.md"
-        ]
     ]
     # html_prettyurls = !("local" in ARGS),
     )

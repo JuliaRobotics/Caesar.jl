@@ -47,11 +47,13 @@ For installation steps, examples/tutorials, and concepts please refer to the fol
 
 ```@contents
 Pages = [
+    "concepts/why_nongaussian.md"
     "installation_environment.md"
     "concepts/concepts.md"
+    "concepts/building_graphs.md"
+    "concepts/2d_plotting.md"
     "examples/examples.md"
-    "func_ref.md"
 ]
-Depth = 3
+Depth = 1
 ```
 

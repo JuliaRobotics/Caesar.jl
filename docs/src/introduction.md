@@ -9,18 +9,17 @@ Caesar.jl addresses numerous issues that arise in prior SLAM solutions, includin
 - centralized (or peer-to-peer distributed) factor-graph persistence, 
 - federated multi-session/agent reduction, and many more.  
 
-Caesar.jl is community orientef and originates from research work at MIT, see the [literature reference page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more information.
-
-[NavAbility](https://www.navability.io/) administers the Caesar/RoME/IncrementalInference packages, please contact [info@navability.io](https://navability.io/contact/) for more details.
-
-Ongoing work on this project focuses on the open development of a stable, reliable, verified, user-friendly, and growing library that is well suited to various data-fusion / state-estimation aspects of robotics and autonomy in [non-Gaussian/multi-modal](https://juliarobotics.org/Caesar.jl/latest/concepts/concepts/#Why/Where-does-non-Gaussian-data-come-from?-1) data processing.
+Ongoing work on this project focuses on the open development of a stable, reliable, verified, user-friendly, community drive, and growing library that is well suited to various data-fusion / state-estimation aspects of robotics and autonomy in [non-Gaussian/multi-modal](https://juliarobotics.org/Caesar.jl/latest/concepts/concepts/#Why/Where-does-non-Gaussian-data-come-from?-1) data processing.
 
 # A Few Highlights
 
 The Caesar framework offers these and other features:
 * Distributed Factor Graph representation deeply-coupled with an on-Manifold probabilistic algebra language;
-* Localization using [MM-iSAMv2](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/#Related-Literature-1)
-  * Multi-core inference supporting `Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc`.
+* Localization using different algorithms:
+  * [MM-iSAMv2](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/#Related-Literature-1)
+  * Parametric methods, including regular Guassian or Max-Mixtures.
+  * Other multi-parametric and non-Gaussian algorithms are presently being implemented.
+* Multi-CPU inference.
 * Native multi-modal (hypothesis) representation in the factor-graph, see [Data Association and Hypotheses](@ref):
   * Multi-modal and non-parametric representation of constraints;
   * Gaussian distributions are but one of the many representations of measurement error;
@@ -32,3 +31,16 @@ The Caesar framework offers these and other features:
 * Natively supports Federated multi-session/agent solving;
 * Native support for `Entry=>Data` blobs [for storing large format data](https://juliarobotics.org/Caesar.jl/latest/concepts/entry_data/).
 * Middleware support, e.g. see the [ROS Integration Page](examples/using_ros.md).
+
+# Next Steps
+
+Quick links to related pages:
+```@contents
+Pages = [
+    "concepts/why_nongaussian.md"
+    "installation_environment.md"
+    "concepts/concepts.md"
+    "concepts/building_graphs.md"
+]
+Depth = 1
+```
