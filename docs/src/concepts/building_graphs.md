@@ -17,7 +17,9 @@ fg_ = generateCanonicalFG_Hexagonal()
 
 and then work with `fg_` to try out something risky.
 
-See the [Canonical Graphs](../examples/canonical_graphs.md) page for a more complete list of existing graph generators.
+!!! note
+    See the [Canonical Graphs](../examples/canonical_graphs.md) page for a more complete list of existing graph generators.
+
 ## Building a new Graph
 
 The first step is to model the data (using the most appropriate *factors*) among *variables* of interest.  To start model, first create a *distributed factor graph object*:
@@ -40,7 +42,7 @@ Variables (a.k.a. poses or states in navigation lingo) are created with the `add
 addVariable!(fg, :x0, Pose2)
 # Add a few more poses
 for i in 1:10
-  addVariable!(fg, Symbol("x$(i)"), Pose2)
+  addVariable!(fg, Symbol("x",i), Pose2)
 end
 ```
 
