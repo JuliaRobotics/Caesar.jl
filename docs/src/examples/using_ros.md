@@ -14,7 +14,7 @@ source /opt/ros/noetic/setup.bash
 Assuming you have bespoke msg types, we suggest using a catkin workspace of choice, for example:
 ```bash
 mkdir -p ~/caesar_ws/src
-cd src
+cd ~/caesar_ws/src
 git clone https://github.com/pvazteixeira/caesar_ros
 ```
 
@@ -30,9 +30,13 @@ This last command is important, as you must have the workspace configuration in 
 
 ## RobotOS.jl with Correct Python
 
-RobotOS.jl currently using [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) to interface through the `rospy` system.  After launching Julia, make sure that PyCall is using the correct Python binary on your local system.  In our local setup, we use (assuming `using Distributed`):
+RobotOS.jl currently uses [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) to interface through the `rospy` system.  After launching Julia, make sure that PyCall is using the correct Python binary on your local system.
 ```julia
-## Prepare python version
+# Assuming multiprocess will be used.
+using Distributed
+# addprocs(4)
+
+# Prepare python version
 using Pkg
 Distributed.@everywhere using Pkg
 
