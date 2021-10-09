@@ -25,11 +25,11 @@ The easiest method is---via the terminal---to [download the desired](https://jul
 cd ~
 mkdir -p .julia
 cd .julia
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.1-linux-x86_64.tar.gz
-tar -xvf julia-1.6.1-linux-x86_64.tar.gz
-rm julia-1.6.1-linux-x86_64.tar.gz
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.3-linux-x86_64.tar.gz
+tar -xvf julia-1.6.3-linux-x86_64.tar.gz
+rm julia-1.6.3-linux-x86_64.tar.gz
 cd /usr/local/bin
-sudo ln -s ~/.julia/julia-1.6.1/bin/julia julia
+sudo ln -s ~/.julia/julia-1.6.3/bin/julia julia
 ```
 !!! note
     Feel free to modify this setup as you see fit.
@@ -137,7 +137,7 @@ Alternatively, the `dev` command:
     ~/.julia/dev/Caesar
     ```
 
-If you'd like to modify or contribute then feel free to fork the specific repo from JuliaRobotics, complete the work on branches in the fork as is normal with a Git workflow and then submit a PR back upstream.  We try to keep PRs small, specific to a task and preempt large changes by first merging smaller non-breaking changes and finally do a small switch over PR.  We also follow a backport onto `release/vX.X` branch strategy with common `master` as the development lobby that builds successfully 99.999% of the time.
+If you'd like to modify or contribute then feel free to fork the specific repo from JuliaRobotics, complete the work on branches in the fork as is normal with a Git workflow and then submit a PR back upstream.  We try to keep PRs small, specific to a task and preempt large changes by first merging smaller non-breaking changes and finally do a small switch over PR.  We also follow a backport onto `release/vX.Y` branch strategy with common `main || master` branch as the "lobby" for shared development into which individual single responsibility PRs are merged.  Each PR, the `main` development lobby, and stable `release/vX.Y` branches are regularly tested through Continuous Integration at each of the repsective packages.
 
 ## Ahead Of Time Compile RoME.so
 
@@ -156,27 +156,8 @@ RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
 (v1.6) pkg> add RoMEPlotting
 ```
 
-## Contributing, Issues, or Comments
+## Contributing, Issues, Comments, or Help
 
-Please feel free to open [issues with Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl/issues) or even Fork and Pull Request as required.
-General conversations or comments can be made in the [Caesar Gist](https://gist.github.com/dehann/537f8a2eb9cc24d8bbd35ae92cb4d2d2).
+Please feel free to open [Issues](https://github.com/JuliaRobotics/Caesar.jl/issues), or [Discussions](https://github.com/JuliaRobotics/Caesar.jl/discussions).  Any Community feedback or contributions (including PRs) are welcome!  You can also get in touch via Slack at [![](https://img.shields.io/badge/Invite-Slack-green.svg?style=popout)](https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw).
 
-
-## Features To Be Restored In Future
-
-### Install 3D Visualization Utils (e.g. Arena.jl)
-
-3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
-Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
-
-!!! note
-    Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
-
-Install the latest `master` branch version with
-```julia
-(v1.5) pkg> add Arena#master
-```
-
-## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
-
-Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).
+[NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io).
