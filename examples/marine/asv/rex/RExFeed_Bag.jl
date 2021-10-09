@@ -54,10 +54,6 @@ using JSON2
 using DistributedFactorGraphs.DocStringExtensions
 using Dates
 
-# move to Caesar.jl RosBagreader
-# using DataStructures
-# using StructTypes
-# using JSON3
 
 # /gps/fix              10255 msgs    : sensor_msgs/NavSatFix
 # /gps/nmea_sentence    51275 msgs    : nmea_msgs/Sentence
@@ -67,11 +63,6 @@ using Dates
 
 # function handleGPS(msg, fg)
 # end
-
-
-StructTypes.StructType(::Type{PyObject}) = StructTypes.Struct()
-StructTypes.StructType(::Type{seagrant_msgs.msg.radar}) = StructTypes.Struct()
-
 
 
 """
