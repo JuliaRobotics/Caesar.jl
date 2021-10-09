@@ -30,7 +30,7 @@ Consider citing our work:
 
 Please feel free to open [Issues](https://github.com/JuliaRobotics/Caesar.jl/issues), or [Discussions](https://github.com/JuliaRobotics/Caesar.jl/discussions).  Any Community feedback or contributions (including PRs) are welcome!  You can also get in touch via Slack at [![](https://img.shields.io/badge/Invite-Slack-green.svg?style=popout)](https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw).
 
-Please file issues via Github for help to resolve problems for everyone. Issues can be transfered moved upstream to the best suited package location. Changes and ongoing work can be tracked via the [Milestone pages (click through badges here)](https://github.com/JuliaRobotics/Caesar.jl/blob/master/README.md#bleeding-edge-development-status). 
+Please file issues via Github for help to resolve problems for everyone.  Maintainers can easily transfer Issues to the best suited package location if necessary. Changes and ongoing work can be tracked via the [Milestone pages (click through badges here)](https://github.com/JuliaRobotics/Caesar.jl/blob/master/README.md#bleeding-edge-development-status). 
 
 !!! note
     Please help improve this documentation--if something confuses you, chances
