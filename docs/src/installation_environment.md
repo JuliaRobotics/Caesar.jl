@@ -1,4 +1,4 @@
-# Welcome
+# Various Install Options
 
 Caesar.jl is one of the packages within the [JuliaRobotics](http://www.juliarobotics.org) community, and adheres to the [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 
@@ -57,7 +57,6 @@ user@...$ julia -e "println(\"one more time.\")"
 one more time.
 user@...$ julia -e "println(\"...testing...\")"
 ...testing...
-
 ```
 
 !!! note
@@ -139,25 +138,6 @@ Alternatively, the `dev` command:
 
 If you'd like to modify or contribute then feel free to fork the specific repo from JuliaRobotics, complete the work on branches in the fork as is normal with a Git workflow and then submit a PR back upstream.  We try to keep PRs small, specific to a task and preempt large changes by first merging smaller non-breaking changes and finally do a small switch over PR.  We also follow a backport onto `release/vX.Y` branch strategy with common `main || master` branch as the "lobby" for shared development into which individual single responsibility PRs are merged.  Each PR, the `main` development lobby, and stable `release/vX.Y` branches are regularly tested through Continuous Integration at each of the repsective packages.
 
-## Ahead Of Time Compile RoME.so
+!!! note
+    Binary compilation and fast "first-time-to-plot" can be done through [PackageCompiler.jl, see here for more details](concepts/compile_binary.md).
 
-In RoME, run the `compileRoME/compileRoMESysimage.jl` script
-
-To use RoME with the newly created sysimage, start julia with:
-```
-julia -O3 -J ~/.julia/dev/RoME/compileRoME/RoMESysimage.so
-```
-
-
-## 2D Plotting, RoMEPlotting.jl
-
-RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
-```julia
-(v1.6) pkg> add RoMEPlotting
-```
-
-## Contributing, Issues, Comments, or Help
-
-Please feel free to open [Issues](https://github.com/JuliaRobotics/Caesar.jl/issues), or [Discussions](https://github.com/JuliaRobotics/Caesar.jl/discussions).  Any Community feedback or contributions (including PRs) are welcome!  You can also get in touch via Slack at [![](https://img.shields.io/badge/Invite-Slack-green.svg?style=popout)](https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw).
-
-[NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io).
