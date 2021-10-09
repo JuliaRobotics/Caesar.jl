@@ -63,6 +63,7 @@ makedocs(
         ],
         "How to Expand?" => [
             "Pkg Framework" => "caesar_framework.md",
+            "Images and AprilTags" => "examples/using_images.md",
             "Custom Variables and Factors" => "examples/adding_variables_factors.md",
             "Creating Variables" => "examples/custom_variables.md",
             "Creating Factors" => "examples/basic_definingfactors.md",
