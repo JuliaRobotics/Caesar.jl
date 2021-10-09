@@ -75,7 +75,7 @@ makedocs(
             "Multiplying Functions (.py)" => "principles/multiplyingDensities.md",
             "Bayes (Junction) tree" => "principles/bayestreePrinciples.md",
             "Advanced Bayes Tree Topics" => "principles/initializingOnBayesTree.md",
-            "Multimodal iSAM Algorithm" => "concepts/mmisam_alg.md",
+            "Non-Gaussian Algorithm" => "concepts/mmisam_alg.md",
         ],
         "Developer Zone" => [
             "Wiki Pointers" => "dev/wiki.md",
