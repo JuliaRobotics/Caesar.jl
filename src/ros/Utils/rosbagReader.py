@@ -18,7 +18,8 @@ class RosbagParser:
 
     def get_next_message(self):
         if (self.idx < self.topic_size):
-            topic, msg, time = self.bag_contents.next()
+            # https://stackoverflow.com/questions/18547878/attribute-error-next
+            topic, msg, time = self.bag_contents.__next__()
             self.idx += 1
             return topic, msg, time
         else:
