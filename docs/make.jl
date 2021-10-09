@@ -23,7 +23,9 @@ makedocs(
         "Welcome" => "index.md",
         "Introduction" => [
             "Introduction" => "introduction.md",
+            "Guassian vs. Non-Gaussian" => "concepts/why_nongaussian.md",
             "Installation" => "installation_environment.md",
+            "Using Julia" => "concepts/using_julia.md",
             "FAQ" => "faq.md",
         ],
         "Getting Started" => [
@@ -42,25 +44,25 @@ makedocs(
             "Dead Reckon Tether" => "examples/deadreckontether.md",
         ],
         "Graph Library" => [
-            "Variables/Factors" => "concepts/available_varfacs.md",
             "Canonical Generators" => "examples/canonical_graphs.md",
-            "Pkg Framework" => "caesar_framework.md",
+            "Entry=>Data Blob" => "concepts/entry_data.md",
+            "Variables/Factors" => "concepts/available_varfacs.md",
+            "Flux (NN) Factors" => "concepts/flux_factors.md",
         ],
         "Visualization" => [
             "Installing Viz" => "install_viz.md",
             "Plotting (2D)" => "concepts/2d_plotting.md",
             "Visualization (3D)" => "concepts/arena_visualizations.md",            
         ],
-        "Additional Features" => [
+        "Middlewares" => [
             "ROS Middleware" => "examples/using_ros.md",
-            "Entry=>Data Blob" => "concepts/entry_data.md",
             "Cloud Server/Database" => "concepts/database_interactions.md",
             "Multi-session/agent Solving" => "concepts/multisession.md",
-            "Flux (NN) Factors" => "concepts/flux_factors.md",
-            "Multi-Language Support" => "concepts/multilang.md",
             "Compile Binaries" => "concepts/compile_binary.md",
+            "Multi-Language Support" => "concepts/multilang.md",
         ],
         "How to Expand?" => [
+            "Pkg Framework" => "caesar_framework.md",
             "Custom Variables and Factors" => "examples/adding_variables_factors.md",
             "Creating Variables" => "examples/custom_variables.md",
             "Creating Factors" => "examples/basic_definingfactors.md",
