@@ -76,10 +76,10 @@ function loop!(rbs::RosbagSubscriber, args...)
   end
 end
 
-function (rbs::RosbagSubscriber)(chl::AbstractString,
-                                 callback::Function,
-                                 args...;
-                                 msgType=nothing)
+function (rbs::RosbagSubscriber)( chl::AbstractString,
+                                  callback::Function,
+                                  args...;
+                                  msgType=nothing )
   #
   cn = Symbol(string(chl))
   push!(rbs.channels, cn)
