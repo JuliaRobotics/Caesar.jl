@@ -7,10 +7,12 @@
         s- periodic export of factor graph object
 
     To run:
-    - source devel/setup.bash in all 3 terminals
+    - source /opt/ros/noetic/setup.bash
+    - cd ~/thecatkin_ws
+        - source devel/setup.bash in all 3 terminals
     - run roscore in one terminal
-    - then rosbag play data/lidar_radar.bag
-    - and julia RExFeed.jl in third.
+    - Make sure the rosbag is in ~/data/Marine/lidar_radar.bag
+    - and julia RExFeed.jl in another terminal.
 """
 
 ## Prepare python version
@@ -20,16 +22,15 @@ using Distributed
 using Pkg
 Distributed.@everywhere using Pkg
 
-# ENV["PYTHON"] = "/usr/bin/python3"
 Distributed.@everywhere begin
-  ENV["PYTHON"] = "/usr/bin/python"
+  ENV["PYTHON"] = "/usr/bin/python3"
   Pkg.build("PyCall")
 end
 
 using PyCall
 Distributed.@everywhere using PyCall
 
-### INIT
+## INIT
 using RobotOS
 
 # standard types
@@ -46,7 +47,8 @@ rostypegen()
 # using .sensor_msgs.msg
 # using .seagrant_msgs.msg
  
-#   ## Load Caesar mmisam stuff
+## Load Caesar mmisam stuff
+using Caesar
 using RoME
 using DistributedFactorGraphs
 
@@ -54,6 +56,7 @@ using JSON2
 using DistributedFactorGraphs.DocStringExtensions
 using Dates
 
+##
 
 # /gps/fix              10255 msgs    : sensor_msgs/NavSatFix
 # /gps/nmea_sentence    51275 msgs    : nmea_msgs/Sentence
@@ -238,7 +241,7 @@ function main()
 
     @info "Hit CTRL+C to exit and save the graph..."
 
-    # init_node("rex_feed")
+    init_node("rex_feed")
     # find the bagfile
     bagfile = joinpath(ENV["HOME"],"data","Marine","lidar_radar.bag")
     bagSubscriber = RosbagSubscriber(bagfile)
@@ -285,6 +288,9 @@ function main()
     saveDFG(fg, "$dfg_datafolder/dfg")
 
 end
+
+##
+
 
 main()
 
