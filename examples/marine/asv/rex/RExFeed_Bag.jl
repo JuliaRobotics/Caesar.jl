@@ -13,9 +13,24 @@
     - and julia RExFeed.jl in third.
 """
 
+## Prepare python version
+using Distributed
+# addprocs(4)
+
+using Pkg
+Distributed.@everywhere using Pkg
+
+# ENV["PYTHON"] = "/usr/bin/python3"
+Distributed.@everywhere begin
+  ENV["PYTHON"] = "/usr/bin/python"
+  Pkg.build("PyCall")
+end
+
+using PyCall
+Distributed.@everywhere using PyCall
+
 ### INIT
 using RobotOS
-using JSON2
 
 # standard types
 @rosimport sensor_msgs.msg: PointCloud2
@@ -39,6 +54,11 @@ using JSON2
 using DistributedFactorGraphs.DocStringExtensions
 using Dates
 
+# move to Caesar.jl RosBagreader
+# using DataStructures
+# using StructTypes
+# using JSON3
+
 # /gps/fix              10255 msgs    : sensor_msgs/NavSatFix
 # /gps/nmea_sentence    51275 msgs    : nmea_msgs/Sentence
 # /radar_0               9104 msgs    : seagrant_msgs/radar
@@ -47,6 +67,10 @@ using Dates
 
 # function handleGPS(msg, fg)
 # end
+
+
+StructTypes.StructType(::Type{PyObject}) = StructTypes.Struct()
+StructTypes.StructType(::Type{seagrant_msgs.msg.radar}) = StructTypes.Struct()
 
 
 
@@ -76,6 +100,26 @@ function updateVariableIfNeeded(fg::AbstractDFG, systemstate::SystemState, newti
         systemstate.lidar_scan_index = 0
     end
     return nothing
+end
+
+
+
+# TODO much room for improvement, and must be consolidated with RobotOS.jl
+function _unpackROSMsgType(T::Type, msgdata)
+    msgT = T()
+    fnms = fieldnames(T)
+    for nm in fnms
+        # FIXME, still have to resolve cases where fieldname header is actually used
+        nm == :header ? continue : nothing
+        _tostr = JSON2.write(msgdata[2][nm])
+        try
+            setfield!(msgT, nm, JSON2.read(_tostr, typeof(getfield(msgT, nm))))
+        catch
+            @warn "not able to unpack ROS message field" T nm typeof(getfield(msgT, nm))
+            @debug _tostr
+        end
+    end
+    msgT
 end
 
 """
@@ -116,7 +160,11 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
 
     # Make a data entry in the graph
     ade,adb = addData!(fg, :radar, systemstate.cur_variable.label, :RADARPC, Vector{UInt8}(JSON2.write(msg)),  mimeType="/radar_pointcloud_0;dataformat=Float32*[[X,Y,Z]]*12")
+end
 
+function _handleRadarPointcloud!(msg, args::Tuple)
+    # sensor_msgs.msg.PointCloud2
+    @info "_pointcloud"
 end
 
 """
@@ -174,12 +222,35 @@ function handleGPS!(msg::sensor_msgs.msg.NavSatFix, fg::AbstractDFG, systemstate
 
 end
 
+
+function _handleRadar!(msgdata, args::Tuple)
+    msgT = _unpackROSMsgType(seagrant_msgs.msg.radar, msgdata)
+    handleRadar!(msgT, args...)
+end
+
+function _handleLidar!(msgdata, args::Tuple)
+    msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
+    handleLidar!(msgT, args...)
+end
+
+function _handleGPS!(msgdata, args)
+    msgT = _unpackROSMsgType(sensor_msgs.msg.NavSatFix, msgdata)
+    handleGPS!(msgT, args...)
+end
+
 function main()
-    dfg_datafolder = "/tmp/rex"
+    dfg_datafolder = "/tmp/caesar/rex"
+    if isdir(dfg_datafolder)
+        rm(dfg_datafolder; force=true, recursive=true)
+    end
+    mkdir(dfg_datafolder)
 
     @info "Hit CTRL+C to exit and save the graph..."
 
-    init_node("rex_feed")
+    # init_node("rex_feed")
+    # find the bagfile
+    bagfile = joinpath(ENV["HOME"],"data","Marine","lidar_radar.bag")
+    bagSubscriber = RosbagSubscriber(bagfile)
 
     # Initialization
     fg = initfg()
@@ -200,15 +271,20 @@ function main()
 
     # Enable and disable as needed.
     # Skipping LIDAR because those are huge...
-    radar_sub = Subscriber{seagrant_msgs.msg.radar}("/radar_0", handleRadar!, (fg, systemstate), queue_size = 10)
+    # radar_sub = Subscriber{seagrant_msgs.msg.radar}("/radar_0", handleRadar!, (fg, systemstate), queue_size = 10)
+    radar_sub = bagSubscriber("/radar_0", _handleRadar!, (fg, systemstate))
+
+
     # radarpc_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/radar_pointcloud0", handleRadarPointcloud!, (fg, systemstate), queue_size = 10)
     # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", handleLidar!, (fg,systemstate), queue_size = 10)
-    gps_sub = Subscriber{sensor_msgs.msg.NavSatFix}("/gps/fix", handleGPS!, (fg, systemstate), queue_size = 10)
+    # gps_sub = Subscriber{sensor_msgs.msg.NavSatFix}("/gps/fix", handleGPS!, (fg, systemstate), queue_size = 10)
+    gps_sub = bagSubscriber("/gps/fix", _handleGPS!, (fg, systemstate))
+
 
     @info "subscribers have been set up; entering main loop"
     loop_rate = Rate(20.0)
-    while ! is_shutdown()
-        rossleep(loop_rate)
+    while loop!(bagSubscriber)
+        print(".")
     end
 
     @info "Exiting"
