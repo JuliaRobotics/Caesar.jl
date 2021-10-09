@@ -37,8 +37,8 @@ makedocs(
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
-            "ContinuousScalar as 1D Example" => "examples/basic_continuousscalar.md",
-            "Under-defined Trilateration, 2D" => "examples/basic_slamedonut.md",
+            "Canonical 1D Example" => "examples/basic_continuousscalar.md",
+            "Too few range-only" => "examples/basic_slamedonut.md",
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
             "Dead Reckon Tether" => "examples/deadreckontether.md",
@@ -57,9 +57,9 @@ makedocs(
         ],
         "Middlewares" => [
             "ROS Middleware" => "examples/using_ros.md",
+            "Compile Binaries" => "concepts/compile_binary.md",
             "Cloud Server/Database" => "concepts/database_interactions.md",
             "Multi-session/agent Solving" => "concepts/multisession.md",
-            "Compile Binaries" => "concepts/compile_binary.md",
             "Multi-Language Support" => "concepts/multilang.md",
         ],
         "How to Expand?" => [
