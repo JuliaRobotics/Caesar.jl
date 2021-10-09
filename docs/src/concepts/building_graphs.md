@@ -10,21 +10,14 @@ The following sections discuss the steps required to construct a graph and solve
 
 ## Familiar Canonical Factor Graphs
 
-Starting with a shortcut to just quickly getting a small predefined *canonical* graph containing a few variables and factors can be done with (try tab-completion in the REPL):
-```julia
-fg = generateCanonicalFG_Kaess()
-fg = generateCanonicalFG_LineStep()
-fg = generateCanonicalFG_Hexagonal()
-fg = generateCanonicalFG_Circle()
-```
-
-Any one of these function *generate* a standard factor graph object that is useful for orientation, testing, learning, or validation.  You can generate any of these factor graphs at any time, for example when quickly wanting to test some idea midway through building a more sophisiticated `fg`, you might just want to quickly do:
+Starting with a shortcut to just quickly getting a small predefined *canonical* graph containing a few variables and factors.  Functions to *generate* a canonical factor graph object that is useful for orientation, testing, learning, or validation.  You can generate any of these factor graphs at any time, for example when quickly wanting to test some idea midway through building a more sophisiticated `fg`, you might just want to quickly do:
 ```julia
 fg_ = generateCanonicalFG_Hexagonal()
 ```
 
 and then work with `fg_` to try out something risky.
 
+See the [Canonical Graphs](../examples/canonical_graphs.md) page for a more complete list of existing graph generators.
 ## Building a new Graph
 
 The first step is to model the data (using the most appropriate *factors*) among *variables* of interest.  To start model, first create a *distributed factor graph object*:
