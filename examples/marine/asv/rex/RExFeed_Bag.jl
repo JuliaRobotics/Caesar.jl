@@ -101,6 +101,7 @@ end
 # TODO much room for improvement, and must be consolidated with RobotOS.jl
 function _unpackROSMsgType(T::Type, msgdata)
     msgT = T()
+    msgT.header = msgdata[2][:header]
     fnms = fieldnames(T)
     for nm in fnms
         # FIXME, still have to resolve cases where fieldname header is actually used
@@ -232,7 +233,7 @@ function _handleGPS!(msgdata, args)
     handleGPS!(msgT, args...)
 end
 
-function main()
+function main(;iters::Integer=50)
     dfg_datafolder = "/tmp/caesar/rex"
     if isdir(dfg_datafolder)
         rm(dfg_datafolder; force=true, recursive=true)
@@ -276,9 +277,10 @@ function main()
 
 
     @info "subscribers have been set up; entering main loop"
-    loop_rate = Rate(20.0)
+    # loop_rate = Rate(20.0)
     while loop!(bagSubscriber)
-        print(".")
+        iters -= 1
+        iters < 0 ? break : nothing
     end
 
     @info "Exiting"
