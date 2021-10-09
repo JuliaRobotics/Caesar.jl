@@ -6,9 +6,10 @@ Gaussian error models in measurement or data cues will only be Gaussian (normall
 - Nonlinearity.  For example in 2D, consider a Pose2 odometry where the orientation is uncertain:  The resulting belief of where a next pose might be (convolution with odometry factor) results in a banana shape curve, even though the entire process is driven by assumed Gaussian belief.
 - Physics of the measurement process.  Many measurement processes exhibit non-Gaussian behaviour.  For example, acoustic/radio time-of-flight measurements, using either pulse-train or matched filtering, result in an "energy intensity" over time/distance of what the range to a scattering-target/source might be--i.e. highly non-Gaussian.
 
-# Next Steps
+## Next Steps
 
 Quick links to related pages:
+
 ```@contents
 Pages = [
     "installation_environment.md"
