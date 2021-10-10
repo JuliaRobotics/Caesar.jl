@@ -213,7 +213,9 @@ function handleGPS!(msg::sensor_msgs.msg.NavSatFix, fg::AbstractDFG, systemstate
         return nothing 
     end
 
-    ade,adb = addData!(fg, :gps_fix, systemstate.cur_variable.label, :GPS, Vector{UInt8}(JSON2.write(msg)),  mimeType="application/json")
+    io = IOBuffer()
+    JSON2.write(io, msg)
+    ade,adb = addData!(fg, :gps_fix, systemstate.cur_variable.label, :GPS, take!(io),  mimeType="application/json", description="JSON2.read(IOBuffer(datablob))")
 
 end
 
@@ -294,7 +296,7 @@ end
 ##
 
 
-main()
+main(iters=300) # 275
 
 
 ## after the graph is saved it can be loaded and the datastores retrieved
