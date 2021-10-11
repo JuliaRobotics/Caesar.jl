@@ -26,7 +26,7 @@ function csmHexDelayTest(injectDelayBefore)
 
   verbosefid = open(joinLogPath(fg, "csmVerbose.log"),"w")
   # verbosefid = stdout
-  tree, smt, hists = solveTree!(fg, recordcliqs=ls(fg), timeout=40, verbose=true, verbosefid=verbosefid, injectDelayBefore=injectDelayBefore); #, limititercliqs=limitcliqs);
+  tree = solveTree!(fg, recordcliqs=ls(fg), timeout=40, verbose=true, verbosefid=verbosefid, injectDelayBefore=injectDelayBefore); #, limititercliqs=limitcliqs);
 
 
   ## wait for async to complete

@@ -1,4 +1,4 @@
-# Plotting
+# Plotting 2D
 
 Once the graph has been built, 2D plot visualizations are provided by [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) and [KernelDensityEstimatePlotting.jl](http://www.github.com/JuliaRobotics/KernelDensityEstimatePlotting.jl).  These visualizations tools are readily modifiable to highlight various aspects of mobile platform navigation.
 

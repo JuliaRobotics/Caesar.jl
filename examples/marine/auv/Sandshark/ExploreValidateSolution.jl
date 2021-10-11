@@ -42,7 +42,7 @@ ls(fg, :x533)
 ## BATCH SOLVE
 
 # dontMarginalizeVariablesAll!(fg)
-# tree, smt, hist = solveTree!(fg)
+# tree = solveTree!(fg)
 
 
 #

@@ -216,7 +216,7 @@ PL[1]
 getSolverParams(fg).graphinit = false
 getSolverParams(fg).treeinit = true   # still experimental, treeinit
 
-tree, _, = solveTree!(fg);
+tree = solveTree!(fg);
 
 ## Show results
 

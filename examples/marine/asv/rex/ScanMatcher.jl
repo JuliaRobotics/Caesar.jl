@@ -136,7 +136,7 @@ lsf(newfg)
 pts = approxConv(newfg, :x0x1f1, :x1)
 
 # solving will internally call ensureAllInitialized!(newfg)
-tree, smt, hist = solveTree!(newfg)
+tree = solveTree!(newfg)
 
 ## Looking at the results
 using Plots

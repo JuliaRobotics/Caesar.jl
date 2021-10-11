@@ -90,7 +90,7 @@ getSolverParams(fg).multiproc = false
 # getSolverParams(fg).limititers = 200
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 # because async solve, cliq histories are stored in task returns instead

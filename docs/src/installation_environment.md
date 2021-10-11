@@ -1,4 +1,4 @@
-# Welcome
+# Various Install Options
 
 Caesar.jl is one of the packages within the [JuliaRobotics](http://www.juliarobotics.org) community, and adheres to the [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 
@@ -25,11 +25,11 @@ The easiest method is---via the terminal---to [download the desired](https://jul
 cd ~
 mkdir -p .julia
 cd .julia
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.1-linux-x86_64.tar.gz
-tar -xvf julia-1.6.1-linux-x86_64.tar.gz
-rm julia-1.6.1-linux-x86_64.tar.gz
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.3-linux-x86_64.tar.gz
+tar -xvf julia-1.6.3-linux-x86_64.tar.gz
+rm julia-1.6.3-linux-x86_64.tar.gz
 cd /usr/local/bin
-sudo ln -s ~/.julia/julia-1.6.1/bin/julia julia
+sudo ln -s ~/.julia/julia-1.6.3/bin/julia julia
 ```
 !!! note
     Feel free to modify this setup as you see fit.
@@ -57,7 +57,6 @@ user@...$ julia -e "println(\"one more time.\")"
 one more time.
 user@...$ julia -e "println(\"...testing...\")"
 ...testing...
-
 ```
 
 !!! note
@@ -137,46 +136,8 @@ Alternatively, the `dev` command:
     ~/.julia/dev/Caesar
     ```
 
-If you'd like to modify or contribute then feel free to fork the specific repo from JuliaRobotics, complete the work on branches in the fork as is normal with a Git workflow and then submit a PR back upstream.  We try to keep PRs small, specific to a task and preempt large changes by first merging smaller non-breaking changes and finally do a small switch over PR.  We also follow a backport onto `release/vX.X` branch strategy with common `master` as the development lobby that builds successfully 99.999% of the time.
-
-## Ahead Of Time Compile RoME.so
-
-In RoME, run the `compileRoME/compileRoMESysimage.jl` script
-
-To use RoME with the newly created sysimage, start julia with:
-```
-julia -O3 -J ~/.julia/dev/RoME/compileRoME/RoMESysimage.so
-```
-
-
-## 2D Plotting, RoMEPlotting.jl
-
-RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
-```julia
-(v1.6) pkg> add RoMEPlotting
-```
-
-## Contributing, Issues, or Comments
-
-Please feel free to open [issues with Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl/issues) or even Fork and Pull Request as required.
-General conversations or comments can be made in the [Caesar Gist](https://gist.github.com/dehann/537f8a2eb9cc24d8bbd35ae92cb4d2d2).
-
-
-## Features To Be Restored In Future
-
-### Install 3D Visualization Utils (e.g. Arena.jl)
-
-3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
-Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
+If you'd like to modify or contribute then feel free to fork the specific repo from JuliaRobotics, complete the work on branches in the fork as is normal with a Git workflow and then submit a PR back upstream.  We try to keep PRs small, specific to a task and preempt large changes by first merging smaller non-breaking changes and finally do a small switch over PR.  We also follow a backport onto `release/vX.Y` branch strategy with common `main || master` branch as the "lobby" for shared development into which individual single responsibility PRs are merged.  Each PR, the `main` development lobby, and stable `release/vX.Y` branches are regularly tested through Continuous Integration at each of the repsective packages.
 
 !!! note
-    Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
+    Binary compilation and fast "first-time-to-plot" can be done through [PackageCompiler.jl, see here for more details](concepts/compile_binary.md).
 
-Install the latest `master` branch version with
-```julia
-(v1.5) pkg> add Arena#master
-```
-
-## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
-
-Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).

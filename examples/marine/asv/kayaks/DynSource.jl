@@ -97,7 +97,7 @@ getSolverParams(fg).limititers=200
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 # Some Debuggging

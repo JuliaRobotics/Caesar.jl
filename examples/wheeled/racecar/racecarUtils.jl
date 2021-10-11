@@ -248,7 +248,7 @@ show ? drawGraph(fg, show=true) : nothing
 # quick solve as sanity check
 failsafe ? @warn("recursive failsafe no longer as option") : nothing
 # , N=N, drawpdf=true, show=show, recursive=failsafe
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 # add other positions
 
@@ -267,7 +267,7 @@ for psid in (prev_psid+1):1:maxlen
   if psid % BB == 0 || psid == maxlen
     saveDFG(fg, resultsdir*"/racecar_fg_$(psym)_presolve")
     # , drawpdf=true, show=show, N=N, recursive=true
-    tree, smt, hist = solveTree!(fg, tree)
+    tree = solveTree!(fg, tree)
   end
 
   # T1 = remotecall(saveDFG, WP, fg, resultsdir*"/racecar_fg_$(psym)")

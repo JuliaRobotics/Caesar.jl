@@ -99,7 +99,7 @@ for STEP in 40:10:50
       addFactor!(fg, [curvar], RoME.PartialPriorYawPose2(Normal(interp_yaw(ep), deg2rad(3))), autoinit=true)
       index+=1
     end
-    tree, smt, hist = solveTree!(fg, tree)
+    tree = solveTree!(fg, tree)
     pla = drawPosesLandmarksAndOdo(fg, ppbrDict, navkeys, X, Y, lblkeys, lblX, lblY)
     pla |> PDF(joinpath(getSolverParams(fg).logpath, "sandshark-beacon_$STEP.pdf"))
 end

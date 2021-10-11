@@ -102,7 +102,7 @@ addFactor!(fg, [:x25; :l1], ppbrDict[epochs[26]], autoinit=false)
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 
 
@@ -119,7 +119,7 @@ plotKDE([ppbrDict[epochs[21]].range; ppbrDict[epochs[22]].range; ppbrDict[epochs
 
 writeGraphPdf(fg, engine="dot")
 
-tree, smt, hist = solveTree!(fg) #, tree) # for incremental solution
+tree = solveTree!(fg) #, tree) # for incremental solution
 
 drawPosesLandms(fg)
 

@@ -68,7 +68,7 @@ saveDFG(fg, saveFolder)
 
 fg2 = initfg();
 loadDFG(saveFolder, IncrementalInference,fg2)
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 retDFG.solverParams = SolverParams()

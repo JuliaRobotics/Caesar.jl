@@ -2,15 +2,17 @@
 This script shows how to assemble full 360 degree radar sweeps from the DFG object
 built with RExFeed.jl
 """
-    s
+    
 using DistributedFactorGraphs
 using IncrementalInference, RoME
 using JSON2
 using LinearAlgebra
 
+##
+
 # Where to fetch data
-dfgDataFolder = ENV["HOME"]*"/data/rex";
-# dfgDataFolder = "/tmp/rex"
+# dfgDataFolder = ENV["HOME"]*"/data/rex";
+dfgDataFolder = "/tmp/caesar/rex"
 
 # Load the graph
 fg = loadDFG("$dfgDataFolder/dfg")
@@ -25,14 +27,14 @@ addBlobStore!(fg, ds)
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfgDataFolder/data/lidar")
 addBlobStore!(fg, ds)
 
-
+##
 
 # Check what's in it
 ls(fg)
 lsf(fg)  # there should be no factors the first time a session is loaded
 
 # How about radar data entries?
-count(v -> :RADAR in listDataEntries(v), getVariables(fg));
+count(v -> :RADAR in listDataEntries(v), getVariables(fg))
 
 # may be too intense as it is fetching ALL data too?
 allRadarVariables = filter(v -> :RADAR in listDataEntries(v), getVariables(fg));
@@ -47,6 +49,8 @@ function fetchRadarMsg(var::DFGVariable)
 end
 
 msg = fetchRadarMsg(allRadarVariables[1])
+
+##
 
 # function azimuth(msg::NamedTuple)
 function azimuth(msg)
@@ -218,10 +222,11 @@ end
 #             (polar, cart) = assembleping(msg, 2.0);
 #             fullsweep .|= round.(UInt8, cart./255)
 #             imshow!(imi["gui"]["canvas"], fullsweep) 
-   
 #         end
 #     end
 # end
+
+##
 
 # set resolution to 1m/px
 (polar, cart) = assembleping(msg, 1.0);
@@ -233,13 +238,15 @@ using ImageFiltering
 imshow(polar)
 imshow(cart)
 
+##
+
 output_dir = joinpath(dfgDataFolder,"pings")
 if (!isdir(output_dir))
     mkdir(output_dir)
 end
 save(joinpath(output_dir,"ping.jpg"),UInt8.(cart))
 
-
+##
 # now let's process all radar variables in here
 
 fullsweep = zeros(size(cart))

@@ -274,7 +274,7 @@ Gadfly.plot(x=pts[1,:], Geom.histogram)
 ## TEMPORARY CORRELATION DEV
 
 
-tree, _, _ = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 ##

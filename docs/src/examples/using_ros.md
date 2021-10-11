@@ -1,31 +1,47 @@
-# Using Caesar.jl with ROS
+# Using ROS Topics
 
 Since 2020, Caesar.jl has native support for ROS via the [RobotOS.jl](https://github.com/jdlangs/RobotOS.jl) package.  
 
-!!! warning
-    Note that ROS neotic has switched to Python3 exclusively, and at the time of writing this page we were usinng Python2.7.  See the ROS Wiki here: https://wiki.ros.org/UsingPython3
-
-!!! note
-    See ongoing RobotOS.jl discussion on building a direct C++ interface and skipping PyCall.jl entirely: https://github.com/jdlangs/RobotOS.jl/issues/59
-
 ## Load the ROS Environment Variables
 
-The first thing to ensure is that the ROS environment is loaded in the bash environment before launching Julia, see ["1.5 Environment setup at ros.org"](https://wiki.ros.org/noetic/Installation/Ubuntu), something similar to:
+The first thing to ensure is that the ROS environment variables are loaded before launching Julia, see ["1.5 Environment setup at ros.org"](https://wiki.ros.org/noetic/Installation/Ubuntu), something similar to:
 ```
 source /opt/ros/noetic/setup.bash
 ```
 
+### Setup a Catkin Workspace
+
+Assuming you have bespoke msg types, we suggest using a catkin workspace of choice, for example:
+```bash
+mkdir -p ~/caesar_ws/src
+cd ~/caesar_ws/src
+git clone https://github.com/pvazteixeira/caesar_ros
+```
+
+Now build and configure your workspace
+
+```bash
+cd ~/caesar_ws
+catkin_make
+source devel/setup.sh
+```
+
+This last command is important, as you must have the workspace configuration in your environment when you run the julia process, so that you can import the service specifications.
+
 ## RobotOS.jl with Correct Python
 
-RobotOS.jl currently using [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) to interface through the `rospy` system.  After launching Julia, make sure that PyCall is using the correct Python binary on your local system.  In our local setup, we use (assuming `using Distributed`):
+RobotOS.jl currently uses [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) to interface through the `rospy` system.  After launching Julia, make sure that PyCall is using the correct Python binary on your local system.
 ```julia
-## Prepare python version
+# Assuming multiprocess will be used.
+using Distributed
+# addprocs(4)
+
+# Prepare python version
 using Pkg
 Distributed.@everywhere using Pkg
 
-# ENV["PYTHON"] = "/usr/bin/python3.6"
 Distributed.@everywhere begin
-  ENV["PYTHON"] = "/usr/bin/python"
+  ENV["PYTHON"] = "/usr/bin/python3"
   Pkg.build("PyCall")
 end
 
@@ -132,15 +148,6 @@ while loop!(bagSubscriber)
 end
 ```
 
-## Using AprilTags.jl and Images.jl
-
-One common use in SLAM is [AprilTags.jl](https://github.com/JuliaRobotics/AprilTags.jl).  Please see that repo for documentation on detecting tags in images.  Note that Caesar.jl has a few built in tools for working with [Images.jl](https://github.com/JuliaImages/Images.jl) too.
-
-```julia
-using AprilTags
-using Images, Caesar
-```
-
 ## Additional Notes
 
 !!! note
@@ -152,3 +159,5 @@ using Images, Caesar
 !!! note
     Additional notes about tricks that came up during development [is kept in this wiki](https://github.com/JuliaRobotics/Caesar.jl/wiki/ROS-PoC).
 
+!!! note
+    See ongoing RobotOS.jl discussion on building a direct C++ interface and skipping PyCall.jl entirely: https://github.com/jdlangs/RobotOS.jl/issues/59

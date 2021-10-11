@@ -125,9 +125,9 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
                println("Solving at SAS-F: $(sas_counter), Pos: $(pose_counter) \n");
                if sas_counter > 1
-                   @time tree, smt, hist = solveTree!(fg,tree)
+                   @time tree = solveTree!(fg,tree)
                else
-                   @time tree, smt, hist = solveTree!(fg)
+                   @time tree = solveTree!(fg)
                end
 
                # writeGraphPdf(fg,viewerapp="", engine="neato", filepath=scriptHeader*"fg.pdf")

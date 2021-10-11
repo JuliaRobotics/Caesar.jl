@@ -70,7 +70,7 @@ wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 #getSolverParams(fg).showtree = true
 
 ## solve the factor graph , recordcliqs=[:x1; :l1; :x8]
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 # using FunctionalStateMachine
 # using IncrementalInference

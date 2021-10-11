@@ -104,7 +104,7 @@ getSolverParams(fg).limititers=500
 #getSolverParams(fg).showtree = true
 getSolverParams(fg).maxincidence = 200
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 # Some Debuggging
 # @time L1 = approxConv(fg,:l1x1x2x3x4x5x6x7x8f1,:l1)
