@@ -244,7 +244,7 @@ output_dir = joinpath(dfgDataFolder,"pings")
 if (!isdir(output_dir))
     mkdir(output_dir)
 end
-save(joinpath(output_dir,"ping.jpg"),UInt8.(cart))
+save(joinpath(output_dir,"ping.png"),UInt8.(cart))
 
 ##
 # now let's process all radar variables in here
@@ -277,7 +277,7 @@ for  i in 1:length(allRadarVariables)
         # now that we have a full sweep, we can try to match with the previous one!
         # TODO: register w/  previous sweep
         # save to disk
-        fname = join(["full_",string(sweep),".jpg"])
+        fname = join(["full_",string(sweep),".png"])
         save(joinpath(output_dir,fname),UInt8.(clamp.(fullsweep,0,255)))
 
         # add full sweep to last variable
@@ -287,9 +287,9 @@ for  i in 1:length(allRadarVariables)
         fullsweep = zeros(size(cart))
         sweep = sweep+1
     end
-    # fname = join(["polar_",String(allRadarVariables[i].label),".jpg"])
+    # fname = join(["polar_",String(allRadarVariables[i].label),".png"])
     # save(joinpath(output_dir,fname),UInt8.(polar))
-    fname = join(["cart_",String(allRadarVariables[i].label),".jpg"])
+    fname = join(["cart_",String(allRadarVariables[i].label),".png"])
     save(joinpath(output_dir,fname),UInt8.(cart))
     last_angle = msg.angle_end
 end

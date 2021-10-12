@@ -34,9 +34,9 @@ allSweepVariables = filter(v -> :RADARSWEEP in listDataEntries(v), getVariables(
 fsvars = allSweepVariables .|> getLabel
 
 # helper function to retrieve the radar sweep for a given variable
-function fetchSweep(varlabel::Symbol)
+function fetchSweep(dfg::AbstractDFG, varlabel::Symbol)
 
-    entry,rawData = getData(fg, varlabel, :RADARSWEEP)
+    entry,rawData = getData(dfg, varlabel, :RADARSWEEP)
     rawdata = Vector{Float64}(JSON2.read(IOBuffer(rawData)))
     n = Int(sqrt(length(rawdata)))
     sweep = reshape(rawdata,(n,n))
@@ -46,7 +46,7 @@ end
 ##
 
 # fetch all radar pings
-sweeps = fetchSweep.(fsvars);
+sweeps = fetchSweep.(fg, fsvars);
 using Images, ImageView
 # Filter the images
 kg = Kernel.gaussian(7)

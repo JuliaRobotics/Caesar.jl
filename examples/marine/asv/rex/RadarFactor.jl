@@ -39,10 +39,9 @@ function getSample( cf::CalcFactor{<:AlignRadarPose2} )
   
   rp2 = cf.factor
   # closure on inner function
+  error("MOVE TO RESIDUAL FUNCTION ONLY")
   cost(x::AbstractVector) = evaluateTransform(rp2.im1,rp2.im2, x...)
-  
   pres = rand(rp2.PreSampler)
-  
   # ignoring failures
   out = optimize(cost, pres, NelderMead()).minimizer
 
