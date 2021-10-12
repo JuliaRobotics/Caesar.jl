@@ -235,8 +235,8 @@ end
 using ImageMagick
 using Images, ImageView
 using ImageFiltering
-imshow(polar)
-imshow(cart)
+# imshow(polar)
+# imshow(cart)
 
 ##
 
