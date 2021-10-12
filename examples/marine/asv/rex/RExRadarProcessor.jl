@@ -39,8 +39,8 @@ count(v -> :RADAR in listDataEntries(v), getVariables(fg))
 # may be too intense as it is fetching ALL data too?
 allRadarVariables = filter(v -> :RADAR in listDataEntries(v), getVariables(fg));
 
+allRadarVariables = sortDFG(allRadarVariables);
 
-allRadarVariables = sortDFG(allRadarVariables)
 
 function fetchRadarMsg(var::DFGVariable)
     entry,rawData = getData(fg, var.label, :RADAR)
@@ -235,8 +235,8 @@ end
 using ImageMagick
 using Images, ImageView
 using ImageFiltering
-imshow(polar)
-imshow(cart)
+# imshow(polar)
+# imshow(cart)
 
 ##
 
@@ -294,3 +294,25 @@ for  i in 1:length(allRadarVariables)
     last_angle = msg.angle_end
 end
     
+
+
+##
+
+
+# count(v -> :RADARSWEEP in listDataEntries(v), getVariables(fg))
+
+# # may be too intense as it is fetching ALL data too?
+# allSweepVariables = filter(v -> :RADARSWEEP in listDataEntries(v), getVariables(fg));
+
+# allSweepVariables = sortDFG(allSweepVariables)
+
+
+# getLabel.(allSweepVariables)
+
+
+# de, db = getData(fg, allSweepVariables[1].label, :RADARSWEEP)
+
+# JSON2.read(IOBuffer(db))
+
+
+#

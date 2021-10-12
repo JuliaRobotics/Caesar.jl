@@ -7,9 +7,11 @@ using DistributedFactorGraphs
 using IncrementalInference, RoME
 using JSON2
 
+##
+
 # Where to fetch data
-dfgDataFolder = ENV["HOME"]*"/data/rex";
-# dfgDataFolder = "/tmp/rex"
+# dfgDataFolder = ENV["HOME"]*"/data/rex";
+dfgDataFolder = "/tmp/caesar/rex"
 
 # Load the graph
 fg = loadDFG("$dfgDataFolder/dfg")
@@ -23,6 +25,8 @@ addBlobStore!(fg, ds)
 
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfgDataFolder/data/lidar")
 addBlobStore!(fg, ds)
+
+##
 
 # fetch variables containing a full sweep
 allSweepVariables = filter(v -> :RADARSWEEP in listDataEntries(v), getVariables(fg)) |> sortDFG
@@ -38,6 +42,8 @@ function fetchSweep(varlabel::Symbol)
     sweep = reshape(rawdata,(n,n))
     return sweep # That's pretty sweep if i say so myself...
 end
+
+##
 
 # fetch all radar pings
 sweeps = fetchSweep.(fsvars);
@@ -61,6 +67,9 @@ sweeps = map(s -> s/maximum(s), sweeps)
 # First step is to have a function that evaluates the cost of a given transform
 # between two subsequent images.
 
+##
+
+import Rotations as _Rotations
 using CoordinateTransformations
 using ImageTransformations
 
@@ -79,7 +88,7 @@ end
 # Next step is to define a function that applies a transform to the image. This
 # transform consists of a translation and a rotation
 function transformImage(img::Array{Float64,2}, dx::Real, dy::Real, dh::Real)
-    tf = LinearMap(RotMatrix(dh))∘Translation(dx,dy)
+    tf = LinearMap(_Rotations.RotZ(dh)[1:2,1:2])∘Translation(dx,dy)
     tf_img = warp(img, tf)
 
     # replace NaN w/ 0
@@ -104,6 +113,8 @@ include("RadarFactor.jl")
 
 using LinearAlgebra
 using Optim
+
+##
 
 startsweep = 5
 endsweep = 10
@@ -131,9 +142,12 @@ end
 # Save the graph
 saveDFG(newfg, "$dfgDataFolder/segment_test.tar.gz");
 
+##
+
 lsf(newfg)
 # this should run the radar alignment
-pts = approxConv(newfg, :x0x1f1, :x1)
+X1_ = approxConvBelief(newfg, :x0x1f1, :x1)
+pts = getPoints(X1_)
 
 # solving will internally call ensureAllInitialized!(newfg)
 tree = solveTree!(newfg)

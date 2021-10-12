@@ -1,3 +1,13 @@
+
+
+using TensorCast
+using Manifolds
+
+import IncrementalInference: getSample
+import Base: convert
+
+import DistributedFactorGraphs: getManifold
+
 """
 $TYPEDEF
 
@@ -11,14 +21,7 @@ arp2 = AlignRadarPose2(sweep[10], sweep[11], MvNormal(zeros(3), diagm([5;5;pi/4]
 ```
 
 """
-
-using TensorCast
-
-import IncrementalInference: getSample
-import Base: convert
-
-
-struct AlignRadarPose2{T <: Real, P <: SamplableBelief} <: FunctorPairwise
+struct AlignRadarPose2{T <: Real, P <: SamplableBelief} <: IIF.AbstractManifoldMinimize
   im1::Matrix{T}
   im2::Matrix{T}
   PreSampler::P
@@ -27,37 +30,35 @@ end
 
 AlignRadarPose2(im1::Matrix{T}, im2::Matrix{T}, pres::P) where {T <: Real, P <: SamplableBelief} = AlignRadarPose2{T,P}(im1, im2, pres, Pose2Pose2(pres))
 
-function getSample(rp2::AlignRadarPose2, N::Int=1)
+getManifold(::IIF.InstanceType{<:AlignRadarPose2}) = getManifold(Pose2Pose2)
 
+function getSample( cf::CalcFactor{<:AlignRadarPose2} )
+
+  M = getManifold(Pose2)
+  e0 = identity_element(M)
+  
+  rp2 = cf.factor
   # closure on inner function
-  cost(x::AbstractVector) = evaluateTransform(rp2.im1,rp2.im2,x...)
+  cost(x::AbstractVector) = evaluateTransform(rp2.im1,rp2.im2, x...)
+  
+  pres = rand(rp2.PreSampler)
+  
+  # ignoring failures
+  out = optimize(cost, pres, NelderMead()).minimizer
 
-  pres = rand(rp2.PreSampler, N)
-  out = zeros(3, N)
-  TASKS = Vector{Task}(undef, N)
-  for i in 1:N
-    # ignoring failures
-      TASKS[i] = Threads.@spawn optimize(cost, pres[:, $i], NelderMead()).minimizer
-    # out[:,i] = optimize(cost, pres[:,i], NelderMead()).minimizer
-  end
-    # retrieve threaded results
-    @sync for i in 1:N
-      @async out[:,$i] .= fetch(TASKS[$i])
-    end
-
-  # only using out, but return pres if user wants to look at it.
-  return (out, pres)
+  # return tangent vector element
+  return hat(M, e0, out)
 end
 
-function (rp2::AlignRadarPose2)(res::Vector{Float64},
-                           userdata::FactorMetadata,
-                           idx::Int,
-                           meas::Tuple,
-                           wXi::Array{Float64,2},
-                           wXj::Array{Float64,2})
-  #
-  rp2.p2p2(res, userdata, idx, meas, wXi, wXj)
-  res
+function (cf::CalcFactor{<:AlignRadarPose2})(X, p, q)
+  @assert X isa ProductRepr "Pose2Pose2 expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
+  M = getManifold(Pose2)
+  e0 = identity_element(M, p)
+  q̂ = Manifolds.compose(M, p, exp(M, e0, X)) #for groups
+  #TODO allocalte for vee! see Manifolds #412, fix for AD
+  Xc = zeros(3)
+  vee!(M, Xc, q, log(M, q, q̂))
+  return Xc
 end
 
 struct PackedAlignRadarPose2 <: PackedInferenceType
@@ -67,7 +68,7 @@ struct PackedAlignRadarPose2 <: PackedInferenceType
   p2p2::PackedPose2Pose2
 end
 
-function convert(::Type{PackedAlignRadarPose2}, arp2::AlignRadarPose2)
+function convert(::Type{<:PackedAlignRadarPose2}, arp2::AlignRadarPose2)
   TensorCast.@cast pim1[row][col] := arp2.im1[row,col]
   TensorCast.@cast pim1[row] := collect(pim1[row])
   TensorCast.@cast pim2[row][col] := arp2.im2[row,col]
@@ -75,16 +76,16 @@ function convert(::Type{PackedAlignRadarPose2}, arp2::AlignRadarPose2)
   PackedAlignRadarPose2(
     pim1,
     pim2,
-    string(arp2.PreSampler),
+    convert(PackedSamplableBelief, arp2.PreSampler),
     convert(PackedPose2Pose2, arp2.p2p2))
 end
 
-function convert(::Type{AlignRadarPose2}, parp2::PackedAlignRadarPose2)
+function convert(::Type{<:AlignRadarPose2}, parp2::PackedAlignRadarPose2)
   TensorCast.@cast im1[row,col] := parp2.im1[row][col]
   TensorCast.@cast im2[row,col] := parp2.im2[row][col]
   AlignRadarPose2(
     collect(im1),
     collect(im2),
-    extractdistribution(parp2.PreSampler),
+    convert(SamplableBelief, parp2.PreSampler), #   extractdistribution(parp2.PreSampler),
     convert(Pose2Pose2, parp2.p2p2))
 end
