@@ -72,13 +72,15 @@ sweeps = map(s -> s/maximum(s), sweeps)
 import Rotations as _Rotations
 using CoordinateTransformations
 using ImageTransformations
+using Manifolds
+
+##
 
 # this function uses the sum of squared differences between the two images.
 # To use low-passed versions of the images, simpy set the kernel argument to
 # Kernel.gaussian(10) (or an appropriate size)
-function getMismatch(a,b)
-    sqrt(sum((a.-b).^2))
-end
+getMismatch(a,b) = sqrt(sum((a.-b).^2))
+
 # sqrt(sum( imfilter( a.-b, Kernel.gaussian(5)).^2 ))
 # sqrt(sum((imfilter(a, kernel).-imfilter(b, kernel)).^2))
 
@@ -87,21 +89,27 @@ end
 
 # Next step is to define a function that applies a transform to the image. This
 # transform consists of a translation and a rotation
-function transformImage(img::Array{Float64,2}, dx::Real, dy::Real, dh::Real)
-    tf = LinearMap(_Rotations.RotZ(dh)[1:2,1:2])∘Translation(dx,dy)
-    tf_img = warp(img, tf)
+function transformImage_SE2(img::AbstractMatrix, 
+                            tf::Union{<:Manifolds.ProductRepr, <:Manifolds.ArrayPartition}  )
+    #
+    tf_ = LinearMap(tf.parts[2])∘Translation(tf.parts[1]...)
+    tf_img = warp(img, tf_, degree=ImageTransformations.Constant())
 
     # replace NaN w/ 0
-    mask = findall(x->isnan(x),tf_img)
+    mask = findall(x->isnan(x), tf_img)
     tf_img[mask] .= 0.0
     return tf_img
 end
 
 
 # now we can combine the two into an evaluation function
-function evaluateTransform(a::Array{Float64,2},b::Array{Float64,2}, dx::Float64, dy::Float64, dh::Float64)
+function evaluateTransform( a::AbstractMatrix, 
+                            b::AbstractMatrix, 
+                            tf::Union{<:Manifolds.ProductRepr, <:Manifolds.ArrayPartition} )
+    #
     # transform image
-    bp = transformImage(b,dx,dy,dh)
+    bp = transformImage_SE2(b,tf)
+
     # get matching padded views
     ap, bpp = paddedviews(0.0, a, bp)
     return getMismatch(ap,bpp)
@@ -117,7 +125,7 @@ using Optim
 ##
 
 startsweep = 5
-endsweep = 10
+endsweep = 6
 graphinit = false
 
 # newfg = initfg()
@@ -126,9 +134,11 @@ for i in 1:(endsweep-startsweep)
     addVariable!(newfg, Symbol("x$i"), Pose2, solvable=1)
 end
 for i in 1:(endsweep-startsweep)
-    factor = AlignRadarPose2(sweeps[i+startsweep-1], sweeps[i+startsweep], MvNormal(zeros(3), diagm([5;5;pi/4])))
+    factor = AlignRadarPose2( sweeps[i+startsweep-1], sweeps[i+startsweep] )
     addFactor!(newfg, Symbol.(["x$(i-1)", "x$i"]), factor, graphinit=graphinit, solvable=1)
 end
+
+##
 
 # Run the initialization (very slow right now)
 # ensureAllInitialized!(newfg)
@@ -164,7 +174,7 @@ Plots.plot(x, y, title="Path Plot", lw=3)
 using Optim
 
 
-cost(x, im1, im2) = evaluateTransform(im1,im2,x[1],x[2],x[3])
+cost(tf, im1, im2) = evaluateTransform(im1,im2, tf )
 
 
 # Plotting

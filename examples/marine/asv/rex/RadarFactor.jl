@@ -13,58 +13,72 @@ $TYPEDEF
 
 This is but one incarnation for how radar alignment factor could work, treat it as a starting point.
 
+Notes
+- Stanard `cvt` argument is lambda function to convert incoming images to user convention of image axes,
+  - default `cvt` flips image rows so that Pose2 xy-axes corresponds to img[x,y] -- i.e. rows down and across from top left corner.
+
 Example
 -------
 ```julia
 using LinearAlgebra
 arp2 = AlignRadarPose2(sweep[10], sweep[11], MvNormal(zeros(3), diagm([5;5;pi/4])))
 ```
-
 """
-struct AlignRadarPose2{T <: Real, P <: SamplableBelief} <: IIF.AbstractManifoldMinimize
+struct AlignRadarPose2{T} <: IIF.AbstractManifoldMinimize
   im1::Matrix{T}
   im2::Matrix{T}
-  PreSampler::P
-  p2p2::Pose2Pose2
+
+  # replace inner constructor with transform on image
+  AlignRadarPose2{T}( im1::AbstractMatrix{T}, 
+                      im2::AbstractMatrix{T},
+                      cvt = (im)->reverse(im, dims=1) # convert incoming image
+                    ) where {T} = new{T}( cvt(im1), 
+                                          cvt(im2) )
 end
 
-AlignRadarPose2(im1::Matrix{T}, im2::Matrix{T}, pres::P) where {T <: Real, P <: SamplableBelief} = AlignRadarPose2{T,P}(im1, im2, pres, Pose2Pose2(pres))
+AlignRadarPose2(im1::AbstractMatrix{T}, im2::AbstractMatrix{T}, w...) where T = AlignRadarPose2{T}(im1,im2, w...)
+
+#
 
 getManifold(::IIF.InstanceType{<:AlignRadarPose2}) = getManifold(Pose2Pose2)
 
 function getSample( cf::CalcFactor{<:AlignRadarPose2} )
-
-  M = getManifold(Pose2)
-  e0 = identity_element(M)
+  # M = getManifold(Pose2)
+  # e0 = identity_element(M)
   
-  rp2 = cf.factor
+  # rp2 = cf.factor
   # closure on inner function
-  error("MOVE TO RESIDUAL FUNCTION ONLY")
-  cost(x::AbstractVector) = evaluateTransform(rp2.im1,rp2.im2, x...)
-  pres = rand(rp2.PreSampler)
+  # cost(x::AbstractVector) = evaluateTransform(rp2.im1,rp2.im2, x...)
+  # pres = rand(rp2.PreSampler)
   # ignoring failures
-  out = optimize(cost, pres, NelderMead()).minimizer
+  # out = optimize(cost, pres, NelderMead()).minimizer
 
   # return tangent vector element
-  return hat(M, e0, out)
+  # return hat(M, e0, out)
+  return nothing
 end
 
 function (cf::CalcFactor{<:AlignRadarPose2})(X, p, q)
-  @assert X isa ProductRepr "Pose2Pose2 expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
   M = getManifold(Pose2)
-  e0 = identity_element(M, p)
-  q̂ = Manifolds.compose(M, p, exp(M, e0, X)) #for groups
-  #TODO allocalte for vee! see Manifolds #412, fix for AD
-  Xc = zeros(3)
-  vee!(M, Xc, q, log(M, q, q̂))
-  return Xc
+  # e0 = identity_element(M, p)
+  rp2 = cf.factor
+  
+  tf = Manifolds.compose(M, inv(p), q) # for groups
+  
+  return evaluateTransform(rp2.im1, rp2.im2, tf)
+  
+  # q̂ = Manifolds.compose(M, p, exp(M, e0, X)) #for groups
+  # #TODO allocalte for vee! see Manifolds #412, fix for AD
+  # Xc = zeros(3)
+  # vee!(M, Xc, q, log(M, q, q̂))
+  # return Xc
 end
 
 struct PackedAlignRadarPose2 <: PackedInferenceType
   im1::Vector{Vector{Float64}}
   im2::Vector{Vector{Float64}}
-  PreSampler::String
-  p2p2::PackedPose2Pose2
+  # PreSampler::String
+  # p2p2::PackedPose2Pose2
 end
 
 function convert(::Type{<:PackedAlignRadarPose2}, arp2::AlignRadarPose2)
@@ -74,9 +88,9 @@ function convert(::Type{<:PackedAlignRadarPose2}, arp2::AlignRadarPose2)
   TensorCast.@cast pim2[row] := collect(pim2[row])
   PackedAlignRadarPose2(
     pim1,
-    pim2,
-    convert(PackedSamplableBelief, arp2.PreSampler),
-    convert(PackedPose2Pose2, arp2.p2p2))
+    pim2 )
+    # convert(PackedSamplableBelief, arp2.PreSampler),
+    # convert(PackedPose2Pose2, arp2.p2p2))
 end
 
 function convert(::Type{<:AlignRadarPose2}, parp2::PackedAlignRadarPose2)
@@ -84,7 +98,7 @@ function convert(::Type{<:AlignRadarPose2}, parp2::PackedAlignRadarPose2)
   TensorCast.@cast im2[row,col] := parp2.im2[row][col]
   AlignRadarPose2(
     collect(im1),
-    collect(im2),
-    convert(SamplableBelief, parp2.PreSampler), #   extractdistribution(parp2.PreSampler),
-    convert(Pose2Pose2, parp2.p2p2))
+    collect(im2) )
+    # convert(SamplableBelief, parp2.PreSampler), #   extractdistribution(parp2.PreSampler),
+    # convert(Pose2Pose2, parp2.p2p2))
 end
