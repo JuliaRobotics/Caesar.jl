@@ -130,6 +130,7 @@ function __init__()
   @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" begin 
     include("images/images.jl")
     include("images/ScanMatcherUtils.jl")
+    include("images/ScanMatcherPose2.jl")
   end
   @require Distributed="8ba89e20-285c-5b6f-9357-94700520ee1b" include("images/DistributedUtils.jl")
 end

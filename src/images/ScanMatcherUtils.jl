@@ -45,26 +45,4 @@ function evaluateTransform( a::AbstractMatrix,
 end
 
 
-"""
-    $SIGNATURES
-
-Overlay the two images from `AlignRadarPose2` with the first (red) fixed and transform the second image (blue) according to `tf`.
-
-Notes:
-- `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
-"""
-function overlayScanMatcher(sm::AlignRadarPose2, 
-                            tf = Manifolds.identity_element(SpecialEuclidean(2)) )
-    #
-    im2_ = transformImage_SE2(sm.im2, tf)
-    
-    # get matching padded views
-    im1_, im2__ = paddedviews(0.0, sm.im1, im2_)
-
-    im1__ = RGBA.(im1_, 0, 0, 0.5)
-    im2___ = RGBA.(0, 0, im2__, 0.5)    
-
-    # im2__ = RGBA.(im2_, 0, 0, 0.5)
-    im1__ .+ im2___
-end
 

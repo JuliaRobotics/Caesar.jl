@@ -1,14 +1,10 @@
 
 
-using TensorCast
-using Manifolds
-
 import IncrementalInference: getSample
 import Base: convert, show
+# import DistributedFactorGraphs: getManifold
 
-import DistributedFactorGraphs: getManifold
-
-export AlignRadarPose2, PackedAlignRadarPose2
+export ScanMatcherPose2, PackedScanMatcherPose2
 
 """
 $TYPEDEF
@@ -24,12 +20,12 @@ Notes
 Example
 -------
 ```julia
-arp2 = AlignRadarPose2(img1, img2, 2) # e.g. 2 meters/pixel 
+arp2 = ScanMatcherPose2(img1, img2, 2) # e.g. 2 meters/pixel 
 ```
 
 See also: [`overlayScanMatcher`](@ref)
 """
-struct AlignRadarPose2{T} <: IIF.AbstractManifoldMinimize
+struct ScanMatcherPose2{T} <: IIF.AbstractManifoldMinimize
   """ reference image for scan matching. """
   im1::Matrix{T}
   """ test image to scan match against the reference image. """
@@ -40,7 +36,7 @@ struct AlignRadarPose2{T} <: IIF.AbstractManifoldMinimize
   gridscale::Float64
 
   # replace inner constructor with transform on image
-  AlignRadarPose2{T}( im1::AbstractMatrix{T}, 
+  ScanMatcherPose2{T}( im1::AbstractMatrix{T}, 
                       im2::AbstractMatrix{T},
                       gridlength::Real,
                       rescale::Real=1,
@@ -50,21 +46,21 @@ struct AlignRadarPose2{T} <: IIF.AbstractManifoldMinimize
                                           rescale*gridlength )
 end
 
-AlignRadarPose2(im1::AbstractMatrix{T}, im2::AbstractMatrix{T}, w...) where T = AlignRadarPose2{T}(im1,im2, w...)
+ScanMatcherPose2(im1::AbstractMatrix{T}, im2::AbstractMatrix{T}, w...) where T = ScanMatcherPose2{T}(im1,im2, w...)
 
-getManifold(::IIF.InstanceType{<:AlignRadarPose2}) = getManifold(Pose2Pose2)
+getManifold(::IIF.InstanceType{<:ScanMatcherPose2}) = getManifold(Pose2Pose2)
 
-getSample( cf::CalcFactor{<:AlignRadarPose2} ) = nothing
+getSample( cf::CalcFactor{<:ScanMatcherPose2} ) = nothing
 
-function (cf::CalcFactor{<:AlignRadarPose2})(X, p, q)
+function (cf::CalcFactor{<:ScanMatcherPose2})(X, p, q)
   M = getManifold(Pose2)
   arp = cf.factor
   tf = Manifolds.compose(M, inv(M, p), q) # for groups
   return evaluateTransform(arp.im1, arp.im2, tf, arp.rescale/arp.gridlength)
 end
 
-function Base.show(io::IO, arp::AlignRadarPose2{T}) where {T}
-  printstyled(io, "AlignRadarPose2{", bold=true, color=:blue)
+function Base.show(io::IO, arp::ScanMatcherPose2{T}) where {T}
+  printstyled(io, "ScanMatcherPose2{", bold=true, color=:blue)
   println(io)
   printstyled(io, "    T = ", color=:magenta)
   println(io, T)
@@ -78,34 +74,58 @@ function Base.show(io::IO, arp::AlignRadarPose2{T}) where {T}
   nothing
 end
 
-Base.show(io::IO, ::MIME"text/plain", arp::AlignRadarPose2) = show(io, arp)
-Base.show(io::IO, ::MIME"application/juno.inline", arp::AlignRadarPose2) = show(io, arp)
+Base.show(io::IO, ::MIME"text/plain", arp::ScanMatcherPose2) = show(io, arp)
+Base.show(io::IO, ::MIME"application/juno.inline", arp::ScanMatcherPose2) = show(io, arp)
+
+
+"""
+    $SIGNATURES
+
+Overlay the two images from `AlignRadarPose2` with the first (red) fixed and transform the second image (blue) according to `tf`.
+
+Notes:
+- `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
+"""
+function overlayScanMatcher(sm::ScanMatcherPose2, 
+                            tf = Manifolds.identity_element(SpecialEuclidean(2)) )
+    #
+    im2_ = transformImage_SE2(sm.im2, tf)
+    
+    # get matching padded views
+    im1_, im2__ = paddedviews(0.0, sm.im1, im2_)
+
+    im1__ = RGBA.(im1_, 0, 0, 0.5)
+    im2___ = RGBA.(0, 0, im2__, 0.5)    
+
+    # im2__ = RGBA.(im2_, 0, 0, 0.5)
+    im1__ .+ im2___
+end
 
 ## =========================================================================================
 ## Factor serialization below
 ## =========================================================================================
 
-struct PackedAlignRadarPose2 <: PackedInferenceType
+struct PackedScanMatcherPose2 <: PackedInferenceType
   im1::Vector{Vector{Float64}}
   im2::Vector{Vector{Float64}}
   gridscale::Float64
 end
 
-function convert(::Type{<:PackedAlignRadarPose2}, arp2::AlignRadarPose2)
+function convert(::Type{<:PackedScanMatcherPose2}, arp2::ScanMatcherPose2)
   TensorCast.@cast pim1[row][col] := arp2.im1[row,col]
   TensorCast.@cast pim1[row] := collect(pim1[row])
   TensorCast.@cast pim2[row][col] := arp2.im2[row,col]
   TensorCast.@cast pim2[row] := collect(pim2[row])
-  PackedAlignRadarPose2(
+  PackedScanMatcherPose2(
     pim1,
     pim2,
     arp.gridscale )
 end
 
-function convert(::Type{<:AlignRadarPose2}, parp2::PackedAlignRadarPose2)
+function convert(::Type{<:ScanMatcherPose2}, parp2::PackedScanMatcherPose2)
   TensorCast.@cast im1[row,col] := parp2.im1[row][col]
   TensorCast.@cast im2[row,col] := parp2.im2[row][col]
-  AlignRadarPose2(
+  ScanMatcherPose2(
     collect(im1),
     collect(im2),
     parp2.gridscale )

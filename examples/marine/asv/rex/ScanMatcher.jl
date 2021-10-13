@@ -2,12 +2,14 @@
 this script fetches sequential pairs of poses, fetches the big data (radar pings) tied to those poses, and then determines the pairwise factors that should be added between these sequential pairs
 """
 
-using GraphPlot
-using DistributedFactorGraphs
-using IncrementalInference, RoME
+using Images
+using Caesar
 using JSON2
 
-using DocStringExtensions
+# using GraphPlot
+# using DistributedFactorGraphs
+# using IncrementalInference, RoME
+# using DocStringExtensions
 
 ##
 
@@ -49,7 +51,7 @@ end
 
 # fetch all radar pings
 sweeps = fetchSweep.(fg, fsvars);
-using Images, ImageView
+using ImageView
 # Filter the images
 kg = Kernel.gaussian(7)
 sweeps = map(s -> imfilter(s, kg), sweeps)
@@ -71,22 +73,19 @@ sweeps = map(s -> s/maximum(s), sweeps)
 
 ##
 
-import Rotations as _Rotations
-using CoordinateTransformations
-using ImageTransformations
+# import Rotations as _Rotations
+# using CoordinateTransformations
+# using ImageTransformations
 using Manifolds
-
-
-
-## Building the graph
-
-
-include("RadarFactor.jl")
 
 using LinearAlgebra
 using Optim
 
 ##
+
+
+## Building the graph
+
 
 startsweep = 5
 endsweep = 6
@@ -98,7 +97,7 @@ for i in 1:(endsweep-startsweep)
     addVariable!(newfg, Symbol("x$i"), Pose2, solvable=1)
 end
 for i in 1:(endsweep-startsweep)
-    factor = AlignRadarPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], 1, 0.1 )
+    factor = ScanMatcherPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], 1, 0.1 )
     addFactor!(newfg, Symbol.(["x$(i-1)", "x$i"]), factor, graphinit=graphinit, solvable=1)
 end
 
@@ -114,9 +113,9 @@ end
 
 # Factor debugging
 # fs = getFactorFunction.(getFactor.(newfg, lsf(newfg)))
-# fs = filter(f -> f isa AlignRadarPose2, fs)
+# fs = filter(f -> f isa ScanMatcherPose2, fs)
 # pf = convert.(PackedAlignRadarPose3, fs)
-# convert.(AlignRadarPose2, pf)
+# convert.(ScanMatcherPose2, pf)
 
 # Save the graph
 saveDFG(newfg, "$dfgDataFolder/segment_test.tar.gz");
