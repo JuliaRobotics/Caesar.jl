@@ -127,7 +127,10 @@ function __init__()
     @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/AprilTagDrawingTools.jl")
   end
   @require ImageMagick="6218d12a-5da1-5696-b52f-db25d2ecc6d1" include("images/imagedata.jl")
-  @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" include("images/images.jl")
+  @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" begin 
+    include("images/images.jl")
+    include("images/ScanMatcherUtils.jl")
+  end
   @require Distributed="8ba89e20-285c-5b6f-9357-94700520ee1b" include("images/DistributedUtils.jl")
 end
 
