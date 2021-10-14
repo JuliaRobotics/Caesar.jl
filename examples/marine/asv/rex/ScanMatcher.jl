@@ -5,11 +5,22 @@ this script fetches sequential pairs of poses, fetches the big data (radar pings
 using Images
 using Caesar
 using JSON2
+using Manifolds
+
+using ImageView
 
 # using GraphPlot
 # using DistributedFactorGraphs
 # using IncrementalInference, RoME
 # using DocStringExtensions
+
+import Rotations as _Rot
+# using CoordinateTransformations
+# using ImageTransformations
+
+# using LinearAlgebra
+# using Optim
+
 
 ##
 
@@ -39,7 +50,7 @@ fsvars = allSweepVariables .|> getLabel
 
 # helper function to retrieve the radar sweep for a given variable
 function fetchSweep(dfg::AbstractDFG, varlabel::Symbol)
-
+    #
     entry,rawData = getData(dfg, varlabel, :RADARSWEEP)
     rawdata = Vector{Float64}(JSON2.read(IOBuffer(rawData)))
     n = Int(sqrt(length(rawdata)))
@@ -51,7 +62,7 @@ end
 
 # fetch all radar pings
 sweeps = fetchSweep.(fg, fsvars);
-using ImageView
+
 # Filter the images
 kg = Kernel.gaussian(7)
 sweeps = map(s -> imfilter(s, kg), sweeps)
@@ -71,35 +82,23 @@ sweeps = map(s -> s/maximum(s), sweeps)
 # First step is to have a function that evaluates the cost of a given transform
 # between two subsequent images.
 
-##
-
-# import Rotations as _Rotations
-# using CoordinateTransformations
-# using ImageTransformations
-using Manifolds
-
-using LinearAlgebra
-using Optim
-
-##
-
 
 ## Building the graph
 
-
 startsweep = 5
-endsweep = 6
-graphinit = false
+endsweep = 10
+graphinit = true
 
 # newfg = initfg()
-newfg = generateCanonicalFG_ZeroPose(varType=Pose2)
+newfg = generateCanonicalFG_ZeroPose(varType=Pose2, graphinit=graphinit)
 for i in 1:(endsweep-startsweep)
     addVariable!(newfg, Symbol("x$i"), Pose2, solvable=1)
 end
 for i in 1:(endsweep-startsweep)
-    factor = ScanMatcherPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], 1, 0.1 )
+    factor = ScanMatcherPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], 1, 0.05 )
     addFactor!(newfg, Symbol.(["x$(i-1)", "x$i"]), factor, graphinit=graphinit, solvable=1)
 end
+
 
 ##
 

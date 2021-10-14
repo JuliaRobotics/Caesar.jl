@@ -4,6 +4,8 @@ import IncrementalInference: getSample
 import Base: convert, show
 # import DistributedFactorGraphs: getManifold
 
+using .Images
+
 export ScanMatcherPose2, PackedScanMatcherPose2
 
 """
@@ -40,7 +42,7 @@ struct ScanMatcherPose2{T} <: IIF.AbstractManifoldMinimize
                       im2::AbstractMatrix{T},
                       gridlength::Real,
                       rescale::Real=1,
-                      cvt = (im)->reverse(imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
+                      cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
                     ) where {T} = new{T}( cvt(im1), 
                                           cvt(im2),
                                           rescale*gridlength )
@@ -55,8 +57,12 @@ getSample( cf::CalcFactor{<:ScanMatcherPose2} ) = nothing
 function (cf::CalcFactor{<:ScanMatcherPose2})(X, p, q)
   M = getManifold(Pose2)
   arp = cf.factor
-  tf = Manifolds.compose(M, inv(M, p), q) # for groups
-  return evaluateTransform(arp.im1, arp.im2, tf, arp.rescale/arp.gridlength)
+  # for groups
+  tf = Manifolds.compose(M, inv(M, p), q) 
+  Mr = M.manifold[2]
+  r0 = identity_element(Mr)
+  r = vee(Mr, r0, log(Mr, r0, tf.parts[2]))[1]
+  return evaluateTransform(arp.im1, arp.im2, tf.parts[1], r, arp.gridscale)
 end
 
 function Base.show(io::IO, arp::ScanMatcherPose2{T}) where {T}
@@ -87,18 +93,39 @@ Notes:
 - `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
 """
 function overlayScanMatcher(sm::ScanMatcherPose2, 
+                            trans::AbstractVector{<:Real}=Float64[0;0],
+                            rot::Real=0.0;
+                            showscore::Bool=true  )
+  #
+  im2_ = transformImage_SE2(sm.im2, trans, rot)
+  
+  # get matching padded views
+  im1_, im2__ = paddedviews(0.0, sm.im1, im2_)
+
+  im1__ = RGBA.(im1_, 0, 0, 0.5)
+  im2___ = RGBA.(0, 0, im2__, 0.5)    
+
+  if showscore
+    score = evaluateTransform(sm.im1, sm.im2, trans, rot, sm.gridscale)
+    @info "overlayScanMatcher score" score
+  end
+
+  # im2__ = RGBA.(im2_, 0, 0, 0.5)
+  im1__ .+ im2___
+end
+
+
+#
+
+function overlayScanMatcher(sm::ScanMatcherPose2, 
                             tf = Manifolds.identity_element(SpecialEuclidean(2)) )
-    #
-    im2_ = transformImage_SE2(sm.im2, tf)
-    
-    # get matching padded views
-    im1_, im2__ = paddedviews(0.0, sm.im1, im2_)
+  #
+  M = SpecialOrthogonal(2)
+  e0 = identity_element(M)
 
-    im1__ = RGBA.(im1_, 0, 0, 0.5)
-    im2___ = RGBA.(0, 0, im2__, 0.5)    
+  rot = vee( M, e0, log(M, e0, tf.parts[2]) )[1]
 
-    # im2__ = RGBA.(im2_, 0, 0, 0.5)
-    im1__ .+ im2___
+  overlayScanMatcher(sm, tf.parts[1], rot)
 end
 
 ## =========================================================================================
