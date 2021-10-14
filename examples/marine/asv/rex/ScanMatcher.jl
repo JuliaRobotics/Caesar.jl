@@ -2,10 +2,25 @@
 this script fetches sequential pairs of poses, fetches the big data (radar pings) tied to those poses, and then determines the pairwise factors that should be added between these sequential pairs
 """
 
-using GraphPlot
-using DistributedFactorGraphs
-using IncrementalInference, RoME
+using Images
+using Caesar
 using JSON2
+using Manifolds
+
+using ImageView
+
+# using GraphPlot
+# using DistributedFactorGraphs
+# using IncrementalInference, RoME
+# using DocStringExtensions
+
+import Rotations as _Rot
+# using CoordinateTransformations
+# using ImageTransformations
+
+# using LinearAlgebra
+# using Optim
+
 
 ##
 
@@ -34,9 +49,9 @@ allSweepVariables = filter(v -> :RADARSWEEP in listDataEntries(v), getVariables(
 fsvars = allSweepVariables .|> getLabel
 
 # helper function to retrieve the radar sweep for a given variable
-function fetchSweep(varlabel::Symbol)
-
-    entry,rawData = getData(fg, varlabel, :RADARSWEEP)
+function fetchSweep(dfg::AbstractDFG, varlabel::Symbol)
+    #
+    entry,rawData = getData(dfg, varlabel, :RADARSWEEP)
     rawdata = Vector{Float64}(JSON2.read(IOBuffer(rawData)))
     n = Int(sqrt(length(rawdata)))
     sweep = reshape(rawdata,(n,n))
@@ -46,8 +61,8 @@ end
 ##
 
 # fetch all radar pings
-sweeps = fetchSweep.(fsvars);
-using Images, ImageView
+sweeps = fetchSweep.(fg, fsvars);
+
 # Filter the images
 kg = Kernel.gaussian(7)
 sweeps = map(s -> imfilter(s, kg), sweeps)
@@ -67,77 +82,39 @@ sweeps = map(s -> s/maximum(s), sweeps)
 # First step is to have a function that evaluates the cost of a given transform
 # between two subsequent images.
 
-##
-
-import Rotations as _Rotations
-using CoordinateTransformations
-using ImageTransformations
-
-# this function uses the sum of squared differences between the two images.
-# To use low-passed versions of the images, simpy set the kernel argument to
-# Kernel.gaussian(10) (or an appropriate size)
-function getMismatch(a,b)
-    sqrt(sum((a.-b).^2))
-end
-# sqrt(sum( imfilter( a.-b, Kernel.gaussian(5)).^2 ))
-# sqrt(sum((imfilter(a, kernel).-imfilter(b, kernel)).^2))
-
-# also do MMD version
-
-
-# Next step is to define a function that applies a transform to the image. This
-# transform consists of a translation and a rotation
-function transformImage(img::Array{Float64,2}, dx::Real, dy::Real, dh::Real)
-    tf = LinearMap(_Rotations.RotZ(dh)[1:2,1:2])∘Translation(dx,dy)
-    tf_img = warp(img, tf)
-
-    # replace NaN w/ 0
-    mask = findall(x->isnan(x),tf_img)
-    tf_img[mask] .= 0.0
-    return tf_img
-end
-
-
-# now we can combine the two into an evaluation function
-function evaluateTransform(a::Array{Float64,2},b::Array{Float64,2}, dx::Float64, dy::Float64, dh::Float64)
-    # transform image
-    bp = transformImage(b,dx,dy,dh)
-    # get matching padded views
-    ap, bpp = paddedviews(0.0, a, bp)
-    return getMismatch(ap,bpp)
-end
 
 ## Building the graph
-using DocStringExtensions
-include("RadarFactor.jl")
-
-using LinearAlgebra
-using Optim
-
-##
 
 startsweep = 5
 endsweep = 10
-graphinit = false
+graphinit = true
 
 # newfg = initfg()
-newfg = generateCanonicalFG_ZeroPose(varType=Pose2)
+newfg = generateCanonicalFG_ZeroPose(varType=Pose2, graphinit=graphinit)
 for i in 1:(endsweep-startsweep)
     addVariable!(newfg, Symbol("x$i"), Pose2, solvable=1)
 end
 for i in 1:(endsweep-startsweep)
-    factor = AlignRadarPose2(sweeps[i+startsweep-1], sweeps[i+startsweep], MvNormal(zeros(3), diagm([5;5;pi/4])))
+    factor = ScanMatcherPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], 1, 0.05 )
     addFactor!(newfg, Symbol.(["x$(i-1)", "x$i"]), factor, graphinit=graphinit, solvable=1)
 end
+
+
+##
+
+
+
+##
+
 
 # Run the initialization (very slow right now)
 # ensureAllInitialized!(newfg)
 
 # Factor debugging
 # fs = getFactorFunction.(getFactor.(newfg, lsf(newfg)))
-# fs = filter(f -> f isa AlignRadarPose2, fs)
+# fs = filter(f -> f isa ScanMatcherPose2, fs)
 # pf = convert.(PackedAlignRadarPose3, fs)
-# convert.(AlignRadarPose2, pf)
+# convert.(ScanMatcherPose2, pf)
 
 # Save the graph
 saveDFG(newfg, "$dfgDataFolder/segment_test.tar.gz");
@@ -164,7 +141,7 @@ Plots.plot(x, y, title="Path Plot", lw=3)
 using Optim
 
 
-cost(x, im1, im2) = evaluateTransform(im1,im2,x[1],x[2],x[3])
+cost(tf, im1, im2) = evaluateTransform(im1,im2, tf )
 
 
 # Plotting

@@ -1,5 +1,5 @@
 
-@info "Loading Caesar tools related to ImageMagick."
+@info "Loading Caesar tools related to ImageMagick.jl."
 
 export fetchDataImage
 
