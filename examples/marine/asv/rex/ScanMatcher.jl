@@ -67,7 +67,7 @@ sweeps = fetchSweep.(fg, fsvars);
 kg = Kernel.gaussian(7)
 sweeps = map(s -> imfilter(s, kg), sweeps)
 # Normalize
-sweeps = map(s -> s/maximum(s), sweeps)
+sweeps = map(s -> s/maximum(s), sweeps);
 
 # Clamp out NaN's:
 #map(clamp01nan, img)
@@ -85,8 +85,11 @@ sweeps = map(s -> s/maximum(s), sweeps)
 
 ## Building the graph
 
+# maybe one exists, or build a new one below
+# newfg = loadDFG("$dfgDataFolder/newfg")
+
 startsweep = 5
-endsweep = 10
+endsweep = 8
 graphinit = true
 
 # newfg = initfg()
@@ -108,7 +111,7 @@ end
 
 
 # Run the initialization (very slow right now)
-# ensureAllInitialized!(newfg)
+# initAll!(newfg)
 
 # Factor debugging
 # fs = getFactorFunction.(getFactor.(newfg, lsf(newfg)))
@@ -126,7 +129,7 @@ lsf(newfg)
 X1_ = approxConvBelief(newfg, :x0x1f1, :x1)
 pts = getPoints(X1_)
 
-# solving will internally call ensureAllInitialized!(newfg)
+# solving will internally call initAll!(newfg)
 tree = solveTree!(newfg)
 
 ## Looking at the results

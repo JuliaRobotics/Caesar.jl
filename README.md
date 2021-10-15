@@ -40,7 +40,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 
 # Contributors
 
-We are grateful for many, many contributions within the Julia package ecosystem -- see the [Juliahub.com page](https://juliahub.com/ui/Packages/Caesar/BNbRm/0.10.2?t=1) for the upstream package dependencies.
+We are grateful for many, many contributions within the Julia package ecosystem -- see the [Juliahub.com page](https://juliahub.com/ui/Packages/Caesar/BNbRm?page=1) for the upstream package dependencies.
 
 Consider citing our work:
 ```
