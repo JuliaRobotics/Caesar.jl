@@ -21,6 +21,7 @@ import Rotations as _Rot
 # using LinearAlgebra
 # using Optim
 
+# using Caesar: AlignRadarMMDPose2
 
 ##
 
@@ -89,8 +90,10 @@ sweeps = map(s -> s/maximum(s), sweeps);
 # newfg = loadDFG("$dfgDataFolder/newfg")
 
 startsweep = 5
-endsweep = 8
-graphinit = true
+endsweep = 6
+graphinit = false
+
+len = size(sweeps[5],1)
 
 # newfg = initfg()
 newfg = generateCanonicalFG_ZeroPose(varType=Pose2, graphinit=graphinit)
@@ -98,7 +101,8 @@ for i in 1:(endsweep-startsweep)
     addVariable!(newfg, Symbol("x$i"), Pose2, solvable=1)
 end
 for i in 1:(endsweep-startsweep)
-    factor = ScanMatcherPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], 1, 0.05 )
+    factor = AlignRadarMMDPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], (range(-100,100,length=976),range(-100,100,length=976)) )
+    # factor = ScanMatcherPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], 1, 0.05 )
     addFactor!(newfg, Symbol.(["x$(i-1)", "x$i"]), factor, graphinit=graphinit, solvable=1)
 end
 

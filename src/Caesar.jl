@@ -131,6 +131,7 @@ function __init__()
     include("images/images.jl")
     include("images/ScanMatcherUtils.jl")
     include("images/ScanMatcherPose2.jl")
+    include("images/AlignRadarMMDPose2.jl")
   end
   @require Distributed="8ba89e20-285c-5b6f-9357-94700520ee1b" include("images/DistributedUtils.jl")
 end
