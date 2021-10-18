@@ -97,6 +97,10 @@ len = size(sweeps[5],1)
 
 # newfg = initfg()
 newfg = generateCanonicalFG_ZeroPose(varType=Pose2, graphinit=graphinit)
+
+# single cycle for speed in this radar case
+getSolverParams(newfg).inflateCycles=1
+
 for i in 1:(endsweep-startsweep)
     addVariable!(newfg, Symbol("x$i"), Pose2, solvable=1)
 end
@@ -108,6 +112,14 @@ end
 
 
 ##
+
+fct = getFactorType(newfg, :x0x1f1)
+
+Xtup = sampleFactor(newfg, :x0x1f1)
+
+e0 = identity_element(SpecialEuclidean(2))
+
+calcFactorResidualTemporary(fct, (Pose2,Pose2), Xtup, (e0, e0))
 
 
 

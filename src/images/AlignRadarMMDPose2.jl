@@ -55,21 +55,44 @@ getManifold(::IIF.InstanceType{<:AlignRadarMMDPose2}) = getManifold(Pose2Pose2)
 
 function getSample( cf::CalcFactor{<:AlignRadarMMDPose2} )
   
-  pts1 = sample(cf.factor.hgd1.densityFnc, 1000)
-  pts2 = sample(cf.factor.hgd1.densityFnc, 1000)
+  pts1, = sample(cf.factor.hgd1.densityFnc, 100)
+  pts2, = sample(cf.factor.hgd1.densityFnc, 100)
   
-  return pts1, pts2
+  M = getManifold(Pose2)
+  e0 = ProductRepr(SA[0 0.0], SMatrix{2,2}(1.0, 0, 0, 1)) # identity_element(M)
+
+  # precalc SE2 points
+  R0 = e0.parts[2]
+  pts2_ = map(pt->ProductRepr(pt, R0), pts2)
+
+  # @info "HERE" typeof(pts2) length(pts2) typeof(pts2_) length(pts2_)
+
+  return pts1, pts2_ #, M, e0
 end
 
-function (cf::CalcFactor{<:AlignRadarMMDPose2})(X, p, q)
+function (cf::CalcFactor{<:AlignRadarMMDPose2})(Xtup, p, q)
+  # 
   M = getManifold(Pose2)
-  arp = cf.factor
-  # for groups
-  tf = Manifolds.compose(M, inv(M, p), q) 
-  Mr = M.manifold[2]
-  r0 = identity_element(Mr)
-  r = vee(Mr, r0, log(Mr, r0, tf.parts[2]))[1]
-  return [0;0;0] #evaluateTransform(arp.im1, arp.im2, tf.parts[1], r, arp.gridscale)
+  # e0 = ProductRepr(SA[0 0.0], SMatrix{2,2}(1.0, 0, 0, 1)) # identity_element(M)
+
+  pts1, pts2_ = Xtup[1], Xtup[2]
+  # M = Xtup[3]
+
+  # get the current relative transform estimate
+  pTq = Manifolds.compose(M, inv(M,p), q)
+  
+  # move other points with relative transform
+  pts2__ = map(i->Manifolds.compose(M, pTq, pts2_[i]).parts[1], 1:length(pts1))
+  
+  return Float64[mmd(M.manifold[1], pts1, pts2__);]
+  
+  # arp = cf.factor
+  # # for groups
+  # tf = Manifolds.compose(M, inv(M, p), q) 
+  # Mr = M.manifold[2]
+  # r0 = identity_element(Mr)
+  # r = vee(Mr, r0, log(Mr, r0, tf.parts[2]))[1]
+  # return # evaluateTransform(arp.im1, arp.im2, tf.parts[1], r, arp.gridscale)
 end
 
 # function Base.show(io::IO, arp::AlignRadarMMDPose2{T}) where {T}

@@ -11,6 +11,7 @@ using Requires
 using Dates
 
 using Manifolds
+using StaticArrays
 
 @reexport using RoME
 @reexport using IncrementalInference
