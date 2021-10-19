@@ -12,7 +12,7 @@ Caesar.jl is a community project to facilate software technology development for
 
 [NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io), or using the community links provided below.
 
-# Origins in Fundamental Research
+# Origins and Ongoing Research
 
 Caesar.jl developed as a spin-out project from MIT's Computer Science and Artificial Intelligence Laboratory.  See related works on [the literature page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.
 
@@ -26,11 +26,9 @@ Consider citing our work:
  note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
 }
 ```
-## Contributing, Issues, Comments, or Help
+## Community, Issues, Comments, or Help
 
-Please feel free to open [Issues](https://github.com/JuliaRobotics/Caesar.jl/issues), or [Discussions](https://github.com/JuliaRobotics/Caesar.jl/discussions).  Any Community feedback or contributions (including PRs) are welcome!  You can also get in touch via Slack at [![](https://img.shields.io/badge/Invite-Slack-green.svg?style=popout)](https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw).
-
-Please file issues via Github for help to resolve problems for everyone.  Maintainers can easily transfer Issues to the best suited package location if necessary. Changes and ongoing work can be tracked via the [Milestone pages (click through badges here)](https://github.com/JuliaRobotics/Caesar.jl/blob/master/README.md#bleeding-edge-development-status). 
+Post [Issues](https://github.com/JuliaRobotics/Caesar.jl/issues), or [Discussions](https://github.com/JuliaRobotics/Caesar.jl/discussions) for community help.  Maintainers can easily transfer Issues to the best suited package location if necessary.  Also see the history of changes and ongoing work can via the [Milestone pages (click through badges here)](https://github.com/JuliaRobotics/Caesar.jl/blob/master/README.md#bleeding-edge-development-status).  You can also get in touch via Slack at [![](https://img.shields.io/badge/Invite-Slack-green.svg?style=popout)](https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw).
 
 !!! note
     Please help improve this documentation--if something confuses you, chances
@@ -41,6 +39,7 @@ Please file issues via Github for help to resolve problems for everyone.  Mainta
     worry about whether you might say something wrong.
 
 # JuliaRobotics Code of Conduct
+
 The Caesar.jl project is part of the JuliaRobotics organization and adheres to the JuliaRobotics [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 # Next Steps
 For installation steps, examples/tutorials, and concepts please refer to the following pages:
