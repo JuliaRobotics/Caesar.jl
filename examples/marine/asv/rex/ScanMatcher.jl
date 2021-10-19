@@ -70,15 +70,6 @@ sweeps = map(s -> imfilter(s, kg), sweeps)
 # Normalize
 sweeps = map(s -> s/maximum(s), sweeps);
 
-# Clamp out NaN's:
-#map(clamp01nan, img)
-#
-# using ImageMagick
-# for i in 5:length(sweeps)
-#   s = sweeps[i]./maximum(sweeps[i])
-#   save("/home/gearsad/SlamInDb/seagrant/$i.jpg", Gray.(s))
-# end
-
 # At this point we can load the sweeps; let's work on registration
 # First step is to have a function that evaluates the cost of a given transform
 # between two subsequent images.
@@ -90,38 +81,35 @@ sweeps = map(s -> s/maximum(s), sweeps);
 # newfg = loadDFG("$dfgDataFolder/newfg")
 
 startsweep = 5
-endsweep = 6
-graphinit = false
+endsweep = 20
+graphinit = true
 
 len = size(sweeps[5],1)
 
-# newfg = initfg()
-newfg = generateCanonicalFG_ZeroPose(varType=Pose2, graphinit=graphinit)
+## use a standard builder
 
-# single cycle for speed in this radar case
-getSolverParams(newfg).inflateCycles=1
+STEP = 3
+sweeps_ = sweeps[startsweep:STEP:endsweep]
 
-for i in 1:(endsweep-startsweep)
-    addVariable!(newfg, Symbol("x$i"), Pose2, solvable=1)
-end
-for i in 1:(endsweep-startsweep)
-    factor = AlignRadarMMDPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], (range(-100,100,length=976),range(-100,100,length=976)) )
-    # factor = ScanMatcherPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], 1, 0.05 )
-    addFactor!(newfg, Symbol.(["x$(i-1)", "x$i"]), factor, graphinit=graphinit, solvable=1)
-end
+domain = (range(-100,100,length=976),range(-100,100,length=976))
+# build the graph
+newfg = buildGraphChain!( sweeps_,
+                          AlignRadarMMDPose2,
+                          (_, data) -> (data.currData,data.nextData,domain),
+                          stopAfter=5,
+                          doRef = false,
+                          inflation_fct=0.0,
+                          solverParams=SolverParams(graphinit=true, inflateCycles=1) )
+#
+
 
 
 ##
 
-fct = getFactorType(newfg, :x0x1f1)
-
-Xtup = sampleFactor(newfg, :x0x1f1)
-
-e0 = identity_element(SpecialEuclidean(2))
-
-calcFactorResidualTemporary(fct, (Pose2,Pose2), Xtup, (e0, e0))
-
-
+# fct = getFactorType(newfg, :x0x1f1)
+# Xtup = sampleFactor(newfg, :x0x1f1)
+# e0 = identity_element(SpecialEuclidean(2))
+# δ = calcFactorResidualTemporary(fct, (Pose2,Pose2), Xtup, (e0, e0))
 
 ##
 
