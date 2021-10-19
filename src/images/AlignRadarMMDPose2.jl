@@ -36,7 +36,8 @@ struct AlignRadarMMDPose2{H1<:HeatmapGridDensity,H2<:HeatmapGridDensity} <: IIF.
   Constructor uses two arguments `gridlength`*`rescale=1`=`gridscale`.
   Arg 0 < `rescale` ≤ 1 is also used to rescale the images to lower resolution for speed. """
   gridscale::Float64
-
+  """ how many heatmap sampled particles to use for mmd ailgnment """
+  sample_count::Int
 end
 
   # replace inner constructor with transform on image
@@ -45,18 +46,20 @@ end
                       domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
                       rescale::Real=1,
                       N::Integer=1000,
+                      sample_count::Integer=50,
                       cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
                     ) where {T} = AlignRadarMMDPose2( HeatmapGridDensity(cvt(im1),domain,N=N), 
                                                       HeatmapGridDensity(cvt(im2),domain,N=N),
-                                                      float(rescale) )
+                                                      float(rescale),
+                                                      sample_count  )
 #
 
 getManifold(::IIF.InstanceType{<:AlignRadarMMDPose2}) = getManifold(Pose2Pose2)
 
 function getSample( cf::CalcFactor{<:AlignRadarMMDPose2} )
   
-  pts1, = sample(cf.factor.hgd1.densityFnc, 100)
-  pts2, = sample(cf.factor.hgd1.densityFnc, 100)
+  pts1, = sample(cf.factor.hgd1.densityFnc, cf.factor.sample_count)
+  pts2, = sample(cf.factor.hgd1.densityFnc, cf.factor.sample_count)
   
   M = getManifold(Pose2)
   e0 = ProductRepr(SA[0 0.0], SMatrix{2,2}(1.0, 0, 0, 1)) # identity_element(M)
@@ -67,16 +70,15 @@ function getSample( cf::CalcFactor{<:AlignRadarMMDPose2} )
 
   # @info "HERE" typeof(pts2) length(pts2) typeof(pts2_) length(pts2_)
 
-  return pts1, pts2_ #, M, e0
+  return pts1, pts2_, M #, e0
 end
 
 function (cf::CalcFactor{<:AlignRadarMMDPose2})(Xtup, p, q)
   # 
-  M = getManifold(Pose2)
-  # e0 = ProductRepr(SA[0 0.0], SMatrix{2,2}(1.0, 0, 0, 1)) # identity_element(M)
+  M = Xtup[3]
+  # M = getManifold(Pose2)
 
   pts1, pts2_ = Xtup[1], Xtup[2]
-  # M = Xtup[3]
 
   # get the current relative transform estimate
   pTq = Manifolds.compose(M, inv(M,p), q)
@@ -84,6 +86,7 @@ function (cf::CalcFactor{<:AlignRadarMMDPose2})(Xtup, p, q)
   # move other points with relative transform
   pts2__ = map(i->Manifolds.compose(M, pTq, pts2_[i]).parts[1], 1:length(pts1))
   
+  # cf._residual[1] = 
   return Float64[mmd(M.manifold[1], pts1, pts2__);]
   
   # arp = cf.factor
@@ -114,6 +117,11 @@ end
 # Base.show(io::IO, ::MIME"application/juno.inline", arp::AlignRadarMMDPose2) = show(io, arp)
 
 
+# function mosaicImageData()
+
+
+
+
 """
     $SIGNATURES
 
@@ -122,11 +130,11 @@ Overlay the two images from `AlignRadarPose2` with the first (red) fixed and tra
 Notes:
 - `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
 """
-function overlayScanMatcher(sm::AlignRadarMMDPose2, 
-                            trans::AbstractVector{<:Real}=Float64[0;0],
-                            rot::Real=0.0;
-                            score=Ref(0.0),
-                            showscore::Bool=true  )
+function overlayAlignMMD( sm::AlignRadarMMDPose2, 
+                          trans::AbstractVector{<:Real}=Float64[0;0.0],
+                          rot::Real=0.0;
+                          score=Ref(0.0),
+                          showscore::Bool=true  )
   #
   # im2_ = transformImage_SE2(sm.im2, trans, rot, sm.gridscale)
   
@@ -148,9 +156,9 @@ end
 
 #
 
-function overlayScanMatcher(sm::AlignRadarMMDPose2, 
-                            tf = Manifolds.identity_element(SpecialEuclidean(2));
-                            kw... )
+# function overlayScanMatcher(sm::AlignRadarMMDPose2, 
+#                             tf = Manifolds.identity_element(SpecialEuclidean(2));
+#                             kw... )
   #
   # M = SpecialOrthogonal(2)
   # e0 = identity_element(M)
@@ -158,7 +166,7 @@ function overlayScanMatcher(sm::AlignRadarMMDPose2,
   # rot = vee( M, e0, log(M, e0, tf.parts[2]) )[1]
 
   # overlayScanMatcher(sm, tf.parts[1], rot; kw...)
-end
+# end
 
 ## =========================================================================================
 ## Factor serialization below
@@ -168,20 +176,23 @@ struct PackedAlignRadarMMDPose2 <: PackedInferenceType
   hgd1::PackedHeatmapGridDensity
   hgd2::PackedHeatmapGridDensity
   gridscale::Float64
+  sample_count::Int
 end
 
 function convert(::Type{<:PackedAlignRadarMMDPose2}, arp::AlignRadarMMDPose2)
   PackedAlignRadarMMDPose2(
     convert(PackedHeatmapGridDensity,arp.hgd1),
     convert(PackedHeatmapGridDensity,arp.hgd2),
-    arp.gridscale )
+    arp.gridscale,
+    arp.sample_count )
 end
 
 function convert(::Type{<:AlignRadarMMDPose2}, parp::PackedAlignRadarMMDPose2)
   AlignRadarMMDPose2(
     covert(HeatmapGridDensity,parp.hgd1),
     covert(HeatmapGridDensity,parp.hgd2),
-    parp.gridscale )
+    parp.gridscale,
+    parp.sample_count )
 end
 
 #
