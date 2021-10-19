@@ -6,7 +6,7 @@ import Base: convert, show
 
 using .Images
 
-export AlignRadarMMDPose2, PackedAlignRadarMMDPose2
+export ScatterAlignPose2, PackedScatterAlignPose2
 
 """
 $TYPEDEF
@@ -22,12 +22,12 @@ Notes
 Example
 -------
 ```julia
-arp2 = AlignRadarMMDPose2(img1, img2, 2) # e.g. 2 meters/pixel 
+arp2 = ScatterAlignPose2(img1, img2, 2) # e.g. 2 meters/pixel 
 ```
 
 See also: [`overlayScanMatcher`](@ref)
 """
-struct AlignRadarMMDPose2{H1<:HeatmapGridDensity,H2<:HeatmapGridDensity} <: IIF.AbstractManifoldMinimize
+struct ScatterAlignPose2{H1<:HeatmapGridDensity,H2<:HeatmapGridDensity} <: IIF.AbstractManifoldMinimize
   """ reference image for scan matching. """
   hgd1::H1
   """ test image to scan match against the reference image. """
@@ -41,22 +41,22 @@ struct AlignRadarMMDPose2{H1<:HeatmapGridDensity,H2<:HeatmapGridDensity} <: IIF.
 end
 
   # replace inner constructor with transform on image
-  AlignRadarMMDPose2( im1::AbstractMatrix{T}, 
+  ScatterAlignPose2( im1::AbstractMatrix{T}, 
                       im2::AbstractMatrix{T},
                       domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
                       rescale::Real=1,
                       N::Integer=1000,
                       sample_count::Integer=50,
                       cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
-                    ) where {T} = AlignRadarMMDPose2( HeatmapGridDensity(cvt(im1),domain,N=N), 
+                    ) where {T} = ScatterAlignPose2( HeatmapGridDensity(cvt(im1),domain,N=N), 
                                                       HeatmapGridDensity(cvt(im2),domain,N=N),
                                                       float(rescale),
                                                       sample_count  )
 #
 
-getManifold(::IIF.InstanceType{<:AlignRadarMMDPose2}) = getManifold(Pose2Pose2)
+getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 
-function getSample( cf::CalcFactor{<:AlignRadarMMDPose2} )
+function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   
   pts1, = sample(cf.factor.hgd1.densityFnc, cf.factor.sample_count)
   pts2, = sample(cf.factor.hgd1.densityFnc, cf.factor.sample_count)
@@ -73,7 +73,7 @@ function getSample( cf::CalcFactor{<:AlignRadarMMDPose2} )
   return pts1, pts2_, M #, e0
 end
 
-function (cf::CalcFactor{<:AlignRadarMMDPose2})(Xtup, p, q)
+function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, p, q)
   # 
   M = Xtup[3]
   # M = getManifold(Pose2)
@@ -98,8 +98,8 @@ function (cf::CalcFactor{<:AlignRadarMMDPose2})(Xtup, p, q)
   # return # evaluateTransform(arp.im1, arp.im2, tf.parts[1], r, arp.gridscale)
 end
 
-# function Base.show(io::IO, arp::AlignRadarMMDPose2{T}) where {T}
-#   printstyled(io, "AlignRadarMMDPose2{", bold=true, color=:blue)
+# function Base.show(io::IO, arp::ScatterAlignPose2{T}) where {T}
+#   printstyled(io, "ScatterAlignPose2{", bold=true, color=:blue)
 #   println(io)
 #   printstyled(io, "    T = ", color=:magenta)
 #   println(io, T)
@@ -113,8 +113,8 @@ end
 #   nothing
 # end
 
-# Base.show(io::IO, ::MIME"text/plain", arp::AlignRadarMMDPose2) = show(io, arp)
-# Base.show(io::IO, ::MIME"application/juno.inline", arp::AlignRadarMMDPose2) = show(io, arp)
+# Base.show(io::IO, ::MIME"text/plain", arp::ScatterAlignPose2) = show(io, arp)
+# Base.show(io::IO, ::MIME"application/juno.inline", arp::ScatterAlignPose2) = show(io, arp)
 
 
 # function mosaicImageData()
@@ -130,7 +130,7 @@ Overlay the two images from `AlignRadarPose2` with the first (red) fixed and tra
 Notes:
 - `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
 """
-function overlayAlignMMD( sm::AlignRadarMMDPose2, 
+function overlayAlignMMD( sm::ScatterAlignPose2, 
                           trans::AbstractVector{<:Real}=Float64[0;0.0],
                           rot::Real=0.0;
                           score=Ref(0.0),
@@ -156,7 +156,7 @@ end
 
 #
 
-# function overlayScanMatcher(sm::AlignRadarMMDPose2, 
+# function overlayScanMatcher(sm::ScatterAlignPose2, 
 #                             tf = Manifolds.identity_element(SpecialEuclidean(2));
 #                             kw... )
   #
@@ -172,23 +172,23 @@ end
 ## Factor serialization below
 ## =========================================================================================
 
-struct PackedAlignRadarMMDPose2 <: PackedInferenceType
+struct PackedScatterAlignPose2 <: PackedInferenceType
   hgd1::PackedHeatmapGridDensity
   hgd2::PackedHeatmapGridDensity
   gridscale::Float64
   sample_count::Int
 end
 
-function convert(::Type{<:PackedAlignRadarMMDPose2}, arp::AlignRadarMMDPose2)
-  PackedAlignRadarMMDPose2(
+function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
+  PackedScatterAlignPose2(
     convert(PackedHeatmapGridDensity,arp.hgd1),
     convert(PackedHeatmapGridDensity,arp.hgd2),
     arp.gridscale,
     arp.sample_count )
 end
 
-function convert(::Type{<:AlignRadarMMDPose2}, parp::PackedAlignRadarMMDPose2)
-  AlignRadarMMDPose2(
+function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
+  ScatterAlignPose2(
     covert(HeatmapGridDensity,parp.hgd1),
     covert(HeatmapGridDensity,parp.hgd2),
     parp.gridscale,

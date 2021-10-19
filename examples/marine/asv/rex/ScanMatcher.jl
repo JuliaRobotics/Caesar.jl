@@ -21,7 +21,7 @@ import Rotations as _Rot
 # using LinearAlgebra
 # using Optim
 
-# using Caesar: AlignRadarMMDPose2
+# using Caesar: ScatterAlignPose2
 
 ##
 
@@ -94,7 +94,7 @@ sweeps_ = sweeps[startsweep:STEP:endsweep]
 domain = (range(-100,100,length=976),range(-100,100,length=976))
 # build the graph
 newfg = buildGraphChain!( sweeps_,
-                          AlignRadarMMDPose2,
+                          ScatterAlignPose2,
                           (_, data) -> (data.currData,data.nextData,domain),
                           stopAfter=5,
                           doRef = false,
