@@ -4,9 +4,10 @@ While Caesar.jl is accessible from various programming languages, this page desc
 
 If you are familar with Julia, feel free to skip over to the next page.
 
-## Julia and Help
+## Julia REPL and Help
 
-When launching the REPL in a terminal or and IDE like VS Code (see link for documtation website):
+Julia's documentation on the REPL can [be found here](https://docs.julialang.org/en/v1/stdlib/REPL/).  As a brief example, the REPL in a terminal looks as follows:
+
 ```bash
 $ julia -O3
                _
@@ -14,29 +15,23 @@ $ julia -O3
   (_)     | (_) (_)    |
    _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
   | | | | | | |/ _` |  |
-  | | |_| | | | (_| |  |  Version 1.5.2 (2020-09-23)
+  | | |_| | | | (_| |  |  Version 1.6.3 (2021-09-23)
  _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
 |__/                   |
+
+julia> ? # upon typing ?, the prompt changes (in place) to: help?>
+
+help?> string
+search: string String Cstring Cwstring RevString randstring bytestring SubString
+
+  string(xs...)
+
+  Create a string from any values using the print function.
+  ...
 ```
 
 The `-O 3` is for level 3 code compilation optimization and is a useful habit for slightly faster execution, but slightly slower first run just-in-time compilation of any new function.
 
-To get help with a function, just start with the `?` character followed by the function name, e.g.:
-```julia
-?sin
-# help?> sin
-search: sin sinh sind sinc sinpi sincos sincosd SingleThreaded SingularException asin using isinf asinh asind isinteger isinteractive
-
-  sin(x)
-
-  Compute sine of x, where x is in radians.
-
-  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-
-  sin(A::AbstractMatrix)
-
-  Compute the matrix...
-```
 
 ## Loading Packages
 
