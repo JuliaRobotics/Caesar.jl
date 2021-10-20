@@ -87,7 +87,7 @@ function cb(fg_, lastpose)
   z_e = elevation(lastpose)
   
   # generate noisy measurement
-  @info "Callback for DEM heatmap priors" lastpose ls(fg_, lastpose) z_e
+  @info "Callback for DEM LevelSet priors" lastpose ls(fg_, lastpose) z_e
   
   # create prior
   hmd = LevelSetGridNormal(img, (x,y), z_e, sigma_e, N=10000, sigma_scale=1)

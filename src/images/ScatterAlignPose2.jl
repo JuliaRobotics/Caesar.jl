@@ -38,20 +38,23 @@ struct ScatterAlignPose2{H1<:HeatmapGridDensity,H2<:HeatmapGridDensity} <: IIF.A
   gridscale::Float64
   """ how many heatmap sampled particles to use for mmd ailgnment """
   sample_count::Int
+  """ bandwidth to use for mmd """
+  bw::Float64
 end
 
   # replace inner constructor with transform on image
   ScatterAlignPose2( im1::AbstractMatrix{T}, 
                       im2::AbstractMatrix{T},
                       domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
+                      sample_count::Integer=50,
+                      bw::Real=0.001,
                       rescale::Real=1,
                       N::Integer=1000,
-                      sample_count::Integer=50,
                       cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
                     ) where {T} = ScatterAlignPose2( HeatmapGridDensity(cvt(im1),domain,N=N), 
                                                       HeatmapGridDensity(cvt(im2),domain,N=N),
                                                       float(rescale),
-                                                      sample_count  )
+                                                      sample_count, bw  )
 #
 
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
@@ -130,27 +133,39 @@ Overlay the two images from `AlignRadarPose2` with the first (red) fixed and tra
 Notes:
 - `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
 """
-function overlayAlignMMD( sm::ScatterAlignPose2, 
-                          trans::AbstractVector{<:Real}=Float64[0;0.0],
-                          rot::Real=0.0;
-                          score=Ref(0.0),
-                          showscore::Bool=true  )
+function overlayScatter(sap::ScatterAlignPose2, 
+                        trans::AbstractVector{<:Real}=Float64[0;0.0],
+                        rot::Real=0.0;
+                        score=Ref(0.0),
+                        sample_count::Integer=sap.sample_count,
+                        showscore::Bool=true  )
   #
-  # im2_ = transformImage_SE2(sm.im2, trans, rot, sm.gridscale)
+
+  pts1_, = sample(sap.hgd1.densityFnc, sample_count)
+  pts2_, = sample(sap.hgd1.densityFnc, sample_count)
   
-  # # get matching padded views
-  # im1_, im2__ = paddedviews(0.0, sm.im1, im2_)
+  M = getManifold(Pose2Pose2)
+  e0 = identity_element(M)
+  pTq = exp(M, e0, hat(M, e0, [trans;rot]))
 
-  # im1__ = RGBA.(im1_, 0, 0, 0.5)
-  # im2___ = RGBA.(0, 0, im2__, 0.5)    
+  R0 = e0.parts[2]
+  _pts2_ = map(pt->ProductRepr(pt, R0), pts2_)
 
-  # if showscore
-  #   score[] = evaluateTransform(sm.im1, sm.im2, trans, rot, sm.gridscale)
-  #   @info "overlayScanMatcher score" score[]
-  # end
+  # take p as reference identity
+  pts2T_ = map(pt->Manifolds.compose(M, pTq, pt), _pts2_)
 
-  # # im2__ = RGBA.(im2_, 0, 0, 0.5)
-  # im1__ .+ im2___
+  @cast pts1[i,j] := pts1_[j][i]
+  @cast pts2[i,j] := pts2_[j][i]
+  @cast pts2T[i,j] := pts2T_[j][i]
+
+  if showscore
+    score[] = calcFactorResidualTemporary(sap, (Pose2,Pose2),
+                                          (pts1_,_pts2_,M),
+                                          (e0,pTq) )[1]
+    @info "overlayScatter score" score[]
+  end
+
+  (;pPp=pts1, qPq=pts2, pPq=pts2T)
 end
 
 
@@ -172,19 +187,21 @@ end
 ## Factor serialization below
 ## =========================================================================================
 
-struct PackedScatterAlignPose2 <: PackedInferenceType
+Base.@kwdef struct PackedScatterAlignPose2 <: PackedInferenceType
   hgd1::PackedHeatmapGridDensity
   hgd2::PackedHeatmapGridDensity
-  gridscale::Float64
-  sample_count::Int
+  gridscale::Float64 = 1.0
+  sample_count::Int = 50
+  bw::Float64 = 0.001
 end
 
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
-  PackedScatterAlignPose2(
-    convert(PackedHeatmapGridDensity,arp.hgd1),
-    convert(PackedHeatmapGridDensity,arp.hgd2),
-    arp.gridscale,
-    arp.sample_count )
+  PackedScatterAlignPose2(;
+    hgd1 = convert(PackedHeatmapGridDensity,arp.hgd1),
+    hgd2 = convert(PackedHeatmapGridDensity,arp.hgd2),
+    gridscale = arp.gridscale,
+    sample_count = arp.sample_count,
+    bw = arp.bw )
 end
 
 function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
@@ -192,7 +209,8 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
     covert(HeatmapGridDensity,parp.hgd1),
     covert(HeatmapGridDensity,parp.hgd2),
     parp.gridscale,
-    parp.sample_count )
+    parp.sample_count,
+    parp.bw )
 end
 
 #
