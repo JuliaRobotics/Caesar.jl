@@ -34,7 +34,7 @@ imshow(dem)
 
 # z_elevation = 0.5,      # actual measurement
 # sigma_elevation = 0.001 # measurement uncertainty
-hmd = HeatmapDensityRegular(dem, (x,y), 0.5, 0.001)
+hmd = LevelSetGridNormal(dem, (x,y), 0.5, 0.001)
 
 # pr = Mixture(PriorPoint2, [hmd; MvNormal([0;0], [....])], [0.5;0.5])
 # addFactor!(fg, [:x17;], pr)

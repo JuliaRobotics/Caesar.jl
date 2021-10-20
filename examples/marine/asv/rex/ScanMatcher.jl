@@ -21,6 +21,7 @@ import Rotations as _Rot
 # using LinearAlgebra
 # using Optim
 
+# using Caesar: ScatterAlignPose2
 
 ##
 
@@ -50,12 +51,12 @@ fsvars = allSweepVariables .|> getLabel
 
 # helper function to retrieve the radar sweep for a given variable
 function fetchSweep(dfg::AbstractDFG, varlabel::Symbol)
-    #
-    entry,rawData = getData(dfg, varlabel, :RADARSWEEP)
-    rawdata = Vector{Float64}(JSON2.read(IOBuffer(rawData)))
-    n = Int(sqrt(length(rawdata)))
-    sweep = reshape(rawdata,(n,n))
-    return sweep # That's pretty sweep if i say so myself...
+  #
+  entry,rawData = getData(dfg, varlabel, :RADARSWEEP)
+  rawdata = Vector{Float64}(JSON2.read(IOBuffer(rawData)))
+  n = Int(sqrt(length(rawdata)))
+  sweep = reshape(rawdata,(n,n))
+  return sweep # That's pretty sweep if i say so myself...
 end
 
 ##
@@ -67,16 +68,7 @@ sweeps = fetchSweep.(fg, fsvars);
 kg = Kernel.gaussian(7)
 sweeps = map(s -> imfilter(s, kg), sweeps)
 # Normalize
-sweeps = map(s -> s/maximum(s), sweeps)
-
-# Clamp out NaN's:
-#map(clamp01nan, img)
-#
-# using ImageMagick
-# for i in 5:length(sweeps)
-#   s = sweeps[i]./maximum(sweeps[i])
-#   save("/home/gearsad/SlamInDb/seagrant/$i.jpg", Gray.(s))
-# end
+sweeps = map(s -> s/maximum(s), sweeps);
 
 # At this point we can load the sweeps; let's work on registration
 # First step is to have a function that evaluates the cost of a given transform
@@ -85,30 +77,67 @@ sweeps = map(s -> s/maximum(s), sweeps)
 
 ## Building the graph
 
+# maybe one exists, or build a new one below
+# newfg = loadDFG("$dfgDataFolder/newfg")
+
 startsweep = 5
-endsweep = 10
+endsweep = 20
 graphinit = true
 
-# newfg = initfg()
-newfg = generateCanonicalFG_ZeroPose(varType=Pose2, graphinit=graphinit)
-for i in 1:(endsweep-startsweep)
-    addVariable!(newfg, Symbol("x$i"), Pose2, solvable=1)
-end
-for i in 1:(endsweep-startsweep)
-    factor = ScanMatcherPose2( sweeps[i+startsweep-1], sweeps[i+startsweep], 1, 0.05 )
-    addFactor!(newfg, Symbol.(["x$(i-1)", "x$i"]), factor, graphinit=graphinit, solvable=1)
-end
+len = size(sweeps[5],1)
+domain = (range(-100,100,length=976),range(-100,100,length=976))
 
+## use a standard builder
+
+STEP = 3
+sweeps_ = sweeps[startsweep:STEP:endsweep]
+
+# build the graph
+newfg = buildGraphChain!( sweeps_,
+                          ScatterAlignPose2,
+                          (_, data) -> (data.currData,data.nextData,domain),
+                          stopAfter=5,
+                          doRef = false,
+                          inflation_fct=0.0,
+                          solverParams=SolverParams(graphinit=true, inflateCycles=1) )
+#
+
+
+
+## plotting function for understanding
+
+
+
+
+
+## dev testing on one scatter image with known transform
+
+# sweeps_ = sweeps[5:6]
+# sweeps_[2] =sweeps[5]
+
+# domain = (range(-100,100,length=976),range(-100,100,length=976))
+
+# newfg = buildGraphChain!( sweeps_,
+#                           ScatterAlignPose2,
+#                           (_, data) -> (data.currData,data.nextData,domain),
+#                           stopAfter=1,
+#                           doRef = false,
+#                           inflation_fct=0.0,
+#                           solverParams=SolverParams(graphinit=false, inflateCycles=1) )
+# #
 
 ##
 
-
+# fct = getFactorType(newfg, :x0x1f1)
+# Xtup = sampleFactor(newfg, :x0x1f1)
+# e0 = identity_element(SpecialEuclidean(2))
+# δ = calcFactorResidualTemporary(fct, (Pose2,Pose2), Xtup, (e0, e0))
 
 ##
 
 
 # Run the initialization (very slow right now)
-# ensureAllInitialized!(newfg)
+# initAll!(newfg)
 
 # Factor debugging
 # fs = getFactorFunction.(getFactor.(newfg, lsf(newfg)))
@@ -117,7 +146,7 @@ end
 # convert.(ScanMatcherPose2, pf)
 
 # Save the graph
-saveDFG(newfg, "$dfgDataFolder/segment_test.tar.gz");
+saveDFG("$dfgDataFolder/segment_test.tar.gz", newfg);
 
 ##
 
@@ -126,7 +155,7 @@ lsf(newfg)
 X1_ = approxConvBelief(newfg, :x0x1f1, :x1)
 pts = getPoints(X1_)
 
-# solving will internally call ensureAllInitialized!(newfg)
+# solving will internally call initAll!(newfg)
 tree = solveTree!(newfg)
 
 ## Looking at the results
@@ -148,20 +177,20 @@ cost(tf, im1, im2) = evaluateTransform(im1,im2, tf )
 xrange = -100.0:1.0:100.0
 hrange = -pi:0.1:pi
 val = reshape(
-    [sweepx(sweeps[10],sweeps[11],xrange); sweepx(sweep_original[10],sweep_original[11],xrange)],
-    length(xrange), 2)
+  [sweepx(sweeps[10],sweeps[11],xrange); sweepx(sweep_original[10],sweep_original[11],xrange)],
+  length(xrange), 2)
 Plots.plot(xrange,val)
 # Heading
 val = reshape(
-    [sweeph(sweeps[10],sweeps[11],hrange); sweeph(sweep_original[10],sweep_original[11],hrange)],
-    length(hrange), 2)
+  [sweeph(sweeps[10],sweeps[11],hrange); sweeph(sweep_original[10],sweep_original[11],hrange)],
+  length(hrange), 2)
 Plots.plot(hrange,val)
 
 corr_func = (a,b)->sqrt(sum((a .- 0.5).*(b .- 0.5)))
 val = reshape(
-    [sweepx(sweeps[10],sweeps[11],xrange,diff_func=corr_func);
-    sweepx(sweep_original[10],sweep_original[11],xrange,diff_func=corr_func)],
-    length(xrange), 2)
+  [sweepx(sweeps[10],sweeps[11],xrange,diff_func=corr_func);
+  sweepx(sweep_original[10],sweep_original[11],xrange,diff_func=corr_func)],
+  length(xrange), 2)
 Plots.plot(xrange,val)
 
 ## Sweep plotting

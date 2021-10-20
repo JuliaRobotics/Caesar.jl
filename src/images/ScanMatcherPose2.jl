@@ -95,9 +95,10 @@ Notes:
 function overlayScanMatcher(sm::ScanMatcherPose2, 
                             trans::AbstractVector{<:Real}=Float64[0;0],
                             rot::Real=0.0;
+                            score=Ref(0.0),
                             showscore::Bool=true  )
   #
-  im2_ = transformImage_SE2(sm.im2, trans, rot)
+  im2_ = transformImage_SE2(sm.im2, trans, rot, sm.gridscale)
   
   # get matching padded views
   im1_, im2__ = paddedviews(0.0, sm.im1, im2_)
@@ -106,8 +107,8 @@ function overlayScanMatcher(sm::ScanMatcherPose2,
   im2___ = RGBA.(0, 0, im2__, 0.5)    
 
   if showscore
-    score = evaluateTransform(sm.im1, sm.im2, trans, rot, sm.gridscale)
-    @info "overlayScanMatcher score" score
+    score[] = evaluateTransform(sm.im1, sm.im2, trans, rot, sm.gridscale)
+    @info "overlayScanMatcher score" score[]
   end
 
   # im2__ = RGBA.(im2_, 0, 0, 0.5)
@@ -118,14 +119,15 @@ end
 #
 
 function overlayScanMatcher(sm::ScanMatcherPose2, 
-                            tf = Manifolds.identity_element(SpecialEuclidean(2)) )
+                            tf = Manifolds.identity_element(SpecialEuclidean(2));
+                            kw... )
   #
   M = SpecialOrthogonal(2)
   e0 = identity_element(M)
 
   rot = vee( M, e0, log(M, e0, tf.parts[2]) )[1]
 
-  overlayScanMatcher(sm, tf.parts[1], rot)
+  overlayScanMatcher(sm, tf.parts[1], rot; kw...)
 end
 
 ## =========================================================================================
@@ -146,7 +148,7 @@ function convert(::Type{<:PackedScanMatcherPose2}, arp2::ScanMatcherPose2)
   PackedScanMatcherPose2(
     pim1,
     pim2,
-    arp.gridscale )
+    arp2.gridscale )
 end
 
 function convert(::Type{<:ScanMatcherPose2}, parp2::PackedScanMatcherPose2)

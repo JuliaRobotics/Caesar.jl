@@ -6,18 +6,19 @@ import RoME: getRangeKDEMax2D
 import IncrementalInference: getSample, initfg
 import DistributedFactorGraphs: getManifold
 
-using Reexport
+# handy project consts (not for export)
+import IncrementalInference: NothingUnion, InstanceType
+
 using Requires
 using Dates
 
 using Manifolds
+using StaticArrays
 
-@reexport using RoME
-@reexport using IncrementalInference
-@reexport using KernelDensityEstimate
-@reexport using Distributions
+import Rotations as _Rot
 
-import Rotations as _Rotations
+# TODO remove
+const _Rotations = _Rot
 
 using
   Pkg,
@@ -42,54 +43,14 @@ using
   TimeZones,
   TensorCast
 
-export
-  GenericInSituSystem,  # insitu components
-  makeGenericInSituSys,
-  InSituSystem,
-  makeInSituSys,
-  triggerPose,
-  poseTrigAndAdd!,
-  processTreeTrackersUpdates!,
-  advOdoByRules,
-  SLAMWrapper,
+using Reexport
 
-  # servers
-  tcpStringSLAMServer,
-  tcpStringBRTrackingServer,
-
-  # user functions
-  identitypose6fg,
-  projectrbe,
-  hasval,
-
-  # Robot Utils
-  getRangeKDEMax2D,
-
-  # sas-slam
-  CBFFilterConfig,
-  CZTFilter,
-  prepCZTFilter,
-  getCBFFilter2Dsize,
-  constructCBFFilter2D!,
-  CBF2D_DelaySum!,
-  MatchedFilter,
-  SASBearing2D,
-  PackedSASBearing2D,
-  compare,
-  SASDebug,
-  reset!,
-  prepMF,
-  loadConfigFile,
-  prepareSAS2DFactor,
-  wrapRad,
-  phaseShiftSingle!,
-  liebf!,
-  SASDebug
+# public API exports
+include("ExportAPI.jl")
 
 
-
-const NothingUnion{T} = Union{Nothing, T}
-
+## ===============================================================================================
+# and source files
 include("BearingRangeTrackingServer.jl")
 
 include("SlamServer.jl")
@@ -99,9 +60,7 @@ include("UserFunctions.jl")
 # Configuration
 include("config/CaesarConfig.jl")
 
-
 include("Deprecated.jl")
-
 
 # Multisession operation
 # include("attic/multisession/Multisession.jl")
@@ -131,6 +90,7 @@ function __init__()
     include("images/images.jl")
     include("images/ScanMatcherUtils.jl")
     include("images/ScanMatcherPose2.jl")
+    include("images/ScatterAlignPose2.jl")
   end
   @require Distributed="8ba89e20-285c-5b6f-9357-94700520ee1b" include("images/DistributedUtils.jl")
 end
