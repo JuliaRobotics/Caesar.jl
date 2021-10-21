@@ -8,6 +8,8 @@ using .Images
 
 export ScatterAlignPose2, PackedScatterAlignPose2
 
+export overlayScatter, overlayScatterMutate
+
 """
 $TYPEDEF
 
@@ -43,18 +45,18 @@ struct ScatterAlignPose2{H1<:HeatmapGridDensity,H2<:HeatmapGridDensity} <: IIF.A
 end
 
   # replace inner constructor with transform on image
-  ScatterAlignPose2( im1::AbstractMatrix{T}, 
-                      im2::AbstractMatrix{T},
-                      domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
-                      sample_count::Integer=50,
-                      bw::Real=0.001,
-                      rescale::Real=1,
-                      N::Integer=1000,
-                      cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
-                    ) where {T} = ScatterAlignPose2( HeatmapGridDensity(cvt(im1),domain,N=N), 
-                                                      HeatmapGridDensity(cvt(im2),domain,N=N),
-                                                      float(rescale),
-                                                      sample_count, bw  )
+  ScatterAlignPose2(im1::AbstractMatrix{T}, 
+                    im2::AbstractMatrix{T},
+                    domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
+                    sample_count::Integer=75,
+                    bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
+                    rescale::Real=1,
+                    N::Integer=1000,
+                    cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
+                  ) where {T} = ScatterAlignPose2(HeatmapGridDensity(cvt(im1),domain,N=N), 
+                                                  HeatmapGridDensity(cvt(im2),domain,N=N),
+                                                  float(rescale),
+                                                  sample_count, bw  )
 #
 
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
@@ -69,17 +71,18 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
 
   # precalc SE2 points
   R0 = e0.parts[2]
-  pts2_ = map(pt->ProductRepr(pt, R0), pts2)
 
-  # @info "HERE" typeof(pts2) length(pts2) typeof(pts2_) length(pts2_)
+  ## FIXME REMOVE DEBUG + [20.0;-10]
+  pts2_ = map(pt->ProductRepr(pt, R0), pts2)
 
   return pts1, pts2_, M #, e0
 end
 
 function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, p, q)
   # 
+
+  # will move to CalcFactor, follow IIF #1415
   M = Xtup[3]
-  # M = getManifold(Pose2)
 
   pts1, pts2_ = Xtup[1], Xtup[2]
 
@@ -90,37 +93,33 @@ function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, p, q)
   pts2__ = map(i->Manifolds.compose(M, pTq, pts2_[i]).parts[1], 1:length(pts1))
   
   # cf._residual[1] = 
-  return Float64[mmd(M.manifold[1], pts1, pts2__);]
-  
-  # arp = cf.factor
-  # # for groups
-  # tf = Manifolds.compose(M, inv(M, p), q) 
-  # Mr = M.manifold[2]
-  # r0 = identity_element(Mr)
-  # r = vee(Mr, r0, log(Mr, r0, tf.parts[2]))[1]
-  # return # evaluateTransform(arp.im1, arp.im2, tf.parts[1], r, arp.gridscale)
+  return Float64[mmd(M.manifold[1], pts1, pts2__, bw=SA[cf.factor.bw;]);]
 end
 
-# function Base.show(io::IO, arp::ScatterAlignPose2{T}) where {T}
-#   printstyled(io, "ScatterAlignPose2{", bold=true, color=:blue)
-#   println(io)
-#   printstyled(io, "    T = ", color=:magenta)
-#   println(io, T)
-#   printstyled(io, " }", color=:blue, bold=true)
-#   println(io)
-#   println(io, "  size(.im1):      ", size(arp.im1))
-#   println(io, "    min/max:       ", round(minimum(arp.im1),digits=3), "/", round(maximum(arp.im1),digits=3))
-#   println(io, "  size(.im2):      ", size(arp.im2))
-#   println(io, "    min/max:       ", round(minimum(arp.im2),digits=3), "/", round(maximum(arp.im2),digits=3))
-#   println(io, "  gridscale:       ", arp.gridscale)
-#   nothing
-# end
+function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
+  printstyled(io, "ScatterAlignPose2{", bold=true, color=:blue)
+  println(io)
+  printstyled(io, "    H1 = ", color=:magenta)
+  println(io, H1)
+  printstyled(io, "    H2 = ", color=:magenta)
+  println(io, H2)
+  printstyled(io, " }", color=:blue, bold=true)
+  println(io)
+  println(io, "  size(.data):     ", size(sap.hgd1.data))
+  println(io, "    min/max:       ", round(minimum(sap.hgd1.data),digits=3), "/", round(maximum(sap.hgd1.data),digits=3))
 
-# Base.show(io::IO, ::MIME"text/plain", arp::ScatterAlignPose2) = show(io, arp)
-# Base.show(io::IO, ::MIME"application/juno.inline", arp::ScatterAlignPose2) = show(io, arp)
+  println(io, "  size(.data):     ", size(sap.hgd2.data))
+  println(io, "    min/max:       ", round(minimum(sap.hgd2.data),digits=3), "/", round(maximum(sap.hgd2.data),digits=3))
 
+  println(io, "  gridscale:       ", sap.gridscale)
+  println(io, "  sample_count:    ", sap.sample_count)
+  println(io, "  bw:              ", sap.bw)
+  nothing
+end
 
-# function mosaicImageData()
+Base.show(io::IO, ::MIME"text/plain", sap::ScatterAlignPose2) = show(io, sap)
+Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = show(io, sap)
+
 
 
 
@@ -136,52 +135,66 @@ Notes:
 function overlayScatter(sap::ScatterAlignPose2, 
                         trans::AbstractVector{<:Real}=Float64[0;0.0],
                         rot::Real=0.0;
+                        user_coords = round.([trans; rot], digits=3),
+                        offsetTrans::AbstractVector{<:Real}=+[-20.0;+10],
                         score=Ref(0.0),
                         sample_count::Integer=sap.sample_count,
-                        showscore::Bool=true  )
+                        showscore::Bool=true,
+                        findBest::Bool=true  )
   #
 
   pts1_, = sample(sap.hgd1.densityFnc, sample_count)
-  pts2_, = sample(sap.hgd1.densityFnc, sample_count)
+  pts2_, = sample(sap.hgd2.densityFnc, sample_count)
   
   M = getManifold(Pose2Pose2)
   e0 = identity_element(M)
-  pTq = exp(M, e0, hat(M, e0, [trans;rot]))
+  # not efficient, but okay for here
+  pTq(xyr=user_coords) = exp(M, e0, hat(M, e0, xyr))
 
   R0 = e0.parts[2]
-  _pts2_ = map(pt->ProductRepr(pt, R0), pts2_)
+  _pts2_ = map(pt->ProductRepr(pt+offsetTrans, R0), pts2_)
 
   # take p as reference identity
-  pts2T_ = map(pt->Manifolds.compose(M, pTq, pt), _pts2_)
+  pts2T_ = map(pt->Manifolds.compose(M, pTq(), pt).parts[1], _pts2_)
+  best_coords = zeros(3)
+
+  if findBest
+    # keep tfg separately so that optim can be more efficient
+    tfg = initfg()
+    ev_(xyr) = calcFactorResidualTemporary( sap, (Pose2,Pose2),
+                                              (pts1_,_pts2_,M),
+                                              (e0,pTq(xyr));
+                                              tfg )[1]
+    #
+    score[] = ev_(user_coords)
+    best = Optim.optimize(ev_, user_coords)
+    best_coords .= round.(best.minimizer,digits=3)
+
+    if showscore
+      @info "overlayScatter score" score[] string(best_coords) best.minimum
+    end
+  end
+
+  pts2T_best = map(pt->Manifolds.compose(M, pTq(best_coords), pt).parts[1], _pts2_)
 
   @cast pts1[i,j] := pts1_[j][i]
   @cast pts2[i,j] := pts2_[j][i]
   @cast pts2T[i,j] := pts2T_[j][i]
+  @cast pts2Tb[i,j] := pts2T_best[j][i]
 
-  if showscore
-    score[] = calcFactorResidualTemporary(sap, (Pose2,Pose2),
-                                          (pts1_,_pts2_,M),
-                                          (e0,pTq) )[1]
-    @info "overlayScatter score" score[]
-  end
-
-  (;pPp=pts1, qPq=pts2, pPq=pts2T)
+  (;pPp=pts1, qPq=pts2, pPq=pts2T, pPq_best=pts2Tb, best_coords, user_coords)
 end
 
 
-#
-
-# function overlayScanMatcher(sm::ScatterAlignPose2, 
-#                             tf = Manifolds.identity_element(SpecialEuclidean(2));
-#                             kw... )
+function overlayScatterMutate(sap_::ScatterAlignPose2;
+                              sample_count::Integer = sap_.sample_count,
+                              bw::Real = sap_.bw,
+                              user_coords = zeros(3) )
   #
-  # M = SpecialOrthogonal(2)
-  # e0 = identity_element(M)
+  sap = ScatterAlignPose2(sap_.hgd1, sap_.hgd2, sap_.gridscale, sample_count, float(bw))
+  Caesar.overlayScatter(sap; user_coords);
+end
 
-  # rot = vee( M, e0, log(M, e0, tf.parts[2]) )[1]
-
-  # overlayScanMatcher(sm, tf.parts[1], rot; kw...)
-# end
 
 ## =========================================================================================
 ## Factor serialization below
@@ -192,7 +205,7 @@ Base.@kwdef struct PackedScatterAlignPose2 <: PackedInferenceType
   hgd2::PackedHeatmapGridDensity
   gridscale::Float64 = 1.0
   sample_count::Int = 50
-  bw::Float64 = 0.001
+  bw::Float64 = 0.01
 end
 
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
