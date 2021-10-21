@@ -4,6 +4,8 @@ using LinearAlgebra
 using DataStructures
 using RoME, DistributedFactorGraphs
 
+import Rotations as _Rot
+
 ## clear old memory
 
 # delete!(vis[:tags])
