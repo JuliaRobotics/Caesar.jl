@@ -133,10 +133,11 @@ Notes:
 - `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
 """
 function overlayScatter(sap::ScatterAlignPose2, 
-                        trans::AbstractVector{<:Real}=Float64[0;0.0],
+                        trans::AbstractVector{<:Real}=SA[0;0.0],
                         rot::Real=0.0;
-                        user_coords = round.([trans; rot], digits=3),
-                        offsetTrans::AbstractVector{<:Real}=+[-20.0;+10],
+                        user_coords = [trans; rot],
+                        offsetTrans::AbstractVector{<:Real}=SA[0;0.0],
+                        user_offset = [offsetTrans;0.0],
                         score=Ref(0.0),
                         sample_count::Integer=sap.sample_count,
                         showscore::Bool=true,
@@ -146,13 +147,19 @@ function overlayScatter(sap::ScatterAlignPose2,
   pts1_, = sample(sap.hgd1.densityFnc, sample_count)
   pts2_, = sample(sap.hgd2.densityFnc, sample_count)
   
+  # artificial offset for testing
+  # TODO must still add the rotation user_offset component (not critical)
+  for pt in pts2_ 
+    pt .+= user_offset[1:2]
+  end
+
   M = getManifold(Pose2Pose2)
   e0 = identity_element(M)
   # not efficient, but okay for here
   pTq(xyr=user_coords) = exp(M, e0, hat(M, e0, xyr))
 
   R0 = e0.parts[2]
-  _pts2_ = map(pt->ProductRepr(pt+offsetTrans, R0), pts2_)
+  _pts2_ = map(pt->ProductRepr(pt, R0), pts2_)
 
   # take p as reference identity
   pts2T_ = map(pt->Manifolds.compose(M, pTq(), pt).parts[1], _pts2_)
@@ -162,16 +169,16 @@ function overlayScatter(sap::ScatterAlignPose2,
     # keep tfg separately so that optim can be more efficient
     tfg = initfg()
     ev_(xyr) = calcFactorResidualTemporary( sap, (Pose2,Pose2),
-                                              (pts1_,_pts2_,M),
-                                              (e0,pTq(xyr));
-                                              tfg )[1]
+                                            (pts1_,_pts2_,M),
+                                            (e0,pTq(xyr));
+                                            tfg )[1]
     #
     score[] = ev_(user_coords)
     best = Optim.optimize(ev_, user_coords)
     best_coords .= round.(best.minimizer,digits=3)
 
     if showscore
-      @info "overlayScatter score" score[] string(best_coords) best.minimum
+      @info "overlayScatter score" score[] string(best_coords) best.minimum user_offset
     end
   end
 
@@ -182,17 +189,17 @@ function overlayScatter(sap::ScatterAlignPose2,
   @cast pts2T[i,j] := pts2T_[j][i]
   @cast pts2Tb[i,j] := pts2T_best[j][i]
 
-  (;pPp=pts1, qPq=pts2, pPq=pts2T, pPq_best=pts2Tb, best_coords, user_coords)
+  (;pPp=pts1, qPq=pts2, pPq=pts2T, pPq_best=pts2Tb, best_coords, user_coords, user_offset)
 end
 
 
 function overlayScatterMutate(sap_::ScatterAlignPose2;
                               sample_count::Integer = sap_.sample_count,
                               bw::Real = sap_.bw,
-                              user_coords = zeros(3) )
+                              kwargs... )
   #
   sap = ScatterAlignPose2(sap_.hgd1, sap_.hgd2, sap_.gridscale, sample_count, float(bw))
-  Caesar.overlayScatter(sap; user_coords);
+  Caesar.overlayScatter(sap; kwargs...);
 end
 
 
