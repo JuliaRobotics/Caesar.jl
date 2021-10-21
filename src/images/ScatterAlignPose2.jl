@@ -133,10 +133,10 @@ Notes:
 - `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
 """
 function overlayScatter(sap::ScatterAlignPose2, 
-                        trans::AbstractVector{<:Real}=SA[0;0.0],
+                        trans::AbstractVector{<:Real}=[0;0.0],
                         rot::Real=0.0;
                         user_coords = [trans; rot],
-                        offsetTrans::AbstractVector{<:Real}=SA[0;0.0],
+                        offsetTrans::AbstractVector{<:Real}=[0;0.0],
                         user_offset = [offsetTrans;0.0],
                         score=Ref(0.0),
                         sample_count::Integer=sap.sample_count,
@@ -158,8 +158,18 @@ function overlayScatter(sap::ScatterAlignPose2,
   # not efficient, but okay for here
   pTq(xyr=user_coords) = exp(M, e0, hat(M, e0, xyr))
 
+  
   R0 = e0.parts[2]
-  _pts2_ = map(pt->ProductRepr(pt, R0), pts2_)
+  _pts2_nt = map(pt->ProductRepr(pt, R0), pts2_)
+  
+  # add user_offset
+  uo = exp(M, e0, hat(M, e0, user_offset))
+  _pts2_ = map(pt->Manifolds.compose(M, uo, pt), _pts2_nt)
+  for (i,pt) in enumerate(_pts2_)
+    pt.parts[2] .= R0
+    # overwrite original for updated return values
+    pts2_[i] .= pt.parts[1]
+  end
 
   # take p as reference identity
   pts2T_ = map(pt->Manifolds.compose(M, pTq(), pt).parts[1], _pts2_)

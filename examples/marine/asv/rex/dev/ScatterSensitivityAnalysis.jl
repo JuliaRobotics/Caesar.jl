@@ -18,7 +18,7 @@ Caesar.plotScatterAlign(sap_, bw=0.001)
 ##
 
 # snt_ = deepcopy(snt)
-snt = overlayScatterMutate(sap_; offsetTrans=[-20.0;+100], sample_count=200, bw=1e-4, user_coords=[0;-50;0.]) #, user_coords=snt_.best_coords)
+snt = overlayScatterMutate(sap_; user_offset=[-20.0;+100; pi/4], sample_count=200, bw=1e-4, user_coords=[0;-50;0.]) #, user_coords=snt_.best_coords)
 plotScatterAlign(snt)
 
 
@@ -27,10 +27,10 @@ plotScatterAlign(snt)
 ## sensitivity sweep on bw
 
 
-SNT_08 = [[overlayScatterMutate(sap_; offsetTrans=[-20.0;+100], sample_count=150, bw) for i in 1:100] for bw in exp10.(-6:1:-1)];
+SNT_10 = [[overlayScatterMutate(sap_; user_offset=[-20.0;+20;pi/4], sample_count=100, bw) for i in 1:200] for bw in exp10.(-6:1:-1)];
 
-mkdir("/tmp/caesar/rex/SNT_08")
-@save "/tmp/caesar/rex/SNT_08/SNT_08.jld2" SNT_08
+mkdir("/tmp/caesar/rex/SNT_10")
+@save "/tmp/caesar/rex/SNT_10/SNT_10.jld2" SNT_10
 
 ## histogram sensitivities
 
