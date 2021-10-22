@@ -133,6 +133,3 @@ approxDeconv
 ```
 
 This feature is not yet as feature rich as the `approxConvBelief` function, and also requires further work to improve the consistency of the calculation -- but none the less exists and is useful in many applications.
-
-
-...
