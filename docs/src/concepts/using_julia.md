@@ -83,6 +83,9 @@ juila> ] # activate Pkg manager
 Alternatively, the `dev` command:
 ```julia
 (v1.6) pkg> dev https://github.com/JuliaRobotics/Caesar.jl
+
+# Or fetching a local fork where you push access
+# (v1.6) pkg> dev https://github.com/dehann/Caesar.jl
 ```
 
 !!! warn
@@ -94,7 +97,7 @@ Alternatively, the `dev` command:
 If you'd like to modify or contribute then feel free to fork the specific repo from JuliaRobotics, complete the work on branches in the fork as is normal with a Git workflow and then submit a PR back upstream.  We try to keep PRs small, specific to a task and preempt large changes by first merging smaller non-breaking changes and finally do a small switch over PR.  We also follow a backport onto `release/vX.Y` branch strategy with common `main || master` branch as the "lobby" for shared development into which individual single responsibility PRs are merged.  Each PR, the `main` development lobby, and stable `release/vX.Y` branches are regularly tested through Continuous Integration at each of the repsective packages.
 
 !!! note
-    Binary compilation and fast "first-time-to-plot" can be done through [PackageCompiler.jl, see here for more details](concepts/compile_binary.md).
+    Binary compilation and fast "first-time-to-plot" can be done through [PackageCompiler.jl, see here for more details](@ref compile_binaries).
 
 ## Julia Command Examples
 
