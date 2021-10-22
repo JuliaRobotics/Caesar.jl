@@ -89,7 +89,7 @@ jobs:
         shell: bash
   
   docs:
-    name: 'Documentation: Dev, Julia 1'
+    name: 'Docs: ${{ github.head_ref }}'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -104,6 +104,7 @@ jobs:
         with:
           version: '1'
       - run: |
+          echo ${{ github.head_ref }}
           export JULIA_PKG_SERVER=""
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
