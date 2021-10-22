@@ -1,10 +1,22 @@
-# Multi-Language and Shared Objects
-
+# Multi-Language
 ## Multilanguage Interops: Caesar SDKs and APIs
-The Caesar framework is not limited to direct Julia use. The following Github projects provide access to features of Caesar in their language:
+
+The Caesar framework is not limited to direct Julia use.  
 
 !!! note
-    21Q1, a new multilanguage interface is under development and will replace and consolidate the previous methods listed below.
+    2021Q4, Coming Soon!  A new multilanguage SDK is under development and will replace and consolidate the previous methods listed below.
+
+Please contact info@navability.io for more information.
+
+### Static, Shared Object `.so` Compilation
+
+See the [Compiling Binaries](@ref compile_binaries).
+### ROS Integration
+
+Yes, see [ROS Integration](@ref ros_direct).
+### Previous Generation APIs
+
+The following Github projects provide access to features of Caesar in their language:
 
 * Julia Web interface:
   * [GraffSDK.jl](https://github.com/GearsAD/GraffSDK.jl)
@@ -13,11 +25,10 @@ The Caesar framework is not limited to direct Julia use. The following Github pr
   * C/C++:
     * [Graff Cpp](https://github.com/MarineRoboticsGroup/graff_cpp)
     * [Caesar LCM](http://github.com/pvazteixeira/caesar-lcm)
+    * [Caesar ROS](http://github.com/pvazteixeira/caesar-ros)
   * Python:
     * [GraffSDK.py](https://github.com/nicrip/graff_py)
     * [Synchrony_py](https://github.com/nicrip/SynchronySDK_py)
-
-Please contact info@navability.io for more information.
 
 ## ZMQ Messaging Interface
 
@@ -54,18 +65,6 @@ start(zmqConfig)
 The [current tests are a good place to see some examples](http://github.com/JuliaRobotics/Caesar.jl/tree/master/test/multilangzmq) of the current interfacing functions.  Feel free to change the ZMQ interface for to any of the ZMQ supported modes of data transport, such as [Interprocess Communication (IPC)](http://api.zeromq.org/2-1:zmq-ipc) vs. TCP.
 
 > TODO: expand the ZMQ documentation
-
-### ROS Integration
-
-Yes, see [ROS Integration](@ref ros_direct)
-
-## Static, Shared Object `.so` Compilation
-
-> [FAQ: Static, Shared Object `.so` Compilation](@ref faq_compile_binaries)
-
-The plan for the `Caesar.jl` & the mm-iSAM is to use [PackageCompiler.jl](https://github.com/JuliaLang/PackageCompiler.jl) to generate linkable `.o` or `.so` files.
-
-> Please add your comments to [this issue discussion](https://github.com/JuliaRobotics/Caesar.jl/issues/210).
 
 ## Alternative Methods
 
