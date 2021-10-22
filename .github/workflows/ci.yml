@@ -88,7 +88,7 @@ jobs:
         shell: bash
   
   docs:
-    name: 'Docs: ${{ github.head_ref }}'
+    name: 'Build Docs'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -102,9 +102,10 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
-      - run: |
-          echo ${{ github.head_ref }}
+      - name: 'Docs on ${{ github.head_ref }}'
+        run: |
           export JULIA_PKG_SERVER=""
+          julia -e `println("Julia gets branch: ","${{ github.head_ref }}")'
           julia --project=${{ matrix.jlenv }} --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(name="Caesar", rev="${{ github.head_ref }}"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
