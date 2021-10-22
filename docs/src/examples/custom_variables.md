@@ -1,5 +1,4 @@
-
-## Creating New Variables
+# [Custom Variables](@id custom_variables)
 
 A handy macro can help define new variables which shows a Pose2 example with 3 degrees of freedom: ``X, Y, \theta``.  Note that we use [Manifolds.jl as fundamental abstraction](https://juliamanifolds.github.io/Manifolds.jl/latest/examples/manifold.html) for numerical operations.  Users can choose how to represent data, for example [`RoME.Pose2`](@ref) is defined as a `Manifolds.SpecialEuclidean(2)`, and the default data representation is (but doesn't have to be) `Manifolds.identity_element(SpecialEuclidean(2))` -- i.e. likely an `Manifolds.ArrayPartition` or `Manifolds.ProductRepr` (older).
 ```@docs
