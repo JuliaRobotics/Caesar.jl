@@ -30,8 +30,9 @@ makedocs(
         ],
         "Getting Started" => [
             "Initial Concepts" => "concepts/concepts.md",
-            "Building Factor Graphs" => "concepts/building_graphs.md",
-            "Solving and Interacting" => "concepts/interacting_fgs.md",
+            "Building Graphs" => "concepts/building_graphs.md",
+            "Solving Graphs" => "concepts/solving_graphs.md",
+            "Interact w Graphs" => "concepts/interacting_fgs.md",
             "Multi-Modal/Hypothesis" => "concepts/dataassociation.md",
             "Parallel Processing" => "concepts/parallel_processing.md",
             "[DEV] Parametric Solve" => "examples/parametric_solve.md",
@@ -39,7 +40,7 @@ makedocs(
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",
             "Canonical 1D Example" => "examples/basic_continuousscalar.md",
-            "Too few range-only" => "examples/basic_slamedonut.md",
+            "Underconstrained Range-only" => "examples/basic_slamedonut.md",
             "Hexagonal 2D SLAM" => "examples/basic_hexagonal2d.md",
             "Fixed-Lag Solving 2D" => "examples/interm_fixedlag_hexagonal.md",
             "Dead Reckon Tether" => "examples/deadreckontether.md",
@@ -59,7 +60,7 @@ makedocs(
         "Middlewares" => [
             "ROS Middleware" => "examples/using_ros.md",
             "Compile Binaries" => "concepts/compile_binary.md",
-            "Cloud Server/Database" => "concepts/database_interactions.md",
+            "Zero Install Solution" => "concepts/zero_install.md",
             "Multi-session/agent Solving" => "concepts/multisession.md",
             "Multi-Language Support" => "concepts/multilang.md",
         ],

@@ -46,7 +46,7 @@ using RoME
 using IncrementalInference
 ```
 
-### Requires.jl for Optional Package Loading
+### Optional Package Loading
 
 Many of these packages have additional features that are not included by default.  For example, the [Flux.jl](https://fluxml.ai/Flux.jl/stable/) machine learning package will introduce several additional features when loaded, e.g.:
 ```julia
@@ -61,8 +61,70 @@ For completeness, so too with packages like `Images.jl`, `RobotOS.jl`, and other
 using Caesar, Images
 ```
 
-## Next Steps
+## Running Unit Tests Locally
 
-The next section describes the initial steps in constructing and solving graphs will be discussed in the upcoming documentation page [Building and Solving Graphs](building_graphs.md).  We also recommend reviewing the various examples available in the [Examples section](../examples/examples.md).  The variables and factors in Caesar should be sufficient for the majority of robotic applications, however Caesar allows users to extend the framework without changing the core code. This is discussed in [Creating New Variables and Factors](../examples/adding_variables_factors.md).  Caesar supports both in-memory solving (fast, for moderately-sized graphs) as well as [shared data persistence and inference](database_interactions.md) for massive graphs, multiple sessions, and multiple agents.
+Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.  These test can take up to an hour and may have occasional stochastic failures in any one of the many tests being run.  Thus far we have accepted occasional stochasticly driven numerical events---e.g. a test event might result in `1.03 < 1`---rather than making tests so loose such that actual bugs are missed.  Strictly speaking, we should repeat tests 10 times over with tighter tolerances, but that would require hundreds or thousands of cloud CI hours a week.
+```julia
+juila> ] # activate Pkg manager
+
+# the multimodal incremental smoothing and mapping solver
+(v1.6) pkg> test IncrementalInference
+...
+# robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
+(v1.6) pkg> test RoME
+...
+# umbrella framework with interaction tools and more -- allows stand alone and server based solving
+(v1.6) pkg> test Caesar
+...
+```
+
+## Install Repos for Development
+
+Alternatively, the `dev` command:
+```julia
+(v1.6) pkg> dev https://github.com/JuliaRobotics/Caesar.jl
+
+# Or fetching a local fork where you push access
+# (v1.6) pkg> dev https://github.com/dehann/Caesar.jl
+```
+
+!!! warn
+    Development packages are NOT managed by Pkg.jl, so you have to manage this Git repo manually.  Development packages can usually be found at, e.g. `Caesar`
+    ```
+    ~/.julia/dev/Caesar
+    ```
+
+If you'd like to modify or contribute then feel free to fork the specific repo from JuliaRobotics, complete the work on branches in the fork as is normal with a Git workflow and then submit a PR back upstream.  We try to keep PRs small, specific to a task and preempt large changes by first merging smaller non-breaking changes and finally do a small switch over PR.  We also follow a backport onto `release/vX.Y` branch strategy with common `main || master` branch as the "lobby" for shared development into which individual single responsibility PRs are merged.  Each PR, the `main` development lobby, and stable `release/vX.Y` branches are regularly tested through Continuous Integration at each of the repsective packages.
+
+!!! note
+    Binary compilation and fast "first-time-to-plot" can be done through [PackageCompiler.jl, see here for more details](@ref compile_binaries).
+
+## Julia Command Examples
+
+Run Julia in REPL (console) mode:
+```julia
+$ julia
+julia> println("hello world")
+"hello world"
+```
+
+Maybe a script, or command:
+
+```
+user@...$ echo "println(\"hello again\")" > myscript.jl
+user@...$ julia myscript.jl
+hello again
+user@...$ rm myscript.jl
+
+user@...$ julia -e "println(\"one more time.\")"
+one more time.
+user@...$ julia -e "println(\"...testing...\")"
+...testing...
+```
+
+!!! note
+    When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.  For example, search for 'julialang workflow tips' or 'julialang performance tips'.
+    Also, see [FAQ - Why are first runs slow?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Just-In-Time-Compiling-(i.e.-why-are-first-runs-slow?)-1), which is due to Just-In-Time/Pre compiling and caching.
+## Next Steps
 
 Although Caesar is Julia-based, it provides multi-language support with a ZMQ interface. This is discussed in [Caesar Multi-Language Support](multilang.md).  Caesar.jl also supports various visualizations and plots by using Arena, RoMEPlotting, and Director. This is discussed in [Visualization with Arena.jl and RoMEPlotting.jl](arena_visualizations.md).

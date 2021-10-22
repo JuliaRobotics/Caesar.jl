@@ -88,7 +88,7 @@ jobs:
         shell: bash
   
   docs:
-    name: 'Documentation: Dev, Julia 1'
+    name: 'Build Docs'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -102,8 +102,11 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
-      - run: |
-          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="Caesar", rev="master")); Pkg.instantiate()'
+      - name: 'Docs on ${{ github.head_ref }}'
+        run: |
+          export JULIA_PKG_SERVER=""
+          julia -e 'println("Julia gets branch: ","${{ github.head_ref }}")'
+          julia --project=${{ matrix.jlenv }} --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(name="Caesar", rev="${{ github.head_ref }}"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
