@@ -103,7 +103,6 @@ jobs:
         with:
           version: '1'
       - run: |
-          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="Caesar", rev="master")); Pkg.instantiate()'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
