@@ -80,6 +80,7 @@ jobs:
       
       - name: Run tests on Upstream Dev
         run: |
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); Pkg.dev(PackageSpec(path=pwd()));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="RoME",rev="master"));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference",rev="master"));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="master"));'
