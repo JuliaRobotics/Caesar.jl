@@ -1,4 +1,4 @@
-# Building and Solving Graphs
+# [Building Graphs](@ref building_graphs)
 
 Irrespective of your application - real-time robotics, batch processing of survey data, or really complex multi-hypothesis modeling - you're going to need to add factors and variables to a graph. This section discusses how to do that in Caesar.
 
@@ -138,8 +138,8 @@ Computation will progress faster if poses and landmarks are very sparse.  To ext
 
 For completeness, one could also re-project the most meaningful measurements from sensor measurements between pose epochs as though measured from the pose epoch.  This approach essentially marginalizes the local dead reckoning drift errors into the local interpose re-projections, but helps keep the pose count low.
 
-In addition, see [fixed-lag discussion](https://www.juliarobotics.org/Caesar.jl/latest/examples/examples/#Hexagonal-2D-1) for limiting during inference the number of fluid variables manually to a user desired count.
+In addition, see [Fixed-lag Solving](@ref fixedlag_solving) for limiting during inference the number of fluid variables manually to a user desired count.
 
 ## Which Variables and Factors to use
 
-See the next page on [available variables and factors](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/)
+See the next page on [available variables and factors](@ref variables_factors)
