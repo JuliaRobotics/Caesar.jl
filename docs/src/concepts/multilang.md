@@ -57,15 +57,13 @@ The [current tests are a good place to see some examples](http://github.com/Juli
 
 ### ROS Integration
 
-Yes, but not yet.  See:
-
-> [FAQ: ROS Integration](http://www.juliarobotics.org/Caesar.jl/latest/faq/#ROS-Integration-1)
+Yes, see [ROS Integration](@ref ros_direct)
 
 ## Static, Shared Object `.so` Compilation
 
-> [FAQ: Static, Shared Object `.so` Compilation](.http://www.juliarobotics.org/Caesar.jl/latest/faq/#Static,-Shared-Object-.so-Compilation-1)
+> [FAQ: Static, Shared Object `.so` Compilation](@ref faq_compile_binaries)
 
-The plan for the `Caesar.jl` & the mm-iSAM is to use [PackageCompiler.jl](https://github.com/JuliaLang/PackageCompiler.jl) to generate linkable `.o` or `.so` files; or maybe even full executables.
+The plan for the `Caesar.jl` & the mm-iSAM is to use [PackageCompiler.jl](https://github.com/JuliaLang/PackageCompiler.jl) to generate linkable `.o` or `.so` files.
 
 > Please add your comments to [this issue discussion](https://github.com/JuliaRobotics/Caesar.jl/issues/210).
 
