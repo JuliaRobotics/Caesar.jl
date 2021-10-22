@@ -52,8 +52,8 @@ To use this feature, IIF must be told that there are no data race concerns with 
 addFactor!(fg, [:x0; :x1], MyFactor(...); threadmodel=MultiThreaded)
 ```
 
-!!! warn
-    The current, interface is likely to be reworked in the near future (penciled in for 1H2022). 
+!!! warning
+    The current IIF factor multithreading interface is likely to be reworked/improved in the near future (penciled in for 1H2022).
 
 See page [Custom Factors](@ref custom_factors) for details on how factor computations are represented in code.  Regarding threading, consider for example `OtherFactor.userdata`.  The residual calculations from different threads might create a data race on `userdata` for some volatile internal computation.  In that case it is recommended the to instead use `Threads.nthreads()` and `Threads.threadid()` to make sure the shared-memory issues are avoided:
 ```julia
