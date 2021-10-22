@@ -34,12 +34,9 @@ See the JuliaCon presentation by [rdeits here](https://www.youtube.com/watch?v=d
 ## Can Caesar.jl be used in other languages beyond Julia? Yes.
 The Caesar.jl project is expressly focused on making this algorithmic code available to [C/Fortran](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/)/[C++](https://juliacomputing.com/blog/2017/12/01/cxx-and-cxxwrap-intro.html)/C#/[Python](https://github.com/JuliaPy/PyCall.jl)/[Java](https://github.com/JuliaInterop/JavaCall.jl)/JS.  Julia itself offers [many additional interops](https://github.com/JuliaInterop).  ZMQ and HTTP/WebSockets are the standardized interfaces of choice, please see [details at the multi-language section](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/)).  Consider opening issues or getting in touch for more information.
 
-### Static, Shared Object `.so` Compilation
+### Can Julia Compile Binaries / Shared Libraries
 
-Packages are already compiled to static objects (`.ji` files), but can also be compiled to more common `.so` files.  See [this AOT vs JIT compiling blog post](https://juliacomputing.com/blog/2016/02/09/static-julia.html) for a deeper discussion.  Also see [this Julia Binaries Blog](https://medium.com/@sdanisch/compiling-julia-binaries-ddd6d4e0caf4).  See recent dedicated [issue tracker here](https://github.com/JuliaRobotics/RoME.jl/issues/288).  Initial work is for system image is [described in the docs here](https://juliarobotics.org/Caesar.jl/latest/installation_environment/#Ahead-Of-Time-Compile-RoME.so-1).
-
-!!! note
-    [recent developments announced on discourse.](https://discourse.julialang.org/t/ann-packagecompiler-with-incremental-system-images/20489).  Also see new brute force sysimg work at [Fezzik.jl](https://github.com/TsurHerman/Fezzik).
+Yes, see the [Compile Binaries Page](@ref compile_binaries).
 
 ### Can Julia be Embedded into C/C++
 Yes, see [the Julia embedding documentation page](https://docs.julialang.org/en/v1/manual/embedding/index.html).

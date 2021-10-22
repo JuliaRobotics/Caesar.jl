@@ -1,4 +1,4 @@
-# Defining New Factors
+# [Custom Factors](@id custom_factors)
 
 Julia's type inference allows overloading of member functions outside a module.  Therefore new factors can be defined at any time.  To better illustrate, in this example we will add new factors into the `Main` context **after** construction of the factor graph has already begun.
 
@@ -186,24 +186,6 @@ At present `cfo` contains three main fields:
 
 !!! note
     The old `.specialSampler` framework has been replaced with the standardized `::CalcFactor` interface.  See http://www.github.com/JuliaRobotics/IIF.jl/issues/467 for details.
-
-
-### Multithreading
-
-Julia and therefore IIF has strong support for shared-memory multithreading.  The thing to keep in mind is what parts of residual factor computation is shared memory.  The most sensible breakdown into threaded work is for separate samples (i.e. `cfo._sampleIdx`) to be calculated in separate threads.  The user residual function itself could likely also be broken down further into more threaded operations.
-
-The example above introduced `OtherFactor.userdata`.  This could cause problems if the residual calculations are actively using `userdata` for some volatile internal computation.  In that case it might be useful for the user to instead use `Threads.nthreads()` and `Threads.threadid()` to make sure the shared-memory issues are avoided:
-```julia
-struct OtherFactor{T <: SamplableBelief} <: IIF.AbstractRelativeMinimize
-  Z::T             # assuming something 2 dimensional
-  inplace::Vector{MyInplaceMem}
-end
-
-# helper function
-OtherFactor(z) = OtherFactor(z, [MyInplaceMem(0) for i in 1:Threads.nthreads()])
-
-# in residual function just use `thr_inplace = cfo.factor.inplace[Threads.threadid()]`
-```
 
 ## [OPTIONAL] Standardized Serialization
 

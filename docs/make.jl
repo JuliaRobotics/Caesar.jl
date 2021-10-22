@@ -33,7 +33,8 @@ makedocs(
             "Building Factor Graphs" => "concepts/building_graphs.md",
             "Solving and Interacting" => "concepts/interacting_fgs.md",
             "Multi-Modal/Hypothesis" => "concepts/dataassociation.md",
-            "Parametric Solve (EXP)" => "examples/parametric_solve.md",
+            "Parallel Processing" => "concepts/parallel_processing.md",
+            "[DEV] Parametric Solve" => "examples/parametric_solve.md",
         ],
         "Examples" => [
             "Caesar Examples" => "examples/examples.md",

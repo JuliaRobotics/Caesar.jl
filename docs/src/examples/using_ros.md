@@ -1,4 +1,4 @@
-# Using ROS Topics
+# [ROS Direct](@id ros_direct)
 
 Since 2020, Caesar.jl has native support for ROS via the [RobotOS.jl](https://github.com/jdlangs/RobotOS.jl) package.  
 
