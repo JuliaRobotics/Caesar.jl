@@ -102,15 +102,10 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
-      - name: Setup for either branch
-        if: ${{ github.ref != 'refs/heads/master' }}
-        run: export CJL_DOCS_BRANCH="${{ github.head_ref }}"
-      - name: Setup for main branch
-        if: ${{ github.ref == 'refs/heads/master' }}
-        run: export CJL_DOCS_BRANCH="master"
       - name: 'Docs on ${{ github.head_ref }}'
         run: |
           export JULIA_PKG_SERVER=""
+          [ '${{ github.ref }}' == 'refs/heads/master' ] && export CJL_DOCS_BRANCH="master" || export CJL_DOCS_BRANCH="${{ github.head_ref }}"
           julia -e 'println("Julia gets branch: ",ENV["CJL_DOCS_BRANCH"])'
           julia --project=${{ matrix.jlenv }} --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(name="Caesar", rev=ENV["CJL_DOCS_BRANCH"]))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
