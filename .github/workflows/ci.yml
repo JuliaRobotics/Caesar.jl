@@ -105,7 +105,7 @@ jobs:
       - run: |
           echo ${{ github.head_ref }}
           export JULIA_PKG_SERVER=""
-          CJL_PR_BRANCH=${{ github.head_ref }} julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); @show Pkg.status(PackageSpec(name="Caesar"))'
+          CJL_PR_BRANCH=${{ github.head_ref }} julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="Caesar", rev=ENV["CJL_PR_BRANCH"]));'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
