@@ -105,8 +105,9 @@ jobs:
       - name: 'Docs on ${{ github.head_ref }}'
         run: |
           export JULIA_PKG_SERVER=""
-          julia -e 'println("Julia gets branch: ","${{ github.head_ref }}")'
-          julia --project=${{ matrix.jlenv }} --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(name="Caesar", rev="${{ github.head_ref }}"))'
+          [ '${{ github.ref }}' == 'refs/heads/master' ] && export CJL_DOCS_BRANCH="master" || export CJL_DOCS_BRANCH="${{ github.head_ref }}"
+          julia -e 'println("Julia gets branch: ",ENV["CJL_DOCS_BRANCH"])'
+          julia --project=${{ matrix.jlenv }} --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(name="Caesar", rev=ENV["CJL_DOCS_BRANCH"]))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
