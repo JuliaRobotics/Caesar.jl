@@ -98,31 +98,12 @@ end
 
 
 
-# TODO much room for improvement, and must be consolidated with RobotOS.jl
-function _unpackROSMsgType(T::Type, msgdata)
-    msgT = T()
-    msgT.header = msgdata[2][:header]
-    fnms = fieldnames(T)
-    for nm in fnms
-        # FIXME, still have to resolve cases where fieldname header is actually used
-        nm == :header ? continue : nothing
-        _tostr = JSON2.write(msgdata[2][nm])
-        try
-            setfield!(msgT, nm, JSON2.read(_tostr, typeof(getfield(msgT, nm))))
-        catch
-            @warn "not able to unpack ROS message field" T nm typeof(getfield(msgT, nm))
-            @debug _tostr
-        end
-    end
-    msgT
-end
-
 """
     $SIGNATURES
 
 Message callback for /radar_0.
 """
-function handleRadar!(msg::seagrant_msgs.msg.radar, fg::AbstractDFG, systemstate::SystemState)
+function handleRadar!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDFG, systemstate::SystemState)
     @info "handleRadar" maxlog=10
 
     # if systemstate.cur_variable === nothing
@@ -134,7 +115,7 @@ function handleRadar!(msg::seagrant_msgs.msg.radar, fg::AbstractDFG, systemstate
     @info "[$timestamp] RADAR sample on $(systemstate.cur_variable.label)"
 
     # Make a data entry in the graph - use JSON2 to just write this (really really verbosely)
-    ade,adb = addData!(fg, :radar, systemstate.cur_variable.label, :RADAR, Vector{UInt8}(JSON2.write(msg)))
+    # ade,adb = addData!(fg, :radar, systemstate.cur_variable.label, :RADAR, Vector{UInt8}(JSON2.write(msg)))
    
 end
 
@@ -144,6 +125,7 @@ end
 Message callback for Radar pings. Adds a variable to the factor graph and appends the scan as a bigdata element.
 """
 function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDFG, systemstate::SystemState)
+    error("WHAT")
     @info "handleRadarPointcloud" maxlog=10
 
     if systemstate.cur_variable === nothing
@@ -154,12 +136,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
     @info "[$timestamp] RADAR pointcloud sample on $(systemstate.cur_variable.label)"
 
     # Make a data entry in the graph
-    ade,adb = addData!(fg, :radar, systemstate.cur_variable.label, :RADARPC, Vector{UInt8}(JSON2.write(msg)),  mimeType="/radar_pointcloud_0;dataformat=Float32*[[X,Y,Z]]*12")
-end
-
-function _handleRadarPointcloud!(msg, args::Tuple)
-    # sensor_msgs.msg.PointCloud2
-    @info "_pointcloud"
+    # ade,adb = addData!(fg, :radar, systemstate.cur_variable.label, :RADARPC, Vector{UInt8}(JSON2.write(msg)),  mimeType="/radar_pointcloud_0;dataformat=Float32*[[X,Y,Z]]*12")
 end
 
 """
@@ -219,9 +196,42 @@ function handleGPS!(msg::sensor_msgs.msg.NavSatFix, fg::AbstractDFG, systemstate
 
 end
 
+## Own unpacking of ROS types from bagreader (not regular subscriber)
+
+
+# TODO much room for improvement, and must be consolidated with RobotOS.jl
+function _unpackROSMsgType(T::Type, msgdata)
+    return convert(T, msgdata[2])
+
+    # msgT = T()
+    # msgT.header = msgdata[2][:header]
+    # fnms = fieldnames(T)
+    # for nm in fnms
+    #     @show nm, typeof(msgdata[2][nm])  #, typeof(getfield(msgT, nm))
+    #     # FIXME, still have to resolve cases where fieldname header is actually used
+    #     nm == :header ? continue : nothing
+    #     msgdata[2][nm] isa DataType ? @error("$nm is DataType") : nothing
+        
+    #     try
+    #         _tostr = JSON2.write(msgdata[2][nm])
+    #         setfield!(msgT, nm, JSON2.read(_tostr, typeof(getfield(msgT, nm))))
+    #     catch
+    #         @warn "not able to unpack ROS message field" T nm #typeof(getfield(T, nm))
+    #         @debug _tostr
+    #     end
+    # end
+    # msgT
+end
+
+
+function _handleRadarPointcloud!(msgdata, args::Tuple)
+    msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
+    # @info "_handleRadarPointcloud!" typeof(msgT)
+    handleRadarPointcloud!(msgT, args...)
+end
 
 function _handleRadar!(msgdata, args::Tuple)
-    msgT = _unpackROSMsgType(seagrant_msgs.msg.radar, msgdata)
+    msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
     handleRadar!(msgT, args...)
 end
 
@@ -235,9 +245,12 @@ function _handleGPS!(msgdata, args)
     handleGPS!(msgT, args...)
 end
 
+##
+
 function main(;iters::Integer=50)
-    dfg_datafolder = "/tmp/caesar/rex"
+    dfg_datafolder = "/tmp/caesar/philos"
     if isdir(dfg_datafolder)
+        println("Deleting old contents at: ",dfg_datafolder)
         rm(dfg_datafolder; force=true, recursive=true)
     end
     mkdir(dfg_datafolder)
@@ -246,7 +259,7 @@ function main(;iters::Integer=50)
 
     init_node("rex_feed")
     # find the bagfile
-    bagfile = joinpath(ENV["HOME"],"data","Marine","lidar_radar.bag")
+    bagfile = joinpath(ENV["HOME"],"data","Marine","philos_car_far.bag")
     bagSubscriber = RosbagSubscriber(bagfile)
 
     # Initialization
@@ -269,13 +282,13 @@ function main(;iters::Integer=50)
     # Enable and disable as needed.
     # Skipping LIDAR because those are huge...
     # radar_sub = Subscriber{seagrant_msgs.msg.radar}("/radar_0", handleRadar!, (fg, systemstate), queue_size = 10)
-    radar_sub = bagSubscriber("/radar_0", _handleRadar!, (fg, systemstate))
-
-
-    # radarpc_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/radar_pointcloud0", handleRadarPointcloud!, (fg, systemstate), queue_size = 10)
-    # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", handleLidar!, (fg,systemstate), queue_size = 10)
     # gps_sub = Subscriber{sensor_msgs.msg.NavSatFix}("/gps/fix", handleGPS!, (fg, systemstate), queue_size = 10)
-    gps_sub = bagSubscriber("/gps/fix", _handleGPS!, (fg, systemstate))
+    
+    # radar_sub = bagSubscriber(, _handleRadar!, (fg, systemstate))
+
+    radarpc_sub = bagSubscriber("/broadband_radar/channel_0/pointcloud", _handleRadarPointcloud!, (fg, systemstate) )
+    # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", handleLidar!, (fg,systemstate), queue_size = 10)
+    gps_sub = bagSubscriber("/gnss", _handleGPS!, (fg, systemstate))
 
 
     @info "subscribers have been set up; entering main loop"
@@ -296,12 +309,12 @@ end
 ##
 
 
-main(iters=300) # 275
+main(iters=100)
 
 
 ## after the graph is saved it can be loaded and the datastores retrieved
 
-dfg_datafolder = "/tmp/rex"
+dfg_datafolder = "/tmp/caesar/philos"
 
 fg = loadDFG("$dfg_datafolder/dfg")
 
