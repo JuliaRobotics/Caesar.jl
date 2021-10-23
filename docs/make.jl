@@ -23,7 +23,7 @@ makedocs(
         "Welcome" => "index.md",
         "Introduction" => [
             "Introduction" => "introduction.md",
-            "Guassian vs. Non-Gaussian" => "concepts/why_nongaussian.md",
+            "Gaussian vs. Non-Gaussian" => "concepts/why_nongaussian.md",
             "Installation" => "installation_environment.md",
             "Using Julia" => "concepts/using_julia.md",
             "FAQ" => "faq.md",
