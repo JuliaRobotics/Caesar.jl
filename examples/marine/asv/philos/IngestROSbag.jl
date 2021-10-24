@@ -72,13 +72,14 @@ using Dates
     $TYPEDEF
 Quick placeholder for the system state - we're going to use timestamps to align all the data.
 """
-mutable struct SystemState
-    curtimestamp::Float64
-    cur_variable::Union{Nothing, DFGVariable}
-    var_index::Int
-    lidar_scan_index::Int
-    max_lidar::Int
-    SystemState() = new(-1000, nothing, 0, 0, 3)
+Base.@kwdef mutable struct SystemState
+    curtimestamp::Float64 = -1000
+    cur_variable::Union{Nothing, DFGVariable} = nothing
+    var_index::Int = 0
+    lidar_scan_index::Int = 0
+    max_lidar::Int = 3
+    radar_scan_queue::Channel{sensor_msgs.msg.PointCloud2} = Channel{sensor_msgs.msg.PointCloud2}(10)
+    # SystemState() = new(-1000, nothing, 0, 0, 3)
 end
 
 """
@@ -125,18 +126,47 @@ end
 Message callback for Radar pings. Adds a variable to the factor graph and appends the scan as a bigdata element.
 """
 function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDFG, systemstate::SystemState)
-    error("WHAT")
     @info "handleRadarPointcloud" maxlog=10
 
-    if systemstate.cur_variable === nothing
-        # Keyed by the radar, skip if we don't have a variable yet.
+    # assume there is still space (previously cleared)
+    # add new piece of radar point cloud to queue for later processing.
+    put!(systemstate.radar_scan_queue, msg)
+
+    # check if the queue still has space
+    @show length(systemstate.radar_scan_queue.data)
+    if length(systemstate.radar_scan_queue.data) < systemstate.radar_scan_queue.sz_max
+        # nothing more to do
         return nothing
     end
-    timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/1.0e9
-    @info "[$timestamp] RADAR pointcloud sample on $(systemstate.cur_variable.label)"
 
+    # Full sweep, lets empty the queue and add a variable
+    queueScans = Vector{Any}(undef, systemstate.radar_scan_queue.sz_max)
+    for i in 1:length(systemstate.radar_scan_queue.data)
+        # something minimal, will do util for transforming PointCloud2 next
+        println(i)
+        di = Dict{Symbol,Any}()
+        md = take!(systemstate.radar_scan_queue)
+        @info typeof(md.data) fieldnames(typeof(md))
+        for nm in fieldnames(typeof(md))
+            @show di[:height] = md.height
+            # di[nm] = getfield(md, nm)
+        end
+        queueScans[i] = di
+    end
+
+    # add a new variable to the graph
+    timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/1.0e9
+    systemstate.curtimestamp = timestamp
+    systemstate.cur_variable = addVariable!(fg, Symbol("x$(systemstate.var_index)"), Pose2, timestamp = unix2datetime(timestamp))
+    systemstate.var_index += 1
+
+    @show datablob = queueScans
+    # and add a data blob of all the scans
     # Make a data entry in the graph
-    # ade,adb = addData!(fg, :radar, systemstate.cur_variable.label, :RADARPC, Vector{UInt8}(JSON2.write(msg)),  mimeType="/radar_pointcloud_0;dataformat=Float32*[[X,Y,Z]]*12")
+    addData!(   fg, :radar, systemstate.cur_variable.label, :RADARPC, 
+                Vector{UInt8}(JSON2.write(datablob)),  
+                mimeType="/application/octet-stream/json;dataformat=sensor_msgs.msg.PointCloud2")
+    #
 end
 
 """
@@ -199,34 +229,11 @@ end
 ## Own unpacking of ROS types from bagreader (not regular subscriber)
 
 
-# TODO much room for improvement, and must be consolidated with RobotOS.jl
-function _unpackROSMsgType(T::Type, msgdata)
-    return convert(T, msgdata[2])
-
-    # msgT = T()
-    # msgT.header = msgdata[2][:header]
-    # fnms = fieldnames(T)
-    # for nm in fnms
-    #     @show nm, typeof(msgdata[2][nm])  #, typeof(getfield(msgT, nm))
-    #     # FIXME, still have to resolve cases where fieldname header is actually used
-    #     nm == :header ? continue : nothing
-    #     msgdata[2][nm] isa DataType ? @error("$nm is DataType") : nothing
-        
-    #     try
-    #         _tostr = JSON2.write(msgdata[2][nm])
-    #         setfield!(msgT, nm, JSON2.read(_tostr, typeof(getfield(msgT, nm))))
-    #     catch
-    #         @warn "not able to unpack ROS message field" T nm #typeof(getfield(T, nm))
-    #         @debug _tostr
-    #     end
-    # end
-    # msgT
-end
-
+# TODO consolidated with RobotOS.jl pattern
+_unpackROSMsgType(T::Type, msgdata) = convert(T, msgdata[2])
 
 function _handleRadarPointcloud!(msgdata, args::Tuple)
     msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
-    # @info "_handleRadarPointcloud!" typeof(msgT)
     handleRadarPointcloud!(msgT, args...)
 end
 
