@@ -1,6 +1,6 @@
 # Introduction
 
-Caesar is an open-source robotic software stack aimed at localization and mapping for robotics, using non-Gaussian graphical model state-estimation techniques.  Ths factor graph method is well suited to combining heterogeneous and ambiguous sonsor data streams.  The focus is predominantly on geometric/spatial/semantic estimation tasks related to simultaneous localization and mapping (SLAM).  The software is also highly extensible and well suited to a variety of estimation /filtering-type tasks — especially in non-Gaussian/multimodal settings.  Check out a brief description on why [non-Gaussian / multi-modal](https://juliarobotics.org/Caesar.jl/latest/concepts/concepts/#Why/Where-does-non-Gaussian-data-come-from?-1) data processing needs arise.
+Caesar is an open-source robotic software stack aimed at localization and mapping for robotics, using non-Gaussian graphical model state-estimation techniques.  Ths factor graph method is well suited to combining heterogeneous and ambiguous sonsor data streams.  The focus is predominantly on geometric/spatial/semantic estimation tasks related to simultaneous localization and mapping (SLAM).  The software is also highly extensible and well suited to a variety of estimation /filtering-type tasks — especially in non-Gaussian/multimodal settings.  Check out a brief description on [why non-Gaussian / multi-modal](@ref why_nongaussian) data processing needs arise.
 
 # A Few Highlights
 
