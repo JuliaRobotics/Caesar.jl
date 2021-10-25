@@ -8,16 +8,16 @@ import DrakeVisualizer: Triad
 import Base: convert
 using Base: Test
 
-
+import Rotations as _Rot
 
 
 # random testing and converstion to be moved out
 
 function convert{T <: CoordinateTransformations.AffineMap}(::Type{T}, x::SE3)
   q = convert(TransformUtils.Quaternion, x.R)
-  Translation(x.t...) ∘ LinearMap( Rotations.Quat(q.s, q.v...) )
+  Translation(x.t...) ∘ LinearMap( _Rot.UnitQuaternion(q.s, q.v...) )
 end
-function convert{T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64}}}(::Type{SE3}, x::T)
+function convert{T <: CoordinateTransformations.AffineMap{_Rot.UnitQuaternion{Float64}}}(::Type{SE3}, x::T)
   SE3(x.v[1:3], TransformUtils.Quaternion(x.m.w, [x.m.x,x.m.y,x.m.z]) )
 end
 

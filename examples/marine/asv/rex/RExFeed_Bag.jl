@@ -46,7 +46,7 @@ rostypegen()
 # No using needed because we're specifying by full name.
 # using .sensor_msgs.msg
 # using .seagrant_msgs.msg
- 
+
 ## Load Caesar mmisam stuff
 using Caesar
 using RoME
@@ -246,7 +246,7 @@ function main(;iters::Integer=50)
 
     init_node("rex_feed")
     # find the bagfile
-    bagfile = joinpath(ENV["HOME"],"data","Marine","lidar_radar.bag")
+    bagfile = joinpath(ENV["HOME"],"data","Marine","basin_radar.bag") # lidar_radar.bag
     bagSubscriber = RosbagSubscriber(bagfile)
 
     # Initialization
@@ -296,7 +296,9 @@ end
 ##
 
 
-main(iters=300) # 275
+main(iters=100) 
+
+# 275
 
 
 ## after the graph is saved it can be loaded and the datastores retrieved
