@@ -47,12 +47,14 @@ rostypegen()
 # using .sensor_msgs.msg
 # using .seagrant_msgs.msg
 
-## Load Caesar mmisam stuff
+## Load Caesar. solver stuff
+using Colors
 using Caesar
 using RoME
 using DistributedFactorGraphs
 
 using JSON2
+using BSON
 using DistributedFactorGraphs.DocStringExtensions
 using Dates
 
@@ -139,19 +141,22 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
         return nothing
     end
 
+    # type instability
+
     # Full sweep, lets empty the queue and add a variable
     queueScans = Vector{Any}(undef, systemstate.radar_scan_queue.sz_max)
     for i in 1:length(systemstate.radar_scan_queue.data)
         # something minimal, will do util for transforming PointCloud2 next
         println(i)
-        di = Dict{Symbol,Any}()
         md = take!(systemstate.radar_scan_queue)
         @info typeof(md.data) fieldnames(typeof(md))
-        for nm in fieldnames(typeof(md))
-            @show di[:height] = md.height
-            # di[nm] = getfield(md, nm)
-        end
-        queueScans[i] = di
+        pc = Caesar._PCL.PointCloud(; height=md.height, width=md.width)
+            # di = Dict{Symbol,Any}()
+            # for nm in fieldnames(typeof(md))
+            #     @show di[:height] = md.height
+            #     # di[nm] = getfield(md, nm)
+            # end
+        queueScans[i] = pc #di
     end
 
     # add a new variable to the graph
@@ -160,12 +165,17 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
     systemstate.cur_variable = addVariable!(fg, Symbol("x$(systemstate.var_index)"), Pose2, timestamp = unix2datetime(timestamp))
     systemstate.var_index += 1
 
-    @show datablob = queueScans
+    io = IOBuffer()
+    BSON.@save io queueScans
+
+    # @show datablob = pc # queueScans
     # and add a data blob of all the scans
     # Make a data entry in the graph
     addData!(   fg, :radar, systemstate.cur_variable.label, :RADARPC, 
-                Vector{UInt8}(JSON2.write(datablob)),  
-                mimeType="/application/octet-stream/json;dataformat=sensor_msgs.msg.PointCloud2")
+                take!(io), # get base64 binary
+                # Vector{UInt8}(JSON2.write(datablob)),  
+                mimeType="/application/octet-stream/bson;dataformat=Vector{Caesar._PCL.PointCloud}",
+                description="BSON.@load PipeBuffer(readBytes) queueScans")
     #
 end
 
@@ -334,3 +344,11 @@ addBlobStore!(fg, ds)
 # add if you want lidar also 
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
 addBlobStore!(fg, ds)
+
+
+## load one of the PointCloud sets
+
+de,db = getData(fg, :x0, :RADARPC)
+
+BSON.@load PipeBuffer(db) queueScans
+
