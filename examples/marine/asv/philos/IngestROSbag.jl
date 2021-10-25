@@ -47,11 +47,15 @@ rostypegen()
 # using .sensor_msgs.msg
 # using .seagrant_msgs.msg
 
-## Load Caesar. solver stuff
+## Load Caesar with additional tools
+
 using Colors
 using Caesar
-using RoME
-using DistributedFactorGraphs
+
+##
+
+# using RoME
+# using DistributedFactorGraphs
 
 using DistributedFactorGraphs.DocStringExtensions
 using Dates
@@ -151,8 +155,9 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
         # something minimal, will do util for transforming PointCloud2 next
         println(i)
         md = take!(systemstate.radar_scan_queue)
-        @info typeof(md.data) fieldnames(typeof(md))
-        pc = Caesar._PCL.PointCloud(; height=md.height, width=md.width)
+        # @info typeof(md) fieldnames(typeof(md))
+        pc = Caesar._PCL.PointCloud(md)
+        # pc = Caesar._PCL.PointCloud(; height=md.height, width=md.width)
             # di = Dict{Symbol,Any}()
             # for nm in fieldnames(typeof(md))
             #     @show di[:height] = md.height

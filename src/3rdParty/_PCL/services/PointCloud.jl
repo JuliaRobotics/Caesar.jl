@@ -66,26 +66,30 @@ function Base.cat(A::PointCloud, B::PointCloud; reuse::Bool=false)
 end
 
 
-function Base.show(io::IO, pc::PointCloud{T,P,R}) where {T,P,R}
+function Base.show(io::IO, pc::PointCloud{T}) where {T}
   printstyled(io, "Caesar._PCL.PointCloud{", bold=true, color=:blue)
   println(io)
   printstyled(io, "    T = ", bold=true, color=:magenta)
   println(io, T)
-  printstyled(io, "    P = ", bold=true, color=:magenta)
-  println(io, P)
-  printstyled(io, "    R = ", bold=true, color=:magenta)
-  println(io, R)
+  # part of version 1 data type
+  # printstyled(io, "    P = ", bold=true, color=:magenta)
+  # println(io, P)
+  # printstyled(io, "    R = ", bold=true, color=:magenta)
+  # println(io, R)
   printstyled(io, " }", bold=true, color=:blue)
   println(io)
   println(io, "  header:       ", pc.header)
-  println(io, "  data[T]:      ", length(pc.data) )
-  println(io, "  width:        ", pc.width)
   println(io, "  height:       ", pc.height)
+  println(io, "  width:        ", pc.width)
+  println(io, "  data[::T]:    ", length(pc.data) )
+  println(io, "  point_step:   ", pc.point_step )
+  println(io, "  row_step:     ", pc.row_step )
   println(io, "  is_dense:     ", pc.is_dense)
-  println(io, "  sensor pose:")
-  println(io, "    xyz:    ", round.(pc.sensor_origin_, digits=3))
-  q = convert(_Rot.UnitQuaternion, pc.sensor_orientation_)
-  println(io, "    w_xyz*: ", round.([q.w; q.x; q.y; q.z], digits=3))
+  # part of version 1 data type
+  # println(io, "  sensor pose:")
+  # println(io, "    xyz:    ", round.(pc.sensor_origin_, digits=3))
+  # q = convert(_Rot.UnitQuaternion, pc.sensor_orientation_)
+  # println(io, "    w_xyz*: ", round.([q.w; q.x; q.y; q.z], digits=3))
 
   nothing
 end
