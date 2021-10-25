@@ -39,10 +39,12 @@
 
 module _PCL
 
+using ..Colors
+
 using DocStringExtensions
 using StaticArrays
 using Requires
-using ..Colors
+import Rotations as _Rot
 
 # Going to add dispatches on these functions
 import Base: getindex, setindex!, resize!, cat

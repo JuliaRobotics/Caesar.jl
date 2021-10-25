@@ -38,7 +38,7 @@ using RobotOS
 @rosimport sensor_msgs.msg: NavSatFix
 # @rosimport nmea_msgs.msg: Sentence
 # seagrant type
-# OMG, rosmsg list is awesome by the way...
+
 # Also rosnode info
 @rosimport seagrant_msgs.msg: radar
 
@@ -53,10 +53,12 @@ using Caesar
 using RoME
 using DistributedFactorGraphs
 
-using JSON2
-using BSON
 using DistributedFactorGraphs.DocStringExtensions
 using Dates
+using JSON2
+using BSON
+using FixedPointNumbers
+using StaticArrays
 
 ##
 

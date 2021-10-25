@@ -44,11 +44,11 @@ References:
 - https://pointclouds.org/documentation/classpcl_1_1_point_cloud.html
 - https://pointclouds.org/documentation/common_2include_2pcl_2point__cloud_8h_source.html
 """
-Base.@kwdef struct PointCloud{P,R}
+Base.@kwdef struct PointCloud{T<:PointT,P,R}
   """ the point cloud header """
   header::PCLHeader        = PCLHeader()
   """ `Vector` of `<:PointT` representing the point cloud """
-  points::Vector{<:PointT} = Vector{PointXYZ{RGBA{Colors.FixedPointNumbers.N0f8}, Float32}}()
+  data::Vector{T} = Vector{PointXYZ{RGB{Colors.FixedPointNumbers.N0f8}, Float32}}()
   """ the point cloud width (if organized as image structure).  Specifies the width 
   of the point cloud dataset in the number of points. WIDTH has two meanings:
   - it can specify the total number of points in the cloud (equal with POINTS see below) for unorganized datasets;
