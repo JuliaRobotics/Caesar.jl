@@ -9,19 +9,10 @@ using Manifolds
 
 using ImageView
 
-# using GraphPlot
-# using DistributedFactorGraphs
-# using IncrementalInference, RoME
-# using DocStringExtensions
-
-import Rotations as _Rot
-# using CoordinateTransformations
-# using ImageTransformations
-
-# using LinearAlgebra
-# using Optim
+# import Rotations as _Rot
 
 # using Caesar: ScatterAlignPose2
+
 
 ##
 
@@ -81,7 +72,7 @@ sweeps = map(s -> s/maximum(s), sweeps);
 # newfg = loadDFG("$dfgDataFolder/newfg")
 
 startsweep = 5
-endsweep = 20
+endsweep = 26
 graphinit = true
 
 len = size(sweeps[5],1)
@@ -89,14 +80,14 @@ domain = (range(-100,100,length=976),range(-100,100,length=976))
 
 ## use a standard builder
 
-STEP = 3
+STEP = 20
 sweeps_ = sweeps[startsweep:STEP:endsweep]
 
 # build the graph
 newfg = buildGraphChain!( sweeps_,
                           ScatterAlignPose2,
                           (_, data) -> (data.currData,data.nextData,domain),
-                          stopAfter=5,
+                          stopAfter=1,
                           doRef = false,
                           inflation_fct=0.0,
                           solverParams=SolverParams(graphinit=true, inflateCycles=1) )
@@ -104,46 +95,8 @@ newfg = buildGraphChain!( sweeps_,
 
 
 
-## plotting function for understanding
-
-
-
-
-
-## dev testing on one scatter image with known transform
-
-# sweeps_ = sweeps[5:6]
-# sweeps_[2] =sweeps[5]
-
-# domain = (range(-100,100,length=976),range(-100,100,length=976))
-
-# newfg = buildGraphChain!( sweeps_,
-#                           ScatterAlignPose2,
-#                           (_, data) -> (data.currData,data.nextData,domain),
-#                           stopAfter=1,
-#                           doRef = false,
-#                           inflation_fct=0.0,
-#                           solverParams=SolverParams(graphinit=false, inflateCycles=1) )
-# #
-
 ##
 
-# fct = getFactorType(newfg, :x0x1f1)
-# Xtup = sampleFactor(newfg, :x0x1f1)
-# e0 = identity_element(SpecialEuclidean(2))
-# δ = calcFactorResidualTemporary(fct, (Pose2,Pose2), Xtup, (e0, e0))
-
-##
-
-
-# Run the initialization (very slow right now)
-# initAll!(newfg)
-
-# Factor debugging
-# fs = getFactorFunction.(getFactor.(newfg, lsf(newfg)))
-# fs = filter(f -> f isa ScanMatcherPose2, fs)
-# pf = convert.(PackedAlignRadarPose3, fs)
-# convert.(ScanMatcherPose2, pf)
 
 # Save the graph
 saveDFG("$dfgDataFolder/segment_test.tar.gz", newfg);
@@ -158,63 +111,11 @@ pts = getPoints(X1_)
 # solving will internally call initAll!(newfg)
 tree = solveTree!(newfg)
 
-## Looking at the results
-using Plots
 
-ppes = map(v -> getSuggestedPPE(getPPE(getVariable(newfg, v))), ls(newfg))
-x = map(ppe -> ppe[1], ppes); y = map(ppe -> ppe[2], ppes); h = map(ppe -> ppe[3], ppes)
-Plots.plot(x, y, title="Path Plot", lw=3)
+##
 
-
-## Stuff
-using Optim
+using Cairo, Gadfly
+Gadfly.set_default_plot_size(40cm,20cm)
 
 
-cost(tf, im1, im2) = evaluateTransform(im1,im2, tf )
-
-
-# Plotting
-xrange = -100.0:1.0:100.0
-hrange = -pi:0.1:pi
-val = reshape(
-  [sweepx(sweeps[10],sweeps[11],xrange); sweepx(sweep_original[10],sweep_original[11],xrange)],
-  length(xrange), 2)
-Plots.plot(xrange,val)
-# Heading
-val = reshape(
-  [sweeph(sweeps[10],sweeps[11],hrange); sweeph(sweep_original[10],sweep_original[11],hrange)],
-  length(hrange), 2)
-Plots.plot(hrange,val)
-
-corr_func = (a,b)->sqrt(sum((a .- 0.5).*(b .- 0.5)))
-val = reshape(
-  [sweepx(sweeps[10],sweeps[11],xrange,diff_func=corr_func);
-  sweepx(sweep_original[10],sweep_original[11],xrange,diff_func=corr_func)],
-  length(xrange), 2)
-Plots.plot(xrange,val)
-
-## Sweep plotting
-# sanity check: identity transform should yield zero cost
-# @assert evaluateTransform(sweeps[11],sweeps[11],0.,0.,0.) == 0 "There's error with no transform!"
-
-# let's try small displacements:
-# sweepx(im1, im2, xrange) = (x->@show evaluateTransform(im1,im2,x,0.,0.)).(xrange)
-# sweepy(im1, im2, yrange) = (y->@show evaluateTransform(im1,im2,0.,y,0.)).(yrange)
-# sweeph(im1, im2, hrange) = (h->@show evaluateTransform(im1,im2,0.,0.,h)).(hrange)
-
-
-# using Plots
-# xrange = -10:0.1:10
-# hrange = -pi:0.1:pi
-# Plots.plot(xrange,sweepx(sweeps[10],sweeps[11],xrange))
-# Plots.plot(xrange,sweepy(sweeps[10],sweeps[11],xrange))
-# Plots.plot(hrange,sweeph(sweeps[10],sweeps[11],hrange))
-
-
-# fs10 = imfilter(sweeps[10],Kernel.gaussian(3))
-# fs11 = imfilter(sweeps[11],Kernel.gaussian(3))
-# ffs10 = imfilter(fs10,Kernel.gaussian(3))
-# ffs11 = imfilter(fs11,Kernel.gaussian(3))
 #
-# Plots.plot(xrange,sweepx(ffs10,ffs11,xrange))
-# Plots.plot(xrange,sweepy(fs10,fs11,xrange))

@@ -43,6 +43,8 @@ using
   TimeZones,
   TensorCast
 
+using Optim
+
 using Reexport
 
 # public API exports
@@ -91,6 +93,8 @@ function __init__()
     include("images/ScanMatcherUtils.jl")
     include("images/ScanMatcherPose2.jl")
     include("images/ScatterAlignPose2.jl")
+    
+    @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("plotting/ScatterAlignPlotting.jl")
   end
   @require Colors="5ae59095-9a9b-59fe-a467-6f913c188581" include("3rdParty/_PCL/_PCL.jl")
   @require Distributed="8ba89e20-285c-5b6f-9357-94700520ee1b" include("images/DistributedUtils.jl")
