@@ -156,7 +156,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
         println(i)
         md = take!(systemstate.radar_scan_queue)
         # @info typeof(md) fieldnames(typeof(md))
-        pc = Caesar._PCL.PointCloud(md)
+        pc = Caesar._PCL.PCLPointCloud2(md)
         # pc = Caesar._PCL.PointCloud(; height=md.height, width=md.width)
             # di = Dict{Symbol,Any}()
             # for nm in fieldnames(typeof(md))
@@ -181,7 +181,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
     addData!(   fg, :radar, systemstate.cur_variable.label, :RADARPC, 
                 take!(io), # get base64 binary
                 # Vector{UInt8}(JSON2.write(datablob)),  
-                mimeType="/application/octet-stream/bson;dataformat=Vector{Caesar._PCL.PointCloud}",
+                mimeType="/application/octet-stream/bson;dataformat=Vector{Caesar._PCL.PCLPointCloud2}",
                 description="BSON.@load PipeBuffer(readBytes) queueScans")
     #
 end
