@@ -13,7 +13,7 @@ Base.convert(::Type{UInt64}, rost::RobotOS.Time) = UInt64(rost.secs)*1000000 + t
 
 # Really odd constructor, strong assumption that user FIRST ran @rostypegen in Main BEFORE loading Caesar
 function PCLPointCloud2(pc2::Main.sensor_msgs.msg.PointCloud2)
-  @error("work in progress on PCLPointCloud2(pc2::Main.sensor_msgs.msg.PointCloud2)")
+  @warn("work in progress on PCLPointCloud2(pc2::Main.sensor_msgs.msg.PointCloud2)")
   header = Header(;stamp = pc2.header.stamp,
                   seq    = pc2.header.seq,
                   frame_id= pc2.header.frame_id )
@@ -30,3 +30,5 @@ function PCLPointCloud2(pc2::Main.sensor_msgs.msg.PointCloud2)
                   row_step   = pc2.row_step )
                   # is_dense   = pc2.is_dense )
 end
+
+#

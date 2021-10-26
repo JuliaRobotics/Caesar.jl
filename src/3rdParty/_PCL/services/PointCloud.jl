@@ -1,5 +1,6 @@
 
-
+## FIXME DOUBLCHECK
+Base.sizeof(::Type{PointXYZ{C,T}}) where {C,T} = sizeof(T)
 
 # Construct helpers nearest to PCL
 PointXYZRGBA( x::Real=0, y::Real=0, z::Real=Float32(1); 
@@ -70,60 +71,71 @@ function Base.cat(A::PointCloud, B::PointCloud; reuse::Bool=false)
   return pc
 end
 
-## https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00123
-# 0123   createMapping (const std::vector<pcl::PCLPointField>& msg_fields, MsgFieldMap& field_map)
-# 00124   {
-# 00125     // Create initial 1-1 mapping between serialized data segments and struct fields
-# 00126     detail::FieldMapper<PointT> mapper (msg_fields, field_map);
-# 00127     for_each_type< typename traits::fieldList<PointT>::type > (mapper);
-# 00128 
-# 00129     // Coalesce adjacent fields into single memcpy's where possible
-# 00130     if (field_map.size() > 1)
-# 00131     {
-# 00132       std::sort(field_map.begin(), field_map.end(), detail::fieldOrdering);
-# 00133       MsgFieldMap::iterator i = field_map.begin(), j = i + 1;
-# 00134       while (j != field_map.end())
-# 00135       {
-# 00136         // This check is designed to permit padding between adjacent fields.
-# 00139         if (j->serialized_offset - i->serialized_offset == j->struct_offset - i->struct_offset)
-# 00140         {
-# 00141           i->size += (j->struct_offset + j->size) - (i->struct_offset + i->size);
-# 00142           j = field_map.erase(j);
-# 00143         }
-# 00144         else
-# 00145         {
-# 00146           ++i;
-# 00147           ++j;
-# 00148         }
-# 00149       }
-# 00150     }
-# 00151   }
+# https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00115
+# fieldOrdering(a::FieldMapping, b::FieldMapping) = a.serialized_offset < b.serialized_offset
 
-function PointCloud(pc2::PCLPointCloud2)
+# https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00123
+# https://docs.ros.org/en/jade/api/pcl_conversions/html/namespacepcl.html
+function createMapping(msg_fields::AbstractVector{<:PointField}, field_map::MsgFieldMap=MsgFieldMap())
+  # Create initial 1-1 mapping between serialized data segments and struct fields
+  mapper = FieldMapper(;fields_=msg_fields, map_=field_map)
+  # 00127     for_each_type< typename traits::fieldList<PointT>::type > (mapper);
 
-  cloud_data = Vector{UInt8}(undef, pc2.width*pc2.height)
+  # Coalesce adjacent fields into single copy where possible
+  if 1 < length(field_map)
+    # TODO check accending vs descending order
+    sort!(field_map, by = x->x.serialized_offset)
+    i = 1
+    j = i + 1
+    while j <= length(field_map)
+      # This check is designed to permit padding between adjacent fields.
+      if (field_map[j].serialized_offset - field_map[i].serialized_offset) == (field_map[j].struct_offset - field_map[i].struct_offset)
+        field_map[i].size += (field_map[j].struct_offset + field_map[j].size) - (field_map[i].struct_offset + field_map[i].size)
+        # https://www.cplusplus.com/reference/vector/vector/erase/
+        deleteat!(field_map,j)
+        j += 1
+        # j = field_map.erase(j);
+      else
+        i += 1
+        j += 1
+      end
+    end
+  end
+
+  return field_map
+end
+
+
+# https://pointclouds.org/documentation/conversions_8h_source.html#l00166
+# (differences) https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00123 
+function PointCloud(msg::PCLPointCloud2{T}, field_map::MsgFieldMap=createMapping(msg.fields) ) where {T <: PointT}
+
+  cloudsize = msg.width*msg.height
+  cloud_data = Vector{UInt8}(undef, cloudsize)
 
   # Check if we can copy adjacent points in a single memcpy.  We can do so if there
   # is exactly one field to copy and it is the same size as the source and destination
   # point types.
-  if (field_map.size() == 1 &&
-      field_map[0].serialized_offset == 0 &&
-      field_map[0].struct_offset == 0 &&
-      field_map[0].size == msg.point_step &&
-      field_map[0].size == sizeof(PointT))
+  if (length(field_map) == 1 &&
+      field_map[1].serialized_offset == 0 &&
+      field_map[1].struct_offset == 0 &&
+      field_map[1].size == msg.point_step &&
+      field_map[1].size == sizeof(T))
     #
-
+    @info "copy just one field_map"
   else
-
+    @info "not just one field_map to copy"
   end
 
-  pc = PointCloud(;
-    header  = pc2.header,
-    # points = pc2.data, # must first convert reference frame
-    width   = pc2.width,
-    height  = pc2.height,
-    is_dense= pc2.is_dense == UInt8(1)
+  cloud = PointCloud(;
+    header  = msg.header,
+    # points = msg.data, # must first convert data to points
+    width   = msg.width,
+    height  = msg.height,
+    is_dense= msg.is_dense == UInt8(1)
   )
+
+  return cloud
 end
 
 ## =========================================================================================================

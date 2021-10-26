@@ -116,6 +116,7 @@ Base.@kwdef struct Header
   frame_id::String = ""
 end
 
+# https://pointclouds.org/documentation/structpcl_1_1_p_c_l_point_field.html
 Base.@kwdef struct PointField
   """ name of field """
   name::String
@@ -127,10 +128,26 @@ Base.@kwdef struct PointField
   count::UInt32                    = UInt32(0)
 end
 
-struct FieldMapping
+# https://docs.ros.org/en/hydro/api/pcl/html/structpcl_1_1detail_1_1FieldMapping.html
+# https://pointclouds.org/documentation/common_2include_2pcl_2point__cloud_8h_source.html#l00072
+Base.@kwdef mutable struct FieldMapping
   serialized_offset::UInt32  = UInt32(0)
   struct_offset::UInt32      = UInt32(0)
   size::UInt32               = UInt32(0)
+end
+
+# https://docs.ros.org/en/hydro/api/pcl/html/structpcl_1_1detail_1_1FieldAdder.html
+Base.@kwdef struct FieldAdder
+  fields_::Vector{PointField} = Vector{PointField}()
+end
+
+# https://docs.ros.org/en/hydro/api/pcl/html/point__cloud_8h_source.html#l00066
+# https://pointclouds.org/documentation/common_2include_2pcl_2point__cloud_8h_source.html#l00072
+const MsgFieldMap = Vector{FieldMapping}
+
+Base.@kwdef struct FieldMapper
+  fields_::Vector{PointField} = Vector{PointField}()
+  map_::Vector{FieldMapping}  = Vector{FieldMapping}()
 end
 
 """
@@ -169,6 +186,7 @@ Base.@kwdef struct PCLPointCloud2{T<:PointT}
 end
 
 
+# https://pointclouds.org/documentation/classpcl_1_1_point_cloud.html
 Base.@kwdef struct PointCloud{T<:PointT,P,R}
   """ the point cloud header """
   header::Header           = Header()

@@ -156,14 +156,15 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
         println(i)
         md = take!(systemstate.radar_scan_queue)
         # @info typeof(md) fieldnames(typeof(md))
-        pc = Caesar._PCL.PCLPointCloud2(md)
+        pc2 = Caesar._PCL.PCLPointCloud2(md)
+        pc_ = Caesar._PCL.PointCloud(pc2)
         # pc = Caesar._PCL.PointCloud(; height=md.height, width=md.width)
             # di = Dict{Symbol,Any}()
             # for nm in fieldnames(typeof(md))
             #     @show di[:height] = md.height
             #     # di[nm] = getfield(md, nm)
             # end
-        queueScans[i] = pc #di
+        queueScans[i] = (pc2,pc_) #di
     end
 
     # add a new variable to the graph
