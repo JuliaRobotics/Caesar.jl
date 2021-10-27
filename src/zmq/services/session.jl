@@ -49,8 +49,8 @@ function addFactor(configDict, fg, requestDict)::Dict{String, Any}
     # Right, carrying on...
     factor = nothing
     try
-        # FIXME, use appropriate new DFG method rather than _evalType
-        factType = _evalType(factorRequest["factorType"])
+        factType = DFG.getTypeFromSerializationModule(factorRequest["factorType"])
+        # factType = _evalType(factorRequest["factorType"]) # FIXME, use appropriate new DFG method rather than _evalType
         factor = convert(factType, packedFactor)
     catch ex
         io = IOBuffer()

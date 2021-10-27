@@ -1,6 +1,6 @@
 module ZmqCaesar
     using Requires
-    using ZMQ
+    using ..ZMQ
     using JSON
     using Distributions, IncrementalInference, DistributedFactorGraphs, Caesar
     using Unmarshal
