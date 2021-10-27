@@ -23,6 +23,18 @@ BSON.@load testdatafile PointCloudRef PointCloudTest
 
 show(PointCloudTest[1])
 
+pc = PointCloud(PointCloudTest[1])
+
+@test pc.height == 1
+@test pc.width == 493
+@test pc.is_dense
+
+@test_broken length(pc.points) == 493
+
+for (i,pt) in enumerate(pc.points)
+  @test isapprox( PointCloudRef[1][1,:], pt.data; atol=1e-6)
+end
+
 ##
 end
 

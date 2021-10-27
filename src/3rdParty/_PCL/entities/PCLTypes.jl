@@ -140,6 +140,8 @@ Base.@kwdef mutable struct FieldMapping
   size::UInt32               = UInt32(0)
 end
 
+struct FieldMatches{<:PointT} end
+
 # https://docs.ros.org/en/hydro/api/pcl/html/structpcl_1_1detail_1_1FieldAdder.html
 Base.@kwdef struct FieldAdder
   fields_::Vector{PointField} = Vector{PointField}()
@@ -149,7 +151,8 @@ end
 # https://pointclouds.org/documentation/common_2include_2pcl_2point__cloud_8h_source.html#l00072
 const MsgFieldMap = Vector{FieldMapping}
 
-Base.@kwdef struct FieldMapper
+# https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00091
+Base.@kwdef struct FieldMapper #{T <: PointT}
   fields_::Vector{PointField} = Vector{PointField}()
   map_::Vector{FieldMapping}  = Vector{FieldMapping}()
 end

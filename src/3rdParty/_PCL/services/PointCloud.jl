@@ -71,6 +71,26 @@ function Base.cat(A::PointCloud, B::PointCloud; reuse::Bool=false)
   return pc
 end
 
+##
+
+# https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00091
+function (fm::FieldMapper)()
+  for field in fm.fields_
+    if true # FieldMatches
+      mapping = FieldMapping(;
+        serialized_offset = field.offset,
+        # struct_offset     = 0, # offset_value???
+        # size              = sizeof()
+      )
+      push!(fm.map_, mapping)
+      return nothing
+    end
+  end
+  @warn "Failed to find match for field..."
+end
+
+
+
 # https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00115
 # fieldOrdering(a::FieldMapping, b::FieldMapping) = a.serialized_offset < b.serialized_offset
 
@@ -78,7 +98,7 @@ end
 # https://docs.ros.org/en/jade/api/pcl_conversions/html/namespacepcl.html
 function createMapping(msg_fields::AbstractVector{<:PointField}, field_map::MsgFieldMap=MsgFieldMap())
   # Create initial 1-1 mapping between serialized data segments and struct fields
-  mapper = FieldMapper(;fields_=msg_fields, map_=field_map)
+  mapper = FieldMapper{T}(;fields_=msg_fields, map_=field_map)
   # 00127     for_each_type< typename traits::fieldList<PointT>::type > (mapper);
 
   # Coalesce adjacent fields into single copy where possible
@@ -88,12 +108,14 @@ function createMapping(msg_fields::AbstractVector{<:PointField}, field_map::MsgF
     i = 1
     j = i + 1
     # FIXME WIP ...[j] != field_map[end]
-    while j <= length(field_map)
+    while field_map[j] != field_map[end]
       # This check is designed to permit padding between adjacent fields.
+      @info "preif $j"
       if (field_map[j].serialized_offset - field_map[i].serialized_offset) == (field_map[j].struct_offset - field_map[i].struct_offset)
         field_map[i].size += (field_map[j].struct_offset + field_map[j].size) - (field_map[i].struct_offset + field_map[i].size)
         # https://www.cplusplus.com/reference/vector/vector/erase/
         deleteat!(field_map,j)
+        @info "deleteat $j"
         j += 1
         # j = field_map.erase(j);
       else
@@ -141,7 +163,7 @@ function PointCloud(
       # TODO check might have an off by one error here
       @show row_data = row * msg.row_step + 1 # msg.data[(row-1) * msg.row_step]
       for col in 0:(msg.width-1)
-        @show msg_data = row_data + col*msg.point_step
+        msg_data = row_data + col*msg.point_step
         for mapping in field_map
           # memcpy (cloud_data + mapping.struct_offset, msg_data + mapping.serialized_offset, mapping.size);
           @info "copy" mapping.struct_offset mapping.serialized_offset mapping.size
