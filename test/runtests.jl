@@ -18,4 +18,4 @@ end
 
 include("testPose2AprilTag4Corner.jl")
 
-
+include("pcl/testPointCloud2.jl")

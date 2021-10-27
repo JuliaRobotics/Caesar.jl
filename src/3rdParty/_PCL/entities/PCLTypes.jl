@@ -37,6 +37,10 @@
 
 
 """
+    _PCL_ENDIAN
+
+FIXME These values have not been validated!
+
 - `_PCL_ENDIAN_BIG_BYTE`, byte-swapped big-endian.
 - `_PCL_ENDIAN_BIG_WORD`, word-swapped big-endian.
 - `_PCL_ENDIAN_LITTLE_BYTE`, byte-swapped little-endian.
@@ -161,7 +165,7 @@ References:
 - https://pointclouds.org/documentation/classpcl_1_1_point_cloud.html
 - https://pointclouds.org/documentation/common_2include_2pcl_2point__cloud_8h_source.html
 """
-Base.@kwdef struct PCLPointCloud2{T<:PointT}
+Base.@kwdef struct PCLPointCloud2
   """ the point cloud header """
   header::Header           = Header()
   """ the point cloud height (if organized as image structure).  Specifies the height 
@@ -174,11 +178,12 @@ Base.@kwdef struct PCLPointCloud2{T<:PointT}
   - it can specify the total number of points in the cloud (equal with POINTS see below) for unorganized datasets;
   - it can specify the width (total number of points in a row) of an organized point cloud dataset. """
   width::UInt32            = UInt32(0)
-  """ `Vector` of `<:PointT` representing the point cloud """
+  """ field descriptions of data """
   fields::Vector{PointField}= Vector{PointField}()
-  data::Vector{T}          = Vector{PointXYZ{RGB{Colors.FixedPointNumbers.N0f8}, Float32}}()
+  """ `Vector` of `<:PointT` representing the point cloud """
+  data::Vector{UInt8}      = Vector{UInt8}()
   """ WARNING, untested """
-  is_bigendian::_PCL_ENDIAN= convert(_PCL_ENDIAN, Base.ENDIAN_BOM) # (en=instances(_PCL_ENDIAN); en[findfirst(Int.(en) .== Int.(Base.ENDIAN_BOM))])
+  is_bigendian::_PCL_ENDIAN= convert(_PCL_ENDIAN, Base.ENDIAN_BOM)
   point_step::UInt32       = UInt32(0)
   row_step::UInt32         = UInt32(0)
   """ true if points are invalid (e.g., have NaN or Inf values in any of their floating point fields). """
@@ -186,12 +191,28 @@ Base.@kwdef struct PCLPointCloud2{T<:PointT}
 end
 
 
-# https://pointclouds.org/documentation/classpcl_1_1_point_cloud.html
+"""
+    $TYPEDEF
+
+Convert a PCLPointCloud2 binary data blob into a `Caesar._PCL.PointCloud{T}` object using 
+a `field_map::Caesar._PCL.MsgFieldMap`.
+
+Use `PointCloud(::Caesar._PCL.PCLPointCloud2)` directly or create you
+own `MsgFieldMap`:
+
+```julia
+field_map = Caesar._PCL.createMapping(msg.fields, field_map)
+```
+
+References
+- https://pointclouds.org/documentation/classpcl_1_1_point_cloud.html
+- (seems older) https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00123 
+"""
 Base.@kwdef struct PointCloud{T<:PointT,P,R}
   """ the point cloud header """
   header::Header           = Header()
-  """ `Vector` of `<:PointT` representing the point cloud """
-  points::Vector{T}          = Vector{PointXYZ{RGB{Colors.FixedPointNumbers.N0f8}, Float32}}()
+  """ `Vector` of `UInt8` representing the raw point cloud data """
+  points::Vector{T}         = Vector{PointXYZ{RGB{Colors.FixedPointNumbers.N0f8}, Float32}}()
   """ the point cloud width (if organized as image structure).  Specifies the width 
   of the point cloud dataset in the number of points. WIDTH has two meanings:
   - it can specify the total number of points in the cloud (equal with POINTS see below) for unorganized datasets;
@@ -203,9 +224,11 @@ Base.@kwdef struct PointCloud{T<:PointT,P,R}
   - it is set to 1 for unorganized datasets (thus used to check whether a dataset is organized or not). """
   height::UInt32           = UInt32(0)
   """ true if points are invalid (e.g., have NaN or Inf values in any of their floating point fields). """
-  is_dense::Bool          = false
+  is_dense::Bool           = false
   """ Sensor acquisition pose (origin/translation), optional."""
-  sensor_origin_::P        = SA[0;0;0.0]
+  sensor_origin_::P        = SA[0f0;0;0]
   """ sensor acquisition pose (rotation), optional."""
-  sensor_orientation_::R   = SMatrix{3,3}(1.0,0,0,0,1,0,0,0,1)
+  sensor_orientation_::R   = SMatrix{3,3}(1f0,0,0,0,1,0,0,0,1)
 end
+
+#

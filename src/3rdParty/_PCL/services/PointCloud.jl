@@ -87,6 +87,7 @@ function createMapping(msg_fields::AbstractVector{<:PointField}, field_map::MsgF
     sort!(field_map, by = x->x.serialized_offset)
     i = 1
     j = i + 1
+    # FIXME WIP ...[j] != field_map[end]
     while j <= length(field_map)
       # This check is designed to permit padding between adjacent fields.
       if (field_map[j].serialized_offset - field_map[i].serialized_offset) == (field_map[j].struct_offset - field_map[i].struct_offset)
@@ -107,11 +108,20 @@ end
 
 
 # https://pointclouds.org/documentation/conversions_8h_source.html#l00166
-# (differences) https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00123 
-function PointCloud(msg::PCLPointCloud2{T}, field_map::MsgFieldMap=createMapping(msg.fields) ) where {T <: PointT}
-
+function PointCloud(
+    msg::PCLPointCloud2, 
+    cloud::PointCloud{T} = PointCloud(;
+      header   = msg.header,
+      width    = msg.width,
+      height   = msg.height,
+      is_dense = msg.is_dense == 1 ),
+    field_map::MsgFieldMap=createMapping(msg.fields)
+  ) where {T}
+  #
   cloudsize = msg.width*msg.height
-  cloud_data = Vector{UInt8}(undef, cloudsize)
+  # cloud_data = Vector{UInt8}(undef, cloudsize)
+
+  @info "field_map" length(field_map)
 
   # Check if we can copy adjacent points in a single memcpy.  We can do so if there
   # is exactly one field to copy and it is the same size as the source and destination
@@ -120,20 +130,26 @@ function PointCloud(msg::PCLPointCloud2{T}, field_map::MsgFieldMap=createMapping
       field_map[1].serialized_offset == 0 &&
       field_map[1].struct_offset == 0 &&
       field_map[1].size == msg.point_step &&
-      field_map[1].size == sizeof(T))
+      field_map[1].size == sizeof(T)) 
     #
-    @info "copy just one field_map"
+    error("copy of just one field_map not implemented yet")
   else
-    @info "not just one field_map to copy"
+    # If not, memcpy each group of contiguous fields separately
+    @info "not just a copy of one field_map" Int(msg.height) Int(msg.width) sizeof(T)
+    for row in 0:(msg.height-1)
+      # @show Int(msg.row_step)
+      # TODO check might have an off by one error here
+      @show row_data = row * msg.row_step + 1 # msg.data[(row-1) * msg.row_step]
+      for col in 0:(msg.width-1)
+        @show msg_data = row_data + col*msg.point_step
+        for mapping in field_map
+          # memcpy (cloud_data + mapping.struct_offset, msg_data + mapping.serialized_offset, mapping.size);
+          @info "copy" mapping.struct_offset mapping.serialized_offset mapping.size
+        end
+        cloudsize += sizeof(T)
+      end
+    end
   end
-
-  cloud = PointCloud(;
-    header  = msg.header,
-    # points = msg.data, # must first convert data to points
-    width   = msg.width,
-    height  = msg.height,
-    is_dense= msg.is_dense == UInt8(1)
-  )
 
   return cloud
 end
@@ -143,7 +159,7 @@ end
 ## =========================================================================================================
 
 
-function Base.show(io::IO, hdr::Header) where {T}
+function Base.show(io::IO, hdr::Header) # where {T}
   printstyled(io, "Caesar._PCL.Header", bold=true, color=:blue)
   println(io)
   println(io, "   seq:       ", hdr.seq)
@@ -157,21 +173,22 @@ Base.show(io::IO, ::MIME"text/plain", pc::Header) = show(io, pc)
 Base.show(io::IO, ::MIME"application/prs.juno.inline", pc::Header) = show(io, pc)
 
 
-function Base.show(io::IO, pc::PCLPointCloud2{T}) where {T}
-  printstyled(io, "Caesar._PCL.PCLPointCloud2{", bold=true, color=:blue)
+function Base.show(io::IO, pc::PCLPointCloud2)
+  printstyled(io, "Caesar._PCL.PCLPointCloud2", bold=true, color=:blue)
   println(io)
-  printstyled(io, "    T = ", bold=true, color=:magenta)
-  println(io, T)
-  printstyled(io, " }", bold=true, color=:blue)
+  # printstyled(io, "    T = ", bold=true, color=:magenta)
+  # println(io, T)
+  # printstyled(io, " }", bold=true, color=:blue)
   println(io)
   println(io, "  header::", pc.header)
   println(io, "  height:       ", pc.height)
   println(io, "  width:        ", pc.width)
-  println(io, "  data[::T]:    ", length(pc.data) )
+  println(io, "  # fields:     ", length(pc.fields))
+  println(io, "  # data[]:     ", length(pc.data) )
+  println(io, "  is_bigendian: ", pc.is_bigendian)
   println(io, "  point_step:   ", pc.point_step )
   println(io, "  row_step:     ", pc.row_step )
-  println(io, "  is_dense:     ", pc.is_dense)
-
+  println(io, "  is_dense:     ", pc.is_dense )
   nothing
 end
 
@@ -195,6 +212,7 @@ function Base.show(io::IO, pc::PointCloud{T,P,R}) where {T,P,R}
   println(io, "  width:        ", pc.width)
   println(io, "  height:       ", pc.height)
   println(io, "  points[::T]:  ", length(pc.points) )
+  println(io, "  is_dense:     ", pc.is_dense)
   println(io, "  sensor pose:")
   println(io, "    xyz:    ", round.(pc.sensor_origin_, digits=3))
   q = convert(_Rot.UnitQuaternion, pc.sensor_orientation_)
