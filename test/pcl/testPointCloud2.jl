@@ -5,6 +5,7 @@
 # Pkg.build("PyCall")
 # using PyCall
 # using RobotOS
+
 using Colors
 using Caesar
 using BSON
@@ -23,7 +24,8 @@ BSON.@load testdatafile PointCloudRef PointCloudTest
 
 show(PointCloudTest[1])
 
-pc = PointCloud(PointCloudTest[1])
+# test major unpacking / type conversion needed by ROS.sensor_msgs.pointcloud2
+pc = Caesar._PCL.PointCloud(PointCloudTest[1])
 
 @test pc.height == 1
 @test pc.width == 493

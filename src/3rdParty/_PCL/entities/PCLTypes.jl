@@ -69,14 +69,14 @@ References
 - https://docs.ros.org/en/api/sensor_msgs/html/msg/PointField.html
 """
 @enum _PCL_POINTFIELD_FORMAT begin
-  _PCL_INT8    = 1
-  _PCL_UINT8   = 2
-  _PCL_INT16   = 3
-  _PCL_UINT16  = 4
-  _PCL_INT32   = 5
-  _PCL_UINT32  = 6
-  _PCL_FLOAT32 = 7
-  _PCL_FLOAT64 = 8
+  _PCL_INT8    = UInt8(1)
+  _PCL_UINT8   = UInt8(2)
+  _PCL_INT16   = UInt8(3)
+  _PCL_UINT16  = UInt8(4)
+  _PCL_INT32   = UInt8(5)
+  _PCL_UINT32  = UInt8(6)
+  _PCL_FLOAT32 = UInt8(7)
+  _PCL_FLOAT64 = UInt8(8)
 end
 
 Base.convert(::Type{<:_PCL_POINTFIELD_FORMAT}, val::Integer) = (en=instances(_PCL_POINTFIELD_FORMAT); en[findfirst(Int.(en) .== Int.(convert(UInt8, val)))])
@@ -140,7 +140,7 @@ Base.@kwdef mutable struct FieldMapping
   size::UInt32               = UInt32(0)
 end
 
-struct FieldMatches{<:PointT} end
+struct FieldMatches end # {<:PointT}
 
 # https://docs.ros.org/en/hydro/api/pcl/html/structpcl_1_1detail_1_1FieldAdder.html
 Base.@kwdef struct FieldAdder

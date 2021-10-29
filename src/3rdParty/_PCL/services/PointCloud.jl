@@ -74,6 +74,7 @@ end
 ##
 
 # https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00091
+# https://github.com/PointCloudLibrary/pcl/blob/903f8b30065866ae5ca57f4c3606437476b51fcc/common/include/pcl/point_traits.h
 function (fm::FieldMapper)()
   for field in fm.fields_
     if true # FieldMatches
@@ -98,7 +99,7 @@ end
 # https://docs.ros.org/en/jade/api/pcl_conversions/html/namespacepcl.html
 function createMapping(msg_fields::AbstractVector{<:PointField}, field_map::MsgFieldMap=MsgFieldMap())
   # Create initial 1-1 mapping between serialized data segments and struct fields
-  mapper = FieldMapper{T}(;fields_=msg_fields, map_=field_map)
+  mapper = FieldMapper(;fields_=msg_fields, map_=field_map)
   # 00127     for_each_type< typename traits::fieldList<PointT>::type > (mapper);
 
   # Coalesce adjacent fields into single copy where possible
@@ -197,20 +198,29 @@ Base.show(io::IO, ::MIME"application/prs.juno.inline", pc::Header) = show(io, pc
 
 function Base.show(io::IO, pc::PCLPointCloud2)
   printstyled(io, "Caesar._PCL.PCLPointCloud2", bold=true, color=:blue)
-  println(io)
+  # println(io)
   # printstyled(io, "    T = ", bold=true, color=:magenta)
   # println(io, T)
   # printstyled(io, " }", bold=true, color=:blue)
   println(io)
-  println(io, "  header::", pc.header)
+  print(io, "  header::", pc.header)
   println(io, "  height:       ", pc.height)
   println(io, "  width:        ", pc.width)
-  println(io, "  # fields:     ", length(pc.fields))
+  print(io, "  # fields:     ", length(pc.fields))
+  if 0 < length(pc.fields)
+    print(io, ":  [")
+    for fld in pc.fields
+      print(io, fld.name, ",")
+    end
+    print(io, "]")
+  end
+  println(io)
   println(io, "  # data[]:     ", length(pc.data) )
   println(io, "  is_bigendian: ", pc.is_bigendian)
   println(io, "  point_step:   ", pc.point_step )
   println(io, "  row_step:     ", pc.row_step )
   println(io, "  is_dense:     ", pc.is_dense )
+  println(io)
   nothing
 end
 

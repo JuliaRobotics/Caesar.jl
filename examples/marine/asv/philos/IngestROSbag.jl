@@ -159,12 +159,8 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
         pc2 = Caesar._PCL.PCLPointCloud2(md)
         pc_ = Caesar._PCL.PointCloud(pc2)
         # pc = Caesar._PCL.PointCloud(; height=md.height, width=md.width)
-            # di = Dict{Symbol,Any}()
-            # for nm in fieldnames(typeof(md))
-            #     @show di[:height] = md.height
-            #     # di[nm] = getfield(md, nm)
-            # end
-        queueScans[i] = (pc2,pc_) #di
+
+        queueScans[i] = (pc2,pc_) 
     end
 
     # add a new variable to the graph
@@ -359,4 +355,6 @@ addBlobStore!(fg, ds)
 de,db = getData(fg, :x0, :RADARPC)
 
 BSON.@load PipeBuffer(db) queueScans
+
+queueScans[1][3]
 
