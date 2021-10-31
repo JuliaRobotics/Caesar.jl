@@ -12,7 +12,7 @@ using Requires
 import Rotations as _Rot
 
 # Going to add dispatches on these functions
-import Base: getindex, setindex!, resize!, cat, convert, sizeof
+import Base: getindex, setindex!, resize!, cat, convert, sizeof, hasproperty, getproperty
 
 ## hold off on exports, users can in the mean-time use/import via e.g. _PCL.PointXYZ
 # export PointT, PointXYZ, PointXYZRGB, PointXYZRGBA

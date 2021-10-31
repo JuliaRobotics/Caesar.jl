@@ -1,6 +1,5 @@
 
-## FIXME DOUBLCHECK
-Base.sizeof(::Type{PointXYZ{C,T}}) where {C,T} = sizeof(T)
+Base.sizeof(pt::PointXYZ) = sizeof(pt.data)
 
 # Construct helpers nearest to PCL
 PointXYZRGBA( x::Real=0, y::Real=0, z::Real=Float32(1); 
@@ -13,6 +12,17 @@ PointXYZRGB(  x::Real=0, y::Real=0, z::Real=Float32(1);
               color::Colorant=RGB(r,g,b), 
               pos=SA[x,y,z], data=SA[pos...,1] ) = PointXYZ(;color,data)
 #
+
+## ==============================================================================================
+## translating property names from upside-down C++ meta functions not clean Julian style yet, but 
+## can easily refactor once enough unit tests for conversions and use-cases exist here in Julia
+
+function Base.hasproperty(P::Type{<:PointXYZ}, f::Symbol)
+  # https://github.com/PointCloudLibrary/pcl/blob/35e03cec65fb3857c1d4062e4bf846d841fb98df/common/include/pcl/conversions.h#L126
+  # https://github.com/PointCloudLibrary/pcl/blob/35e03cec65fb3857c1d4062e4bf846d841fb98df/common/include/pcl/for_each_type.h#L70-L86
+  # TODO, missing colors when point has RGB
+  f in union(fieldnames(P), [:x;:y;:z])
+end
 
 function Base.getproperty(p::PointXYZ, f::Symbol)
   if f == :x 
@@ -37,7 +47,6 @@ function Base.getproperty(p::PointXYZ, f::Symbol)
   error("PointXYZ has no field $f")
 end
 
-
 # Add a few basic dispatches
 Base.getindex(pc::PCLPointCloud2, i) = pc.data[i]
 Base.setindex!(pc::PCLPointCloud2, pt::PointT, idx) = (pc.data[idx] = pt)
@@ -47,6 +56,10 @@ Base.resize!(pc::PCLPointCloud2, s::Integer) = resize!(pc.data, s)
 Base.getindex(pc::PointCloud, i) = pc.points[i]
 Base.setindex!(pc::PointCloud, pt::PointT, idx) = (pc.points[idx] = pt)
 Base.resize!(pc::PointCloud, s::Integer) = resize!(pc.points, s)
+
+## not very Julian translations from C++ above
+## ==============================================================================================
+
 
 # builds a new immutable object, reuse=true will modify and reuse parts of A and B
 function Base.cat(A::PointCloud, B::PointCloud; reuse::Bool=false)
@@ -73,19 +86,35 @@ end
 
 ##
 
+function (fm::FieldMatches{PointXYZ{C,T}})(field::PointField) where {C,T}
+  # dev wip, just one basic check to find right implementation pattern first
+  @info "FieldMatches" field.count
+  hasproperty(PointXYZ{C,T}, Symbol(field.name)) && 
+  asType{field.datatype}() == T ## && 
+  # (field.count ==  ||
+  # field.count == 0 && .size == 1)
+end
+
 # https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00091
 # https://github.com/PointCloudLibrary/pcl/blob/903f8b30065866ae5ca57f4c3606437476b51fcc/common/include/pcl/point_traits.h
-function (fm::FieldMapper)()
-  for field in fm.fields_
-    if true # FieldMatches
+function (fm!::FieldMapper{T})() where T
+  @info "msg_fields" length(fm!.fields_) T
+  for field in fm!.fields_
+    @info "GOT" field.name
+    if FieldMatches{T}()(field)
       mapping = FieldMapping(;
         serialized_offset = field.offset,
-        # struct_offset     = 0, # offset_value???
-        # size              = sizeof()
+        struct_offset     = 0, # FIXME which offset value to use here ???
+        size              = sizeof(asType{field.datatype}())
       )
-      push!(fm.map_, mapping)
-      return nothing
+      @info "add mapping for " field mapping
+      push!(fm!.map_, mapping)
+      # https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00125
+      # return nothing
     end
+  end
+  if 0 < length(fm!.map_)
+    return nothing
   end
   @warn "Failed to find match for field..."
 end
@@ -97,10 +126,17 @@ end
 
 # https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00123
 # https://docs.ros.org/en/jade/api/pcl_conversions/html/namespacepcl.html
-function createMapping(msg_fields::AbstractVector{<:PointField}, field_map::MsgFieldMap=MsgFieldMap())
+function createMapping(T,msg_fields::AbstractVector{<:PointField}, field_map::MsgFieldMap=MsgFieldMap())
   # Create initial 1-1 mapping between serialized data segments and struct fields
-  mapper = FieldMapper(;fields_=msg_fields, map_=field_map)
+  mapper! = FieldMapper{T}(;fields_=msg_fields, map_=field_map)
+  # the idea here is that for_each_type<> will recursively call the operator `mapper()` on each element on msg_fields
+  # and then check if the desired destination PointCloud{<:PointT}'s points have field names that can absorb
+  # the data contained in msg_fields, e.g. `.name==:x`, etc as checked by `FieldMatcher`.  This should
+  # add all msg_fields that match properties of destination cloud <:PointT into `field_map`.
+  # https://github.com/PointCloudLibrary/pcl/blob/35e03cec65fb3857c1d4062e4bf846d841fb98df/common/include/pcl/conversions.h#L126
+  # https://github.com/PointCloudLibrary/pcl/blob/35e03cec65fb3857c1d4062e4bf846d841fb98df/common/include/pcl/for_each_type.h#L70-L86
   # 00127     for_each_type< typename traits::fieldList<PointT>::type > (mapper);
+  mapper!()
 
   # Coalesce adjacent fields into single copy where possible
   if 1 < length(field_map)
@@ -109,6 +145,7 @@ function createMapping(msg_fields::AbstractVector{<:PointField}, field_map::MsgF
     i = 1
     j = i + 1
     # FIXME WIP ...[j] != field_map[end]
+    # TODO consolidate strips of memory into a single field_map -- e.g. [x,y,z],offsets=0,size=4 becomes, [x],offsets=0,size=12 
     while field_map[j] != field_map[end]
       # This check is designed to permit padding between adjacent fields.
       @info "preif $j"
@@ -138,7 +175,7 @@ function PointCloud(
       width    = msg.width,
       height   = msg.height,
       is_dense = msg.is_dense == 1 ),
-    field_map::MsgFieldMap=createMapping(msg.fields)
+    field_map::MsgFieldMap=createMapping(T,msg.fields)
   ) where {T}
   #
   cloudsize = msg.width*msg.height
@@ -167,7 +204,7 @@ function PointCloud(
         msg_data = row_data + col*msg.point_step
         for mapping in field_map
           # memcpy (cloud_data + mapping.struct_offset, msg_data + mapping.serialized_offset, mapping.size);
-          @info "copy" mapping.struct_offset mapping.serialized_offset mapping.size
+          # @info "copy" mapping.struct_offset mapping.serialized_offset mapping.size
         end
         cloudsize += sizeof(T)
       end

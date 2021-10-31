@@ -81,6 +81,17 @@ end
 
 Base.convert(::Type{<:_PCL_POINTFIELD_FORMAT}, val::Integer) = (en=instances(_PCL_POINTFIELD_FORMAT); en[findfirst(Int.(en) .== Int.(convert(UInt8, val)))])
 
+struct asType{T} end
+
+(::Type{<:asType{_PCL_INT8}})()    = Int8
+(::Type{<:asType{_PCL_UINT8}})()   = UInt8
+(::Type{<:asType{_PCL_INT16}})()   = Int16
+(::Type{<:asType{_PCL_UINT16}})()  = UInt16
+(::Type{<:asType{_PCL_INT32}})()   = Int32
+(::Type{<:asType{_PCL_UINT32}})()  = UInt32
+(::Type{<:asType{_PCL_FLOAT32}})() = Float32
+(::Type{<:asType{_PCL_FLOAT64}})() = Float64
+
 
 abstract type PointT end
 
@@ -98,8 +109,8 @@ See
 - https://pointclouds.org/documentation/point__types_8hpp_source.html
 """
 Base.@kwdef struct PointXYZ{C <: Colorant, T <: Number} <: PointT
-  color::C           = RGBA(1,1,1,1)
-  data::SVector{4,T} = SVector(0,0,0,Float32(1))
+  color::C           = RGB(1,1,1)
+  data::SVector{4,T} = SVector(0,0,0,1f0)
 end
 
 
@@ -140,11 +151,11 @@ Base.@kwdef mutable struct FieldMapping
   size::UInt32               = UInt32(0)
 end
 
-struct FieldMatches end # {<:PointT}
+struct FieldMatches{T<:PointT} end
 
 # https://docs.ros.org/en/hydro/api/pcl/html/structpcl_1_1detail_1_1FieldAdder.html
 Base.@kwdef struct FieldAdder
-  fields_::Vector{PointField} = Vector{PointField}()
+  fields_::Vector{<:PointField} = Vector{PointField}()
 end
 
 # https://docs.ros.org/en/hydro/api/pcl/html/point__cloud_8h_source.html#l00066
@@ -152,9 +163,9 @@ end
 const MsgFieldMap = Vector{FieldMapping}
 
 # https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00091
-Base.@kwdef struct FieldMapper #{T <: PointT}
-  fields_::Vector{PointField} = Vector{PointField}()
-  map_::Vector{FieldMapping}  = Vector{FieldMapping}()
+Base.@kwdef struct FieldMapper{T<:PointT}
+  fields_::Vector{<:PointField} = Vector{PointField}()
+  map_::Vector{<:FieldMapping}  = Vector{FieldMapping}()
 end
 
 """
@@ -213,9 +224,9 @@ References
 """
 Base.@kwdef struct PointCloud{T<:PointT,P,R}
   """ the point cloud header """
-  header::Header           = Header()
-  """ `Vector` of `UInt8` representing the raw point cloud data """
-  points::Vector{T}         = Vector{PointXYZ{RGB{Colors.FixedPointNumbers.N0f8}, Float32}}()
+  header::Header            = Header()
+  """ `Vector` of `UInt8` representing the cloud points """
+  points::Vector{T}         = Vector{typeof(PointXYZ())}() # {PointXYZ{RGB{Colors.FixedPointNumbers.N0f8}, Float32}}
   """ the point cloud width (if organized as image structure).  Specifies the width 
   of the point cloud dataset in the number of points. WIDTH has two meanings:
   - it can specify the total number of points in the cloud (equal with POINTS see below) for unorganized datasets;
