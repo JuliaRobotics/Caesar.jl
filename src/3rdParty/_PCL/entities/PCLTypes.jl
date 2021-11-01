@@ -193,7 +193,7 @@ Base.@kwdef struct PCLPointCloud2
   - it can specify the width (total number of points in a row) of an organized point cloud dataset. """
   width::UInt32            = UInt32(0)
   """ field descriptions of data """
-  fields::Vector{PointField}= Vector{PointField}()
+  fields::Vector{<:PointField}= Vector{PointField}()
   """ `Vector` of `<:PointT` representing the point cloud """
   data::Vector{UInt8}      = Vector{UInt8}()
   """ WARNING, untested """
@@ -217,6 +217,13 @@ own `MsgFieldMap`:
 ```julia
 field_map = Caesar._PCL.createMapping(msg.fields, field_map)
 ```
+
+Notes
+- Tested on Radar data with height `z=constant` for all points -- i.e. 2D sweeping scan where `.height=1`.
+
+DevNotes
+- TODO .PCLPointCloud2 convert not tested on regular 3D data from structured light or lidar yet, but current implementation should be close (or already working).
+
 
 References
 - https://pointclouds.org/documentation/classpcl_1_1_point_cloud.html
@@ -244,5 +251,6 @@ Base.@kwdef struct PointCloud{T<:PointT,P,R}
   """ sensor acquisition pose (rotation), optional."""
   sensor_orientation_::R   = SMatrix{3,3}(1f0,0,0,0,1,0,0,0,1)
 end
+
 
 #

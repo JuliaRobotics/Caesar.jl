@@ -87,12 +87,14 @@ end
 ##
 
 function (fm::FieldMatches{PointXYZ{C,T}})(field::PointField) where {C,T}
-  # dev wip, just one basic check to find right implementation pattern first
-  @info "FieldMatches" field.count
+  # https://github.com/PointCloudLibrary/pcl/blob/35e03cec65fb3857c1d4062e4bf846d841fb98df/common/include/pcl/PCLPointField.h#L57
+  # TODO complete all tests
   hasproperty(PointXYZ{C,T}, Symbol(field.name)) && 
-  asType{field.datatype}() == T ## && 
-  # (field.count ==  ||
-  # field.count == 0 && .size == 1)
+  asType{field.datatype}() == T && 
+  (field.count == 1 || # FIXME, SHOULD NOT HARD CODE 1
+  field.count == 0 && false) #.size == 1)
+    # ((field.count == traits::datatype<PointT, Tag>::size) ||
+    # (field.count == 0 && traits::datatype<PointT, Tag>::size == 1 /* see bug #821 */)));
 end
 
 # https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00091
@@ -104,12 +106,11 @@ function (fm!::FieldMapper{T})() where T
     if FieldMatches{T}()(field)
       mapping = FieldMapping(;
         serialized_offset = field.offset,
-        struct_offset     = 0, # FIXME which offset value to use here ???
+        struct_offset     = field.offset, # FIXME which offset value to use here ???
         size              = sizeof(asType{field.datatype}())
       )
       @info "add mapping for " field mapping
       push!(fm!.map_, mapping)
-      # https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00125
       # return nothing
     end
   end
@@ -142,25 +143,31 @@ function createMapping(T,msg_fields::AbstractVector{<:PointField}, field_map::Ms
   if 1 < length(field_map)
     # TODO check accending vs descending order
     sort!(field_map, by = x->x.serialized_offset)
-    i = 1
-    j = i + 1
-    # FIXME WIP ...[j] != field_map[end]
-    # TODO consolidate strips of memory into a single field_map -- e.g. [x,y,z],offsets=0,size=4 becomes, [x],offsets=0,size=12 
-    while field_map[j] != field_map[end]
-      # This check is designed to permit padding between adjacent fields.
-      @info "preif $j"
-      if (field_map[j].serialized_offset - field_map[i].serialized_offset) == (field_map[j].struct_offset - field_map[i].struct_offset)
-        field_map[i].size += (field_map[j].struct_offset + field_map[j].size) - (field_map[i].struct_offset + field_map[i].size)
-        # https://www.cplusplus.com/reference/vector/vector/erase/
-        deleteat!(field_map,j)
-        @info "deleteat $j"
-        j += 1
-        # j = field_map.erase(j);
-      else
-        i += 1
-        j += 1
-      end
-    end
+    
+    # something strange with how C++ does and skips the while loop, disabling the coalescing for now
+    # i = 1
+    # j = i + 1
+    # # TODO consolidate strips of memory into a single field_map -- e.g. [x,y,z],offsets=0,size=4 becomes, [x],offsets=0,size=12 
+    # _jend = field_map[end]
+    # _jmap = field_map[j]
+    # while _jmap != _jend
+    #   # This check is designed to permit padding between adjacent fields.
+    #   if (_jmap.serialized_offset - field_map[i].serialized_offset) == (_jmap.struct_offset - field_map[i].struct_offset)
+    #     field_map[i].size += (_jmap.struct_offset + _jmap.size) - (field_map[i].struct_offset + field_map[i].size)
+    #     @info "deleteat j" j
+    #     # https://www.cplusplus.com/reference/vector/vector/erase/
+    #     deleteat!(field_map,j)
+    #     _jmap = field_map[j] # same iterator j now points to shifted element in vector after deletion (still the same position after i). 
+    #     _jend = field_map[end]
+    #   else
+    #     i += 1
+    #     j += 1
+        
+    #     _jmap = field_map[j]
+    #     _jend = field_map[end]
+    #   end
+    # end
+    # @info "after coalesce" field_map
   end
 
   return field_map
@@ -181,7 +188,16 @@ function PointCloud(
   cloudsize = msg.width*msg.height
   # cloud_data = Vector{UInt8}(undef, cloudsize)
 
-  @info "field_map" length(field_map)
+  @info "field_map" length(field_map) T
+
+  # NOTE assume all fields use the same data type
+  # off script conversion for XYZ_ data only
+  datatype = asType{msg.fields[1].datatype}()
+  len = trunc(Int, length(msg.data)/field_map[1].size)
+  data_ = Vector{datatype}(undef, len)
+  read!(IOBuffer(msg.data), data_)
+  mat = reshape(data_, :, cloudsize)
+  
 
   # Check if we can copy adjacent points in a single memcpy.  We can do so if there
   # is exactly one field to copy and it is the same size as the source and destination
@@ -193,20 +209,28 @@ function PointCloud(
       field_map[1].size == sizeof(T)) 
     #
     error("copy of just one field_map not implemented yet")
-  else
+  else    
     # If not, memcpy each group of contiguous fields separately
-    @info "not just a copy of one field_map" Int(msg.height) Int(msg.width) sizeof(T)
-    for row in 0:(msg.height-1)
-      # @show Int(msg.row_step)
+    @info "not just a copy of one field_map" Int(msg.height) Int(msg.width) sizeof(T) length(cloud.points)
+    @assert msg.height == 1 "only decoding msg.height=1 messages, update converter here."
+    for row in 1:msg.height
       # TODO check might have an off by one error here
-      @show row_data = row * msg.row_step + 1 # msg.data[(row-1) * msg.row_step]
-      for col in 0:(msg.width-1)
-        msg_data = row_data + col*msg.point_step
-        for mapping in field_map
+      # row_data = row * msg.row_step + 1 # msg.data[(row-1) * msg.row_step]
+      for col in 1:msg.width
+        # msg_data = row_data + col*msg.point_step
+        # the slow way of building the point.data entry
+        ptdata = zeros(datatype, 4)
+        for (i,mapping) in enumerate(field_map)
+          midx = trunc(Int,mapping.serialized_offset/mapping.size) + 1
+          # TODO, why the weird index reversal?
+          ptdata[i] = mat[midx, col] 
+          # @info "DO COPY" mapping 
           # memcpy (cloud_data + mapping.struct_offset, msg_data + mapping.serialized_offset, mapping.size);
           # @info "copy" mapping.struct_offset mapping.serialized_offset mapping.size
         end
-        cloudsize += sizeof(T)
+        pt = T(;data=SVector(ptdata...))
+        push!(cloud.points, pt)
+        # cloudsize += sizeof(T)
       end
     end
   end
