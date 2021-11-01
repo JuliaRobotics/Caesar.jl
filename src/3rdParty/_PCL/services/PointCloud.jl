@@ -100,16 +100,13 @@ end
 # https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00091
 # https://github.com/PointCloudLibrary/pcl/blob/903f8b30065866ae5ca57f4c3606437476b51fcc/common/include/pcl/point_traits.h
 function (fm!::FieldMapper{T})() where T
-  @info "msg_fields" length(fm!.fields_) T
   for field in fm!.fields_
-    @info "GOT" field.name
     if FieldMatches{T}()(field)
       mapping = FieldMapping(;
         serialized_offset = field.offset,
         struct_offset     = field.offset, # FIXME which offset value to use here ???
         size              = sizeof(asType{field.datatype}())
       )
-      @info "add mapping for " field mapping
       push!(fm!.map_, mapping)
       # return nothing
     end
@@ -188,8 +185,6 @@ function PointCloud(
   cloudsize = msg.width*msg.height
   # cloud_data = Vector{UInt8}(undef, cloudsize)
 
-  @info "field_map" length(field_map) T
-
   # NOTE assume all fields use the same data type
   # off script conversion for XYZ_ data only
   datatype = asType{msg.fields[1].datatype}()
@@ -211,7 +206,6 @@ function PointCloud(
     error("copy of just one field_map not implemented yet")
   else    
     # If not, memcpy each group of contiguous fields separately
-    @info "not just a copy of one field_map" Int(msg.height) Int(msg.width) sizeof(T) length(cloud.points)
     @assert msg.height == 1 "only decoding msg.height=1 messages, update converter here."
     for row in 1:msg.height
       # TODO check might have an off by one error here
