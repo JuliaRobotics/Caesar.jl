@@ -109,7 +109,7 @@ See
 - https://pointclouds.org/documentation/point__types_8hpp_source.html
 """
 Base.@kwdef struct PointXYZ{C <: Colorant, T <: Number} <: PointT
-  color::C           = RGB(1,1,1)
+  color::C           = RGBA(1,1,1,1)
   data::SVector{4,T} = SVector(0,0,0,1f0)
 end
 

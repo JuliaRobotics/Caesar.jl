@@ -14,7 +14,6 @@ Base.convert(::Type{UInt64}, rost::RobotOS.Time) = UInt64(rost.secs)*1000000 + t
 # Really odd constructor, strong assumption that user FIRST ran @rostypegen in Main BEFORE loading Caesar
 # https://docs.ros.org/en/hydro/api/pcl_conversions/html/pcl__conversions_8h_source.html#l00208
 function PCLPointCloud2(msg::Main.sensor_msgs.msg.PointCloud2)
-  @warn("work in progress on PCLPointCloud2(msg::Main.sensor_msgs.msg.PointCloud2)")
   header = Header(;stamp  = msg.header.stamp,
                   seq     = msg.header.seq,
                   frame_id= msg.header.frame_id )

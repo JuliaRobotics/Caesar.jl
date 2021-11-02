@@ -61,6 +61,7 @@ using DistributedFactorGraphs.DocStringExtensions
 using Dates
 using JSON2
 using BSON
+using Serialization
 using FixedPointNumbers
 using StaticArrays
 
@@ -161,6 +162,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
         # pc = Caesar._PCL.PointCloud(; height=md.height, width=md.width)
 
         queueScans[i] = (pc2,pc_) 
+        # queueScans[i] = pc_
     end
 
     # add a new variable to the graph
@@ -170,7 +172,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
     systemstate.var_index += 1
 
     io = IOBuffer()
-    BSON.@save io queueScans
+    serialize(io, queueScans)
 
     # @show datablob = pc # queueScans
     # and add a data blob of all the scans
@@ -179,7 +181,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
                 take!(io), # get base64 binary
                 # Vector{UInt8}(JSON2.write(datablob)),  
                 mimeType="/application/octet-stream/bson;dataformat=Vector{Caesar._PCL.PCLPointCloud2}",
-                description="BSON.@load PipeBuffer(readBytes) queueScans")
+                description="queueScans = Serialize.deserialize(PipeBuffer(readBytes))")
     #
 end
 
@@ -354,7 +356,39 @@ addBlobStore!(fg, ds)
 
 de,db = getData(fg, :x0, :RADARPC)
 
-BSON.@load PipeBuffer(db) queueScans
+queueScans = deserialize(PipeBuffer(db)) # BSON.@load
 
-queueScans[1]
+pc2,pc = queueScans[1]
 
+## 
+
+using Gadfly
+Gadfly.set_default_plot_size(40cm,20cm)
+
+##
+
+
+PL = []
+
+for lb in [:x0;:x1;:x2;:x3;:x4;:x5]
+de,db = getData(fg, lb, :RADARPC)
+queueScans = deserialize(PipeBuffer(db)) 
+for (pc2,pc) in queueScans
+X = (c->c.x).(pc.points)
+Y = (c->c.y).(pc.points)
+push!(PL, Gadfly.layer(x=X,y=Y, Geom.point))
+end
+end
+
+Gadfly.plot(PL...)
+
+##
+
+
+
+
+
+
+
+
+##
