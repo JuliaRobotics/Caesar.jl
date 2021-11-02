@@ -62,23 +62,23 @@ Base.resize!(pc::PointCloud, s::Integer) = resize!(pc.points, s)
 
 
 # builds a new immutable object, reuse=true will modify and reuse parts of A and B
-function Base.cat(A::PointCloud, B::PointCloud; reuse::Bool=false)
+function Base.cat(A::PointCloud, B::PointCloud; reuse::Bool=false, stamp_earliest::Bool=true)
   pc = PointCloud(;
-    header = PCLHeader(;
+    header = Header(;
       seq = A.header.seq,
-      stamp = maximum(A.header.stamp, B.header.stamp),
+      stamp = stamp_earliest ? A.header.stamp : maximum(A.header.stamp, B.header.stamp),
       frame_id = A.header.frame_id
     ),
     # can go a little faster, but modifies A
-    points = reuse ? A.data : deepcopy(A.data),
-    width = A.width,
-    height = 1,
+    points = reuse ? A.points : deepcopy(A.points),
+    height = A.height,
+    width = A.width + B.width,
     is_dense = A.is_dense && B.is_dense
   )
-  lenA = length(A.data)
-  lenB = length(B.data)
-  resize!(pc.data, lenA+lenB)
-  pc.data[(lenA+1):end] .= B.data
+  lenA = length(A.points)
+  lenB = length(B.points)
+  resize!(pc.points, lenA+lenB)
+  pc.points[(lenA+1):end] .= B.points
 
   # return the new PCLPointCloud2 object
   return pc
