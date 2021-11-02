@@ -66,6 +66,7 @@ function loop!(rbs::RosbagSubscriber, args...)
   return if isa(msgT, PyObject)
     # update the syncBuffer
     rbs.syncBuffer[rbs.nextMsgChl] = rbs.nextMsgTimestamp = getROSPyMsgTimestamp(msgT)
+    @debug "RosbagSubscriber got msg $(rbs.nextMsgChl)"
     # call the callback
     rbs.callbacks[rbs.nextMsgChl](msg, args...)
     true
