@@ -166,7 +166,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
     addData!(   fg, :radar, systemstate.cur_variable.label, :RADAR_PC2s, 
                 take!(io), # get base64 binary
                 # Vector{UInt8}(JSON2.write(datablob)),  
-                mimeType="application/octet-stream",
+                mimeType="application/octet-stream/julia.serialize",
                 description="queueScans = Serialization.deserialize(PipeBuffer(readBytes))")
     #
 
@@ -175,7 +175,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
 
     addData!(   fg, :radar, systemstate.cur_variable.label, :RADAR_SWEEP,
                 take!(io),
-                mimeType="application/octet-stream",
+                mimeType="application/octet-stream/julia.serialize",
                 description="queueScans = Serialization.deserialize(PipeBuffer(readBytes))" )
     #
 end
@@ -270,7 +270,7 @@ function main(;iters::Integer=50)
 
     @info "Hit CTRL+C to exit and save the graph..."
 
-    init_node("rex_feed")
+    init_node("asv_feed")
     # find the bagfile
     bagfile = joinpath(ENV["HOME"],"data","Marine","philos_car_far.bag")
     bagSubscriber = RosbagSubscriber(bagfile)
@@ -322,7 +322,7 @@ end
 ##
 
 
-main(iters=100)
+main(iters=150)
 
 
 ## after the graph is saved it can be loaded and the datastores retrieved
@@ -344,11 +344,10 @@ addBlobStore!(fg, ds)
 
 ## load one of the PointCloud sets
 
-de,db = getData(fg, :x0, :RADARPC)
+de,db = getData(fg, :x0, :RADAR_SWEEP)
 
-queueScans = deserialize(PipeBuffer(db)) # BSON.@load
+sweep = deserialize(PipeBuffer(db)) # BSON.@load
 
-pc2,pc = queueScans[1]
 
 ## 
 
