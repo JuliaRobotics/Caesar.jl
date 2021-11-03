@@ -87,9 +87,11 @@ Base.@kwdef mutable struct SystemState
     var_index::Int = 0
     lidar_scan_index::Int = 0
     max_lidar::Int = 3
-    radar_scan_queue::Channel{sensor_msgs.msg.PointCloud2} = Channel{sensor_msgs.msg.PointCloud2}(10)
+    radar_scan_queue::Channel{sensor_msgs.msg.PointCloud2} = Channel{sensor_msgs.msg.PointCloud2}(60)
     # SystemState() = new(-1000, nothing, 0, 0, 3)
 end
+
+##
 
 """
     $(SIGNATURES)
@@ -106,28 +108,6 @@ function updateVariableIfNeeded(fg::AbstractDFG, systemstate::SystemState, newti
     return nothing
 end
 
-
-
-"""
-    $SIGNATURES
-
-Message callback for /radar_0.
-"""
-function handleRadar!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDFG, systemstate::SystemState)
-    @info "handleRadar" maxlog=10
-
-    # if systemstate.cur_variable === nothing
-    #     return nothing
-    # end
-    # Update the variable if needed
-    timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/1.0e9
-    updateVariableIfNeeded(fg, systemstate, timestamp)
-    @info "[$timestamp] RADAR sample on $(systemstate.cur_variable.label)"
-
-    # Make a data entry in the graph - use JSON2 to just write this (really really verbosely)
-    # ade,adb = addData!(fg, :radar, systemstate.cur_variable.label, :RADAR, Vector{UInt8}(JSON2.write(msg)))
-   
-end
 
 """
     $SIGNATURES
@@ -147,11 +127,18 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
         # nothing more to do
         return nothing
     end
-
-    # type instability
-
+    
     # Full sweep, lets empty the queue and add a variable
+    # type instability
     queueScans = Vector{Any}(undef, systemstate.radar_scan_queue.sz_max)
+
+    # get the first
+    md = take!(systemstate.radar_scan_queue)
+    pc2 = Caesar._PCL.PCLPointCloud2(md)
+    pc_cat = Caesar._PCL.PointCloud(pc2)
+    
+    queueScans[1] = pc2
+
     for i in 1:length(systemstate.radar_scan_queue.data)
         # something minimal, will do util for transforming PointCloud2 next
         println(i)
@@ -159,10 +146,9 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
         # @info typeof(md) fieldnames(typeof(md))
         pc2 = Caesar._PCL.PCLPointCloud2(md)
         pc_ = Caesar._PCL.PointCloud(pc2)
-        # pc = Caesar._PCL.PointCloud(; height=md.height, width=md.width)
+        pc_cat = cat(pc_cat, pc_; reuse=true)
 
-        queueScans[i] = (pc2,pc_) 
-        # queueScans[i] = pc_
+        queueScans[i] = (pc2) 
     end
 
     # add a new variable to the graph
@@ -177,11 +163,20 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
     # @show datablob = pc # queueScans
     # and add a data blob of all the scans
     # Make a data entry in the graph
-    addData!(   fg, :radar, systemstate.cur_variable.label, :RADARPC, 
+    addData!(   fg, :radar, systemstate.cur_variable.label, :RADAR_PC2s, 
                 take!(io), # get base64 binary
                 # Vector{UInt8}(JSON2.write(datablob)),  
-                mimeType="/application/octet-stream/bson;dataformat=Vector{Caesar._PCL.PCLPointCloud2}",
-                description="queueScans = Serialize.deserialize(PipeBuffer(readBytes))")
+                mimeType="application/octet-stream",
+                description="queueScans = Serialization.deserialize(PipeBuffer(readBytes))")
+    #
+
+    io = IOBuffer()
+    serialize(io, pc_cat)
+
+    addData!(   fg, :radar, systemstate.cur_variable.label, :RADAR_SWEEP,
+                take!(io),
+                mimeType="application/octet-stream",
+                description="queueScans = Serialization.deserialize(PipeBuffer(readBytes))" )
     #
 end
 
@@ -251,11 +246,6 @@ _unpackROSMsgType(T::Type, msgdata) = convert(T, msgdata[2])
 function _handleRadarPointcloud!(msgdata, args::Tuple)
     msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
     handleRadarPointcloud!(msgT, args...)
-end
-
-function _handleRadar!(msgdata, args::Tuple)
-    msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
-    handleRadar!(msgT, args...)
 end
 
 function _handleLidar!(msgdata, args::Tuple)
@@ -365,19 +355,35 @@ pc2,pc = queueScans[1]
 using Gadfly
 Gadfly.set_default_plot_size(40cm,20cm)
 
+
 ##
+
+lb = :x0
+de,db = getData(fg, lb, :RADAR_SWEEP)
+pointcloud = deserialize(PipeBuffer(db)) 
+
+X = (c->c.x).(pointcloud.points)
+Y = (c->c.y).(pointcloud.points)
+
+PL = []
+push!(PL, Gadfly.layer(x=X, y=Y, Geom.point))
+
+Gadfly.plot(PL...)
+
+## Converting PCLPointCloud2 again
 
 
 PL = []
 
-for lb in [:x0;:x1;:x2;:x3;:x4;:x5]
-de,db = getData(fg, lb, :RADARPC)
-queueScans = deserialize(PipeBuffer(db)) 
-for (pc2,pc) in queueScans
-X = (c->c.x).(pc.points)
-Y = (c->c.y).(pc.points)
-push!(PL, Gadfly.layer(x=X,y=Y, Geom.point))
-end
+for lb in [:x0;] #:x1;:x2;:x3;:x4;:x5]
+    de,db = getData(fg, lb, :RADAR_PC2s)
+    queueScans = deserialize(PipeBuffer(db)) 
+    for pc2 in queueScans[1:end]
+        pc_ = Caesar._PCL.PointCloud(pc2)
+        X = (c->c.x).(pc_.points)
+        Y = (c->c.y).(pc_.points)
+        push!(PL, Gadfly.layer(x=X, y=Y, Geom.point))
+    end
 end
 
 Gadfly.plot(PL...)
