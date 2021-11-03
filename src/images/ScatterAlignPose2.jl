@@ -3,6 +3,7 @@
 import IncrementalInference: getSample
 import Base: convert, show
 # import DistributedFactorGraphs: getManifold
+import ApproxManifoldProducts: sample
 
 using .Images
 
@@ -44,30 +45,30 @@ struct ScatterAlignPose2{H1<:HeatmapGridDensity,H2<:HeatmapGridDensity} <: IIF.A
   bw::Float64
 end
 
-  # replace inner constructor with transform on image
-  ScatterAlignPose2(im1::AbstractMatrix{T}, 
-                    im2::AbstractMatrix{T},
-                    domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
-                    sample_count::Integer=75,
-                    bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
-                    rescale::Real=1,
-                    N::Integer=1000,
-                    cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
-                  ) where {T} = ScatterAlignPose2(HeatmapGridDensity(cvt(im1),domain,N=N), 
-                                                  HeatmapGridDensity(cvt(im2),domain,N=N),
-                                                  float(rescale),
-                                                  sample_count, bw  )
+# replace inner constructor with transform on image
+ScatterAlignPose2(im1::AbstractMatrix{T}, 
+                  im2::AbstractMatrix{T},
+                  domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
+                  sample_count::Integer=75,
+                  bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
+                  rescale::Real=1,
+                  N::Integer=1000,
+                  cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
+                ) where {T} = ScatterAlignPose2(HeatmapGridDensity(cvt(im1),domain,N=N), 
+                                                HeatmapGridDensity(cvt(im2),domain,N=N),
+                                                float(rescale),
+                                                sample_count, bw  )
 #
 
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 
 function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
-  
-  pts1, = sample(cf.factor.hgd1.densityFnc, cf.factor.sample_count)
-  pts2, = sample(cf.factor.hgd1.densityFnc, cf.factor.sample_count)
+  #
+  pts1, = sample(cf.factor.hgd1, cf.factor.sample_count)
+  pts2, = sample(cf.factor.hgd2, cf.factor.sample_count)
   
   M = getManifold(Pose2)
-  e0 = ProductRepr(SA[0 0.0], SMatrix{2,2}(1.0, 0, 0, 1)) # identity_element(M)
+  e0 = ProductRepr(SA[0 0.0], SMatrix{2,2}(1.0, 0, 0, 1))
 
   # precalc SE2 points
   R0 = e0.parts[2]
@@ -218,26 +219,45 @@ end
 ## =========================================================================================
 
 Base.@kwdef struct PackedScatterAlignPose2 <: PackedInferenceType
-  hgd1::PackedHeatmapGridDensity
-  hgd2::PackedHeatmapGridDensity
+  hgd1::String # PackedHeatmapGridDensity # change to String
+  hgd2::String # PackedHeatmapGridDensity # change to String
   gridscale::Float64 = 1.0
   sample_count::Int = 50
   bw::Float64 = 0.01
 end
 
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
+  hgd1 = convert(PackedHeatmapGridDensity,arp.hgd1)
+  hgd2 = convert(PackedHeatmapGridDensity,arp.hgd2)
+  hgd1_ = JSON2.write(hgd1)
+  hgd2_ = JSON2.write(hgd2)
+
   PackedScatterAlignPose2(;
-    hgd1 = convert(PackedHeatmapGridDensity,arp.hgd1),
-    hgd2 = convert(PackedHeatmapGridDensity,arp.hgd2),
+    hgd1 = hgd1_,
+    hgd2 = hgd2_,
     gridscale = arp.gridscale,
     sample_count = arp.sample_count,
     bw = arp.bw )
 end
 
 function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
+  # first understand the schema friendly belief type to unpack
+  _hgd1 = JSON2.read(parp.hgd1)
+  _hgd2 = JSON2.read(parp.hgd2)
+  PackedT1 = DFG.getTypeFromSerializationModule(_hgd1[Symbol("_type")])
+  PackedT2 = DFG.getTypeFromSerializationModule(_hgd2[Symbol("_type")])
+  # re-unpack into the local PackedT (marshalling)
+  # TODO check if there is perhaps optimization to marshal directly from _hgd instead - maybe `obj(;namedtuple...)`
+  phgd1 = JSON2.read(parp.hgd1, PackedT1)
+  phgd2 = JSON2.read(parp.hgd2, PackedT2)
+  # convert from packed schema friendly to local performance type
+  hgd1 = convert(SamplableBelief, phgd1)
+  hgd2 = convert(SamplableBelief, phgd2)
+  
+  # and build the final object
   ScatterAlignPose2(
-    covert(HeatmapGridDensity,parp.hgd1),
-    covert(HeatmapGridDensity,parp.hgd2),
+    hgd1,
+    hgd2,
     parp.gridscale,
     parp.sample_count,
     parp.bw )
