@@ -1,6 +1,18 @@
 # [Custom Factors](@id custom_factors)
 
-Julia's type inference allows overloading of member functions outside a module.  Therefore new factors can be defined at any time.  To better illustrate, in this example we will add new factors into the `Main` context **after** construction of the factor graph has already begun.
+Julia's type inference allows overloading of member functions outside a module.  Therefore new factors can be defined at any time.  
+
+
+| Required                                  | Brief description                                                                      |
+|:------------------------------------------|:-------------------------------------------------------------------------------------- |
+| `MyFactor`  struct                        | Prior (`<:AbstractPrior`) or Relative (`<:AbstractManifoldMinimize`) factor definition |
+| `getManifold`                             | The manifold of the factor |
+| `(cfo::CalcFactor{<:MyFactor})`           | Factor residual function |
+| **Optional methods**                      | **Brief description**                                                                  |
+| `getSample(cfo::CalcFactor{<:MyFactor})`  | Get a sample from the factor |
+
+
+To better illustrate, in this example we will add new factors into the `Main` context **after** construction of the factor graph has already begun.
 
 ```julia
 using IncrementalInference
@@ -41,29 +53,24 @@ end
 
 # import IncrementalInference: getSample
 # sampling function
-getSample(cfo::CalcFactor{<:MyPrior}, N::Int=1) = (reshape(rand(cfo.factor.Z,N),1,:), )
+getSample(cfo::CalcFactor{<:MyPrior}) = rand(cfo.factor.Z,1)[:]
 ```
 
 Note the following critical aspects that allows IIF to use the new definition:
 - `<:AbstractPrior` as a unary factor that introduces absolute (or gauge) information about only one variable.
 - `getSample` is overloaded with dispatch on:
-  - `(cfo::CalcFactor{<:MyPrior}, ::Int)`
-- `getSample` must return a `::Tuple`, even if there is only stochastic value (as is the case above).
-  - The first value in the tuple is special, and must be of type `<:AbstractMatrix{<:Real}`.  We ensure that with the `reshape`.
+  - `(cfo::CalcFactor{<:MyPrior})`
+- `getSample` must return a point on the manifold for `<:AbstractPrior` factors that matches the point representation of the variable.
 
-IIF internally uses the number of rows in the first element of the `getSample` return tuple (i.e. the matrix) to extract the measurement dimension for this factor.  In this case it is 1 dimensional.
-
-!!! note
-    `getSample` works similar for factors below.  If the measurement dimension is 2D (i.e. `zDim=2`) then you should not use `reshape(..., 1,N)` which would force the samples into a 1 row matrix.  The `reshape(.., 1,N)` in the above example is added as convenient way to convert from the `rand` return value a `::Array{Float64,1}` to the required `::Array{Float64,2}` type.
-
-To recap, the new `getSample` function in this example factor returns a measurement which is of type `::Tuple{::Matrix{Float64}}`.  The `::Tuple` is slightly clunky but was borne out of necessity to allow for versatility when multiple values from sampling are used during residual function evaluation.  Previous uses  include cases such as `::Tuple{<:Matrix, <:Vector, <:Function}`.
+To recap, the new `getSample` function in this example factor returns a measurement which is of type `::Vector{Float64}}`.
 
 ### Ready to Use
 
 This new prior can now readily be added to an ongoing factor graph:
 ```julia
 # lets generate a random nonparametric belief
-pts = 8 .+ 2*rand(1,75)
+
+pts = [samplePoint(getManifold(ContinuousEuclid{1}), Normal(8.0,2.0)) for _=1:75]
 someBelief = manikde!(pts, ContinuousEuclid{1})
 
 # and build your new factor as an object
@@ -72,7 +79,7 @@ myprior = MyPrior(someBelief)
 
 and add it to the existing factor graph from earlier, lets say:
 ```julia
-addFactor!(fg, :x1, myprior)
+addFactor!(fg, [:x1], myprior)
 ```
 
 Thats it, this factor is now part of the graph.  This should be a solvable graph:
@@ -94,7 +101,56 @@ The `cfo` object contains the field `.factor::T` which is the type of the user f
     Many factors already exists in `IncrementalInference`, `RoME`, and `Caesar`.  Please see their `src` directories for more details.
 
 
-## Relative Factors
+## Relative Factors on Manifolds
+### One Dimension Example
+
+Previously we looked at adding a prior.  This section demonstrates relative factors on manifold.  These are factors that introduce only relative information between variables in the factor graph.
+
+Lets look at the Pose2Pose2 factor available in RoME as an example.  First, lets create the factor as before 
+```julia
+struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+  Z::T
+end
+
+DFG.getManifold(::Pose2Pose2) = Manifolds.SpecialEuclidean(2)
+```
+
+Extending the `getSample` method for our new `Pose2Pose2` factor is optional in this case.
+The default behavior for sampling on `<:AbstractManifoldMinimize` factors defined on Group Manifolds is:
+- The returned value from `getSample` represents a tangent vector at the identity element.
+- The `SamplableBelief` shall be in the field `Z` and that shall be enough to fully define the factor.
+
+If more advanced sampling is required, the `getSample` function can be extended. 
+
+```julia
+function getSample(cf::CalcFactor{<:Pose2Pose2}) 
+  M = getManifold(cf.factor)
+  ϵ = getPointIdentity(Pose2)
+  X = sampleTangent(M, cf.factor.Z, ϵ)
+  return X
+end
+```
+
+The selection of `<:IIF.AbstractManifoldMinimize`, akin to earlier `<:AbstractPrior`, instructs IIF to find the minimum of the provided residual function.
+That is the one dimensional residual function, `residual = measurement - prediction`, is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.
+
+The returned value (the factor measurement) from getSample will always be passed as the first argument (`X`) in the factor calculation.
+The residual function should return a coordinate. 
+```julia
+function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
+    M = getManifold(Pose2)
+    q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X))
+    Xc = vee(M, q, log(M, q, q̂))
+    return Xc
+end
+```
+
+!!! note
+    Measurements and variables passed in to the factor residual function do not have the same type as when constructing the factor graph.  It is recommended to leave these incoming types unrestricted.  If you must define the types, these either are (or will be) of element type relating to the manifold on which the measurement or variable beliefs reside.  Probably a vector or manifolds type.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work for you. 
+
+[//]: # (#TODO ### Advanced Sampling)
+
+## Relative Factors (Legacy)
 ### One Dimension Roots Example
 
 Previously we looked at adding a prior.  This section demonstrates the first of two `<:AbstractRelative` factor types.  These are factors that introduce only relative information between variables in the factor graph.
