@@ -30,7 +30,8 @@ arp2 = ScatterAlignPose2(img1, img2, 2) # e.g. 2 meters/pixel
 
 See also: [`overlayScanMatcher`](@ref)
 """
-struct ScatterAlignPose2{H1<:HeatmapGridDensity,H2<:HeatmapGridDensity} <: IIF.AbstractManifoldMinimize
+Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity},
+                                      H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity} } <: IIF.AbstractManifoldMinimize
   """ reference image for scan matching. """
   hgd1::H1
   """ test image to scan match against the reference image. """
@@ -38,12 +39,13 @@ struct ScatterAlignPose2{H1<:HeatmapGridDensity,H2<:HeatmapGridDensity} <: IIF.A
   """ Common grid scale for both images -- i.e. units/pixel.  
   Constructor uses two arguments `gridlength`*`rescale=1`=`gridscale`.
   Arg 0 < `rescale` ≤ 1 is also used to rescale the images to lower resolution for speed. """
-  gridscale::Float64
+  gridscale::Float64 = 1.0
   """ how many heatmap sampled particles to use for mmd ailgnment """
-  sample_count::Int
+  sample_count::Int  = 100
   """ bandwidth to use for mmd """
-  bw::Float64
+  bw::Float64        = 1.0
 end
+
 
 # replace inner constructor with transform on image
 ScatterAlignPose2(im1::AbstractMatrix{T}, 
@@ -73,7 +75,6 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   # precalc SE2 points
   R0 = e0.parts[2]
 
-  ## FIXME REMOVE DEBUG + [20.0;-10]
   pts2_ = map(pt->ProductRepr(pt, R0), pts2)
 
   return pts1, pts2_, M #, e0
@@ -82,19 +83,18 @@ end
 function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, p, q)
   # 
 
-  # will move to CalcFactor, follow IIF #1415
-  M = Xtup[3]
-
-  pts1, pts2_ = Xtup[1], Xtup[2]
+  # get measured points 1 and 2, 
+  # TODO move M to CalcFactor, follow IIF #1415
+  pVi, qVj_, M = Xtup
 
   # get the current relative transform estimate
   pTq = Manifolds.compose(M, inv(M,p), q)
   
   # move other points with relative transform
-  pts2__ = map(i->Manifolds.compose(M, pTq, pts2_[i]).parts[1], 1:length(pts1))
-  
-  # cf._residual[1] = 
-  return Float64[mmd(M.manifold[1], pts1, pts2__, bw=SA[cf.factor.bw;]);]
+  _pVj_ = map(pt->Manifolds.compose(M, pTq, pt).parts[1], qVj_ )
+
+
+  return mmd(M.manifold[1], pVi, _pVj_, bw=SA[cf.factor.bw;])
 end
 
 function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
@@ -106,11 +106,14 @@ function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
   println(io, H2)
   printstyled(io, " }", color=:blue, bold=true)
   println(io)
-  println(io, "  size(.data):     ", size(sap.hgd1.data))
-  println(io, "    min/max:       ", round(minimum(sap.hgd1.data),digits=3), "/", round(maximum(sap.hgd1.data),digits=3))
-
-  println(io, "  size(.data):     ", size(sap.hgd2.data))
-  println(io, "    min/max:       ", round(minimum(sap.hgd2.data),digits=3), "/", round(maximum(sap.hgd2.data),digits=3))
+  if H1 <: HeatmapGridDensity
+    println(io, "  size(.data):     ", size(sap.hgd1.data))
+    println(io, "    min/max:       ", round(minimum(sap.hgd1.data),digits=3), "/", round(maximum(sap.hgd1.data),digits=3))
+  end
+  if H2 <: HeatmapGridDensity
+    println(io, "  size(.data):     ", size(sap.hgd2.data))
+    println(io, "    min/max:       ", round(minimum(sap.hgd2.data),digits=3), "/", round(maximum(sap.hgd2.data),digits=3))
+  end
 
   println(io, "  gridscale:       ", sap.gridscale)
   println(io, "  sample_count:    ", sap.sample_count)
@@ -132,55 +135,39 @@ Overlay the two images from `AlignRadarPose2` with the first (red) fixed and tra
 
 Notes:
 - `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
+- `user_offset` translates both are the same.
+
+See also: [`plotScatterAlign`](@ref)
 """
 function overlayScatter(sap::ScatterAlignPose2, 
                         trans::AbstractVector{<:Real}=[0;0.0],
                         rot::Real=0.0;
                         user_coords = [trans; rot],
-                        offsetTrans::AbstractVector{<:Real}=[0;0.0],
-                        user_offset = [offsetTrans;0.0],
                         score=Ref(0.0),
                         sample_count::Integer=sap.sample_count,
                         showscore::Bool=true,
                         findBest::Bool=true  )
   #
 
-  pts1_, = sample(sap.hgd1.densityFnc, sample_count)
-  pts2_, = sample(sap.hgd2.densityFnc, sample_count)
-  
-  # artificial offset for testing
-  # TODO must still add the rotation user_offset component (not critical)
-  for pt in pts2_ 
-    pt .+= user_offset[1:2]
-  end
-
   M = getManifold(Pose2Pose2)
   e0 = identity_element(M)
+  R0 = e0.parts[2]
+
   # not efficient, but okay for here
   pTq(xyr=user_coords) = exp(M, e0, hat(M, e0, xyr))
 
-  
-  R0 = e0.parts[2]
-  _pts2_nt = map(pt->ProductRepr(pt, R0), pts2_)
-  
-  # add user_offset
-  uo = exp(M, e0, hat(M, e0, user_offset))
-  _pts2_ = map(pt->Manifolds.compose(M, uo, pt), _pts2_nt)
-  for (i,pt) in enumerate(_pts2_)
-    pt.parts[2] .= R0
-    # overwrite original for updated return values
-    pts2_[i] .= pt.parts[1]
-  end
+  # sample points from the scatter field
+  pts1, = sample(sap.hgd1, sample_count)
+  pts2, = sample(sap.hgd2, sample_count)
 
-  # take p as reference identity
-  pts2T_ = map(pt->Manifolds.compose(M, pTq(), pt).parts[1], _pts2_)
+  pts2_ = map(pt->ProductRepr(pt, R0), pts2)
+
   best_coords = zeros(3)
-
   if findBest
     # keep tfg separately so that optim can be more efficient
     tfg = initfg()
     ev_(xyr) = calcFactorResidualTemporary( sap, (Pose2,Pose2),
-                                            (pts1_,_pts2_,M),
+                                            (pts1,pts2_,M),
                                             (e0,pTq(xyr));
                                             tfg )[1]
     #
@@ -189,18 +176,20 @@ function overlayScatter(sap::ScatterAlignPose2,
     best_coords .= round.(best.minimizer,digits=3)
 
     if showscore
-      @info "overlayScatter score" score[] string(best_coords) best.minimum user_offset
+      @info "overlayScatter score" score[] string(best_coords) best.minimum # user_offset
     end
   end
 
-  pts2T_best = map(pt->Manifolds.compose(M, pTq(best_coords), pt).parts[1], _pts2_)
+  # transform points1 to frame of 2 -- take p as coordinate expansion point
+  pts2T_u = map(pt->Manifolds.compose(M, pTq(), pt).parts[1], pts2_)
+  pts2T_b = map(pt->Manifolds.compose(M, pTq(best_coords), pt).parts[1], pts2_)
 
-  @cast pts1[i,j] := pts1_[j][i]
-  @cast pts2[i,j] := pts2_[j][i]
-  @cast pts2T[i,j] := pts2T_[j][i]
-  @cast pts2Tb[i,j] := pts2T_best[j][i]
+  @cast __pts1[i,j] := pts1[j][i]
+  @cast __pts2[i,j] := pts2[j][i]
+  @cast __pts2Tu[i,j] := pts2T_u[j][i]
+  @cast __pts2Tb[i,j] := pts2T_b[j][i]
 
-  (;pPp=pts1, qPq=pts2, pPq=pts2T, pPq_best=pts2Tb, best_coords, user_coords, user_offset)
+  (;pP1=__pts1, qP2=__pts2, pP2_u=__pts2Tu, pP2_b=__pts2Tb, best_coords, user_coords) #, user_offset)
 end
 
 
