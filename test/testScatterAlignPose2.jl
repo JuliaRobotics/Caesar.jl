@@ -7,6 +7,7 @@ using Distributions
 
 # test plotting helper functions
 using Gadfly
+using Random
 
 import Rotations as _Rot
 
@@ -49,7 +50,7 @@ sap = ScatterAlignPose2(img1, img2, (x,y); sample_count=100, bw=1.0)
 
 ## test plotting function
 
-snt = overlayScatterMutate(sap; sample_count=50, bw=1., user_coords=[-1.0;0;0.6]); # , user_offset=[0.;0;0.]);
+snt = overlayScatterMutate(sap; sample_count=50, bw=1., user_coords=[0.;0;0]); # , user_offset=[0.;0;0.]);
 plotScatterAlign(snt)
 
 ##
@@ -120,13 +121,15 @@ end
 
 # Points in XY only
 
-p1 = vcat([randn(2) for i in 1:50], [randn(2)+[0;10] for i in 1:50])
+p1 = vcat([randn(2) for i in 1:50], [randn(2)+[0;10] for i in 1:50], [randn(2)+[10;0] for i in 1:50])
+shuffle!(p1)
 P1 = manikde!(getManifold(Point2), p1)
 
-p2 = vcat([randn(2)+[10;0] for i in 1:50], [randn(2)+[10;10] for i in 1:50])
+p2 = vcat([randn(2)+[3;0] for i in 1:50], [randn(2)+[3;10] for i in 1:50], [randn(2)+[13;0] for i in 1:50])
+shuffle!(p2)
 P2 = manikde!(getManifold(Point2), p2)
 
-sap = ScatterAlignPose2(;hgd1=P1, hgd2=P2, sample_count=100, bw=1.0)
+sap = ScatterAlignPose2(;hgd1=P1, hgd2=P2, sample_count=100, bw=2.0)
 
 ##
 
@@ -137,7 +140,6 @@ addVariable!(fg, :x0, Pose2)
 addVariable!(fg, :x1, Pose2)
 
 addFactor!(fg, [:x0], PriorPose2(MvNormal([0.01;0.01;0.01])))
-
 
 ## check residual calculation
 
@@ -155,30 +157,35 @@ meas = sample(P1,100)[1], [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 
 
 ## check that optimize works (using the same tfg)
 
-# tfg = initfg()
-δ(x) = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,ProductRepr(x[1:2],_Rot.RotMatrix(x[3]))) )[1] #, tfg=tfg)[1]
+tfg = initfg()
+meas = sample(P1,100)[1], [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
+δ(x) = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,ProductRepr(x[1:2],_Rot.RotMatrix(x[3]))), tfg=tfg)[1]
 
 @show δ([0;0;0.])
 @show δ([1.;0;0.])
 
 @test !isapprox( δ([0;0;0.]), δ([1.;0;0.]), atol=1e-6 )
 
+
+## test plotting function
+
+snt = overlayScatterMutate(sap; sample_count=100, bw=2.0);
+plotScatterAlign(snt)
+
+
 ##
 
-r = Optim.optimize(δ,[0;0;0.])
-@test !isapprox( [0;0;0], r.minimizer; atol=1e-3 )
-
+# inverse for q --> p
+@test isapprox( [3;0], -snt.best_coords[1:2]; atol=1.0 )
+@test isapprox( 0, -snt.best_coords[3]; atol=0.5 )
 
 ##
+
+doautoinit!(fg, :x0)
 
 addFactor!(fg, [:x0;:x1], sap)
 X1 = approxConvBelief(fg, :x0x1f1, :x1)
 c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
-
-## test plotting function
-
-snt = overlayScatterMutate(sap; sample_count=100, bw=1.0);
-plotScatterAlign(snt);
 
 ##
 end
