@@ -49,13 +49,14 @@ sap = ScatterAlignPose2(img1, img2, (x,y); sample_count=100, bw=1.0)
 
 ## test plotting function
 
-snt = overlayScatterMutate(sap; sample_count=50, bw=1.0) #, user_coords=[1.0;0;0*pi/6]); # , user_offset=[0.;0;0.]);
+snt = overlayScatterMutate(sap; sample_count=50, bw=1., user_coords=[-1.0;0;0.6]); # , user_offset=[0.;0;0.]);
 plotScatterAlign(snt)
 
 ##
 
-@test isapprox( oT, snt.best_coords[1:2]; atol=0.3 )
-@test isapprox( oΨ, snt.best_coords[3]; atol=0.2 )
+# inverse for q --> p
+@test isapprox( oT, -snt.best_coords[1:2]; atol=0.3 )
+@test isapprox( oΨ, -snt.best_coords[3]; atol=0.2 )
 
 
 
@@ -93,20 +94,21 @@ meas = sample(sap.hgd1,100)[1], [ProductRepr(sample(sap.hgd2,1)[1][1],[1 0; 0 1.
 ## use in graph
 
 fg = initfg()
+getSolverParams(fg).inflateCycles=1
 
 addVariable!(fg, :x0, Pose2)
 addVariable!(fg, :x1, Pose2)
 
 addFactor!(fg, [:x0;], PriorPose2(MvNormal([0.01;0.01;0.01])))
-addFactor!(fg, [:x0;:x1], sap)
+addFactor!(fg, [:x0;:x1], sap, inflation=0.0)
 
 X1 = approxConvBelief(fg, :x0x1f1, :x1)
 
 c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
 
-@warn "skipping numerical check on ScatterAlignPose2 convolution test" c1
-# @test isapprox( [-1;0], c1[1:2], atol=1.0 )
-# @test isapprox( 0, c1[3], atol=0.5 )
+# @warn "skipping numerical check on ScatterAlignPose2 convolution test" c1
+@test isapprox( [-2;0], c1[1:2], atol=0.5 )
+@test isapprox( -0.58, c1[3], atol=0.3 )
 
 
 ##
@@ -129,6 +131,7 @@ sap = ScatterAlignPose2(;hgd1=P1, hgd2=P2, sample_count=100, bw=1.0)
 ##
 
 fg = initfg()
+getSolverParams(fg).inflateCycles=1
 
 addVariable!(fg, :x0, Pose2)
 addVariable!(fg, :x1, Pose2)
@@ -141,10 +144,10 @@ addFactor!(fg, [:x0], PriorPose2(MvNormal([0.01;0.01;0.01])))
 # see #1415
 M = getManifold(sap)
 e0 = identity_element(M)
-meas = [ProductRepr([0;0.],[1 0; 0 1.]) for _ in 1:100], sample(P2,100)[1], M
+meas = sample(P1,100)[1], [ProductRepr([0;0.],[1 0; 0 1.]) for _ in 1:100], M
 δ1 = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,e0))
 
-meas = [ProductRepr(sample(P1,1)[1][1],[1 0; 0 1.]) for _ in 1:100], sample(P2,100)[1], M
+meas = sample(P1,100)[1], [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
 δ2 = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,e0))
 
 # check different cloud samplings produce different residual values

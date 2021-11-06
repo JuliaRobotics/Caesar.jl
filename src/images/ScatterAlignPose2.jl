@@ -172,7 +172,7 @@ function overlayScatter(sap::ScatterAlignPose2,
                                             tfg )[1]
     #
     score[] = ev_(user_coords)
-    best = Optim.optimize(ev_, user_coords)
+    best = Optim.optimize(ev_, user_coords, BFGS())
     best_coords .= round.(best.minimizer,digits=3)
 
     if showscore
