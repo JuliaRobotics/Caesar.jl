@@ -4,6 +4,7 @@ using Test
 using Images
 using Caesar
 using Distributions
+using Manifolds
 
 # test plotting helper functions
 using Gadfly
@@ -22,27 +23,29 @@ x = -10:0.1:10;
 
 σ = 0.1
 
-g = (x,y)->pdf(MvNormal([σ;σ]),[x;y]) + pdf(MvNormal([5;0.0],[σ;σ]),[x;y]) + pdf(MvNormal([0;5.0],[σ;σ]),[x;y])
+g = (x,y)->pdf(MvNormal([3.;0],[σ;σ]),[x;y]) + pdf(MvNormal([8.;0.0],[σ;σ]),[x;y]) + pdf(MvNormal([0;5.0],[σ;σ]),[x;y])
 
-img1 = zeros(length(x),length(y))
-img2 = zeros(length(x),length(y))
+bIM1 = zeros(length(x),length(y))
+bIM2 = zeros(length(x),length(y))
 
 oT = [2.; 0]
-oΨ = pi/6
+oΨ =  pi/6
 
-pTq = zeros(3,3)
-pTq[3,3] = 1
-pTq[1:2,1:2] .= _Rot.RotMatrix(oΨ)
-pTq[1:2,3] .= oT
+M = SpecialEuclidean(2)
+e0 = identity_element(M)
+pCq = [oT;oΨ]
+pTq = affine_matrix(M, exp(M, e0, hat(M, e0, pCq)))
+
+##
 
 for (i,x_) in enumerate(x), (j,y_) in enumerate(y)
-  img1[i,j] = g(x_,y_)
+  bIM1[i,j] = g(x_,y_)
   v = pTq*[x_;y_;1.0]
   _x_, _y_ = v[1], v[2]
-  img2[i,j] = g(_x_, _y_)  # shifted by +1
+  bIM2[i,j] = g(_x_, _y_)
 end
 
-sap = ScatterAlignPose2(img1, img2, (x,y); sample_count=100, bw=1.0)
+sap = ScatterAlignPose2(bIM1, bIM2, (x,y); sample_count=100, bw=1.0, cvt=(im)->im)
 
 # requires IIF at least v0.25.6
 @test sample(sap.hgd1,1) isa Tuple
@@ -51,13 +54,13 @@ sap = ScatterAlignPose2(img1, img2, (x,y); sample_count=100, bw=1.0)
 ## test plotting function
 
 snt = overlayScatterMutate(sap; sample_count=50, bw=1., user_coords=[0.;0;0]); # , user_offset=[0.;0;0.]);
-plotScatterAlign(snt)
+plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 
 ##
 
 # inverse for q --> p
-@test isapprox( oT, -snt.best_coords[1:2]; atol=0.3 )
-@test isapprox( oΨ, -snt.best_coords[3]; atol=0.2 )
+@test isapprox( oT, snt.best_coords[1:2]; atol=0.3 )
+@test isapprox( oΨ, snt.best_coords[3]; atol=0.2 )
 
 
 
@@ -108,8 +111,8 @@ X1 = approxConvBelief(fg, :x0x1f1, :x1)
 c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
 
 # @warn "skipping numerical check on ScatterAlignPose2 convolution test" c1
-@test isapprox( [-2;0], c1[1:2], atol=0.5 )
-@test isapprox( -0.58, c1[3], atol=0.3 )
+@test isapprox( oT, c1[1:2], atol=0.5 )
+@test isapprox( oΨ, c1[3],   atol=0.3 )
 
 
 ##
@@ -119,6 +122,18 @@ end
 @testset "test ScatterAlignPose2 with MKD direct" begin
 ##
 
+# setup
+
+oT = [2.; 0]
+oΨ =  pi/6
+
+M = SpecialEuclidean(2)
+e0 = identity_element(M)
+pCq = [oT;oΨ]
+pTq = affine_matrix(M, exp(M, e0, hat(M, e0, pCq)))
+
+##
+
 # Points in XY only
 
 p1 = vcat([randn(2) for i in 1:50], [randn(2)+[0;10] for i in 1:50], [randn(2)+[10;0] for i in 1:50])
@@ -126,6 +141,13 @@ shuffle!(p1)
 P1 = manikde!(getManifold(Point2), p1)
 
 p2 = vcat([randn(2)+[3;0] for i in 1:50], [randn(2)+[3;10] for i in 1:50], [randn(2)+[13;0] for i in 1:50])
+
+# adjust points
+for (i,pt) in enumerate(p2)
+  v = pTq*[pt;1.0]
+  pt[1:2] .= v[1:2]
+end
+
 shuffle!(p2)
 P2 = manikde!(getManifold(Point2), p2)
 
@@ -144,8 +166,6 @@ addFactor!(fg, [:x0], PriorPose2(MvNormal([0.01;0.01;0.01])))
 ## check residual calculation
 
 # see #1415
-M = getManifold(sap)
-e0 = identity_element(M)
 meas = sample(P1,100)[1], [ProductRepr([0;0.],[1 0; 0 1.]) for _ in 1:100], M
 δ1 = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,e0))
 
@@ -170,14 +190,14 @@ meas = sample(P1,100)[1], [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 
 ## test plotting function
 
 snt = overlayScatterMutate(sap; sample_count=100, bw=2.0);
-plotScatterAlign(snt)
+plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 
 
 ##
 
 # inverse for q --> p
-@test isapprox( [3;0], -snt.best_coords[1:2]; atol=1.0 )
-@test isapprox( 0, -snt.best_coords[3]; atol=0.5 )
+@test isapprox( oT, snt.best_coords[1:2]; atol=1.0 )
+@test isapprox( oΨ,   snt.best_coords[3]; atol=0.5 )
 
 ##
 

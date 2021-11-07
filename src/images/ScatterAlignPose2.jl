@@ -18,7 +18,8 @@ This is but one incarnation for how radar alignment factor could work, treat it 
 
 Notes
 - Stanard `cvt` argument is lambda function to convert incoming images to user convention of image axes,
-  - default `cvt` flips image rows so that Pose2 xy-axes corresponds to img[x,y] -- i.e. rows down and across from top left corner.
+  - **Geography map default** `cvt` flips image rows so that Pose2 +xy-axes corresponds to img[-x,+y]
+    - i.e. rows down is "North" and columns across from top left corner is "East".
 - Use rescale to resize the incoming images for lower resolution (faster) correlations
 - Both images passed to the construct must have the same type some matrix of type `T`.
 
@@ -91,10 +92,10 @@ function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, p, q)
   pTq = Manifolds.compose(M, inv(M,p), q)
   
   # move other points with relative transform
-  _pVj_ = map(pt->Manifolds.compose(M, pTq, pt).parts[1], qVj_ )
+  pVj = map( pt->Manifolds.compose(M, pTq, pt).parts[1], qVj_ )
 
-
-  return mmd(M.manifold[1], pVi, _pVj_, bw=SA[cf.factor.bw;])
+  # return mmd as residual for minimization
+  return mmd(M.manifold[1], pVi, pVj, bw=SA[cf.factor.bw;])
 end
 
 function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
