@@ -57,10 +57,11 @@ ScatterAlignPose2(im1::AbstractMatrix{T},
                   rescale::Real=1,
                   N::Integer=1000,
                   cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
-                ) where {T} = ScatterAlignPose2(HeatmapGridDensity(cvt(im1),domain,N=N), 
-                                                HeatmapGridDensity(cvt(im2),domain,N=N),
-                                                float(rescale),
-                                                sample_count, bw  )
+                ) where {T} = ScatterAlignPose2(;hgd1=HeatmapGridDensity(cvt(im1),domain,N=N), 
+                                                hgd2=HeatmapGridDensity(cvt(im2),domain,N=N),
+                                                gridscale=float(rescale),
+                                                sample_count, 
+                                                bw  )
 #
 
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
@@ -81,6 +82,7 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   return pts1, pts2_, M #, e0
 end
 
+
 function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, p, q)
   # 
 
@@ -89,7 +91,7 @@ function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, p, q)
   pVi, qVj_, M = Xtup
 
   # get the current relative transform estimate
-  pTq = Manifolds.compose(M, inv(M,p), q)
+  pTq = inv(M, Manifolds.compose(M, inv(M,p), q))
   
   # move other points with relative transform
   pVj = map( pt->Manifolds.compose(M, pTq, pt).parts[1], qVj_ )
@@ -97,6 +99,7 @@ function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, p, q)
   # return mmd as residual for minimization
   return mmd(M.manifold[1], pVi, pVj, bw=SA[cf.factor.bw;])
 end
+
 
 function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
   printstyled(io, "ScatterAlignPose2{", bold=true, color=:blue)
@@ -150,25 +153,28 @@ function overlayScatter(sap::ScatterAlignPose2,
                         findBest::Bool=true  )
   #
 
-  M = getManifold(Pose2Pose2)
+  # # sample points from the scatter field
+  tfg = initfg()
+  addVariable!(tfg, :x0, Pose2)
+  addVariable!(tfg, :x1, Pose2)
+  addFactor!(tfg, [:x0;:x1], sap; graphinit=false)
+  meas = sampleFactor(tfg, :x0x1f1)[1]
+  
+  pts1, pts2_, M = meas
+  pts2 = map(pt->pt.parts[1], pts2_)
   e0 = identity_element(M)
-  R0 = e0.parts[2]
+  # R0 = e0.parts[2]
 
   # not efficient, but okay for here
   pTq(xyr=user_coords) = exp(M, e0, hat(M, e0, xyr))
 
-  # sample points from the scatter field
-  pts1, = sample(sap.hgd1, sample_count)
-  pts2, = sample(sap.hgd2, sample_count)
-
-  pts2_ = map(pt->ProductRepr(pt, R0), pts2)
 
   best_coords = zeros(3)
   if findBest
     # keep tfg separately so that optim can be more efficient
-    tfg = initfg()
+    # tfg = initfg()
     ev_(xyr) = calcFactorResidualTemporary( sap, (Pose2,Pose2),
-                                            (pts1,pts2_,M),
+                                            meas,
                                             (e0,pTq(xyr));
                                             tfg )[1]
     #
@@ -182,8 +188,8 @@ function overlayScatter(sap::ScatterAlignPose2,
   end
 
   # transform points1 to frame of 2 -- take p as coordinate expansion point
-  pts2T_u = map(pt->Manifolds.compose(M, pTq(), pt).parts[1], pts2_)
-  pts2T_b = map(pt->Manifolds.compose(M, pTq(best_coords), pt).parts[1], pts2_)
+  pts2T_u = map(pt->Manifolds.compose(M, inv(M, pTq()), pt).parts[1], pts2_)
+  pts2T_b = map(pt->Manifolds.compose(M, inv(M, pTq(best_coords)), pt).parts[1], pts2_)
 
   @cast __pts1[i,j] := pts1[j][i]
   @cast __pts2[i,j] := pts2[j][i]

@@ -34,13 +34,16 @@ oΨ =  pi/6
 M = SpecialEuclidean(2)
 e0 = identity_element(M)
 pCq = [oT;oΨ]
-pTq = affine_matrix(M, exp(M, e0, hat(M, e0, pCq)))
+qGp = inv(M, exp(M, e0, hat(M, e0, pCq)))
+qTp = affine_matrix(M, qGp )
+
+qCp = vee(M, e0, log(M, e0, qGp))
 
 ##
 
 for (i,x_) in enumerate(x), (j,y_) in enumerate(y)
   bIM1[i,j] = g(x_,y_)
-  v = pTq*[x_;y_;1.0]
+  v = qTp*[x_;y_;1.0]
   _x_, _y_ = v[1], v[2]
   bIM2[i,j] = g(_x_, _y_)
 end
@@ -53,14 +56,14 @@ sap = ScatterAlignPose2(bIM1, bIM2, (x,y); sample_count=100, bw=1.0, cvt=(im)->i
 
 ## test plotting function
 
-snt = overlayScatterMutate(sap; sample_count=50, bw=1., user_coords=[0.;0;0]); # , user_offset=[0.;0;0.]);
+snt = overlayScatterMutate(sap; sample_count=50, bw=1., user_coords=[0.;0;0*pi/6]); # , user_offset=[0.;0;0.]);
 plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 
 ##
 
 # inverse for q --> p
-@test isapprox( oT, snt.best_coords[1:2]; atol=0.3 )
-@test isapprox( oΨ, snt.best_coords[3]; atol=0.2 )
+@test isapprox( pCq[1:2], snt.best_coords[1:2]; atol=0.3 )
+@test isapprox( pCq[3], snt.best_coords[3]; atol=0.2 )
 
 
 
@@ -94,8 +97,7 @@ meas = sample(sap.hgd1,100)[1], [ProductRepr(sample(sap.hgd2,1)[1][1],[1 0; 0 1.
 @test !isapprox( δ([0;0;0.]), δ([0;0;0.1]), atol=1e-6 )
 
 
-
-## use in graph
+## build into graph
 
 fg = initfg()
 getSolverParams(fg).inflateCycles=1
@@ -106,17 +108,29 @@ addVariable!(fg, :x1, Pose2)
 addFactor!(fg, [:x0;], PriorPose2(MvNormal([0.01;0.01;0.01])))
 addFactor!(fg, [:x0;:x1], sap, inflation=0.0)
 
+## use in graph
+
 X1 = approxConvBelief(fg, :x0x1f1, :x1)
 
 c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
+@show c1
 
-# @warn "skipping numerical check on ScatterAlignPose2 convolution test" c1
-@test isapprox( oT, c1[1:2], atol=0.5 )
-@test isapprox( oΨ, c1[3],   atol=0.3 )
+##
+
+@test isapprox( pCq[1:2], c1[1:2], atol=0.5 )
+@test isapprox( pCq[3], c1[3],   atol=0.3 )
 
 
 ##
 end
+
+
+
+
+
+
+
+
 
 
 @testset "test ScatterAlignPose2 with MKD direct" begin
@@ -130,28 +144,40 @@ oΨ =  pi/6
 M = SpecialEuclidean(2)
 e0 = identity_element(M)
 pCq = [oT;oΨ]
-pTq = affine_matrix(M, exp(M, e0, hat(M, e0, pCq)))
+qTp = affine_matrix(M, exp(M, e0, hat(M, e0, pCq)))
 
 ##
 
 # Points in XY only
 
-p1 = vcat([randn(2) for i in 1:50], [randn(2)+[0;10] for i in 1:50], [randn(2)+[10;0] for i in 1:50])
+# g = (x,y)->pdf(MvNormal([3.;0],[σ;σ]),[x;y]) + pdf(MvNormal([8.;0.0],[σ;σ]),[x;y]) + pdf(MvNormal([0;5.0],[σ;σ]),[x;y])
+p1 = vcat([0.1*randn(2).+[3;0.] for i in 1:50], [0.1*randn(2)+[8.;0] for i in 1:50], [0.1*randn(2)+[0;5.] for i in 1:50])
+# foreach(pt->(pt[1] += 100), p1)
 shuffle!(p1)
 P1 = manikde!(getManifold(Point2), p1)
 
-p2 = vcat([randn(2)+[3;0] for i in 1:50], [randn(2)+[3;10] for i in 1:50], [randn(2)+[13;0] for i in 1:50])
-
+p2 = vcat([0.1*randn(2).+[3;0.] for i in 1:50], [0.1*randn(2)+[8.;0] for i in 1:50], [0.1*randn(2)+[0;5.] for i in 1:50])
+# foreach(pt->(pt[1] += 100), p2)
 # adjust points
 for (i,pt) in enumerate(p2)
-  v = pTq*[pt;1.0]
+  v = qTp*[pt;1.0]
   pt[1:2] .= v[1:2]
 end
-
 shuffle!(p2)
 P2 = manikde!(getManifold(Point2), p2)
 
-sap = ScatterAlignPose2(;hgd1=P1, hgd2=P2, sample_count=100, bw=2.0)
+sap = ScatterAlignPose2(;hgd1=P1, hgd2=P2, sample_count=100, bw=1.0)
+
+## test plotting function
+
+snt = overlayScatterMutate(sap; sample_count=100, bw=2.0, user_coords=[0.;0;0*pi/6]);
+plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
+
+##
+
+# inverse for q --> p
+@test isapprox( oT, snt.best_coords[1:2]; atol=1.0 )
+@test isapprox( oΨ,   snt.best_coords[3]; atol=0.5 )
 
 ##
 
@@ -162,6 +188,7 @@ addVariable!(fg, :x0, Pose2)
 addVariable!(fg, :x1, Pose2)
 
 addFactor!(fg, [:x0], PriorPose2(MvNormal([0.01;0.01;0.01])))
+addFactor!(fg, [:x0;:x1], sap, inflation=0.0)
 
 ## check residual calculation
 
@@ -178,7 +205,8 @@ meas = sample(P1,100)[1], [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 
 ## check that optimize works (using the same tfg)
 
 tfg = initfg()
-meas = sample(P1,100)[1], [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
+# meas = sample(P1,100)[1], [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
+meas = sampleFactor(fg, :x0x1f1)[1]
 δ(x) = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,ProductRepr(x[1:2],_Rot.RotMatrix(x[3]))), tfg=tfg)[1]
 
 @show δ([0;0;0.])
@@ -187,25 +215,17 @@ meas = sample(P1,100)[1], [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 
 @test !isapprox( δ([0;0;0.]), δ([1.;0;0.]), atol=1e-6 )
 
 
-## test plotting function
-
-snt = overlayScatterMutate(sap; sample_count=100, bw=2.0);
-plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
-
-
 ##
 
-# inverse for q --> p
-@test isapprox( oT, snt.best_coords[1:2]; atol=1.0 )
-@test isapprox( oΨ,   snt.best_coords[3]; atol=0.5 )
-
-##
-
-doautoinit!(fg, :x0)
-
-addFactor!(fg, [:x0;:x1], sap)
 X1 = approxConvBelief(fg, :x0x1f1, :x1)
 c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
+@show c1
+
+##
+
+@test isapprox( pCq[1:2], c1[1:2], atol=0.5 )
+@test isapprox( pCq[3], c1[3],   atol=0.3 )
+
 
 ##
 end
