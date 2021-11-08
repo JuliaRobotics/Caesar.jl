@@ -26,7 +26,7 @@ function plotScatterAlign(snt::NamedTuple; title::String="")
   ar = Gadfly.Coord.cartesian(; aspect_ratio=1)
   H1 = Gadfly.plot(pP1, qP2,      ar, Guide.title("body frame data."*title))
   H2 = Gadfly.plot(pP1, pP2_u,    ar, Guide.title("User transform: $(round.(snt.user_coords,digits=3))"))
-  H3 = Gadfly.plot(pP1, pP2_b,    ar, Guide.title("Best fit: $(snt.best_coords)"))
+  H3 = Gadfly.plot(pP1, pP2_b,    ar, Guide.title("Best fit: $(snt.best_coords)\nscore=$(snt.score)"))
   
   hstack(H1,H2, H3)
 end

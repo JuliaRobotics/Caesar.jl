@@ -74,6 +74,7 @@ using Serialization
 using FixedPointNumbers
 using StaticArrays
 using ImageMagick, FileIO
+using Images
 
 using ImageDraw
 
@@ -387,9 +388,19 @@ addBlobStore!(fg, ds)
 ## load one of the PointCloud sets
 
 de,db = getData(fg, :x0, :RADAR_SWEEP)
-
 sweep = deserialize(PipeBuffer(db)) # BSON.@load
+XY = map(pt->pt.data[1:2], sweep.points)
+XY_ = filter(pt->10 < norm(pt), XY)
+r0 = manikde!(getManifold(Point2), XY_, bw=[2;2.])
 
+##
+
+sap = ScatterAlignPose2(;hgd1=r0, hgd2=r10)
+
+## show factor alignment plots
+
+snt = overlayScatterMutate(sap; sample_count=300, bw=0.0001, user_coords=[-50.;0;0]);
+plotScatterAlign(snt;title="\n#smpl=$(300)")
 
 ## visualize the radar data
 
