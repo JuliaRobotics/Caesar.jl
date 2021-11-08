@@ -34,9 +34,9 @@ See also: [`overlayScanMatcher`](@ref)
 Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity},
                                       H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity} } <: IIF.AbstractManifoldMinimize
   """ reference image for scan matching. """
-  hgd1::H1
+  cloud1::H1
   """ test image to scan match against the reference image. """
-  hgd2::H2
+  cloud2::H2
   """ Common grid scale for both images -- i.e. units/pixel.  
   Constructor uses two arguments `gridlength`*`rescale=1`=`gridscale`.
   Arg 0 < `rescale` ≤ 1 is also used to rescale the images to lower resolution for speed. """
@@ -57,8 +57,8 @@ ScatterAlignPose2(im1::AbstractMatrix{T},
                   rescale::Real=1,
                   N::Integer=1000,
                   cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
-                ) where {T} = ScatterAlignPose2(;hgd1=HeatmapGridDensity(cvt(im1),domain,N=N), 
-                                                hgd2=HeatmapGridDensity(cvt(im2),domain,N=N),
+                ) where {T} = ScatterAlignPose2(;cloud1=HeatmapGridDensity(cvt(im1),domain,N=N), 
+                                                cloud2=HeatmapGridDensity(cvt(im2),domain,N=N),
                                                 gridscale=float(rescale),
                                                 sample_count, 
                                                 bw  )
@@ -68,8 +68,8 @@ getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 
 function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
-  pts1, = sample(cf.factor.hgd1, cf.factor.sample_count)
-  pts2, = sample(cf.factor.hgd2, cf.factor.sample_count)
+  pts1, = sample(cf.factor.cloud1, cf.factor.sample_count)
+  pts2, = sample(cf.factor.cloud2, cf.factor.sample_count)
   
   M = getManifold(Pose2)
   e0 = ProductRepr(SA[0 0.0], SMatrix{2,2}(1.0, 0, 0, 1))
@@ -111,12 +111,12 @@ function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
   printstyled(io, " }", color=:blue, bold=true)
   println(io)
   if H1 <: HeatmapGridDensity
-    println(io, "  size(.data):     ", size(sap.hgd1.data))
-    println(io, "    min/max:       ", round(minimum(sap.hgd1.data),digits=3), "/", round(maximum(sap.hgd1.data),digits=3))
+    println(io, "  size(.data):     ", size(sap.cloud1.data))
+    println(io, "    min/max:       ", round(minimum(sap.cloud1.data),digits=3), "/", round(maximum(sap.cloud1.data),digits=3))
   end
   if H2 <: HeatmapGridDensity
-    println(io, "  size(.data):     ", size(sap.hgd2.data))
-    println(io, "    min/max:       ", round(minimum(sap.hgd2.data),digits=3), "/", round(maximum(sap.hgd2.data),digits=3))
+    println(io, "  size(.data):     ", size(sap.cloud2.data))
+    println(io, "    min/max:       ", round(minimum(sap.cloud2.data),digits=3), "/", round(maximum(sap.cloud2.data),digits=3))
   end
 
   println(io, "  gridscale:       ", sap.gridscale)
@@ -205,7 +205,7 @@ function overlayScatterMutate(sap_::ScatterAlignPose2;
                               bw::Real = sap_.bw,
                               kwargs... )
   #
-  sap = ScatterAlignPose2(sap_.hgd1, sap_.hgd2, sap_.gridscale, sample_count, float(bw))
+  sap = ScatterAlignPose2(sap_.cloud1, sap_.cloud2, sap_.gridscale, sample_count, float(bw))
   Caesar.overlayScatter(sap; kwargs...);
 end
 
@@ -215,22 +215,22 @@ end
 ## =========================================================================================
 
 Base.@kwdef struct PackedScatterAlignPose2 <: PackedInferenceType
-  hgd1::String # PackedHeatmapGridDensity # change to String
-  hgd2::String # PackedHeatmapGridDensity # change to String
+  cloud1::String # PackedHeatmapGridDensity # change to String
+  cloud2::String # PackedHeatmapGridDensity # change to String
   gridscale::Float64 = 1.0
   sample_count::Int = 50
   bw::Float64 = 0.01
 end
 
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
-  hgd1 = convert(PackedHeatmapGridDensity,arp.hgd1)
-  hgd2 = convert(PackedHeatmapGridDensity,arp.hgd2)
-  hgd1_ = JSON2.write(hgd1)
-  hgd2_ = JSON2.write(hgd2)
+  cloud1 = convert(PackedHeatmapGridDensity,arp.cloud1)
+  cloud2 = convert(PackedHeatmapGridDensity,arp.cloud2)
+  cloud1_ = JSON2.write(cloud1)
+  cloud2_ = JSON2.write(cloud2)
 
   PackedScatterAlignPose2(;
-    hgd1 = hgd1_,
-    hgd2 = hgd2_,
+    cloud1 = cloud1_,
+    cloud2 = cloud2_,
     gridscale = arp.gridscale,
     sample_count = arp.sample_count,
     bw = arp.bw )
@@ -238,22 +238,22 @@ end
 
 function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
   # first understand the schema friendly belief type to unpack
-  _hgd1 = JSON2.read(parp.hgd1)
-  _hgd2 = JSON2.read(parp.hgd2)
-  PackedT1 = DFG.getTypeFromSerializationModule(_hgd1[Symbol("_type")])
-  PackedT2 = DFG.getTypeFromSerializationModule(_hgd2[Symbol("_type")])
+  _cloud1 = JSON2.read(parp.cloud1)
+  _cloud2 = JSON2.read(parp.cloud2)
+  PackedT1 = DFG.getTypeFromSerializationModule(_cloud1[Symbol("_type")])
+  PackedT2 = DFG.getTypeFromSerializationModule(_cloud2[Symbol("_type")])
   # re-unpack into the local PackedT (marshalling)
-  # TODO check if there is perhaps optimization to marshal directly from _hgd instead - maybe `obj(;namedtuple...)`
-  phgd1 = JSON2.read(parp.hgd1, PackedT1)
-  phgd2 = JSON2.read(parp.hgd2, PackedT2)
+  # TODO check if there is perhaps optimization to marshal directly from _cloud instead - maybe `obj(;namedtuple...)`
+  pcloud1 = JSON2.read(parp.cloud1, PackedT1)
+  pcloud2 = JSON2.read(parp.cloud2, PackedT2)
   # convert from packed schema friendly to local performance type
-  hgd1 = convert(SamplableBelief, phgd1)
-  hgd2 = convert(SamplableBelief, phgd2)
+  cloud1 = convert(SamplableBelief, pcloud1)
+  cloud2 = convert(SamplableBelief, pcloud2)
   
   # and build the final object
   ScatterAlignPose2(
-    hgd1,
-    hgd2,
+    cloud1,
+    cloud2,
     parp.gridscale,
     parp.sample_count,
     parp.bw )
