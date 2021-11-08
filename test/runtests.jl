@@ -23,3 +23,4 @@ using Caesar, Caesar.ZmqCaesar
 end
 
 
+include("testScatterAlignPose2.jl")
