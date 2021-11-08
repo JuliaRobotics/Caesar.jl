@@ -277,6 +277,7 @@ function main(;iters::Integer=50)
 
     # Initialization
     fg = initfg()
+    getSolverParams(fg).inflateCycles=1
 
     ds = FolderStore{Vector{UInt8}}(:radar, "$dfg_datafolder/data/radar")
     addBlobStore!(fg, ds)

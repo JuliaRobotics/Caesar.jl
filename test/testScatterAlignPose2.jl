@@ -51,8 +51,8 @@ end
 sap = ScatterAlignPose2(bIM1, bIM2, (x,y); sample_count=100, bw=1.0, cvt=(im)->im)
 
 # requires IIF at least v0.25.6
-@test sample(sap.hgd1,1) isa Tuple
-@test sample(sap.hgd2,10)[1] isa AbstractArray
+@test sample(sap.cloud1,1) isa Tuple
+@test sample(sap.cloud2,10)[1] isa AbstractArray
 
 ## test plotting function
 
@@ -76,8 +76,8 @@ sap_ = convert(ScatterAlignPose2, psap);
 @test sap.sample_count == sap_.sample_count
 @test sap.bw == sap_.bw
 
-@test isapprox(sap.hgd1, sap_.hgd1, mmd_tol=1e-2)
-@test isapprox(sap.hgd2, sap_.hgd2, mmd_tol=1e-2)
+@test isapprox(sap.cloud1, sap_.cloud1, mmd_tol=1e-2)
+@test isapprox(sap.cloud2, sap_.cloud2, mmd_tol=1e-2)
 
 ## check that optimize works (using the same tfg)
 
@@ -85,7 +85,7 @@ tfg = initfg()
 getSolverParams(tfg).attemptGradients = false
 M = getManifold(sap)
 e0 = identity_element(M)
-meas = sample(sap.hgd1,100)[1], [ProductRepr(sample(sap.hgd2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
+meas = sample(sap.cloud1,100)[1], [ProductRepr(sample(sap.cloud2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
 δ(x) = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,ProductRepr(x[1:2],_Rot.RotMatrix(x[3]))) , tfg=tfg)[1]
 
 @show δ([0;0;0.]);
@@ -166,7 +166,7 @@ end
 shuffle!(p2)
 P2 = manikde!(getManifold(Point2), p2)
 
-sap = ScatterAlignPose2(;hgd1=P1, hgd2=P2, sample_count=100, bw=1.0)
+sap = ScatterAlignPose2(;cloud1=P1, cloud2=P2, sample_count=100, bw=1.0)
 
 ## test plotting function
 
