@@ -99,7 +99,7 @@ Base.@kwdef mutable struct SystemState
     var_index::Int = 0
     lidar_scan_index::Int = 0
     max_lidar::Int = 3
-    radar_scan_queue::Channel{sensor_msgs.msg.PointCloud2} = Channel{sensor_msgs.msg.PointCloud2}(60)
+    radar_scan_queue::Channel{sensor_msgs.msg.PointCloud2} = Channel{sensor_msgs.msg.PointCloud2}(64)
     # SystemState() = new(-1000, nothing, 0, 0, 3)
 end
 
@@ -148,7 +148,7 @@ end
 Message callback for Radar pings. Adds a variable to the factor graph and appends the scan as a bigdata element.
 """
 function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDFG, systemstate::SystemState)
-    @info "handleRadarPointcloud" maxlog=10
+    @info "handleRadarPointcloud!" maxlog=100
 
     # assume there is still space (previously cleared)
     # add new piece of radar point cloud to queue for later processing.
@@ -173,7 +173,6 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
 
     for i in 1:length(systemstate.radar_scan_queue.data)
         # something minimal, will do util for transforming PointCloud2 next
-        println(i)
         md = take!(systemstate.radar_scan_queue)
         # @info typeof(md) fieldnames(typeof(md))
         pc2 = Caesar._PCL.PCLPointCloud2(md)
@@ -186,7 +185,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
     # add a new variable to the graph
     timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/1.0e9
     systemstate.curtimestamp = timestamp
-    systemstate.cur_variable = addVariable!(fg, Symbol("x$(systemstate.var_index)"), Pose2, timestamp = unix2datetime(timestamp))
+    systemstate.cur_variable = addVariable!(fg, Symbol("x$(systemstate.var_index)"), Pose2, timestamp = unix2datetime(timestamp), tags=[:POSE])
     systemstate.var_index += 1
 
     io = IOBuffer()
@@ -364,7 +363,7 @@ end
 ##
 
 
-main(iters=1500)
+main(iters=20000)
 
 
 ## after the graph is saved it can be loaded and the datastores retrieved
@@ -384,11 +383,18 @@ ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
 addBlobStore!(fg, ds)
 
 
+
 ## load one of the PointCloud sets
 
 de,db = getData(fg, :x0, :RADAR_SWEEP)
 
 sweep = deserialize(PipeBuffer(db)) # BSON.@load
+
+
+## visualize the radar data
+
+imgs = map(x->Gray{N0f8}.(x), fetchDataImage.(fg, sortDFG(ls(fg)), :RADAR_IMG));
+writevideo("/tmp/caesar/philos/radar.ogv", imgs; fps=3, player="totem")
 
 
 ## 
