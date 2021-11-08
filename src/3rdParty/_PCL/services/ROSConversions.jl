@@ -23,7 +23,6 @@ function PCLPointCloud2(msg::Main.sensor_msgs.msg.PointCloud2)
   pfs = PointField[PointField(;name=pf_.name,offset=pf_.offset,datatype=pf_.datatype,count=pf_.count) for pf_ in msg.fields]
 
   endian = msg.is_bigendian ? _PCL_ENDIAN_BIG_BYTE : _PCL_ENDIAN_LITTLE_WORD
-  @show typeof(msg.data) length(msg.data)
   pc2 = PCLPointCloud2(;header,
                         height     = msg.height, 
                         width      = msg.width,
@@ -33,6 +32,7 @@ function PCLPointCloud2(msg::Main.sensor_msgs.msg.PointCloud2)
                         point_step = msg.point_step,
                         row_step   = msg.row_step,
                         is_dense   = UInt8(msg.is_dense) )
+  #
 end
 
 #

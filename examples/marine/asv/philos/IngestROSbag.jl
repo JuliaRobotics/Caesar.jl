@@ -1,18 +1,26 @@
 """
     Proof of concept for Caesar-ROS integration
-    (check Caesar wiki for details/instructions)
+    (check Caesar Docs for details)
+    https://juliarobotics.org/Caesar.jl/latest/examples/using_ros/
 
-    To do:
-    - re-enable JSON replies
-        s- periodic export of factor graph object
+    Input:
+    - Make sure the rosbag is in ~/data/Marine/philos_car_far.bag
 
-    To run:
+    Output:
+    - Generates output dfg tar and data folder at /tmp/caesar/philos 
+        containing data from the bagfile, see below for details.
+
+    Prerequisites:
     - source /opt/ros/noetic/setup.bash
     - cd ~/thecatkin_ws
         - source devel/setup.bash in all 3 terminals
     - run roscore in one terminal
-    - Make sure the rosbag is in ~/data/Marine/lidar_radar.bag
-    - and julia RExFeed.jl in another terminal.
+    - Then run this Julia in another terminal/process.
+
+
+    To do:
+    - re-enable JSON replies
+        s- periodic export of factor graph object
 """
 
 ## Prepare python version
@@ -33,14 +41,15 @@ Distributed.@everywhere using PyCall
 ## INIT
 using RobotOS
 
+# Also rosnode info
 # standard types
 @rosimport sensor_msgs.msg: PointCloud2
 @rosimport sensor_msgs.msg: NavSatFix
 # @rosimport nmea_msgs.msg: Sentence
 # seagrant type
 
-# Also rosnode info
-@rosimport seagrant_msgs.msg: radar
+# Application specific ROS message types from catkin workspace
+# @rosimport seagrant_msgs.msg: radar
 
 rostypegen()
 # No using needed because we're specifying by full name.
@@ -64,6 +73,9 @@ using BSON
 using Serialization
 using FixedPointNumbers
 using StaticArrays
+using ImageMagick, FileIO
+
+using ImageDraw
 
 ##
 
@@ -108,6 +120,27 @@ function updateVariableIfNeeded(fg::AbstractDFG, systemstate::SystemState, newti
     return nothing
 end
 
+function makeImage!(pc::Caesar._PCL.PointCloud,
+                    x_domain::Tuple{<:Real,<:Real}=(-1000,1000),
+                    y_domain::Tuple{<:Real,<:Real}=x_domain;
+                    rows::Integer=1000, 
+                    cols::Integer=rows,
+                    img::AbstractMatrix{<:Colorant} = Gray.(zeros(UInt8,rows,cols)),
+                    circle_size::Real=1,
+                    drawkws... )
+    #
+    gridsize_x = (x_domain[2]-x_domain[1])/rows
+    gridsize_y = (y_domain[2]-y_domain[1])/cols
+    
+    for pt in pc.points
+        _x = trunc(Int,pt.x / gridsize_x + 500)
+        _y = trunc(Int,pt.y / gridsize_y + 500)
+        draw!( img, Ellipse(CirclePointRadius(_x,_y, circle_size)); drawkws... )  #; thickness = 1, fill = true)) )
+    end
+    
+    return img
+end
+
 
 """
     $SIGNATURES
@@ -122,7 +155,6 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
     put!(systemstate.radar_scan_queue, msg)
 
     # check if the queue still has space
-    @show length(systemstate.radar_scan_queue.data)
     if length(systemstate.radar_scan_queue.data) < systemstate.radar_scan_queue.sz_max
         # nothing more to do
         return nothing
@@ -178,6 +210,16 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
                 mimeType="application/octet-stream/julia.serialize",
                 description="queueScans = Serialization.deserialize(PipeBuffer(readBytes))" )
     #
+
+    # also make and add an image of the radar sweep
+    img = makeImage!(pc_cat)
+    addData!(   fg, :radar, systemstate.cur_variable.label, :RADAR_IMG,
+                Caesar.toFormat(format"PNG", img),
+                mimeType="image/png",
+                description="ImageMagick.readblob(imgBytes)" )
+    #
+
+    nothing
 end
 
 """
@@ -322,7 +364,7 @@ end
 ##
 
 
-main(iters=150)
+main(iters=1500)
 
 
 ## after the graph is saved it can be loaded and the datastores retrieved
@@ -363,6 +405,8 @@ pointcloud = deserialize(PipeBuffer(db))
 
 X = (c->c.x).(pointcloud.points)
 Y = (c->c.y).(pointcloud.points)
+
+##
 
 PL = []
 push!(PL, Gadfly.layer(x=X, y=Y, Geom.point))

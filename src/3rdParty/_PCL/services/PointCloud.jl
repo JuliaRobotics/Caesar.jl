@@ -118,12 +118,20 @@ function (fm!::FieldMapper{T})() where T
 end
 
 
+"""
+    $SIGNATURES
 
-# https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00115
-# fieldOrdering(a::FieldMapping, b::FieldMapping) = a.serialized_offset < b.serialized_offset
+Still incomplete, basic 2D and 3D *should* work.
 
-# https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00123
-# https://docs.ros.org/en/jade/api/pcl_conversions/html/namespacepcl.html
+DevNotes
+- Resolve, if necessary, conversions endianness with `htol`, `ltoh`, etc.
+
+Notes
+- https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00115
+- fieldOrdering(a::FieldMapping, b::FieldMapping) = a.serialized_offset < b.serialized_offset
+- https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00123
+- https://docs.ros.org/en/jade/api/pcl_conversions/html/namespacepcl.html
+"""
 function createMapping(T,msg_fields::AbstractVector{<:PointField}, field_map::MsgFieldMap=MsgFieldMap())
   # Create initial 1-1 mapping between serialized data segments and struct fields
   mapper! = FieldMapper{T}(;fields_=msg_fields, map_=field_map)
