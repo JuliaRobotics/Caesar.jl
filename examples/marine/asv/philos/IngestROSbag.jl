@@ -3,13 +3,6 @@
     (check Caesar Docs for details)
     https://juliarobotics.org/Caesar.jl/latest/examples/using_ros/
 
-    Input:
-    - Make sure the rosbag is in ~/data/Marine/philos_car_far.bag
-
-    Output:
-    - Generates output dfg tar and data folder at /tmp/caesar/philos 
-        containing data from the bagfile, see below for details.
-
     Prerequisites:
     - source /opt/ros/noetic/setup.bash
     - cd ~/thecatkin_ws
@@ -17,10 +10,16 @@
     - run roscore in one terminal
     - Then run this Julia in another terminal/process.
 
+    Input:
+    - Make sure the rosbag is in ~/data/Marine/philos_car_far.bag
 
-    To do:
-    - re-enable JSON replies
-        s- periodic export of factor graph object
+    Output:
+    - Generates output dfg tar and data folder at /tmp/caesar/philos 
+        containing data from the bagfile, see below for details.
+
+    Future:
+    - ROS msg replies
+    - periodic export of factor graph object
 """
 
 ## Prepare python version
@@ -52,9 +51,6 @@ using RobotOS
 # @rosimport seagrant_msgs.msg: radar
 
 rostypegen()
-# No using needed because we're specifying by full name.
-# using .sensor_msgs.msg
-# using .seagrant_msgs.msg
 
 ## Load Caesar with additional tools
 
@@ -82,7 +78,6 @@ using ImageDraw
 
 # /gps/fix              10255 msgs    : sensor_msgs/NavSatFix
 # /gps/nmea_sentence    51275 msgs    : nmea_msgs/Sentence
-# /radar_0               9104 msgs    : seagrant_msgs/radar
 # /radar_pointcloud_0    9104 msgs    : sensor_msgs/PointCloud2
 # /velodyne_points      20518 msgs    : sensor_msgs/PointCloud2
 
@@ -333,7 +328,6 @@ function main(;iters::Integer=50)
     # System state
     systemstate = SystemState()
 
-
     # Enable and disable as needed.
     # Skipping LIDAR because those are huge...
     # radar_sub = Subscriber{seagrant_msgs.msg.radar}("/radar_0", handleRadar!, (fg, systemstate), queue_size = 10)
@@ -364,9 +358,12 @@ end
 ##
 
 
+# Actually run the program and build 
 main(iters=20000)
 
 
+
+## ===========================================================================================
 ## after the graph is saved it can be loaded and the datastores retrieved
 
 dfg_datafolder = "/tmp/caesar/philos"
@@ -382,78 +379,6 @@ addBlobStore!(fg, ds)
 # add if you want lidar also 
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
 addBlobStore!(fg, ds)
-
-
-
-## load one of the PointCloud sets
-
-de,db = getData(fg, :x0, :RADAR_SWEEP)
-sweep = deserialize(PipeBuffer(db)) # BSON.@load
-XY = map(pt->pt.data[1:2], sweep.points)
-XY_ = filter(pt->10 < norm(pt), XY)
-r0 = manikde!(getManifold(Point2), XY_, bw=[2;2.])
-
-##
-
-sap = ScatterAlignPose2(;hgd1=r0, hgd2=r10)
-
-## show factor alignment plots
-
-snt = overlayScatterMutate(sap; sample_count=300, bw=0.0001, user_coords=[-50.;0;0]);
-plotScatterAlign(snt;title="\n#smpl=$(300)")
-
-## visualize the radar data
-
-imgs = map(x->Gray{N0f8}.(x), fetchDataImage.(fg, sortDFG(ls(fg)), :RADAR_IMG));
-writevideo("/tmp/caesar/philos/radar.ogv", imgs; fps=3, player="totem")
-
-
-## 
-
-using Gadfly
-Gadfly.set_default_plot_size(40cm,20cm)
-
-
-##
-
-lb = :x0
-de,db = getData(fg, lb, :RADAR_SWEEP)
-pointcloud = deserialize(PipeBuffer(db)) 
-
-X = (c->c.x).(pointcloud.points)
-Y = (c->c.y).(pointcloud.points)
-
-##
-
-PL = []
-push!(PL, Gadfly.layer(x=X, y=Y, Geom.point))
-
-Gadfly.plot(PL...)
-
-## Converting PCLPointCloud2 again
-
-
-PL = []
-
-for lb in [:x0;] #:x1;:x2;:x3;:x4;:x5]
-    de,db = getData(fg, lb, :RADAR_PC2s)
-    queueScans = deserialize(PipeBuffer(db)) 
-    for pc2 in queueScans[1:end]
-        pc_ = Caesar._PCL.PointCloud(pc2)
-        X = (c->c.x).(pc_.points)
-        Y = (c->c.y).(pc_.points)
-        push!(PL, Gadfly.layer(x=X, y=Y, Geom.point))
-    end
-end
-
-Gadfly.plot(PL...)
-
-##
-
-
-
-
-
 
 
 
