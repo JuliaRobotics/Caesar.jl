@@ -196,7 +196,7 @@ function overlayScatter(sap::ScatterAlignPose2,
   @cast __pts2Tu[i,j] := pts2T_u[j][i]
   @cast __pts2Tb[i,j] := pts2T_b[j][i]
 
-  (;pP1=__pts1, qP2=__pts2, pP2_u=__pts2Tu, pP2_b=__pts2Tb, best_coords, user_coords) #, user_offset)
+  (;pP1=__pts1, qP2=__pts2, pP2_u=__pts2Tu, pP2_b=__pts2Tb, best_coords, user_coords, score=round(score[],digits=5)) #, user_offset)
 end
 
 

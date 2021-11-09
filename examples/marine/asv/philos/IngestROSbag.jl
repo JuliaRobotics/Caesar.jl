@@ -1,18 +1,25 @@
 """
     Proof of concept for Caesar-ROS integration
-    (check Caesar wiki for details/instructions)
+    (check Caesar Docs for details)
+    https://juliarobotics.org/Caesar.jl/latest/examples/using_ros/
 
-    To do:
-    - re-enable JSON replies
-        s- periodic export of factor graph object
-
-    To run:
+    Prerequisites:
     - source /opt/ros/noetic/setup.bash
     - cd ~/thecatkin_ws
         - source devel/setup.bash in all 3 terminals
     - run roscore in one terminal
-    - Make sure the rosbag is in ~/data/Marine/lidar_radar.bag
-    - and julia RExFeed.jl in another terminal.
+    - Then run this Julia in another terminal/process.
+
+    Input:
+    - Make sure the rosbag is in ~/data/Marine/philos_car_far.bag
+
+    Output:
+    - Generates output dfg tar and data folder at /tmp/caesar/philos 
+        containing data from the bagfile, see below for details.
+
+    Future:
+    - ROS msg replies
+    - periodic export of factor graph object
 """
 
 ## Prepare python version
@@ -33,19 +40,17 @@ Distributed.@everywhere using PyCall
 ## INIT
 using RobotOS
 
+# Also rosnode info
 # standard types
 @rosimport sensor_msgs.msg: PointCloud2
 @rosimport sensor_msgs.msg: NavSatFix
 # @rosimport nmea_msgs.msg: Sentence
 # seagrant type
 
-# Also rosnode info
-@rosimport seagrant_msgs.msg: radar
+# Application specific ROS message types from catkin workspace
+# @rosimport seagrant_msgs.msg: radar
 
 rostypegen()
-# No using needed because we're specifying by full name.
-# using .sensor_msgs.msg
-# using .seagrant_msgs.msg
 
 ## Load Caesar with additional tools
 
@@ -64,12 +69,15 @@ using BSON
 using Serialization
 using FixedPointNumbers
 using StaticArrays
+using ImageMagick, FileIO
+using Images
+
+using ImageDraw
 
 ##
 
 # /gps/fix              10255 msgs    : sensor_msgs/NavSatFix
 # /gps/nmea_sentence    51275 msgs    : nmea_msgs/Sentence
-# /radar_0               9104 msgs    : seagrant_msgs/radar
 # /radar_pointcloud_0    9104 msgs    : sensor_msgs/PointCloud2
 # /velodyne_points      20518 msgs    : sensor_msgs/PointCloud2
 
@@ -87,7 +95,7 @@ Base.@kwdef mutable struct SystemState
     var_index::Int = 0
     lidar_scan_index::Int = 0
     max_lidar::Int = 3
-    radar_scan_queue::Channel{sensor_msgs.msg.PointCloud2} = Channel{sensor_msgs.msg.PointCloud2}(60)
+    radar_scan_queue::Channel{sensor_msgs.msg.PointCloud2} = Channel{sensor_msgs.msg.PointCloud2}(64)
     # SystemState() = new(-1000, nothing, 0, 0, 3)
 end
 
@@ -108,6 +116,27 @@ function updateVariableIfNeeded(fg::AbstractDFG, systemstate::SystemState, newti
     return nothing
 end
 
+function makeImage!(pc::Caesar._PCL.PointCloud,
+                    x_domain::Tuple{<:Real,<:Real}=(-1000,1000),
+                    y_domain::Tuple{<:Real,<:Real}=x_domain;
+                    rows::Integer=1000, 
+                    cols::Integer=rows,
+                    img::AbstractMatrix{<:Colorant} = Gray.(zeros(UInt8,rows,cols)),
+                    circle_size::Real=1,
+                    drawkws... )
+    #
+    gridsize_x = (x_domain[2]-x_domain[1])/rows
+    gridsize_y = (y_domain[2]-y_domain[1])/cols
+    
+    for pt in pc.points
+        _x = trunc(Int, pt.x/gridsize_x + x_domain/2 )
+        _y = trunc(Int, pt.y/gridsize_y + y_domain/2 )
+        draw!( img, Ellipse(CirclePointRadius(_x,_y, circle_size)); drawkws... )  #; thickness = 1, fill = true)) )
+    end
+    
+    return img
+end
+
 
 """
     $SIGNATURES
@@ -115,14 +144,13 @@ end
 Message callback for Radar pings. Adds a variable to the factor graph and appends the scan as a bigdata element.
 """
 function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDFG, systemstate::SystemState)
-    @info "handleRadarPointcloud" maxlog=10
+    @info "handleRadarPointcloud!" maxlog=100
 
     # assume there is still space (previously cleared)
     # add new piece of radar point cloud to queue for later processing.
     put!(systemstate.radar_scan_queue, msg)
 
     # check if the queue still has space
-    @show length(systemstate.radar_scan_queue.data)
     if length(systemstate.radar_scan_queue.data) < systemstate.radar_scan_queue.sz_max
         # nothing more to do
         return nothing
@@ -141,7 +169,6 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
 
     for i in 1:length(systemstate.radar_scan_queue.data)
         # something minimal, will do util for transforming PointCloud2 next
-        println(i)
         md = take!(systemstate.radar_scan_queue)
         # @info typeof(md) fieldnames(typeof(md))
         pc2 = Caesar._PCL.PCLPointCloud2(md)
@@ -154,7 +181,7 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
     # add a new variable to the graph
     timestamp = Float64(msg.header.stamp.secs) + Float64(msg.header.stamp.nsecs)/1.0e9
     systemstate.curtimestamp = timestamp
-    systemstate.cur_variable = addVariable!(fg, Symbol("x$(systemstate.var_index)"), Pose2, timestamp = unix2datetime(timestamp))
+    systemstate.cur_variable = addVariable!(fg, Symbol("x$(systemstate.var_index)"), Pose2, timestamp = unix2datetime(timestamp), tags=[:POSE])
     systemstate.var_index += 1
 
     io = IOBuffer()
@@ -178,6 +205,16 @@ function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDF
                 mimeType="application/octet-stream/julia.serialize",
                 description="queueScans = Serialization.deserialize(PipeBuffer(readBytes))" )
     #
+
+    # also make and add an image of the radar sweep
+    img = makeImage!(pc_cat)
+    addData!(   fg, :radar, systemstate.cur_variable.label, :RADAR_IMG,
+                Caesar.toFormat(format"PNG", img),
+                mimeType="image/png",
+                description="ImageMagick.readblob(imgBytes)" )
+    #
+
+    nothing
 end
 
 """
@@ -292,7 +329,6 @@ function main(;iters::Integer=50)
     # System state
     systemstate = SystemState()
 
-
     # Enable and disable as needed.
     # Skipping LIDAR because those are huge...
     # radar_sub = Subscriber{seagrant_msgs.msg.radar}("/radar_0", handleRadar!, (fg, systemstate), queue_size = 10)
@@ -323,9 +359,12 @@ end
 ##
 
 
-main(iters=150)
+# Actually run the program and build 
+main(iters=20000)
 
 
+
+## ===========================================================================================
 ## after the graph is saved it can be loaded and the datastores retrieved
 
 dfg_datafolder = "/tmp/caesar/philos"
@@ -341,59 +380,6 @@ addBlobStore!(fg, ds)
 # add if you want lidar also 
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
 addBlobStore!(fg, ds)
-
-
-## load one of the PointCloud sets
-
-de,db = getData(fg, :x0, :RADAR_SWEEP)
-
-sweep = deserialize(PipeBuffer(db)) # BSON.@load
-
-
-## 
-
-using Gadfly
-Gadfly.set_default_plot_size(40cm,20cm)
-
-
-##
-
-lb = :x0
-de,db = getData(fg, lb, :RADAR_SWEEP)
-pointcloud = deserialize(PipeBuffer(db)) 
-
-X = (c->c.x).(pointcloud.points)
-Y = (c->c.y).(pointcloud.points)
-
-PL = []
-push!(PL, Gadfly.layer(x=X, y=Y, Geom.point))
-
-Gadfly.plot(PL...)
-
-## Converting PCLPointCloud2 again
-
-
-PL = []
-
-for lb in [:x0;] #:x1;:x2;:x3;:x4;:x5]
-    de,db = getData(fg, lb, :RADAR_PC2s)
-    queueScans = deserialize(PipeBuffer(db)) 
-    for pc2 in queueScans[1:end]
-        pc_ = Caesar._PCL.PointCloud(pc2)
-        X = (c->c.x).(pc_.points)
-        Y = (c->c.y).(pc_.points)
-        push!(PL, Gadfly.layer(x=X, y=Y, Geom.point))
-    end
-end
-
-Gadfly.plot(PL...)
-
-##
-
-
-
-
-
 
 
 

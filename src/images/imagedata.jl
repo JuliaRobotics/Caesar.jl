@@ -1,7 +1,33 @@
 
-@info "Loading Caesar tools related to ImageMagick.jl."
+@info "Caesar.jl is loading tools using ImageMagick.jl."
 
 export fetchDataImage
+
+
+"""
+    $SIGNATURES
+
+Convert image to PNG bytestream.
+
+Notes
+- `using ImageMagick, FileIO`
+
+DevNotes
+- TODO somehow consolidate with `MIME"image/png"`.
+
+See also: [`makeImage`](@ref)
+"""
+function toFormat(format::DataType,
+                  img::AbstractMatrix{<:Colorant} )
+  #
+  io = IOBuffer()
+  pngSm = Stream(format, io)
+  save(pngSm, img)  # think FileIO is required for this
+  take!(io)
+end
+
+toFormat(img::AbstractMatrix{<:Colorant}) = toFormat(format"PNG", img)
+
 
 """
     $SIGNATURES

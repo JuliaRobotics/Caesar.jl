@@ -48,12 +48,10 @@ end
 
 function writevideo(fname::AbstractString,
                     imgs::AbstractVector{<:AbstractArray{<:Colorant,2}};
-                    overwrite=true, fps::Int=30, options=``, 
-                    player::AbstractString="",
-                    pix_fmt="yuv420p" )
+                    kwargs... )
   #
   @cast imgstack[r,c,k] := imgs[k][r,c]
-  writevideo(fname, imgstack, overwrite=overwrite, fps=fps, options=options, player=player, pix_fmt=pix_fmt)
+  writevideo(fname, imgstack; kwargs...)
 end
 
 
