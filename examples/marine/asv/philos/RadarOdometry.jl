@@ -81,7 +81,7 @@ for (i,lb) in enumerate(slv[1:(end-1)])
   r2 = manikde!(getManifold(Point2), XY_, bw=[bw;bw])
 
   # create the radar alignment factor
-  sap = ScatterAlignPose2(;hgd1=r1, hgd2=r2, bw=0.0001, sample_count=150)
+  sap = ScatterAlignPose2(;hgd1=r1, hgd2=r2, bw=0.00001, sample_count=50)
 
   # add the new factor to the graph
   addFactor!(fg, [lb; lb_], sap, inflation=0.0, solvable=1, tags=[:RADAR_ODOMETRY])

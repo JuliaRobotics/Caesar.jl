@@ -129,8 +129,8 @@ function makeImage!(pc::Caesar._PCL.PointCloud,
     gridsize_y = (y_domain[2]-y_domain[1])/cols
     
     for pt in pc.points
-        _x = trunc(Int,pt.x / gridsize_x + 500)
-        _y = trunc(Int,pt.y / gridsize_y + 500)
+        _x = trunc(Int, pt.x/gridsize_x + x_domain/2 )
+        _y = trunc(Int, pt.y/gridsize_y + y_domain/2 )
         draw!( img, Ellipse(CirclePointRadius(_x,_y, circle_size)); drawkws... )  #; thickness = 1, fill = true)) )
     end
     
