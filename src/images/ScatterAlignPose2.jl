@@ -68,66 +68,46 @@ getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 
 function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
-  pts1, = sample(cf.factor.cloud1, cf.factor.sample_count)
+  pVi,  = sample(cf.factor.cloud1, cf.factor.sample_count)
   pts2, = sample(cf.factor.cloud2, cf.factor.sample_count)
   
   M = getManifold(Pose2)
-  e0 = ProductRepr(SA[0 0.0], SMatrix{2,2}(1.0, 0, 0, 1))
+  e0 = ProductRepr(SVector(0,0.), SMatrix{2,2}(1.0, 0, 0, 1))
 
   # precalc SE2 points
   R0 = e0.parts[2]
 
-  pts2_ = map(pt->ProductRepr(pt, R0), pts2)
-
-  return pts1, pts2_, M #, e0
-end
-
-
-function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, p, q)
-  # 
-
-  # get measured points 1 and 2, 
-  # TODO move M to CalcFactor, follow IIF #1415
-  pVi, qVj_, M = Xtup
+  qVj_ = map(pt->ProductRepr(pt, R0), pts2)
 
   # get the current relative transform estimate
-  pTq = inv(M, Manifolds.compose(M, inv(M,p), q))
-  
+  # not efficient, but okay for here
+  pTq(xyr) = exp(M, e0, hat(M, e0, xyr))
   # move other points with relative transform
-  pVj = map( pt->Manifolds.compose(M, pTq, pt).parts[1], qVj_ )
+  pVj(xyr) = map( pt->Manifolds.compose(M, pTq(xyr), pt).parts[1], qVj_ )
+  
+  cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), bw=SA[cf.factor.bw;])
 
   # return mmd as residual for minimization
-  return mmd(M.manifold[1], pVi, pVj, bw=SA[cf.factor.bw;])
+  res = Optim.optimize(cost, [10*randn(2); 0.1*randn()] )
+
+  M, e0, hat(M, e0, res.minimizer)
 end
 
 
-function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
-  printstyled(io, "ScatterAlignPose2{", bold=true, color=:blue)
-  println(io)
-  printstyled(io, "    H1 = ", color=:magenta)
-  println(io, H1)
-  printstyled(io, "    H2 = ", color=:magenta)
-  println(io, H2)
-  printstyled(io, " }", color=:blue, bold=true)
-  println(io)
-  if H1 <: HeatmapGridDensity
-    println(io, "  size(.data):     ", size(sap.cloud1.data))
-    println(io, "    min/max:       ", round(minimum(sap.cloud1.data),digits=3), "/", round(maximum(sap.cloud1.data),digits=3))
-  end
-  if H2 <: HeatmapGridDensity
-    println(io, "  size(.data):     ", size(sap.cloud2.data))
-    println(io, "    min/max:       ", round(minimum(sap.cloud2.data),digits=3), "/", round(maximum(sap.cloud2.data),digits=3))
-  end
+function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, wPp, wPq)
+  # 
 
-  println(io, "  gridscale:       ", sap.gridscale)
-  println(io, "  sample_count:    ", sap.sample_count)
-  println(io, "  bw:              ", sap.bw)
-  nothing
+  # TODO move M to CalcFactor, follow IIF #1415
+  M, e0, pXq = Xtup
+
+  # get the current relative transform estimate
+  wPq_ = Manifolds.compose(M, wPp, exp(M, e0, pXq))
+  
+  #TODO allocalte for vee! see Manifolds #412, fix for AD
+  Xc = zeros(3)
+  vee!(M, Xc, wPq, log(M, wPq, wPq_))
+  return Xc
 end
-
-Base.show(io::IO, ::MIME"text/plain", sap::ScatterAlignPose2) = show(io, sap)
-Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = show(io, sap)
-
 
 
 
@@ -208,6 +188,35 @@ function overlayScatterMutate(sap_::ScatterAlignPose2;
   sap = ScatterAlignPose2(sap_.cloud1, sap_.cloud2, sap_.gridscale, sample_count, float(bw))
   Caesar.overlayScatter(sap; kwargs...);
 end
+
+
+function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
+  printstyled(io, "ScatterAlignPose2{", bold=true, color=:blue)
+  println(io)
+  printstyled(io, "    H1 = ", color=:magenta)
+  println(io, H1)
+  printstyled(io, "    H2 = ", color=:magenta)
+  println(io, H2)
+  printstyled(io, " }", color=:blue, bold=true)
+  println(io)
+  if H1 <: HeatmapGridDensity
+    println(io, "  size(.data):     ", size(sap.cloud1.data))
+    println(io, "    min/max:       ", round(minimum(sap.cloud1.data),digits=3), "/", round(maximum(sap.cloud1.data),digits=3))
+  end
+  if H2 <: HeatmapGridDensity
+    println(io, "  size(.data):     ", size(sap.cloud2.data))
+    println(io, "    min/max:       ", round(minimum(sap.cloud2.data),digits=3), "/", round(maximum(sap.cloud2.data),digits=3))
+  end
+
+  println(io, "  gridscale:       ", sap.gridscale)
+  println(io, "  sample_count:    ", sap.sample_count)
+  println(io, "  bw:              ", sap.bw)
+  nothing
+end
+
+Base.show(io::IO, ::MIME"text/plain", sap::ScatterAlignPose2) = show(io, sap)
+Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = show(io, sap)
+
 
 
 ## =========================================================================================
