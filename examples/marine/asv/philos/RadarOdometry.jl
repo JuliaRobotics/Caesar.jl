@@ -48,17 +48,18 @@ end
 
 # set case specific parameters
 getSolverParams(fg).inflateCycles=1
+getSolverParams(fg).inflation=2.0
 
 # switch of all variables
 setSolvable!.(fg, ls(fg), 0)
 
 # select the pose variables to include in the solve
-slv = [Symbol("x",i) for i in 0:10:30]
+slv = [Symbol("x",i) for i in 0:10:50]
 setSolvable!.(fg, slv, 1)
 
 # add a PriorPose2
 if 0==length(lsf(fg, tags=[:ORIGIN]))
-  addFactor!(fg, [:x0;], PriorPose2(MvNormal([0;0;0.],0.01*[0;0;0.])), tags=[:ORIGIN;])
+  addFactor!(fg, [:x0;], PriorPose2(MvNormal([0;0;0.],0.01*[1;1;1.])), tags=[:ORIGIN;])
 end
 
 ## load the point clouds and create the radar odometry factors
@@ -81,7 +82,7 @@ for (i,lb) in enumerate(slv[1:(end-1)])
   r2 = manikde!(getManifold(Point2), XY_, bw=[bw;bw])
 
   # create the radar alignment factor
-  sap = ScatterAlignPose2(;hgd1=r1, hgd2=r2, bw=0.00001, sample_count=50)
+  sap = ScatterAlignPose2(;cloud1=r1, cloud2=r2, bw=0.0001, sample_count=100)
 
   # add the new factor to the graph
   addFactor!(fg, [lb; lb_], sap, inflation=0.0, solvable=1, tags=[:RADAR_ODOMETRY])
@@ -92,8 +93,14 @@ end
 
 fg_ = initfg()
 getSolverParams(fg).inflateCycles=1
+getSolverParams(fg).inflation = 2.0
 
 copyGraph!(fg_, fg, ls(fg, solvable=1), lsf(fg, solvable=1))
+
+
+## solve the graph copy
+
+tree = solveTree!(fg_);
 
 ## load one of the PointCloud sets
 
@@ -105,7 +112,7 @@ r0 = manikde!(getManifold(Point2), XY_, bw=[2;2.])
 
 ##
 
-sap = ScatterAlignPose2(;hgd1=r0, hgd2=r10)
+sap = ScatterAlignPose2(;cloud1=r0, cloud2=r10)
 
 ## show factor alignment plots
 
@@ -130,7 +137,7 @@ r0 = manikde!(getManifold(Point2), XY_, bw=[2;2.])
 
 ##
 
-sap = ScatterAlignPose2(;hgd1=r0, hgd2=r10)
+sap = ScatterAlignPose2(;cloud1=r0, cloud2=r10)
 
 ## show factor alignment plots
 
