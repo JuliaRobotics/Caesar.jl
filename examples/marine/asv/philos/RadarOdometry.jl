@@ -1,6 +1,6 @@
 
 using Distributed
-addprocs(4)
+# addprocs(4)
 
 using Colors
 using Caesar
@@ -54,12 +54,12 @@ getSolverParams(fg).inflation=2.0
 setSolvable!.(fg, ls(fg), 0)
 
 # select the pose variables to include in the solve
-slv = [Symbol("x",i) for i in 0:5:15]
+slv = [Symbol("x",i) for i in 0:5:5]
 # setSolvable!.(fg, slv, 1)
 
 # add a PriorPose2
 if 0==length(lsf(fg, tags=[:ORIGIN]))
-  addFactor!(fg, [:x0;], PriorPose2(MvNormal([0;0;0.],0.01*[1;1;1.])), tags=[:ORIGIN;], solvable=1)
+  addFactor!(fg, [:x0;], PriorPose2(MvNormal([0;0;0.],diagm(0.01*[1;1;1.]))), tags=[:ORIGIN;], solvable=1)
 end
 
 ## load the point clouds and create the radar odometry factors
@@ -110,7 +110,7 @@ for lb in slv
   setSolvable!.(fg_, ls(fg_, lb), 1)
 end
 
-saveDFG("/tmp/caesar/philos/x0_5_15", fg_)
+saveDFG("/tmp/caesar/philos/x0_5_$(slv[end])", fg_)
 
 ## load one of the PointCloud sets
 
