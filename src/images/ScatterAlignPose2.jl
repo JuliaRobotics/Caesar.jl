@@ -232,10 +232,17 @@ Base.@kwdef struct PackedScatterAlignPose2 <: PackedInferenceType
 end
 
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
-  cloud1 = convert(PackedHeatmapGridDensity,arp.cloud1)
-  cloud2 = convert(PackedHeatmapGridDensity,arp.cloud2)
-  cloud1_ = JSON2.write(cloud1)
-  cloud2_ = JSON2.write(cloud2)
+
+  function _toDensityJson(dens::ManifoldKernelDensity)
+    convert(PackedSamplableBelief,dens)
+  end
+  function _toDensityJson(dens::HeatmapGridDensity)
+    cloud1 = convert(PackedHeatmapGridDensity,dens)
+    JSON2.write(cloud1)    
+  end
+
+  cloud1_ = _toDensityJson(arp.cloud1)
+  cloud2_ = _toDensityJson(arp.cloud2)
 
   PackedScatterAlignPose2(;
     cloud1 = cloud1_,
@@ -249,6 +256,10 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
   # first understand the schema friendly belief type to unpack
   _cloud1 = JSON2.read(parp.cloud1)
   _cloud2 = JSON2.read(parp.cloud2)
+  @info "deserialize ScatterAlignPose2" typeof(_cloud1)
+  # @show _cloud1
+  @show parp.cloud1
+  #  _cloud2[Symbol("_type")]
   PackedT1 = DFG.getTypeFromSerializationModule(_cloud1[Symbol("_type")])
   PackedT2 = DFG.getTypeFromSerializationModule(_cloud2[Symbol("_type")])
   # re-unpack into the local PackedT (marshalling)

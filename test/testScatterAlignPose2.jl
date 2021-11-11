@@ -105,7 +105,7 @@ getSolverParams(fg).inflateCycles=1
 addVariable!(fg, :x0, Pose2)
 addVariable!(fg, :x1, Pose2)
 
-addFactor!(fg, [:x0;], PriorPose2(MvNormal([0.01;0.01;0.01])))
+addFactor!(fg, [:x0;], PriorPose2(MvNormal([0;0;0.],[0.01;0.01;0.01])))
 addFactor!(fg, [:x0;:x1], sap, inflation=0.0)
 
 ## use in graph
@@ -120,6 +120,22 @@ c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
 @test isapprox( pCq[1:2], c1[1:2], atol=0.5 )
 @test isapprox( pCq[3], c1[3],   atol=0.3 )
 
+## check save and load of sap
+
+saveDFG("/tmp/caesar/test_sap", fg)
+fg_ = loadDFG("/tmp/caesar/test_sap")
+
+##
+
+sap = getFactorType(fg, :x0x1f1)
+sap_ = getFactorType(fg_, :x0x1f1)
+
+@test isapprox( sap.cloud1, sap_.cloud1)
+@test isapprox( sap.cloud2, sap_.cloud2)
+
+@test sap.gridscale == sap_.gridscale
+@test sap.sample_count == sap_.sample_count
+@test sap.bw == sap_.bw
 
 ##
 end
