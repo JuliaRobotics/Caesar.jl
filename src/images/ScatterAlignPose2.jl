@@ -256,19 +256,25 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
   # first understand the schema friendly belief type to unpack
   _cloud1 = JSON2.read(parp.cloud1)
   _cloud2 = JSON2.read(parp.cloud2)
-  @info "deserialize ScatterAlignPose2" typeof(_cloud1)
   # @show _cloud1
-  @show parp.cloud1
+  # @show parp.cloud1
   #  _cloud2[Symbol("_type")]
   PackedT1 = DFG.getTypeFromSerializationModule(_cloud1[Symbol("_type")])
   PackedT2 = DFG.getTypeFromSerializationModule(_cloud2[Symbol("_type")])
   # re-unpack into the local PackedT (marshalling)
   # TODO check if there is perhaps optimization to marshal directly from _cloud instead - maybe `obj(;namedtuple...)`
-  pcloud1 = JSON2.read(parp.cloud1, PackedT1)
-  pcloud2 = JSON2.read(parp.cloud2, PackedT2)
+  # pcloud1 = JSON2.read(parp.cloud1, PackedT1)
+  # pcloud2 = JSON2.read(parp.cloud2, PackedT2)
+  
+  # outT
+  outT1 = convert(SamplableBelief, PackedT1)
+  outT2 = convert(SamplableBelief, PackedT2)
+  
+  @info "deserialize ScatterAlignPose2" typeof(_cloud1) PackedT1 outT1
+
   # convert from packed schema friendly to local performance type
-  cloud1 = convert(SamplableBelief, pcloud1)
-  cloud2 = convert(SamplableBelief, pcloud2)
+  cloud1 = convert(outT1, parp.cloud1)
+  cloud2 = convert(outT2, parp.cloud2)
   
   # and build the final object
   ScatterAlignPose2(
