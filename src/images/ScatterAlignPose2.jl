@@ -66,26 +66,53 @@ ScatterAlignPose2(im1::AbstractMatrix{T},
 
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 
+Base.@kwdef struct _FastRetract{M_ <: AbstractManifold, T}
+  M::M_ = SpecialEuclidean(2)
+  pTq::T = ProductRepr(MVector(0,0.0), MMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+  p::ProductRepr{Tuple{SVector{2, Float64}, SMatrix{2, 2, Float64, 4}}} = ProductRepr(SA[0.0;0.0], SMatrix{2,2}(1.0, 0, 0, 1))
+end
+
+function (_user::_FastRetract)(pCq::AbstractVector{<:Real})
+  retract!(_user.M, _user.pTq, _user.p, hat(_user.M, _user.p, pCq))
+
+  return _user.pTq
+end
+
 function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
   pVi,  = sample(cf.factor.cloud1, cf.factor.sample_count)
   pts2, = sample(cf.factor.cloud2, cf.factor.sample_count)
   
   M = getManifold(Pose2)
-  e0 = ProductRepr(SVector(0,0.), SMatrix{2,2}(1.0, 0, 0, 1))
+  e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
 
   # precalc SE2 points
   R0 = e0.parts[2]
 
-  qVj_ = map(pt->ProductRepr(pt, R0), pts2)
+  qVj_ = map(pt->ProductRepr(SVector(pt...), R0), pts2)
 
-  # get the current relative transform estimate
-  # not efficient, but okay for here
-  pTq(xyr) = exp(M, e0, hat(M, e0, xyr))
-  # move other points with relative transform
-  pVj(xyr) = map( pt->Manifolds.compose(M, pTq(xyr), pt).parts[1], qVj_ )
+  _pVj_! = map(pt->ProductRepr(MVector(pt...), MMatrix{2,2}(0.0,0.0,0.0,0.0)), pts2)
+  _pVj! = map(x->x.parts[1], _pVj_!)
+
+  function pVj(xyr)
+    pTq! = _FastRetract()
+    for i in eachindex(qVj_)
+      Manifolds.compose!(M, _pVj_![i], pTq!(xyr), qVj_[i])
+      # _pVj![i][:] = Manifolds.compose(M, pTq!(xyr), qVj_[i]).parts[1] 
+    end
+
+    _pVj!
+  end
+
+  # # get the current relative transform estimate
+  # pTq! = _FastRetract() # not really any faster yet
+  # # not efficient, but okay for here
+  # # pTq(xyr) = exp(M, e0, hat(M, e0, xyr))
+  # # move other points with relative transform
+  # pVj(xyr) = map(pt->Manifolds.compose(M, pTq!(xyr), pt).parts[1], qVj_)
   
-  cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), bw=SA[cf.factor.bw;])
+  bw = SA[cf.factor.bw;]
+  cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr); bw)
 
   # return mmd as residual for minimization
   res = Optim.optimize(cost, [10*randn(2); 0.1*randn()] )
@@ -270,7 +297,7 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
   outT1 = convert(SamplableBelief, PackedT1)
   outT2 = convert(SamplableBelief, PackedT2)
   
-  @info "deserialize ScatterAlignPose2" typeof(_cloud1) PackedT1 outT1
+  # @info "deserialize ScatterAlignPose2" typeof(_cloud1) PackedT1 outT1
 
   # convert from packed schema friendly to local performance type
   cloud1 = convert(outT1, parp.cloud1)
