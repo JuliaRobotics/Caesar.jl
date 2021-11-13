@@ -1,6 +1,7 @@
 
 @info "Caesar.jl is loading tools using ImageMagick.jl."
 
+export toFormat
 export fetchDataImage
 
 

@@ -240,6 +240,46 @@ function PointCloud(
   return cloud
 end
 
+
+## =========================================================================================================
+## Coordinate transformations using Manifolds.jl
+## =========================================================================================================
+
+
+# 2D, do similar or better for 3D
+# FIXME, to optimize, this function will likely be slow
+function apply( M_::typeof(SpecialEuclidean(2)),
+                          rPp::Union{<:ProductRepr,<:Manifolds.ArrayPartition},
+                          pc::PointCloud{T} ) where T
+  #
+
+  rTp = affine_matrix(M_, rPp)
+  pV = MVector(0.0,0.0,1.0)
+  _data = MVector(0.0,0.0,0.0,0.0)
+
+  _pc = PointCloud(;header=pc.header,
+                    points = Vector{T}(),
+                    width=pc.width,
+                    height=pc.height,
+                    is_dense=pc.is_dense,
+                    sensor_origin_=pc.sensor_origin_,
+                    sensor_orientation_=pc.sensor_orientation_ )
+  #
+
+  # rotate the elements from the old point cloud into new static memory locations
+  # NOTE these types must match the types use for PointCloud and PointXYZ
+  for pt in pc.points
+    pV[1] = pt.x
+    pV[2] = pt.y
+    _data[1:3] .= rTp*pV
+    push!(_pc.points, PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data[1], _data[2], pt.data[3:4]...)) )
+  end
+
+  # return the new point cloud
+  return _pc
+end
+
+
 ## =========================================================================================================
 ## Custom printing
 ## =========================================================================================================

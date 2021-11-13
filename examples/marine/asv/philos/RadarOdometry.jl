@@ -1,9 +1,10 @@
 
 using Distributed
-# addprocs(4)
+# addprocs(10)
 
 using Colors
 using Caesar
+@everywhere using Caesar
 
 using DistributedFactorGraphs.DocStringExtensions
 using Dates
@@ -17,7 +18,6 @@ using Images
 
 using ImageDraw
 
-##
 
 ## after the graph is saved it can be loaded and the datastores retrieved
 
@@ -40,7 +40,7 @@ addBlobStore!(fg, ds)
 
 if false
   imgs = map(x->Gray{N0f8}.(x), fetchDataImage.(fg, sortDFG(ls(fg)), :RADAR_IMG));
-  writevideo("/tmp/caesar/philos/radar.mp4", imgs; fps=5, player="totem")
+  writevideo("/tmp/caesar/philos/radar5.mp4", imgs; fps=5, player="totem")
 end
 
 
@@ -54,12 +54,12 @@ getSolverParams(fg).inflation=2.0
 setSolvable!.(fg, ls(fg), 0)
 
 # select the pose variables to include in the solve
-slv = [Symbol("x",i) for i in 0:10:50]
-setSolvable!.(fg, slv, 1)
+slv = [Symbol("x",i) for i in 0:5:285]
+# setSolvable!.(fg, slv, 1)
 
 # add a PriorPose2
 if 0==length(lsf(fg, tags=[:ORIGIN]))
-  addFactor!(fg, [:x0;], PriorPose2(MvNormal([0;0;0.],0.01*[1;1;1.])), tags=[:ORIGIN;])
+  addFactor!(fg, [:x0;], PriorPose2(MvNormal([0;0;0.],diagm(0.01*[1;1;1.]))), tags=[:ORIGIN;], solvable=1)
 end
 
 ## load the point clouds and create the radar odometry factors
@@ -82,10 +82,10 @@ for (i,lb) in enumerate(slv[1:(end-1)])
   r2 = manikde!(getManifold(Point2), XY_, bw=[bw;bw])
 
   # create the radar alignment factor
-  sap = ScatterAlignPose2(;cloud1=r1, cloud2=r2, bw=0.0001, sample_count=100)
+  sap = ScatterAlignPose2(;cloud1=r1, cloud2=r2, bw=0.0001, sample_count=150)
 
   # add the new factor to the graph
-  addFactor!(fg, [lb; lb_], sap, inflation=0.0, solvable=1, tags=[:RADAR_ODOMETRY])
+  addFactor!(fg, [lb; lb_], sap, inflation=0.0, solvable=0, tags=[:RADAR_ODOMETRY], graphinit=false)
 end
 
 
@@ -94,13 +94,31 @@ end
 fg_ = initfg()
 getSolverParams(fg).inflateCycles=1
 getSolverParams(fg).inflation = 2.0
+getSolverParams(fg).alwaysFreshMeasurements = false
 
-copyGraph!(fg_, fg, ls(fg, solvable=1), lsf(fg, solvable=1))
+copyGraph!(fg_, fg, slv, union((ls.(fg, slv))...))
 
 
-## solve the graph copy
+## many batch solves of graph copy
 
-tree = solveTree!(fg_);
+setSolvable!(fg_, :x0, 1)
+setSolvable!(fg_, :x0f1, 1)
+
+tree = buildTreeReset!(fg_)
+
+for (i,lb) in enumerate(slv)
+  # latest pose to solve (factors were set at previous cycle)
+  setSolvable!(fg_, lb, 1)
+  if isodd(i)
+    @info "solve for" lb
+    tree = solveTree!(fg_, tree; storeOld=true);
+    saveDFG("/tmp/caesar/philos/results_3/x0_5_$(lb)", fg_)
+  end
+
+  # set factors for next cycle
+  setSolvable!.(fg_, ls(fg_, lb), 1)
+end
+
 
 ## load one of the PointCloud sets
 
@@ -116,8 +134,8 @@ sap = ScatterAlignPose2(;cloud1=r0, cloud2=r10)
 
 ## show factor alignment plots
 
-snt = overlayScatterMutate(sap; sample_count=300, bw=0.0001, user_coords=[-50.;0;0]);
-plotScatterAlign(snt;title="\n#smpl=$(300)")
+snt = overlayScatterMutate(sap; sample_count=100, bw=0.0001, user_coords=[0.;0;0]);
+plotScatterAlign(snt;title="\n#smpl=$(100)")
 
 ## visualize the radar data
 
