@@ -1,6 +1,6 @@
 
 using Distributed
-# addprocs(4)
+# addprocs(10)
 
 using Colors
 using Caesar
@@ -40,7 +40,7 @@ addBlobStore!(fg, ds)
 
 if false
   imgs = map(x->Gray{N0f8}.(x), fetchDataImage.(fg, sortDFG(ls(fg)), :RADAR_IMG));
-  writevideo("/tmp/caesar/philos/radar.mp4", imgs; fps=5, player="totem")
+  writevideo("/tmp/caesar/philos/radar5.mp4", imgs; fps=5, player="totem")
 end
 
 
@@ -54,7 +54,7 @@ getSolverParams(fg).inflation=2.0
 setSolvable!.(fg, ls(fg), 0)
 
 # select the pose variables to include in the solve
-slv = [Symbol("x",i) for i in 0:5:5]
+slv = [Symbol("x",i) for i in 0:5:285]
 # setSolvable!.(fg, slv, 1)
 
 # add a PriorPose2
@@ -82,7 +82,7 @@ for (i,lb) in enumerate(slv[1:(end-1)])
   r2 = manikde!(getManifold(Point2), XY_, bw=[bw;bw])
 
   # create the radar alignment factor
-  sap = ScatterAlignPose2(;cloud1=r1, cloud2=r2, bw=0.0001, sample_count=200)
+  sap = ScatterAlignPose2(;cloud1=r1, cloud2=r2, bw=0.0001, sample_count=150)
 
   # add the new factor to the graph
   addFactor!(fg, [lb; lb_], sap, inflation=0.0, solvable=0, tags=[:RADAR_ODOMETRY], graphinit=false)
@@ -94,23 +94,31 @@ end
 fg_ = initfg()
 getSolverParams(fg).inflateCycles=1
 getSolverParams(fg).inflation = 2.0
+getSolverParams(fg).alwaysFreshMeasurements = false
 
 copyGraph!(fg_, fg, slv, union((ls.(fg, slv))...))
 
 
 ## many batch solves of graph copy
 
-for lb in slv
+setSolvable!(fg_, :x0, 1)
+setSolvable!(fg_, :x0f1, 1)
+
+tree = buildTreeReset!(fg_)
+
+for (i,lb) in enumerate(slv)
   # latest pose to solve (factors were set at previous cycle)
   setSolvable!(fg_, lb, 1)
-  @info "solve for" lb
-  tree = solveTree!(fg_; storeOld=true);
+  if isodd(i)
+    @info "solve for" lb
+    tree = solveTree!(fg_, tree; storeOld=true);
+    saveDFG("/tmp/caesar/philos/results_3/x0_5_$(lb)", fg_)
+  end
 
   # set factors for next cycle
   setSolvable!.(fg_, ls(fg_, lb), 1)
 end
 
-saveDFG("/tmp/caesar/philos/x0_5_$(slv[end])", fg_)
 
 ## load one of the PointCloud sets
 

@@ -7,12 +7,16 @@ using ..Colors
 
 using Dates
 using DocStringExtensions
-using StaticArrays
 using Requires
+using StaticArrays
+using Manifolds
 import Rotations as _Rot
 
 # Going to add dispatches on these functions
 import Base: getindex, setindex!, resize!, cat, convert, sizeof, hasproperty, getproperty
+
+# gets overloaded
+import Manifolds: apply
 
 ## hold off on exports, users can in the mean-time use/import via e.g. _PCL.PointXYZ
 # export PointT, PointXYZ, PointXYZRGB, PointXYZRGBA
