@@ -90,13 +90,14 @@ wPC100 = _fetchDataPointCloudWorld(fg, :x100)
 ##
 
 wPC = _fetchDataPointCloudWorld(fg, :x0)
-for l in [:x50;:x100;:x150;:x200;:x250;:x280]
-  wPC = cat(wPC, _fetchDataPointCloudWorld(fg, l) )
+for l in [Symbol(:x,i) for i in 10:10:280]
+  wPC = cat(wPC, _fetchDataPointCloudWorld(fg, l); reuse=true )
 end
 # wPC = cat(wPC0, wPC50, wPC100)
 
-D = 3000
-img_wPC = makeImage!(wPC, (-D,D),(-D,D)) 
+_X_ = 3000
+_Y_ = 1250
+img_wPC = makeImage!(wPC, (-1250,_X_),(-_Y_,_Y_)) 
 imshow(img_wPC)
 
 
