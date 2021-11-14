@@ -1,6 +1,6 @@
 
 using Distributed
-# addprocs(10)
+addprocs(10)
 
 using Colors
 using Caesar
@@ -82,14 +82,14 @@ for (i,lb) in enumerate(slv[1:(end-1)])
   r2 = manikde!(getManifold(Point2), XY_, bw=[bw;bw])
 
   # create the radar alignment factor
-  sap = ScatterAlignPose2(;cloud1=r1, cloud2=r2, bw=0.0001, sample_count=150)
+  sap = ScatterAlignPose2(;cloud1=r1, cloud2=r2, bw=0.0001, sample_count=200)
 
   # add the new factor to the graph
   addFactor!(fg, [lb; lb_], sap, inflation=0.0, solvable=0, tags=[:RADAR_ODOMETRY], graphinit=false)
 end
 
 
-## make a copy of this subgraph for debugging
+## make a copy of this subgraph for for dev engineering and debugging only
 
 fg_ = initfg()
 getSolverParams(fg).inflateCycles=1
@@ -112,7 +112,7 @@ for (i,lb) in enumerate(slv)
   if isodd(i)
     @info "solve for" lb
     tree = solveTree!(fg_, tree; storeOld=true);
-    saveDFG("/tmp/caesar/philos/results_3/x0_5_$(lb)", fg_)
+    saveDFG("/tmp/caesar/philos/results_4/x0_5_$(lb)", fg_)
   end
 
   # set factors for next cycle
@@ -120,95 +120,4 @@ for (i,lb) in enumerate(slv)
 end
 
 
-## load one of the PointCloud sets
-
-de,db = getData(fg, :x0, :RADAR_SWEEP)
-sweep = deserialize(PipeBuffer(db)) # BSON.@load
-XY = map(pt->pt.data[1:2], sweep.points)
-XY_ = filter(pt->10 < norm(pt), XY)
-r0 = manikde!(getManifold(Point2), XY_, bw=[2;2.])
-
-##
-
-sap = ScatterAlignPose2(;cloud1=r0, cloud2=r10)
-
-## show factor alignment plots
-
-snt = overlayScatterMutate(sap; sample_count=100, bw=0.0001, user_coords=[0.;0;0]);
-plotScatterAlign(snt;title="\n#smpl=$(100)")
-
-## visualize the radar data
-
-imgs = map(x->Gray{N0f8}.(x), fetchDataImage.(fg, sortDFG(ls(fg)), :RADAR_IMG));
-writevideo("/tmp/caesar/philos/radar.ogv", imgs; fps=3, player="totem")
-
-
-
-
-## load one of the PointCloud sets
-
-de,db = getData(fg, :x0, :RADAR_SWEEP)
-sweep = deserialize(PipeBuffer(db)) # BSON.@load
-XY = map(pt->pt.data[1:2], sweep.points)
-XY_ = filter(pt->10 < norm(pt), XY)
-r0 = manikde!(getManifold(Point2), XY_, bw=[2;2.])
-
-##
-
-sap = ScatterAlignPose2(;cloud1=r0, cloud2=r10)
-
-## show factor alignment plots
-
-snt = overlayScatterMutate(sap; sample_count=300, bw=0.0001, user_coords=[-50.;0;0]);
-plotScatterAlign(snt;title="\n#smpl=$(300)")
-
-
-
-
-
-
-
-
-# ## ===
-
-# using Gadfly
-# Gadfly.set_default_plot_size(40cm,20cm)
-
-
-# ##
-
-# lb = :x0
-# de,db = getData(fg, lb, :RADAR_SWEEP)
-# pointcloud = deserialize(PipeBuffer(db)) 
-
-# X = (c->c.x).(pointcloud.points)
-# Y = (c->c.y).(pointcloud.points)
-
-# ##
-
-# PL = []
-# push!(PL, Gadfly.layer(x=X, y=Y, Geom.point))
-
-# Gadfly.plot(PL...)
-
-# ## Converting PCLPointCloud2 again
-
-
-# PL = []
-
-# for lb in [:x0;] #:x1;:x2;:x3;:x4;:x5]
-#     de,db = getData(fg, lb, :RADAR_PC2s)
-#     queueScans = deserialize(PipeBuffer(db)) 
-#     for pc2 in queueScans[1:end]
-#         pc_ = Caesar._PCL.PointCloud(pc2)
-#         X = (c->c.x).(pc_.points)
-#         Y = (c->c.y).(pc_.points)
-#         push!(PL, Gadfly.layer(x=X, y=Y, Geom.point))
-#     end
-# end
-
-# Gadfly.plot(PL...)
-
-# ##
-
-
+#
