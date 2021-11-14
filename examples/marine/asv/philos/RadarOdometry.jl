@@ -106,17 +106,19 @@ setSolvable!(fg_, :x0f1, 1)
 
 tree = buildTreeReset!(fg_)
 
-for (i,lb) in enumerate(slv)
-  # latest pose to solve (factors were set at previous cycle)
-  setSolvable!(fg_, lb, 1)
-  if isodd(i)
-    @info "solve for" lb
-    tree = solveTree!(fg_, tree; storeOld=true);
-    saveDFG("/tmp/caesar/philos/results_4/x0_5_$(lb)", fg_)
-  end
+let tree = tree
+  for (i,lb) in enumerate(slv)
+    # latest pose to solve (factors were set at previous cycle)
+    setSolvable!(fg_, lb, 1)
+    if isodd(i)
+      @info "solve for" lb
+      tree = solveTree!(fg_, tree; storeOld=true);
+      saveDFG("/tmp/caesar/philos/results_4/x0_5_$(lb)", fg_)
+    end
 
-  # set factors for next cycle
-  setSolvable!.(fg_, ls(fg_, lb), 1)
+    # set factors for next cycle
+    setSolvable!.(fg_, ls(fg_, lb), 1)
+  end
 end
 
 
