@@ -15,6 +15,8 @@ using Colors
 using Caesar
 @everywhere using Caesar
 
+import Rotations as _Rot
+
 # using DistributedFactorGraphs.DocStringExtensions
 using Dates
 using JSON2
@@ -100,6 +102,13 @@ _Y_ = 1250
 img_wPC = makeImage!(wPC, (-1250,_X_),(-_Y_,_Y_)) 
 imshow(img_wPC)
 
+## manually north align
+
+
+nPC = apply(M, ProductRepr([0.0;0.0], _Rot.RotMatrix(135*pi/180.0)), wPC)
+
+img_nPC = makeImage!(nPC, (-2500,1000),(-2000,1500)) 
+imshow(img_nPC)
 
 ##
 
