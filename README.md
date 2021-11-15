@@ -29,7 +29,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
-| [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
+| [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-ver-img]][dfg-rel-url] | [![Build Status][dfg-ci-dev-img]][dfg-ci-dev-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
 | [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | *upstream* |
 | [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | *upstream* |
 | [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | *upstream* |
@@ -152,14 +152,16 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [lgjl-ver-jhub]: https://juliahub.com/ui/Packages/LightGraphs/Xm08G
 [lgjl-releases]: https://github.com/JuliaGraphs/LightGraphs.jl/releases
 
+[dfg-ci-dev-img]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml/badge.svg
+[dfg-ci-dev-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml
+[dfg-ci-stb-img]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml/badge.svg?branch=release%2Fv0.16
+[dfg-ci-stb-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml
+[dfg-ver-img]: https://juliahub.com/docs/IncrementalInference/version.svg
 [dfg-cov-img]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl/coverage.svg?branch=master
 [dfg-cov-url]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl?branch=master
-[dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
-[dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2021Q2-v0.14.x-green.svg
 [dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones
-[dfg-releases]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
+[dfg-rel-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
 
 [amp-cov-img]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl/coverage.svg?branch=master
 [amp-cov-url]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl?branch=master

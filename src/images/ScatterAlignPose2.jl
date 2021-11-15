@@ -112,7 +112,7 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   # pVj(xyr) = map(pt->Manifolds.compose(M, pTq!(xyr), pt).parts[1], qVj_)
   
   bw = SA[cf.factor.bw;]
-  cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr); bw)
+  cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj_), cf._allowThreads; bw)
 
   # return mmd as residual for minimization
   res = Optim.optimize(cost, [10*randn(2); 0.1*randn()] )
