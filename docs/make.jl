@@ -81,6 +81,7 @@ makedocs(
         ],
         "Developer Zone" => [
             "Wiki Pointers" => "dev/wiki.md",
+            "Legacy Factors" => "examples/legacy_deffactors.md",
             "Creating DynPose Factor" => "principles/interm_dynpose.md",
             "Known Issue List" => "dev/known_issues.md",
             "Internal Functions" => "dev/internal_fncs.md",
