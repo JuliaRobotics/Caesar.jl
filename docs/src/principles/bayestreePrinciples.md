@@ -29,7 +29,7 @@ Trees and factor graphs are separated in the implementation, allowing the user t
 using IncrementalInference # RoME or Caesar will work too
 
 ## construct a distributed factor graph object
-fg = generateCanonicalFG_Kaess()
+fg = generateGraph_Kaess()
 # add variables and factors
 # ...
 
