@@ -6,6 +6,7 @@ Draw radar map in resulting world frame (after solve)
 
 =#
 
+##
 
 
 using Distributed
@@ -39,7 +40,9 @@ Gadfly.set_default_plot_size(35cm,20cm)
 
 dfg_datafolder = "/tmp/caesar/philos"
 
-fg = loadDFG("$dfg_datafolder/results_3/x0_5_x280")
+fg = loadDFG("$dfg_datafolder/results_4/x0_5_x280")
+
+##
 
 ds = FolderStore{Vector{UInt8}}(:radar, "$dfg_datafolder/data/radar")
 addBlobStore!(fg, ds)
@@ -80,7 +83,8 @@ end
 ##
 
 wPC0 = _fetchDataPointCloudWorld(fg, :x0)
-# makeImage!(wPC0, (-1500,1500)) |> imshow
+img0 = makeImage!(wPC0, (-1500,1500); color=Gray{N0f8}(0.01)) 
+imshow(img0)
 
 wPC50 = _fetchDataPointCloudWorld(fg, :x50)
 # makeImage!(wPC50, (-1500,1500)) |> imshow
@@ -91,34 +95,61 @@ wPC100 = _fetchDataPointCloudWorld(fg, :x100)
 
 ##
 
-wPC = _fetchDataPointCloudWorld(fg, :x0)
-for l in [Symbol(:x,i) for i in 10:10:280]
-  wPC = cat(wPC, _fetchDataPointCloudWorld(fg, l); reuse=true )
-end
-# wPC = cat(wPC0, wPC50, wPC100)
-
 _X_ = 3000
 _Y_ = 1250
-img_wPC = makeImage!(wPC, (-1250,_X_),(-_Y_,_Y_)) 
+
+wPC__ = _fetchDataPointCloudWorld.(fg, [Symbol(:x,i) for i in 0:5:280]);
+img_wPC_ = map(pc->makeImage!(pc, (-1250,_X_),(-_Y_,_Y_); color=Gray{Float64}(0.05)), wPC__);
+img_wPC = +(img_wPC_...);
+
 imshow(img_wPC)
+
+## movie sequence in world frame
+
+IMGS = Vector{Matrix{RGB{Float64}}}()
+
+img_wPC = RGB.(img_wPC_[1])
+for gim in img_wPC_[2:end]
+  # green overlay of latest
+  imgG = (px->RGB(0,10*px,0)).(gim);
+  imgL = img_wPC + imgG
+  push!(IMGS, imgL)
+
+  # grow full world map
+  img_wPC += RGB.(gim)
+end
+
+writevideo("/tmp/caesar/philos/results_4/radarmap.mp4", IMGS; fps=3, player="totem")
+
+
+
+
+## ================================================================================
+## Keeping a few code fragments below
+## ================================================================================
+
+
+# for l in [Symbol(:x,i) for i in 10:10:280]
+#   wPC = cat(wPC, _fetchDataPointCloudWorld(fg, l); reuse=true )
+# end
+# img_wPC = makeImage!(wPC, (-1250,_X_),(-_Y_,_Y_)) 
+# imshow(img_wPC)
 
 ## manually north align
 
+# nPC = apply(M, ProductRepr([0.0;0.0], _Rot.RotMatrix(135*pi/180.0)), wPC)
 
-nPC = apply(M, ProductRepr([0.0;0.0], _Rot.RotMatrix(135*pi/180.0)), wPC)
+# img_nPC = makeImage!(nPC, (-2500,1000),(-2000,1500), color=Gray{N0f8}(0.1)) 
+# img_nPC[1,1] = Gray(1)
+# imshow(img_nPC)
 
-img_nPC = makeImage!(nPC, (-2500,1000),(-2000,1500)) 
-imshow(img_nPC)
+# ##
 
-##
+# using ImageMagick, FileIO
+# pngimg = toFormat(format"PNG", img_wPC)
+# save(dfg_datafolder*"/results_3/wPC.png", img_wPC)
 
-using ImageMagick, FileIO
-
-pngimg = toFormat(format"PNG", img_wPC)
-
-save(dfg_datafolder*"/results_3/wPC.png", img_wPC)
-
-##
+# ##
 
 
 #
