@@ -35,6 +35,9 @@ addBlobStore!(fg, ds)
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
 addBlobStore!(fg, ds)
 
+# add if you want lidar also 
+ds = FolderStore{Vector{UInt8}}(:camera, "$dfg_datafolder/data/camera")
+addBlobStore!(fg, ds)
 
 ## visualize the radar data
 
@@ -91,12 +94,15 @@ end
 
 ## make a copy of this subgraph for for dev engineering and debugging only
 
-fg_ = initfg()
-getSolverParams(fg).inflateCycles=1
-getSolverParams(fg).inflation = 2.0
-getSolverParams(fg).alwaysFreshMeasurements = false
-
-copyGraph!(fg_, fg, slv, union((ls.(fg, slv))...))
+fg_ = if false
+  _fg_ = initfg()
+  getSolverParams(_fg_).inflateCycles=1
+  getSolverParams(_fg_).inflation = 2.0
+  getSolverParams(_fg_).alwaysFreshMeasurements = false
+  copyGraph!(_fg_, fg, slv, union((ls.(fg, slv))...))
+else
+  fg
+end
 
 
 ## many batch solves of graph copy
@@ -113,7 +119,7 @@ let tree = tree
     if isodd(i)
       @info "solve for" lb
       tree = solveTree!(fg_, tree; storeOld=true);
-      saveDFG("/tmp/caesar/philos/results_4/x0_5_$(lb)", fg_)
+      saveDFG("/tmp/caesar/philos/results_5/x0_5_$(lb)", fg_)
     end
 
     # set factors for next cycle

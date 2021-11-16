@@ -31,6 +31,7 @@ using Images
 
 using ImageDraw
 using ImageView
+using ImageTransformations
 
 using RoMEPlotting
 Gadfly.set_default_plot_size(35cm,20cm)
@@ -52,6 +53,10 @@ addBlobStore!(fg, ds)
 
 # add if you want lidar also 
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
+addBlobStore!(fg, ds)
+
+# add if you want lidar also 
+ds = FolderStore{Vector{UInt8}}(:camera, "$dfg_datafolder/data/camera")
 addBlobStore!(fg, ds)
 
 

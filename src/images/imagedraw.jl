@@ -12,8 +12,8 @@ function makeImage!(pc::Caesar._PCL.PointCloud,
                     y_domain::Tuple{<:Real,<:Real}=x_domain;
                     rows::Integer=1000, 
                     cols::Integer=rows,
-                    color::C=Gray{N0f8}(0.1),
-                    img::AbstractMatrix{C} = Gray.(zeros(rows,cols)),
+                    color::C=Gray(0.1),
+                    img::AbstractMatrix{<:Colorant} = Gray.(zeros(rows,cols)),
                     circle_size::Real=1,
                     drawkws... ) where {C <: Colorant}
   #
