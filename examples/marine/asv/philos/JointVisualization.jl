@@ -43,7 +43,7 @@ Gadfly.set_default_plot_size(35cm,20cm)
 
 dfg_datafolder = "/tmp/caesar/philos"
 
-fg = loadDFG("$dfg_datafolder/results_4/x0_5_x280")
+fg = loadDFG("$dfg_datafolder/results_5/x0_5_x260")
 
 ##
 
@@ -94,35 +94,128 @@ function _fetchDataPointCloudWorld(fg::AbstractDFG, lb::Symbol)
   apply(M, wPb, bPC)
 end
 
+function listDataEntrySequence( fg::AbstractDFG,
+                                lb::Symbol,
+                                pattern::Regex,
+                                _sort=(x)->x)
+  #
+  ents_ = listDataEntries(fg, lb)
+  entReg = map(l->match(pattern, string(l)), ents_)
+  entMsk = entReg .!== nothing
+  ents_[findall(entMsk)] |> _sort
+end
+
+Base.clamp(img::AbstractMatrix{<:RGB},b::Real,t::Real) = map(px->RGB{N0f8}(clamp(px.r,b,t),clamp(px.g,b,t),clamp(px.b,b,t)), img)
+
+
+function buildPoseImages( fg::AbstractDFG, 
+                          lb::Symbol;
+                          # _X_ = 3000,
+                          # _Y_ = 1200,
+                          T = RGB{N0f8},
+                          color=Gray{Float64}(0.05),
+                          scale_map=1.2 )
+  #
+  global img_wPC, imgL
+
+  R_ = _Rot.RotMatrix(0.017*pi)
+
+  framestack = []
+
+  # fetch the camera images
+  ents = listDataEntrySequence(fg, lb, r"IMG_CENTER_", sortDFG)
+  imgs_lb = fetchDataImage.(fg, lb, ents)
+  rows,cols = size(imgs_lb[1])
+  
+  # expand the radar map
+  if isSolved(fg, lb)
+    wPC__ = _fetchDataPointCloudWorld(fg, lb);
+    nPC = apply(M, ProductRepr([0.0;0.0], _Rot.RotMatrix(145*pi/180.0)), wPC__)
+    img_wPC_ = makeImage!(nPC, (-2000,1250),(-1000,2000); rows=trunc(Int, scale_map*rows), color);
+    if lb == :x0
+      img_wPC = deepcopy(img_wPC_)
+    else
+      img_wPC .+= img_wPC_
+    end
+    imgG = (px->RGB(0,10*px,0)).(img_wPC_);
+
+    imgL = RGB.(img_wPC) + imgG
+  end
+
+  imgs_R = map(img->warp(img, ImageTransformations.recenter(R_, center(img))), imgs_lb)
+
+  frame_ = Matrix{T}(undef, size(imgs_R[1])...)
+
+  # write mosaic frames to the video
+  for frame in imgs_R
+    ax, ay = axes(frame)
+    I = ax.parent .+ ax.offset
+    J = ay.parent .+ ay.offset
+    for (i,i_) in enumerate(I), (j,j_) in enumerate(J)
+      frame_[i,j] = frame[i_,j_]
+    end
+    imgF = mosaic([imgL, frame_]; nrow=1)
+    push!(framestack, imgF)
+  end
+
+  # typeof(framestack[1])
+  framestack_ = Vector{Matrix{T}}(undef, length(framestack));
+  for (i,fr) in enumerate(framestack)
+    framestack_[i] = clamp(fr, 0,1);
+  end
+
+  return framestack_
+end
+
 
 ##
 
-_X_ = 3000
-_Y_ = 1250
+
 
 lbls = sortDFG(ls(fg))
 
-img_wPC = nothing # Matrix{RGB{Float64}}()
+# imgL = nothing    # Matrix{RGB{Float64}}()
+global img_wPC = nothing
+global imgL = nothing
 
-i=1
-lb=:x0
-# for (i,lb) in enumerate(lbls)
 
-if (i-1) in 0:5:280
-  wPC__ = _fetchDataPointCloudWorld(fg, lb);
-  img_wPC_ = makeImage!(wPC__, (-1250,_X_),(-_Y_,_Y_); color=Gray{Float64}(0.05));
-  if i == 1
-    img_wPC = deepcopy(img_wPC_)
-  end
-  img_wPC = +(img_wPC_...);
-end
+framestack = buildPoseImages(fg, :x0 );
 
-# imshow(img_wPC)
 
+encoder_options = (crf=23, preset="medium")
+framerate=90
+open_video_out("/tmp/caesar/philos/mosaic.mp4", framestack[1], framerate=framerate, encoder_options=encoder_options) do writer
+
+  for (i,lb) in enumerate(lbls[1:51])
+    println("doing all frames for ", lb)
+
+    framestack = buildPoseImages(fg, lb )
+
+    for frame in framestack
+      # frame_ .= T.(frame)
+      write(writer, frame)
+    end
+
+  end # for
+
+end # video
+
+
+##
+
+# _framestack = framestack[755:756]
+
+##
+# frame_ = Matrix{T}(undef, size(framestack_[1])...)
+
+# frame_ = T.(framestack_[1])
+
+
+
+##
 
 # movie sequence in world frame
 
-imgL = Matrix{RGB{Float64}}()
 
 img_wPC = RGB.(img_wPC_[1])
 for gim in img_wPC_[2:end]
@@ -136,16 +229,13 @@ imgL |> imshow
 ##======================================================================================
 ## extract camera image sequence
 
+
 IMGS = []
 
 for lb in lbls
-  ents_ = listDataEntries(fg, lb)
-  entReg = map(l->match(r"IMG_CENTER_", string(l)), ents_)
-  entMsk = entReg .!== nothing
-  ents = ents_[findall(entMsk)] |> sortDFG
+  ents = listDataEntrySequence(fg, lb, r"IMG_CENTER_", sortDFG)
   
   imgs_lb = fetchDataImage.(fg, lb, ents)
-  
   IMGS = [IMGS; imgs_lb]
 end
 
