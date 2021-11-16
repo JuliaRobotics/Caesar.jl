@@ -3,6 +3,10 @@
 try tab-completion in the REPL:
 ```@docs
 IncrementalInference.generateGraph_Kaess
+IncrementalInference.generateGraph_TestSymbolic
+IncrementalInference.generateGraph_CaesarRing1D
+IncrementalInference.generateGraph_LineStep
+IncrementalInference.generateGraph_EuclidDistance
 RoME.generateGraph_Circle
 RoME.generateGraph_ZeroPose
 RoME.generateGraph_Hexagonal
