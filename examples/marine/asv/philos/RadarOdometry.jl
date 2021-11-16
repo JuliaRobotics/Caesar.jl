@@ -123,7 +123,10 @@ let tree = tree
     end
 
     # set factors for next cycle
-    setSolvable!.(fg_, ls(fg_, lb), 1)
+    if i < length(slv)
+      btwfc = intersect(ls(fg_, lb), ls(fg_, slv[i+1]))
+      setSolvable!.(fg_, btwfc, 1)
+    end
   end
 end
 
