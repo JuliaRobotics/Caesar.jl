@@ -131,7 +131,7 @@ function buildPoseImages( fg::AbstractDFG,
   if isSolved(fg, lb)
     wPC__ = _fetchDataPointCloudWorld(fg, lb);
     nPC = apply(M, ProductRepr([0.0;0.0], _Rot.RotMatrix(145*pi/180.0)), wPC__)
-    img_wPC_ = makeImage!(nPC, (-2000,1250),(-1000,2000); rows=trunc(Int, scale_map*rows), color);
+    img_wPC_ = makeImage!(nPC, (-2000,1000),(-1500,1000); rows=trunc(Int, scale_map*rows), color);
     if lb == :x0
       img_wPC = deepcopy(img_wPC_)
     else
@@ -186,7 +186,7 @@ encoder_options = (crf=23, preset="medium")
 framerate=90
 open_video_out("/tmp/caesar/philos/mosaic.mp4", framestack[1], framerate=framerate, encoder_options=encoder_options) do writer
 
-  for (i,lb) in enumerate(lbls[1:51])
+  for (i,lb) in enumerate(lbls[1:21])
     println("doing all frames for ", lb)
 
     framestack = buildPoseImages(fg, lb )
