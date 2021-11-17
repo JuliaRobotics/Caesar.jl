@@ -97,7 +97,7 @@ end
 function listDataEntrySequence( fg::AbstractDFG,
                                 lb::Symbol,
                                 pattern::Regex,
-                                _sort=(x)->x)
+                                _sort::Function=(x)->x)
   #
   ents_ = listDataEntries(fg, lb)
   entReg = map(l->match(pattern, string(l)), ents_)
@@ -186,7 +186,7 @@ encoder_options = (crf=23, preset="medium")
 framerate=90
 open_video_out("/tmp/caesar/philos/mosaic.mp4", framestack[1], framerate=framerate, encoder_options=encoder_options) do writer
 
-  for (i,lb) in enumerate(lbls[1:21])
+  for (i,lb) in enumerate(lbls)
     println("doing all frames for ", lb)
 
     framestack = buildPoseImages(fg, lb )
@@ -270,5 +270,100 @@ end
 
 ##
 
+
+
+
+
+##
+
+
+function transformIndexes(bP__::AbstractVector{C}, aTb) where {C <: CartesianIndex{2}}
+  bV = zeros(3)
+  bV[3] = 1.0
+
+  aV = zeros(3)
+  aP__ = Vector{Vector{Float64}}(undef, length(bP__))
+
+  for (i,kp) in enumerate(bP__)
+    bV[1] = kp[1]
+    bV[2] = kp[2]
+
+    aV[:] = aTb*bV
+    aP__[i] = aV[1:2]
+  end
+
+  return aP__
+end
+
+
+function cost(matches, aTb_)
+  pts1 = (x->x[1]).(matches) .|> x-> [x[1];x[2]]
+  _pts2 = (x->x[2]).(matches)
+  pts2 = transformIndexes(_pts2, aTb_)
+
+  total = 0.0
+  for (i,p2) in enumerate(pts2)
+    total += norm( pts1[i] .- p2 )
+  end
+
+  return total
+end
+
+##
+
+# aTb = [1. 0 0; 0 1 0; 0 0 1]
+# cost(desc_1, ret_kps_1, desc_2, ret_kps_2, [1. 0 0; 0 1 0; 0 0 1])
+
+cost_tr(xy) = cost(matches, [1. 0 xy[1]; 0 1 xy[2]; 0 0 1])
+
+
+
+##
+
+
+
+img1 = Gray.(imgs[1])
+img2 = Gray.(imgs[2])
+
+keypoints_1 = Keypoints(fastcorners(img1, 15, 0.3))
+keypoints_2 = Keypoints(fastcorners(img2, 15, 0.3))
+
+brief_params = BRIEF(size = 256, window = 20, seed = 123)
+
+desc_1, ret_kps_1 = create_descriptor(img1, keypoints_1, brief_params);
+desc_2, ret_kps_2 = create_descriptor(img2, keypoints_2, brief_params);
+
+matches = match_keypoints(ret_kps_1, ret_kps_2, desc_1, desc_2, 0.1)
+
+
+pts1 = (x->x[1]).(matches) .|> x-> [x[1];x[2]]
+_pts2 = (x->x[2]).(matches)
+
+aTb = [1. 0 0; 0 1 0; 0 0 1]
+pts2 = transformIndexes(_pts2, aTb)
+
+grid = hcat(img1, img2)
+offset = CartesianIndex(0, size(img1, 2))
+map(m -> draw!(grid, LineSegment(m[1], m[2] + offset)), matches)
+
+imshow(grid)
+
+##
+
+# cost_(mtc) = sum( (x->x[1]-x[2]).(mtc) .|> x-> norm([x[1];x[2]]) )
+
+##
+
+_img2(x,y) = warp(img2, trans(x,y), axes(img2));
+cost(xy)  = norm(img1 .- _img2(xy...))
+
+
+##
+
+using Optim
+
+res = Optim.optimize(cost_tr, [0.0;0.0])
+
+##
 
 #
