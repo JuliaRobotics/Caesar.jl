@@ -31,8 +31,11 @@ function cost(matches, aTb_)
   return total
 end
 
-# aTb = [1. 0 0; 0 1 0; 0 0 1]
-cost_tr(xy, matches) = cost(matches, [1. 0 xy[1]; 0 1 xy[2]; 0 0 1])
+function cost_xyr!(xyr, matches, aTb = [1. 0 0; 0 1 0; 0 0 1])
+  aTb[1:2,1:2] .= _Rot.RotMatrix(xyr[3])
+  aTb[1:2, 3] .= xyr[1:2]
+  cost(matches, aTb)
+end
 
 # draw matches
 
@@ -43,40 +46,99 @@ function mosaicMatches(img1, img2, matches)
   grid
 end
 
+function getFeaturesDescriptors(img::AbstractMatrix)
+  # img = parent(img_)
+  brisk_params = BRISK()
+  features = Features(Keypoints(imcorner(img, method=harris)))
+  desc, ret_features = create_descriptor(Gray.(img), features, brisk_params)
+end
 
-function matchAndMinimize(img1::AbstractMatrix{<:Gray}, img2::AbstractMatrix{<:Gray})
-  keypoints_1 = Keypoints(fastcorners(img1, 15, 0.3))
-  keypoints_2 = Keypoints(fastcorners(img2, 15, 0.3))
+function getCornersDescriptors( img::AbstractMatrix; 
+                                kparg1 = 15, kparg2=0.3,
+                                size = 256, window = 20, seed = 123 )
+  #
+  brief_params = BRIEF(;size, window, seed)
+  keypoints = Keypoints(fastcorners(img, kparg1, kparg2))
+  desc, ret_features = create_descriptor(img, keypoints, brief_params);
+end
 
-  brief_params = BRIEF(size = 256, window = 20, seed = 123)
+function getKeypointsMatchBRIEF(  img1, img2; 
+                                  kparg1 = 15, kparg2=0.3, threshold=0.1,
+                                  size = 256, window = 20, seed = 123 )
+  #
+  desc_1, ret_kps_1 = getCornersDescriptors( img1; kparg1, kparg2, size, window, seed )
+  desc_2, ret_kps_2 = getCornersDescriptors( img2; kparg1, kparg2, size, window, seed )
 
-  desc_1, ret_kps_1 = create_descriptor(img1, keypoints_1, brief_params);
-  desc_2, ret_kps_2 = create_descriptor(img2, keypoints_2, brief_params);
+  match_keypoints(ret_kps_1, ret_kps_2, desc_1, desc_2, threshold)
+end
 
-  matches = match_keypoints(ret_kps_1, ret_kps_2, desc_1, desc_2, 0.1)
+function getKeypointsMatchBRISK(img1, img2; 
+                                threshold=0.1,
+                                kwargs... )
+  #
+  desc_1, ret_kps_1 = getFeaturesDescriptors( img1; kwargs... )
+  desc_2, ret_kps_2 = getFeaturesDescriptors( img2; kwargs... )
 
-  pts1 = (x->x[1]).(matches) .|> x-> [x[1];x[2]]
-  _pts2 = (x->x[2]).(matches)
+  match_keypoints(Keypoints(ret_kps_1), Keypoints(ret_kps_2), desc_1, desc_2, threshold)
+end
 
-  aTb = [1. 0 0; 0 1 0; 0 0 1]
-  pts2 = transformIndexes(_pts2, aTb)
 
-  res = Optim.optimize((xy)->cost_tr(xy, matches), [0.0;0.0])
+function calcMatchMinimize( img1::AbstractMatrix{<:Gray}, img2::AbstractMatrix{<:Gray};
+                            keypoint_fnc::Function=getKeypointsMatchBRIEF,
+                            kwargs...)
+  #
+  
+  matches = keypoint_fnc( img1, img2; kwargs... )
+
+  res = Optim.optimize((xyr)->cost_xyr!(xyr, matches), [0.0;0.0;0.0])
   res.minimizer, matches
 end
 
 
 function pushMatchWindowMedian!(iCB::AbstractVector{<:AbstractMatrix{<:Gray}}, 
                                 trBuffer::AbstractVector{<:AbstractVector},
-                                newImg::AbstractMatrix{<:Gray} )
+                                newImg::AbstractMatrix{<:Gray};
+                                kwargs... )
   #
   for bimg in iCB
-    trans, matches = matchAndMinimize(newImg, bimg);
+    trans, matches = calcMatchMinimize(newImg, bimg; kwargs...);
     push!(trBuffer, trans)
   end
 
   Ti = median((x->x[1]).(trBuffer))
   Tj = median((x->x[2]).(trBuffer))
+  Tr = median((x->x[3]).(trBuffer))
 
-  return [Ti; Tj]
+  return [Ti; Tj; Tr]
 end
+
+Base.@kwdef struct BasicImageOnlyStabilization{N}
+  imgBuf::CircularBuffer{<:AbstractMatrix{<:Gray}} = CircularBuffer{Matrix{Gray{N0f8}}}(N)
+  trBuf::CircularBuffer{<:AbstractVector{Float64}} = CircularBuffer{Vector{Float64}}(N)
+end
+
+function (bi::BasicImageOnlyStabilization)( newImg::AbstractMatrix;
+                                            offset::AbstractVector=zeros(3),
+                                            roi_i = :,
+                                            roi_j = :,
+                                            scale_i=1,
+                                            scale_j=1,
+                                            scale_r=1,
+                                            kwargs... )
+  #
+  img_g = Gray.(newImg[roi_i,roi_j])
+  if length(bi.imgBuf) == 0
+    push!(bi.imgBuf, img_g)
+  end
+  tr = pushMatchWindowMedian!(bi.imgBuf, bi.trBuf, img_g ; kwargs... )
+  rot = ImageTransformations.recenter(_Rot.RotMatrix(scale_r*tr[3] + offset[3]), [Base.size(img_g)...] .÷ 2)  # a rotation around the center
+  
+  tform = rot ∘ Translation(scale_i*tr[1],scale_j*tr[2])
+  warp(newImg, tform, axes(newImg))
+end
+
+
+
+
+
+#

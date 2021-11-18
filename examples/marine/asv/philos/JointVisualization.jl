@@ -16,6 +16,8 @@ using Colors
 using Caesar
 @everywhere using Caesar
 
+using DistributedFactorGraphs: listDataEntrySequence
+
 import Rotations as _Rot
 using CoordinateTransformations
 
@@ -49,7 +51,7 @@ using Optim
 
 dfg_datafolder = "/tmp/caesar/philos"
 
-fg = loadDFG("$dfg_datafolder/results_5/x0_5_x260")
+fg = loadDFG("$dfg_datafolder/results_5/x0_5_x280")
 
 ##
 
@@ -59,11 +61,9 @@ addBlobStore!(fg, ds)
 ds = FolderStore{Vector{UInt8}}(:gps_fix, "$dfg_datafolder/data/gps")
 addBlobStore!(fg, ds)
 
-# add if you want lidar also 
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
 addBlobStore!(fg, ds)
 
-# add if you want lidar also 
 ds = FolderStore{Vector{UInt8}}(:camera, "$dfg_datafolder/data/camera")
 addBlobStore!(fg, ds)
 
@@ -76,13 +76,6 @@ addBlobStore!(fg, ds)
 #  draw side by side radar on left and camera on right (more camera than radar images)
 #  
 
-
-## visualize the radar data
-
-# if false
-#   imgs = map(x->Gray{N0f8}.(x), fetchDataImage.(fg, sortDFG(ls(fg)), :RADAR_IMG));
-#   writevideo("/tmp/caesar/philos/radar280.mp4", imgs; fps=5, player="totem")
-# end
 
 ##
 
@@ -100,16 +93,6 @@ function _fetchDataPointCloudWorld(fg::AbstractDFG, lb::Symbol)
   apply(M, wPb, bPC)
 end
 
-function listDataEntrySequence( fg::AbstractDFG,
-                                lb::Symbol,
-                                pattern::Regex,
-                                _sort::Function=(x)->x)
-  #
-  ents_ = listDataEntries(fg, lb)
-  entReg = map(l->match(pattern, string(l)), ents_)
-  entMsk = entReg .!== nothing
-  ents_[findall(entMsk)] |> _sort
-end
 
 Base.clamp(img::AbstractMatrix{<:RGB},b::Real,t::Real) = map(px->RGB{N0f8}(clamp(px.r,b,t),clamp(px.g,b,t),clamp(px.b,b,t)), img)
 
@@ -210,135 +193,9 @@ end # video
 
 ##
 
-# _framestack = framestack[755:756]
-
-##
-# frame_ = Matrix{T}(undef, size(framestack_[1])...)
-
-# frame_ = T.(framestack_[1])
-
-
-
-##
-
-
-##======================================================================================
-
-include(joinpath(@__DIR__,"ImageOnlyStabilization.jl"))
-
-
-##
-
-des = listDataEntrySequence(fg, :x0, r"IMG_CENTER", sortDFG)
-imgs = fetchDataImage.(fg, :x0, des)
-
-imgG = map(img->Gray.(img[1:900,:]), imgs);
-
-##
-
-# mosaicMatches(imgG[[1;3]]..., matches) |> imshow
-# trans, matches = matchAndMinimize(imgG[[1;2]]...); trans
-
-##
-
-N = 4
-iCB = CircularBuffer{eltype(imgG)}(N)
-TR = CircularBuffer{Vector{Float64}}(N)
-# pad buffer with boundary condition 
-for _ in 1:N
-  push!(iCB, imgG[1])
-end
-
-# _img2(x,y) = warp(img2, trans(x,y), axes(img2));
-
-rot = ImageTransformations.recenter(_Rot.RotMatrix(0.017*pi), [size(img1)...] .÷ 2)  # a rotation around the center
-
-imgG_s = Vector{eltype(imgG)}()
-push!(imgG_s, imgG[1])
-
-for i in 2:15
-  @show tr = pushMatchWindowMedian!(iCB, TR, imgG[i])
-  tform = rot ∘ Translation(tr...)
-  push!(imgG_s, warp(imgG[i], tform, axes(imgG[i])) )
-end
-
-
-encoder_options = (crf=23, preset="medium")
-framerate=90
-open_video_out("/tmp/caesar/philos/mosaic.mp4", framestack[1], framerate=framerate, encoder_options=encoder_options) do writer
-  for (i,lb) in enumerate(lbls)
-    println("doing all frames for ", lb)
-    framestack = buildPoseImages(fg, lb )
-    for frame in framestack
-      # frame_ .= T.(frame)
-      write(writer, frame)
-    end
-  end # for
-end # video
-
-# writevideo("/tmp/caesar/philos/quickstb.mp4", imgG_s; fps=5)
-
-##
-
-# _img2(x,y) = warp(img2, trans(x,y), axes(img2));
-# cost(xy)  = norm(img1 .- _img2(xy...))
-
-
-## =============================================================================
-## extract camera image sequence
-
-
-IMGS = []
-
-for lb in lbls
-  ents = listDataEntrySequence(fg, lb, r"IMG_CENTER_", sortDFG)
-  
-  imgs_lb = fetchDataImage.(fg, lb, ents)
-  IMGS = [IMGS; imgs_lb]
-end
-
-IMGS_ = Vector{typeof(IMGS[1])}(undef, length(IMGS));
-IMGS_ .= IMGS;
-
-##
-
-R_ = _Rot.RotMatrix(0.017*pi)
-T = eltype(IMGS_[1])
-
-IMGS_R = map(img->warp(img, ImageTransformations.recenter(R_, center(img))), IMGS_);
-
-##
-
-framestack = IMGS_R
-frame_ = Matrix{T}(undef, size(IMGS_R[1])...)
-
-encoder_options = (crf=23, preset="medium")
-framerate=30
-open_video_out("/tmp/caesar/philos/imgs_.mp4", framestack[1], framerate=framerate, encoder_options=encoder_options) do writer
-    for frame in framestack
-        ax, ay = axes(frame)
-        I = ax.parent .+ ax.offset
-        J = ay.parent .+ ay.offset
-        for (i,i_) in enumerate(I), (j,j_) in enumerate(J)
-          frame_[i,j] = frame[i_,j_]
-        end
-        write(writer, frame_)
-    end
-end
-
-##
-
-# movie sequence in world frame
-
-
-img_wPC = RGB.(img_wPC_[1])
-for gim in img_wPC_[2:end]
-  # green overlay of latest
-  imgG = (px->RGB(0,10*px,0)).(gim);
-  imgL = img_wPC + imgG
-end
-
-imgL |> imshow
+lb = :x48
+des = listDataEntrySequence(fg, lb, r"IMG_CENTER", sortDFG)
+imgs = fetchDataImage.(fg, lb, des)
 
 
 ##

@@ -1,6 +1,6 @@
 
 using Distributed
-addprocs(10)
+# addprocs(10)
 
 using Colors
 using Caesar
@@ -57,7 +57,7 @@ getSolverParams(fg).inflation=2.0
 setSolvable!.(fg, ls(fg), 0)
 
 # select the pose variables to include in the solve
-slv = [Symbol("x",i) for i in 0:5:285]
+slv = [Symbol("x",i) for i in 0:5:20] # 285
 # setSolvable!.(fg, slv, 1)
 
 # add a PriorPose2
@@ -100,6 +100,7 @@ fg_ = if false
   getSolverParams(_fg_).inflation = 2.0
   getSolverParams(_fg_).alwaysFreshMeasurements = false
   copyGraph!(_fg_, fg, slv, union((ls.(fg, slv))...))
+  _fg_
 else
   fg
 end
