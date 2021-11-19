@@ -101,6 +101,7 @@ function buildPoseImages( fg::AbstractDFG,
                           lb::Symbol;
                           # _X_ = 3000,
                           # _Y_ = 1200,
+                          pattern::Regex=r"IMG_CENTER_",
                           T = RGB{N0f8},
                           color=Gray{Float64}(0.05),
                           scale_map=1.2,
@@ -111,12 +112,12 @@ function buildPoseImages( fg::AbstractDFG,
   M = SpecialEuclidean(2)
   e0 = identity_element(M)
 
-  R_ = _Rot.RotMatrix(0.017*pi)
+  R_ = _Rot.RotMatrix(0.0) # 0.017*pi
 
   framestack = []
 
   # fetch the camera images
-  ents = listDataEntrySequence(fg, lb, r"IMG_CENTER_", sortDFG)
+  ents = listDataEntrySequence(fg, lb, pattern, sortDFG)
   imgs_lb = fetchDataImage.(fg, lb, ents)
   rows,cols = size(imgs_lb[1])
   
@@ -180,19 +181,20 @@ global img_wPC = nothing
 global imgL = nothing
 
 ppose = zeros(3)
+pattern = r"STAB_IMG_CENTER_"
 
-framestack = buildPoseImages(fg, :x0; ppose );
+framestack = buildPoseImages(fg, :x0; ppose, pattern );
 
 ##
 
 encoder_options = (crf=23, preset="medium")
 framerate=90
-open_video_out("/tmp/caesar/philos/mosaic_.mp4", framestack[1], framerate=framerate, encoder_options=encoder_options) do writer
+open_video_out("/tmp/caesar/philos/mosaic_stab.mp4", framestack[1], framerate=framerate, encoder_options=encoder_options) do writer
   
   for (i,lb) in enumerate(lbls)
     println("doing all frames for ", lb)
 
-    framestack = buildPoseImages(fg, lb; ppose )
+    framestack = buildPoseImages(fg, lb; ppose, pattern )
 
     for frame in framestack
       # frame_ .= T.(frame)
