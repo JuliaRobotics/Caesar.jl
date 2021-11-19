@@ -54,7 +54,7 @@ function getFeaturesDescriptors(img::AbstractMatrix)
 end
 
 function getCornersDescriptors( img::AbstractMatrix; 
-                                kparg1 = 15, kparg2=0.3,
+                                kparg1 = 12, kparg2=0.3,
                                 size = 256, window = 20, seed = 123 )
   #
   brief_params = BRIEF(;size, window, seed)
@@ -63,7 +63,7 @@ function getCornersDescriptors( img::AbstractMatrix;
 end
 
 function getKeypointsMatchBRIEF(  img1, img2; 
-                                  kparg1 = 15, kparg2=0.3, threshold=0.1,
+                                  kparg1 = 12, kparg2=0.3, threshold=0.1,
                                   size = 256, window = 20, seed = 123 )
   #
   desc_1, ret_kps_1 = getCornersDescriptors( img1; kparg1, kparg2, size, window, seed )
@@ -117,20 +117,27 @@ Base.@kwdef struct BasicImageOnlyStabilization{N}
   trBuf::CircularBuffer{<:AbstractVector{Float64}} = CircularBuffer{Vector{Float64}}(N)
 end
 
-function (bi::BasicImageOnlyStabilization)( newImg::AbstractMatrix;
+function (bi::BasicImageOnlyStabilization{N})( newImg::AbstractMatrix;
                                             offset::AbstractVector=zeros(3),
                                             roi_i = :,
                                             roi_j = :,
                                             scale_i=1,
                                             scale_j=1,
                                             scale_r=1,
-                                            kwargs... )
+                                            kwargs... ) where N
   #
+  # image tracking must be in grayscale
   img_g = Gray.(newImg[roi_i,roi_j])
+  # fill buffer with first image
   if length(bi.imgBuf) == 0
-    push!(bi.imgBuf, img_g)
+    for _ in 1:N
+      push!(bi.imgBuf, img_g)
+    end
   end
   tr = pushMatchWindowMedian!(bi.imgBuf, bi.trBuf, img_g ; kwargs... )
+  # replace oldest image in buffer with new
+  push!(bi.imgBuf, img_g)
+
   rot = ImageTransformations.recenter(_Rot.RotMatrix(scale_r*tr[3] + offset[3]), [Base.size(img_g)...] .÷ 2)  # a rotation around the center
   
   tform = rot ∘ Translation(scale_i*tr[1],scale_j*tr[2])
@@ -138,6 +145,62 @@ function (bi::BasicImageOnlyStabilization)( newImg::AbstractMatrix;
 end
 
 
+
+function _stabImageSeq( fg, 
+                        lbls=sortDFG( ls(fg, tags=[:POSE;]) ); 
+                        threshold=0.4, size=1024, window=50, kparg1 = 11,
+                        filecount::Int=0,
+                        folderpath="/tmp/caesar/philos",
+                        filepath=folderpath*"/quickstab_$filecount.mp4",
+                        logentry=false,
+                        scale_j=0,
+                        scale_r=0.8,
+                        roi_i=1:900,
+                        offset=[0;0;0.017*pi],
+                        N::Integer=3 )
+  #
+
+  BIOS! = BasicImageOnlyStabilization{N}()
+
+  des = listDataEntrySequence(fg, lbls[1], r"IMG_CENTER", sortDFG)
+  img = fetchDataImage(fg, lbls[1], des[1])
+
+  R_ = _Rot.RotMatrix(0.017*pi)
+  img_ = warp(img, ImageTransformations.recenter(R_, center(img)));
+
+  encoder_options = (crf=23, preset="medium")
+  framerate=90
+  open_video_out(filepath, img, framerate=framerate, encoder_options=encoder_options) do writer
+
+    for lb in lbls
+      println("stab ", lb)
+
+      des = listDataEntrySequence(fg, lb, r"IMG_CENTER", sortDFG)
+      imgs = fetchDataImage.(fg, lb, des)
+
+      for (id,img) in enumerate(imgs)
+        frame = BIOS!(img; roi_i, scale_j, scale_r, offset, 
+                      threshold, size, window, kparg1)
+        #
+        write(writer, frame)
+        addData!(   fg, :camera, lb, Symbol(:STAB_, des[id]),
+                    Caesar.toFormat(format"PNG", frame),
+                    mimeType="image/png",
+                    description="ImageMagick.readblob(imgBytes)" )
+      end
+
+    end
+
+  end
+
+  # store log
+  if logentry
+    open(folderpath*"/log.txt", "a") do fid
+      println(fid, filepath, " : threshold=$threshold, size=$size, window=$window, kparg1=$kparg1, N=$N")
+    end
+  end
+
+end
 
 
 

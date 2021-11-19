@@ -103,9 +103,13 @@ function buildPoseImages( fg::AbstractDFG,
                           # _Y_ = 1200,
                           T = RGB{N0f8},
                           color=Gray{Float64}(0.05),
-                          scale_map=1.2 )
+                          scale_map=1.2,
+                          ppose=zeros(3) )
   #
   global img_wPC, imgL
+
+  M = SpecialEuclidean(2)
+  e0 = identity_element(M)
 
   R_ = _Rot.RotMatrix(0.017*pi)
 
@@ -119,8 +123,16 @@ function buildPoseImages( fg::AbstractDFG,
   # expand the radar map
   if isSolved(fg, lb)
     wPC__ = _fetchDataPointCloudWorld(fg, lb);
-    nPC = apply(M, ProductRepr([0.0;0.0], _Rot.RotMatrix(140*pi/180.0)), wPC__)
-    img_wPC_ = makeImage!(nPC, (-2500,1000),(-2000,1000); rows=trunc(Int, scale_map*rows), color);
+    # add traj plotting here (draw points and lines on radar plot)
+
+    nRw = _Rot.RotMatrix(140*pi/180.0)
+    nTw = ProductRepr([0.0;0.0], nRw)
+    nPC = apply(M, nTw, wPC__)
+    __ppe = getPPE(fg, lb).suggested
+    _ppe = Manifolds.compose(M, nTw, exp(M, e0, hat(M, e0, __ppe)))
+    ppe = vee(M, e0, log(M, e0, _ppe))
+    img_wPC_ = makeImage!(nPC, (-2500,1000),(-2000,1000); rows=trunc(Int, scale_map*rows), color, pose=ppe, ppose=ppose );
+    ppose .= ppe
     if lb == :x0
       img_wPC = deepcopy(img_wPC_)
     else
@@ -161,25 +173,26 @@ end
 
 
 
-lbls = sortDFG(ls(fg))
+lbls = sortDFG(ls(fg)) #[1:41]
 
 # imgL = nothing    # Matrix{RGB{Float64}}()
 global img_wPC = nothing
 global imgL = nothing
 
+ppose = zeros(3)
 
-framestack = buildPoseImages(fg, :x0 );
+framestack = buildPoseImages(fg, :x0; ppose );
 
 ##
 
 encoder_options = (crf=23, preset="medium")
 framerate=90
-open_video_out("/tmp/caesar/philos/mosaic.mp4", framestack[1], framerate=framerate, encoder_options=encoder_options) do writer
-
+open_video_out("/tmp/caesar/philos/mosaic_.mp4", framestack[1], framerate=framerate, encoder_options=encoder_options) do writer
+  
   for (i,lb) in enumerate(lbls)
     println("doing all frames for ", lb)
 
-    framestack = buildPoseImages(fg, lb )
+    framestack = buildPoseImages(fg, lb; ppose )
 
     for frame in framestack
       # frame_ .= T.(frame)
