@@ -1,10 +1,10 @@
 <p align="center">
-<img src="https://user-images.githubusercontent.com/6412556/134777705-acda768e-884b-4de6-b307-aac6d09b9c81.png" width="480" border="0" />
+<img src="https://user-images.githubusercontent.com/6412556/134777705-acda768e-884b-4de6-b307-aac6d09b9c81.png" width="240" border="0" />
 </p>
 
 A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reducing the barrier of entry for sensor/data fusion tasks, including Simultaneous Localization and Mapping (SLAM).
 
-[NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io) or via the Slack badge-link below.
+[NavAbility.io](http://www.navability.io) is administrating and supporting the ongoing development of Caesar.jl with and to help grow the community, please reach out for any additional information at info@navability.io or via the Slack badge-link below.
 
 # Weblink Info
 
