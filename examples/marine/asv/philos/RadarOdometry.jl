@@ -1,6 +1,6 @@
 
 using Distributed
-addprocs(10)
+# addprocs(10)
 
 using Colors
 using Caesar
@@ -35,6 +35,9 @@ addBlobStore!(fg, ds)
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
 addBlobStore!(fg, ds)
 
+# add if you want lidar also 
+ds = FolderStore{Vector{UInt8}}(:camera, "$dfg_datafolder/data/camera")
+addBlobStore!(fg, ds)
 
 ## visualize the radar data
 
@@ -54,7 +57,7 @@ getSolverParams(fg).inflation=2.0
 setSolvable!.(fg, ls(fg), 0)
 
 # select the pose variables to include in the solve
-slv = [Symbol("x",i) for i in 0:5:285]
+slv = [Symbol("x",i) for i in 0:5:20] # 285
 # setSolvable!.(fg, slv, 1)
 
 # add a PriorPose2
@@ -91,12 +94,16 @@ end
 
 ## make a copy of this subgraph for for dev engineering and debugging only
 
-fg_ = initfg()
-getSolverParams(fg).inflateCycles=1
-getSolverParams(fg).inflation = 2.0
-getSolverParams(fg).alwaysFreshMeasurements = false
-
-copyGraph!(fg_, fg, slv, union((ls.(fg, slv))...))
+fg_ = if false
+  _fg_ = initfg()
+  getSolverParams(_fg_).inflateCycles=1
+  getSolverParams(_fg_).inflation = 2.0
+  getSolverParams(_fg_).alwaysFreshMeasurements = false
+  copyGraph!(_fg_, fg, slv, union((ls.(fg, slv))...))
+  _fg_
+else
+  fg
+end
 
 
 ## many batch solves of graph copy
@@ -113,11 +120,14 @@ let tree = tree
     if isodd(i)
       @info "solve for" lb
       tree = solveTree!(fg_, tree; storeOld=true);
-      saveDFG("/tmp/caesar/philos/results_4/x0_5_$(lb)", fg_)
+      saveDFG("/tmp/caesar/philos/results_5/x0_5_$(lb)", fg_)
     end
 
     # set factors for next cycle
-    setSolvable!.(fg_, ls(fg_, lb), 1)
+    if i < length(slv)
+      btwfc = intersect(ls(fg_, lb), ls(fg_, slv[i+1]))
+      setSolvable!.(fg_, btwfc, 1)
+    end
   end
 end
 

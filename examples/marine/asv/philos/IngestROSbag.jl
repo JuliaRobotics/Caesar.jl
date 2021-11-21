@@ -44,6 +44,7 @@ using RobotOS
 # standard types
 @rosimport sensor_msgs.msg: PointCloud2
 @rosimport sensor_msgs.msg: NavSatFix
+@rosimport sensor_msgs.msg: CompressedImage
 # @rosimport nmea_msgs.msg: Sentence
 # seagrant type
 
@@ -124,7 +125,7 @@ end
 Message callback for Radar pings. Adds a variable to the factor graph and appends the scan as a bigdata element.
 """
 function handleRadarPointcloud!(msg::sensor_msgs.msg.PointCloud2, fg::AbstractDFG, systemstate::SystemState)
-    @info "handleRadarPointcloud!" maxlog=100
+    @info "handleRadarPointcloud!" maxlog=10
 
     # assume there is still space (previously cleared)
     # add new piece of radar point cloud to queue for later processing.
@@ -254,6 +255,31 @@ function handleGPS!(msg::sensor_msgs.msg.NavSatFix, fg::AbstractDFG, systemstate
 
 end
 
+
+"""
+    $SIGNATURES
+
+Message callback for camera images.
+"""
+function handleCamera_Center!(msg::sensor_msgs.msg.CompressedImage, fg::AbstractDFG, systemstate::SystemState)
+  @info "handleCamera_Center!" maxlog=10
+
+  lbls = ls(fg, tags=[:POSE;])
+  if length(lbls) == 0
+    return nothing
+  end
+
+  lb = sortDFG(lbls)[end]
+
+  addData!(   fg, :camera, systemstate.cur_variable.label, Symbol(:IMG_CENTER_, msg.header.seq),
+              msg.data,
+              mimeType="image/jpeg",
+              description="ImageMagick.readblob(imgBytes); # "*msg.format*"; "*string(msg.header.stamp) )
+
+  nothing
+end
+
+
 ## Own unpacking of ROS types from bagreader (not regular subscriber)
 
 
@@ -274,6 +300,12 @@ function _handleGPS!(msgdata, args)
     msgT = _unpackROSMsgType(sensor_msgs.msg.NavSatFix, msgdata)
     handleGPS!(msgT, args...)
 end
+
+function _handleCamCen!(msgdata, args)
+    msgT = _unpackROSMsgType(sensor_msgs.msg.CompressedImage, msgdata)
+    handleCamera_Center!(msgT, args...)
+end
+
 
 ##
 
@@ -306,6 +338,11 @@ function main(;iters::Integer=50)
     ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
     addBlobStore!(fg, ds)
 
+    # add if you want lidar also 
+    ds = FolderStore{Vector{UInt8}}(:camera, "$dfg_datafolder/data/camera")
+    addBlobStore!(fg, ds)
+
+
     # System state
     systemstate = SystemState()
 
@@ -316,6 +353,7 @@ function main(;iters::Integer=50)
     
     # radar_sub = bagSubscriber(, _handleRadar!, (fg, systemstate))
 
+    camcen_sub = bagSubscriber("/center_camera/image_color/compressed", _handleCamCen!, (fg, systemstate) )
     radarpc_sub = bagSubscriber("/broadband_radar/channel_0/pointcloud", _handleRadarPointcloud!, (fg, systemstate) )
     # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", handleLidar!, (fg,systemstate), queue_size = 10)
     gps_sub = bagSubscriber("/gnss", _handleGPS!, (fg, systemstate))
@@ -340,7 +378,7 @@ end
 
 
 # Actually run the program and build 
-main(iters=20000)
+main(iters=100000)
 
 
 
@@ -361,6 +399,8 @@ addBlobStore!(fg, ds)
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfg_datafolder/data/lidar")
 addBlobStore!(fg, ds)
 
-
+# add if you want lidar also 
+ds = FolderStore{Vector{UInt8}}(:camera, "$dfg_datafolder/data/camera")
+addBlobStore!(fg, ds)
 
 ##
