@@ -1,14 +1,16 @@
 # Graph Concepts
 
-A factor graph is a bipartite representation where variables (denoted by larger nodes) are interconnected by a set of factors (smaller nodes) that represent some algebraic interaction between the variables. Factors must adhere to the limits of probabilistic models -- for example conditional likelihoods (between multiple variables) or priors (unary to one variable).  A more heterogeneous factor graph example is shown below; see a broader discussion [in the related literature ](https://juliarobotics.org/Caesar.jl/latest/refs/literature/):
-
-![factorgraphexample](https://user-images.githubusercontent.com/6412556/41196136-e5b05f98-6c07-11e8-8f26-7318e5085cc0.png)
+Factor graphs are bipartite consisting of *variables* and *factors*, which are connected by edges to form a graph structure.  The terminology of nodes is reserved for actually storing the data on some graph oriented technology.
 
 ## What are Variables and Factors
 
-Factor graphs are bipartite, i.e. variables and factors.  The terminology of nodes and edges is reserved for actually storing the data on some graph-based technology.
+Variables, denoted as the larger nodes in the figur below, represent state variables of interest such as vehicle or landmark positions, sensor calibration parameters, and more.  Variables are likely hidden values which are not directly observed, but we want to estimate them them from observed data and at least some minimal algebra structure from probabilistic measurement models.
 
-Variables in the factor graph have not been observed, but we want to back them out given the observed values and algebra defining the structure between all observations.  Mathematically speaking, factors are actually "observed variables" that are stochastically "fixed".  Waving hands over the fact that factors encode both the algebraic model AND the observed measurement values.  If factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the known algebraic model that might connect them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):
+Factors, the smaller nodes in the figure, represent the algebraic interaction between particular variables, which is captured through edges.  Factors must adhere to the limits of probabilistic models -- for example conditional likelihoods capture the likelihood correlations between variables; while priors (unary to one variable) represent absolute information to be introduced.  A heterogeneous factor graph illustration is shown below; also see a broader discussion [linked on the literature page](https://juliarobotics.org/Caesar.jl/latest/refs/literature/).
+
+![factorgraphexample](https://user-images.githubusercontent.com/6412556/41196136-e5b05f98-6c07-11e8-8f26-7318e5085cc0.png)
+
+We assume factors are constructed from statistically independent measurements (i.e. no direct correlations between measurements other than the known algebraic model that might connect them), then we can use Probabilistic Chain rule to write inference operation down (unnormalized):
 
 ```math
 P(\Theta | Z)  \propto  P(Z | \Theta) P(\Theta)
@@ -26,5 +28,12 @@ or similarly,
 P(\Theta, Z) = P(\Theta | Z) P(Z).
 ```
 
-Second, the uncorrelated measurement process assumption implies that `` P(Z) `` constant given the algebraic model.
+The inference objective is to invert this system, so as to find the states given the product between all the likelihood models (based on the data):
+```math
+P(\Theta | Z) \propto \prod_i P(Z_i | \Theta_i) \prod_j P(\Theta_j)
+```
 
+We use the uncorrelated measurement process assumption that measurements Z are independent given the constructed algebraic model.
+
+!!! note
+    Strictly speaking, factors are actually "observed variables" that are stochastically "fixed" and not free for estimation in the conventional SLAM perspective.  Waving hands over the fact that factors encode both the algebraic model and the observed measurement values provides a perspective on learning structure of a problem, including more mundane operations such as sensor calibration or learning of channel transfer models.
