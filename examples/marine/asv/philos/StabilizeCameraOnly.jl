@@ -52,7 +52,7 @@ using Optim
 
 dfg_datafolder = "/tmp/caesar/philos"
 
-fg = loadDFG("$dfg_datafolder/results_5/x0_5_x280")
+fg = loadDFG("$dfg_datafolder/results_5/x0_5_x280_stab")
 
 ##
 
