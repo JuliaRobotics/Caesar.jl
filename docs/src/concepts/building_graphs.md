@@ -3,7 +3,7 @@
 Irrespective of your application - real-time robotics, batch processing of survey data, or really complex multi-hypothesis modeling - you're going to need to add factors and variables to a graph. This section discusses how to do that in Caesar.
 
 The following sections discuss the steps required to construct a graph and solve it:
-* Initialing the Factor Graph
+* Initializing the Factor Graph
 * Adding Variables and Factors to the Graph
 * Solving the Graph
 * Informing the Solver About Ready Data
