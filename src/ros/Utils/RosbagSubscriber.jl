@@ -78,13 +78,15 @@ function loop!(rbs::RosbagSubscriber, args...)
 end
 
 function (rbs::RosbagSubscriber)( chl::AbstractString,
+                                  ::Type{MT},
                                   callback::Function,
                                   args...;
-                                  msgType=nothing )
+                                  msgType=nothing ) where {MT <: RobotOS.AbstractMsg} 
   #
   cn = Symbol(string(chl))
   push!(rbs.channels, cn)
-  rbs.callbacks[cn] = (m)->callback(m,args...)
+  # include the type converter, see ref: https://github.com/jdlangs/RobotOS.jl/blob/21a7088461a21bc9b24cd2763254d5043d5b1800/src/callbacks.jl#L23
+  rbs.callbacks[cn] = (m)->callback(convert(MT,m),args...)
   rbs.syncBuffer[cn] = (unix2datetime(0), 0)
   rbs.readers[cn] = RosbagParser(rbs.bagfile, chl)
 end
