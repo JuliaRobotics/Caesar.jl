@@ -351,7 +351,7 @@ function Base.show(io::IO, pc::PointCloud{T,P,R}) where {T,P,R}
   println(io, "  sensor pose:")
   println(io, "    xyz:    ", round.(pc.sensor_origin_, digits=3))
   q = convert(_Rot.UnitQuaternion, pc.sensor_orientation_)
-  println(io, "    w_xyz*: ", round.([q.q.s; q.q.v1; q.q.v2; q.q.v3], digits=3))
+  println(io, "    w_xyz*: ", round.(_Rot.params(q), digits=3))
 
   nothing
 end
