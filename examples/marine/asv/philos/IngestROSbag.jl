@@ -283,28 +283,28 @@ end
 ## Own unpacking of ROS types from bagreader (not regular subscriber)
 
 
-# TODO consolidated with RobotOS.jl pattern
-_unpackROSMsgType(T::Type, msgdata) = convert(T, msgdata[2])
+# # TODO consolidated with RobotOS.jl pattern
+# _unpackROSMsgType(T::Type, msgdata) = convert(T, msgdata[2])
 
-function _handleRadarPointcloud!(msgdata, args::Tuple)
-    msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
-    handleRadarPointcloud!(msgT, args...)
-end
+# function _handleRadarPointcloud!(msgdata, args::Tuple)
+#     msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
+#     handleRadarPointcloud!(msgT, args...)
+# end
 
-function _handleLidar!(msgdata, args::Tuple)
-    msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
-    handleLidar!(msgT, args...)
-end
+# function _handleLidar!(msgdata, args::Tuple)
+#     msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
+#     handleLidar!(msgT, args...)
+# end
 
-function _handleGPS!(msgdata, args)
-    msgT = _unpackROSMsgType(sensor_msgs.msg.NavSatFix, msgdata)
-    handleGPS!(msgT, args...)
-end
+# function _handleGPS!(msgdata, args)
+#     msgT = _unpackROSMsgType(sensor_msgs.msg.NavSatFix, msgdata)
+#     handleGPS!(msgT, args...)
+# end
 
-function _handleCamCen!(msgdata, args)
-    msgT = _unpackROSMsgType(sensor_msgs.msg.CompressedImage, msgdata)
-    handleCamera_Center!(msgT, args...)
-end
+# function _handleCamCen!(msgdata, args)
+#     msgT = _unpackROSMsgType(sensor_msgs.msg.CompressedImage, msgdata)
+#     handleCamera_Center!(msgT, args...)
+# end
 
 
 ##
@@ -347,16 +347,11 @@ function main(;iters::Integer=50)
     systemstate = SystemState()
 
     # Enable and disable as needed.
-    # Skipping LIDAR because those are huge...
-    # radar_sub = Subscriber{seagrant_msgs.msg.radar}("/radar_0", handleRadar!, (fg, systemstate), queue_size = 10)
-    # gps_sub = Subscriber{sensor_msgs.msg.NavSatFix}("/gps/fix", handleGPS!, (fg, systemstate), queue_size = 10)
-    
-    # radar_sub = bagSubscriber(, _handleRadar!, (fg, systemstate))
-
-    camcen_sub = bagSubscriber("/center_camera/image_color/compressed", _handleCamCen!, (fg, systemstate) )
-    radarpc_sub = bagSubscriber("/broadband_radar/channel_0/pointcloud", _handleRadarPointcloud!, (fg, systemstate) )
-    # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", handleLidar!, (fg,systemstate), queue_size = 10)
-    gps_sub = bagSubscriber("/gnss", _handleGPS!, (fg, systemstate))
+    camcen_sub = bagSubscriber("/center_camera/image_color/compressed", sensor_msgs.msg.CompressedImage, handleCamCen!, (fg, systemstate) )
+    radarpc_sub = bagSubscriber("/broadband_radar/channel_0/pointcloud", sensor_msgs.msg.PointCloud2, handleRadarPointcloud!, (fg, systemstate) )
+    # Skipping LIDAR
+    # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", sensor_msgs.msg.PointCloud2, handleLidar!, (fg,systemstate), queue_size = 10)
+    gps_sub = bagSubscriber("/gnss", sensor_msgs.msg.NavSatFix, handleGPS!, (fg, systemstate))
 
 
     @info "subscribers have been set up; entering main loop"
