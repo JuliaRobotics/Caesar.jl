@@ -34,7 +34,7 @@ function rodrigues!(Rmat::Array{Float64,2}, rvec::Vector{Float64})
 end
 
 function buildtagdict(cTt,
-                      Ql::_Rot.UnitQuaternion,
+                      Ql::_Rot.QuatRotation,
                       tvec, # ::Union{Vector{Float64},StaticArrays.SArray{Tuple{3},<:Real,1,3}}
                       tagsize::Float64,
                       bTcl )
@@ -56,7 +56,7 @@ function buildtagdict(cTt,
   onetag
 end
 # function buildtagdict(cTt,
-#                       q::_Rot.UnitQuaternion,
+#                       q::_Rot.QuatRotation,
 #                       tvec::CoordinateTransformations.Translation{T},
 #                       tagsize::Float64,
 #                       bTcl ) where T

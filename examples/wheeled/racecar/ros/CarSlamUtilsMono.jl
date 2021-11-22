@@ -225,7 +225,7 @@ function updateSLAMMono!(fec::FrontEndContainer,
     # pose = homographytopose(tag.H, fx, fy, cx, cy, taglength = 160.)
     pose, err1 = tagOrthogonalIteration(tag, fx, fy, cx, cy, taglength = 0.25)
     cTt = LinearMap(pose[1:3, 1:3])∘Translation((pose[1:3,4])...)
-    bRc = _Rot.UnitQuaternion(1/sqrt(2),0,0,-1/sqrt(2))*_Rot.UnitQuaternion(1/sqrt(2),-1/sqrt(2),0,0)
+    bRc = _Rot.QuatRotation(1/sqrt(2),0,0,-1/sqrt(2))*_Rot.QuatRotation(1/sqrt(2),-1/sqrt(2),0,0)
     bTt = LinearMap(bRc) ∘ cTt
     # wTb = LinearMap(zT.R.R) ∘ Translation(zT.t...)
     # wTt = wTb ∘ bTt

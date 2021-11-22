@@ -31,7 +31,7 @@ function lcmpointcloudmsg!(vc, slaml::SLAMWrapper,
   # push to DrakeVisualizer
   #=
   position = Translation(msg[:pos]...)
-  orientation = _Rot.UnitQuaternion(msg[:orientation]...)
+  orientation = _Rot.QuatRotation(msg[:orientation]...)
   Tf = position ∘ LinearMap(orientation)
   vsym = Symbol(vert.label)
   setgeometry!(vc[:submaps][vsym], Triad())
