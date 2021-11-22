@@ -88,9 +88,9 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
 
   # precalc SE2 points
   R0 = e0.parts[2]
-
+  # source memory
   qVj_ = map(pt->ProductRepr(SVector(pt...), R0), pts2)
-
+  # destination memory
   _pVj_! = map(pt->ProductRepr(MVector(pt...), MMatrix{2,2}(0.0,0.0,0.0,0.0)), pts2)
   _pVj! = map(x->x.parts[1], _pVj_!)
 
@@ -167,7 +167,7 @@ function overlayScatter(sap::ScatterAlignPose2,
   addFactor!(tfg, [:x0;:x1], sap; graphinit=false)
   meas = sampleFactor(tfg, :x0x1f1)[1]
   
-  pts1, pts2_, M = meas
+  M, pts1, pts2_ = meas
   pts2 = map(pt->pt.parts[1], pts2_)
   e0 = identity_element(M)
   # R0 = e0.parts[2]
