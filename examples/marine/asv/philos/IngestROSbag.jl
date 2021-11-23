@@ -57,6 +57,7 @@ rostypegen()
 
 using Colors
 using Caesar
+# using Caesar._ROS
 
 ##
 
@@ -280,33 +281,6 @@ function handleCamera_Center!(msg::sensor_msgs.msg.CompressedImage, fg::Abstract
 end
 
 
-## Own unpacking of ROS types from bagreader (not regular subscriber)
-
-
-# # TODO consolidated with RobotOS.jl pattern
-# _unpackROSMsgType(T::Type, msgdata) = convert(T, msgdata[2])
-
-# function _handleRadarPointcloud!(msgdata, args::Tuple)
-#     msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
-#     handleRadarPointcloud!(msgT, args...)
-# end
-
-# function _handleLidar!(msgdata, args::Tuple)
-#     msgT = _unpackROSMsgType(sensor_msgs.msg.PointCloud2, msgdata)
-#     handleLidar!(msgT, args...)
-# end
-
-# function _handleGPS!(msgdata, args)
-#     msgT = _unpackROSMsgType(sensor_msgs.msg.NavSatFix, msgdata)
-#     handleGPS!(msgT, args...)
-# end
-
-# function _handleCamCen!(msgdata, args)
-#     msgT = _unpackROSMsgType(sensor_msgs.msg.CompressedImage, msgdata)
-#     handleCamera_Center!(msgT, args...)
-# end
-
-
 ##
 
 function main(;iters::Integer=50)
@@ -347,7 +321,7 @@ function main(;iters::Integer=50)
     systemstate = SystemState()
 
     # Enable and disable as needed.
-    camcen_sub = bagSubscriber("/center_camera/image_color/compressed", sensor_msgs.msg.CompressedImage, handleCamCen!, (fg, systemstate) )
+    camcen_sub = bagSubscriber("/center_camera/image_color/compressed", sensor_msgs.msg.CompressedImage, handleCamera_Center!, (fg, systemstate) )
     radarpc_sub = bagSubscriber("/broadband_radar/channel_0/pointcloud", sensor_msgs.msg.PointCloud2, handleRadarPointcloud!, (fg, systemstate) )
     # Skipping LIDAR
     # lidar_sub = Subscriber{sensor_msgs.msg.PointCloud2}("/velodyne_points", sensor_msgs.msg.PointCloud2, handleLidar!, (fg,systemstate), queue_size = 10)
