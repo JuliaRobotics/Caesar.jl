@@ -81,3 +81,17 @@ function plotMeasured(tags::Vector{AprilTag}, base_tag_id::Int, tHc::Matrix)
 end  
 plotActual(actual_tag_centers)
 plotMeasured(tags, 1, tHc)
+
+## WIP: Plotting the rectified 
+# Now, multiplying the transformed value by the tag length will give you real-world coordinates
+
+using ImageTransformations, LinearAlgebra
+H = LinearMap(tHc)
+push1(x) = [x; 1] # convinience function
+s = 10
+scale = LinearMap(s*I) # scaling transforms
+iscale = LinearMap(I/s) 
+itform = PerspectiveMap() ∘ H ∘ push1 ∘ iscale # add the scaling to the transformation pipelines
+tform =  scale ∘ PerspectiveMap() ∘ inv(H) ∘ push1
+imgw = warp(img', itform, ImageTransformations.autorange(img, tform)) # nice, the image size more useful
+imshow(imgw) # but the rectification is wrong!?
