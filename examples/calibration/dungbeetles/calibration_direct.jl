@@ -15,7 +15,8 @@ using CoordinateTransformations, Rotations
 using Plots
 
 cd("/home/samc/.julia/dev/Caesar/examples/calibration/dungbeetles")
-img = load("20211102_144705.jpg");
+# img = load("20211102_144705.jpg");
+img = load("calibration_board_small.jpg");
 
 ## Inputs
 # It's imporant that you measure and specify the tag length correctly here
@@ -38,9 +39,11 @@ freeDetector!(detector)
 # and we can offset anything by that
 radius = disc_radius/(taglength) # of the circle drawn on the arena + half the size of the printed apriltag
 θs = [(t-1)*π/4.0-pi/2.0 for t in tag_sequence] # Cartesian locations for each tag
+# actual_tag_centers = [
+#   CartesianFromPolar()(Polar(radius, ang))+[0;radius] for ang in θs]
 actual_tag_centers = [
-  CartesianFromPolar()(Polar(radius, ang))+[0;radius] for ang in θs]
-
+  CartesianFromPolar()(Polar(radius, ang)) for ang in θs]
+  
 # Points in tag space
 cP = Matrix{Float64}(undef,3,0)
 tP = Matrix{Float64}(undef,3,0)
@@ -88,7 +91,7 @@ plotMeasured(tags, 1, tHc)
 using ImageTransformations, LinearAlgebra
 H = LinearMap(tHc)
 push1(x) = [x; 1] # convinience function
-s = 10
+s = 1
 scale = LinearMap(s*I) # scaling transforms
 iscale = LinearMap(I/s) 
 itform = PerspectiveMap() ∘ H ∘ push1 ∘ iscale # add the scaling to the transformation pipelines
