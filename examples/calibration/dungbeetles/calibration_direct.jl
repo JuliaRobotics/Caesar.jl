@@ -7,14 +7,17 @@
 # 3. Build out the optimizer for intrinsic as well as extrinsic parameters
 # 4. Show tracking using factor graph
 
-using AprilTags
+using FreeTypeAbstraction, AprilTags
+using LinearAlgebra
 using Images
 using ImageView
 using Optim
 using CoordinateTransformations, Rotations
 using Plots
 
-cd("/home/samc/.julia/dev/Caesar/examples/calibration/dungbeetles")
+##
+
+cd( @__DIR__ )
 # img = load("20211102_144705.jpg");
 img = load("calibration_board_small.jpg");
 
@@ -25,6 +28,24 @@ taglength = 0.0381 # millimeters
 disc_radius = 1 + taglength/2.0 # Radius of the center of tags in meters 
 tag_sequence = collect(1:8)
 
+# Get the coordinates of the tag centers
+# Tag 1 will be the origin (can pick anything but this is easiest)
+# and we can offset anything by that
+radius = disc_radius/(taglength) # of the circle drawn on the arena + half the size of the printed apriltag
+# Cartesian locations for each tag
+# using 0deg as x-axis, and +90deg as y-axis  # [5.0; 50; 95; 140; 185; 230; 275; 320;]
+θs = range(0,360,length=9)[1:end-1] |> collect |> x->x.+5 .|> deg2rad 
+# reproject onto [-pi,pi)
+θs = rem2pi.(θs, RoundNearest)    
+# θs = [(t-1)*π/4.0-pi/2.0 for t in tag_sequence] # not quie right, has some angles bigger than [-pi,pi)
+
+# format cen=[i,j] <==> img[i,j] <==> [down,right]
+dest_center = [] # [0;0] # [0;radius]
+actual_tag_centers = [
+  CartesianFromPolar()(Polar(radius, ang)) for ang in θs]
+
+
+
 ## Detect the tags
 detector = AprilTagDetector()
 tags = detector(img) .|> deepcopy
@@ -34,22 +55,32 @@ end
 # Free the detector memory
 freeDetector!(detector)
 
-## Get the coordinates of the tag centers
-# Tag 1 will be the origin (can pick anything but this is easiest)
-# and we can offset anything by that
-radius = disc_radius/(taglength) # of the circle drawn on the arena + half the size of the printed apriltag
-θs = [(t-1)*π/4.0-pi/2.0 for t in tag_sequence] # Cartesian locations for each tag
-# actual_tag_centers = [
-#   CartesianFromPolar()(Polar(radius, ang))+[0;radius] for ang in θs]
-actual_tag_centers = [
-  CartesianFromPolar()(Polar(radius, ang)) for ang in θs]
-  
+
+## draw the detections
+# using FreeTypeAbstraction
+# `img[i,j]` implies `width == x == j`, and `height == y == i`, top left corner `(0,0)`
+# just a rough guess of intrinsics (not really required here yet)
+fx = size(img, 2)
+fy = fx
+cx = size(img, 1)/2
+cy = size(img, 2)/2
+
+K = [fx 0  cx;
+      0 fy cy] # intrinsics
+imgd = drawTags(img, K, tags);
+# imshow(imgd)
+
+
+## draw desired tag locations for validation
+
 # Points in tag space
+_sax = [2;1] # flip axes used in AprilTags
 cP = Matrix{Float64}(undef,3,0)
 tP = Matrix{Float64}(undef,3,0)
 for t in tags
-  cP = hcat(cP, [t.c;1])
-  tP = hcat(tP, [actual_tag_centers[t.id];1])
+  # use convention [i,j,1] <==> img[i,j] <==> [down,right]
+  cP = hcat(cP, [t.c[_sax];1])
+  tP = hcat(tP, [actual_tag_centers[t.id][_sax];1])
 end
 
 # Calculating the homography matrix (camera to tag) directly
@@ -63,17 +94,18 @@ function plotActual(actual_tag_centers::Vector)
     [c[1] for c in actual_tag_centers], 
     [c[2] for c in actual_tag_centers],
     title = "Tag centers in tag space (normalized by tag length)",
-    xlabel = "X",
-    ylabel = "Y",
+    xlabel = "X, img[i,.]",
+    ylabel = "Y, img[.,j]",
     m = (0.5, :hex, 12),
+    bg = RGB(0.2, 0.2, 0.2),
     label = "Actual centers", 
-    bg = RGB(0.2, 0.2, 0.2))
+    series_annotations = [string(k) for (k,c) in enumerate(actual_tag_centers)])
 end
 function plotMeasured(tags::Vector{AprilTag}, base_tag_id::Int, tHc::Matrix)
   tag = tags[base_tag_id]
   measured_tag_centers = Dict(
     [t.id for t in tags] .=> 
-    [(tHc * [t.c; 1]) for t in tags])  #? Why is there residual in Z? Keep an eye on it in the optimization.
+    [(tHc * [t.c[_sax]; 1]) for t in tags])  #? Why is there residual in Z? Keep an eye on it in the optimization.
   scatter!(
     [c[1] for (k,c) in measured_tag_centers], 
     [c[2] for (k,c) in measured_tag_centers],
@@ -88,7 +120,7 @@ plotMeasured(tags, 1, tHc)
 ## WIP: Plotting the rectified 
 # Now, multiplying the transformed value by the tag length will give you real-world coordinates
 
-using ImageTransformations, LinearAlgebra
+using ImageTransformations
 H = LinearMap(tHc)
 push1(x) = [x; 1] # convinience function
 s = 1
