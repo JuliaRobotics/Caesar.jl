@@ -87,10 +87,10 @@ function cb(fg_, lastpose)
   z_e = elevation(lastpose)
   
   # generate noisy measurement
-  @info "Callback for DEM heatmap priors" lastpose ls(fg_, lastpose) z_e
+  @info "Callback for DEM LevelSet priors" lastpose ls(fg_, lastpose) z_e
   
   # create prior
-  hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e, N=10000, sigma_scale=1)
+  hmd = LevelSetGridNormal(img, (x,y), z_e, sigma_e, N=10000, sigma_scale=1)
   pr = PartialPriorPassThrough(hmd, (1,2))
   addFactor!(fg_, [lastpose], pr, tags=[:DEM;], graphinit=false, nullhypo=0.1)
   nothing
@@ -204,16 +204,17 @@ union!(pl_.layers, pl_m.layers); pl_
 ## redraw z_e level to see if index orders are right
 
 locs = (x->getPPE(fg[x], :simulated).suggested[1:2]).(sortDFG(ls(fg)))
-# PartialPriorPassThrough type, with a HeatmapDensityRegular
+# PartialPriorPassThrough type, with a LevelSetGridNormal
 z_es = (x->getFactorType(fg[x]).Z.level).(sortDFG(lsf(fg, tags=[:DEM;])))
 @cast locs_[j,i] := locs[j][i]
 
 Gadfly.plot(x=locs_[:,1], y=locs_[:,2], color=z_es)
 
 
-## check getLevelSetSigma
-
-kp, weights, _roi = IIF.getLevelSetSigma(img, z_es[50], sigma_e, x, y)
+## check level set
+_roi = img .- z_es[50]
+# DEPRECATED USE NEW LevelSetGridNormal and HeatmapDensityGrid
+# kp, weights = IIF.sampleLevelSetGaussian!(_roi, sigma_e, x, y)
 
 Gadfly.plot(x=kp[1,:],y=kp[2,:], color=weights, Geom.Geom.point)
 

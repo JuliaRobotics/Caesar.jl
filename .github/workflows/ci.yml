@@ -17,6 +17,7 @@ jobs:
       matrix:
         version:
           - '1.6'
+          - '^1.7.0-0'
           - 'nightly'
         os:
           - ubuntu-latest
@@ -48,7 +49,7 @@ jobs:
       - uses: codecov/codecov-action@v1
         with:
           file: lcov.info
-
+  
   test-masters:
     #if: github.ref != 'refs/heads/release**'
     name: Upstream Dev
@@ -57,12 +58,12 @@ jobs:
       JULIA_PKG_SERVER: ""
     steps:
       - uses: actions/checkout@v2
-
+      
       - uses: julia-actions/setup-julia@v1
         with:
           version: 1.6
           arch: x64
-
+      
       - uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
@@ -73,7 +74,7 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
-
+      
       - run: |
           git config --global user.name Tester
           git config --global user.email te@st.er
@@ -86,3 +87,34 @@ jobs:
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="master"));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.test("Caesar"; coverage=false)'
         shell: bash
+  
+  docs:
+    name: 'Build Docs'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - jlenv: 'docs/'
+            makejl: 'docs/make.jl'
+          # - jlenv: 'docs/pdf/'
+          #   makejl: 'docs/pdf/make.jl'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: '1'
+      - name: 'Docs on ${{ github.head_ref }}'
+        run: |
+          export JULIA_PKG_SERVER=""
+          [ '${{ github.ref }}' == 'refs/heads/master' ] && export CJL_DOCS_BRANCH="master" || export CJL_DOCS_BRANCH="${{ github.head_ref }}"
+          julia -e 'println("Julia gets branch: ",ENV["CJL_DOCS_BRANCH"])'
+          julia --project=${{ matrix.jlenv }} --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(name="Caesar", rev=ENV["CJL_DOCS_BRANCH"]))'
+          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
+          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
+          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
+          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master"))'
+      - run: julia --project=${{ matrix.jlenv }} --color=yes ${{ matrix.makejl }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+          JULIA_PKG_SERVER: ""

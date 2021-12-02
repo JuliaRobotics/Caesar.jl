@@ -1,10 +1,10 @@
 <p align="center">
-<img src="https://user-images.githubusercontent.com/6412556/134777705-acda768e-884b-4de6-b307-aac6d09b9c81.png" width="480" border="0" />
+<img src="https://user-images.githubusercontent.com/6412556/134777705-acda768e-884b-4de6-b307-aac6d09b9c81.png" width="240" border="0" />
 </p>
 
 A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reducing the barrier of entry for sensor/data fusion tasks, including Simultaneous Localization and Mapping (SLAM).
 
-[NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io) or via the Slack badge-link below.
+[NavAbility.io](http://www.navability.io) is administrating and supporting the ongoing development of Caesar.jl with and to help grow the community, please reach out for any additional information at info@navability.io or via the Slack badge-link below.
 
 # Weblink Info
 
@@ -29,22 +29,24 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
-| [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-stable]][dfg-releases] | [![Build Status][dfg-build-img]][dfg-build-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
-| [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | upstream |
-| [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | upstream |
-| [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | upstream |
-| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | deprecating |
-| [RoMEPlotting.jl][rp-url] | [![][rp-stable]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
+| [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-ver-img]][dfg-rel-url] | [![Build Status][dfg-ci-dev-img]][dfg-ci-dev-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
+| [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | *upstream* |
+| [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | *upstream* |
+| [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | *upstream* |
+| [Images.jl][ijl-url] | [![][ijl-ver-stb-img]][ijl-ver-stb-url] | [![Build Status][ijl-action-img]][ijl-action-url] | [![][ijl-codecov-img]][ijl-codecov-url] | *upstream* |
+| [AprilTags.jl][apt-url] | [![][apt-ver-img]][apt-ver-url] | [![CI][apt-ci-dev-img]][apt-ci-dev-img] | [![][apt-cov-img]][apt-cov-url] | [![][mst-shield]][apt-milestones] |
+| [RoMEPlotting.jl][rp-url] | [![][rp-ver-img]][rp-releases] | [![Build Status][rp-build-img]][rp-build-url] | [![codecov.io][rp-cov-img]][rp-cov-url] | [![][mst-shield]][rp-milestones] |
+| [TransformUtils.jl][tf-url] | [![][tf-stable]][tf-releases] | [![Build Status][tf-build-img]][tf-build-url] | [![codecov.io][tf-cov-img]][tf-cov-url] | *deprecating* |
 
 # Contributors
 
-We are grateful for many, many contributions within the Julia package ecosystem -- see the [Juliahub.com page](https://juliahub.com/ui/Packages/Caesar/BNbRm/0.10.2?t=1) for the upstream package dependencies.
+We are grateful for many, many contributions within the Julia package ecosystem -- see the [Juliahub.com page](https://juliahub.com/ui/Packages/Caesar/BNbRm?page=1) for the upstream package dependencies.
 
 Consider citing our work:
 ```
 @online{Caesarjl2021,
  author =        {{P}ackage {C}ontributors and {E}cosystem},
- title =         {Caesar.jl, v0.10.2},
+ title =         {Caesar.jl, v0.11.0},
  year =          {2021},
  doi=            {Solver DOI: 10.5281/zenodo.5146222}, 
  note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
@@ -143,20 +145,23 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 
 [lgraphs-cov-img]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl/coverage.svg?branch=master
 [lgraphs-cov-url]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl?branch=master
-[lgraphs-build-img]: https://travis-ci.org/JuliaGraphs/LightGraphs.jl.svg?branch=master
-[lgraphs-build-url]: https://travis-ci.org/JuliaGraphs/LightGraphs.jl
+[lgraphs-build-img]: https://github.com/sbromberger/LightGraphs.jl/actions/workflows/ci.yml/badge.svg
+[lgraphs-build-url]: https://github.com/sbromberger/LightGraphs.jl/actions/workflows/ci.yml
 [lgraphs-url]: http://www.github.com/JuliaGraphs/LightGraphs.jl
-[lgjl-stable]: https://img.shields.io/badge/2019Q3-v1.3.x-green.svg
+[lgjl-stable]: https://juliahub.com/docs/LightGraphs/version.svg
+[lgjl-ver-jhub]: https://juliahub.com/ui/Packages/LightGraphs/Xm08G
 [lgjl-releases]: https://github.com/JuliaGraphs/LightGraphs.jl/releases
 
+[dfg-ci-dev-img]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml/badge.svg
+[dfg-ci-dev-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml
+[dfg-ci-stb-img]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml/badge.svg?branch=release%2Fv0.16
+[dfg-ci-stb-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml
+[dfg-ver-img]: https://juliahub.com/docs/IncrementalInference/version.svg
 [dfg-cov-img]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl/coverage.svg?branch=master
 [dfg-cov-url]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl?branch=master
-[dfg-build-img]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl.svg?branch=master
-[dfg-build-url]: https://travis-ci.org/JuliaRobotics/DistributedFactorGraphs.jl
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-stable]: https://img.shields.io/badge/2021Q2-v0.14.x-green.svg
 [dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones
-[dfg-releases]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
+[dfg-rel-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
 
 [amp-cov-img]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl/coverage.svg?branch=master
 [amp-cov-url]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl?branch=master
@@ -190,8 +195,28 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [rp-url]: http://www.github.com/JuliaRobotics/RoMEPlotting.jl
 [rp-cov-img]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl/coverage.svg?branch=master
 [rp-cov-url]: https://codecov.io/github/JuliaRobotics/RoMEPlotting.jl?branch=master
-[rp-build-img]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl.svg?branch=master
-[rp-build-url]: https://travis-ci.org/JuliaRobotics/RoMEPlotting.jl
-[rp-stable]: https://img.shields.io/badge/2021Q2-v0.7.x-green.svg
+[rp-build-img]: https://github.com/JuliaRobotics/RoMEPlotting.jl/actions/workflows/ci.yml/badge.svg
+[rp-build-url]: https://github.com/JuliaRobotics/RoMEPlotting.jl/actions/workflows/ci.yml
+[rp-ver-img]: https://juliahub.com/docs/RoMEPlotting/version.svg
 [rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones
 [rp-releases]: https://github.com/JuliaRobotics/RoMEPlotting.jl/releases
+
+[ijl-url]: https://github.com/JuliaImages/Images.jl
+[ijl-pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/I/Images.svg
+[ijl-pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
+[ijl-action-img]: https://github.com/JuliaImages/Images.jl/workflows/Unit%20test/badge.svg
+[ijl-action-url]: https://github.com/JuliaImages/Images.jl/actions
+[ijl-codecov-img]: https://codecov.io/github/JuliaImages/Images.jl/coverage.svg?branch=master
+[ijl-codecov-url]: https://codecov.io/github/JuliaImages/Images.jl?branch=master
+[ijl-ver-stb-img]: https://juliahub.com/docs/Images/version.svg
+[ijl-ver-stb-url]: https://github.com/JuliaImages/Images.jl/releases
+
+<!-- AprilTags.jl -->
+[apt-url]: https://github.com/JuliaRobotics/AprilTags.jl
+[apt-ver-img]: https://juliahub.com/docs/AprilTags/version.svg
+[apt-ver-url]: https://github.com/JuliaRobotics/AprilTags.jl/releases
+[apt-ci-dev-img]: https://travis-ci.org/JuliaRobotics/AprilTags.jl.svg?branch=master
+[apt-ci-dev-url]: https://travis-ci.org/JuliaRobotics/AprilTags.jl
+[apt-cov-img]: http://codecov.io/github/JuliaRobotics/AprilTags.jl/coverage.svg?branch=master
+[apt-cov-url]: http://codecov.io/github/JuliaRobotics/AprilTags.jl?branch=master
+[apt-milestones]: https://github.com/JuliaRobotics/AprilTags.jl/milestones

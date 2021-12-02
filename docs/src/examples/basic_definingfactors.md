@@ -1,6 +1,18 @@
-# Defining New Factors
+# [Custom Factors](@id custom_factors)
 
-Julia's type inference allows overloading of member functions outside a module.  Therefore new factors can be defined at any time.  To better illustrate, in this example we will add new factors into the `Main` context **after** construction of the factor graph has already begun.
+Julia's type inference allows overloading of member functions outside a module.  Therefore new factors can be defined at any time.  
+
+
+| Required                                  | Brief description                                                                      |
+|:------------------------------------------|:-------------------------------------------------------------------------------------- |
+| `MyFactor`  struct                        | Prior (`<:AbstractPrior`) or Relative (`<:AbstractManifoldMinimize`) factor definition |
+| `getManifold`                             | The manifold of the factor |
+| `(cfo::CalcFactor{<:MyFactor})`           | Factor residual function |
+| **Optional methods**                      | **Brief description**                                                                  |
+| `getSample(cfo::CalcFactor{<:MyFactor})`  | Get a sample from the factor |
+
+
+To better illustrate, in this example we will add new factors into the `Main` context **after** construction of the factor graph has already begun.
 
 ```julia
 using IncrementalInference
@@ -41,29 +53,24 @@ end
 
 # import IncrementalInference: getSample
 # sampling function
-getSample(cfo::CalcFactor{<:MyPrior}, N::Int=1) = (reshape(rand(cfo.factor.Z,N),1,:), )
+getSample(cfo::CalcFactor{<:MyPrior}) = rand(cfo.factor.Z,1)[:]
 ```
 
 Note the following critical aspects that allows IIF to use the new definition:
 - `<:AbstractPrior` as a unary factor that introduces absolute (or gauge) information about only one variable.
 - `getSample` is overloaded with dispatch on:
-  - `(cfo::CalcFactor{<:MyPrior}, ::Int)`
-- `getSample` must return a `::Tuple`, even if there is only stochastic value (as is the case above).
-  - The first value in the tuple is special, and must be of type `<:AbstractMatrix{<:Real}`.  We ensure that with the `reshape`.
+  - `(cfo::CalcFactor{<:MyPrior})`
+- `getSample` must return a point on the manifold for `<:AbstractPrior` factors that matches the point representation of the variable.
 
-IIF internally uses the number of rows in the first element of the `getSample` return tuple (i.e. the matrix) to extract the measurement dimension for this factor.  In this case it is 1 dimensional.
-
-!!! note
-    `getSample` works similar for factors below.  If the measurement dimension is 2D (i.e. `zDim=2`) then you should not use `reshape(..., 1,N)` which would force the samples into a 1 row matrix.  The `reshape(.., 1,N)` in the above example is added as convenient way to convert from the `rand` return value a `::Array{Float64,1}` to the required `::Array{Float64,2}` type.
-
-To recap, the new `getSample` function in this example factor returns a measurement which is of type `::Tuple{::Matrix{Float64}}`.  The `::Tuple` is slightly clunky but was borne out of necessity to allow for versatility when multiple values from sampling are used during residual function evaluation.  Previous uses  include cases such as `::Tuple{<:Matrix, <:Vector, <:Function}`.
+To recap, the new `getSample` function in this example factor returns a measurement which is of type `::Vector{Float64}}`.
 
 ### Ready to Use
 
 This new prior can now readily be added to an ongoing factor graph:
 ```julia
 # lets generate a random nonparametric belief
-pts = 8 .+ 2*rand(1,75)
+
+pts = [samplePoint(getManifold(ContinuousEuclid{1}), Normal(8.0,2.0)) for _=1:75]
 someBelief = manikde!(pts, ContinuousEuclid{1})
 
 # and build your new factor as an object
@@ -72,7 +79,7 @@ myprior = MyPrior(someBelief)
 
 and add it to the existing factor graph from earlier, lets say:
 ```julia
-addFactor!(fg, :x1, myprior)
+addFactor!(fg, [:x1], myprior)
 ```
 
 Thats it, this factor is now part of the graph.  This should be a solvable graph:
@@ -94,65 +101,59 @@ The `cfo` object contains the field `.factor::T` which is the type of the user f
     Many factors already exists in `IncrementalInference`, `RoME`, and `Caesar`.  Please see their `src` directories for more details.
 
 
-## Relative Factors
-### One Dimension Roots Example
+## Relative Factors on Manifolds
+### One Dimension Example
 
-Previously we looked at adding a prior.  This section demonstrates the first of two `<:AbstractRelative` factor types.  These are factors that introduce only relative information between variables in the factor graph.
+Previously we looked at adding a prior.  This section demonstrates relative factors on manifold.  These are factors that introduce only relative information between variables in the factor graph.
 
-This example is on `<:IIF.AbstractRelativeRoots`.  First, lets create the factor as before 
+Lets look at the Pose2Pose2 factor available in RoME as an example.  First, lets create the factor as before 
 ```julia
-struct MyFactor{T <: SamplableBelief} <: IIF.AbstractRelativeRoots
+struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   Z::T
 end
-getSample(cfo::CalcFactor{<:MyFactor}, N::Int=1) = (reshape(rand(cfo.factor.Z,N) ,1,N), )
 
-function (cfo::CalcFactor{<:MyFactor})( measurement_z,
-                                        x1,
-                                        x2  )
-  #
-  res = measurement_z - (x2[1] - x1[1])
-  return res
-end
+DFG.getManifold(::Pose2Pose2) = Manifolds.SpecialEuclidean(2)
 ```
 
+Extending the `getSample` method for our new `Pose2Pose2` factor is optional in this case.
+The default behavior for sampling on `<:AbstractManifoldMinimize` factors defined on Group Manifolds is:
+- The returned value from `getSample` represents a tangent vector at the identity element.
+- The `SamplableBelief` shall be in the field `Z` and that shall be enough to fully define the factor.
 
-The selection of `<:IIF.AbstractRelativeRoots`, akin to earlier `<:AbstractPrior`, instructs IIF to find the roots of the provided residual function.  That is the one dimensional residual function, `res[1] = measurement - prediction`, is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.
+If more advanced sampling is required, the `getSample` function can be extended. 
 
-Important aspects to note, `<:IIF.AbstractRelativeRoots` requires all elements `length(res)` (the factor measurement dimension) to have a feasible zero crossing solution.  A two dimensional system will solve for variables where both `res[1]==0` and `res[2]==0`.
-
-!!! note
-    As of IncrementalInference v0.21, CalcResidual no longer takes a residual as input parameter and should return residual, see IIF#467.
-
-!!! note
-    Measurements and variables passed in to the factor residual function do not have the same type as when constructing the factor graph.  It is recommended to leave these incoming types unrestricted.  If you must define the types, these either are (or will be) of element type relating to the manifold on which the measurement or variable beliefs reside.  Probably a vector or manifolds type.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work for you. The 
-
-### Two Dimension Minimize Example
-
-The second type is `<:IIF.AbstractRelativeMinimize` which simply minimizes the residual vector of the user factor. This type is useful for partial constraint situations where the residual function is not gauranteed to have zero crossings in all dimensions and the problem is converted into a minimization problem instead:
 ```julia
-struct OtherFactor{T <: SamplableBelief} <: IIF.AbstractRelativeMinimize
-  Z::T             # assuming something 2 dimensional
-  userdata::String # or whatever is necessary
-end
-
-# just illustrating some arbitraty second value in tuple of different size
-getSample(cfo::CalcFactor{<:OtherFactor}, N::Int=1) = (rand(cfo.factor.z,N), rand())
-
-function (cfo::CalcFactor{<:OtherFactor})(res::AbstractVector{<:Real},
-                                          z,
-                                          second_val,
-                                          x1,
-                                          x2 )
-  #
-  # @assert length(z) == 2
-  # not doing anything with `second_val` but illustrating
-  # not doing anything with `cfo.factor.userdata` either
-  
-  # the broadcast operators with automatically vectorize
-  res = z .- (x1[1:2] .- x1[1:2])
-  return res
+function getSample(cf::CalcFactor{<:Pose2Pose2}) 
+  M = getManifold(cf.factor)
+  ϵ = getPointIdentity(Pose2)
+  X = sampleTangent(M, cf.factor.Z, ϵ)
+  return X
 end
 ```
+
+The return type for `getSample` is unrestricted, and will be passed to the residual function "as-is".
+
+!!! note
+    Default dispatches in `IncrementalInference` will try use `cf.factor.Z` to `samplePoint` on manifold (for `<:AbstractPrior`) or `sampleTangent` (for `<:AbstractRelative`), which simplifies new factor definitions.  If, however, you wish to build more complicated sampling processes, then simply define your own `getSample(cf::CalcFactor{<:MyFactor})` function.
+
+The selection of `<:IIF.AbstractManifoldMinimize`, akin to earlier `<:AbstractPrior`, instructs IIF to find the minimum of the provided residual function.
+That is the one dimensional residual function, `residual = measurement - prediction`, is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.
+
+The returned value (the factor measurement) from getSample will always be passed as the first argument (`X`) in the factor calculation.
+The residual function should return a coordinate. 
+```julia
+function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
+    M = getManifold(Pose2)
+    q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X))
+    Xc = vee(M, q, log(M, q, q̂))
+    return Xc
+end
+```
+
+!!! note
+    Measurements and variables passed in to the factor residual function have related but potentially different types during construction or computation.  It is recommended to leave these incoming types unrestricted.  If you must define the types, make sure to allow sufficient dispatch freedom (i.e. dispatch to concrete types) and not force operations to "non-concrete" types.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work of inferring the concrete types.
+
+[//]: # (#TODO ### Advanced Sampling)
 
 ## Special Considerations
 
@@ -168,7 +169,7 @@ end
 # define a helper constructor
 MyMagnetoPrior(z) = MyMagnetoPrior(z, (3,))
 
-getSample(cfo::CalcFactor{<:MyMagnetoPrior}, N::Int=1) = (reshape(rand(cfo.factor.Z,N),1,N),)
+getSample(cfo::CalcFactor{<:MyMagnetoPrior}) = samplePoint(cfo.factor.Z)
 ```
 
 Similarly for `<:IIF.AbstractRelativeMinimize`, and note that the Roots version currently does not support the `.partial` option.
@@ -186,24 +187,6 @@ At present `cfo` contains three main fields:
 
 !!! note
     The old `.specialSampler` framework has been replaced with the standardized `::CalcFactor` interface.  See http://www.github.com/JuliaRobotics/IIF.jl/issues/467 for details.
-
-
-### Multithreading
-
-Julia and therefore IIF has strong support for shared-memory multithreading.  The thing to keep in mind is what parts of residual factor computation is shared memory.  The most sensible breakdown into threaded work is for separate samples (i.e. `cfo._sampleIdx`) to be calculated in separate threads.  The user residual function itself could likely also be broken down further into more threaded operations.
-
-The example above introduced `OtherFactor.userdata`.  This could cause problems if the residual calculations are actively using `userdata` for some volatile internal computation.  In that case it might be useful for the user to instead use `Threads.nthreads()` and `Threads.threadid()` to make sure the shared-memory issues are avoided:
-```julia
-struct OtherFactor{T <: SamplableBelief} <: IIF.AbstractRelativeMinimize
-  Z::T             # assuming something 2 dimensional
-  inplace::Vector{MyInplaceMem}
-end
-
-# helper function
-OtherFactor(z) = OtherFactor(z, [MyInplaceMem(0) for i in 1:Threads.nthreads()])
-
-# in residual function just use `thr_inplace = cfo.factor.inplace[Threads.threadid()]`
-```
 
 ## [OPTIONAL] Standardized Serialization
 

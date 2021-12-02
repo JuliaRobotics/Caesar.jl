@@ -102,29 +102,28 @@ addFactor!(fg, [:x0;:x1], odo)  # note the list is order sensitive
 The code block above (not solved yet) describes a algebraic setup exactly equivalent to the convolution equation presented at the top of this page.  
 
 !!! note
-
     IIF does not require the distribution functions to only be parametric, such as Normal, Rayleigh, mixture models, but also allows intensity based values or kernel density estimates.  Parametric types are just used here for ease of illustration.
 
 To perform an stochastic approximate convolution with the odometry conditional, one can simply call a low level function used the mmisam solver:
 
 ```julia
-pts = approxConv(fg, :x0x1f1, :x1)
+pts = approxConvBelief(fg, :x0x1f1, :x1) |> getPoints
 ```
 
-The `approxConv` function call reads as a operation on `fg` which won't influence any values of parameter list (common Julia exclamation mark convention) and must use the first factor `:x0x1f1` to resolve a convolution on target variable `:x1`.  Implicitly, this result is based on the current estimate contained in `:x0`.  The value of `pts` is a `:;Array{Float64,2}` where the rows represent the different dimensions (1-D in this case) and the columns are each of the different samples drawn from the intermediate posterior (i.e. convolution result).  
+The `approxConvBelief` function call reads as a operation on `fg` which won't influence any values of parameter list (common Julia exclamation mark convention) and must use the first factor `:x0x1f1` to resolve a convolution on target variable `:x1`.  Implicitly, this result is based on the current estimate contained in `:x0`.  The value of `pts` is a `::Array{Float64,2}` where the rows represent the different dimensions (1-D in this case) and the columns are each of the different samples drawn from the intermediate posterior (i.e. convolution result).  
 
 ```@docs
-approxConv
+approxConvBelief
 ```
 
-IIF currently uses kernel density estimation to convert discrete samples into a smooth function estimate -- more details can be found on the function [approximation principles page here](http://www.juliarobotics.org/Caesar.jl/latest/principles/functionApprox/).  The sample set can be converted into an on-manifold functional object as follows:
+IIF currently uses kernel density estimation to convert discrete samples into a smooth function estimate.  The sample set can be converted into an on-manifold functional object as follows:
 
 ```julia
 # create kde object by referencing back the existing memory location pts
 hatX1 = manikde!(pts, ContinuousScalar)
 ```
 
-The functional object `X1` is now ready for other operations such as function evaluation or product computations discussed on [another principles page](http://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/).  The `ContinuousScalar` manifold is just the real line in Euclidean space, internally denoted as single element tuple `(:Euclid,)`.
+The functional object `X1` is now ready for other operations such as function evaluation or product computations discussed on [another principles page](http://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/).  The `ContinuousScalar` manifold is just `Manifolds.TranslationGroup(1)`.
 
 ## `approxDeconv`
 
@@ -133,12 +132,4 @@ Analogous to a 'forward' convolution calculation, we can similarly approximate t
 approxDeconv
 ```
 
-This feature is not yet as feature rich as the `approxConv` function, and also requires further work to improve the consistency of the calculation -- but none the less exists and is useful in many applications.
-
-## ZMQ Interface [WORK IN PROGRESS]
-
-> **NOTE** WIP on expanding ZMQ interface:
-
-In addition, `ZmqCaesar` offers a `ZMQ` interface to the factor graph solution for multilanguage support.  This example is a small subset that shows how to use the `ZMQ` infrastructure, but avoids the larger factor graph related calls.
-
-...
+This feature is not yet as feature rich as the `approxConvBelief` function, and also requires further work to improve the consistency of the calculation -- but none the less exists and is useful in many applications.

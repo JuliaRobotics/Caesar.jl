@@ -8,70 +8,27 @@ Click here to go to the Caesar.jl Github repo:
 
 [![source](https://img.shields.io/badge/source-code-yellow.svg)](https://github.com/JuliaRobotics/Caesar.jl)
 
-## Introduction
-Caesar is an open-source robotic software stack aimed at localization and mapping for robotics, using non-Gaussian graphical model state-estimation techniques.  Ths factor graph method is well suited to combining heterogeneous and ambiguous sonsor data streams.  The focus is predominantly on geometric/spatial/semantic estimation tasks related to simultaneous localization and mapping (SLAM).  The software is also highly extensible and well suited to a variety of estimation/filtering-type tasks — especially in non-Gaussian/multimodal settings.  
+Caesar.jl is a community project to facilate software technology development for localization and mapping from multiple sensor data, and multiple sessions or human / semi-autonomous / autonomous agents.  This software is being developed with broadly [Industry 4.0](https://en.wikipedia.org/wiki/Fourth_Industrial_Revolution), Robotics, and [Work of the Future](https://workofthefuture.mit.edu/) in mind.  Caesar.jl is an "umbrella package" to combine many other libraries from across the Julia package ecosystem.  
 
-Caesar.jl addresses numerous issues that arise in prior SLAM solutions, including: 
-- solving under-defined systems, 
-- inference with non-Gaussian measurements, 
-- standard features for natively handling ambiguous data association and multi-hypotheses, 
-- simplifying bespoke factor development, 
-- centralized (or peer-to-peer distributed) factor-graph persistence, 
-- federated multi-session/agent reduction, and many more.  
+[NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io), or using the community links provided below.
 
-Caesar.jl is community orientef and originates from research work at MIT, see the [literature reference page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/) for more information.
+# Origins and Ongoing Research
 
-[NavAbility](https://www.navability.io/) administers the Caesar/RoME/IncrementalInference packages, please contact [info@navability.io](https://navability.io/contact/) for more details.
+Caesar.jl developed as a spin-out project from MIT's Computer Science and Artificial Intelligence Laboratory.  See related works on [the literature page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.
 
-Ongoing work on this project focuses on the open development of a stable, reliable, verified, user-friendly, and growing library that is well suited to various data-fusion / state-estimation aspects of robotics and autonomy in [non-Gaussian/multi-modal](https://juliarobotics.org/Caesar.jl/latest/concepts/concepts/#Why/Where-does-non-Gaussian-data-come-from?-1) data processing.
+Consider citing our work:
+```
+@online{Caesarjl2021,
+ author =        {{P}ackage {C}ontributors and {E}cosystem},
+ title =         {Caesar.jl, v0.11.0},
+ year =          {2021},
+ doi=            {Solver DOI: 10.5281/zenodo.5146222}, 
+ note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
+}
+```
+## Community, Issues, Comments, or Help
 
-## A Few Highlights
-
-The Caesar framework offers these and other features:
-* Distributed Factor Graph representation deeply-coupled with an on-Manifold probabilistic algebra language;
-* Localization using [MM-iSAMv2](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/#Related-Literature-1)
-  * Multi-core inference supporting `Pose2, Pose3, Point2, Point3, Multi-modal (multi-hypothesis), IMU preintegration, KDE density, intensity map, partial constraints, null hypothesis, etc`.
-* Native multi-modal (hypothesis) representation in the factor-graph, see [Data Association and Hypotheses](@ref):
-  * Multi-modal and non-parametric representation of constraints;
-  * Gaussian distributions are but one of the many representations of measurement error;
-* Out-of-library extendable for [Creating New Variables and Factors](@ref);
-* Natively supports legacy Gaussian parametric and max-mixtures solutions;
-* Local in-memory solving on the device as well as database-driven centralized solving (micro-service architecture);
-* Natively support *Clique Recycling* (i.e. fixed-lag out-marginalization) for continuous operation as well as off-line batch solving, see more at [Using Incremental Updates (Clique Recycling I)](@ref);
-* Natively supports [Dead Reckon Tethering](examples/deadreckontether.md);
-* Natively supports Federated multi-session/agent solving;
-* Native support for `Entry=>Data` blobs [for storing large format data](https://juliarobotics.org/Caesar.jl/latest/concepts/entry_data/).
-* Middleware support, e.g. see the [ROS Integration Page](examples/using_ros.md).
-
-# The Caesar Framework
-
-The [Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl) package is an "umbrella" framework around other dedicated algorithmic packages.  While most of the packages are implemented in native [Julia](http://www.julialang.org/) ([JuliaPro](http://www.juliacomputing.com)), a few dependencies are wrapped C libraries.  Note that C/C++ [can be incorporated with zero overhead](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/), such as was done with [AprilTags.jl](http://www.github.com/JuliaRobotics/AprilTags.jl).
-
-> [FAQ: Why use Julia?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Why-Julia-1)
-
-## AMP / IIF / RoME
-
-Robot motion estimate ([RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl)) can operate in the conventional SLAM manner, using local memory (dictionaries), or alternatively distribute over a persisted [`DistributedFactorGraph.jl`](http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl) through common serialization and graph storage/database technologies, [see this article as example](http://people.csail.mit.edu/spillai/projects/cloud-graphs/2017-icra-cloudgraphs.pdf) [1.3].  
-A variety of 2D plotting, 3D visualization, serialization, middleware, and analysis tools come standard as provided by the associated packages.  RoME.jl combines reference frame transformations and robotics SLAM tool around the back-end solver provides by [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl).
-
-Details about the accompanying packages:
-* [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl) supplies the algebraic logic for factor graph inference with Bayes tree and depends on several packages itself.
-* [RoME.jl](http://www.github.com/JuliaRobotics/RoME.jl) introduces nodes and factors that are useful to robotic navigation.
-* [ApproxManifoldProducts.jl](http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl) provides on-manifold belief product operations.
-
-## Visualization (Arena.jl/RoMEPlotting.jl)
-Caesar visualization (plotting of results, graphs, and data) is provided by 2D and 3D packages respectively:
-* [RoMEPlotting.jl](http://www.github.com/JuliaRobotics/RoMEPlotting.jl) are a set of scripts that provide MATLAB style plotting of factor graph beliefs, mostly supporting 2D visualization with some support for projections of 3D;
-* [Arena.jl](https://github.com/dehann/Arena.jl) package, which is a collection of 3D visualization tools.
-
-## Multilanguage Interops: Caesar SDKs and APIs
-The Caesar framework is not limited to direct Julia use.  See the [multi-language page](https://www.juliarobotics.org/Caesar.jl/latest/concepts/multilang/) for details.
-
-> [FAQ: Interop with other languages (not limited to Julia only)](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Is-Caesar.jl-limited-to-Julia?-No.-1)
-
-## Origins in Fundamental Research
-
-See related works on [the literature page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.  Please see/open issues for specific requests or adding comments to an ongoing discussion -- also consult the Caesar.jl Slack channel to follow/engage with community discussions.
+Post [Issues](https://github.com/JuliaRobotics/Caesar.jl/issues), or [Discussions](https://github.com/JuliaRobotics/Caesar.jl/discussions) for community help.  Maintainers can easily transfer Issues to the best suited package location if necessary.  Also see the history of changes and ongoing work can via the [Milestone pages (click through badges here)](https://github.com/JuliaRobotics/Caesar.jl/blob/master/README.md#bleeding-edge-development-status).  You can also get in touch via Slack at [![](https://img.shields.io/badge/Invite-Slack-green.svg?style=popout)](https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw).
 
 !!! note
     Please help improve this documentation--if something confuses you, chances
@@ -81,35 +38,21 @@ See related works on [the literature page](https://www.juliarobotics.org/Caesar.
     Your changes will be vetted by developers before becoming permanent, so don't
     worry about whether you might say something wrong.
 
-## Contributors
+# JuliaRobotics Code of Conduct
 
-We are grateful for many, many contributions within the Julia package ecosystem -- see the `Project.toml` files of `Caesar, Arena, RoME, RoMEPlotting, KernelDensityEstimate, IncrementalInference, NLsolve, LightGraphs, Gadfly, MeshCat` and others for a far reaching list of contributions.
-
-Consider citing our work:
-```
-@misc{caesarjl,
-  author = "Contributors and Dependencies",
-  title =  "Caesar.jl, v0.10",
-  year =   2021,
-  url =    "https://github.com/JuliaRobotics/Caesar.jl"
-}
-```
-
-Please file issues via Github for help to resolve problems for everyone. Issues can be transfered moved upstream to the best suited package location. Changes and ongoing work can be tracked via the [Milestone pages (click through badges here)](https://github.com/JuliaRobotics/Caesar.jl/blob/master/README.md#bleeding-edge-development-status). 
-
-## JuliaRobotics Code of Conduct
 The Caesar.jl project is part of the JuliaRobotics organization and adheres to the JuliaRobotics [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
-
 # Next Steps
 For installation steps, examples/tutorials, and concepts please refer to the following pages:
 
 ```@contents
 Pages = [
+    "concepts/why_nongaussian.md"
     "installation_environment.md"
     "concepts/concepts.md"
+    "concepts/building_graphs.md"
+    "concepts/2d_plotting.md"
     "examples/examples.md"
-    "func_ref.md"
 ]
-Depth = 3
+Depth = 1
 ```
 

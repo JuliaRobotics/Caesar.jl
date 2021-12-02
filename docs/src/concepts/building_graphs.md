@@ -1,29 +1,24 @@
-# Building and Solving Graphs
+# [Building Graphs](@ref building_graphs)
 
 Irrespective of your application - real-time robotics, batch processing of survey data, or really complex multi-hypothesis modeling - you're going to need to add factors and variables to a graph. This section discusses how to do that in Caesar.
 
 The following sections discuss the steps required to construct a graph and solve it:
-* Initialing the Factor Graph
+* Initializing the Factor Graph
 * Adding Variables and Factors to the Graph
 * Solving the Graph
 * Informing the Solver About Ready Data
 
 ## Familiar Canonical Factor Graphs
 
-Starting with a shortcut to just quickly getting a small predefined *canonical* graph containing a few variables and factors can be done with (try tab-completion in the REPL):
-```julia
-fg = generateCanonicalFG_Kaess()
-fg = generateCanonicalFG_LineStep()
-fg = generateCanonicalFG_Hexagonal()
-fg = generateCanonicalFG_Circle()
-```
-
-Any one of these function *generate* a standard factor graph object that is useful for orientation, testing, learning, or validation.  You can generate any of these factor graphs at any time, for example when quickly wanting to test some idea midway through building a more sophisiticated `fg`, you might just want to quickly do:
+Starting with a shortcut to just quickly getting a small predefined *canonical* graph containing a few variables and factors.  Functions to *generate* a canonical factor graph object that is useful for orientation, testing, learning, or validation.  You can generate any of these factor graphs at any time, for example when quickly wanting to test some idea midway through building a more sophisiticated `fg`, you might just want to quickly do:
 ```julia
 fg_ = generateCanonicalFG_Hexagonal()
 ```
 
 and then work with `fg_` to try out something risky.
+
+!!! note
+    See the [Canonical Graphs](../examples/canonical_graphs.md) page for a more complete list of existing graph generators.
 
 ## Building a new Graph
 
@@ -47,7 +42,7 @@ Variables (a.k.a. poses or states in navigation lingo) are created with the `add
 addVariable!(fg, :x0, Pose2)
 # Add a few more poses
 for i in 1:10
-  addVariable!(fg, Symbol("x$(i)"), Pose2)
+  addVariable!(fg, Symbol("x",i), Pose2)
 end
 ```
 
@@ -143,8 +138,8 @@ Computation will progress faster if poses and landmarks are very sparse.  To ext
 
 For completeness, one could also re-project the most meaningful measurements from sensor measurements between pose epochs as though measured from the pose epoch.  This approach essentially marginalizes the local dead reckoning drift errors into the local interpose re-projections, but helps keep the pose count low.
 
-In addition, see [fixed-lag discussion](https://www.juliarobotics.org/Caesar.jl/latest/examples/examples/#Hexagonal-2D-1) for limiting during inference the number of fluid variables manually to a user desired count.
+In addition, see [Fixed-lag Solving](@ref fixedlag_solving) for limiting during inference the number of fluid variables manually to a user desired count.
 
 ## Which Variables and Factors to use
 
-See the next page on [available variables and factors](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/)
+See the next page on [available variables and factors](@ref variables_factors)

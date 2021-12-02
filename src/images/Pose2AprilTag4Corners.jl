@@ -135,7 +135,7 @@ function _AprilTagToPose2(corners,
   pose, err1 = AprilTags.tagOrthogonalIteration(corners, homography, f_width, f_height, c_width, c_height, taglength=taglength_)
   cVt = Translation((pose[1:3,4])...)
   # bRc = bRy * yRc 
-  bRc = _Rotations.Quat(1/sqrt(2),0,1/sqrt(2),0) * _Rotations.Quat(1/sqrt(2),0,0,-1/sqrt(2))
+  bRc = _Rot.QuatRotation(1/sqrt(2),0,1/sqrt(2),0) * _Rot.QuatRotation(1/sqrt(2),0,0,-1/sqrt(2))
   # for tag in body frame == bTt
   bTt = LinearMap(bRc) ∘ cVt
   

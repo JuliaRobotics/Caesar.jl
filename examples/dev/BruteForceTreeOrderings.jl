@@ -21,7 +21,7 @@ using SuiteSparse.CHOLMOD: SuiteSparse_long
 include(normpath(Base.find_package("IncrementalInference"), "..", "ccolamd.jl"))
 
 
-fgs = generateCanonicalFG_Kaess()
+fgs = generateGraph_Kaess()
 
 drawGraph(fgs)
 

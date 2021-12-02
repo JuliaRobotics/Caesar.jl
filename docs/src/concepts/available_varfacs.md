@@ -1,4 +1,4 @@
-# Variables in Caesar.jl
+# [Variables in Caesar.jl](@id variables_factors)
 
 You can check for the latest variable types by running the following in your terminal:
 
@@ -8,8 +8,10 @@ subtypes(IncrementalInference.InferenceVariable)
 IncrementalInference.getCurrentWorkspaceVariables()
 ```
 
-!!! note
-    More variables and factors exists, but are not yet included in the standard library.  It is fairly straight forward to build your own out-of-library factors, see page [Creating New Variables and Factors](@ref) for more details.
+
+The variables and factors in Caesar should be sufficient for a variety of robotic applications, however, users can easily extend the framework (without changing the core code).  This can even be done *out-of-library*  at runtime after a construction of a factor graph has started!  See [Custom Variables](@ref custom_variables) and [Custom Factors](@ref custom_factors) for more details.
+
+## Basic Variables
 
 Default variables in IncrementalInference
 

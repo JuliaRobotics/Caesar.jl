@@ -1,21 +1,53 @@
-# Welcome
+# Install Caesar.jl
 
 Caesar.jl is one of the packages within the [JuliaRobotics](http://www.juliarobotics.org) community, and adheres to the [code-of-conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
 
-## Local Dependencies
+## Possible System Dependencies
 
-The following system packages are used by Caesar.jl:
+The following (Linux) system packages are used by Caesar.jl:
 ```
-# required packages
+# Likely dependencies
 sudo apt-get install hdf5-tools imagemagick
 
 # optional packages
 sudo apt-get install graphviz xdot
 ```
 
-## New to Julia and want a full Development Install
+For [ROS.org](https://www.ros.org/) users, see at least one usage example at [the ROS Direct page](@ref ros_direct).
 
-### Local Installation of Julia
+## Installing Julia Packages
+
+The philosophy around Julia packages are discussed at length in the [Julia core documentation](https://docs.julialang.org/en/stable/manual/packages/), where each Julia package relates to a git repository likely found on [Github.com](http://www.github.com).  Also see [JuliaHub.com](https://juliahub.com/ui/Packages/Caesar/BNbRm) for dashboard-style representation of the broader Julia package ecosystem.
+To install a Julia package, simply open a `julia` REPL (equally the Julia REPL in VSCode) and type:
+
+```julia
+] # activate Pkg manager
+(v1.6) pkg> add Caesar
+```
+
+These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaRegistries/General](http://github.com/JuliaRegistries/General).
+Unregistered latest packages can also be installed with using only the `Pkg.develop` function:
+
+```julia
+# Caesar is registered on JuliaRegistries/General
+julia> ]
+(v1.6) pkg> add Caesar
+(v1.6) pkg> add Caesar#janes-awesome-fix-branch
+(v1.6) pkg> add Caesar@v0.10.0
+
+# or alternatively your own local fork (just using old link as example)
+(v1.6) pkg> add https://github.com/dehann/Caesar.jl
+```
+
+See [Pkg.jl](https://github.com/JuliaLang/Pkg.jl) for details and features regarding package management, development, version control, virtual environments and much more.
+
+## Next Steps
+
+The sections hereafter describe [Building](@ref building_graphs), [Interacting], and [Solving](@ref solving_graphs) factor graphs.  We also recommend reviewing the various examples available in the [Examples section](@ref examples_section).  
+
+## New to Julia
+
+### Installing the Julia Binary
 
 Although [Julia](https://julialang.org/) (or [JuliaPro](https://juliacomputing.com/)) can be installed on a Linux computer using the `apt` package manager, we are striving for a fully local installation environment which is highly reproducible on a variety of platforms.
 
@@ -25,46 +57,18 @@ The easiest method is---via the terminal---to [download the desired](https://jul
 cd ~
 mkdir -p .julia
 cd .julia
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.1-linux-x86_64.tar.gz
-tar -xvf julia-1.6.1-linux-x86_64.tar.gz
-rm julia-1.6.1-linux-x86_64.tar.gz
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.3-linux-x86_64.tar.gz
+tar -xvf julia-1.6.3-linux-x86_64.tar.gz
+rm julia-1.6.3-linux-x86_64.tar.gz
 cd /usr/local/bin
-sudo ln -s ~/.julia/julia-1.6.1/bin/julia julia
+sudo ln -s ~/.julia/julia-1.6.3/bin/julia julia
 ```
 !!! note
     Feel free to modify this setup as you see fit.
 
 This should allow any terminal or process on the computer to run the Julia REPL by type `julia` and testing with:
 
-#### [Optional] Quick Test that Julia is Working 
-
-Run Julia in REPL (console) mode:
-```julia
-$ julia
-julia> println("hello world")
-"hello world"
-```
-
-Maybe a script, or command:
-
-```
-user@...$ echo "println(\"hello again\")" > myscript.jl
-user@...$ julia myscript.jl
-hello again
-user@...$ rm myscript.jl
-
-user@...$ julia -e "println(\"one more time.\")"
-one more time.
-user@...$ julia -e "println(\"...testing...\")"
-...testing...
-
-```
-
-!!! note
-    When searching for Julia related help online, use the phrase 'julialang' instead of just 'julia'.  For example, search for 'julialang workflow tips' or 'julialang performance tips'.
-    Also, see [FAQ - Why are first runs slow?](https://www.juliarobotics.org/Caesar.jl/latest/faq/#Just-In-Time-Compiling-(i.e.-why-are-first-runs-slow?)-1), which is due to Just-In-Time/Pre compiling and caching.
-
-## Setup VSCode IDE Environment
+## VSCode IDE Environment
 
 [VSCode IDE](https://www.julia-vscode.org/) allows for interactive development of Julia code using the Julia Extension.  After installing and running VSCode, install the Julia Language Support Extension:
 
@@ -83,100 +87,3 @@ In VSCode, open the command pallette by pressing `Ctrl + Shift + p`.  There are 
 
 There are a variety of useful packages in VSCode, such as `GitLens`, `LiveShare`, and `Todo Browser` as just a few highlights.  These *VSCode Extensions* are independent of the already vast JuliaLang Package Ecosystem (see [JuliaObserver.com](https://juliaobserver.com/)).
 
-## Julia Packages
-
-The philosophy around Julia packages are discussed at length in the [Julia core documentation](https://docs.julialang.org/en/stable/manual/packages/), where each Julia package relates to a git repository likely found on [Github.com](http://www.github.com).
-To install a Julia package, simply open a `julia` REPL (equally the Julia REPL in VSCode) and type:
-
-```julia
-] # activate Pkg manager
-(v1.6) pkg> add Caesar
-```
-
-These are [registered packages](https://pkg.julialang.org/) maintained by [JuliaRegistries/General](http://github.com/JuliaRegistries/General).
-Unregistered latest packages can also be installed with using only the `Pkg.develop` function:
-
-```julia
-# Caesar is registered on JuliaRegistries/General
-julia> ]
-(v1.6) pkg> add Caesar
-(v1.6) pkg> add Caesar#some-branch
-(v1.6) pkg> add Caesar@v0.10.0
-
-# or alternatively your own local fork (just using old link as example)
-(v1.6) pkg> add https://github.com/dehann/Caesar.jl
-```
-
-See [Pkg.jl](https://github.com/JuliaLang/Pkg.jl) for details and features regarding package management, development, version control, virtual environments and much more.
-
-## Running Unit Tests Locally
-
-Unit tests can further be performed for the upstream packages as follows -- **NOTE** first time runs are slow since each new function call or package must first be precompiled.
-```julia
-# the multimodal incremental smoothing and mapping solver
-(v1.6) pkg> test IncrementalInference
-...
-# robotics related variables and factors to work with IncrementalInference -- can be used standalone SLAM system
-(v1.6) pkg> test RoME
-...
-# umbrella framework with interaction tools and more -- allows stand alone and server based solving
-(v1.6) pkg> test Caesar
-...
-```
-
-## Install Repos for Development
-
-Alternatively, the `dev` command:
-```julia
-(v1.6) pkg> dev https://github.com/JuliaRobotics/Caesar.jl
-```
-
-!!! warn
-    Development packages are NOT managed by Pkg.jl, so you have to manage this Git repo manually.  Development packages can usually be found at, e.g. `Caesar`
-    ```
-    ~/.julia/dev/Caesar
-    ```
-
-If you'd like to modify or contribute then feel free to fork the specific repo from JuliaRobotics, complete the work on branches in the fork as is normal with a Git workflow and then submit a PR back upstream.  We try to keep PRs small, specific to a task and preempt large changes by first merging smaller non-breaking changes and finally do a small switch over PR.  We also follow a backport onto `release/vX.X` branch strategy with common `master` as the development lobby that builds successfully 99.999% of the time.
-
-## Ahead Of Time Compile RoME.so
-
-In RoME, run the `compileRoME/compileRoMESysimage.jl` script
-
-To use RoME with the newly created sysimage, start julia with:
-```
-julia -O3 -J ~/.julia/dev/RoME/compileRoME/RoMESysimage.so
-```
-
-
-## 2D Plotting, RoMEPlotting.jl
-
-RoMEPlotting.jl (2D) and Arena.jl (3D) as optional visualization packages:
-```julia
-(v1.6) pkg> add RoMEPlotting
-```
-
-## Contributing, Issues, or Comments
-
-Please feel free to open [issues with Caesar.jl](https://github.com/JuliaRobotics/Caesar.jl/issues) or even Fork and Pull Request as required.
-General conversations or comments can be made in the [Caesar Gist](https://gist.github.com/dehann/537f8a2eb9cc24d8bbd35ae92cb4d2d2).
-
-
-## Features To Be Restored In Future
-
-### Install 3D Visualization Utils (e.g. Arena.jl)
-
-3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
-Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
-
-!!! note
-    Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).
-
-Install the latest `master` branch version with
-```julia
-(v1.5) pkg> add Arena#master
-```
-
-## Install "Just the ZMQ/ROS Runtime Solver" (Linux)
-
-Work in progress (see issue [#278](https://github.com/JuliaRobotics/Caesar.jl/issues/278)).

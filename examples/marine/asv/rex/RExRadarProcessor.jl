@@ -2,15 +2,17 @@
 This script shows how to assemble full 360 degree radar sweeps from the DFG object
 built with RExFeed.jl
 """
-    s
+    
 using DistributedFactorGraphs
 using IncrementalInference, RoME
 using JSON2
 using LinearAlgebra
 
+##
+
 # Where to fetch data
-dfgDataFolder = ENV["HOME"]*"/data/rex";
-# dfgDataFolder = "/tmp/rex"
+# dfgDataFolder = ENV["HOME"]*"/data/rex";
+dfgDataFolder = "/tmp/caesar/rex"
 
 # Load the graph
 fg = loadDFG("$dfgDataFolder/dfg")
@@ -25,20 +27,20 @@ addBlobStore!(fg, ds)
 ds = FolderStore{Vector{UInt8}}(:lidar, "$dfgDataFolder/data/lidar")
 addBlobStore!(fg, ds)
 
-
+##
 
 # Check what's in it
 ls(fg)
 lsf(fg)  # there should be no factors the first time a session is loaded
 
 # How about radar data entries?
-count(v -> :RADAR in listDataEntries(v), getVariables(fg));
+count(v -> :RADAR in listDataEntries(v), getVariables(fg))
 
 # may be too intense as it is fetching ALL data too?
 allRadarVariables = filter(v -> :RADAR in listDataEntries(v), getVariables(fg));
 
+allRadarVariables = sortDFG(allRadarVariables);
 
-allRadarVariables = sortDFG(allRadarVariables)
 
 function fetchRadarMsg(var::DFGVariable)
     entry,rawData = getData(fg, var.label, :RADAR)
@@ -47,6 +49,8 @@ function fetchRadarMsg(var::DFGVariable)
 end
 
 msg = fetchRadarMsg(allRadarVariables[1])
+
+##
 
 # function azimuth(msg::NamedTuple)
 function azimuth(msg)
@@ -218,10 +222,11 @@ end
 #             (polar, cart) = assembleping(msg, 2.0);
 #             fullsweep .|= round.(UInt8, cart./255)
 #             imshow!(imi["gui"]["canvas"], fullsweep) 
-   
 #         end
 #     end
 # end
+
+##
 
 # set resolution to 1m/px
 (polar, cart) = assembleping(msg, 1.0);
@@ -230,16 +235,18 @@ end
 using ImageMagick
 using Images, ImageView
 using ImageFiltering
-imshow(polar)
-imshow(cart)
+# imshow(polar)
+# imshow(cart)
+
+##
 
 output_dir = joinpath(dfgDataFolder,"pings")
 if (!isdir(output_dir))
     mkdir(output_dir)
 end
-save(joinpath(output_dir,"ping.jpg"),UInt8.(cart))
+save(joinpath(output_dir,"ping.png"),UInt8.(cart))
 
-
+##
 # now let's process all radar variables in here
 
 fullsweep = zeros(size(cart))
@@ -270,7 +277,7 @@ for  i in 1:length(allRadarVariables)
         # now that we have a full sweep, we can try to match with the previous one!
         # TODO: register w/  previous sweep
         # save to disk
-        fname = join(["full_",string(sweep),".jpg"])
+        fname = join(["full_",string(sweep),".png"])
         save(joinpath(output_dir,fname),UInt8.(clamp.(fullsweep,0,255)))
 
         # add full sweep to last variable
@@ -280,10 +287,32 @@ for  i in 1:length(allRadarVariables)
         fullsweep = zeros(size(cart))
         sweep = sweep+1
     end
-    # fname = join(["polar_",String(allRadarVariables[i].label),".jpg"])
+    # fname = join(["polar_",String(allRadarVariables[i].label),".png"])
     # save(joinpath(output_dir,fname),UInt8.(polar))
-    fname = join(["cart_",String(allRadarVariables[i].label),".jpg"])
+    fname = join(["cart_",String(allRadarVariables[i].label),".png"])
     save(joinpath(output_dir,fname),UInt8.(cart))
     last_angle = msg.angle_end
 end
     
+
+
+##
+
+
+# count(v -> :RADARSWEEP in listDataEntries(v), getVariables(fg))
+
+# # may be too intense as it is fetching ALL data too?
+# allSweepVariables = filter(v -> :RADARSWEEP in listDataEntries(v), getVariables(fg));
+
+# allSweepVariables = sortDFG(allSweepVariables)
+
+
+# getLabel.(allSweepVariables)
+
+
+# de, db = getData(fg, allSweepVariables[1].label, :RADARSWEEP)
+
+# JSON2.read(IOBuffer(db))
+
+
+#

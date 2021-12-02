@@ -1,4 +1,4 @@
-# Hexagonal 2D with Fixed-Lag Solving
+# [Hexagonal 2D with Fixed-Lag Solving](@id fixedlag_solving)
 
 !!! note
 

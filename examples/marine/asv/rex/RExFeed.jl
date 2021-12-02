@@ -20,7 +20,7 @@ using JSON2
 # standard types
 @rosimport sensor_msgs.msg: PointCloud2
 @rosimport sensor_msgs.msg: NavSatFix
-# @rosimport nmea_msgs.msg: Sentence
+@rosimport nmea_msgs.msg: Sentence
 # seagrant type
 # OMG, rosmsg list is awesome by the way...
 # Also rosnode info

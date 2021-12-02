@@ -1,4 +1,4 @@
-# Examples
+# [Examples](@id examples_section)
 
 The following examples demonstrate the conceptual operation of Caesar, highlighting specific features of the framework and its use.
 

@@ -6,18 +6,19 @@ import RoME: getRangeKDEMax2D
 import IncrementalInference: getSample, initfg
 import DistributedFactorGraphs: getManifold
 
-using Reexport
+# handy project consts (not for export)
+import IncrementalInference: NothingUnion, InstanceType
+
 using Requires
 using Dates
 
 using Manifolds
+using StaticArrays
 
-@reexport using RoME
-@reexport using IncrementalInference
-@reexport using KernelDensityEstimate
-@reexport using Distributions
+import Rotations as _Rot
 
-import Rotations as _Rotations
+# TODO remove
+const _Rotations = _Rot
 
 using
   Pkg,
@@ -42,54 +43,16 @@ using
   TimeZones,
   TensorCast
 
-export
-  GenericInSituSystem,  # insitu components
-  makeGenericInSituSys,
-  InSituSystem,
-  makeInSituSys,
-  triggerPose,
-  poseTrigAndAdd!,
-  processTreeTrackersUpdates!,
-  advOdoByRules,
-  SLAMWrapper,
+using Optim
 
-  # servers
-  tcpStringSLAMServer,
-  tcpStringBRTrackingServer,
+using Reexport
 
-  # user functions
-  identitypose6fg,
-  projectrbe,
-  hasval,
-
-  # Robot Utils
-  getRangeKDEMax2D,
-
-  # sas-slam
-  CBFFilterConfig,
-  CZTFilter,
-  prepCZTFilter,
-  getCBFFilter2Dsize,
-  constructCBFFilter2D!,
-  CBF2D_DelaySum!,
-  MatchedFilter,
-  SASBearing2D,
-  PackedSASBearing2D,
-  compare,
-  SASDebug,
-  reset!,
-  prepMF,
-  loadConfigFile,
-  prepareSAS2DFactor,
-  wrapRad,
-  phaseShiftSingle!,
-  liebf!,
-  SASDebug
+# public API exports
+include("ExportAPI.jl")
 
 
-
-const NothingUnion{T} = Union{Nothing, T}
-
+## ===============================================================================================
+# and source files
 include("BearingRangeTrackingServer.jl")
 
 include("SlamServer.jl")
@@ -99,9 +62,7 @@ include("UserFunctions.jl")
 # Configuration
 include("config/CaesarConfig.jl")
 
-
 include("Deprecated.jl")
-
 
 # Multisession operation
 # include("attic/multisession/Multisession.jl")
@@ -122,12 +83,21 @@ function __init__()
     @eval using .PyCall
     @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("ros/Utils/RosbagSubscriber.jl")
   end
+  @require Colors="5ae59095-9a9b-59fe-a467-6f913c188581" include("3rdParty/_PCL/_PCL.jl")
   @require AprilTags="f0fec3d5-a81e-5a6a-8c28-d2b34f3659de" begin 
     include("images/apriltags.jl")
     @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/AprilTagDrawingTools.jl")
   end
+  @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/imagedraw.jl")
   @require ImageMagick="6218d12a-5da1-5696-b52f-db25d2ecc6d1" include("images/imagedata.jl")
-  @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" include("images/images.jl")
+  @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" begin 
+    include("images/images.jl")
+    include("images/ScanMatcherUtils.jl")
+    include("images/ScanMatcherPose2.jl")
+    include("images/ScatterAlignPose2.jl")
+    
+    @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("plotting/ScatterAlignPlotting.jl")
+  end
   @require Distributed="8ba89e20-285c-5b6f-9357-94700520ee1b" include("images/DistributedUtils.jl")
 end
 

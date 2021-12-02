@@ -34,7 +34,7 @@ function rodrigues!(Rmat::Array{Float64,2}, rvec::Vector{Float64})
 end
 
 function buildtagdict(cTt,
-                      Ql::Rotations.Quat,
+                      Ql::_Rot.QuatRotation,
                       tvec, # ::Union{Vector{Float64},StaticArrays.SArray{Tuple{3},<:Real,1,3}}
                       tagsize::Float64,
                       bTcl )
@@ -56,7 +56,7 @@ function buildtagdict(cTt,
   onetag
 end
 # function buildtagdict(cTt,
-#                       q::Rotations.Quat,
+#                       q::_Rot.QuatRotation,
 #                       tvec::CoordinateTransformations.Translation{T},
 #                       tagsize::Float64,
 #                       bTcl ) where T
@@ -122,7 +122,7 @@ function getAprilTagTransform(tag::AprilTag;
 end
 
 
-function prepTagBag(TAGS; iterposes::Int=99999999)
+function prepTagBag(TAGS; iterposes::Int=(2^(Sys.WORD_SIZE-1)-1))
   tvec = Translation(0.0,0,0)
   q = Quat(1.0,0,0,0)
   # package tag detections for all keyframes in a tag_bag
@@ -149,7 +149,7 @@ end
 
 
 ## DETECT APRILTAGS FROM IMAGE DATA
-function detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs; iterposes::Int=999999999)
+function detectTagsInImgs(datafolder, imgfolder, resultsdir, camidxs; iterposes::Int=(2^(Sys.WORD_SIZE-1)-1))
 
     # prep keyframe image data
     camlookup = prepCamLookup(camidxs)
