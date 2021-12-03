@@ -42,16 +42,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 
 We are grateful for many, many contributions within the Julia package ecosystem -- see the [Juliahub.com page](https://juliahub.com/ui/Packages/Caesar/BNbRm?page=1) for the upstream package dependencies.
 
-Consider citing our work:
-```
-@online{Caesarjl2021,
- author =        {{P}ackage {C}ontributors and {E}cosystem},
- title =         {Caesar.jl, v0.11.0},
- year =          {2021},
- doi=            {Solver DOI: 10.5281/zenodo.5146222}, 
- note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
-}
-```
+Consider citing our work [see CITATION.bib](https://github.com/JuliaRobotics/Caesar.jl/blob/master/CITATION.bib).
 
 ## Get Involved and Code of Conduct
 
