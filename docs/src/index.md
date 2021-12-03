@@ -19,7 +19,7 @@ Caesar.jl developed as a spin-out project from MIT's Computer Science and Artifi
 Consider citing our work:
 ```
 @online{Caesarjl2021,
- author =        {{P}ackage {C}ontributors and {E}cosystem},
+ author =        {{C}ontributors, {E}cosystem, and {N}av{A}bility},
  title =         {Caesar.jl, v0.11.1},
  year =          {2021},
  doi=            {Solver DOI: 10.5281/zenodo.5718817}, 
