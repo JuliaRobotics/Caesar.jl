@@ -1,6 +1,6 @@
 ```@raw html
 <p align="center">
-<img src="https://user-images.githubusercontent.com/6412556/134777705-acda768e-884b-4de6-b307-aac6d09b9c81.png" width="480" border="0" />
+<img src="https://user-images.githubusercontent.com/6412556/134777705-acda768e-884b-4de6-b307-aac6d09b9c81.png" width="240" border="0" />
 </p>
 ```
 
@@ -20,9 +20,9 @@ Consider citing our work:
 ```
 @online{Caesarjl2021,
  author =        {{P}ackage {C}ontributors and {E}cosystem},
- title =         {Caesar.jl, v0.11.0},
+ title =         {Caesar.jl, v0.11.1},
  year =          {2021},
- doi=            {Solver DOI: 10.5281/zenodo.5146222}, 
+ doi=            {Solver DOI: 10.5281/zenodo.5718817}, 
  note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
 }
 ```
