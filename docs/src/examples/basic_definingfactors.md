@@ -1,4 +1,4 @@
-# [Custom Prior Factor](@id custom_relative_factor)
+# [Custom Prior Factor](@id custom_prior_factor)
 
 Julia's type inference allows overloading of member functions outside a module.  Therefore new factors can be defined at any time.  
 
