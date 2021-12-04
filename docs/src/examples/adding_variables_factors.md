@@ -1,7 +1,15 @@
-# Creating New Variables and Factors
-In most scenarios, the existing variables and factors should be sufficient for most robotics applications. Caesar however, is extensible and allows you to easily incorporate your own variable and factor types for specialized applications.
+## [What is `CalcFactor`](@id whatiscalcfactor)
 
+`CalcFactor` is part of the `IIF` interface to all factors.  It contains metadata and other important bits of information that are useful in a wide swath of applications.  As work requires more interesting features from the code base, it is likely that the `cfo::CalcFactor` object will contain such data.  If not, please open an issue with Caesar.jl so that the necessary options may be added.
+
+The `cfo` object contains the field `.factor::T` which is the type of the user factor being used, e.g. `myprior` from above example.  That is `cfo.factor::MyPrior`.  This is why `getSample` is using `rand(cfo.factor.Z)`.
+
+`CalcFactor` was introduced in `IncrementalInference v0.20` to consolidate and standardize a variety of features that had previously been diseparate and unwieldy.
+
+!!! tip
+    Many factors already exists in `IncrementalInference`, `RoME`, and `Caesar`.  Please see their `src` directories for more details.
 ## New Variable/Factor Considerations
+
 A couple of important points:
 * You **do not need to** modify/fork/edit internal Caesar/RoME/IncrementalInference source code to introduce new variable and factor types!
 * As long as the factors exist in the working space when the solver is run, the factors are automatically used -- this is possible due to Julia's [multiple dispatch design](https://docs.julialang.org/en/v1/manual/methods/index.html)
@@ -17,7 +25,7 @@ A couple of important points:
     * You need to represent a constraint for a variable (known as a singleton) and that constraint type doesn't exist
     * You need to represent a constraint between two variables and that constraint type doesn't exist
 
-## Getting Started
+## Recommended Pattern
 We suggest the following design pattern for developing and building new factors:
 1. You have reviewed the variable and factor types available in Caesar, RoME, and IncrementalInference and a new type is required - please see [Building and Solving Graphs](https://www.juliarobotics.org/Caesar.jl/latest/concepts/available_varfacs/) if you want to review what is currently available
 1. [OPTIONAL] Create a GitHub repository to store the new types (new types in the Julia Main scope is perfectly okay!)
@@ -42,8 +50,6 @@ If this repository is going to be used for development of the new variables/fact
 
 using Caesar, RoME
 using Caesar_VariableFactorExamples # Your new variable/factor repository
-# Using plotting for experiment validation
-using RoMEPlotting
 
 # 1. Init factor graph
 #TODO
@@ -60,8 +66,9 @@ using RoMEPlotting
 # 4. Solve graph
 solveTree!(fg)
 
-# 5. Graph solution - assuming that you have this open in Atom.
-plotSLAM2DPoses(fg)
+# 5. look at a result
+getBelief(fg, :x0)
+getPPE(fg, :x0).suggested
 ```
 
 ## Unit Tests

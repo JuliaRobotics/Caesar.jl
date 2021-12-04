@@ -9,7 +9,7 @@ IncrementalInference.getCurrentWorkspaceVariables()
 ```
 
 
-The variables and factors in Caesar should be sufficient for a variety of robotic applications, however, users can easily extend the framework (without changing the core code).  This can even be done *out-of-library*  at runtime after a construction of a factor graph has started!  See [Custom Variables](@ref custom_variables) and [Custom Factors](@ref custom_factors) for more details.
+The variables and factors in Caesar should be sufficient for a variety of robotic applications, however, users can easily extend the framework (without changing the core code).  This can even be done *out-of-library*  at runtime after a construction of a factor graph has started!  See [Custom Variables](@ref custom_variables) and [Custom Factors](@ref custom_relative_factor) for more details.
 
 ## Basic Variables
 
