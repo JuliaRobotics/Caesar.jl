@@ -66,9 +66,11 @@ makedocs(
         ],
         "How to Expand?" => [
             "Pkg Framework" => "caesar_framework.md",
-            "Custom Variables and Factors" => "examples/adding_variables_factors.md",
-            "Creating Variables" => "examples/custom_variables.md",
-            "Creating Factors" => "examples/basic_definingfactors.md",
+            "Custom Variables" => "examples/custom_variables.md",
+            "Custom Prior Factor" => "examples/basic_definingfactors.md",
+            "Custom Relative Factor" => "examples/custom_relative_factors.md",
+            "Important Factor Features" => "examples/custom_factor_features.md",
+            "Variable/Factor Considerations" => "examples/adding_variables_factors.md",
             "More Functions" => "func_ref.md",
         ],
         "Principles" => [
