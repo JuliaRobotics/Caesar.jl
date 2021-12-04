@@ -64,5 +64,7 @@ end
 
 It is recommended to leave the incoming types unrestricted.  If you must define the types, make sure to allow sufficient dispatch freedom (i.e. dispatch to concrete types) and not force operations to "non-concrete" types.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work of inferring the concrete types.
 
+Serialization of factors is also discussed in more detail at [Standardized Factor Serialization](@ref factor_serialization).
+
 !!! note
     At present (2021) the residual function should return the residual value as a coordinate (not as tangent vectors or manifold points).  Ongoing work is in progress, and likely to return residual values as manifold tangent vectors instead.

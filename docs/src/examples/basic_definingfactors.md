@@ -70,4 +70,4 @@ solveGraph!(fg); # exact alias of solveTree!(fg)
 
 Later we will see how to ensure these new factors can be properly serialized to work with features like `saveDFG` and `loadDFG`.  See [What is `CalcFactor`](@ref whatiscalcfactor) for more details.
 
-See the next page on how to build your own [Custom Relative Factor](@ref custom_relative_factor).
+See the next page on how to build your own [Custom Relative Factor](@ref custom_relative_factor).  Serialization of factors is also discussed in more detail at [Standardized Factor Serialization](@ref factor_serialization).

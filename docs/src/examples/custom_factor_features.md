@@ -1,6 +1,6 @@
 # Custom Factor Features
 
-### Partial Factors
+## Partial Factors
 
 In some cases a factor only effects a partial set of dimensions of a variable.  For example a magnetometer being added onto a `Pose2` variable would look something like this:
 ```julia
@@ -17,7 +17,7 @@ getSample(cfo::CalcFactor{<:MyMagnetoPrior}) = samplePoint(cfo.factor.Z)
 
 Similarly for `<:IIF.AbstractRelativeMinimize`, and note that the Roots version currently does not support the `.partial` option.
 
-### Metadata
+## Factor Metadata
 
 The MM-iSAMv2 algorithm relies on the Kolmogorov-Criteria as well as uncorrelated factor sampling.  This means that when generating fresh samples for a factor, those samples should not depend on values of variables in the graph or independent volatile variables.  That said, if you are comfortable or have a valid reason for introducing correlation between the factor sampling process with values inside the factor graph then you can do so via the `cfo.CalcFactor` interface.
 
@@ -31,7 +31,7 @@ At present `cfo` contains three main fields:
 !!! note
     The old `.specialSampler` framework has been replaced with the standardized `::CalcFactor` interface.  See http://www.github.com/JuliaRobotics/IIF.jl/issues/467 for details.
 
-## [OPTIONAL] Standardized Serialization
+## [Standardized Factor Serialization](@id factor_serialization)
 
 To take advantage of features like `DFG.saveDFG` and `DFG.loadDFG` a user specified type should be able to serialize via JSON standards.  The decision was taken to require bespoke factor types to always be converted into a JSON friendly `struct` which must be prefixed as type name with `PackedMyPrior{T}`.   Similarly, the user must also overload `Base.convert` as follows:
 ```julia
