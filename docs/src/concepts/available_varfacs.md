@@ -4,10 +4,15 @@ You can check for the latest variable types by running the following in your ter
 
 ```julia
 using RoME, Caesar
-subtypes(IncrementalInference.InferenceVariable)
-IncrementalInference.getCurrentWorkspaceVariables()
-```
 
+subtypes(IIF.InferenceVariable)
+
+# variables already available
+IIF.getCurrentWorkspaceVariables()
+
+# factors already available
+IIF.getCurrentWorkspaceFactors()
+```
 
 The variables and factors in Caesar should be sufficient for a variety of robotic applications, however, users can easily extend the framework (without changing the core code).  This can even be done *out-of-library*  at runtime after a construction of a factor graph has started!  See [Custom Variables](@ref custom_variables) and [Custom Factors](@ref custom_relative_factor) for more details.
 
