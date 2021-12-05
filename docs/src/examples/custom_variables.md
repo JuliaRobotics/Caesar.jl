@@ -28,7 +28,7 @@ Another good example to look at is RoME's [`Pose2`](@ref) with 3 degrees of free
 )
 ```
 
-Here we used `Manifolds.SpecialEuclidean(2)` as the variable manifold, and the default data representation is similar to `Manifolds.identity_element(SpecialEuclidean(2))`, or `Float32[1.0 0; 0 1]`, etc.
+Here we used `Manifolds.SpecialEuclidean(2)` as the variable manifold, and the default data representation is similar to `Manifolds.identity_element(SpecialEuclidean(2))`, or `Float32[1.0 0; 0 1]`, etc.  In the example above, we used `StaticArrays.MVector`, `StaticArrays.MMatrix` for better performance, owing to better heap vs. stack memory management.
 ```@docs
 @defVariable
 ```
