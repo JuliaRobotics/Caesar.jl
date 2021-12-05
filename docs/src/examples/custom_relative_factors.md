@@ -1,5 +1,13 @@
 # [Custom Relative Factor](@id custom_relative_factor)
 
+| Required                                  | Brief description                                                                      |
+|:------------------------------------------|:-------------------------------------------------------------------------------------- |
+| `MyFactor`  struct                        | Prior (`<:AbstractPrior`) or Relative (`<:AbstractManifoldMinimize`) factor definition |
+| `getManifold`                             | The manifold of the factor |
+| `(cfo::CalcFactor{<:MyFactor})`           | Factor residual function |
+| **Optional methods**                      | **Brief description**                                                                  |
+| `getSample(cfo::CalcFactor{<:MyFactor})`  | Get a sample from the measurement model |
+
 ## Define the relative struct
 
 Previously we looked at making a [Custom Prior Factor](@ref custom_prior_factor).  This section describes how to build *relative factors*.  Relative factors introduce relative-only information between variables in the factor graph, and do not add any absolute information.  For example, a rigid transform between two variables is a relative relationship, regardless of their common absolute position in the world.
@@ -62,9 +70,11 @@ function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
 end
 ```
 
-It is recommended to leave the incoming types unrestricted.  If you must define the types, make sure to allow sufficient dispatch freedom (i.e. dispatch to concrete types) and not force operations to "non-concrete" types.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work of inferring the concrete types.
-
-Serialization of factors is also discussed in more detail at [Standardized Factor Serialization](@ref factor_serialization).
-
 !!! note
     At present (2021) the residual function should return the residual value as a coordinate (not as tangent vectors or manifold points).  Ongoing work is in progress, and likely to return residual values as manifold tangent vectors instead.
+
+It is recommended to leave the incoming types unrestricted.  If you must define the types, make sure to allow sufficient dispatch freedom (i.e. dispatch to concrete types) and not force operations to "non-concrete" types.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work of inferring the concrete types.
+
+### Serialization
+
+Serialization of factors is also discussed in more detail at [Standardized Factor Serialization](@ref factor_serialization).

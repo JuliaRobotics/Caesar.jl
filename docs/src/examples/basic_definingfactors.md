@@ -5,11 +5,9 @@ Julia's type inference allows overloading of member functions outside a module. 
 
 | Required                                  | Brief description                                                                      |
 |:------------------------------------------|:-------------------------------------------------------------------------------------- |
-| `MyFactor`  struct                        | Prior (`<:AbstractPrior`) or Relative (`<:AbstractManifoldMinimize`) factor definition |
-| `getManifold`                             | The manifold of the factor |
-| `(cfo::CalcFactor{<:MyFactor})`           | Factor residual function |
+| `MyFactor`  struct                        | Prior (`<:AbstractPrior`) factor definition |
 | **Optional methods**                      | **Brief description**                                                                  |
-| `getSample(cfo::CalcFactor{<:MyFactor})`  | Get a sample from the factor |
+| `getSample(cfo::CalcFactor{<:MyFactor})`  | Get a sample from the measurement model |
 
 
 To better illustrate, in this example we will add new factors into the `Main` context **after** construction of the factor graph has already begun.
