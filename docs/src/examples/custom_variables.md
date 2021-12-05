@@ -2,7 +2,7 @@
 
 In most scenarios, the existing variables and factors should be sufficient for most robotics applications. Caesar however, is extensible and allows you to easily incorporate your own variable and factor types for specialized applications.  Let's look at creating custom variables first.
 
-A handy macro can help define new variables which shows a [`Pose2`](@ref) example with 3 degrees of freedom: ``X, Y, \theta``.  Caesar.jl uses [Manifolds.jl as fundamental abstraction](https://juliamanifolds.github.io/Manifolds.jl/latest/examples/manifold.html) for defining numerical operations.
+A handy macro can help define new variables:
 ```julia
 @defVariable(
     MyVar,
@@ -18,10 +18,20 @@ This new variable is now ready to be added to a factor graph:
 addVariable!(fg, :myvar1, MyVar)
 ```
 
-Users can choose how to represent data, for example [`RoME.Pose2`](@ref) is defined as a `Manifolds.SpecialEuclidean(2)`, and the default data representation is (but doesn't have to be) `Manifolds.identity_element(SpecialEuclidean(2))` -- i.e. likely an `Manifolds.ArrayPartition` or `Manifolds.ProductRepr` (older).
+Another good example to look at is RoME's [`Pose2`](@ref) with 3 degrees of freedom: ``X, Y`` and a rotation matrix using ``R(\theta)``.  Caesar.jl uses the [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) for defining numerical operations, we can use the `Manifolds.ProductRepr` (soon to become `Manifolds.ArrayPartition`), to define manifold point types:
+```julia
+# already exists in RoME/src/factors/Pose2D.jl
+@defVariable(
+    Pose2,
+    SpecialEuclidean(2),
+    ProductRepr(MVector{2}(0.0,0.0), MMatrix{2,2}(1.0,0.0,0.0,1.0))
+)
+```
+
+Here we used `Manifolds.SpecialEuclidean(2)` as the variable manifold, and the default data representation is similar to `Manifolds.identity_element(SpecialEuclidean(2))`, or `Float32[1.0 0; 0 1]`, etc.  In the example above, we used `StaticArrays.MVector`, `StaticArrays.MMatrix` for better performance, owing to better heap vs. stack memory management.
 ```@docs
 @defVariable
 ```
 
 !!! note
-    Since [RoME.jl#244](http://www.github.com/JuliaRobotics/RoME.jl/issues/244) the Caesar.jl system of packages fundamentally integrated with [Manifolds.jl](http://www.github.com/JuliaManifolds/Manifolds.jl).
+    Users can implement their own manifolds using the [ManifoldsBase.jl API](https://juliamanifolds.github.io/Manifolds.jl/stable/examples/manifold.html#manifold-tutorial).  See [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) for more information.
