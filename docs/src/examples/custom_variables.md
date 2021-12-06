@@ -18,7 +18,7 @@ This new variable is now ready to be added to a factor graph:
 addVariable!(fg, :myvar1, MyVar)
 ```
 
-Another good example to look at is RoME's [`Pose2`](@ref) with 3 degrees of freedom: ``X, Y`` and a rotation matrix using ``R(\theta)``.  Caesar.jl uses the [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) for defining numerical operations, we can use the `Manifolds.ProductRepr` (soon to become `Manifolds.ArrayPartition`), to define manifold point types:
+Another good example to look at is RoME's [`Pose2`](@ref) with 3 degrees of freedom: ``X, Y`` and a rotation matrix using ``R(\theta)``.  Caesar.jl uses the [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) for defining numerical operations, we can use the `Manifolds.ProductRepr` (or [`RecursiveArrayTools.ArrayPartition`](https://github.com/SciML/RecursiveArrayTools.jl)), to define manifold point types:
 ```julia
 # already exists in RoME/src/factors/Pose2D.jl
 @defVariable(
