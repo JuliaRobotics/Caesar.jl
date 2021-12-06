@@ -2,7 +2,7 @@
 
 In most scenarios, the existing variables and factors should be sufficient for most robotics applications. Caesar however, is extensible and allows you to easily incorporate your own variable and factor types for specialized applications.  Let's look at creating custom variables first.
 
-A handy macro can help define new variables:
+A handy macro helps define new variables:
 ```julia
 @defVariable(
     MyVar,
@@ -11,14 +11,14 @@ A handy macro can help define new variables:
 )
 ```
 
-First we define the name `MyVar`, then the manifold on which the variable probability estimates exist (a simple Cartesian translation in two dimensions).  The third parameter is a default point for your new variable.
+First, we define the name `MyVar`, then the manifold on which the variable probability estimates exist (a simple Cartesian translation in two dimensions).  The third parameter is a default point for your new variable.
 
 This new variable is now ready to be added to a factor graph:
 ```julia
 addVariable!(fg, :myvar1, MyVar)
 ```
 
-Another good example to look at is RoME's [`Pose2`](@ref) with 3 degrees of freedom: ``X, Y`` and a rotation matrix using ``R(\theta)``.  Caesar.jl uses the [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) for defining numerical operations, we can use the `Manifolds.ProductRepr` (or [`RecursiveArrayTools.ArrayPartition`](https://github.com/SciML/RecursiveArrayTools.jl)), to define manifold point types:
+Another good example to look at is RoME's [`Pose2`](@ref) with 3 degrees of freedom: ``X, Y`` and a rotation matrix using ``R(\theta)``.  Caesar.jl uses [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) defining structuring numerical operations, we can use either the `Manifolds.ProductRepr` (or [`RecursiveArrayTools.ArrayPartition`](https://github.com/SciML/RecursiveArrayTools.jl)), to define manifold point types:
 ```julia
 # already exists in RoME/src/factors/Pose2D.jl
 @defVariable(
