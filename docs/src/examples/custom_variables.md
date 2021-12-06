@@ -34,4 +34,4 @@ Here we used `Manifolds.SpecialEuclidean(2)` as the variable manifold, and the d
 ```
 
 !!! note
-    Users can implement their own manifolds using the [ManifoldsBase.jl API](https://juliamanifolds.github.io/Manifolds.jl/stable/examples/manifold.html#manifold-tutorial).  See [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) for more information.
+    Users can implement their own manifolds using the [ManifoldsBase.jl API](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html); also see [the tutorial](https://juliamanifolds.github.io/Manifolds.jl/stable/examples/manifold.html#manifold-tutorial).  See [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) for general information.
