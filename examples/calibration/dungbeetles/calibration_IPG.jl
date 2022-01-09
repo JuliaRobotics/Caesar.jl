@@ -52,18 +52,27 @@ for t in tags
   tP = hcat(tP, [actual_tag_centers[t.id];1])
 end
 
-tHc = homography2d(tP,cP)
+
+# returns x2 = H*x1
+# tP = tHc * cP
+# c -> plane of the camera detector
+# t -> plane containing all april tags
+tHc = homography2d(cP,tP)
 
 ##
-
 H = LinearMap(tHc)
 push1(x) = [x; 1] # convinience function
 s = 1
 scale = LinearMap(s*I) # scaling transforms
 iscale = LinearMap(I/s) 
-itform = PerspectiveMap() ∘ H ∘ push1 ∘ iscale # add the scaling to the transformation pipelines
-tform =  scale ∘ PerspectiveMap() ∘ inv(H) ∘ push1
-imgw = warp(img', itform, ImageTransformations.autorange(img, tform))' # nice, the image size more useful
-imgw = warp(img', itform, (-1100:1100, -1100:1100))' # nice, the image size more useful
+itform = PerspectiveMap() ∘ inv(H) ∘ push1 ∘ iscale # add the scaling to the transformation pipelines
+tform =  scale ∘ PerspectiveMap() ∘ H ∘ push1
 
+# From warp docs
+# imgw[I] = img[tform(I)]
+# The output array `imgw` has indices that would result from
+# applying `inv(tform)` to the indices of `img`. This can be very
+# handy for keeping track of how pixels in `imgw` line up with
+# pixels in `img`.
+imgw = warp(img', itform, (-1100:1100, -1100:1100))'
 imgw
