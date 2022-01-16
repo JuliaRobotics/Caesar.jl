@@ -165,7 +165,7 @@ addFactor!(fg, [:x0],  PriorPose2( MvNormal(x0_prior[1], Matrix(Diagonal(x0_prio
 ## test for multimodality
 # dfgplot(fg)
 # drawGraph(fg)
-# # ensureAllInitialized!(fg)
+# # initAll!(fg)
 getSolverParams(fg).drawtree=true
 getSolverParams(fg).showtree=true
 # getSolverParams(fg).dbg=true
@@ -209,7 +209,7 @@ pl = vstack(hstack(pl1,pl2), hstack(pl3,pl4))
 x0x1_pp = [[0,0,deg2rad(-90)], [pp_σx, pp_σy, pp_σψ]]
 addVariable!(fg, :x1, Pose2)
 addFactor!(fg, [:x0, :x1], Pose2Pose2(MvNormal(x0x1_pp[1], Matrix(Diagonal(x0x1_pp[2].^2)))), autoinit=autoinit)
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # x2
 x1x2_pp = [[0,0,deg2rad(-90)], [pp_σx, pp_σy, pp_σψ]]
 addVariable!(fg, :x2, Pose2)
@@ -229,7 +229,7 @@ addFactor!(fg, [:x1, :x2], Pose2Pose2(MvNormal(x1x2_pp[1], Matrix(Diagonal(x1x2_
     @doline SKL addLandmarkTrueWithPrior!(fg, :l6_0, landmarks_design[:l6])
     @doline SKL addFactor!(fg, [:x2, :l6, :l6_0], Pose2Point2BearingRange(Normal(x2l6_br[1]...), Normal(x2l6_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # x3:
 x2x3_pp = [[0,0,deg2rad(-90)], [pp_σx, pp_σy, pp_σψ]]
 addVariable!(fg, :x3, Pose2)
@@ -242,13 +242,13 @@ addFactor!(fg, [:x2, :x3], Pose2Pose2(MvNormal(x2x3_pp[1], Matrix(Diagonal(x2x3_
     @doline SKL addLandmarkTrueWithPrior!(fg, :l7_0, landmarks_design[:l7])
     @doline SKL addFactor!(fg, [:x3, :l7, :l7_0], Pose2Point2BearingRange(Normal(x3l7_br[1]...), Normal(x3l7_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # x4 drive + 80
 x3x4_pp = [[80,0,deg2rad(-90)], [pp_σx, pp_σy, pp_σψ]]
 addVariable!(fg, :x4, Pose2)
 addFactor!(fg, [:x3, :x4], Pose2Pose2(MvNormal(x3x4_pp[1], Matrix(Diagonal(x3x4_pp[2].^2)))), autoinit=autoinit)
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # x5 turn -90 -> drive + 50
 x4x5_pp = [[50,0,deg2rad(0)], [pp_σx, pp_σy, pp_σψ]]
 addVariable!(fg, :x5, Pose2)
@@ -278,7 +278,7 @@ addFactor!(fg, [:x4, :x5], Pose2Pose2(MvNormal(x4x5_pp[1], Matrix(Diagonal(x4x5_
 
 #
 drawGraph(fg)
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # drawPosesLandms(fg)
 # getSolverParams(fg).drawtree=true
 # getSolverParams(fg).showtree=true
@@ -318,7 +318,7 @@ reportFactors(fg, Pose2Pose2)
 
 # plotLocalProduct(fg, :x4, levels=5)
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # x6
 x5x6_pp = [[0,0,deg2rad(-90)], [pp_σx, pp_σy, pp_σψ]]
 addVariable!(fg, :x6, Pose2)
@@ -340,7 +340,7 @@ addFactor!(fg, [:x5, :x6], Pose2Pose2(MvNormal(x5x6_pp[1], Matrix(Diagonal(x5x6_
 ## debug check solve here
 # drawGraph(fg)
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # drawPosesLandms(fg)
 # getSolverParams(fg).drawtree=true
 # getSolverParams(fg).showtree=true
@@ -376,7 +376,7 @@ addFactor!(fg, [:x6, :x7], Pose2Pose2(MvNormal(x6x7_pp[1], Matrix(Diagonal(x6x7_
 # pts = approxConv(fg, :x7l7l7bf1, :l7b)
 
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # x8
 x7x8_pp = [[0,0,deg2rad(-90)], [pp_σx, pp_σy, pp_σψ]]
 addVariable!(fg, :x8, Pose2)
@@ -391,7 +391,7 @@ addFactor!(fg, [:x7, :x8], Pose2Pose2(MvNormal(x7x8_pp[1], Matrix(Diagonal(x7x8_
 
 
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 
 
 
@@ -533,7 +533,7 @@ drawGraph(fg)
 # drawPosesLandms(fg)
 
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # cu, pr = predictVariableByFactor(fg, :l7, pp_x7l7_br, [:x7;:l7])
 # if minkld(cu, pr) < 3
     # addFactor!(fg, [:x7, :l7], pp_x7l7_br, autoinit=autoinit)

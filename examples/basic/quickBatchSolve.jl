@@ -20,7 +20,7 @@ vars = setdiff(ls(fg), ls(fg, r"drt"))
 factrs = setdiff(lsf(fg), lsf(fg, r"drt"))
 (x->setSolvable!(getFactor(fg, x), 1)).(factrs)
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).maxincidence = 1000

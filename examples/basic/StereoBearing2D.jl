@@ -69,7 +69,7 @@ addFactor!(fg, [:x0; :l1], Pose2Point2BearingRange(Normal(m1, mstd), Rayleigh(2.
 
 drawGraph(fg, show=true)
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # setValKDE!(fg, :l0, AMP.manikde!(randn(2,100), Point2().manifolds))
 # setValKDE!(fg, :l1, AMP.manikde!(randn(2,100), Point2().manifolds))
 

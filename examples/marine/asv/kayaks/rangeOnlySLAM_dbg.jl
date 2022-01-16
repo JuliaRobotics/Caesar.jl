@@ -86,7 +86,7 @@ getSolverParams(fg).maxincidence = 100
 
 # writeGraphPdf(fg, show=true)
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 tree = solveTree!(fg0)
 drawTree(tree,filepath = "/tmp/caesar/bt.pdf", show=true, imgs=false)
@@ -318,7 +318,7 @@ getSolverParams(fg).maxincidence = 100
 
 # writeGraphPdf(fg, show=true)
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 
 tree = solveTree!(fg)
 

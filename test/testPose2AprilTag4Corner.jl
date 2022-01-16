@@ -224,28 +224,28 @@ ARR = Pose2AprilTag4Corners.(tags, f_width=f_width, f_height=f_height, c_width=c
 # check a tag on the left is actually on the left according to 
 # body frame: fwd-lft-up <==> x-y-z
 # distance x should show the tag roughly 42cm ahead of the camera body frame
-@test 0.4 < ARR[3].Zij.z.μ[1] < 0.5
-@test 0.2 < ARR[3].Zij.z.μ[2]
-@test abs(ARR[3].Zij.z.μ[3]) < 0.1
+@test 0.4 < ARR[3].Zij.Z.μ[1] < 0.5
+@test 0.2 < ARR[3].Zij.Z.μ[2]
+@test abs(ARR[3].Zij.Z.μ[3]) < 0.1
 
 # tag on the right should be on the right
-@test 0.4 < ARR[38].Zij.z.μ[1] < 0.5
-@test ARR[38].Zij.z.μ[2] < -0.2
-@test abs(ARR[38].Zij.z.μ[3]) < 0.1
+@test 0.4 < ARR[38].Zij.Z.μ[1] < 0.5
+@test ARR[38].Zij.Z.μ[2] < -0.2
+@test abs(ARR[38].Zij.Z.μ[3]) < 0.1
 
 # check a tag in the center should be near the center
-@test 0.4 < ARR[18].Zij.z.μ[1] < 0.5
-@test abs(ARR[18].Zij.z.μ[2]) < 0.1
-@test abs(ARR[18].Zij.z.μ[3]) < 0.1
+@test 0.4 < ARR[18].Zij.Z.μ[1] < 0.5
+@test abs(ARR[18].Zij.Z.μ[2]) < 0.1
+@test abs(ARR[18].Zij.Z.μ[3]) < 0.1
 
 # check vertical-only displacement
-@test 0.4 < ARR[1].Zij.z.μ[1] < 0.5
-@test 0.15 < ARR[1].Zij.z.μ[2] < 0.3
-@test abs(ARR[1].Zij.z.μ[3]) < 0.1
+@test 0.4 < ARR[1].Zij.Z.μ[1] < 0.5
+@test 0.15 < ARR[1].Zij.Z.μ[2] < 0.3
+@test abs(ARR[1].Zij.Z.μ[3]) < 0.1
 
-@test 0.4 < ARR[5].Zij.z.μ[1] < 0.5
-@test 0.15 < ARR[5].Zij.z.μ[2] < 0.3
-@test abs(ARR[5].Zij.z.μ[3]) < 0.1
+@test 0.4 < ARR[5].Zij.Z.μ[1] < 0.5
+@test 0.15 < ARR[5].Zij.Z.μ[2] < 0.3
+@test abs(ARR[5].Zij.Z.μ[3]) < 0.1
 
 
 ## drawing test to ensure the functions are working

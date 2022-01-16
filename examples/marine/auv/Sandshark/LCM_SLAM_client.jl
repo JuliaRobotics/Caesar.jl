@@ -242,7 +242,7 @@ fg, dashboard, wtdsh, ST = main(parsed_args=parsed_args, lcm=LCMLog(lcmlogfile) 
 
 ## moved to CommonUtils.jl
 # In case any variables had not been solved yet
-ensureAllInitialized!(fg)
+initAll!(fg)
 saveDFG(fg, joinpath(getLogPath(fg),"fg_final") )
 
 

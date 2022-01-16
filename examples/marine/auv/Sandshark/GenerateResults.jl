@@ -48,7 +48,7 @@ fg = if !isdefined(Main, :fg)
   @show pathElem = splitpath(pargs["reportDir"])
   @show getSolverParams(fg).logpath = joinpath(pathElem[1:end-1]...)
   loadDFG(pargs["reportDir"], Main, fg)
-  ensureAllInitialized!(fg)
+  initAll!(fg)
   fg
 else
   fg

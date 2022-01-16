@@ -30,7 +30,7 @@ addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )
 # ls(fg, :x0)
 # isInitialized(fg, :x0)
 # # to debug the zero lengths issue
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # getVal(fg, :x0)
 # Prior(MvNormal([0.0;0.0;0], diagm([1.0;1.0;0.01].^2)))
 
@@ -53,7 +53,7 @@ isInitialized(fg, :x6)
 
 
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 
 using RoMEPlotting

@@ -91,7 +91,7 @@ p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 
 # Initialize :l1 numerical values but do not rerun solver
-ensureAllInitialized!(fg)
+initAll!(fg)
 ```
 **NOTE** The default behavior for initialization of variable nodes implies the last variable node added will not have any numerical values yet, please see [ContinuousScalar Tutorial](http://www.juliarobotics.org/Caesar.jl/latest/tutorialcontinuousscalar.html) for deeper discussion on automatic initialization (`autoinit`).
 A slightly expanded plotting function will draw both poses and landmarks (and currently assumes labels starting with `:x` and `:l` respectively)---notice the new landmark bottom right:

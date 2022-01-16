@@ -40,7 +40,7 @@ addFactor!(fg,[:l2],pL2)
 
 # doautoinit!(fg, :l1, N=N)
 # doautoinit!(fg, :l2, N=N)
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 
 

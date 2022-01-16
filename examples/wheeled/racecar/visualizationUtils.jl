@@ -296,7 +296,7 @@ end
 #
 # subgraphFromVerts(fg, vars)
 #
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # isInitialized(fg, :x220)
 #
 # ls(fg, :l14)
