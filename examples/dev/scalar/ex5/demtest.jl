@@ -48,7 +48,7 @@ using Caesar, Cairo, RoMEPlotting
 
 ##
 
-@everywhere prjPath = dirname(dirname(pathof(Caesar)))
+@everywhere prjPath = pkgdir(Caesar)
 
 @everywhere include(joinpath(prjPath,"examples/dev/scalar/CommonUtils.jl"))
 @everywhere using .CommonUtils

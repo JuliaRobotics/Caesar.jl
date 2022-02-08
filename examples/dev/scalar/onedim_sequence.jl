@@ -127,7 +127,7 @@ end
 ## Terrain
 
 # load dem (18x18km span)
-img = load(joinpath(dirname(dirname(pathof(Caesar))), "examples/dev/scalar/dem.png")) .|> Gray
+img = load(joinpath(pkgdir(Caesar), "examples/dev/scalar/dem.png")) .|> Gray
 h = 1e3*Float64.( @view img[512,:])
 
 ## Size of the map

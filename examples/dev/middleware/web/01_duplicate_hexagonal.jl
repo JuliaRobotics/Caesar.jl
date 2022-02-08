@@ -12,7 +12,7 @@ using UUIDs
 
 # Graff.....
 # 1. Import the initialization code.
-cd(joinpath(dirname(pathof(GraffSDK)), "..", "examples"))
+cd(joinpath(pkgdir(GraffSDK), "examples"))
 # 1a. Create a Configuration
 config = loadGraffConfig("synchronyConfig1.json")
 #Create a hexagonal sessions

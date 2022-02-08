@@ -11,7 +11,7 @@ using Test
 using JSON2
 import Caesar
 
-prjPath = dirname(dirname(pathof(Caesar)))
+prjPath = pkgdir(Caesar)
 include( joinpath(prjPath, "examples","dev","scalar","Sequences.jl") )
 
 # some Gadfly stuff

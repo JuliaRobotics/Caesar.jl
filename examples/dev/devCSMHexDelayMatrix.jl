@@ -70,7 +70,7 @@ allCSMFunctions = [
 ]
 
 
-runfile = joinpath(pathof(Caesar) |> dirname |> dirname, "examples", "dev", "devCSMHexDelaysTest.jl")
+runfile = joinpath(pkgdir(Caesar), "examples", "dev", "devCSMHexDelaysTest.jl")
 include(runfile)
 
 

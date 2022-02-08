@@ -32,7 +32,7 @@ st=style( major_label_font="CMU Serif",
           minor_label_font_size=20pt)
 
 
-prjPath = dirname(dirname(pathof(Caesar)))
+prjPath = pkgdir(Caesar)
 # this includes Sequences module
 include( joinpath(prjPath, "examples","dev","scalar","Sequences.jl") )
 

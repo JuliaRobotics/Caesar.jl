@@ -5,7 +5,7 @@ using DelimitedFiles
 using Colors, Gadfly
 using RoMEPlotting, KernelDensityEstimatePlotting
 
-#posFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_positions.csv");
+#posFile = joinpath(pkgdir(Caesar),"test","testdata","test_array_positions.csv");
 posFile = joinpath(ENV["HOME"],"data","sas","test_array_positions.csv");
 posData = readdlm(posFile,',',Float64,'\n')
 
@@ -37,7 +37,7 @@ for i in 1:5
     #getData(fg,sym).initialized = true
 end
 
-#dataFile = joinpath(dirname(pathof(Caesar)),"..","test","testdata","test_array_waveforms.csv");
+#dataFile = joinpath(pkgdir(Caesar),"test","testdata","test_array_waveforms.csv");
 dataFile = joinpath(ENV["HOME"],"data","sas","test_array_waveforms.csv");
 
 csvWaveData = readdlm(dataFile,',',Float64,'\n')
