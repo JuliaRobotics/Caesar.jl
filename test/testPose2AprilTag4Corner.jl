@@ -191,7 +191,7 @@ end
 
 ##
 
-calibfile = joinpath(dirname(dirname(pathof(AprilTags))),"data/CameraCalibration/taggridphoto.jpg")
+calibfile = joinpath(pkgdir(AprilTags),"data/CameraCalibration/taggridphoto.jpg")
 
 cimg = load(calibfile)
 

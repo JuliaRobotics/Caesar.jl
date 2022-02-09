@@ -20,13 +20,13 @@ using Pkg
 @testset "test Caesar._PCL.PCLPointCloud2 to Caesar._PCL.PointCloud converter." begin
 ##
 
-# testdatafile = joinpath( dirname(dirname(Pkg.pathof(Caesar))), "test", "testdata", "_PCLPointCloud2.bson")
+# testdatafile = joinpath( pkgdir(Caesar), "test", "testdata", "_PCLPointCloud2.bson")
 # load presaved test data to test the coverter
 # BSON.@load testdatafile PointCloudRef PointCloudTest
 
 ## build PCLPointCloud2 to be converted
 
-datafile = joinpath( dirname(dirname(Pkg.pathof(Caesar))), "test", "testdata", "_PCLPointCloud2_15776.dat")
+datafile = joinpath( pkgdir(Caesar), "test", "testdata", "_PCLPointCloud2_15776.dat")
 fid = open(datafile,"r")
 data = read(fid)
 close(fid)

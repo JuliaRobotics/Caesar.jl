@@ -18,7 +18,7 @@ using TensorCast
 
 ##
 
-prjPath = dirname(dirname(pathof(Caesar)))
+prjPath = pkgdir(Caesar)
 include( joinpath(prjPath, "examples","dev","scalar","CommonUtils.jl") )
 using .CommonUtils
 
