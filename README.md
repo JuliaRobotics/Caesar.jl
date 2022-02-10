@@ -147,7 +147,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [dfg-ci-dev-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml
 [dfg-ci-stb-img]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml/badge.svg?branch=release%2Fv0.16
 [dfg-ci-stb-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml
-[dfg-ver-img]: https://juliahub.com/docs/IncrementalInference/version.svg
+[dfg-ver-img]: https://juliahub.com/docs/DistributedFactorGraphs/version.svg
 [dfg-cov-img]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl/coverage.svg?branch=master
 [dfg-cov-url]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl?branch=master
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
