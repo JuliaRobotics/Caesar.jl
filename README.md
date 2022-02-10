@@ -131,7 +131,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [mani-build-img]: https://github.com/JuliaManifolds/Manifolds.jl/workflows/CI/badge.svg
 [mani-build-url]: https://github.com/JuliaManifolds/Manifolds.jl/actions?query=workflow%3ACI+branch%3Amaster
 [mani-url]: http://www.github.com/JuliaManifolds/Manifolds.jl
-[mani-stable]: https://img.shields.io/badge/2021Q2-v0.5.x-green.svg
+[mani-stable]: https://juliahub.com/docs/Manifolds/version.svg
 [mani-releases]: https://github.com/JuliaManifolds/Manifolds.jl/releases
 
 [lgraphs-cov-img]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl/coverage.svg?branch=master
@@ -171,7 +171,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [optim-build-url]: https://github.com/JuliaNLSolvers/Optim.jl/actions/workflows/linux.yml
 [optim-build-windows]: https://github.com/JuliaNLSolvers/Optim.jl/actions/workflows/windows.yml
 [optim-url]: http://www.github.com/JuliaNLSolvers/Optim.jl
-[optim-stable]: https://img.shields.io/badge/2021Q3-v1.4.x-green.svg
+[optim-stable]: https://juliahub.com/docs/Optim/version.svg
 [optim-releases]: https://github.com/JuliaNLSolvers/Optim.jl/releases
 
 [fsm-cov-img]: https://codecov.io/github/JuliaRobotics/FunctionalStateMachine.jl/coverage.svg?branch=master
