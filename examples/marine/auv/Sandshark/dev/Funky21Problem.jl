@@ -154,7 +154,7 @@ plotKDE([kde!(pts);X25], dims=[3], levels=1, c=["red";"green"])
 
 # Solvery! Roll dice for solvery check
 # writeGraphPdf(fg)
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 t = string(now())
 savejld(fg, file="presolve_$t.jld")
 solveTree!(fg) #, N=100

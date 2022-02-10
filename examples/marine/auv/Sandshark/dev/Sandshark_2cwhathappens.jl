@@ -176,7 +176,7 @@ info("Exp = $(sqrt(xp^2 + yp^2))")
 
 # writeGraphPdf(fg, engine="dot")
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 solveTree!(fg)
 
 # drawPosesLandms(fg)

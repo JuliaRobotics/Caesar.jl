@@ -111,7 +111,7 @@ for psid in 1:1:maxlen #[5;9;13;17;21;25;29;34;39] #17:4:21 #maxlen
     tree = wipeBuildNewTree!(fg, drawpdf=true)
     inferOverTree!(fg,tree, N=N)
   end
-    ensureAllInitialized!(fg)
+    initAll!(fg)
     pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
     Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),15cm, 10cm),pl)
     pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);

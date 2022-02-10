@@ -91,7 +91,7 @@ plotKDE(fg, :x0)
 ```
 By forcing the initialization of `:x1` and plotting its belief estimate,
 ```julia
-ensureAllInitialized!(fg)
+initAll!(fg)
 plotKDE(fg, [:x0, :x1])
 ```
 the predicted influence of the `P(Z| X1 - X0) = LinearRelative(Normal(10, 1))` is shown by the red trace.
@@ -125,7 +125,7 @@ Following the tutorial's practical example frameworks (robot navigation or time 
 In practical terms, collapsing (through observation of an event) the probabilistic likelihoods of the transition from `:x1` to `:x2` may result in the `:x2` location being at either 15-20, or 40-65-ish units.
 The predicted belief over `:x2` is illustrated by plotting the predicted belief (green trace), after forcing initialization.
 ```julia
-ensureAllInitialized!(fg)
+initAll!(fg)
 plotKDE(fg, [:x0, :x1, :x2])
 ```
 ```@raw html
@@ -147,7 +147,7 @@ expands the factor graph to to four variables and four factors.
 ```
 This part of the tutorial shows how a unimodal likelihood (conditional belief) can transmit the bimodal belief currently contained in `:x2`.
 ```julia
-ensureAllInitialized!(fg)
+initAll!(fg)
 plotKDE(fg, [:x0, :x1, :x2, :x3])
 ```
 Notice the blue trace (`:x3`) is a shifted and slightly spread out version of the initialized belief on `:x2`, through the convolution with the conditional belief `P(Z | X2, X3)`.

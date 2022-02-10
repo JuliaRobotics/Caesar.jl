@@ -70,7 +70,7 @@ function loadFGsFromList(fgpaths::Vector{<:AbstractString}; trainingNum::Int=0)
     setShuffleAll!(fg, false)
     setNaiveFracAll!(fg, 0.0)
     enableSolveAllNotDRT!(fg)
-    ensureAllInitialized!(fg)
+    initAll!(fg)
 
     push!(FG, fg)
   end

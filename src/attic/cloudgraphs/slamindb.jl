@@ -60,7 +60,7 @@ function runSlamInDbOnSession(
 
           println("=============ENSURE INITIALIZED==============")
           solverStatus.currentStep = "Prep_EnsureInitialized"
-          ensureAllInitialized!(fg)
+          initAll!(fg)
           println()
 
           println("================MULTI-SESSION================")
@@ -84,7 +84,7 @@ function runSlamInDbOnSession(
 
             println("-------------Ensure Initialization-----------")
             solverStatus.currentStep = "Solve_EnsureInitialized"
-            ensureAllInitialized!(fg)
+            initAll!(fg)
 
             println("------------Bayes (Junction) Tree------------")
             solverStatus.currentStep = "Solve_BuildBayesTree"
@@ -153,7 +153,7 @@ function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
     println()
 
     println("=============ENSURE INITIALIZED==============")
-    ensureAllInitialized!(fgl)
+    initAll!(fgl)
     println()
 
     println("================MULTI-SESSION================")
@@ -172,7 +172,7 @@ function runDbSolver(cloudGraph::CloudGraphs.CloudGraph,
       itercount += 1
 
       println("-------------Ensure Initialization-----------")
-      ensureAllInitialized!(fgl)
+      initAll!(fgl)
 
       println("------------Bayes (Junction) Tree------------")
       tree = wipeBuildNewTree!(fgl,drawpdf=drawbayestree)

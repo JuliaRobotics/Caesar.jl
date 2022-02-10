@@ -122,7 +122,7 @@ v1 = addVariable!(fg, :x1, DynPoint2(ut=1000_000)) # time in microseconds
 dp2dp2 = DynPoint2DynPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))
 f1 = addFactor!(fg, [:x0;:x1], dp2dp2)
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree)
 
@@ -186,7 +186,7 @@ dp2dp2 = VelPoint2VelPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*eye(4)))
 f2 = addFactor!(fg, [:x1;:x2], dp2dp2)
 
 # Graphs.plot(fg.g)
-ensureAllInitialized!(fg)
+initAll!(fg)
 tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree)
 

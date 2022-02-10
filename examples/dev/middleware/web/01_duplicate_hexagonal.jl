@@ -115,7 +115,7 @@ addFactor!(fg, [:x0; :l1], p2br)
 addFactor([:x0, :l1], p2br)
 
 # Initialize :l1 numerical values but do not rerun solver
-ensureAllInitialized!(fg)
+initAll!(fg)
 pl = drawPosesLandms(fg)
 Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf", 20cm, 10cm),pl)  # or PNG(...)
 

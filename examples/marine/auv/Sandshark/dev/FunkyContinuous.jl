@@ -63,7 +63,7 @@ plotKDE(ppbrDict[epochs[23]].range)
 
 writeGraphPdf(fg, engine="dot")
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 solveTree!(fg)
 
 drawPosesLandms(fg)

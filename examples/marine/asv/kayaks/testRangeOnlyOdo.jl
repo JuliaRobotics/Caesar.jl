@@ -73,7 +73,7 @@ getSolverParams(fg).dbg = true
 getSolverParams(fg).maxincidence = 200
 
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 tree = solveTree!(fg, recordcliqs=[:x19;:x169;:x166;:x134;:x171])
 
 

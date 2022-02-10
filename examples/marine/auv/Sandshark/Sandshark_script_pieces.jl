@@ -91,7 +91,7 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
       # write out some metadata to help with debugging
       println(metadata, "$(index[1]), $ep, $curvar")
 
-      ensureAllInitialized!(fgl)
+      initAll!(fgl)
 
       # visualizations
       plre = drawPoses(fgl,drawhist=false,contour=false,spscale=1.0, lbls=false, meanmax=:mean)

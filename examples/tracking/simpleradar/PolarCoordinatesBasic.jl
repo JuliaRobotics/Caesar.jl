@@ -44,7 +44,7 @@ include(joinpath(dirname(@__FILE__),"BuildFactorGraph.jl"))
 
 # writeGraphPdf(fg, show=true)
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 getSolverParams(fg).drawtree=false
 getSolverParams(fg).showtree=false
 getSolverParams(fg).N=N

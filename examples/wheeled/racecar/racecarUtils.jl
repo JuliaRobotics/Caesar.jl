@@ -275,7 +275,7 @@ for psid in (prev_psid+1):1:maxlen
   saveDFG(fg, resultsdir*"/racecar_fg_$(psym)")
 
   ## save factor graph for later testing and evaluation
-  ensureAllInitialized!(fg)
+  initAll!(fg)
   # T2 = remotecall(plotRacecarInterm, WP, fg, resultsdir, psym)
   # @async fetch(T2)
   if 1 < nprocs()
