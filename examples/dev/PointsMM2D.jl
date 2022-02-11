@@ -163,7 +163,7 @@ addFactor!(fg, [:x0],  PriorPose2( MvNormal(x0_prior[1], Matrix(Diagonal(x0_prio
     @doline SKL addFactor!(fg, [:x0, :l4, :l4_0], Pose2Point2BearingRange(Normal(x0l4_br[1]...), Normal(x0l4_br[2]...)), autoinit=autoinit, multihypo=[1.0;pMeas;pDesg])
 
 ## test for multimodality
-# dfgplot(fg)
+# plotDFG(fg)
 # drawGraph(fg)
 # # initAll!(fg)
 getSolverParams(fg).drawtree=true
@@ -496,7 +496,7 @@ drawGraph(fg)
 #                             (var=:box, fac=:elipse),
 #                             spring_layout,#spectral_layout
 #                             true)
-# dfgplot(fg,p)
+# plotDFG(fg,p)
 #
 #
 #

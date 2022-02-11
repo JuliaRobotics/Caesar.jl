@@ -274,7 +274,7 @@ struct PackedPose2AprilTag4Corners <: AbstractPackedFactor
 end
 
 
-function convert( ::Type{<:PackedInferenceType}, 
+function convert( ::Type{<:AbstractPackedFactor}, 
                   obj::Pose2AprilTag4Corners)
   #
   corVec = zeros(8)

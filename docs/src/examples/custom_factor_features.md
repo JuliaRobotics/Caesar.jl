@@ -55,7 +55,7 @@ To take advantage of features like `DFG.saveDFG` and `DFG.loadDFG` a user specif
 # necessary for overloading Base.convert
 import Base: convert
 
-struct PackedMyPrior <: PackedInferenceType
+struct PackedMyPrior <: AbstractPackedFactor
   Z::String
 end
 

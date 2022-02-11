@@ -250,7 +250,7 @@ Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = sho
 ## Factor serialization below
 ## =========================================================================================
 
-Base.@kwdef struct PackedScatterAlignPose2 <: PackedInferenceType
+Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
   cloud1::String # PackedHeatmapGridDensity # change to String
   cloud2::String # PackedHeatmapGridDensity # change to String
   gridscale::Float64 = 1.0

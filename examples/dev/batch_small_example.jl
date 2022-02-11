@@ -71,7 +71,7 @@ ppr = Pose2Point2Range(MvNormal([7.323699045815659], diagm([0.3].^2)))
 addFactor!(fg, [:x0; :l1], ppr )
 # Gadfly.draw(PDF("fg.pdf", 10cm, 10cm),pl)  # or PNG(...)
 # initAll!(fg)
-# dfgplot(fg)
+# plotDFG(fg)
 
 ## Perform inference
 tree = solveTree!(fg)
