@@ -170,7 +170,7 @@ qTp = affine_matrix(M, exp(M, e0, hat(M, e0, pCq)))
 p1 = vcat([0.1*randn(2).+[3;0.] for i in 1:50], [0.1*randn(2)+[8.;0] for i in 1:50], [0.1*randn(2)+[0;5.] for i in 1:50])
 # foreach(pt->(pt[1] += 100), p1)
 shuffle!(p1)
-P1 = manikde!(getManifold(Point2), p1)
+P1 = manikde!(Point2, p1)
 
 p2 = vcat([0.1*randn(2).+[3;0.] for i in 1:50], [0.1*randn(2)+[8.;0] for i in 1:50], [0.1*randn(2)+[0;5.] for i in 1:50])
 # foreach(pt->(pt[1] += 100), p2)
@@ -180,7 +180,7 @@ for (i,pt) in enumerate(p2)
   pt[1:2] .= v[1:2]
 end
 shuffle!(p2)
-P2 = manikde!(getManifold(Point2), p2)
+P2 = manikde!(Point2, p2)
 
 sap = ScatterAlignPose2(;cloud1=P1, cloud2=P2, sample_count=100, bw=1.0)
 

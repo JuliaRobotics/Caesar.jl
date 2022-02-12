@@ -8,7 +8,7 @@ Amax = Float64[]
 
 K = 0:(nposes-1)
 for k in K
-  T0 = getKDE(fg, Symbol("t$k"))
+  T0 = getBelief(fg, Symbol("t$k"))
   push!(TT, T0)
   T0a = marginal(T0, [2])
   push!(TTa, T0a)

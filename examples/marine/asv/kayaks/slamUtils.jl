@@ -282,7 +282,7 @@ function plotSASPair(fg::G,
     L1 = getVal(L1v)
     pl12 = Gadfly.plot(x=L1[1,:],y=L1[2,:], Geom.histogram2d)
 
-    pl22 = plotKDE(getKDE(L1v), levels=3)
+    pl22 = plotKDE(getBelief(L1v), levels=3)
 
     # stack all images together
     plT = Gadfly.hstack(pl11,pl12)

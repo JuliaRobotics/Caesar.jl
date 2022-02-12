@@ -212,7 +212,7 @@ end
 function lcmsendpose(lc, vert::Graphs.ExVertex, usrid::Int)
   msg = rome.pose_node_t()
   # p = getBelief(vert)
-  p = getKDE(vert)
+  p = getBelief(vert)
   mv = getKDEfit(p)
   # pme = getKDEMean(vert)
   msg[:utime] = 0

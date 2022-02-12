@@ -57,7 +57,7 @@ Realistic measurement processes are based on physical process observations such 
 rangeLikeli = AliasingScalarSampler(rangeIndex, Flux.softmax(correlatorIntensity))
 
 # or alternatively with existing samples similar to a what a particle filter would have done
-rangeLikeli = manikde!(probPoints, Euclid{1})
+rangeLikeli = manikde!(Euclid{1}, probPoints)
 
 # add the relative algebra, and remember you can construct your own highly non-linear factor
 rangeFct = Pose2Point2Range(rangeLikeli)

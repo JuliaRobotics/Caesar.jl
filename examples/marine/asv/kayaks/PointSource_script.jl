@@ -71,7 +71,7 @@ for i in 1:wlen
   pp = PriorPoint2(MvNormal(posData[i,:], rtkCov))
   addFactor!(fg, [poses[i];], pp, autoinit=true)
   tmpInit = approxConv(fg,Symbol("x$(i)f1"),poses[i]);
-  XXkde = manikde!(tmpInit,getManifolds(fg,poses[i]));
+  XXkde = manikde!(getManifold(getVariable(fg,poses[i])), tmpInit);
   setValKDE!(fg,poses[i],XXkde);
 end
 

@@ -74,7 +74,7 @@ for (i,lb) in enumerate(slv[1:(end-1)])
   sweep = deserialize(PipeBuffer(db)) # BSON.@load
   XY = map(pt->pt.data[1:2], sweep.points)
   XY_ = filter(pt->10 < norm(pt), XY)
-  r1 = manikde!(getManifold(Point2), XY_, bw=[bw;bw])
+  r1 = manikde!(Point2, XY_, bw=[bw;bw])
 
   # Cloud2, removing values near vehicle itself
   lb_ = slv[i+1]
@@ -82,7 +82,7 @@ for (i,lb) in enumerate(slv[1:(end-1)])
   sweep = deserialize(PipeBuffer(db)) # BSON.@load
   XY = map(pt->pt.data[1:2], sweep.points)
   XY_ = filter(pt->10 < norm(pt), XY)
-  r2 = manikde!(getManifold(Point2), XY_, bw=[bw;bw])
+  r2 = manikde!(Point2, XY_, bw=[bw;bw])
 
   # create the radar alignment factor
   sap = ScatterAlignPose2(;cloud1=r1, cloud2=r2, bw=0.0001, sample_count=200)

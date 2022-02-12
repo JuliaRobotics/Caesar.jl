@@ -7,12 +7,12 @@ asMeas, asPred = solveFactorMeasurements(dfg, fctsym)
 
 mmd!
 
-cr = manikde!(asPred[1:1,:], Sphere1)
-cr0 = manikde!(asMeas[1:1,:], Sphere1)
+cr = manikde!(Sphere1, asPred[1:1,:])
+cr0 = manikde!(Sphere1, asMeas[1:1,:])
 plotKDECircular([cr;cr0], c=["blue";"magenta"])
 
-cr = manikde!(asPred[2:2,:], ContinuousScalar)
-cr0 = manikde!(asMeas[2:2,:], ContinuousScalar)
+cr = manikde!(ContinuousScalar, asPred[2:2,:])
+cr0 = manikde!(ContinuousScalar, asMeas[2:2,:])
 plotKDE([cr;cr0], c=["blue";"magenta"])
 
 val = Float64[0.0;]

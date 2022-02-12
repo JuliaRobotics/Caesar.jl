@@ -37,7 +37,7 @@ function sampleNeuralPose2(nfb::PyNeuralPose2Pose2,
 
   # sample predictive fraction
   iT, jT = getTimestamp(Xi), getTimestamp(Xj)
-  iPts, jPts = (getKDE(Xi) |> getPoints), (getKDE(Xj) |> getPoints)
+  iPts, jPts = (getBelief(Xi) |> getPoints), (getBelief(Xj) |> getPoints)
   @assert size(jPts,2) == size(iPts,2) "sampleNeuralPose2 can currently only evaluate equal population   size variables"
 
   # calculate an average velocity component

@@ -138,7 +138,7 @@ pts = rand(X0, 200)
 
 These kernel density belief objects can be constructed from points as follows:
 ```julia
-X0_ = manikde!(pts, Pose2)
+X0_ = manikde!(Pose2, pts)
 ```
 
 ## Logging Output (Unique Folder)

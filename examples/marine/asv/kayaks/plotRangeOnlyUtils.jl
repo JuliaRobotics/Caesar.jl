@@ -29,7 +29,7 @@ function plotRangeOnlyHandyCompare(fg,
       push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
   end
   # plot new contours too
-  tmp = plotKDE(manikde!(L1ac, Point2().manifolds),levels=5,c=["black"])
+  tmp = plotKDE(manikde!(Point2, L1ac),levels=5,c=["black"])
   push!(plk, tmp.layers[1])
 
   pl2 = Gadfly.plot(plk...)

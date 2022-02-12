@@ -53,7 +53,7 @@ function plotSandsharkFromDFG(dfg::AbstractDFG;
     @show brfi = intersect(ls(dfg, brposes[i]), brf)[1]
     fct = getFactorType(getFactor(dfg, brfi))
     brfacts[brposes[i]] = fct.bearing
-    rVo = getKDEMax(getKDE(dfg, brposes[i]))
+    rVo = getKDEMax(getBelief(dfg, brposes[i]))
     pll = AMP.plotKDECircular([fct.bearing;], rVo=rVo, radix=radix, scale=scale)
     for lyr in pll.layers
       push!(PL.layers, lyr)
@@ -129,8 +129,8 @@ function plotRawBeamFormer(fg1::AbstractDFG, ppbrDict, NAV, interp_x, interp_y, 
     azipts = bfspls[:,1]
     aziptsw = TU.wrapRad.(azipts)
     aziprobl = kde!(azipts)
-    npts = rand(aziprobl, 200)
-    aziprob = manikde!(npts, Sphere1)
+    npts = [rand(aziprobl) for _ in 1:200]
+    aziprob = manikde!(Sphere1, npts)
 
     plraw = Gadfly.plot(x=azipts, Geom.histogram(density=true), Guide.title("$ep, $(meta[i,3])"))
     pc = plotKDECircular(aziprob, title="recalc from raw (b-frame)")

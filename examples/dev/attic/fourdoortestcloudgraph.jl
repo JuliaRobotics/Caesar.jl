@@ -115,7 +115,7 @@ gt[:l1]=([165.0; 1.17284 ]')' # 164.102
 x1neoID = fg.cgIDs[fg.IDs[:x1]]
 cv1r = CloudGraphs.get_vertex(fg.cg, x1neoID, false)
 v1r = cloudVertex2ExVertex(cv1r)
-plotKDE(getKDE(v1r))
+plotKDE(getBelief(v1r))
 
 plotKDE( getBelief(fg, :x2) )
 

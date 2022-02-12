@@ -11,7 +11,7 @@ Gadfly.set_default_plot_size(35cm,25cm)
 
 
 function getCoordCartesianFromKDERange(dfg::AbstractDFG, varsym::Symbol; digits::Int=-2, extend::Float64=0.5)
-    ax = round.(getKDERange(getKDE(dfg, varsym), extend=extend), digits=digits)
+    ax = round.(getKDERange(getBelief(dfg, varsym), extend=extend), digits=digits)
     if size(ax, 1) == 1
       return Coord.Cartesian(xmin=ax[1,1], xmax=ax[1,2])
     elseif size(ax, 1) == 2

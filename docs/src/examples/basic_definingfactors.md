@@ -50,7 +50,7 @@ This new prior can now readily be added to an ongoing factor graph:
 # lets generate a random nonparametric belief
 
 pts = [samplePoint(getManifold(ContinuousEuclid{1}), Normal(8.0,2.0)) for _=1:75]
-someBelief = manikde!(pts, ContinuousEuclid{1})
+someBelief = manikde!(ContinuousEuclid{1}, pts)
 
 # and build your new factor as an object
 myprior = MyPrior(someBelief)
