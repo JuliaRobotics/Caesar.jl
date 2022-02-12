@@ -83,7 +83,7 @@ for i=1:nsasfac
     @show currfac = ls(fg,beacons[i])[1]
 
     tmpInit = approxConv(fg,currfac,beacons[i]);
-    XXkde = manikde!(tmpInit,getManifolds(fg,beacons[i]));
+    XXkde = manikde!(getManifold(getVariable(fg,beacons[i])), tmpInit);
     setValKDE!(fg,beacons[i],XXkde);
 end
 

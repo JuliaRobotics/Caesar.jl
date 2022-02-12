@@ -18,11 +18,11 @@ The [ApproxManifoldProducts.jl](http://www.github.com/JuliaRobotics/ApproxManifo
 ```julia
 using ApproxManifoldProducts
 
-f1 = manikde!(randn(100,1).-3.0, (:Euclid,))
-f2 = manikde!(randn(100,1).+3.0, (:Euclid,))
+f1 = manikde!(ContinuousScalar, [randn()-3.0 for _ in 1:100])
+f2 = manikde!(ContinuousScalar, [randn()+3.0 for _ in 1:100])
 ...
 
-f12 = maniproduct([f1;f2], (:Euclid,))
+f12 = manifoldProduct(ContinuousScalar, [f1;f2])
 ```
 
 > Also see previous [KernelDensityEstimate.jl](http://www.github.com/JuliaRobotics/KernelDensityEstimate.jl).
@@ -106,7 +106,7 @@ solveTree!(fg)
 # plot the results
 using KernelDensityEstimatePlotting
 
-plotKDE(getKDE(fg, :x0))
+plotKDE(getBelief(fg, :x0))
 ```
 
 Example figure:

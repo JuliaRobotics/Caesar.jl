@@ -97,16 +97,16 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
       plre = drawPoses(fgl,drawhist=false,contour=false,spscale=1.0, lbls=false, meanmax=:mean)
       plre.coord = Coord.Cartesian(xmin=0, xmax=100, ymin=-120, ymax=-70)
       # add confidence contour on last
-      pcf = plotKDE(getKDE(fgl, curvar),dims=[1;2],levels=1,c=["gray70"] )
+      pcf = plotKDE(getBelief(fgl, curvar),dims=[1;2],levels=1,c=["gray70"] )
       union!(plre.layers, pcf.layers)
       # export
       plre |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "fg_$curvar.png") )
 
       tfg = initfg()
       addVariable!(tfg, :l1, Point2)
-      initManual!(tfg,:l1,getKDE(fgl,:l1))
+      initManual!(tfg,:l1,getBelief(fgl,:l1))
       addVariable!(tfg, curvar, Pose2)
-      initManual!(tfg,curvar,getKDE(fgl,curvar))
+      initManual!(tfg,curvar,getBelief(fgl,curvar))
       addFactor!(tfg, [curvar;:l1], pprDict[ep])
 
       hdl = []
@@ -115,11 +115,11 @@ function runEpochs!(fgl, epochs, STEP::Int, index::Vector{Int}; acousticRate=3)
       hdl[7] |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "range_$curvar.png") )
 
       # circular illustration
-      cpts = reshape(rand(Normal(interp_yaw(ep), deg2rad(5)),100),1,:)
-      cbm = manikde!(cpts, Sphere1)
+      cpts = [rand(Normal(interp_yaw(ep), deg2rad(5))) for _ in 1:100]
+      cbm = manikde!(Sphere1, cpts)
 
       opts = index[1] > 0 ? approxConv(fgl, intersect(ls(fgl, Pose2Pose2),ls(fgl, curvar))[1], curvar) : 2*randn(3,100)
-      cbo = manikde!(opts[3:3,:], Sphere1)
+      cbo = manikde!(Sphere1, opts[3:3,:])
       plcb = plotKDECircular([cbm; cbo], legend=["mag";"odo"], c=["orange";"blue"])
       plcb.coord = Coord.Cartesian(xmin=-2.5, xmax=2.5, ymin=-2.5, ymax=2.5)
       plcb |> PNG( joinpath(getSolverParams(fgl).logpath, "reckoning", "circ_$curvar.png") )
@@ -252,7 +252,7 @@ for STEP in 0:10:50
     reportFactors(fg1, Pose2Pose2, filepath=joinpath(getSolverParams(fg1).logpath, "odo_$STEP.pdf"), show=false)
 
     poses = sortVarNested(ls(fg1, r"x"))
-    storeLast[poses[end]] = getKDE(fg1, poses[end])
+    storeLast[poses[end]] = getBelief(fg1, poses[end])
     @show keys(storeLast)
 end
 
@@ -291,7 +291,7 @@ reportFactors(fg1, Pose2Point2Bearing)
 fcts = ls(fg1, :l1)
 PTS = map(x->approxConv(fg1, x, :l1), fcts)
 
-PP = map(x->manikde!(x, Point2), PTS)
+PP = map(x->manikde!(Point2, x), PTS)
 
 pp = *(PP...)
 
@@ -485,7 +485,7 @@ union!(PL.layers, pl1.layers)
 
 PL
 
-plotKDE(manikde!(pts, Point2().manifolds))
+plotKDE(manikde!(Point2, pts))
 
 
 
@@ -502,10 +502,3 @@ plotKDE(manikde!(pts, Point2().manifolds))
 
 # pts = collect(azidata[1531153769000000000][:,1:1]')
 #
-# ptsw = TU.wrapRad.(pts)
-#
-# pc = manikde!(pts, Sphere1)
-# pl = manikde!(pts, ContinuousScalar)
-# plw = manikde!(ptsw, ContinuousScalar)
-#
-# plotKDE([pl;plw])

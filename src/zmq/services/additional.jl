@@ -17,11 +17,11 @@ function multiplyDistributions(cfg, fg, requestDict)::Dict{String, Any}
     pts = pbd.points
     @warn "recalculating new bandwidth for multiplyDistributions"
     # TODO assuming 1D Euclidean
-    p = AMP.manikde!( reshape(pts, 1, :), (:Euclid,))
+    p = AMP.manikde!(ContinuousScalar, pts)
     push!(funcs, p)
   end
 
-  pqr = manifoldProduct(funcs, (:Euclid,))
+  pqr = manifoldProduct(ContinuousScalar, funcs)
 
   bw = vec(getBW(pqr))
   n = Npts(pqr)

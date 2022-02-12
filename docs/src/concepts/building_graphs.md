@@ -118,7 +118,7 @@ drawGraph(fg, show=true)
 By setting `show=true`, the application `evince` will be called to show the `fg.pdf` file that was created using *GraphViz*.  A `GraphPlot.jl` visualization engine is also available.
 ```julia
 using GraphPlot
-dfgplot(fg)
+plotDFG(fg)
 ```
 
 ```@docs

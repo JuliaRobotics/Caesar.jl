@@ -79,7 +79,7 @@ pcm = [marginal(stuff[2][1],[3]);marginal(stuff[2][2],[3])]
 AMP.plotKDECircular(pcm)
 
 
-np = manifoldProduct(stuff[2], Pose2().manifolds)
+np = manifoldProduct(stuff[2], Pose2)
 
 
 AMP.plotKDECircular(marginal(np,[3]))
@@ -88,12 +88,12 @@ AMP.plotKDECircular(marginal(np,[3]))
 ## more direct calculation
 
 pts0 = approxConv(fg, :x0l0f1, :x0)
-X0 = manikde!(pts0, Pose2().manifolds)
+X0 = manikde!(Pose2, pts0)
 
 plotPose(Pose2(), [X0])
 
 pts1 = approxConv(fg, :x0l1f1, :x0)
-X1 = manikde!(pts1, Pose2().manifolds)
+X1 = manikde!(Pose2, pts1)
 
 plotPose(Pose2(), [X1])
 
@@ -105,7 +105,7 @@ plotPose(Pose2(), [X1])
 ## Major error here
 
 ptsl0 = approxConv(fg, :x0l0f1, :l0)
-L0 = manikde!(ptsl0, Point2().manifolds)
+L0 = manikde!(Point2, ptsl0)
 plotKDE(L0, levels=3)
 
 
@@ -118,7 +118,7 @@ plotKDE([stuff[2];stuff[1]])
 
 
 pts0_0 = approxConv(fg, :x0l0f1, :l0)
-L00 = manikde!(pts0_0, Point2().manifolds)
+L00 = manikde!(Point2, pts0_0)
 
 plotKDE(L00, levels=3, axis=[-0.5 2; -0.5 1.5])
 
@@ -128,7 +128,7 @@ plotKDE(L00, levels=3, axis=[-0.5 2; -0.5 1.5])
 
 
 pts0_1 = approxConv(fg, :x0l1f1, :l1)
-L01 = manikde!(pts0_1, Point2().manifolds)
+L01 = manikde!(Point2, pts0_1)
 
 plotKDE(L01, levels=3, axis=[-0.5 2; -0.5 1.5])
 

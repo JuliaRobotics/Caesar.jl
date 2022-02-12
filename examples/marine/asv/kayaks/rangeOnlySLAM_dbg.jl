@@ -136,7 +136,7 @@ ct_l1 = solveCliq!(fg, tree, :x1)
 # ct_l1 = solveCliq!(fg, tree, :l1)
 
 
-pts = getPoints(getKDE(fg, :l1))
+pts = getPoints(getBelief(fg, :l1))
 Gadfly.plot(x=pts[1,:],y=pts[2,:], Geom.hexbin())
 plotKDE(fg, :l1)
 
@@ -206,7 +206,7 @@ Gadfly.plot(x=getPoints(LL[1])[1,:],y=getPoints(LL[1])[2,:],Geom.hexbin)
 pts = getPoints(LL[1])
 bw = getBW(LL[1])[:,1]
 
-LL1 = manikde!(pts, [0.2*bw[1];0.1*bw[2]], Point2().manifolds)
+LL1 = manikde!(Point2, pts, bw=[0.2*bw[1];0.1*bw[2]])
 plotKDE(LL1)
 
 
@@ -216,7 +216,7 @@ Gadfly.plot(x=getPoints(LL[2])[1,:],y=getPoints(LL[2])[2,:],Geom.hexbin)
 pts = getPoints(LL[2])
 bw = getBW(LL[2])[:,1]
 
-LL2 = manikde!(pts, [0.2*bw[1];0.1*bw[2]], Point2().manifolds)
+LL2 = manikde!(Point2, pts, bw=[0.2*bw[1];0.1*bw[2]])
 plotKDE(LL2)
 
 
@@ -268,7 +268,7 @@ elseif expID == "drift"
     push!(plk, Coord.cartesian(xmin=20, xmax=200, ymin=-220, ymax=0,fixed=true))
 end
 # plot new contours too
-tmp = plotKDE(manikde!(L1ac, Point2().manifolds),levels=3,c=["black"])
+tmp = plotKDE(manikde!(Point2, L1ac),levels=3,c=["black"])
 push!(plk, tmp.layers[1])
 savefile = "/tmp/caesar/test.pdf"
 Gadfly.plot(plk...) |> PDF(savefile)
@@ -360,9 +360,6 @@ ptsd = [[x; x]'; [y; -y]']
 
 Gadfly.plot(x=ptsd[1,:], y=ptsd[2,:], Geom.hexbin, Coord.Cartesian(fixed=true))
 
-
-# P1 = manikde!(ptsd, Point2().manifolds)
-# P1 = manikde!(ptsd, [0.000001;0.05],Point2().manifolds)
 
 
 P1 = kde!(ptsd )

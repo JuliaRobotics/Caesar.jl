@@ -120,7 +120,7 @@ IIF currently uses kernel density estimation to convert discrete samples into a 
 
 ```julia
 # create kde object by referencing back the existing memory location pts
-hatX1 = manikde!(pts, ContinuousScalar)
+hatX1 = manikde!(ContinuousScalar, pts)
 ```
 
 The functional object `X1` is now ready for other operations such as function evaluation or product computations discussed on [another principles page](http://www.juliarobotics.org/Caesar.jl/latest/principles/multiplyingDensities/).  The `ContinuousScalar` manifold is just `Manifolds.TranslationGroup(1)`.

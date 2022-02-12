@@ -75,7 +75,7 @@ function addnextpose!(fg,
     #   # replace theta points
     #   nnpts[:,3] .= rand(DXmvn, size(nnpts,1))[:,3]
     #   mvnpts = rand( DXmvn, round(Int, parametricOdoMix*size(nnpts, 1)) )
-    #   odoKDE = manikde!([nnpts;mvnpts], Pose2)
+    #   odoKDE = manikde!(Pose2, [nnpts;mvnpts])
     # else
     #   odoKDE = DXmvn
 
@@ -154,7 +154,7 @@ prevpos = [0.0;0.0;0.0]
 prevT = getTimestamp(getVariable(fg, :x0))
 poses = ls(fg, r"x\d") |> sortDFG
 for sym in poses # poses first
-  # p = getKDE(fg, sym)
+  # p = getBelief(fg, sym)
   # val = string(KDE.getKDEMax(p))
   val = getPPE(fg, sym).suggested
   # assuming Pose2 was used

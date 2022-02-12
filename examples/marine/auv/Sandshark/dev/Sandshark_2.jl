@@ -160,7 +160,7 @@ drawPosesLandms(fg)
 ls(fg, :x25)
 
 #To Boldly Believe... The Good, the Bad, and the Unbeliefable
-X25 = getKDE(getVariable(fg, :x25))
+X25 = getBelief(getVariable(fg, :x25))
 
 # i
 pts, = predictbelief(fg, :x21, [:x20x21f1; :x21l1f1])

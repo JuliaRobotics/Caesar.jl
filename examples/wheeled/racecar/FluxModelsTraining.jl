@@ -108,9 +108,9 @@ function plotInterpose(fg::AbstractDFG, prevPs::Symbol, ps::Symbol, fcs::Symbol,
     se2vee!((@view pts_naiv[:,i]), SE2(x0[:,i])\SE2(pts_naive[:,i]))
   end
 
-  X1slam = manikde!(pts_slam, Pose2)
-  X1pynn = manikde!(pts_pynn, Pose2)
-  X1naiv = manikde!(pts_naiv, Pose2)
+  X1slam = manikde!(Pose2, pts_slam)
+  X1pynn = manikde!(Pose2, pts_pynn)
+  X1naiv = manikde!(Pose2, pts_naiv)
   pl = plotKDE([X1slam;X1pynn;X1naiv], dims=[1;2],legend=["slam";"pred";"naiv"],title="labrun ?, $prevPs ->   $ps",levels=6)
   push!(pl.layers, Gadfly.layer(x=[0],y=[0],Geom.point)[1])
   pl.coord = Coord.Cartesian(xmin=-1,xmax=2,ymin=-1.5,ymax=1.5)
@@ -175,8 +175,8 @@ function plotInterposeFromData(fg::AbstractDFG, mda::Tuple, models::Vector, pc::
   for i in 1:length(models)
     pred_yd[1:2,i] = models[i](jd)
   end
-  X1yd = manikde!(Float64.(yd), Pose2)
-  X1pr = manikde!(Float64.(pred_yd), Point2)
+  X1yd = manikde!(Pose2, Float64.(yd))
+  X1pr = manikde!(Point2, Float64.(pred_yd))
   pl = plotKDE([X1yd;X1pr], dims=[1;2],legend=["slam";"pred"],title="labrun=$runNumber, pc=$pc",levels=6)
   push!(pl.layers, Gadfly.layer(x=[0],y=[0],Geom.point)[1])
   pl.coord = Coord.Cartesian(xmin=-1,xmax=2,ymin=-1.5,ymax=1.5)

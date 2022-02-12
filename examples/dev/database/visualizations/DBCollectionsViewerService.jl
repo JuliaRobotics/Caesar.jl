@@ -110,7 +110,7 @@ while true
   		if haskey(vert.attributes, "MAP_est")
   			X = vert.attributes["MAP_est"]
   		else
-  			X = getKDEfit(getKDE(vert))
+  			X = getKDEfit(getBelief(vert))
   		end
   		posei = bgrt.RigidTransform[:from_angle_axis](X[3],[0;0;1],[X[1];X[2];0])
   		push!(poses, posei)
@@ -223,7 +223,7 @@ while true
   		if haskey(vert.attributes, "MAP_est")
   			X = vert.attributes["MAP_est"]
   		else
-  			X = getKDEMax(getKDE(vert))
+  			X = getKDEMax(getBelief(vert))
   		end
 
       lmi = bgrt.RigidTransform[:from_angle_axis](0,[0;0;1],[X[1];X[2];0])

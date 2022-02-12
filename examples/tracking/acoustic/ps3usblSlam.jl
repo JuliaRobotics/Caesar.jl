@@ -63,12 +63,12 @@ solveTree!(fg)
 drawPosesLandms(fg, spscale=0.5)
 
 
-getKDEMean(getKDE(fg, :l0))
-getKDEMax(getKDE(fg, :l0))
+getKDEMean(getBelief(fg, :l0))
+getKDEMax(getBelief(fg, :l0))
 
 
-getKDEMean(getKDE(fg, :l1))
-getKDEMax(getKDE(fg, :l1))
+getKDEMean(getBelief(fg, :l1))
+getKDEMax(getBelief(fg, :l1))
 
 
 
@@ -116,21 +116,21 @@ plotKDE(X00)
 ##
 
 
-pl = plotPose(Pose2(), [getKDE(fg, :x0);])
+pl = plotPose(Pose2(), [getBelief(fg, :x0);])
 
 drawPosesLandms(fg, spscale=0.5, meanmax=:mean, xmin=-3.0, xmax=3.0)
 
 
-getKDEMean(getKDE(fg, :x0))
-getKDEMax(getKDE(fg, :x0))
+getKDEMean(getBelief(fg, :x0))
+getKDEMax(getBelief(fg, :x0))
 
 
-getKDEMean(getKDE(fg, :l0))
-getKDEMax(getKDE(fg, :l0))
+getKDEMean(getBelief(fg, :l0))
+getKDEMax(getBelief(fg, :l0))
 
 
-getKDEMean(getKDE(fg, :l1))
-getKDEMax(getKDE(fg, :l1))
+getKDEMean(getBelief(fg, :l1))
+getKDEMax(getBelief(fg, :l1))
 
 
 ##

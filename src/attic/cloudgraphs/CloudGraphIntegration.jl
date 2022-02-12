@@ -217,7 +217,7 @@ function updateFullCloudVertData!(fgl::G,
   # println("updateFullCloudVertData! -- trying to get $(neoID)")
   vert = CloudGraphs.get_vertex(fgl.cg, neoID, false)
   if typeof(getData(nv)) == VariableNodeData && updateMAPest
-    mv = getKDEMax(getKDE(nv))
+    mv = getKDEMax(getBelief(nv))
     nv.attributes["MAP_est"] = mv
     # @show nv.attributes["MAP_est"]
   end

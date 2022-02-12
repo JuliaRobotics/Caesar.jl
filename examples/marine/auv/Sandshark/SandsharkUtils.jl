@@ -109,7 +109,7 @@ function poorMansDeconv_BF(XX = collect(range(-pi,pi,length=1000)),
   # Gadfly.plot(x=XX, y=YY2, Geom.line)
   bss = AliasingScalarSampler(XX, YY2)
   pts = reshape(rand(bss, 200), 1, :)
-  pc = manikde!(pts, Sphere1)
+  pc = manikde!(Sphere1, pts)
   # plotKDECircular(pc)
 
   return pc
@@ -158,7 +158,7 @@ function doEpochs(timestamps, rangedata, azidata, interp_x, interp_y, interp_yaw
     # direct
     aziprobl = kde!(azipts)
     # npts = rand(aziprobl, 200)
-    # aziprob = manikde!(npts, Sphere1)
+    # aziprob = manikde!(Sphere1, npts)
 
     # with deconv
     aziprob = poorMansDeconv_BF(XX, aziprobl(XX))

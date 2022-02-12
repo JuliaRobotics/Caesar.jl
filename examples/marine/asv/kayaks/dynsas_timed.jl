@@ -120,7 +120,7 @@ function main(expID::String, datastart::Int, dataend::Int, fgap::Int, gps_gap::I
 
                lstpose = Symbol("x$(pose_counter)");
                tmpInit = approxConv(fg,Symbol("x$(pose_counter-1)x$(pose_counter)f1"),lstpose);
-               XXkde = manikde!(tmpInit,getManifolds(fg,lstpose));
+               XXkde = manikde!(getManifold(getVariable(fg,lstpose)), tmpInit);
                setValKDE!(fg,lstpose,XXkde);
 
                println("Solving at SAS-F: $(sas_counter), Pos: $(pose_counter) \n");

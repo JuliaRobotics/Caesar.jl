@@ -102,7 +102,7 @@ function intensityToCircularKDE(intensity::Vector{Float64}; N=100, SNRfloor::Flo
 
   ptsC = TransformUtils.wrapRad.(rand(bss,N))
 
-  return manikde!(reshape(ptsC,1,:), (:Circular,))
+  return manikde!(Circular, ptsC)
 end
 
 

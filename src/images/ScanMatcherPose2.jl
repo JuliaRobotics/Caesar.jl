@@ -134,7 +134,7 @@ end
 ## Factor serialization below
 ## =========================================================================================
 
-struct PackedScanMatcherPose2 <: PackedInferenceType
+struct PackedScanMatcherPose2 <: AbstractPackedFactor
   im1::Vector{Vector{Float64}}
   im2::Vector{Vector{Float64}}
   gridscale::Float64
