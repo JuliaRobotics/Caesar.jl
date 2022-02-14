@@ -78,13 +78,25 @@ struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: IIF.Abstrac
   # tag id
   id::Int
   # internally computed relative factor between binary variables-- from camera to tag in camera or body frame
-  Zij::RoME.Pose2Pose2{T}
+  Z::RoME.Pose2Pose2{T}
 
   # experimental for 'SLAM-aware' camera intrinsic calibration -- stores (lambda function, starting estimate), see [`generateCostAprilTagsPreimageCalib`](@ref).
   preimage::Tuple{F, Vector{Float64}}
 end
 
 getManifold(::IIF.InstanceType{<:Pose2AprilTag4Corners}) = getManifold(Pose2Pose2) # SE2E2_Manifold
+
+
+Base.propertynames(::Pose2AprilTag4Corners, private::Bool=false) = private ? (:Zij, :Z) : (:Z,)
+
+Base.getproperty(x::Pose2AprilTag4Corners,f::Symbol) = begin
+    if f == :Zij
+      @warn "Pose2AprilTag4Corners field .Zij is deprecated, use .Z instead."
+      getfield(x, :Z)
+    else
+      getfield(x,f)
+    end
+  end
 
 """
     $SIGNATURES
@@ -232,10 +244,10 @@ end
 
 function getSample( pat4c::CalcFactor{<:Pose2AprilTag4Corners} )
   #
-  M = getManifold(pat4c.factor.Zij)
+  M = getManifold(pat4c.factor.Z)
   ϵ = getPointIdentity(Pose2)
 
-  X = sampleTangent(M, pat4c.factor.Zij.z, ϵ)
+  X = sampleTangent(M, pat4c.factor.Z.Z, ϵ)
   return X
 end
 
@@ -245,7 +257,7 @@ function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(X,
   #
 
   @assert X isa ProductRepr "Pose2AprilTag4Corners expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
-  M = getManifold(pat4c.factor.Zij)
+  M = getManifold(pat4c.factor.Z)
   q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
   #TODO allocalte for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
@@ -258,9 +270,9 @@ end
 
 ## serialization
 
-struct PackedPose2AprilTag4Corners <: AbstractPackedFactor
+Base.@kwdef struct PackedPose2AprilTag4Corners <: AbstractPackedFactor
   # format of serialized data
-  mimeType::String
+  _type::String = "Caesar.PackedPose2AprilTag4Corners"
   # corners, as detected by AprilTags library
   corners::Vector{Float64}
   # homography matrix
@@ -273,9 +285,29 @@ struct PackedPose2AprilTag4Corners <: AbstractPackedFactor
   id::Int
 end
 
+Base.propertynames(::PackedPose2AprilTag4Corners, private::Bool=false) = private ? (:mimeType, :_type) : (:_type,)
 
-function convert( ::Type{<:AbstractPackedFactor}, 
-                  obj::Pose2AprilTag4Corners)
+Base.getproperty(x::PackedPose2AprilTag4Corners,f::Symbol) = begin
+    if f == :mimeType
+      @warn "PackedPose2AprilTag4Corners field .mimeType is deprecated, use ._type instead."
+      getfield(x, :_type)
+    else
+      getfield(x,f)
+    end
+  end
+
+# not needed for immutable
+# Base.setproperty!(x::PackedPose2AprilTag4Corners,f::Symbol,val) = begin
+#   if f == :mimeType
+#     @warn "PackedPose2AprilTag4Corners field .mimeType is deprecated, use ._type instead."
+#     setfield!(x, :_type, val)
+#   else
+#     setfield!(x,f,val)
+#   end
+# end
+
+function Base.convert(::Type{<:AbstractPackedFactor}, 
+                      obj::Pose2AprilTag4Corners)
   #
   corVec = zeros(8)
   corVec[1] = obj.corners[1][1]

@@ -32,7 +32,7 @@ function drawBearingLinesAprilTags!(img_::AbstractMatrix{<:AbstractRGB},
                                     c_height::Real=round(Int, size(img_,1)/2),
                                     taglength::Real=0.172 )
   #
-  xx,yy,th = (atp4.Zij.z.μ...,)
+  xx,yy,th = (atp4.Z.Z.μ...,)
 
   # TODO use proper camera model
   py = round(Int, -f_width*(yy/xx) + c_width)
