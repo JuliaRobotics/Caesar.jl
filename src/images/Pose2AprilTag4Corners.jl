@@ -45,7 +45,7 @@ detector = AprilTagDetector()
 tags = detector(img)
 
 # new factor graph with Pose2 `:x0` and a Prior.
-fg = generateCanonicalFG_ZeroPose(varType=Pose2)
+fg = generateGraph_ZeroPose(varType=Pose2)
 
 # use a construction helper to add factors to all the tags
 for tag in tags
