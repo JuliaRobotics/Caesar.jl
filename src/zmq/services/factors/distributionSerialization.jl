@@ -1,5 +1,24 @@
 import Base.convert
 
+
+# NEW WITH DFG v0.18
+# function convert(::Type{Dict{String, Any}}, dist::PackedSamplableBelief)
+#     JSON.parse(JSON.json(dist))
+# end
+
+# dictkeys(d::Dict) = (collect(Symbol.(keys(d)))...,)
+# dictvalues(d::Dict) = (collect(values(d))...,)
+
+# _namedtuple(d::Dict{<:AbstractString,T}) where {T} =
+#     NamedTuple{dictkeys(d)}(dictvalues(d))
+
+# function convert(::Type{<:PackedSamplableBelief}, dict::Dict{String, Any})
+#     nt = _namedtuple(dict)
+#     convert(PackedSamplableBelief, nt)
+# end
+
+
+
 """
 Converter: Packed_MvNormal -> MvNormal
 """
