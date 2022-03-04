@@ -16,16 +16,8 @@ Caesar.jl is a community project to facilate software technology development for
 
 Caesar.jl developed as a spin-out project from MIT's Computer Science and Artificial Intelligence Laboratory.  See related works on [the literature page](https://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Many future directions are in the works -- including fundamental research, implementation quality/performance, and system integration.
 
-Consider citing our work:
-```
-@online{Caesarjl2021,
- author =        {{C}ontributors, {E}cosystem, and {N}av{A}bility},
- title =         {Caesar.jl, v0.11.1},
- year =          {2021},
- doi=            {Solver DOI: 10.5281/zenodo.5718817}, 
- note =          {\url{https://github.com/JuliaRobotics/Caesar.jl}}
-}
-```
+Consider citing our work: [CITATION.bib](https://github.com/JuliaRobotics/Caesar.jl/blob/master/CITATION.bib).
+
 ## Community, Issues, Comments, or Help
 
 Post [Issues](https://github.com/JuliaRobotics/Caesar.jl/issues), or [Discussions](https://github.com/JuliaRobotics/Caesar.jl/discussions) for community help.  Maintainers can easily transfer Issues to the best suited package location if necessary.  Also see the history of changes and ongoing work can via the [Milestone pages (click through badges here)](https://github.com/JuliaRobotics/Caesar.jl/blob/master/README.md#bleeding-edge-development-status).  You can also get in touch via Slack at [![](https://img.shields.io/badge/Invite-Slack-green.svg?style=popout)](https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw).
