@@ -2,22 +2,21 @@
 
 ## IncrementalInference.jl ContinuousScalar
 
-This tutorial illustrates how `IncrementalInference` enables algebraic relations (residual functions) between multiple stochastic variables, and how a final posterior belief estimate is calculated from several pieces of information.
 The application of this tutorial is presented in abstract from which the user is free to imagine any system of relationships:  For example, a robot driving in a one dimensional world; or a time traveler making uncertain jumps forwards and backwards in time.
-The tutorial implicitly shows a multi-modal uncertainty introduced and transmitted.
+The tutorial implicitly shows a multi-modal uncertainty can be introduced from non-Gaussian measurements, and then transmitted through the system.
 The tutorial also illustrates consensus through an additional piece of information, which reduces all stochastic variable marginal beliefs to unimodal only beliefs.
-The example will also illustrate the use of non-Gaussian beliefs and global inference.
+This tutorial illustrates how algebraic relations (i.e. residual functions) between multiple stochastic variables are calculated, as well as the final posterior belief estimate, from several pieces of information.
 Lastly, the tutorial demonstrates how automatic initialization of variables works.
 
-This tutorial requires `IncrementalInference v0.3.0+, RoME v0.1.0, RoMEPlotting` packages be installed. In addition, the optional `GraphViz` package will allow easy visualization of the `FactorGraph` object structure.
+This tutorial requires `RoME.jl` and `RoMEPlotting` packages be installed. In addition, the optional `GraphViz` package will allow easy visualization of the `FactorGraph` object structure.
 
 To start, the two major mathematical packages are brought into scope.
 ```julia
 using IncrementalInference
-# using Distributions # automatically reexported by IncrementalInference
 ```
 
-Guidelines for developing your own functions are discussed here in [Adding Variables and Factors](../examples/adding_variables_factors.md), and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package [RoME.jl](http://www.github.com/dehann/RoME.jl).
+!!! note
+    Guidelines for developing your own functions are discussed here in [Adding Variables and Factors](../examples/adding_variables_factors.md), and we note that mechanizations and manifolds required for robotic simultaneous localization and mapping (SLAM) has been tightly integrated with the expansion package [RoME.jl](http://www.github.com/dehann/RoME.jl).
 
 The next step is to describe the inference problem with a graphical model with any of the existing concrete types that inherit from  `<: AbstractDFG`.
 The first step is to create an empty factor graph object and start populating it with variable nodes.
@@ -46,6 +45,9 @@ The two node factor graph is shown in the image below.
 <img src="https://raw.githubusercontent.com/JuliaRobotics/Caesar.jl/master/docs/src/assets/tutorials/ContinuousScalar/fgx0.png" width="120" border="0" />
 </p>
 ```
+
+### Graph-based Variable Initialization
+
 Automatic initialization of variables depend on how the factor graph model is constructed.
 This tutorial demonstrates this behavior by first showing that `:x0` is not initialized:
 ```julia
@@ -55,7 +57,7 @@ Why is `:x0` not initialized?
 Since no other variable nodes have been 'connected to' (or depend) on `:x0` and future intentions of the user are unknown, the initialization of `:x0` is deferred until the latest possible moment.
 `IncrementalInference.jl` assumes that the user will generally populate new variable nodes with most of the associated factors before moving to the next variable.
 By delaying initialization of a new variable (say `:x0`) until a second newer uninitialized variable (say `:x1`) depends on `:x0`, the `IncrementalInference` algorithms hope to then initialize `:x0` with the more information from previous and surrounding variables and factors.
-Also note that initialization of variables is a local operation based only on the neighboring nodes -- global inference will over the entire graph is shows later in this tutorial.
+Also note that graph-based initialization of variables is a local operation based only on the neighboring nodes -- global inference occurs over the entire graph and is shown later in this tutorial.
 
 By adding `:x1` and connecting it through the `LinearRelative` and `Normal` distributed factor, the automatic initialization of `:x0` is triggered.
 ```julia
@@ -76,6 +78,8 @@ Notice how the new `:x1` variable is not yet initialized:
 ```julia
 @show isInitialized(fg, :x1) # false
 ```
+
+### Visualizing the Variable Probability Belief
 
 The `RoMEPlotting.jl` package allows visualization (plotting) of the belief state over any of the variable nodes.
 Remember the first time executions are slow given required code compilation, and that future versions of these package will use more precompilation to reduce first execution running cost.
