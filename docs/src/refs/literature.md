@@ -74,7 +74,9 @@ Newly created page to list related references and additional literature pertaini
 
 [3.6]  Pennec, Xavier. [Intrinsic Statistics on Riemannian Manifolds: Basic Tools for Geometric Measurements, HAL Archive](https://hal.inria.fr/inria-00614994/PDF/Pennec.JMIV06.pdf), 2011, Inria, France.
 
-[3.7]  Weber, P., Medina-Oliva, G., Simon, C., et al., 2012. Overview on Bayesian networks applications for dependability risk analysis and maintenance areas. Appl. Artif. Intell. 25 (4), 671e682. [https://doi.org/10.1016/j.engappai.2010.06.002](https://doi.org/10.1016/j.engappai.2010.06.002).
+[3.7]  Weber, P., Medina-Oliva, G., Simon, C., et al., 2012. Overview on Bayesian networks applications for dependability risk analysis and maintenance areas. Appl. Artif. Intell. 25 (4), 671e682. [https://doi.org/10.1016/j.engappai.2010.06.002](https://doi.org/10.1016/j.engappai.2010.06.002). [Preprint PDF](https://hal.archives-ouvertes.fr/hal-00546144/file/Draft_00_Weber_eaai_2010.pdf).
+
+[3.8]  Wang, H.R., Ye, L.T., Xu, X.Y., et al., 2010. Bayesian networks precipitation model based on hidden markov analysis and its application. Sci. China Technol. Sci. 53 (2), 539e547. [https://doi.org/10.1007/s11431-010-0034-3](https://doi.org/10.1007/s11431-010-0034-3).
 
 ### Signal Processing (Beamforming and Channel Deconvolution)
 
