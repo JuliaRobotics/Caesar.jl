@@ -48,7 +48,7 @@ plotSLAM2D
 
 While the Caesar.jl framework is focussed on non-Gaussian inference, it is frequently desirable to relate the results to a more familiar covariance ellipse, and native support for this exists:
 ```julia
-plotSLAM2D(fg, contour=false, drawEllipse=true, drawPoints=true)
+plotSLAM2D(fg, drawContour=false, drawEllipse=true, drawPoints=true)
 ```
 
 ```@raw html
@@ -85,9 +85,9 @@ The following example better shows some of features (via [Gadfly.jl](http://gadf
 pl = plotKDE(fg, [:x0; :x2; :x4], c=["red";"green";"blue"], levels=2, dims=[1;2])
 
 # add a few fun layers
-pl3 = plotSLAM2DPoses(fg, regexPoses=r"x\d", from=3, to=3, contour=false, drawEllipse=true)
-pl5 = plotSLAM2DPoses(fg, regexPoses=r"x\d", from=5, to=5, contour=false, drawEllipse=true, drawPoints=false)
-pl_ = plotSLAM2DPoses(fg, contour=false, drawPoints=false, dyadScale=0.001, to=5)
+pl3 = plotSLAM2DPoses(fg, regexPoses=r"x\d", from=3, to=3, drawContour=false, drawEllipse=true)
+pl5 = plotSLAM2DPoses(fg, regexPoses=r"x\d", from=5, to=5, drawContour=false, drawEllipse=true, drawPoints=false)
+pl_ = plotSLAM2DPoses(fg, drawContour=false, drawPoints=false, dyadScale=0.001, to=5)
 union!(pl.layers, pl3.layers)
 union!(pl.layers, pl5.layers)
 union!(pl.layers, pl_.layers)
