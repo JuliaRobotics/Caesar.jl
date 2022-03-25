@@ -142,7 +142,7 @@ addData!(dfg,:default_folder_store,:x0,:nnModel,
 
 ## Experimental Features
 
-Loading images is a relatively common task, there a convenience function has been developed:
+Loading images is a relatively common task, hence a convenience function has been developed:
 ```@docs
 Caesar.fetchDataImage
 ```
