@@ -80,6 +80,8 @@ Newly created page to list related references and additional literature pertaini
 
 [3.8]  Wang, H.R., Ye, L.T., Xu, X.Y., et al., 2010. Bayesian networks precipitation model based on hidden markov analysis and its application. Sci. China Technol. Sci. 53 (2), 539e547. [https://doi.org/10.1007/s11431-010-0034-3](https://doi.org/10.1007/s11431-010-0034-3).
 
+[3.9]  Mangelson, J.G., Dominic, D., Eustice, R.M. and Vasudevan, R., 2018, May. [Pairwise consistent measurement set maximization for robust multi-robot map merging](http://141.212.194.179/publications/jmangelson-2018a.pdf). In 2018 IEEE international conference on robotics and automation (ICRA) (pp. 2916-2923). IEEE.
+
 ### Signal Processing (Beamforming and Channel Deconvolution)
 
 [4.1]  Van Trees, H.L., 2004. Optimum array processing: Part IV of detection, estimation, and modulation theory. John Wiley & Sons.
