@@ -90,3 +90,6 @@ Newly created page to list related references and additional literature pertaini
 
 [4.2b]  Hossein Abadi, S., 2013. "Blind deconvolution in multipath environments and extensions to remote source localization", [paper](https://asa.scitation.org/doi/pdf/10.1121/1.3688502?class=pdf), [thesis](https://deepblue.lib.umich.edu/bitstream/handle/2027.42/102443/shimah_1.pdf?sequence=1&isAllowed=y).
 
+### Contact or Tactile
+
+[5.1]  Suresh, S., Bauza, M., Yu, K.T., Mangelson, J.G., Rodriguez, A. and Kaess, M., 2021, May. [Tactile SLAM: Real-time inference of shape and pose from planar pushing](https://dspace.mit.edu/bitstream/handle/1721.1/139635/2011.07044.pdf?sequence=2&isAllowed=y). In 2021 IEEE International Conference on Robotics and Automation (ICRA) (pp. 11322-11328). IEEE.
