@@ -7,7 +7,7 @@ This page will showcase some of `Entry=>Data` features available.
 # Adding A FolderStore
 
 Caesar.jl (with DFG) supports storage and retrieval of larger data blobs by means of various database/datastore technologies.  To get going, you can use a conventional `FolderStore`: 
-```
+```julia
 getSolverParams(fg).logpath = pwd()
 storeDir = joinLogPath(fg,"data")
 mkpath(storeDir)
@@ -22,7 +22,7 @@ addBlobStore!(fg, datastore)
 ## Adding Data Blobs
 
 Just showcasing a JSON Dict approach
-```
+```julia
 using JSON2
 someDict = Dict(:name => "Jane", :data => randn(100))
 addData!(fg, :default_folder_store, :x1, :datalabel, Vector{UInt8}(JSON2.write( someDict )), mimeType="application/json/octet-stream"  )
@@ -137,4 +137,12 @@ mdlBytes = take!(io)
 addData!(dfg,:default_folder_store,:x0,:nnModel,
          mdlBytes, mimeType="application/bson/octet-stream", 
          description="BSON.@load PipeBuffer(readBytes) model") 
+```
+
+
+## Experimental Features
+
+Loading images is a relatively common task, hence a convenience function has been developed:
+```@docs
+Caesar.fetchDataImage
 ```
