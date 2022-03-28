@@ -6,7 +6,7 @@ The Community has been developing high quality [documentation for Manifolds.jl](
 
 ## Separate Manifold Beliefs Page
 
-Follow these hyperlinks if you are looking for information on working with Manifold Beliefs or [`ManifoldKernelDensity`s](@ref)
+Follow these hyperlinks if you are looking for information on working with Manifold Beliefs or [`ManifoldKernelDensity`s](@ref manikde_page)
 
 ## Why Manifolds.jl
 
@@ -65,33 +65,63 @@ Although you will be able to find many answers for these seven questions in many
 
 The rest of this page is devoted to showing you how to use the math, write your own code to do new things beyond what Caesar.jl can already do.  If are willing to share any contributions, please do so by opening pull requests against the related repos.
 
+## Using Manifolds in Factors
+
+The best way to show this is just dive straight into a factor that actually uses a Manifolds mechanization, and [`RoME.Pose2Pose2`](@ref) is a fairly straight forward example.  This factor gets used for rigid transforms on a 2D plane, with coordinates ``[x,y,\theta]`` as elluded to above.
+
 ### A Tutorial on Rotations
 
-
+!!! note
+    Work in progress, [Upstream Tutorial](https://github.com/JuliaManifolds/Manifolds.jl/pull/355/files)
 ### A Tutorial on 2D Rigid Transforms
 
-
-## How to use in Factors
-
+!!! note
+    Work in progress, [Upstream Tutorial](https://github.com/JuliaManifolds/Manifolds.jl/pull/366/files)
 
 ### Existing Manifolds
 
+The most popular Manifolds used in Caesar.jl related packages are:
+- [`Sphere(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html#Manifolds.Sphere) WORK IN PROGRESS.
+- [`TranslationGroup(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.TranslationGroup) (future work will relax to `Euclidean(N)`).
+- [`SpecialOrthogonal(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.SpecialOrthogonal).
+- [`SpecialEuclidean(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Special-Euclidean-group).
+- `_CircleEuclid` LEGACY, TODO.
+- `AMP.SE2_E2` LEGACY, TODO.
 
+!!! note
+    Caesar.jl encourages the JuliaManifolds approach to defining new manifolds, and can readily be used for Caesar.jl related operations.
 ### Creating a new Manifold
 
+JuliaManifolds.jl is designed to make it as easy as possible to define your own manifold and then get all the benefits of the Manifolds.jl ecosystem.
 
 ## [Answers to 7 Questions](@id seven_mani_answers)
 
 ### Q1) What are Point, Tangents, Coordinates
 
+A manifold ``M`` is a collection of points that together create the given space.  **Points** are like sprinkles on the donut.  The representation of points will vary from manifold to manifold.  Sometimes it is even possible to have different representations for the same point on a manifold.  These are usually denoted as ``p``.
+Tangent **vectors** (we prefer _tangents_ for clarity) is a vector ``x`` that emminates from a point on a manifold.  A vector lives in the tangent space of the manifold, a local flat region around a point ``x \in T_M(p)``.  On the donut, imagine a long srtaight sprinkle stuck along the tangent of the surface at a particular point.
+The **tangent space** is the collection of all possible tangents from ``p``.  
+**Coordinates** are a user defined property that uses the Euclidean nature of the tangent space at point ``p`` to operate as a regular linear space.  Coordinates are just a list of values composed into a vector.  
+
+For example, a tangent vector in the ``Euclidean(2)`` manifold, at the origin point ``(0,0)`` is exactly the most people are familiar with from school.  For Euclidean space, the vector from point ``p`` of length ``[x,y]`` looks like the line segment between points ``p`` and ``q`` on the underlying manifold.  Not so for manifolds with curvature.
+
 ### Q2) What is the Logarithm map
+
+Multiple ``x = logmap(M,p,q)`` types can exist for some manifolds.  The logarithm computes, based at point ``p``, the tangent vector ``x`` on the tangent plane ``T_M(p)`` from ``p``.  In other words, image a string following the curve of a manifold from ``p`` to ``q``, pick up that string from ``q`` while holding ``p`` firm, until the string is flat against the tangent space emminating from ``p``.  The logarithm is the opposite of the exponential map.
 
 ### Q3) What is the Exponential map
 
+The exponential map does the opposite of the logarithm.  Image a tangent vector ``x`` emminating from point ``p``.  The length and direction of ``x`` can be wrapped onto the curvature of the manifold to form a line on the manifold surface.
 ### Q4) What does `vee`/`hat` do
 
+`vee` is an operation that converts a tangent vector representation into a coordinate representation.  For example Lie algebra elements are tangent vector elements, so ``vee([0 -w; w 0]) = w``.  And visa versa for ``hat(w) = [0 -w; w 0]``, which goes from coordinates to tangent vectors.
 ### Q5) What Riemannian vs. Group Manifolds
 
+WIP
 ### Q6) Retraction vs. Exp map
 
+WIP
+
 ### Q7) Projection vs. Log map
+
+WIP
