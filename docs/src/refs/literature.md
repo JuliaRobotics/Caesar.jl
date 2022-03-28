@@ -40,7 +40,7 @@ Newly created page to list related references and additional literature pertaini
 
 [2.5]  Sudderth, E.B., Ihler, A.T., Isard, M., Freeman, W.T. and Willsky, A.S., 2010. ["Nonparametric belief propagation."](https://www.microsoft.com/en-us/research/wp-content/uploads/2010/10/p95-sudderth.pdf) Communications of the ACM, 53(10), pp.95-103
 
-[2.6] Paskin, Mark A. ["Thin junction tree filters for simultaneous localization and mapping."](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.15.7602&rep=rep1&type=pdf) in Int. Joint Conf. on Artificial Intelligence. 2003.
+[2.6]  Paskin, Mark A. ["Thin junction tree filters for simultaneous localization and mapping."](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.15.7602&rep=rep1&type=pdf) in Int. Joint Conf. on Artificial Intelligence. 2003.
 
 [2.7]  Farrell, J., and Matthew B.: "The global positioning system and inertial navigation." Vol. 61. New York: Mcgraw-hill, 1999.
 
@@ -61,6 +61,8 @@ Newly created page to list related references and additional literature pertaini
 [2.15] Sola, J., Deray, J. and Atchuthan, D., 2018. ["A micro Lie theory for state estimation in robotics". arXiv preprint arXiv:1812.01537](https://arxiv.org/pdf/1812.01537), and [tech report](https://upcommons.upc.edu/bitstream/handle/2117/179757/2089-A-micro-Lie-theory-for-state-estimation-in-robotics%20(3).pdf).
 
 [2.16] Kaess, M. and Dellaert, F., 2009. [Covariance recovery from a square root information matrix for data association](https://apps.dtic.mil/dtic/tr/fulltext/u2/a537233.pdf). Robotics and autonomous systems, 57(12), pp.1198-1210.
+
+[2.17] Bishop, C.M., 2006. Pattern recognition and machine learning. New York: Springer. ISBN 978-0-387-31073-2.
 
 ### Additional References
 
