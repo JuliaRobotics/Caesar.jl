@@ -10,7 +10,8 @@ The major 2D plotting functions between `RoMEPlotting.jl` and `KernelDensityEsti
 - [`plotSLAM2DPoses`](@ref),
 - [`plotSLAM2DLandmarks`](@ref),
 - [`plotPose`](@ref),
-- [`plotKDE`](@ref) / `plot`,
+- [`plotBelief`](@ref)
+- LEGACY [`plotKDE`](@ref)
 - [`plotLocalProduct`](@ref),
 - `PDF`, `PNG`, `SVG`,
 - `hstack`, `vstack`.
@@ -25,7 +26,7 @@ Assuming some `fg<:AbstractDFG` has been loaded/constructed:
 using RoME, RoMEPlotting
 
 # generate some factor graph with numerical values
-fg = generateCanonicalFG_Hexagonal()
+fg = generateGraph_Hexagonal()
 solveTree!(fg)
 
 # or fg = loadDFG("somepath")
@@ -71,18 +72,18 @@ plotSLAM2DLandmarks
 `KernelDensityEstimatePlotting` (as used in `RoMEPlotting`) provides an interface to visualize belief densities as counter plots.  Something basic might be to just show all plane pairs of this variable marginal belief:
 ```julia
 # Draw the KDE for x0
-plotKDE(fg, :x0)
+plotBelief(fg, :x0)
 ```
 
 Plotting the marginal density over say variables `(x,y)` in a [`Pose2`](@ref) would be:
 ```julia
-plotKDE(fg, :x1, dims=[1;2])
+plotBelief(fg, :x1, dims=[1;2])
 ```
 
 The following example better shows some of features (via [Gadfly.jl](http://gadflyjl.org/stable/)):
 ```julia
 # Draw the (x,y) marginal estimated belief contour for :x0, :x2, and Lx4
-pl = plotKDE(fg, [:x0; :x2; :x4], c=["red";"green";"blue"], levels=2, dims=[1;2])
+pl = plotBelief(fg, [:x0; :x2; :x4], c=["red";"green";"blue"], levels=2, dims=[1;2])
 
 # add a few fun layers
 pl3 = plotSLAM2DPoses(fg, regexPoses=r"x\d", from=3, to=3, drawContour=false, drawEllipse=true)
@@ -110,7 +111,7 @@ pl
 
 See function documentation for more details on API features
 ```@docs
-plotKDE
+plotBelief
 ```
 
 #### Save Plot to Image
@@ -190,7 +191,7 @@ plotLocalProduct
 Multiple beliefs can be plotted at the same time, while setting `levels=4` rather than the default value:
 
 ```julia
-plX1 = plotKDE(fg, [:x0; :x1], dims=[1;2], levels=4)
+plX1 = plotBelief(fg, [:x0; :x1], dims=[1;2], levels=4)
 
 # plX1 |> PNG("/tmp/testX1.png")
 ```
@@ -204,7 +205,7 @@ plX1 = plotKDE(fg, [:x0; :x1], dims=[1;2], levels=4)
 One dimensional (such as `Θ`) or a stack of all plane projections is also available:
 
 ```julia
-plTh = plotKDE(fg, [:x0; :x1], dims=[3], levels=4)
+plTh = plotBelief(fg, [:x0; :x1], dims=[3], levels=4)
 
 # plTh |> PNG("/tmp/testTh.png")
 ```
@@ -216,7 +217,7 @@ plTh = plotKDE(fg, [:x0; :x1], dims=[3], levels=4)
 ```
 
 ```julia
-plAll = plotKDE(fg, [:x0; :x1], levels=3)
+plAll = plotBelief(fg, [:x0; :x1], levels=3)
 # plAll |> PNG("/tmp/testX1.png",20cm,15cm)
 ```
 
@@ -227,7 +228,6 @@ plAll = plotKDE(fg, [:x0; :x1], levels=3)
 ```
 
 !!! note
-
     The functions `hstack` and `vstack` is provided through the `Gadfly` package and allows the user to build a near arbitrary composition of plots.
 
 Please see [KernelDensityEstimatePlotting package source](https://github.com/JuliaRobotics/KernelDensityEstimatePlotting.jl) for more features.
