@@ -90,9 +90,10 @@ The most popular Manifolds used in Caesar.jl related packages are:
 
 !!! note
     Caesar.jl encourages the JuliaManifolds approach to defining new manifolds, and can readily be used for Caesar.jl related operations.
+    
 ### Creating a new Manifold
 
-JuliaManifolds.jl is designed to make it as easy as possible to define your own manifold and then get all the benefits of the Manifolds.jl ecosystem.
+JuliaManifolds.jl is designed to make [it as easy as possible to define your own manifold and then get all the benefits of the Manifolds.jl ecosystem](https://juliamanifolds.github.io/Manifolds.jl/stable/examples/manifold.html).  Follow the documentation there to make your own manifold, which can then readily be used with all the features of both JuliaManifolds as well as the Caesar.jl related packages.
 
 ## [Answers to 7 Questions](@id seven_mani_answers)
 
