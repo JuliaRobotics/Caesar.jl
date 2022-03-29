@@ -117,11 +117,18 @@ The exponential map does the opposite of the logarithm.  Image a tangent vector 
 `vee` is an operation that converts a tangent vector representation into a coordinate representation.  For example Lie algebra elements are tangent vector elements, so ``vee([0 -w; w 0]) = w``.  And visa versa for ``hat(w) = [0 -w; w 0]``, which goes from coordinates to tangent vectors.
 ### Q5) What Riemannian vs. Group Manifolds
 
-WIP
+Groups are defined mathematical structures which often fit well inside the manifold way of working.  For example in robotics, Lie Groups are popular under `SpecialEuclidean(N) <: AbstractGroupManifold`.  [Groups](https://en.wikipedia.org/wiki/Group_(mathematics)) also have a well defined action.  Most prominently for our usage, groups are sets of points for which there exists an identity point. [Riemannian manifolds](https://en.wikipedia.org/wiki/Riemannian_manifold) are more general that groups, specifically Riemannian manifolds do not have an identity point.  
+
+An easy example is that the `Euclidean(N)` manifold does not have an identity element, since what we know as ``[0,0]`` is actually a coordinate base point for the local tangent space, and which just happens to look the same as the underlying `Euclidean(N)` manifold.  The `TranslationGroup(N)` exists in the `Euclidean(N)` space, but has a defined identity element as well as a defined operations on points.
+
 ### Q6) Retraction vs. Exp map
 
-WIP
+Retractions are numerically efficient approximations to convert a tangent vector onto the manifold.  The exponential map is the theoretically precise retraction, but may well be computationally expensive beyond the need for most applications.
 
 ### Q7) Projection vs. Log map
 
-WIP
+Projections are somewhat ambiguous, since on the one hand it might mean that a point from the manifold is projected up onto a nearby tangent space.  
+
+Confusion,  however, is never too far away since there is a second type of projection that people sometimes use:  that is when a vector in the ambient space around a manifold (if one exists) is projected down onto a nearby tangent space.
+
+There is of course also the confusion on whether a vector is projected up onto the tangent space from the manifold, or whether a tangent vector is projected down onto the manifold... It's an overloaded term, so best is to make sure you know which one is being used in any particular situation.
