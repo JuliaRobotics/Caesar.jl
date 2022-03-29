@@ -35,6 +35,7 @@ makedocs(
             "Interact w Graphs" => "concepts/interacting_fgs.md",
             "Multi-Modal/Hypothesis" => "concepts/dataassociation.md",
             "Parallel Processing" => "concepts/parallel_processing.md",
+            "Using Manifold" => "concepts/using_manifolds.md",
             "[DEV] Parametric Solve" => "examples/parametric_solve.md",
         ],
         "Examples" => [
