@@ -4,6 +4,8 @@ using RoME
 using Test
 using GraphPlot
 
+import Rotations as _Rot
+
 ##
 @testset "Test ICRA Tutorial 1 CJL API code" begin
 ##
