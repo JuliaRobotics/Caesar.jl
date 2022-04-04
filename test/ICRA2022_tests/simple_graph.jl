@@ -98,7 +98,7 @@ X3 = getBelief(fg, :x3)
 x3 = mean(X3)
 @test isapprox( ProductRepr([0;1], _Rot.RotMatrix2(-pi/2)), x3; atol=0.2)
 
-@test getManifold(fg, :x1) isa SpecialEuclidean(2)
+@test getManifold(fg, :x1) isa AbstractManifold
 
 ##
 end
