@@ -76,6 +76,6 @@ See mixed-manifold products presented in [the literature section](http://www.jul
 
 Work In Progress -- deferred for progress on full functional methods, but likely to have Gaussian legacy algorithm with mixture model expansion added in the near future.
 
-## Full Deterministic Chapman-Kolmogorov Super Product Method
+## Chapman-Kolmogorov
 
-> Work in progress, likely to include Kernel Embedding and Homotopy Continuation methods for combining convolution and product operations as a concurrent calculation.
+> Work in progress
