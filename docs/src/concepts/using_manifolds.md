@@ -100,11 +100,13 @@ JuliaManifolds.jl is designed to make [it as easy as possible to define your own
 ### Q1) What are Point, Tangents, Coordinates
 
 A manifold ``M`` is a collection of points that together create the given space.  **Points** are like round sprinkles on the donut.  The representation of points will vary from manifold to manifold.  Sometimes it is even possible to have different representations for the same point on a manifold.  These are usually denoted as ``p``.
-Tangent **vectors** (we prefer _tangents_ for clarity) is a vector ``x`` that emminates from a point on a manifold.  A vector lives in the tangent space of the manifold, a local flat region around a point ``x \in T_M(p)``.  On the donut, imagine a rod-shaped sprinkles stuck along the tangent of the surface at a particular point ``p``.
-The **tangent space** is the collection of all possible tangents at ``p``.  
-**Coordinates** are a user defined property that uses the Euclidean nature of the tangent space at point ``p`` to operate as a regular linear space.  Coordinates are just a list of values composed into a vector.  
+Tangent **vectors** (we prefer _tangents_ for clarity) is a vector ``x`` that emminates from a point on a manifold.  A vector lives in the tangent space of the manifold, a local flat region around a point ``x \in T_M(p)``.  On the donut, imagine a rod-shaped sprinkle stuck along the tangent of the surface at a particular point ``p``.  The **tangent space** is the collection of all possible tangents at ``p``.  
 
-For example, a tangent vector in the ``Euclidean(2)`` manifold, at the origin point ``(0,0)`` is exactly the most people are familiar with from school.  For Euclidean space, the vector from point ``p`` of length ``[x,y]`` looks like the line segment between points ``p`` and ``q`` on the underlying manifold.  Not so for manifolds with curvature.
+**Coordinates** are a user defined property that uses the Euclidean nature of the tangent space at point ``p`` to operate as a regular linear space.  Coordinates are just a list of the indepedent coordinate dimensions of the tangent space values collected together.  Read this part carefully, as it can easily be confused with a conventional tangent vector in a regular Euclidean space.  
+
+For example, a tangent vector to the ``Euclidean(2)`` manifold, at the origin point ``(0,0)`` is what you likely are familiar with from school as a "vector" (not the coordinates, although that happens to be the same thing in the trivial case).  For Euclidean space, a vector from point ``p`` of length ``[x,y]`` looks like the line segment between points ``p`` and ``q`` on the underlying manifold.  
+
+This trivial overlapping of "vectors" in the Euclidean Manifold, and in a tangent space around ``p``, and coordinates for that tangent space, are no longer trivial when the manifold has curvature.
 
 ### Q2) What is the Logarithm map
 
