@@ -10,7 +10,7 @@ Follow these hyperlinks if you are looking for information on working with Manif
 
 ## Why Manifolds.jl
 
-There is much to be said about how and why Manifolds.jl is the right decision for building a factor graph solver ecosystems.  We believe the future will show that mathematicians are way ahead of the curve, and that adopting a manifold approach will pretty much be the only way to develop the required mathematical operations in Caesar.jl for the forseable future.
+There is much to be said about how and why Manifolds.jl is the right decision for building a next-gen factor graph solver.  We believe the future will show that mathematicians are way ahead of the curve, and that adopting a manifold approach will pretty much be the only way to develop the required mathematical operations in Caesar.jl for the forseable future.
 
 ### Are Manifolds Difficult? No.
 
