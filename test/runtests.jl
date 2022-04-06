@@ -5,7 +5,7 @@ using Test
 ## See tests in DFG, IIF, and RoME for more complete coverage of features
 
 # specific end-to-end checks for ICRA 2022 tutorials
-include("ICRA2022_tests/simple_graph.jl")
+include("ICRA2022_tests/runtests.jl")
 
 # highly multipackage tests that don't fit well in specific library dependencies.
 include("pcl/testPointCloud2.jl")
