@@ -1,6 +1,6 @@
 # On-Manifold Operations
 
-Caesar.jl and libraries have adopted the [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) as foundation for developing the algebraic operations used.  
+Caesar.jl and libraries have adopted [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) as foundation for developing the algebraic operations used.  
 
 The Community has been developing high quality [documentation for Manifolds.jl](https://juliamanifolds.github.io/Manifolds.jl/stable/), and we encourage the interested reader to learn and use everything available there.
 
