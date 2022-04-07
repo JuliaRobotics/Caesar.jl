@@ -132,7 +132,7 @@ Retractions are numerically efficient approximations to convert a tangent vector
 
 The term projection can be somewhat ambiguous between references.  In Manifolds.jl, projections either project a point in the [embedding](https://en.wikipedia.org/wiki/Embedding) to a point on the manifold, or a vector from the embedding onto a tangent space at a certain point.  
 
-Confusion, can easily happen since a second type of projection that people sometimes use:  that is when a vector in the ambient space around a manifold (if one exists) is projected down onto a nearby tangent space.
+Confusion, can easily happen between cases where there is no ambient space around a particular manifold.  Then the term projection may be moot.
 
 In Manifolds.jl, an _inverse retraction_ is the operation that more or less ~~projects~~ a point up from the manifold onto a nearby tangent space.
 
