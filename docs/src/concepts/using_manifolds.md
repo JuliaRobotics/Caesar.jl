@@ -138,6 +138,7 @@ In Manifolds.jl, an _inverse retraction_ is an approximate logmap of a point up 
 
 It is best to make sure you know which one is being used in any particular situation.
 
-
+!!! note
+    For a slightly deeper dive into the relation between embedding, ambient space, and projections, see the [background conversation here](https://github.com/JuliaRobotics/Caesar.jl/pull/841#discussion_r845560914).
 
 
