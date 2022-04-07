@@ -132,8 +132,15 @@ Retractions are numerically efficient approximations to convert a tangent vector
 
 ### Q7) Projection vs. Log map
 
-Projections are somewhat ambiguous, since on the one hand it might mean that a point from the manifold is projected up onto a nearby tangent space.  
+The term projection can be somewhat ambiguous between references.  In Manifolds.jl, projections either project a point in the [embedding](https://en.wikipedia.org/wiki/Embedding) to a point on the manifold, or a vector from the embedding onto a tangent space at a certain point.  
 
-Confusion,  however, is never too far away since there is a second type of projection that people sometimes use:  that is when a vector in the ambient space around a manifold (if one exists) is projected down onto a nearby tangent space.
+Confusion, can easily happen between cases where there is no ambient space around a particular manifold.  Then the term projection may be moot.
 
-There is of course also the confusion on whether a vector is projected up onto the tangent space from the manifold, or whether a tangent vector is projected down onto the manifold... It's an overloaded term, so best is to make sure you know which one is being used in any particular situation.
+In Manifolds.jl, an _inverse retraction_ is an approximate logmap of a point up from the manifold onto a tangent space -- i.e. not a projection.  It is important not to confuse a point on the manifold as a point in the ambient space, when thinking about the term projection.
+
+It is best to make sure you know which one is being used in any particular situation.
+
+!!! note
+    For a slightly deeper dive into the relation between embedding, ambient space, and projections, see the [background conversation here](https://github.com/JuliaRobotics/Caesar.jl/pull/841#discussion_r845560914).
+
+
