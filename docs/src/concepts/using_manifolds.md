@@ -110,7 +110,9 @@ This trivial overlapping of "vectors" in the Euclidean Manifold, and in a tangen
 
 ### Q2) What is the Logarithm map
 
-Multiple `X = log(M,p,q)` types can exist for some manifolds.  The logarithm computes, based at point ``p``, the tangent vector ``X`` on the tangent plane ``T_p\mathcal{M}`` from ``p``.  In other words, image a string following the curve of a manifold from ``p`` to ``q``, pick up that string from ``q`` while holding ``p`` firm, until the string is flat against the tangent space emminating from ``p``.  The logarithm is the opposite of the exponential map.
+The logarithm `X = logmap(M,p,q)` computes, based at point ``p``, the tangent vector ``X`` on the tangent plane ``T_p\mathcal{M}`` from ``p``.  In other words, image a string following the curve of a manifold from ``p`` to ``q``, pick up that string from ``q`` while holding ``p`` firm, until the string is flat against the tangent space emminating from ``p``.  The logarithm is the opposite of the exponential map.  
+
+Multiple logmap interpretations exist, for example in the case of ``SpecialEuclidean(N)`` there are multiple definitions for ``\oplus`` and ``\ominus``, see [[2.15]](https://juliarobotics.org/Caesar.jl/latest/refs/literature/).  When using a library, it is worth testing how logmap and expmap are computed (away from the identity element for Groups).
 
 ### Q3) What is the Exponential map
 
