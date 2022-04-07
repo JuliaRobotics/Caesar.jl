@@ -40,7 +40,7 @@ If you are drinking some coffee right now, then you are moving the cup in `Eucli
 
 What if you are concerned with the orientation of the cup too---as in not spill the hot contents everywhere---then you might actually want to work on the [`SpecialEuclidean(3)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Special-Euclidean-group) manifold -- that is 3 degrees of translational freedom, and 3 degrees of rotational freedom.  You might have heard of [Lie Groups](https://en.wikipedia.org/wiki/Lie_group) and [Lie Algebras](https://en.wikipedia.org/wiki/Lie_algebra), well that is exactly it, Lie Groups are a special set of Group Manifolds and associated operations that are already supported by [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl).
 
-Things are a little easier for a robot traveling around on a flat 2D surface.  If your robot is moving around with coordinates ``[x,y,\theta]``, well then you are working with the coordinates of the `SpecialEuclidean(2)` manifold.  There is more to say on how the coordinates ``[x,y,\theta]`` get converted into the `se(2)` Lie algebra, and that gets converted into a Lie Group element -- i.e. ``([x;y], \mathrm{RotMat}(\theta))``.  More on that later.
+Things are a little easier for a robot traveling around on a flat 2D surface.  If your robot is moving around with coordinates ``[x,y,\theta]``, well then you are working with the coordinates of the `SpecialEuclidean(2)` manifold.  There is more to say on how the coordinates ``[x,y,\theta]`` get converted into the ``\mathfrak{se}(2)`` Lie algebra, and that gets converted into a Lie Group element -- i.e. ``([x;y], \mathrm{RotMat}(\theta))``.  More on that later.
 
 Perhaps you are interested in relativistic effects where time as the fourth dimension is of interest, well then the [Minkowski space](https://en.wikipedia.org/wiki/Minkowski_space) provides Group and Manifold constructs for that -- actually Minkowski falls under the supported [Lorentz Manifolds](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/lorentz.html).
 
@@ -99,22 +99,22 @@ JuliaManifolds.jl is designed to make [it as easy as possible to define your own
 
 ### Q1) What are Point, Tangents, Coordinates
 
-A manifold ``M`` is a collection of points that together create the given space.  **Points** are like round sprinkles on the donut.  The representation of points will vary from manifold to manifold.  Sometimes it is even possible to have different representations for the same point on a manifold.  These are usually denoted as ``p``.
-Tangent **vectors** (we prefer _tangents_ for clarity) is a vector ``x`` that emanates from a point on a manifold.  A vector lives in the tangent space of the manifold, a locally flat region around a point ``x \in T_M(p)``.  On the donut, imagine a rod-shaped sprinkle stuck along the tangent of the surface at a particular point ``p``.  The **tangent space** is the collection of all possible tangents at ``p``.  
+A manifold ``\mathcal{M}`` is a collection of points that together create the given space.  **Points** are like round sprinkles on the donut.  The representation of points will vary from manifold to manifold.  Sometimes it is even possible to have different representations for the same point on a manifold.  These are usually denoted as ``p``.
+Tangent **vectors** (we prefer _tangents_ for clarity) is a vector ``X`` that emanates from a point on a manifold.  A vector lives in the tangent space of the manifold, a locally flat region around a point ``X\in T_p \mathcal{M}``.  On the donut, imagine a rod-shaped sprinkle stuck along the tangent of the surface at a particular point ``p``.  The **tangent space** is the collection of all possible tangents at ``p``.  
 
 **Coordinates** are a user defined property that uses the Euclidean nature of the tangent space at point ``p`` to operate as a regular linear space.  Coordinates are just a list of the indepedent coordinate dimensions of the tangent space values collected together.  Read this part carefully, as it can easily be confused with a conventional tangent vector in a regular Euclidean space.  
 
-For example, a tangent vector to the ``Euclidean(2)`` manifold, at the origin point ``(0,0)`` is what you likely are familiar with from school as a "vector" (not the coordinates, although that happens to be the same thing in the trivial case).  For Euclidean space, a vector from point ``p`` of length ``[x,y]`` looks like the line segment between points ``p`` and ``q`` on the underlying manifold.  
+For example, a tangent vector to the `Euclidean(2)` manifold, at the origin point ``(0,0)`` is what you likely are familiar with from school as a "vector" (not the coordinates, although that happens to be the same thing in the trivial case).  For Euclidean space, a vector from point ``p`` of length ``[x,y]`` looks like the line segment between points ``p`` and ``q`` on the underlying manifold.  
 
 This trivial overlapping of "vectors" in the Euclidean Manifold, and in a tangent space around ``p``, and coordinates for that tangent space, are no longer trivial when the manifold has curvature.
 
 ### Q2) What is the Logarithm map
 
-Multiple `x = logmap(M,p,q)` types can exist for some manifolds.  The logarithm computes, based at point ``p``, the tangent vector ``x`` on the tangent plane ``T_M(p)`` from ``p``.  In other words, image a string following the curve of a manifold from ``p`` to ``q``, pick up that string from ``q`` while holding ``p`` firm, until the string is flat against the tangent space emminating from ``p``.  The logarithm is the opposite of the exponential map.
+Multiple `X = log(M,p,q)` types can exist for some manifolds.  The logarithm computes, based at point ``p``, the tangent vector ``X`` on the tangent plane ``T_p\mathcal{M}`` from ``p``.  In other words, image a string following the curve of a manifold from ``p`` to ``q``, pick up that string from ``q`` while holding ``p`` firm, until the string is flat against the tangent space emminating from ``p``.  The logarithm is the opposite of the exponential map.
 
 ### Q3) What is the Exponential map
 
-The exponential map does the opposite of the logarithm.  Image a tangent vector ``x`` emanating from point ``p``.  The length and direction of ``x`` can be wrapped onto the curvature of the manifold to form a line on the manifold surface.
+The exponential map does the opposite of the logarithm.  Image a tangent vector ``X`` emanating from point ``p``.  The length and direction of ``X`` can be wrapped onto the curvature of the manifold to form a line on the manifold surface.
 ### Q4) What does `vee`/`hat` do
 
 `vee` is an operation that converts a tangent vector representation into a coordinate representation.  For example Lie algebra elements are tangent vector elements, so `vee([0 -w; w 0]) = w`.  And visa versa for `hat(w) = [0 -w; w 0]`, which goes from coordinates to tangent vectors.
