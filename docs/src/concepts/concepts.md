@@ -37,3 +37,6 @@ We use the uncorrelated measurement process assumption that measurements Z are i
 
 !!! note
     Strictly speaking, factors are actually "observed variables" that are stochastically "fixed" and not free for estimation in the conventional SLAM perspective.  Waving hands over the fact that factors encode both the algebraic model and the observed measurement values provides a perspective on learning structure of a problem, including more mundane operations such as sensor calibration or learning of channel transfer models.
+    
+!!! note
+    [Wikipedia too provides a short overview of factor graphs](https://en.wikipedia.org/wiki/Factor_graph).
