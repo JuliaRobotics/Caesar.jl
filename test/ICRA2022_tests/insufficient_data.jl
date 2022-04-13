@@ -163,8 +163,9 @@ solveGraph!(fg);
 checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:l1;:l2], atol=0.01)
 checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:l3;:l4], atol=0.3)
 
-checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x0;:x1], atol=0.1)
-checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x2], atol=0.2)
+checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x0], atol=0.15)
+checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x1], atol=0.3)
+checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x2], atol=0.3)
 
 ## ===========================================================================================
 ## PART _3
@@ -181,14 +182,15 @@ solveGraph!(fg);
 
 ##
 
-# plotBelief(fg, [:x0;:x1;:x2;:x3;:x4]) #, c=["red";"green";"blue"])
+# plotBelief(fg, sortDFG(ls(fg, r"x")))
 # plotBelief(fg, [:l3;:l4], c=["pink";"orange"])
-# checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:l1;:l2], atol=0.01)
-# checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:l3;:l4], atol=0.3)
+checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:l1;:l2], atol=0.01)
+checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:l3;:l4], atol=0.3)
 
-# checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x0;:x1], atol=0.1)
-# checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x2], atol=0.2)
-# checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x3;:x4], atol=0.2)
+checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x0], atol=0.15)
+checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x1], atol=0.25)
+checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x2], atol=0.25)
+checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x3;:x4], atol=0.25)
 
 
 ## ===========================================================================================
@@ -201,18 +203,20 @@ vehicle_drives!(fg, :x5, :x6, GTp, GTl)
 ##
 
 solveGraph!(fg);
-# storeAllBeliefs(fg,refFdr; suffix="_4") #, vars=ls(fg, r"l"))
+# storeAllBeliefs(fg,refFdr; suffix="_4")
 
 ##
 
-plotBelief(fg, sortDFG(ls(fg, r"x")))
+# plotBelief(fg, sortDFG(ls(fg, r"x")))
 # plotBelief(fg, [:l3;:l4], c=["pink";"orange"])
 checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:l1;:l2], atol=0.01)
 checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:l3;:l4], atol=0.3)
 
-checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x0;:x1], atol=0.1)
+checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x0], atol=0.2)
+checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x1], atol=0.2)
 checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x2], atol=0.2)
-checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x3;:x4], atol=0.2)
+checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x3;:x4], atol=0.25)
+checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x5;:x6], atol=0.3)
 
 
 
