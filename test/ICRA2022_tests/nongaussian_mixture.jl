@@ -94,8 +94,8 @@ ppes = DFG.getPPESuggested.(fg, [:x0;:x1;:x2;:x3])
 
 @test isapprox( getPPESuggested(fg, :x0)[1], 0; atol=1)
 @test isapprox( getPPESuggested(fg, :x1)[1], 10; atol=1)
-@test isapprox( getPPESuggested(fg, :x2)[1], 20; atol=1)
-@test isapprox( getPPESuggested(fg, :x3)[1], -30; atol=1)
+@test isapprox( getPPESuggested(fg, :x2)[1], 20; atol=2)
+@test isapprox( getPPESuggested(fg, :x3)[1], -30; atol=2)
 
 
 
