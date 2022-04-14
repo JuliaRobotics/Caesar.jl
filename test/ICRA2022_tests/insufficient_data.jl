@@ -239,7 +239,7 @@ solveGraph!(fg);
 # plotBelief(fg, [:l3;:l4], c=["pink";"orange"])
 
 checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:l1;:l2], atol=0.01)
-checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:l3;:l4], atol=0.6)
+checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:l3;:l4], atol=0.8)
 
 checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:x0], atol=0.3)
 checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:x1], atol=0.6)
