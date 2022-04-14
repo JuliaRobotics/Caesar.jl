@@ -52,7 +52,7 @@ function checkTut3Posteriors(dfg::AbstractDFG, refFdr; atol=0.1, suffix="", vars
     # test belief
     tb = getBelief(dfg, v)
     dist = mmd(ref, tb)
-    @info "Test Tut3 "*string(v) dist
+    @info "Test Tut3 "*string(v)*" "*suffix dist
     @test dist < atol
   end
 end
