@@ -187,10 +187,10 @@ solveGraph!(fg);
 checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:l1;:l2], atol=0.01)
 checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:l3;:l4], atol=0.3)
 
-checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x0], atol=0.15)
+checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x0], atol=0.2)
 checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x1], atol=0.25)
-checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x2], atol=0.25)
-checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x3;:x4], atol=0.25)
+checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x2], atol=0.3)
+checkTut3Posteriors(fg, refFdr; suffix="_3", vars=[:x3;:x4], atol=0.3)
 
 
 ## ===========================================================================================
@@ -213,9 +213,9 @@ checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:l1;:l2], atol=0.01)
 checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:l3;:l4], atol=0.3)
 
 checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x0], atol=0.2)
-checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x1], atol=0.2)
-checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x2], atol=0.2)
-checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x3;:x4], atol=0.25)
+checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x1], atol=0.25)
+checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x2], atol=0.3)
+checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x3;:x4], atol=0.3)
 checkTut3Posteriors(fg, refFdr; suffix="_4", vars=[:x5;:x6], atol=0.3)
 
 
