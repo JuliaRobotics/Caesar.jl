@@ -245,7 +245,7 @@ checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:x0], atol=0.3)
 checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:x1], atol=0.5)
 checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:x2], atol=0.5)
 checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:x3;:x4], atol=0.5)
-checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:x5;:x6], atol=0.5)
+checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:x5;:x6], atol=0.6)
 checkTut3Posteriors(fg, refFdr; suffix="_5", vars=[:x7;:x8], atol=0.6)
 
 
