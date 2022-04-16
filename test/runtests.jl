@@ -10,6 +10,7 @@ include("ICRA2022_tests/runtests.jl")
 # highly multipackage tests that don't fit well in specific library dependencies.
 include("pcl/testPointCloud2.jl")
 include("testPose2AprilTag4Corner.jl")
+include("testScatterAlignPose2.jl")
 
 
 using ZMQ
@@ -26,4 +27,3 @@ using Caesar, Caesar.ZmqCaesar
 end
 
 
-# include("testScatterAlignPose2.jl")

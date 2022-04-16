@@ -116,7 +116,7 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
 
   # return mmd as residual for minimization
   res = Optim.optimize(cost, [10*randn(2); 0.1*randn()] )
-
+  
   M, e0, hat(M, e0, res.minimizer)
 end
 
@@ -165,12 +165,21 @@ function overlayScatter(sap::ScatterAlignPose2,
   addVariable!(tfg, :x0, Pose2)
   addVariable!(tfg, :x1, Pose2)
   addFactor!(tfg, [:x0;:x1], sap; graphinit=false)
+
   meas = sampleFactor(tfg, :x0x1f1)[1]
-  
   M, pts1, pts2_ = meas
-  pts2 = map(pt->pt.parts[1], pts2_)
   e0 = identity_element(M)
-  # R0 = e0.parts[2]
+  PT1 = []
+  PT2_ = []
+  PT2 = []
+  for k in 1:sample_count
+    meas = sampleFactor(tfg, :x0x1f1)[1]
+    _, pts1_, pts2_ = meas
+    push!(PT1, pts1_.parts[1])
+    push!(PT2_, pts2_)
+    push!(PT2, pts2_.parts[1])
+  end
+  # pts2 = map(pt->pt.parts[1], pts2_)
 
   # not efficient, but okay for here
   pTq(xyr=user_coords) = exp(M, e0, hat(M, e0, xyr))
@@ -195,11 +204,11 @@ function overlayScatter(sap::ScatterAlignPose2,
   end
 
   # transform points1 to frame of 2 -- take p as coordinate expansion point
-  pts2T_u = map(pt->Manifolds.compose(M, inv(M, pTq()), pt).parts[1], pts2_)
-  pts2T_b = map(pt->Manifolds.compose(M, inv(M, pTq(best_coords)), pt).parts[1], pts2_)
+  pts2T_u = map(pt->Manifolds.compose(M, inv(M, pTq()), pt).parts[1], PT2_)
+  pts2T_b = map(pt->Manifolds.compose(M, inv(M, pTq(best_coords)), pt).parts[1], PT2_)
 
-  @cast __pts1[i,j] := pts1[j][i]
-  @cast __pts2[i,j] := pts2[j][i]
+  @cast __pts1[i,j] := PT1[j][i]
+  @cast __pts2[i,j] := PT2[j][i]
   @cast __pts2Tu[i,j] := pts2T_u[j][i]
   @cast __pts2Tb[i,j] := pts2T_b[j][i]
 
@@ -251,8 +260,8 @@ Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = sho
 ## =========================================================================================
 
 Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
-  cloud1::String # PackedHeatmapGridDensity # change to String
-  cloud2::String # PackedHeatmapGridDensity # change to String
+  cloud1::PackedHeatmapGridDensity # change to String
+  cloud2::PackedHeatmapGridDensity # change to String
   gridscale::Float64 = 1.0
   sample_count::Int = 50
   bw::Float64 = 0.01
@@ -261,11 +270,14 @@ end
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
 
   function _toDensityJson(dens::ManifoldKernelDensity)
-    convert(PackedSamplableBelief,dens)
+    # convert(PackedSamplableBelief,dens)
+    packDistribution(dens)
+    # JSON2.write(pd)
   end
   function _toDensityJson(dens::HeatmapGridDensity)
-    cloud1 = convert(PackedHeatmapGridDensity,dens)
-    JSON2.write(cloud1)    
+    packDistribution(dens)
+    # cloud1 = convert(PackedHeatmapGridDensity,dens)
+    # JSON2.write(cloud1)    
   end
 
   cloud1_ = _toDensityJson(arp.cloud1)
@@ -280,28 +292,22 @@ function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
 end
 
 function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
-  # first understand the schema friendly belief type to unpack
-  _cloud1 = JSON2.read(parp.cloud1)
-  _cloud2 = JSON2.read(parp.cloud2)
-  # @show _cloud1
-  # @show parp.cloud1
-  #  _cloud2[Symbol("_type")]
-  PackedT1 = DFG.getTypeFromSerializationModule(_cloud1[Symbol("_type")])
-  PackedT2 = DFG.getTypeFromSerializationModule(_cloud2[Symbol("_type")])
-  # re-unpack into the local PackedT (marshalling)
-  # TODO check if there is perhaps optimization to marshal directly from _cloud instead - maybe `obj(;namedtuple...)`
-  # pcloud1 = JSON2.read(parp.cloud1, PackedT1)
-  # pcloud2 = JSON2.read(parp.cloud2, PackedT2)
-  
-  # outT
-  outT1 = convert(SamplableBelief, PackedT1)
-  outT2 = convert(SamplableBelief, PackedT2)
-  
-  # @info "deserialize ScatterAlignPose2" typeof(_cloud1) PackedT1 outT1
 
-  # convert from packed schema friendly to local performance type
-  cloud1 = convert(outT1, parp.cloud1)
-  cloud2 = convert(outT2, parp.cloud2)
+  cloud1 = unpackDistribution(parp.cloud1)
+  cloud2 = unpackDistribution(parp.cloud2)
+
+  # # first understand the schema friendly belief type to unpack
+  # _cloud1 = JSON2.read(parp.cloud1)
+  # _cloud2 = JSON2.read(parp.cloud2)
+  # PackedT1 = DFG.getTypeFromSerializationModule(_cloud1[Symbol("_type")])
+  # PackedT2 = DFG.getTypeFromSerializationModule(_cloud2[Symbol("_type")])
+  # # outT
+  # @info "HERE" PackedT1
+  # outT1 = convert(SamplableBelief, PackedT1)
+  # outT2 = convert(SamplableBelief, PackedT2)
+  # # convert from packed schema friendly to local performance type
+  # cloud1 = convert(outT1, parp.cloud1)
+  # cloud2 = convert(outT2, parp.cloud2)
   
   # and build the final object
   ScatterAlignPose2(
