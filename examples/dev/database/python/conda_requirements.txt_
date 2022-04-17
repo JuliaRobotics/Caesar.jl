@@ -1,3 +1,5 @@
+# renamed this file as txt_ since it is not used, in core and unnecessary to piecemeal update dependabot warnings on github.  Just update all conda packages once before use.
+
 # This file may be used to create an environment using:
 # $ conda create --name <env> --file <this file>
 # platform: linux-64
