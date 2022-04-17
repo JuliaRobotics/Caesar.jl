@@ -95,6 +95,7 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   M = cf.cache.M   # getManifold(Pose2)
   e0 = cf.cache.e0 # ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
   
+  # pVi = cf.cache
   pVi,  = sample(cf.factor.cloud1, cf.factor.sample_count)
   pts2, = sample(cf.factor.cloud2, cf.factor.sample_count)
 
@@ -129,16 +130,16 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   # return mmd as residual for minimization
   res = Optim.optimize(cost, [10*randn(2); 0.1*randn()] )
   
-  M, e0, hat(M, e0, res.minimizer)
+  hat(M, e0, res.minimizer)
 end
 
 
-function (cf::CalcFactor{<:ScatterAlignPose2})(Xtup, wPp, wPq)
+function (cf::CalcFactor{<:ScatterAlignPose2})(pXq, wPp, wPq)
   # 
 
-  # TODO move M to CalcFactor, follow IIF #1415
-  M, e0, pXq = Xtup
-
+  M = cf.cache.M
+  e0 = cf.cache.e0
+  
   # get the current relative transform estimate
   wPq_ = Manifolds.compose(M, wPp, exp(M, e0, pXq))
   
