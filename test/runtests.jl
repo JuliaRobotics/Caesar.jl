@@ -4,13 +4,14 @@ using Test
 
 ## See tests in DFG, IIF, and RoME for more complete coverage of features
 
-# specific end-to-end checks for ICRA 2022 tutorials
-include("ICRA2022_tests/runtests.jl")
-
+println("Starting tests...")
 # highly multipackage tests that don't fit well in specific library dependencies.
 include("pcl/testPointCloud2.jl")
 include("testPose2AprilTag4Corner.jl")
 include("testScatterAlignPose2.jl")
+
+# specific end-to-end checks for ICRA 2022 tutorials
+include("ICRA2022_tests/runtests.jl")
 
 
 using ZMQ
