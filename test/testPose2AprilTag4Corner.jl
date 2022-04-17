@@ -63,7 +63,7 @@ apt4 = Pose2AprilTag4Corners(corners=corners, homography=homog, f_width=f_w, c_w
 
 ## test adding to a graph
 
-fg = generateCanonicalFG_ZeroPose(varType=Pose2)
+fg = generateGraph_ZeroPose(varType=Pose2)
 addVariable!(fg, :tag17, Pose2)
 
 atf = addFactor!(fg, [:x0;:tag17], apt4)

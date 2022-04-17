@@ -4,7 +4,7 @@
 
 function csmHexDelayTest(injectDelayBefore)
 
-  fg = generateCanonicalFG_Hexagonal(graphinit=false)
+  fg = generateGraph_Hexagonal(graphinit=false)
 
   getSolverParams(fg).treeinit = true
   getSolverParams(fg).graphinit = false

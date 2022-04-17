@@ -8,7 +8,7 @@ using RoME
 cb(fg_, lp) = @show lp, length(ls(fg_))
 
 Qd = diagm( [0.1;0.1;0.05].^2 )
-fg = generateCanonicalFG_Helix2DSlew!(46, slew_x=2/3, posesperturn=15, radius=10, 
+fg = generateGraph_Helix2DSlew!(46, slew_x=2/3, posesperturn=15, radius=10, 
                                       useMsgLikelihoods=false, Qd=Qd, postpose_cb=cb)
 #
 

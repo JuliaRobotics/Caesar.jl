@@ -82,7 +82,7 @@ DevNotes
 Example
 -------
 ```julia
-fg = generateCanonicalFG_Hexagonal()
+fg = generateGraph_Hexagonal()
 pl, Z = plotVariableBeliefs(fg, r"x\\d") # using optional Regex filter
 ```
 
@@ -265,7 +265,7 @@ end
 
 0
 
-# fg = generateCanonicalFG_Hexagonal()
+# fg = generateGraph_Hexagonal()
 # pl = plotVariableBeliefs(fg, r"x\d") # using optional Regex filter
 # pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=3) # using optional Regex filter
 # pl = plotVariableBeliefs(fg, r"x\d", sortVars=true, fade=2, tail=4) # using optional Regex filter
