@@ -92,15 +92,22 @@ end
 
 function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
-  M = cf.cache.M   # getManifold(Pose2)
-  e0 = cf.cache.e0 # ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+  M = cf.cache.M
+  e0 = cf.cache.e0
+  R0 = e0.parts[2]
   
-  # pVi = cf.cache
-  pVi,  = sample(cf.factor.cloud1, cf.factor.sample_count)
-  pts2, = sample(cf.factor.cloud2, cf.factor.sample_count)
+  pVi = cf.cache.smps1
+  pts2 = cf.cache.smps2
+  # Fresh samples
+  for i in 1:cf.factor.sample_count
+    pVi[i] .= sample(cf.factor.cloud1)[1][1]
+    pts2[i] .= sample(cf.factor.cloud2)[1][1]
+  end
+  # pVi,  = sample(cf.factor.cloud1, cf.factor.sample_count)
+  # pts2, = sample(cf.factor.cloud2, cf.factor.sample_count)
 
   # precalc SE2 points
-  R0 = e0.parts[2]
+
   # source memory
   qVj_ = map(pt->ProductRepr(SVector(pt...), R0), pts2)
   # destination memory
@@ -130,6 +137,8 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   # return mmd as residual for minimization
   res = Optim.optimize(cost, [10*randn(2); 0.1*randn()] )
   
+  # give measurement relative to e0 identity
+  #  TODO relax to Riemannian where e0 is replaced by any point
   hat(M, e0, res.minimizer)
 end
 
