@@ -232,7 +232,7 @@ addBlobStore!(fg, datastore)
 ##
 
 # drive the first box, no correlations
-RoME.generateCanonicalFG_Boxes2D!(8, dfg=fg, skew_x=skew_x, postpose_cb=newcallback_ex4)
+RoME.generateGraph_Boxes2D!(8, dfg=fg, skew_x=skew_x, postpose_cb=newcallback_ex4)
 
 
 

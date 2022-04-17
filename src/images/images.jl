@@ -112,7 +112,7 @@ Example
 -------
 
 ```julia
-fg = generateCanonicalFG_Hexagonal()
+fg = generateGraph_Hexagonal()
 tree = solveTree!(fg, recordcliqs=ls(fg))
 
 # now generate all the video frames at default `folderpath=/tmp/caesar/csmCompound/`
