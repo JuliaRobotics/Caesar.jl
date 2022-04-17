@@ -1,6 +1,6 @@
 
 
-import IncrementalInference: getSample
+import IncrementalInference: getSample, preambleCache
 import Base: convert, show
 # import DistributedFactorGraphs: getManifold
 import ApproxManifoldProducts: sample
@@ -66,6 +66,18 @@ ScatterAlignPose2(im1::AbstractMatrix{T},
 
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 
+# runs once upon addFactor! and returns object later used as `cache`
+function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::ScatterAlignPose2)
+  #
+  M = getManifold(Pose2)
+  e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+
+  smps1, = sample(fnc.cloud1, fnc.sample_count)
+  smps2, = sample(fnc.cloud2, fnc.sample_count)
+  
+  (;M,e0,smps1,smps2)
+end
+
 Base.@kwdef struct _FastRetract{M_ <: AbstractManifold, T}
   M::M_ = SpecialEuclidean(2)
   pTq::T = ProductRepr(MVector(0,0.0), MMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
@@ -80,11 +92,11 @@ end
 
 function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
+  M = cf.cache.M   # getManifold(Pose2)
+  e0 = cf.cache.e0 # ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+  
   pVi,  = sample(cf.factor.cloud1, cf.factor.sample_count)
   pts2, = sample(cf.factor.cloud2, cf.factor.sample_count)
-  
-  M = getManifold(Pose2)
-  e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
 
   # precalc SE2 points
   R0 = e0.parts[2]
