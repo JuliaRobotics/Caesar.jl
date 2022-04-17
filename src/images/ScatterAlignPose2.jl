@@ -186,48 +186,58 @@ function overlayScatter(sap::ScatterAlignPose2,
   tfg = initfg()
   addVariable!(tfg, :x0, Pose2)
   addVariable!(tfg, :x1, Pose2)
-  addFactor!(tfg, [:x0;:x1], sap; graphinit=false)
+  fc = addFactor!(tfg, [:x0;:x1], sap; graphinit=false)
 
   meas = sampleFactor(tfg, :x0x1f1)[1]
-  M, pts1, pts2_ = meas
-  e0 = identity_element(M)
-  PT1 = []
-  PT2_ = []
-  PT2 = []
-  for k in 1:sample_count
-    meas = sampleFactor(tfg, :x0x1f1)[1]
-    _, pts1_, pts2_ = meas
-    push!(PT1, pts1_.parts[1])
-    push!(PT2_, pts2_)
-    push!(PT2, pts2_.parts[1])
-  end
+
+  cac = IIF._getCCW(fc).dummyCache
+  PT1 = cac.smps1
+  PT2 = cac.smps2
+
+  M = cac.M
+  e0 = cac.e0
+  R0 = [1 0; 0 1.]
+
+  # M, pts1, pts2_ = meas
+  # e0 = identity_element(M)
+  # PT1 = []
+  # PT2_ = []
+  # PT2 = []
+  # for k in 1:sample_count
+  #   meas = sampleFactor(tfg, :x0x1f1)[1]
+  #   _, pts1_, pts2_ = meas
+  #   push!(PT1, pts1_.parts[1])
+  #   push!(PT2_, pts2_)
+  #   push!(PT2, pts2_.parts[1])
+  # end
   # pts2 = map(pt->pt.parts[1], pts2_)
 
   # not efficient, but okay for here
   pTq(xyr=user_coords) = exp(M, e0, hat(M, e0, xyr))
 
+  best = vee(M, e0, meas)
+  best_coords = round.(best,digits=3)
+  # best_coords = zeros(3)
+  # if findBest
+  #   # keep tfg separately so that optim can be more efficient
+  #   # tfg = initfg()
+  #   ev_(xyr) = calcFactorResidualTemporary( sap, (Pose2,Pose2),
+  #                                           meas,
+  #                                           (e0,pTq(xyr));
+  #                                           tfg )[1]
+  #   #
+  #   score[] = ev_(user_coords)
+  #   best = Optim.optimize(ev_, user_coords, BFGS())
+  #   best_coords .= round.(best.minimizer,digits=3)
 
-  best_coords = zeros(3)
-  if findBest
-    # keep tfg separately so that optim can be more efficient
-    # tfg = initfg()
-    ev_(xyr) = calcFactorResidualTemporary( sap, (Pose2,Pose2),
-                                            meas,
-                                            (e0,pTq(xyr));
-                                            tfg )[1]
-    #
-    score[] = ev_(user_coords)
-    best = Optim.optimize(ev_, user_coords, BFGS())
-    best_coords .= round.(best.minimizer,digits=3)
-
-    if showscore
-      @info "overlayScatter score" score[] string(best_coords) best.minimum # user_offset
-    end
-  end
+  #   if showscore
+  #     @info "overlayScatter score" score[] string(best_coords) best.minimum # user_offset
+  #   end
+  # end
 
   # transform points1 to frame of 2 -- take p as coordinate expansion point
-  pts2T_u = map(pt->Manifolds.compose(M, inv(M, pTq()), pt).parts[1], PT2_)
-  pts2T_b = map(pt->Manifolds.compose(M, inv(M, pTq(best_coords)), pt).parts[1], PT2_)
+  pts2T_u = map(pt->Manifolds.compose(M, inv(M, pTq()), ProductRepr(pt,R0)).parts[1], PT2)
+  pts2T_b = map(pt->Manifolds.compose(M, inv(M, pTq(best)), ProductRepr(pt,R0)).parts[1], PT2)
 
   @cast __pts1[i,j] := PT1[j][i]
   @cast __pts2[i,j] := PT2[j][i]

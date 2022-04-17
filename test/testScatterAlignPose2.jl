@@ -7,7 +7,7 @@ using Distributions
 using Manifolds
 
 # test plotting helper functions
-# using Gadfly
+using Gadfly
 using Random
 
 import Rotations as _Rot
@@ -58,8 +58,8 @@ sap = ScatterAlignPose2(bIM1, bIM2, (x,y); sample_count=100, bw=1.0, cvt=(im)->i
 ## test plotting function
 
 @warn("overlayScatterMutate is OUT OF DATE, these functions need to be updated to use new cache sampling values instead")
-# snt = overlayScatterMutate(sap; sample_count=100, bw=1., user_coords=[0.;0;0*pi/6], findBest=false); # , user_offset=[0.;0;0.]);
-# plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
+snt = overlayScatterMutate(sap; sample_count=100, bw=1., user_coords=[2.;0;pi/6], findBest=false); # , user_offset=[0.;0;0.]);
+plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 
 # inverse for q --> p
 # @test_broken isapprox( pCq[1:2], snt.best_coords[1:2]; atol=0.3 )
