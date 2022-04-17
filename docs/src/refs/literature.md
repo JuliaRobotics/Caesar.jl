@@ -84,6 +84,8 @@ Newly created page to list related references and additional literature pertaini
 
 [3.9]  Mangelson, J.G., Dominic, D., Eustice, R.M. and Vasudevan, R., 2018, May. [Pairwise consistent measurement set maximization for robust multi-robot map merging](http://141.212.194.179/publications/jmangelson-2018a.pdf). In 2018 IEEE international conference on robotics and automation (ICRA) (pp. 2916-2923). IEEE.
 
+[3.10] Bourgeois, F. and Lassalle, J.C., 1971. [An extension of the Munkres algorithm for the assignment problem to rectangular matrices](https://dl.acm.org/doi/pdf/10.1145/362919.362945). Communications of the ACM, 14(12), pp.802-804.
+
 ### Signal Processing (Beamforming and Channel Deconvolution)
 
 [4.1]  Van Trees, H.L., 2004. Optimum array processing: Part IV of detection, estimation, and modulation theory. John Wiley & Sons.
