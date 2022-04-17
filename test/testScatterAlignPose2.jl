@@ -19,8 +19,6 @@ import Rotations as _Rot
 x = -10:0.1:10;
 y = -10:0.1:10;
 
-x = -10:0.1:10;
-
 σ = 0.1
 
 g = (x,y)->pdf(MvNormal([3.;0],[σ;σ]),[x;y]) + pdf(MvNormal([8.;0.0],[σ;σ]),[x;y]) + pdf(MvNormal([0;5.0],[σ;σ]),[x;y])
@@ -56,14 +54,13 @@ sap = ScatterAlignPose2(bIM1, bIM2, (x,y); sample_count=100, bw=1.0, cvt=(im)->i
 
 ## test plotting function
 
-snt = overlayScatterMutate(sap; sample_count=50, bw=1., user_coords=[0.;0;0*pi/6]); # , user_offset=[0.;0;0.]);
-plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
-
-##
+@warn("overlayScatterMutate is OUT OF DATE, these functions need to be updated via cache approach in sampling")
+# snt = overlayScatterMutate(sap; sample_count=100, bw=1., user_coords=[0.;0;0*pi/6], findBest=false); # , user_offset=[0.;0;0.]);
+# plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 
 # inverse for q --> p
-@test_broken isapprox( pCq[1:2], snt.best_coords[1:2]; atol=0.3 )
-@test_broken isapprox( pCq[3], snt.best_coords[3]; atol=0.2 )
+# @test_broken isapprox( pCq[1:2], snt.best_coords[1:2]; atol=0.3 )
+# @test_broken isapprox( pCq[3], snt.best_coords[3]; atol=0.2 )
 
 
 
