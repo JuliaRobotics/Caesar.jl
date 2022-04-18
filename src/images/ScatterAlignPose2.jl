@@ -74,8 +74,12 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fn
 
   smps1, = sample(fnc.cloud1, fnc.sample_count)
   smps2, = sample(fnc.cloud2, fnc.sample_count)
+
+  bw = SA[fnc.bw;]
   
-  (;M,e0,smps1,smps2)
+  score = Ref(0.0)
+
+  (;M,e0,smps1,smps2,bw,score)
 end
 
 Base.@kwdef struct _FastRetract{M_ <: AbstractManifold, T}
@@ -90,6 +94,63 @@ function (_user::_FastRetract)(pCq::AbstractVector{<:Real})
   return _user.pTq
 end
 
+@doc raw"""
+    $SIGNATURES
+
+Transform and put 2D pointcloud as [x,y] coordinates of a-frame into `aP_dest`, by transforming 
+incoming b-frame points `bP_src` as [x,y] coords via the transform `aTb` describing the b-to-a (aka a-in-b)
+relation.  Return the vector of points `aP_dest`.
+
+````math
+{}^a \begin{bmatrix} x, y \end{bmatrix} = {}^a_b \mathbf{T} \, {}^b \begin{bmatrix} x, y \end{bmatrix}
+````
+"""
+function _transformPointCloud2D!(
+    # manifold
+    M::typeof(SpecialEuclidean(2)),
+    # destination points
+    aP_dest::AbstractVector,
+    # source points
+    bP_src::AbstractVector,
+    # transform coordinates
+    aCb::AbstractVector{<:Real}; 
+    # base point on manifold about which to do the transform
+    e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0)),
+    backward::Bool=false
+  )
+  #
+  
+  aTb = retract(M, e0, hat(M, e0, aCb))
+  aTb = backward ? inv(M,aTb) : aTb
+  bT_src = ProductRepr(MVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0))
+  aT_dest = ProductRepr(MVector(0.0,0.0), MMatrix{2,2}(1.0,0.0,0.0,1.0))
+  
+  for (i,bP) in enumerate(bP_src)
+    bT_src.parts[1] .= bP
+    Manifolds.compose!(M, aT_dest, aTb, bT_src)
+    # aP_dest[i][:] = Manifolds.compose(M, aTb, bP_src[i]).parts[1]
+    aP_dest[i] .= aT_dest.parts[1]
+  end
+
+  aP_dest
+end
+
+function _transformPointCloud2D(
+    # manifold
+    M::typeof(SpecialEuclidean(2)),
+    # source points
+    bP_src::AbstractVector,
+    # transform coordinates
+    aCb::AbstractVector{<:Real}; 
+    kw...
+  )
+  #
+  #dest points
+  aP_dest = typeof(MVector(0.0,0.0))[MVector(0.0,0.0) for _ in 1:length(bP_src)] # Vector{typeof(MVector(0.0,0.0))}(undef, length(bP_src))
+  # fill!(aP_dest, MVector(0.0,0.0))
+  _transformPointCloud2D!(M, aP_dest, bP_src, aCb; kw...)
+end
+
 function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
   M = cf.cache.M
@@ -97,45 +158,23 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   R0 = e0.parts[2]
   
   pVi = cf.cache.smps1
-  pts2 = cf.cache.smps2
+  qVj = cf.cache.smps2
   # Fresh samples
   for i in 1:cf.factor.sample_count
     pVi[i] .= sample(cf.factor.cloud1)[1][1]
-    pts2[i] .= sample(cf.factor.cloud2)[1][1]
+    qVj[i] .= sample(cf.factor.cloud2)[1][1]
   end
-  # pVi,  = sample(cf.factor.cloud1, cf.factor.sample_count)
-  # pts2, = sample(cf.factor.cloud2, cf.factor.sample_count)
-
-  # precalc SE2 points
-
-  # source memory
-  qVj_ = map(pt->ProductRepr(SVector(pt...), R0), pts2)
-  # destination memory
-  _pVj_! = map(pt->ProductRepr(MVector(pt...), MMatrix{2,2}(0.0,0.0,0.0,0.0)), pts2)
-  _pVj! = map(x->x.parts[1], _pVj_!)
-
-  function pVj(xyr)
-    pTq! = _FastRetract()
-    for i in eachindex(qVj_)
-      Manifolds.compose!(M, _pVj_![i], pTq!(xyr), qVj_[i])
-      # _pVj![i][:] = Manifolds.compose(M, pTq!(xyr), qVj_[i]).parts[1] 
-    end
-
-    _pVj!
-  end
-
-  # # get the current relative transform estimate
-  # pTq! = _FastRetract() # not really any faster yet
-  # # not efficient, but okay for here
-  # # pTq(xyr) = exp(M, e0, hat(M, e0, xyr))
-  # # move other points with relative transform
-  # pVj(xyr) = map(pt->Manifolds.compose(M, pTq!(xyr), pt).parts[1], qVj_)
   
-  bw = SA[cf.factor.bw;]
-  cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj_), cf._allowThreads; bw)
-
+  # qVi(qCp) = _transformPointCloud2D(M,pVi,qCp)
+  pVj(qCp) = _transformPointCloud2D(M,qVj,qCp; backward=true)
+  
+  # bw = SA[cf.factor.bw;]
+  cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj), cf._allowThreads; cf.cache.bw)
+  
   # return mmd as residual for minimization
-  res = Optim.optimize(cost, [10*randn(2); 0.1*randn()] )
+  res = Optim.optimize(cost, [10*randn(2); 0.1*randn()], Optim.BFGS() )
+  
+  cf.cache.score[] = res.minimum
   
   # give measurement relative to e0 identity
   #  TODO relax to Riemannian where e0 is replaced by any point
@@ -145,7 +184,7 @@ end
 
 function (cf::CalcFactor{<:ScatterAlignPose2})(pXq, wPp, wPq)
   # 
-
+  
   M = cf.cache.M
   e0 = cf.cache.e0
   
@@ -155,10 +194,9 @@ function (cf::CalcFactor{<:ScatterAlignPose2})(pXq, wPp, wPq)
   #TODO allocalte for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
   vee!(M, Xc, wPq, log(M, wPq, wPq_))
+  
   return Xc
 end
-
-
 
 
 """
@@ -176,7 +214,7 @@ function overlayScatter(sap::ScatterAlignPose2,
                         trans::AbstractVector{<:Real}=[0;0.0],
                         rot::Real=0.0;
                         user_coords = [trans; rot],
-                        score=Ref(0.0),
+                        # score=Ref(0.0),
                         sample_count::Integer=sap.sample_count,
                         showscore::Bool=true,
                         findBest::Bool=true  )
@@ -184,11 +222,14 @@ function overlayScatter(sap::ScatterAlignPose2,
 
   # # sample points from the scatter field
   tfg = initfg()
+  # getSolverParams(tfg).attemptGradients = false
   addVariable!(tfg, :x0, Pose2)
   addVariable!(tfg, :x1, Pose2)
   fc = addFactor!(tfg, [:x0;:x1], sap; graphinit=false)
 
   meas = sampleFactor(tfg, :x0x1f1)[1]
+
+  b_score = IIF._getCCW(tfg, :x0x1f1).dummyCache.score[]
 
   cac = IIF._getCCW(fc).dummyCache
   PT1 = cac.smps1
@@ -198,53 +239,23 @@ function overlayScatter(sap::ScatterAlignPose2,
   e0 = cac.e0
   R0 = [1 0; 0 1.]
 
-  # M, pts1, pts2_ = meas
-  # e0 = identity_element(M)
-  # PT1 = []
-  # PT2_ = []
-  # PT2 = []
-  # for k in 1:sample_count
-  #   meas = sampleFactor(tfg, :x0x1f1)[1]
-  #   _, pts1_, pts2_ = meas
-  #   push!(PT1, pts1_.parts[1])
-  #   push!(PT2_, pts2_)
-  #   push!(PT2, pts2_.parts[1])
-  # end
-  # pts2 = map(pt->pt.parts[1], pts2_)
-
   # not efficient, but okay for here
-  pTq(xyr=user_coords) = exp(M, e0, hat(M, e0, xyr))
+  # pTq(xyr=user_coords) = exp(M, e0, hat(M, e0, xyr))
 
   best = vee(M, e0, meas)
   best_coords = round.(best,digits=3)
-  # best_coords = zeros(3)
-  # if findBest
-  #   # keep tfg separately so that optim can be more efficient
-  #   # tfg = initfg()
-  #   ev_(xyr) = calcFactorResidualTemporary( sap, (Pose2,Pose2),
-  #                                           meas,
-  #                                           (e0,pTq(xyr));
-  #                                           tfg )[1]
-  #   #
-  #   score[] = ev_(user_coords)
-  #   best = Optim.optimize(ev_, user_coords, BFGS())
-  #   best_coords .= round.(best.minimizer,digits=3)
-
-  #   if showscore
-  #     @info "overlayScatter score" score[] string(best_coords) best.minimum # user_offset
-  #   end
-  # end
-
-  # transform points1 to frame of 2 -- take p as coordinate expansion point
-  pts2T_u = map(pt->Manifolds.compose(M, inv(M, pTq()), ProductRepr(pt,R0)).parts[1], PT2)
-  pts2T_b = map(pt->Manifolds.compose(M, inv(M, pTq(best)), ProductRepr(pt,R0)).parts[1], PT2)
+  
+  # transform points1 to frame of 2.  TBD, p as coordinate expansion point?
+  pts2T_u = _transformPointCloud2D(M, PT2, user_coords; backward=true)
+  pts2T_b = _transformPointCloud2D(M, PT2, best; backward=true)
 
   @cast __pts1[i,j] := PT1[j][i]
   @cast __pts2[i,j] := PT2[j][i]
   @cast __pts2Tu[i,j] := pts2T_u[j][i]
   @cast __pts2Tb[i,j] := pts2T_b[j][i]
-
-  (;pP1=__pts1, qP2=__pts2, pP2_u=__pts2Tu, pP2_b=__pts2Tb, best_coords, user_coords, score=round(score[],digits=5)) #, user_offset)
+  
+  # return NamedTuple obj with all the necessary data for plotting, see plotScatterAlign
+  (;pP1=__pts1, qP2=__pts2, pP2_u=__pts2Tu, pP2_b=__pts2Tb, best_coords, user_coords, u_score=round(0,sigdigits=3), b_score=round(b_score[],sigdigits=3)) #, user_offset)
 end
 
 
@@ -301,19 +312,8 @@ end
 
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
 
-  function _toDensityJson(dens::ManifoldKernelDensity)
-    # convert(PackedSamplableBelief,dens)
-    packDistribution(dens)
-    # JSON2.write(pd)
-  end
-  function _toDensityJson(dens::HeatmapGridDensity)
-    packDistribution(dens)
-    # cloud1 = convert(PackedHeatmapGridDensity,dens)
-    # JSON2.write(cloud1)    
-  end
-
-  cloud1_ = _toDensityJson(arp.cloud1)
-  cloud2_ = _toDensityJson(arp.cloud2)
+  cloud1_ = packDistribution(arp.cloud1)
+  cloud2_ = packDistribution(arp.cloud2)
 
   PackedScatterAlignPose2(;
     cloud1 = cloud1_,
@@ -327,19 +327,6 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
 
   cloud1 = unpackDistribution(parp.cloud1)
   cloud2 = unpackDistribution(parp.cloud2)
-
-  # # first understand the schema friendly belief type to unpack
-  # _cloud1 = JSON2.read(parp.cloud1)
-  # _cloud2 = JSON2.read(parp.cloud2)
-  # PackedT1 = DFG.getTypeFromSerializationModule(_cloud1[Symbol("_type")])
-  # PackedT2 = DFG.getTypeFromSerializationModule(_cloud2[Symbol("_type")])
-  # # outT
-  # @info "HERE" PackedT1
-  # outT1 = convert(SamplableBelief, PackedT1)
-  # outT2 = convert(SamplableBelief, PackedT2)
-  # # convert from packed schema friendly to local performance type
-  # cloud1 = convert(outT1, parp.cloud1)
-  # cloud2 = convert(outT2, parp.cloud2)
   
   # and build the final object
   ScatterAlignPose2(
