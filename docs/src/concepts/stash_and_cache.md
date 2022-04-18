@@ -35,7 +35,7 @@ The Caesar.jl framework [supports various data store](@ref section_data_entry_bl
 
 If the user chooses to store weird and wonderful caching links to alternative hardware via the described caching, go forth and be productive!  Consider sharing enhancements back the public repositories.
 
-## Stash Serialization
+## [Stash Serialization](@id section_stash_unstash)
 
 !!! note
     Stashing uses [Additional (Large) Data](@ref section_data_entry_blob_store) storage and retrieval following starved graph design considerations.

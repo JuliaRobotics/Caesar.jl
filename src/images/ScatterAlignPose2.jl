@@ -45,8 +45,8 @@ Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:Hea
   sample_count::Int  = 100
   """ bandwidth to use for mmd """
   bw::Float64        = 1.0
-  """ EXPERIMENTAL, leverage data stores to 'stash' large point clouds, see 'Stash & Cache' """
-  stashSerialize
+  """ EXPERIMENTAL, flag whether to use 'stashing' for large point cloud, see [Stash & Cache](@ref section_stash_unstash) """
+  stashSerialize::Bool = false
   """ DataEntry ID for hollow store of cloud 1 & 2 """
   dataEntry_cloud1::String = ""
   dataEntry_cloud2::String = ""
