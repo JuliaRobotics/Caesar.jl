@@ -45,9 +45,11 @@ Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:Hea
   sample_count::Int  = 100
   """ bandwidth to use for mmd """
   bw::Float64        = 1.0
-  """ EXPERIMENTAL, DataEntry ID for hollow store of cloud 1 & 2 """
-  c1_entryId::String = ""
-  c2_entryId::String = ""
+  """ EXPERIMENTAL, leverage data stores to 'stash' large point clouds, see 'Stash & Cache' """
+  stashSerialize
+  """ DataEntry ID for hollow store of cloud 1 & 2 """
+  dataEntry_cloud1::String = ""
+  dataEntry_cloud2::String = ""
   """ Data store hint where likely to find the data entries and blobs for reconstructing cloud1 and cloud2"""
   dataStoreHint::String = ""
 end
@@ -76,6 +78,14 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fn
   #
   M = getManifold(Pose2)
   e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+
+  # constitute cloud belief from dataEntry
+  if 0 < length(fnc.dataEntry_cloud1)
+    de1, db1 = getData(dfg, getLabel(vars[1]), fnc.dataEntry_cloud1) # fnc.dataStoreHint
+    cld1 = unpackDistribution(db1)
+    update!(fnc.cloud1, cld1)
+
+  end
 
   smps1, = sample(fnc.cloud1, fnc.sample_count)
   smps2, = sample(fnc.cloud2, fnc.sample_count)
@@ -247,8 +257,8 @@ Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
   sample_count::Int = 50
   bw::Float64 = 0.01
   """ EXPERIMENTAL, DataEntry ID for hollow store of cloud 1 & 2 """
-  c1_entryId::String = ""
-  c2_entryId::String = ""
+  dataEntry_cloud1::String = ""
+  dataEntry_cloud2::String = ""
   """ Data store hint where likely to find the data entries and blobs for reconstructing cloud1 and cloud2"""
   dataStoreHint::String = ""
 end
@@ -264,8 +274,8 @@ function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
     gridscale = arp.gridscale,
     sample_count = arp.sample_count,
     bw = arp.bw,
-    c1_entryId = arp.c1_entryId,
-    c2_entryId = arp.c2_entryId,
+    dataEntry_cloud1 = arp.dataEntry_cloud1,
+    dataEntry_cloud2 = arp.dataEntry_cloud2,
     dataStoreHint = arp.dataStoreHint )
 end
 
@@ -281,8 +291,8 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
     gridscale=parp.gridscale,
     sample_count=parp.sample_count,
     bw=parp.bw,
-    c1_entryId = parp.c1_entryId,
-    c2_entryId = parp.c2_entryId,
+    dataEntry_cloud1 = parp.dataEntry_cloud1,
+    dataEntry_cloud2 = parp.dataEntry_cloud2,
     dataStoreHint = parp.dataStoreHint )
 end
 

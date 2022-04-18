@@ -70,6 +70,7 @@ makedocs(
             "Custom Variables" => "examples/custom_variables.md",
             "Custom Prior Factor" => "examples/basic_definingfactors.md",
             "Custom Relative Factor" => "examples/custom_relative_factors.md",
+            "Caching and Stashing" => "concepts/stash_and_cache.md",
             "Important Factor Features" => "examples/custom_factor_features.md",
             "Variable/Factor Considerations" => "examples/adding_variables_factors.md",
             "More Functions" => "func_ref.md",

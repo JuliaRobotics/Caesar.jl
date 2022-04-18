@@ -1,4 +1,4 @@
-# Additional (Large) Data
+# [Additional (Large) Data](@id section_data_entry_blob_store)
 
 There are a variety of situations that require more data to be stored natively in the factor graph object.
 This page will showcase some of `Entry=>Data` features available.
@@ -46,7 +46,7 @@ pngBytes = take!(io)
 addData!(fg, :default_folder_store, :x1, :testImage, pngBytes, mimeType="image/png", description="mandrill test image"  )
 ```
 
-## Retrieving a Data Blob
+## [Retrieving a Data Blob](@id section_retrieve_data_blob)
 
 Data is stored as an `Entry => Blob` relationship, and the entries associated with a variable can be found via
 ```julia

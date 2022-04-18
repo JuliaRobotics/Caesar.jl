@@ -70,3 +70,8 @@ MyThreadSafeFactor(z) = MyThreadSafeFactor(z, [MyInplaceMem(0) for i in 1:Thread
 
 !!! note
     Beyond the cases discussed above, other features in the IncrementalInference.jl code base (especially regarding the Bayes tree) are already multithreaded.
+
+
+## Factor Caching (In-place operations)
+
+In-place memory operations for factors can have a significant performance improvement.  See the [Cache and Stash section](@ref section_stash_and_cache) for more details.
