@@ -163,9 +163,9 @@ solveGraph!(fg);
 checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:l1;:l2], atol=0.01)
 checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:l3;:l4], atol=0.3)
 
-checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x0], atol=0.15)
-checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x1], atol=0.3)
-checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x2], atol=0.3)
+checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x0], atol=0.2)
+checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x1], atol=0.4)
+checkTut3Posteriors(fg, refFdr; suffix="_2", vars=[:x2], atol=0.4)
 
 ## ===========================================================================================
 ## PART _3

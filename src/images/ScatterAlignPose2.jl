@@ -172,7 +172,7 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj), cf._allowThreads; cf.cache.bw)
   
   # return mmd as residual for minimization
-  res = Optim.optimize(cost, [10*randn(2); 0.1*randn()], Optim.BFGS() )
+  res = Optim.optimize(cost, [5*randn(2); 0.1*randn()], Optim.BFGS() )
   
   cf.cache.score[] = res.minimum
   
