@@ -24,7 +24,7 @@ y = -10:0.1:10;
 σ = 0.1
 
 Σ = Diagonal([σ;σ])
-g = (x,y)->pdf(MvNormal([3.;0],Σ),[x;y]) + pdf(MvNormal([8.;0.0],Σ),[x;y]) + pdf(MvNormal([0;5.0],Σ),[x;y])
+g = (x,y)->pdf(MvNormal([3.;0],Σ),[x;y]) + pdf(MvNormal([8.;0.0],4*Σ),[x;y]) + pdf(MvNormal([0;5.0],Σ),[x;y])
 
 bIM1 = zeros(length(x),length(y))
 bIM2 = zeros(length(x),length(y))
@@ -57,15 +57,14 @@ sap = ScatterAlignPose2(bIM1, bIM2, (x,y); sample_count=100, bw=1.0, cvt=(im)->i
 
 ## test plotting function
 
-snt = overlayScatterMutate(sap; sample_count=100, bw=0.01, user_coords=[0.;0;pi/6]);  # , user_offset=[0.;0;0.]);
+snt = overlayScatterMutate(sap; sample_count=100, bw=0.001, user_coords=[0.;0;pi/6]);  # , user_offset=[0.;0;0.]);
 plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 
 ##
 
 # inverse for q --> p
-# @test_broken isapprox( pCq[1:2], snt.best_coords[1:2]; atol=0.3 )
-# @test_broken isapprox( pCq[3], snt.best_coords[3]; atol=0.2 )
-
+@test isapprox( pCq[1:2], snt.best_coords[1:2]; atol=1 )
+@test isapprox( pCq[3], rem2pi(snt.best_coords[3], RoundNearest); atol=0.2 )
 
 
 ## check packing and unpacking
@@ -125,7 +124,7 @@ c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
 ##
 
 @test_broken isapprox( pCq[1:2], c1[1:2], atol=0.1 )
-@test_broken isapprox( pCq[3], c1[3],   atol=0.3 )
+@test_broken isapprox( pCq[3], rem2pi(c1[3],RoundNearest),   atol=0.3 )
 
 ## Check pack and unpacking of the SAP factor
 
@@ -205,12 +204,12 @@ sap = ScatterAlignPose2(;cloud1=P1, cloud2=P2, sample_count=100, bw=1.0)
 
 ## test plotting function
 
-# snt = overlayScatterMutate(sap; sample_count=100, bw=2.0, user_coords=[0.;0;0*pi/6]);
+snt = overlayScatterMutate(sap; sample_count=100, bw=2.0, user_coords=[0.;0;0*pi/6]);
 # plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 
 # inverse for q --> p
-# @test isapprox( oT, snt.best_coords[1:2]; atol=1.0 )
-# @test isapprox( oΨ,   snt.best_coords[3]; atol=0.5 )
+@test isapprox( oT, snt.best_coords[1:2]; atol=1.0 )
+@test isapprox( oΨ,   rem2pi(snt.best_coords[3], RoundNearest); atol=0.5 )
 
 ##
 
@@ -257,11 +256,10 @@ c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
 
 ##
 
-@error "Disabled a SAP test"
-if false
-  @test isapprox( pCq[1:2], c1[1:2], atol=0.5 )
-  @test isapprox( pCq[3], c1[3],   atol=0.3 )
-end
+# @error "Disabled a SAP test"
+@test isapprox( pCq[1:2], c1[1:2], atol=1.0 )
+@test isapprox( pCq[3], rem2pi(c1[3], RoundNearest),   atol=0.3 )
+
 
 ##
 end
