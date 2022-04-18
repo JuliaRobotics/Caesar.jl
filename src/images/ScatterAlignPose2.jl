@@ -45,6 +45,11 @@ Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:Hea
   sample_count::Int  = 100
   """ bandwidth to use for mmd """
   bw::Float64        = 1.0
+  """ EXPERIMENTAL, DataEntry ID for hollow store of cloud 1 & 2 """
+  c1_entryId::String = ""
+  c2_entryId::String = ""
+  """ Data store hint where likely to find the data entries and blobs for reconstructing cloud1 and cloud2"""
+  dataStoreHint::String = ""
 end
 
 
@@ -82,74 +87,6 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fn
   (;M,e0,smps1,smps2,bw,score)
 end
 
-Base.@kwdef struct _FastRetract{M_ <: AbstractManifold, T}
-  M::M_ = SpecialEuclidean(2)
-  pTq::T = ProductRepr(MVector(0,0.0), MMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
-  p::ProductRepr{Tuple{SVector{2, Float64}, SMatrix{2, 2, Float64, 4}}} = ProductRepr(SA[0.0;0.0], SMatrix{2,2}(1.0, 0, 0, 1))
-end
-
-function (_user::_FastRetract)(pCq::AbstractVector{<:Real})
-  retract!(_user.M, _user.pTq, _user.p, hat(_user.M, _user.p, pCq))
-
-  return _user.pTq
-end
-
-@doc raw"""
-    $SIGNATURES
-
-Transform and put 2D pointcloud as [x,y] coordinates of a-frame into `aP_dest`, by transforming 
-incoming b-frame points `bP_src` as [x,y] coords via the transform `aTb` describing the b-to-a (aka a-in-b)
-relation.  Return the vector of points `aP_dest`.
-
-````math
-{}^a \begin{bmatrix} x, y \end{bmatrix} = {}^a_b \mathbf{T} \, {}^b \begin{bmatrix} x, y \end{bmatrix}
-````
-"""
-function _transformPointCloud2D!(
-    # manifold
-    M::typeof(SpecialEuclidean(2)),
-    # destination points
-    aP_dest::AbstractVector,
-    # source points
-    bP_src::AbstractVector,
-    # transform coordinates
-    aCb::AbstractVector{<:Real}; 
-    # base point on manifold about which to do the transform
-    e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0)),
-    backward::Bool=false
-  )
-  #
-  
-  aTb = retract(M, e0, hat(M, e0, aCb))
-  aTb = backward ? inv(M,aTb) : aTb
-  bT_src = ProductRepr(MVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0))
-  aT_dest = ProductRepr(MVector(0.0,0.0), MMatrix{2,2}(1.0,0.0,0.0,1.0))
-  
-  for (i,bP) in enumerate(bP_src)
-    bT_src.parts[1] .= bP
-    Manifolds.compose!(M, aT_dest, aTb, bT_src)
-    # aP_dest[i][:] = Manifolds.compose(M, aTb, bP_src[i]).parts[1]
-    aP_dest[i] .= aT_dest.parts[1]
-  end
-
-  aP_dest
-end
-
-function _transformPointCloud2D(
-    # manifold
-    M::typeof(SpecialEuclidean(2)),
-    # source points
-    bP_src::AbstractVector,
-    # transform coordinates
-    aCb::AbstractVector{<:Real}; 
-    kw...
-  )
-  #
-  #dest points
-  aP_dest = typeof(MVector(0.0,0.0))[MVector(0.0,0.0) for _ in 1:length(bP_src)] # Vector{typeof(MVector(0.0,0.0))}(undef, length(bP_src))
-  # fill!(aP_dest, MVector(0.0,0.0))
-  _transformPointCloud2D!(M, aP_dest, bP_src, aCb; kw...)
-end
 
 function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
@@ -264,7 +201,7 @@ function overlayScatterMutate(sap_::ScatterAlignPose2;
                               bw::Real = sap_.bw,
                               kwargs... )
   #
-  sap = ScatterAlignPose2(sap_.cloud1, sap_.cloud2, sap_.gridscale, sample_count, float(bw))
+  sap = ScatterAlignPose2(;cloud1=sap_.cloud1, cloud2=sap_.cloud2, gridscale=sap_.gridscale, sample_count, bw=float(bw))
   Caesar.overlayScatter(sap; kwargs...);
 end
 
@@ -303,24 +240,33 @@ Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = sho
 ## =========================================================================================
 
 Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
-  cloud1::PackedHeatmapGridDensity # change to String
-  cloud2::PackedHeatmapGridDensity # change to String
+  _type::String = "Caesar.PackedScatterAlignPose2"
+  cloud1::PackedHeatmapGridDensity
+  cloud2::PackedHeatmapGridDensity
   gridscale::Float64 = 1.0
   sample_count::Int = 50
   bw::Float64 = 0.01
+  """ EXPERIMENTAL, DataEntry ID for hollow store of cloud 1 & 2 """
+  c1_entryId::String = ""
+  c2_entryId::String = ""
+  """ Data store hint where likely to find the data entries and blobs for reconstructing cloud1 and cloud2"""
+  dataStoreHint::String = ""
 end
 
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
 
-  cloud1_ = packDistribution(arp.cloud1)
-  cloud2_ = packDistribution(arp.cloud2)
+  cloud1 = packDistribution(arp.cloud1)
+  cloud2 = packDistribution(arp.cloud2)
 
   PackedScatterAlignPose2(;
-    cloud1 = cloud1_,
-    cloud2 = cloud2_,
+    cloud1,
+    cloud2,
     gridscale = arp.gridscale,
     sample_count = arp.sample_count,
-    bw = arp.bw )
+    bw = arp.bw,
+    c1_entryId = arp.c1_entryId,
+    c2_entryId = arp.c2_entryId,
+    dataStoreHint = arp.dataStoreHint )
 end
 
 function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
@@ -329,12 +275,15 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
   cloud2 = unpackDistribution(parp.cloud2)
   
   # and build the final object
-  ScatterAlignPose2(
+  ScatterAlignPose2(;
     cloud1,
     cloud2,
-    parp.gridscale,
-    parp.sample_count,
-    parp.bw )
+    gridscale=parp.gridscale,
+    sample_count=parp.sample_count,
+    bw=parp.bw,
+    c1_entryId = parp.c1_entryId,
+    c2_entryId = parp.c2_entryId,
+    dataStoreHint = parp.dataStoreHint )
 end
 
 #
