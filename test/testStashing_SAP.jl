@@ -8,6 +8,9 @@ using Manifolds
 import Rotations as _Rot
 
 
+##
+
+@testset "test ScatterAlignPose2 with stashed deserialization" begin
 ## Build a factor graph with ScatterAlignPose2 factors and set for stashing serialization
 
 
@@ -52,7 +55,6 @@ getSolverParams(fg).inflateCycles=1
 # getSolverParams(fg).logpath = pwd()
 storeDir = joinLogPath(fg,"data")
 mkpath(storeDir)
-# requires IIF v0.15, DFG v0.10
 datastore = FolderStore{Vector{UInt8}}(:test_stashing_store, storeDir) 
 addBlobStore!(fg, datastore)
 
@@ -113,9 +115,29 @@ saveDFG(filepath, fg)
 
 ## load the factor graph using unstash 
 
+fg_ = initfg()
+datastore_ = FolderStore{Vector{UInt8}}(:test_stashing_store, storeDir) 
+addBlobStore!(fg_, datastore_)
 
-fg_ = loadDFG(filepath)
+loadDFG!(fg_, filepath)
 
 
 ## confirm that the right factor graph has be reconstituted
 
+@test isapprox( getFactorType(fg, :x0x1f1).cloud1.data,getFactorType(fg_, :x0x1f1).cloud1.data )
+@test isapprox( getFactorType(fg, :x0x1f1).cloud2.data,getFactorType(fg_, :x0x1f1).cloud2.data )
+
+##
+
+
+@test_broken isapprox(
+  getPoints(getFactorType(fg, :x0x1f1).cloud1.densityFnc)[1],
+  getPoints(getFactorType(fg_, :x0x1f1).cloud1.densityFnc)[1]
+)
+
+
+
+##
+end
+
+#

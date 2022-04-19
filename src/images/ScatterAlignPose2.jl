@@ -335,6 +335,23 @@ function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
 end
 
 function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
+  #
+  
+  function _resizeCloudData!(cl::PackedHeatmapGridDensity)
+    typ, col, row = typeof(cl.data[1][1]), Int(cl.data[1][2]), Int(cl.data[2][1])
+    resize!(cl.data,row)
+    for i in 1:row
+      cl.data[i] = Vector{typ}(undef, col)
+    end
+    nothing
+  end
+  _resizeCloudData!(cl::ManifoldKernelDensity) = nothing
+  
+  # prep cloud1.data fields for larger data
+  if parp.useStashing
+    _resizeCloudData!(parp.cloud1)
+    _resizeCloudData!(parp.cloud2)
+  end
   
   cloud1 = unpackDistribution(parp.cloud1)
   cloud2 = unpackDistribution(parp.cloud2)
