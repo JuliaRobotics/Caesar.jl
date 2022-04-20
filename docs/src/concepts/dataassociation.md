@@ -12,7 +12,7 @@ In conventional parametric Gaussian-only systems an incorrect loop-closure can o
 
 The data association problem applies well beyond just loop-closures including (but not limited to) navigation-affordance matching and discrepancy detection, and indicates the versatility of the IncrementalInference.jl standardized `multihypo` interface.  Note that much more is possible, however, the so-called single-fraction multihypo approach already yields significant benefits and simplicity.
 
-## Multihypothesis
+## [Multihypothesis](@id section_multihypo)
 
 Consider for example a regular three variable factor `[:pose;:landmark;:calib]` that due to some decision has a triple association uncertainty about the middle variable.  This *fractional certainty* can easily be modelled via:
 ```julia

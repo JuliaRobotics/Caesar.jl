@@ -9,6 +9,7 @@ println("Starting tests...")
 include("pcl/testPointCloud2.jl")
 include("testPose2AprilTag4Corner.jl")
 include("testScatterAlignPose2.jl")
+include("testStashing_SAP.jl")
 
 # specific end-to-end checks for ICRA 2022 tutorials
 include("ICRA2022_tests/runtests.jl")

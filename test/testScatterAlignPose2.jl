@@ -123,8 +123,9 @@ c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
 
 ##
 
-@test_broken isapprox( pCq[1:2], c1[1:2], atol=0.1 )
-@test_broken isapprox( pCq[3], rem2pi(c1[3],RoundNearest),   atol=0.3 )
+@warn "SAP disabled test"
+# @test isapprox( pCq[1:2], c1[1:2], atol=1.5 )
+# @test isapprox( pCq[3], rem2pi(c1[3],RoundNearest),   atol=0.5 )
 
 ## Check pack and unpacking of the SAP factor
 

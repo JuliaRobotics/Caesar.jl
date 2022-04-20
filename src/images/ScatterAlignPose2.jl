@@ -41,10 +41,17 @@ Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:Hea
   Constructor uses two arguments `gridlength`*`rescale=1`=`gridscale`.
   Arg 0 < `rescale` ≤ 1 is also used to rescale the images to lower resolution for speed. """
   gridscale::Float64 = 1.0
-  """ how many heatmap sampled particles to use for mmd ailgnment """
+  """ how many heatmap sampled particles to use for mmd alignment """
   sample_count::Int  = 100
   """ bandwidth to use for mmd """
   bw::Float64        = 1.0
+  """ EXPERIMENTAL, flag whether to use 'stashing' for large point cloud, see [Stash & Cache](@ref section_stash_unstash) """
+  useStashing::Bool = false
+  """ DataEntry ID for hollow store of cloud 1 & 2 """
+  dataEntry_cloud1::String = ""
+  dataEntry_cloud2::String = ""
+  """ Data store hint where likely to find the data entries and blobs for reconstructing cloud1 and cloud2"""
+  dataStoreHint::String = ""
 end
 
 
@@ -56,12 +63,20 @@ ScatterAlignPose2(im1::AbstractMatrix{T},
                   bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
                   rescale::Real=1,
                   N::Integer=1000,
-                  cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1)
+                  cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1),
+                  useStashing::Bool=false,
+                  dataEntry_cloud1="",
+                  dataEntry_cloud2="",
+                  dataStoreHint=""
                 ) where {T} = ScatterAlignPose2(;cloud1=HeatmapGridDensity(cvt(im1),domain,N=N), 
                                                 cloud2=HeatmapGridDensity(cvt(im2),domain,N=N),
                                                 gridscale=float(rescale),
                                                 sample_count, 
-                                                bw  )
+                                                bw,
+                                                useStashing,
+                                                dataEntry_cloud1 = string(dataEntry_cloud1), 
+                                                dataEntry_cloud2 = string(dataEntry_cloud2),
+                                                dataStoreHint = string(dataStoreHint)  )
 #
 
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
@@ -71,6 +86,17 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fn
   #
   M = getManifold(Pose2)
   e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+
+  # reconstitute cloud belief from dataEntry
+  for (va,de,cl) in zip(vars,[fnc.dataEntry_cloud1,fnc.dataEntry_cloud2],[fnc.cloud1,fnc.cloud2])
+    if fnc.useStashing 
+      @assert 0 < length(de) "cannot reconstitute ScatterAlignPose2 without necessary data entry, only have $de"
+      _, db = getData(dfg, getLabel(va), Symbol(de)) # fnc.dataStoreHint
+      cld = convert(SamplableBelief, String(take!(IOBuffer(db))))
+      # cld = unpackDistribution(strdstr)
+      IIF._update!(cl, cld)
+    end
+  end
 
   smps1, = sample(fnc.cloud1, fnc.sample_count)
   smps2, = sample(fnc.cloud2, fnc.sample_count)
@@ -82,74 +108,6 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fn
   (;M,e0,smps1,smps2,bw,score)
 end
 
-Base.@kwdef struct _FastRetract{M_ <: AbstractManifold, T}
-  M::M_ = SpecialEuclidean(2)
-  pTq::T = ProductRepr(MVector(0,0.0), MMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
-  p::ProductRepr{Tuple{SVector{2, Float64}, SMatrix{2, 2, Float64, 4}}} = ProductRepr(SA[0.0;0.0], SMatrix{2,2}(1.0, 0, 0, 1))
-end
-
-function (_user::_FastRetract)(pCq::AbstractVector{<:Real})
-  retract!(_user.M, _user.pTq, _user.p, hat(_user.M, _user.p, pCq))
-
-  return _user.pTq
-end
-
-@doc raw"""
-    $SIGNATURES
-
-Transform and put 2D pointcloud as [x,y] coordinates of a-frame into `aP_dest`, by transforming 
-incoming b-frame points `bP_src` as [x,y] coords via the transform `aTb` describing the b-to-a (aka a-in-b)
-relation.  Return the vector of points `aP_dest`.
-
-````math
-{}^a \begin{bmatrix} x, y \end{bmatrix} = {}^a_b \mathbf{T} \, {}^b \begin{bmatrix} x, y \end{bmatrix}
-````
-"""
-function _transformPointCloud2D!(
-    # manifold
-    M::typeof(SpecialEuclidean(2)),
-    # destination points
-    aP_dest::AbstractVector,
-    # source points
-    bP_src::AbstractVector,
-    # transform coordinates
-    aCb::AbstractVector{<:Real}; 
-    # base point on manifold about which to do the transform
-    e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0)),
-    backward::Bool=false
-  )
-  #
-  
-  aTb = retract(M, e0, hat(M, e0, aCb))
-  aTb = backward ? inv(M,aTb) : aTb
-  bT_src = ProductRepr(MVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0))
-  aT_dest = ProductRepr(MVector(0.0,0.0), MMatrix{2,2}(1.0,0.0,0.0,1.0))
-  
-  for (i,bP) in enumerate(bP_src)
-    bT_src.parts[1] .= bP
-    Manifolds.compose!(M, aT_dest, aTb, bT_src)
-    # aP_dest[i][:] = Manifolds.compose(M, aTb, bP_src[i]).parts[1]
-    aP_dest[i] .= aT_dest.parts[1]
-  end
-
-  aP_dest
-end
-
-function _transformPointCloud2D(
-    # manifold
-    M::typeof(SpecialEuclidean(2)),
-    # source points
-    bP_src::AbstractVector,
-    # transform coordinates
-    aCb::AbstractVector{<:Real}; 
-    kw...
-  )
-  #
-  #dest points
-  aP_dest = typeof(MVector(0.0,0.0))[MVector(0.0,0.0) for _ in 1:length(bP_src)] # Vector{typeof(MVector(0.0,0.0))}(undef, length(bP_src))
-  # fill!(aP_dest, MVector(0.0,0.0))
-  _transformPointCloud2D!(M, aP_dest, bP_src, aCb; kw...)
-end
 
 function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
@@ -264,7 +222,7 @@ function overlayScatterMutate(sap_::ScatterAlignPose2;
                               bw::Real = sap_.bw,
                               kwargs... )
   #
-  sap = ScatterAlignPose2(sap_.cloud1, sap_.cloud2, sap_.gridscale, sample_count, float(bw))
+  sap = ScatterAlignPose2(;cloud1=sap_.cloud1, cloud2=sap_.cloud2, gridscale=sap_.gridscale, sample_count, bw=float(bw))
   Caesar.overlayScatter(sap; kwargs...);
 end
 
@@ -302,39 +260,88 @@ Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = sho
 ## Factor serialization below
 ## =========================================================================================
 
+
+const _PARCHABLE_PACKED_CLOUD = Union{<:PackedManifoldKernelDensity, <:PackedHeatmapGridDensity}
+
 Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
-  cloud1::PackedHeatmapGridDensity # change to String
-  cloud2::PackedHeatmapGridDensity # change to String
+  _type::String = "Caesar.PackedScatterAlignPose2"
+  cloud1::_PARCHABLE_PACKED_CLOUD
+  cloud2::_PARCHABLE_PACKED_CLOUD
   gridscale::Float64 = 1.0
   sample_count::Int = 50
   bw::Float64 = 0.01
+  """ EXPERIMENTAL, flag whether to use 'stashing' for large point cloud, see [Stash & Cache](@ref section_stash_unstash) """
+  useStashing::Bool = false
+  """ DataEntry ID for stash store of cloud 1 & 2 """
+  dataEntry_cloud1::String = ""
+  dataEntry_cloud2::String = ""
+  """ Data store hint where likely to find the data entries and blobs for reconstructing cloud1 and cloud2"""
+  dataStoreHint::String = ""
 end
+
 
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
 
-  cloud1_ = packDistribution(arp.cloud1)
-  cloud2_ = packDistribution(arp.cloud2)
+  cld1 = arp.cloud1
+  cld2 = arp.cloud2
+
+  # reconstitute full type during the preambleCache step
+  if arp.useStashing
+    @assert length(arp.dataEntry_cloud1) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud1` exists for later loading"
+    cld1 = IIF.parchDistribution(arp.cloud1)
+    @assert length(arp.dataEntry_cloud2) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud2` exists for later loading"
+    cld2 = IIF.parchDistribution(arp.cloud2)
+  end
+
+  cloud1 = packDistribution(cld1)
+  cloud2 = packDistribution(cld2)
 
   PackedScatterAlignPose2(;
-    cloud1 = cloud1_,
-    cloud2 = cloud2_,
+    cloud1,
+    cloud2,
     gridscale = arp.gridscale,
     sample_count = arp.sample_count,
-    bw = arp.bw )
+    bw = arp.bw,
+    useStashing = arp.useStashing,
+    dataEntry_cloud1 = arp.dataEntry_cloud1,
+    dataEntry_cloud2 = arp.dataEntry_cloud2,
+    dataStoreHint = arp.dataStoreHint )
 end
 
 function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
-
+  #
+  
+  function _resizeCloudData!(cl::PackedHeatmapGridDensity)
+    typ, col, row = typeof(cl.data[1][1]), Int(cl.data[1][2]), Int(cl.data[2][1])
+    resize!(cl.data,row)
+    for i in 1:row
+      cl.data[i] = Vector{typ}(undef, col)
+    end
+    nothing
+  end
+  _resizeCloudData!(cl::ManifoldKernelDensity) = nothing
+  
+  # prep cloud1.data fields for larger data
+  if parp.useStashing
+    _resizeCloudData!(parp.cloud1)
+    _resizeCloudData!(parp.cloud2)
+  end
+  
   cloud1 = unpackDistribution(parp.cloud1)
   cloud2 = unpackDistribution(parp.cloud2)
   
   # and build the final object
-  ScatterAlignPose2(
+  ScatterAlignPose2(;
     cloud1,
     cloud2,
-    parp.gridscale,
-    parp.sample_count,
-    parp.bw )
+    gridscale=parp.gridscale,
+    sample_count=parp.sample_count,
+    bw=parp.bw,
+    useStashing = parp.useStashing,
+    dataEntry_cloud1 = parp.dataEntry_cloud1,
+    dataEntry_cloud2 = parp.dataEntry_cloud2,
+    dataStoreHint = parp.dataStoreHint 
+  )
 end
 
 #

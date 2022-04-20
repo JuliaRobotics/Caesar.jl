@@ -23,7 +23,6 @@ global sessionverbs = [
     :addLandmark2D;
     :addFactorBearingRangeNormal;
     :ls;
-    :getNode;
     :getVariable;
     :getFactor;
     :setSolvable;

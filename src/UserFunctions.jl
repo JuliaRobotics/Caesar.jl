@@ -1,5 +1,69 @@
 # user functions
 
+@doc raw"""
+    $SIGNATURES
+
+Transform and put 2D pointcloud as [x,y] coordinates of a-frame into `aP_dest`, by transforming 
+incoming b-frame points `bP_src` as [x,y] coords via the transform `aTb` describing the b-to-a (aka a-in-b)
+relation.  Return the vector of points `aP_dest`.
+
+````math
+{}^a \begin{bmatrix} x, y \end{bmatrix} = {}^a_b \mathbf{T} \, {}^b \begin{bmatrix} x, y \end{bmatrix}
+````
+"""
+function _transformPointCloud2D!(
+    # manifold
+    M::typeof(SpecialEuclidean(2)),
+    # destination points
+    aP_dest::AbstractVector,
+    # source points
+    bP_src::AbstractVector,
+    # transform coordinates
+    aCb::AbstractVector{<:Real}; 
+    # base point on manifold about which to do the transform
+    e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0)),
+    backward::Bool=false
+  )
+  #
+  
+  aTb = retract(M, e0, hat(M, e0, aCb))
+  aTb = backward ? inv(M,aTb) : aTb
+  bT_src = ProductRepr(MVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0))
+  aT_dest = ProductRepr(MVector(0.0,0.0), MMatrix{2,2}(1.0,0.0,0.0,1.0))
+  
+  for (i,bP) in enumerate(bP_src)
+    bT_src.parts[1] .= bP
+    Manifolds.compose!(M, aT_dest, aTb, bT_src)
+    # aP_dest[i][:] = Manifolds.compose(M, aTb, bP_src[i]).parts[1]
+    aP_dest[i] .= aT_dest.parts[1]
+  end
+
+  aP_dest
+end
+
+function _transformPointCloud2D(
+    # manifold
+    M::typeof(SpecialEuclidean(2)),
+    # source points
+    bP_src::AbstractVector,
+    # transform coordinates
+    aCb::AbstractVector{<:Real}; 
+    kw...
+  )
+  #
+  #dest points
+  aP_dest = typeof(MVector(0.0,0.0))[MVector(0.0,0.0) for _ in 1:length(bP_src)] # Vector{typeof(MVector(0.0,0.0))}(undef, length(bP_src))
+  # fill!(aP_dest, MVector(0.0,0.0))
+  _transformPointCloud2D!(M, aP_dest, bP_src, aCb; kw...)
+end
+
+
+
+
+## ===============================================================
+## LEGACY BELOW, TODO DEPRECATE OBSOLETE OR OUTDATED FUNCTIONS BELOW
+## ===============================================================
+
 """
     identitypose6fg()
 
