@@ -41,7 +41,7 @@ Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:Hea
   Constructor uses two arguments `gridlength`*`rescale=1`=`gridscale`.
   Arg 0 < `rescale` ≤ 1 is also used to rescale the images to lower resolution for speed. """
   gridscale::Float64 = 1.0
-  """ how many heatmap sampled particles to use for mmd ailgnment """
+  """ how many heatmap sampled particles to use for mmd alignment """
   sample_count::Int  = 100
   """ bandwidth to use for mmd """
   bw::Float64        = 1.0
@@ -260,49 +260,23 @@ Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = sho
 ## Factor serialization below
 ## =========================================================================================
 
+
+const _PARCHABLE_PACKED_CLOUD = Union{<:PackedManifoldKernelDensity, <:PackedHeatmapGridDensity}
+
 Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
   _type::String = "Caesar.PackedScatterAlignPose2"
-  cloud1::PackedHeatmapGridDensity
-  cloud2::PackedHeatmapGridDensity
+  cloud1::_PARCHABLE_PACKED_CLOUD
+  cloud2::_PARCHABLE_PACKED_CLOUD
   gridscale::Float64 = 1.0
   sample_count::Int = 50
   bw::Float64 = 0.01
   """ EXPERIMENTAL, flag whether to use 'stashing' for large point cloud, see [Stash & Cache](@ref section_stash_unstash) """
   useStashing::Bool = false
-  """ DataEntry ID for hollow store of cloud 1 & 2 """
+  """ DataEntry ID for stash store of cloud 1 & 2 """
   dataEntry_cloud1::String = ""
   dataEntry_cloud2::String = ""
   """ Data store hint where likely to find the data entries and blobs for reconstructing cloud1 and cloud2"""
   dataStoreHint::String = ""
-end
-
-function parchDistribution(mkd::ManifoldKernelDensity)
-  pts = getPoints(mkd)
-  bw = getBW(mkd)[:,1]
-  manikde!(mkd.manifold, pts[1:1], mkd._u0; bw, partial=mkd._partial, infoPerCoord=mkd.infoPerCoord)
-end
-
-function parchDistribution(hgd::HeatmapGridDensity)
-  @assert 2 <= size(hgd.data,1) "parchDistribution of HeatmapGridDensity can only be done when `.data` is larger than 2x1"
-  
-  data = Matrix{eltype(hgd.data)}(undef, 2,2)
-  data[1,1] = hgd.data[1,1]
-  # data[2,2] = hgd.data[2,2] # disable since data might be a single column in unusual cases
-  data[2,1] = size(hgd.data,1)
-  data[1,2] = size(hgd.data,2)
-
-  domain = hgd.domain
-  hint_callback = hgd.hint_callback
-  bw_factor = hgd.bw_factor
-  densityFnc = parchDistribution(hgd.densityFnc)
-  
-  HeatmapGridDensity(
-    data,
-    domain,
-    hint_callback,
-    bw_factor,
-    densityFnc
-  )
 end
 
 
@@ -314,9 +288,9 @@ function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
   # reconstitute full type during the preambleCache step
   if arp.useStashing
     @assert length(arp.dataEntry_cloud1) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud1` exists for later loading"
-    cld1 = parchDistribution(arp.cloud1)
+    cld1 = IIF.parchDistribution(arp.cloud1)
     @assert length(arp.dataEntry_cloud2) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud2` exists for later loading"
-    cld2 = parchDistribution(arp.cloud2)
+    cld2 = IIF.parchDistribution(arp.cloud2)
   end
 
   cloud1 = packDistribution(cld1)
