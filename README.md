@@ -103,10 +103,10 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 
 [kde-cov-img]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl/coverage.svg?branch=master
 [kde-cov-url]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimate.jl?branch=master
-[kde-build-img]: https://travis-ci.org/JuliaRobotics/KernelDensityEstimate.jl.svg?branch=master
-[kde-build-url]: https://travis-ci.org/JuliaRobotics/KernelDensityEstimate.jl
+[kde-build-img]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/actions/workflows/ci.yml/badge.svg
+[kde-build-url]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/actions/workflows/ci.yml
 [kde-url]: http://www.github.com/JuliaRobotics/KernelDensityEstimate.jl
-[kde-stable]: https://img.shields.io/badge/2019Q1-v0.5.x-green.svg
+[kde-stable]: https://juliahub.com/docs/KernelDensityEstimate/version.svg
 [kde-milestones]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/milestones
 [kde-releases]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/releases
 
