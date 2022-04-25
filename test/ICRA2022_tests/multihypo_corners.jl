@@ -67,25 +67,25 @@ tp = zeros(3,1)
 
 # near c0
 tp[:,1] = [2;2;0.]
-@test 0.25 < getBelief(fg, :x0)(tp)[1]
+@test 0.15 < getBelief(fg, :x0)(tp)[1]
 tp[:,1] = [2;2;pi/2]
 @test getBelief(fg, :x0)(tp)[1] < 0.01
 
 # near c1
 tp[:,1] = [18;2;pi/2]
-@test 0.25 < getBelief(fg, :x0)(tp)[1]
+@test 0.15 < getBelief(fg, :x0)(tp)[1]
 tp[:,1] = [18;2;0]
 @test getBelief(fg, :x0)(tp)[1] < 0.01
 
 # near c2
 tp[:,1] = [18;8;-pi]
-@test 0.25 < getBelief(fg, :x0)(tp)[1]
+@test 0.15 < getBelief(fg, :x0)(tp)[1]
 tp[:,1] = [18;8;0]
 @test getBelief(fg, :x0)(tp)[1] < 0.01
 
 # near c3
 tp[:,1] = [2;8;-pi/2]
-@test 0.25 < getBelief(fg, :x0)(tp)[1]
+@test 0.15 < getBelief(fg, :x0)(tp)[1]
 tp[:,1] = [2;8;0]
 @test getBelief(fg, :x0)(tp)[1] < 0.01
 
@@ -113,13 +113,13 @@ solveGraph!(fg)
 
 # near c1
 tp[:,1] = [18;2;pi/2]
-@test 0.25 < getBelief(fg, :x0)(tp)[1]
+@test 0.15 < getBelief(fg, :x0)(tp)[1]
 tp[:,1] = [18;2;0]
 @test getBelief(fg, :x0)(tp)[1] < 0.01
 
 # near c3
 tp[:,1] = [2;8;-pi/2]
-@test 0.25 < getBelief(fg, :x0)(tp)[1]
+@test 0.15 < getBelief(fg, :x0)(tp)[1]
 tp[:,1] = [2;8;0]
 @test getBelief(fg, :x0)(tp)[1] < 0.01
 
@@ -135,7 +135,7 @@ tp[:,1] = [18;6;0]
 
 # near c3
 tp[:,1] = [2;4;0]
-@test 0.25 < getBelief(fg, :x1)(tp)[1]
+@test 0.15 < getBelief(fg, :x1)(tp)[1]
 tp[:,1] = [2;4;pi/2]
 @test getBelief(fg, :x1)(tp)[1] < 0.01
 
@@ -171,13 +171,13 @@ X2_b = manikde!(M, pts2_b)
 
 # near c1
 tp[:,1] = [18;2;pi/2]
-@test 0.25 < getBelief(fg, :x0)(tp)[1]
+@test 0.15 < getBelief(fg, :x0)(tp)[1]
 tp[:,1] = [18;2;0]
 @test getBelief(fg, :x0)(tp)[1] < 0.01
 
 # near c3
 tp[:,1] = [2;8;-pi/2]
-@test 0.25 < getBelief(fg, :x0)(tp)[1]
+@test 0.15 < getBelief(fg, :x0)(tp)[1]
 tp[:,1] = [2;8;0]
 @test getBelief(fg, :x0)(tp)[1] < 0.01
 
