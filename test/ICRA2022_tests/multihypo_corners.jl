@@ -193,7 +193,7 @@ tp[:,1] = [18;6;0]
 
 # near c3
 tp[:,1] = [2;4;0]
-@test 0.25 < getBelief(fg, :x1)(tp)[1]
+@test 0.15 < getBelief(fg, :x1)(tp)[1]
 tp[:,1] = [2;4;pi/2]
 @test getBelief(fg, :x1)(tp)[1] < 0.01
 
@@ -213,14 +213,14 @@ solveGraph!(fg)
 
 # near c3
 tp[:,1] = [2;8;-pi/2]
-@test 0.25 < getBelief(fg, :x0)(tp)[1]
+@test 0.15 < getBelief(fg, :x0)(tp)[1]
 tp[:,1] = [2;8;0]
 @test getBelief(fg, :x0)(tp)[1] < 0.01
 
 
 # near c3
 tp[:,1] = [2;4;0]
-@test 0.25 < getBelief(fg, :x1)(tp)[1]
+@test 0.15 < getBelief(fg, :x1)(tp)[1]
 tp[:,1] = [2;4;pi/2]
 @test getBelief(fg, :x1)(tp)[1] < 0.01
 
