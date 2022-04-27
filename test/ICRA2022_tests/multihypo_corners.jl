@@ -198,8 +198,8 @@ tp[:,1] = [2;4;pi/2]
 @test getBelief(fg, :x1)(tp)[1] < 0.01
 
 
-@test isapprox(X2_a, getBelief(fg, :x2); atol=0.1)
-@test isapprox(X2_b, getBelief(fg, :x2); atol=0.1)
+@test mmd(X2_a, getBelief(fg, :x2) ) < 0.2
+@test mmd(X2_b, getBelief(fg, :x2) ) < 0.2
 
 
 ##
@@ -226,11 +226,11 @@ tp[:,1] = [2;4;pi/2]
 
 
 # use synthetic belief to ensure x2 is correct
-@test isapprox(X2_a, getBelief(fg, :x2); atol=0.1)
-@test !isapprox(X2_b, getBelief(fg, :x2); atol=0.1)
+@test  mmd(X2_a, getBelief(fg, :x2)) < 0.2
+@test !mmd(X2_b, getBelief(fg, :x2)) < 0.2
 
-@test isapprox(getPPE(fg, :door_prior).suggested[3], 0; atol=0.2) 
-@test isapprox(abs(getPPE(fg, :door_dual).suggested[3]), pi; atol=0.5)
+@test isapprox(    getPPE(fg, :door_prior).suggested[3], 0; atol=0.2) 
+@test isapprox(abs(getPPE(fg, :door_dual ).suggested[3]), pi; atol=0.5)
 
 ##
 end
