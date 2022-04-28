@@ -198,8 +198,8 @@ tp[:,1] = [2;4;pi/2]
 @test getBelief(fg, :x1)(tp)[1] < 0.01
 
 
-@test mmd(X2_a, getBelief(fg, :x2) ) < 0.2
-@test mmd(X2_b, getBelief(fg, :x2) ) < 0.2
+@test mmd(X2_a, getBelief(fg, :x2) ) < 0.25
+@test mmd(X2_b, getBelief(fg, :x2) ) < 0.25
 
 
 ##
