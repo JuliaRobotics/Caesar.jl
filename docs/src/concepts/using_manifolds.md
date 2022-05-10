@@ -93,14 +93,15 @@ The most popular Manifolds used in Caesar.jl related packages are:
     
 ### Creating a new Manifold
 
-JuliaManifolds.jl is designed to make [it as easy as possible to define your own manifold and then get all the benefits of the Manifolds.jl ecosystem](https://juliamanifolds.github.io/Manifolds.jl/stable/examples/manifold.html).  Follow the documentation there to make your own manifold, which can then readily be used with all the features of both JuliaManifolds as well as the Caesar.jl related packages.
+JuliaManifolds.jl is designed to make [it as easy as possible to define your own manifold and then get all the benefits of the Manifolds.jl ecosystem](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html).  Follow the documentation there to make your own manifold, which can then readily be used with all the features of both JuliaManifolds as well as the Caesar.jl related packages.
 
 ## [Answers to 7 Questions](@id seven_mani_answers)
 
 ### Q1) What are Point, Tangents, Coordinates
 
 A manifold ``\mathcal{M}`` is a collection of points that together create the given space.  **Points** are like round sprinkles on the donut.  The representation of points will vary from manifold to manifold.  Sometimes it is even possible to have different representations for the same point on a manifold.  These are usually denoted as ``p``.
-Tangent **vectors** (we prefer _tangents_ for clarity) is a vector ``X`` that emanates from a point on a manifold.  A vector lives in the tangent space of the manifold, a locally flat region around a point ``X\in T_p \mathcal{M}``.  On the donut, imagine a rod-shaped sprinkle stuck along the tangent of the surface at a particular point ``p``.  The **tangent space** is the collection of all possible tangents at ``p``.  
+
+Tangent **vectors** (we prefer _tangents_ for clarity) is a vector ``X`` that emanates from a point on a manifold tangential to the manifold curvature.  A vector lives in the tangent space of the manifold, a locally flat region around a point ``X\in T_p \mathcal{M}``.  On the donut, imagine a rod-shaped sprinkle stuck along the tangent of the surface at a particular point ``p``.  The **tangent space** is the collection of all possible tangents at ``p``.  
 
 **Coordinates** are a user defined property that uses the Euclidean nature of the tangent space at point ``p`` to operate as a regular linear space.  Coordinates are just a list of the indepedent coordinate dimensions of the tangent space values collected together.  Read this part carefully, as it can easily be confused with a conventional tangent vector in a regular Euclidean space.  
 
@@ -116,7 +117,7 @@ Multiple logmap interpretations exist, for example in the case of ``SpecialEucli
 
 ### Q3) What is the Exponential map
 
-The exponential map does the opposite of the logarithm.  Image a tangent vector ``X`` emanating from point ``p``.  The length and direction of ``X`` can be wrapped onto the curvature of the manifold to form a line on the manifold surface.
+The exponential map does the opposite of the logarithm.  Imagine a tangent vector ``X`` emanating from point ``p``.  The length and direction of ``X`` can be wrapped onto the curvature of the manifold to form a line on the manifold surface.
 ### Q4) What does `vee`/`hat` do
 
 `vee` is an operation that converts a tangent vector representation into a coordinate representation.  For example Lie algebra elements are tangent vector elements, so `vee([0 -w; w 0]) = w`.  And visa versa for `hat(w) = [0 -w; w 0]`, which goes from coordinates to tangent vectors.
