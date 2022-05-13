@@ -48,10 +48,10 @@ makedocs(
         ],
         "Graph Library" => [
             "Canonical Generators" => "examples/canonical_graphs.md",
-            "Entry=>Data Blob" => "concepts/entry_data.md",
             "Variables/Factors" => "concepts/available_varfacs.md",
-            "Flux (NN) Factors" => "concepts/flux_factors.md",
+            "Entry=>Data Blob" => "concepts/entry_data.md",
             "Images and AprilTags" => "examples/using_images.md",
+            "Flux (NN) Factors" => "concepts/flux_factors.md",
         ],
         "Visualization" => [
             "Installing Viz" => "install_viz.md",
