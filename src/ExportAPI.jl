@@ -4,6 +4,8 @@
 @reexport using KernelDensityEstimate
 @reexport using Distributions
 
+export CJL
+
 export
   GenericInSituSystem,  # insitu components
   makeGenericInSituSys,
