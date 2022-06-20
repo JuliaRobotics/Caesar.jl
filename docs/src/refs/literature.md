@@ -60,9 +60,11 @@ Newly created page to list related references and additional literature pertaini
 
 [2.15a] Sola, J., Deray, J. and Atchuthan, D., 2018. ["A micro Lie theory for state estimation in robotics". arXiv preprint arXiv:1812.01537](https://arxiv.org/pdf/1812.01537), and [tech report](https://upcommons.upc.edu/bitstream/handle/2117/179757/2089-A-micro-Lie-theory-for-state-estimation-in-robotics%20(3).pdf).
 
-[2.15b] Delleart F., 2012. ["Lie Groups for Beginners"](https://raw.githubusercontent.com/devbharat/gtsam/master/doc/LieGroups.pdf).
+[2.15b] Delleart F., 2012. [Lie Groups for Beginners](https://raw.githubusercontent.com/devbharat/gtsam/master/doc/LieGroups.pdf).
 
-[2.15c] Eade E., 2017 ["Lie Groups for 2D and 3D Transformations"](https://ethaneade.com/lie.pdf).
+[2.15c] Eade E., 2017 [Lie Groups for 2D and 3D Transformations](https://ethaneade.com/lie.pdf).
+
+[2.15d] Chirikjian, G.S., 2015. [Partial bi-invariance of SE(3) metrics](https://rpk.lcsr.jhu.edu/wp-content/uploads/2017/08/Partial-Bi-Invariance-of-SE3-Metrics1.pdf). Journal of Computing and Information Science in Engineering, 15(1).
 
 [2.16] Kaess, M. and Dellaert, F., 2009. [Covariance recovery from a square root information matrix for data association](https://apps.dtic.mil/dtic/tr/fulltext/u2/a537233.pdf). Robotics and autonomous systems, 57(12), pp.1198-1210.
 
