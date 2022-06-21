@@ -66,6 +66,8 @@ Newly created page to list related references and additional literature pertaini
 
 [2.15d] Chirikjian, G.S., 2015. [Partial bi-invariance of SE(3) metrics](https://rpk.lcsr.jhu.edu/wp-content/uploads/2017/08/Partial-Bi-Invariance-of-SE3-Metrics1.pdf). Journal of Computing and Information Science in Engineering, 15(1).
 
+[2.15e] Pennec, X. and Lorenzi, M., 2020. [Beyond Riemannian geometry: The affine connection setting for transformation groups](https://hal.inria.fr/hal-02342137/document). In Riemannian Geometric Statistics in Medical Image Analysis (pp. 169-229). Academic Press.
+
 [2.16] Kaess, M. and Dellaert, F., 2009. [Covariance recovery from a square root information matrix for data association](https://apps.dtic.mil/dtic/tr/fulltext/u2/a537233.pdf). Robotics and autonomous systems, 57(12), pp.1198-1210.
 
 [2.17] Bishop, C.M., 2006. Pattern recognition and machine learning. New York: Springer. ISBN 978-0-387-31073-2.
