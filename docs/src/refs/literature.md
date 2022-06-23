@@ -68,6 +68,8 @@ Newly created page to list related references and additional literature pertaini
 
 [2.15e] Pennec, X. and Lorenzi, M., 2020. [Beyond Riemannian geometry: The affine connection setting for transformation groups](https://hal.inria.fr/hal-02342137/document). In Riemannian Geometric Statistics in Medical Image Analysis (pp. 169-229). Academic Press.
 
+[2.15f] Žefran, M., Kumar, V. and Croke, C., 1996, August. [Choice of Riemannian metrics for rigid body kinematics](https://www.cis.upenn.edu/~cis610/SE3-Croke-Kumar.pdf). In International Design Engineering Technical Conferences and Computers and Information in Engineering Conference (Vol. 97584, p. V02BT02A030). American Society of Mechanical Engineers.
+
 [2.16] Kaess, M. and Dellaert, F., 2009. [Covariance recovery from a square root information matrix for data association](https://apps.dtic.mil/dtic/tr/fulltext/u2/a537233.pdf). Robotics and autonomous systems, 57(12), pp.1198-1210.
 
 [2.17] Bishop, C.M., 2006. Pattern recognition and machine learning. New York: Springer. ISBN 978-0-387-31073-2.
