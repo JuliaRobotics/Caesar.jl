@@ -31,8 +31,9 @@ arp2 = ScatterAlignPose2(img1, img2, 2) # e.g. 2 meters/pixel
 
 See also: [`overlayScanMatcher`](@ref)
 """
-Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity},
-                                      H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity} } <: IIF.AbstractManifoldMinimize
+Base.@kwdef struct ScatterAlign{P,
+                                H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity},
+                                H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity} } <: IIF.AbstractManifoldMinimize
   """ reference image for scan matching. """
   cloud1::H1
   """ test image to scan match against the reference image. """
@@ -54,9 +55,10 @@ Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:Hea
   dataStoreHint::String = ""
 end
 
+ScatterAlignPose2 = ScatterAlign{Pose2}
 
 # replace inner constructor with transform on image
-ScatterAlignPose2(im1::AbstractMatrix{T}, 
+function ScatterAlignPose2(im1::AbstractMatrix{T}, 
                   im2::AbstractMatrix{T},
                   domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
                   sample_count::Integer=75,
@@ -68,21 +70,27 @@ ScatterAlignPose2(im1::AbstractMatrix{T},
                   dataEntry_cloud1="",
                   dataEntry_cloud2="",
                   dataStoreHint=""
-                ) where {T} = ScatterAlignPose2(;cloud1=HeatmapGridDensity(cvt(im1),domain,N=N), 
-                                                cloud2=HeatmapGridDensity(cvt(im2),domain,N=N),
-                                                gridscale=float(rescale),
-                                                sample_count, 
-                                                bw,
-                                                useStashing,
-                                                dataEntry_cloud1 = string(dataEntry_cloud1), 
-                                                dataEntry_cloud2 = string(dataEntry_cloud2),
-                                                dataStoreHint = string(dataStoreHint)  )
+                ) where {T}
+  #
+  cloud1 = HeatmapGridDensity(cvt(im1),domain,N=N)
+  cloud2 = HeatmapGridDensity(cvt(im2),domain,N=N)
+  ScatterAlign{Pose2,typeof(cloud1),typeof(cloud2)}(;
+                      cloud1,
+                      cloud2,
+                      gridscale=float(rescale),
+                      sample_count, 
+                      bw,
+                      useStashing,
+                      dataEntry_cloud1 = string(dataEntry_cloud1), 
+                      dataEntry_cloud2 = string(dataEntry_cloud2),
+                      dataStoreHint = string(dataStoreHint)  )
 #
+end
 
-getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
+getManifold(::IIF.InstanceType{<:ScatterAlign{Pose2}}) = getManifold(Pose2Pose2)
 
 # runs once upon addFactor! and returns object later used as `cache`
-function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::ScatterAlignPose2)
+function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::ScatterAlign{Pose2})
   #
   M = getManifold(Pose2)
   e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
@@ -109,7 +117,7 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fn
 end
 
 
-function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
+function getSample( cf::CalcFactor{<:ScatterAlign{Pose2}} )
   #
   M = cf.cache.M
   e0 = cf.cache.e0
@@ -140,7 +148,7 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
 end
 
 
-function (cf::CalcFactor{<:ScatterAlignPose2})(pXq, wPp, wPq)
+function (cf::CalcFactor{<:ScatterAlign{Pose2}})(pXq, wPp, wPq)
   # 
   
   M = cf.cache.M
@@ -168,7 +176,7 @@ Notes:
 
 See also: [`plotScatterAlign`](@ref)
 """
-function overlayScatter(sap::ScatterAlignPose2, 
+function overlayScatter(sap::ScatterAlign{Pose2}, 
                         trans::AbstractVector{<:Real}=[0;0.0],
                         rot::Real=0.0;
                         user_coords = [trans; rot],
@@ -217,17 +225,17 @@ function overlayScatter(sap::ScatterAlignPose2,
 end
 
 
-function overlayScatterMutate(sap_::ScatterAlignPose2;
+function overlayScatterMutate(sap_::ScatterAlign{Pose2};
                               sample_count::Integer = sap_.sample_count,
                               bw::Real = sap_.bw,
                               kwargs... )
   #
-  sap = ScatterAlignPose2(;cloud1=sap_.cloud1, cloud2=sap_.cloud2, gridscale=sap_.gridscale, sample_count, bw=float(bw))
+  sap = ScatterAlign{Pose2,typeof(sap_.cloud1),typeof(sap_.cloud2)}(;cloud1=sap_.cloud1, cloud2=sap_.cloud2, gridscale=sap_.gridscale, sample_count, bw=float(bw))
   Caesar.overlayScatter(sap; kwargs...);
 end
 
 
-function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
+function Base.show(io::IO, sap::ScatterAlign{P,H1,H2}) where {P,H1,H2}
   printstyled(io, "ScatterAlignPose2{", bold=true, color=:blue)
   println(io)
   printstyled(io, "    H1 = ", color=:magenta)
@@ -251,8 +259,8 @@ function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
   nothing
 end
 
-Base.show(io::IO, ::MIME"text/plain", sap::ScatterAlignPose2) = show(io, sap)
-Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = show(io, sap)
+Base.show(io::IO, ::MIME"text/plain", sap::ScatterAlign) = show(io, sap)
+Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlign) = show(io, sap)
 
 
 
@@ -280,7 +288,7 @@ Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
 end
 
 
-function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
+function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlign{Pose2})
 
   cld1 = arp.cloud1
   cld2 = arp.cloud2
@@ -308,7 +316,7 @@ function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
     dataStoreHint = arp.dataStoreHint )
 end
 
-function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
+function convert(::Type{<:ScatterAlign}, parp::PackedScatterAlignPose2)
   #
   
   function _resizeCloudData!(cl::PackedHeatmapGridDensity)
@@ -331,7 +339,7 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
   cloud2 = unpackDistribution(parp.cloud2)
   
   # and build the final object
-  ScatterAlignPose2(;
+  ScatterAlign{Pose2}(;
     cloud1,
     cloud2,
     gridscale=parp.gridscale,
