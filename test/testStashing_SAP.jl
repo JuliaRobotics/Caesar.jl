@@ -78,10 +78,10 @@ sap = ScatterAlignPose2(bIM1, bIM2, (x,y);
 
 ##
 
-db = Vector{UInt8}( convert(String, sap.cloud1) )
+db = Vector{UInt8}( convert(String, sap.align.cloud1) )
 addData!(fg, :test_stashing_store, :x0, :hgd_stash_x0, db, mimeType="application/json/octet-stream")
 
-db = Vector{UInt8}( convert(String,sap.cloud2) )
+db = Vector{UInt8}( convert(String,sap.align.cloud2) )
 addData!(fg, :test_stashing_store, :x1, :hgd_stash_x1, db, mimeType="application/json/octet-stream")
 
 
