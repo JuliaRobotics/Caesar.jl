@@ -165,10 +165,6 @@ end
 
 
 
-
-
-
-
 @testset "test ScatterAlignPose2 with MKD direct" begin
 ##
 
@@ -266,5 +262,48 @@ c1 = AMP.makeCoordsFromPoint(getManifold(Pose2), mean(X1))
 
 ##
 end
+
+
+
+@testset "test ScatterAlignPose2 with MKD direct" begin
+##
+
+# setup
+
+oT = [2.; 0;0]
+oΨ =  [0;0;pi/6]
+
+M = SpecialEuclidean(3)
+e0 = identity_element(M)
+pCq = [oT;oΨ]
+qTp = affine_matrix(M, exp(M, e0, hat(M, e0, pCq)))
+
+##
+
+# Points in XYZ only
+
+# g = (x,y)->pdf(MvNormal([3.;0],[σ;σ]),[x;y]) + pdf(MvNormal([8.;0.0],[σ;σ]),[x;y]) + pdf(MvNormal([0;5.0],[σ;σ]),[x;y])
+p1 = vcat([0.1*randn(3).+[3;0.;0] for i in 1:50], [0.1*randn(3)+[8.;0;0] for i in 1:50], [0.1*randn(3)+[0;5.;0] for i in 1:50])
+# foreach(pt->(pt[1] += 100), p1)
+shuffle!(p1)
+P1 = manikde!(Point3, p1)
+
+p2 = vcat([0.1*randn(3).+[3;0.;0.] for i in 1:50], [0.1*randn(3)+[8.;0;0] for i in 1:50], [0.1*randn(3)+[0;5.;0] for i in 1:50])
+# foreach(pt->(pt[1] += 100), p2)
+# adjust points
+for (i,pt) in enumerate(p2)
+  v = qTp*[pt;1.0]
+  pt[1:3] .= v[1:3]
+end
+shuffle!(p2)
+P2 = manikde!(Point3, p2)
+
+sap = ScatterAlignPose3(;cloud1=P1, cloud2=P2, sample_count=100, bw=1.0)
+
+##
+
+end
+
+
 
 #

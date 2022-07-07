@@ -8,6 +8,7 @@ import ApproxManifoldProducts: sample
 using .Images
 
 export ScatterAlignPose2, PackedScatterAlignPose2
+export ScatterAlignPose3
 
 export overlayScatter, overlayScatterMutate
 
@@ -58,6 +59,11 @@ end
 struct ScatterAlignPose2 <: IIF.AbstractManifoldMinimize
   align::ScatterAlign{Pose2,<:Any,<:Any}
 end
+
+struct ScatterAlignPose3 <: IIF.AbstractManifoldMinimize
+  align::ScatterAlign{Pose3,<:Any,<:Any}
+end
+
 
 # replace inner constructor with transform on image
 function ScatterAlignPose2(im1::AbstractMatrix{T}, 
@@ -117,7 +123,35 @@ function ScatterAlignPose2(;
   ScatterAlignPose2(sa)
 end
 
+function ScatterAlignPose3(;
+    cloud1::ManifoldKernelDensity, 
+    cloud2::ManifoldKernelDensity,
+    sample_count::Integer=75,
+    bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
+    rescale::Real=1,
+    useStashing::Bool=false,
+    dataEntry_cloud1="",
+    dataEntry_cloud2="",
+    dataStoreHint=""
+  ) where {T}
+  #
+  
+  sa = ScatterAlign{Pose3,typeof(cloud1),typeof(cloud2)}(;
+                      cloud1,
+                      cloud2,
+                      gridscale=float(rescale),
+                      sample_count, 
+                      bw,
+                      useStashing,
+                      dataEntry_cloud1 = string(dataEntry_cloud1), 
+                      dataEntry_cloud2 = string(dataEntry_cloud2),
+                      dataStoreHint = string(dataStoreHint)  )
+  #
+  ScatterAlignPose3(sa)
+end
+
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
+getManifold(::IIF.InstanceType{<:ScatterAlignPose3}) = getManifold(Pose3Pose3)
 
 # runs once upon addFactor! and returns object later used as `cache`
 function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::ScatterAlignPose2)
@@ -267,8 +301,10 @@ end
 
 
 function Base.show(io::IO, sap::ScatterAlign{P,H1,H2}) where {P,H1,H2}
-  printstyled(io, "ScatterAlignPose2{", bold=true, color=:blue)
+  printstyled(io, "ScatterAlign{", bold=true, color=:blue)
   println(io)
+  printstyled(io, "    P  = ", color=:magenta)
+  println(io, P)
   printstyled(io, "    H1 = ", color=:magenta)
   println(io, H1)
   printstyled(io, "    H2 = ", color=:magenta)
