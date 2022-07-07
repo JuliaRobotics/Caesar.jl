@@ -90,6 +90,33 @@ function ScatterAlignPose2(im1::AbstractMatrix{T},
   ScatterAlignPose2(sa)
 end
 
+function ScatterAlignPose2(;
+    cloud1::ManifoldKernelDensity, 
+    cloud2::ManifoldKernelDensity,
+    sample_count::Integer=75,
+    bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
+    rescale::Real=1,
+    useStashing::Bool=false,
+    dataEntry_cloud1="",
+    dataEntry_cloud2="",
+    dataStoreHint=""
+  ) where {T}
+  #
+  
+  sa = ScatterAlign{Pose2,typeof(cloud1),typeof(cloud2)}(;
+                      cloud1,
+                      cloud2,
+                      gridscale=float(rescale),
+                      sample_count, 
+                      bw,
+                      useStashing,
+                      dataEntry_cloud1 = string(dataEntry_cloud1), 
+                      dataEntry_cloud2 = string(dataEntry_cloud2),
+                      dataStoreHint = string(dataStoreHint)  )
+  #
+  ScatterAlignPose2(sa)
+end
+
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 
 # runs once upon addFactor! and returns object later used as `cache`
@@ -322,7 +349,7 @@ function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
     dataStoreHint = arp.align.dataStoreHint )
 end
 
-function convert(::Type{<:ScatterAlign}, parp::PackedScatterAlignPose2)
+function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
   #
   
   function _resizeCloudData!(cl::PackedHeatmapGridDensity)
@@ -345,7 +372,7 @@ function convert(::Type{<:ScatterAlign}, parp::PackedScatterAlignPose2)
   cloud2 = unpackDistribution(parp.cloud2)
   
   # and build the final object
-  ScatterAlignPose2(ScatterAlign{Pose2}(;
+  ScatterAlignPose2(ScatterAlign{Pose2, typeof(cloud1), typeof(cloud2)}(;
     cloud1,
     cloud2,
     gridscale=parp.gridscale,

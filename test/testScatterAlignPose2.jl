@@ -73,12 +73,12 @@ plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 psap = convert(PackedScatterAlignPose2, sap);
 sap_ = convert(ScatterAlignPose2, psap);
 
-@test sap.gridscale == sap_.gridscale
-@test sap.sample_count == sap_.sample_count
-@test sap.bw == sap_.bw
+@test sap.align.gridscale == sap_.align.gridscale
+@test sap.align.sample_count == sap_.align.sample_count
+@test sap.align.bw == sap_.align.bw
 
-@test isapprox(sap.cloud1, sap_.cloud1, mmd_tol=1e-2)
-@test isapprox(sap.cloud2, sap_.cloud2, mmd_tol=1e-2)
+@test isapprox(sap.align.cloud1, sap_.align.cloud1, mmd_tol=1e-2)
+@test isapprox(sap.align.cloud2, sap_.align.cloud2, mmd_tol=1e-2)
 
 
 ## check that optimize works (using the same tfg)
@@ -147,8 +147,8 @@ Base.rm("/tmp/caesar/test_sap.tar.gz")
 
 ##
 
-sap = getFactorType(fg, :x0x1f1)
-sap_ = getFactorType(fg_, :x0x1f1)
+sap = getFactorType(fg, :x0x1f1).align
+sap_ = getFactorType(fg_, :x0x1f1).align
 
 @test isapprox( sap.cloud1, sap_.cloud1)
 @test isapprox( sap.cloud2, sap_.cloud2)
