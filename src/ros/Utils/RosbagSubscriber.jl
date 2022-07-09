@@ -3,6 +3,7 @@
 
 
 export RosbagSubscriber, loop!, getROSPyMsgTimestamp, nanosecond2datetime
+export RosbagWriter
 
 ## Load rosbag file parser
 
@@ -11,9 +12,9 @@ pushfirst!(PyVector(pyimport("sys")."path"), @__DIR__ )
 rosbagReaderPy = pyimport("rosbagReader")
 RosbagParser = rosbagReaderPy."RosbagParser"
 
-rosbagWriterPy = pyimport("rosbagWriter")
-RosbagWriter = rosbagWriterPy."RosbagWriter"
-
+# piggy back writer code here
+writeRosbagPy = pyimport("rosbagWriter")
+RosbagWriter = writeRosbagPy."RosbagWriter"
 
 ## Common handler approach
 
