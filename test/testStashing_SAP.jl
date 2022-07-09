@@ -124,15 +124,15 @@ loadDFG!(fg_, filepath)
 
 ## confirm that the right factor graph has be reconstituted
 
-@test isapprox( getFactorType(fg, :x0x1f1).cloud1.data,getFactorType(fg_, :x0x1f1).cloud1.data )
-@test isapprox( getFactorType(fg, :x0x1f1).cloud2.data,getFactorType(fg_, :x0x1f1).cloud2.data )
+@test isapprox( getFactorType(fg, :x0x1f1).align.cloud1.data,getFactorType(fg_, :x0x1f1).align.cloud1.data )
+@test isapprox( getFactorType(fg, :x0x1f1).align.cloud2.data,getFactorType(fg_, :x0x1f1).align.cloud2.data )
 
 ##
 
 
 @test_broken isapprox(
-  getPoints(getFactorType(fg, :x0x1f1).cloud1.densityFnc)[1],
-  getPoints(getFactorType(fg_, :x0x1f1).cloud1.densityFnc)[1]
+  getPoints(getFactorType(fg, :x0x1f1).align.cloud1.densityFnc)[1],
+  getPoints(getFactorType(fg_, :x0x1f1).align.cloud1.densityFnc)[1]
 )
 
 
