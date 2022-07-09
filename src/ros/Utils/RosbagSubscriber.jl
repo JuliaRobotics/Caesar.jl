@@ -11,6 +11,9 @@ pushfirst!(PyVector(pyimport("sys")."path"), @__DIR__ )
 rosbagReaderPy = pyimport("rosbagReader")
 RosbagParser = rosbagReaderPy."RosbagParser"
 
+rosbagWriterPy = pyimport("rosbagWriter")
+RosbagWriter = rosbagWriterPy."RosbagWriter"
+
 
 ## Common handler approach
 
