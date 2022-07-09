@@ -59,19 +59,19 @@ solveGraph!(fg);
 
 X2 = getBelief(fg, :x2)
 x2 = mean(X2)
-@test isapprox( ProductRepr([1;1], _Rot.RotMatrix2(pi)), x2; atol=0.2)
+@test isapprox( ArrayPartition([1;1], _Rot.RotMatrix2(pi)), x2; atol=0.2)
 
 X3 = getBelief(fg, :x3)
 x3 = mean(X3)
-@test isapprox( ProductRepr([0;1], _Rot.RotMatrix2(-pi/2)), x3; atol=0.2)
+@test isapprox( ArrayPartition([0;1], _Rot.RotMatrix2(-pi/2)), x3; atol=0.2)
 
 X4 = getBelief(fg, :x4)
 x4 = mean(X4)
-@test isapprox( ProductRepr([0;0], _Rot.RotMatrix2(0)), x4; atol=0.2)
+@test isapprox( ArrayPartition([0;0], _Rot.RotMatrix2(0)), x4; atol=0.2)
 
 X3 = getBelief(fg, :x3)
 x3 = mean(X3)
-@test isapprox( ProductRepr([0;1], _Rot.RotMatrix2(-pi/2)), x3; atol=0.2)
+@test isapprox( ArrayPartition([0;1], _Rot.RotMatrix2(-pi/2)), x3; atol=0.2)
 
 # solve again with loop closure
 
@@ -86,19 +86,19 @@ solveGraph!(fg)
 
 X2 = getBelief(fg, :x2)
 x2 = mean(X2)
-@test isapprox( ProductRepr([1;1], _Rot.RotMatrix2(pi)), x2; atol=0.2)
+@test isapprox( ArrayPartition([1;1], _Rot.RotMatrix2(pi)), x2; atol=0.2)
 
 X3 = getBelief(fg, :x3)
 x3 = mean(X3)
-@test isapprox( ProductRepr([0;1], _Rot.RotMatrix2(-pi/2)), x3; atol=0.2)
+@test isapprox( ArrayPartition([0;1], _Rot.RotMatrix2(-pi/2)), x3; atol=0.2)
 
 X4 = getBelief(fg, :x4)
 x4 = mean(X4)
-@test isapprox( ProductRepr([0;0], _Rot.RotMatrix2(0)), x4; atol=0.2)
+@test isapprox( ArrayPartition([0;0], _Rot.RotMatrix2(0)), x4; atol=0.2)
 
 X3 = getBelief(fg, :x3)
 x3 = mean(X3)
-@test isapprox( ProductRepr([0;1], _Rot.RotMatrix2(-pi/2)), x3; atol=0.2)
+@test isapprox( ArrayPartition([0;1], _Rot.RotMatrix2(-pi/2)), x3; atol=0.2)
 
 @test getManifold(fg, :x1) isa AbstractManifold
 

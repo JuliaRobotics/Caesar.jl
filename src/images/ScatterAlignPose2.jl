@@ -8,6 +8,7 @@ import ApproxManifoldProducts: sample
 using .Images
 
 export ScatterAlignPose2, PackedScatterAlignPose2
+export ScatterAlignPose3
 
 export overlayScatter, overlayScatterMutate
 
@@ -31,8 +32,9 @@ arp2 = ScatterAlignPose2(img1, img2, 2) # e.g. 2 meters/pixel
 
 See also: [`overlayScanMatcher`](@ref)
 """
-Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity},
-                                      H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity} } <: IIF.AbstractManifoldMinimize
+Base.@kwdef struct ScatterAlign{P,
+                                H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity},
+                                H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity} } <: IIF.AbstractManifoldMinimize
   """ reference image for scan matching. """
   cloud1::H1
   """ test image to scan match against the reference image. """
@@ -54,9 +56,17 @@ Base.@kwdef struct ScatterAlignPose2{ H1 <: Union{<:ManifoldKernelDensity, <:Hea
   dataStoreHint::String = ""
 end
 
+struct ScatterAlignPose2 <: IIF.AbstractManifoldMinimize
+  align::ScatterAlign{Pose2,<:Any,<:Any}
+end
+
+struct ScatterAlignPose3 <: IIF.AbstractManifoldMinimize
+  align::ScatterAlign{Pose3,<:Any,<:Any}
+end
+
 
 # replace inner constructor with transform on image
-ScatterAlignPose2(im1::AbstractMatrix{T}, 
+function ScatterAlignPose2(im1::AbstractMatrix{T}, 
                   im2::AbstractMatrix{T},
                   domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
                   sample_count::Integer=75,
@@ -68,40 +78,102 @@ ScatterAlignPose2(im1::AbstractMatrix{T},
                   dataEntry_cloud1="",
                   dataEntry_cloud2="",
                   dataStoreHint=""
-                ) where {T} = ScatterAlignPose2(;cloud1=HeatmapGridDensity(cvt(im1),domain,N=N), 
-                                                cloud2=HeatmapGridDensity(cvt(im2),domain,N=N),
-                                                gridscale=float(rescale),
-                                                sample_count, 
-                                                bw,
-                                                useStashing,
-                                                dataEntry_cloud1 = string(dataEntry_cloud1), 
-                                                dataEntry_cloud2 = string(dataEntry_cloud2),
-                                                dataStoreHint = string(dataStoreHint)  )
-#
+                ) where {T}
+  #
+  cloud1 = HeatmapGridDensity(cvt(im1),domain,N=N)
+  cloud2 = HeatmapGridDensity(cvt(im2),domain,N=N)
+  sa = ScatterAlign{Pose2,typeof(cloud1),typeof(cloud2)}(;
+                      cloud1,
+                      cloud2,
+                      gridscale=float(rescale),
+                      sample_count, 
+                      bw,
+                      useStashing,
+                      dataEntry_cloud1 = string(dataEntry_cloud1), 
+                      dataEntry_cloud2 = string(dataEntry_cloud2),
+                      dataStoreHint = string(dataStoreHint)  )
+  #
+  ScatterAlignPose2(sa)
+end
+
+function ScatterAlignPose2(;
+    cloud1::ManifoldKernelDensity, 
+    cloud2::ManifoldKernelDensity,
+    sample_count::Integer=75,
+    bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
+    rescale::Real=1,
+    useStashing::Bool=false,
+    dataEntry_cloud1="",
+    dataEntry_cloud2="",
+    dataStoreHint=""
+  ) where {T}
+  #
+  
+  sa = ScatterAlign{Pose2,typeof(cloud1),typeof(cloud2)}(;
+                      cloud1,
+                      cloud2,
+                      gridscale=float(rescale),
+                      sample_count, 
+                      bw,
+                      useStashing,
+                      dataEntry_cloud1 = string(dataEntry_cloud1), 
+                      dataEntry_cloud2 = string(dataEntry_cloud2),
+                      dataStoreHint = string(dataStoreHint)  )
+  #
+  ScatterAlignPose2(sa)
+end
+
+function ScatterAlignPose3(;
+    cloud1::ManifoldKernelDensity, 
+    cloud2::ManifoldKernelDensity,
+    sample_count::Integer=75,
+    bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
+    rescale::Real=1,
+    useStashing::Bool=false,
+    dataEntry_cloud1="",
+    dataEntry_cloud2="",
+    dataStoreHint=""
+  ) where {T}
+  #
+  
+  sa = ScatterAlign{Pose3,typeof(cloud1),typeof(cloud2)}(;
+                      cloud1,
+                      cloud2,
+                      gridscale=float(rescale),
+                      sample_count, 
+                      bw,
+                      useStashing,
+                      dataEntry_cloud1 = string(dataEntry_cloud1), 
+                      dataEntry_cloud2 = string(dataEntry_cloud2),
+                      dataStoreHint = string(dataStoreHint)  )
+  #
+  ScatterAlignPose3(sa)
+end
 
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
+getManifold(::IIF.InstanceType{<:ScatterAlignPose3}) = getManifold(Pose3Pose3)
 
 # runs once upon addFactor! and returns object later used as `cache`
 function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::ScatterAlignPose2)
   #
   M = getManifold(Pose2)
-  e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+  e0 = ArrayPartition(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
 
   # reconstitute cloud belief from dataEntry
-  for (va,de,cl) in zip(vars,[fnc.dataEntry_cloud1,fnc.dataEntry_cloud2],[fnc.cloud1,fnc.cloud2])
-    if fnc.useStashing 
+  for (va,de,cl) in zip(vars,[fnc.align.dataEntry_cloud1,fnc.align.dataEntry_cloud2],[fnc.align.cloud1,fnc.align.cloud2])
+    if fnc.align.useStashing 
       @assert 0 < length(de) "cannot reconstitute ScatterAlignPose2 without necessary data entry, only have $de"
-      _, db = getData(dfg, getLabel(va), Symbol(de)) # fnc.dataStoreHint
+      _, db = getData(dfg, getLabel(va), Symbol(de)) # fnc.align.dataStoreHint
       cld = convert(SamplableBelief, String(take!(IOBuffer(db))))
       # cld = unpackDistribution(strdstr)
       IIF._update!(cl, cld)
     end
   end
 
-  smps1, = sample(fnc.cloud1, fnc.sample_count)
-  smps2, = sample(fnc.cloud2, fnc.sample_count)
+  smps1, = sample(fnc.align.cloud1, fnc.align.sample_count)
+  smps2, = sample(fnc.align.cloud2, fnc.align.sample_count)
 
-  bw = SA[fnc.bw;]
+  bw = SA[fnc.align.bw;]
   
   score = Ref(0.0)
 
@@ -113,14 +185,14 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
   M = cf.cache.M
   e0 = cf.cache.e0
-  R0 = e0.parts[2]
+  # R0 = submanifold_component(e0,2)
   
   pVi = cf.cache.smps1
   qVj = cf.cache.smps2
   # Fresh samples
-  for i in 1:cf.factor.sample_count
-    pVi[i] .= sample(cf.factor.cloud1)[1][1]
-    qVj[i] .= sample(cf.factor.cloud2)[1][1]
+  for i in 1:cf.factor.align.sample_count
+    pVi[i] .= sample(cf.factor.align.cloud1)[1][1]
+    qVj[i] .= sample(cf.factor.align.cloud2)[1][1]
   end
   
   # qVi(qCp) = _transformPointCloud2D(M,pVi,qCp)
@@ -163,7 +235,7 @@ end
 Overlay the two images from `AlignRadarPose2` with the first (red) fixed and transform the second image (blue) according to `tf`.
 
 Notes:
-- `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
+- `tf` is a Manifolds.jl type `::ArrayPartition` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
 - `user_offset` translates both are the same.
 
 See also: [`plotScatterAlign`](@ref)
@@ -173,7 +245,7 @@ function overlayScatter(sap::ScatterAlignPose2,
                         rot::Real=0.0;
                         user_coords = [trans; rot],
                         # score=Ref(0.0),
-                        sample_count::Integer=sap.sample_count,
+                        sample_count::Integer=sap.align.sample_count,
                         showscore::Bool=true,
                         findBest::Bool=true  )
   #
@@ -222,14 +294,17 @@ function overlayScatterMutate(sap_::ScatterAlignPose2;
                               bw::Real = sap_.bw,
                               kwargs... )
   #
-  sap = ScatterAlignPose2(;cloud1=sap_.cloud1, cloud2=sap_.cloud2, gridscale=sap_.gridscale, sample_count, bw=float(bw))
-  Caesar.overlayScatter(sap; kwargs...);
+  sap = ScatterAlign{Pose2,typeof(sap_.align.cloud1),typeof(sap_.align.cloud2)}(;cloud1=sap_.align.cloud1, cloud2=sap_.align.cloud2, gridscale=sap_.align.gridscale, sample_count, bw=float(bw))
+  sa = ScatterAlignPose2(sap)
+  Caesar.overlayScatter(sa; kwargs...);
 end
 
 
-function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
-  printstyled(io, "ScatterAlignPose2{", bold=true, color=:blue)
+function Base.show(io::IO, sap::ScatterAlign{P,H1,H2}) where {P,H1,H2}
+  printstyled(io, "ScatterAlign{", bold=true, color=:blue)
   println(io)
+  printstyled(io, "    P  = ", color=:magenta)
+  println(io, P)
   printstyled(io, "    H1 = ", color=:magenta)
   println(io, H1)
   printstyled(io, "    H2 = ", color=:magenta)
@@ -251,9 +326,11 @@ function Base.show(io::IO, sap::ScatterAlignPose2{H1,H2}) where {H1,H2}
   nothing
 end
 
-Base.show(io::IO, ::MIME"text/plain", sap::ScatterAlignPose2) = show(io, sap)
-Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = show(io, sap)
+Base.show(io::IO, ::MIME"text/plain", sap::ScatterAlign) = show(io, sap)
+Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlign) = show(io, sap)
 
+Base.show(io::IO, ::MIME"text/plain", sap::ScatterAlignPose2) = show(io, sap.align)
+Base.show(io::IO, ::MIME"application/juno.inline", sap::ScatterAlignPose2) = show(io, sap.align)
 
 
 ## =========================================================================================
@@ -282,15 +359,15 @@ end
 
 function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
 
-  cld1 = arp.cloud1
-  cld2 = arp.cloud2
+  cld1 = arp.align.cloud1
+  cld2 = arp.align.cloud2
 
   # reconstitute full type during the preambleCache step
-  if arp.useStashing
-    @assert length(arp.dataEntry_cloud1) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud1` exists for later loading"
-    cld1 = IIF.parchDistribution(arp.cloud1)
-    @assert length(arp.dataEntry_cloud2) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud2` exists for later loading"
-    cld2 = IIF.parchDistribution(arp.cloud2)
+  if arp.align.useStashing
+    @assert length(arp.align.dataEntry_cloud1) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud1` exists for later loading"
+    cld1 = IIF.parchDistribution(arp.align.cloud1)
+    @assert length(arp.align.dataEntry_cloud2) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud2` exists for later loading"
+    cld2 = IIF.parchDistribution(arp.align.cloud2)
   end
 
   cloud1 = packDistribution(cld1)
@@ -299,13 +376,13 @@ function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
   PackedScatterAlignPose2(;
     cloud1,
     cloud2,
-    gridscale = arp.gridscale,
-    sample_count = arp.sample_count,
-    bw = arp.bw,
-    useStashing = arp.useStashing,
-    dataEntry_cloud1 = arp.dataEntry_cloud1,
-    dataEntry_cloud2 = arp.dataEntry_cloud2,
-    dataStoreHint = arp.dataStoreHint )
+    gridscale = arp.align.gridscale,
+    sample_count = arp.align.sample_count,
+    bw = arp.align.bw,
+    useStashing = arp.align.useStashing,
+    dataEntry_cloud1 = arp.align.dataEntry_cloud1,
+    dataEntry_cloud2 = arp.align.dataEntry_cloud2,
+    dataStoreHint = arp.align.dataStoreHint )
 end
 
 function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
@@ -331,7 +408,7 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
   cloud2 = unpackDistribution(parp.cloud2)
   
   # and build the final object
-  ScatterAlignPose2(;
+  ScatterAlignPose2(ScatterAlign{Pose2, typeof(cloud1), typeof(cloud2)}(;
     cloud1,
     cloud2,
     gridscale=parp.gridscale,
@@ -341,7 +418,7 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
     dataEntry_cloud1 = parp.dataEntry_cloud1,
     dataEntry_cloud2 = parp.dataEntry_cloud2,
     dataStoreHint = parp.dataStoreHint 
-  )
+  ))
 end
 
 #
