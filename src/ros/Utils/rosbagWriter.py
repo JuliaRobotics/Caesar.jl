@@ -10,5 +10,5 @@ class RosbagWriter:
     def write_message(self, channel, msg):
         self.bag.write(channel, msg) # , header
     
-    def close():
+    def close(self):
         self.bag.close()
