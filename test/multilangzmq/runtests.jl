@@ -5,10 +5,10 @@ using Caesar, Caesar.ZmqCaesar
 
 @testset "ZMQ Interface" begin
     # Unit tests
-    include("multilangzmq/callbackCompatibilityTest.jl")
+    include("callbackCompatibilityTest.jl")
     # Integration tests
-    include("multilangzmq/zmqInternal.jl")
+    include("zmqInternal.jl")
     # End to end tests
     # Do this manually...
-    # include("multilangzmq/serverTest.jl")
+    # include("serverTest.jl")
 end
