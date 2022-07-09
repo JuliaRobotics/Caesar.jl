@@ -73,7 +73,7 @@ meas = sampleFactor(IIF._getCCW(atf),2)
 
 @error "restore type checking for AprilTags4Corners Factor"
 @test  meas isa Vector
-@test  meas[1] isa ProductRepr # TBD likely to change to new Manifolds.jl type
+@test  meas[1] isa ArrayPartition # TBD likely to change to new Manifolds.jl type
 
 ##
 
@@ -81,8 +81,8 @@ meas = sampleFactor(IIF._getCCW(atf),2)
 pts = approxConv(fg, DFG.ls(fg,:tag17)[1], :tag17)
 
 @test 1 < length(pts)
-@test length(pts[1].parts[1]) == 2
-@test size(pts[1].parts[2]) == (2,2)
+@test length(submanifold_component(pts[1],1)) == 2
+@test size(submanifold_component(pts[1],2)) == (2,2)
 
 
 ## test packing of factor
@@ -136,8 +136,8 @@ uf4_ = getFactorType(fg_, DFG.ls(fg_, :tag17)[1])
 pred, meas = approxDeconv(fg, DFG.ls(fg, :tag17)[1])
 
 M = Manifolds.SpecialEuclidean(2)
-pred_ = exp.(Ref(M), Ref(identity_element(M)), pred)
-meas_ = exp.(Ref(M), Ref(identity_element(M)), meas)
+pred_ = exp.(Ref(M), Ref(getPointIdentity(M)), pred)
+meas_ = exp.(Ref(M), Ref(getPointIdentity(M)), meas)
 
 @test isapprox( M, mean(M,pred_),  mean(M, meas_), atol=0.5)
 

@@ -258,7 +258,7 @@ function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(X,
 
   # @assert X isa ProductRepr "Pose2AprilTag4Corners expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
   M = getManifold(pat4c.factor.Z)
-  q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M, p), X)) #for groups
+  q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M), X)) #for groups
   #TODO allocalte for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
   vee!(M, Xc, q, log(M, q, q̂))
