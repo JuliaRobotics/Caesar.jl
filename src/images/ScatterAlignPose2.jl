@@ -157,7 +157,7 @@ getManifold(::IIF.InstanceType{<:ScatterAlignPose3}) = getManifold(Pose3Pose3)
 function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::ScatterAlignPose2)
   #
   M = getManifold(Pose2)
-  e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+  e0 = ArrayPartition(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
 
   # reconstitute cloud belief from dataEntry
   for (va,de,cl) in zip(vars,[fnc.align.dataEntry_cloud1,fnc.align.dataEntry_cloud2],[fnc.align.cloud1,fnc.align.cloud2])
@@ -185,7 +185,7 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   #
   M = cf.cache.M
   e0 = cf.cache.e0
-  R0 = e0.parts[2]
+  # R0 = submanifold_component(e0,2)
   
   pVi = cf.cache.smps1
   qVj = cf.cache.smps2
@@ -235,7 +235,7 @@ end
 Overlay the two images from `AlignRadarPose2` with the first (red) fixed and transform the second image (blue) according to `tf`.
 
 Notes:
-- `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
+- `tf` is a Manifolds.jl type `::ArrayPartition` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
 - `user_offset` translates both are the same.
 
 See also: [`plotScatterAlign`](@ref)

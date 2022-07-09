@@ -33,7 +33,7 @@ oT = [2.; 0]
 oΨ =  pi/8
 
 M = SpecialEuclidean(2)
-e0 = identity_element(M)
+e0 = getPointIdentity(M)
 pCq = [oT;oΨ]
 qGp = inv(M, exp(M, e0, hat(M, e0, pCq)))
 qTp = affine_matrix(M, qGp )
@@ -86,11 +86,11 @@ sap_ = convert(ScatterAlignPose2, psap);
 tfg = initfg()
 getSolverParams(tfg).attemptGradients = false
 M = getManifold(sap)
-e0 = identity_element(M)
-# meas = sample(sap.cloud1,100)[1], [ProductRepr(sample(sap.cloud2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
-meas = ProductRepr(oT, log(M.manifold.manifolds[2],e0.parts[2], _Rot.RotMatrix(oΨ)))
+e0 = getPointIdentity(M)
+# meas = sample(sap.cloud1,100)[1], [ArrayPartition(sample(sap.cloud2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
+meas = ArrayPartition(oT, log(M.manifold.manifolds[2], submanifold_component(e0,2), _Rot.RotMatrix(oΨ)))
 
-δ(x) = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,ProductRepr(x[1:2],_Rot.RotMatrix(x[3]))) , tfg=tfg)[1]
+δ(x) = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,ArrayPartition(x[1:2],_Rot.RotMatrix(x[3]))) , tfg=tfg)[1]
 
 @show δ([0;0;0.]);
 @show δ([1.;0;0.]);
@@ -174,7 +174,7 @@ oT = [2.; 0]
 oΨ =  pi/6
 
 M = SpecialEuclidean(2)
-e0 = identity_element(M)
+e0 = getPointIdentity(M)
 pCq = [oT;oΨ]
 qTp = affine_matrix(M, exp(M, e0, hat(M, e0, pCq)))
 
@@ -225,10 +225,10 @@ addFactor!(fg, [:x0;:x1], sap, inflation=0.0)
 
 # see #1415
 # Mr = M.manifold.manifolds[2]
-meas = ProductRepr([0;0.], zeros(2,2)) # sample(P1,100)[1], [ProductRepr([0;0.],[1 0; 0 1.]) for _ in 1:100], M
+meas = ArrayPartition([0;0.], zeros(2,2)) # sample(P1,100)[1], [ArrayPartition([0;0.],[1 0; 0 1.]) for _ in 1:100], M
 δ1 = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,e0))
 
-meas = ProductRepr([1;0.], zeros(2,2)) # sample(P1,100)[1] , [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
+meas = ArrayPartition([1;0.], zeros(2,2)) # sample(P1,100)[1] , [ArrayPartition(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
 δ2 = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,e0))
 
 # check different cloud samplings produce different residual values
@@ -237,9 +237,9 @@ meas = ProductRepr([1;0.], zeros(2,2)) # sample(P1,100)[1] , [ProductRepr(sample
 ## check that optimize works (using the same tfg)
 
 tfg = initfg()
-# meas = sample(P1,100)[1], [ProductRepr(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
+# meas = sample(P1,100)[1], [ArrayPartition(sample(P2,1)[1][1],[1 0; 0 1.]) for _ in 1:100], M
 meas = sampleFactor(fg, :x0x1f1)[1]
-δ(x) = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,ProductRepr(x[1:2],_Rot.RotMatrix(x[3]))), tfg=tfg)[1]
+δ(x) = calcFactorResidualTemporary(sap, (Pose2,Pose2), meas, (e0,ArrayPartition(x[1:2],_Rot.RotMatrix(x[3]))), tfg=tfg)[1]
 
 @show δ([0;0;0.])
 @show δ([1.;0;0.])
@@ -274,7 +274,7 @@ oT = [2.; 0;0]
 oΨ =  [0;0;pi/6]
 
 M = SpecialEuclidean(3)
-e0 = identity_element(M)
+e0 = getPointIdentity(M)
 pCq = [oT;oΨ]
 qTp = affine_matrix(M, exp(M, e0, hat(M, e0, pCq)))
 
