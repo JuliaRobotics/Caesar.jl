@@ -125,7 +125,8 @@ Base.@kwdef struct Header
   """ The sequence number """
   seq::UInt32      = UInt32(0)
   """ A timestamp associated with the time when the data was acquired. 
-  The value represents microseconds since 1970-01-01 00:00:00 (the UNIX epoch). """
+  The value represents microseconds since 1970-01-01 00:00:00 (the UNIX epoch). 
+  Suggest: making this relative to UCT to account for timezones in future. """
   stamp::UInt64    = UInt64(0)
   """ Coordinate frame ID. """
   frame_id::String = ""
