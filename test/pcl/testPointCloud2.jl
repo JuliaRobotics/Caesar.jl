@@ -92,4 +92,24 @@ show(pc)
 ##
 end
 
+
+@testset "PandarXT test point cloud conversion test" begin
+##
+
+@warn "TODO, see testdata/_pandar_PCLPointCloud2.jldat which via `Serialization.serialize` of a `Caesar._PCL.PCLPointCloud2` object, at JL 1.7.3, CJL v0.13.1+" 
+# pc2.fields
+#   6-element Vector{Caesar._PCL.PointField}:
+#  Caesar._PCL.PointField("x", 0x00000000, Caesar._PCL._PCL_FLOAT32, 0x00000001)
+#  Caesar._PCL.PointField("y", 0x00000004, Caesar._PCL._PCL_FLOAT32, 0x00000001)
+#  Caesar._PCL.PointField("z", 0x00000008, Caesar._PCL._PCL_FLOAT32, 0x00000001)
+#  Caesar._PCL.PointField("intensity", 0x00000010, Caesar._PCL._PCL_FLOAT32, 0x00000001)
+#  Caesar._PCL.PointField("timestamp", 0x00000018, Caesar._PCL._PCL_FLOAT64, 0x00000001)
+#  Caesar._PCL.PointField("ring", 0x00000020, Caesar._PCL._PCL_UINT16, 0x00000001)
+
+
+##
+end
+
+
+
 #

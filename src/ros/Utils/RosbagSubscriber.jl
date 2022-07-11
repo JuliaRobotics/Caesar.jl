@@ -3,6 +3,7 @@
 
 
 export RosbagSubscriber, loop!, getROSPyMsgTimestamp, nanosecond2datetime
+export RosbagWriter
 
 ## Load rosbag file parser
 
@@ -11,6 +12,30 @@ pushfirst!(PyVector(pyimport("sys")."path"), @__DIR__ )
 rosbagReaderPy = pyimport("rosbagReader")
 RosbagParser = rosbagReaderPy."RosbagParser"
 
+# piggy back writer code here
+writeRosbagPy = pyimport("rosbagWriter")
+
+"""
+    RosbagWriter(bagfilepath)
+
+```julia
+# Link with ROSbag infrastructure via rospy
+using Pkg
+ENV["PYTHON"] = "/usr/bin/python3"
+Pkg.build("PyCall")
+using PyCall
+using RobotOS
+@rosimport std_msgs.msg: String
+rostypegen()
+using Caesar
+
+bagwr = Caesar.RosbagWriter("/tmp/test.bag")
+s = std_msgs.msg.StringMsg("test")
+bagwr.write_message("/ch1", s)
+bagwr.close()
+```
+"""
+RosbagWriter = writeRosbagPy."RosbagWriter"
 
 ## Common handler approach
 
