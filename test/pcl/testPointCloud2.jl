@@ -9,6 +9,8 @@
 using Colors
 using Caesar
 using BSON
+using Serialization
+using FixedPointNumbers
 
 using Test
 using Pkg
@@ -93,9 +95,9 @@ show(pc)
 @info "test `apply` transform SpecialEuclidean(2) to 2D pointcloud."
 
 M = SpecialEuclidean(2)
-rTc = ArrayPartition([1.;0], [1 0; 0 1.])
+rPc = ArrayPartition([1.;0], [1 0; 0 1.])
 
-pc_ = Caesar._PCL.apply(M, rTc, pc)
+pc_ = Caesar._PCL.apply(M, rPc, pc)
 
 
 @test isapprox( [1-0,0,0],              pc_.points[1].data[1:3], atol=5e-3)
@@ -117,7 +119,10 @@ end
 @testset "PandarXT test point cloud conversion test" begin
 ##
 
-@warn "TODO, see testdata/_pandar_PCLPointCloud2.jldat which via `Serialization.serialize` of a `Caesar._PCL.PCLPointCloud2` object, at JL 1.7.3, CJL v0.13.1+" 
+# Alternative approach, see more hardcoded test data example (only .data writen to binary) for _PCLPointCloud2_15776.dat"
+@info "Loading testdata/_pandar_PCLPointCloud2.jldat which via `Serialization.serialize` of a `Caesar._PCL.PCLPointCloud2` object, at JL 1.7.3, CJL v0.13.1+" 
+datafile = joinpath( pkgdir(Caesar), "test", "testdata", "_pandar_PCLPointCloud2.jldat")
+pc2 = Serialization.deserialize(datafile)
 # pc2.fields
 #   6-element Vector{Caesar._PCL.PointField}:
 #  Caesar._PCL.PointField("x", 0x00000000, Caesar._PCL._PCL_FLOAT32, 0x00000001)
@@ -126,6 +131,67 @@ end
 #  Caesar._PCL.PointField("intensity", 0x00000010, Caesar._PCL._PCL_FLOAT32, 0x00000001)
 #  Caesar._PCL.PointField("timestamp", 0x00000018, Caesar._PCL._PCL_FLOAT64, 0x00000001)
 #  Caesar._PCL.PointField("ring", 0x00000020, Caesar._PCL._PCL_UINT16, 0x00000001)
+
+##
+
+pc = Caesar._PCL.PointCloud(pc2)
+
+@test UInt32(1) === pc.height
+@test UInt32(58015) === pc.width
+@test 58015 === length(pc.points)
+@test pc.points[1] isa Caesar._PCL.PointXYZ{RGBA{FixedPointNumbers.N0f8}, Float32}
+@test pc.is_dense
+@test pc.header.seq === UInt32(24285)
+
+# check actual points
+@test isapprox( Float32[0.009075656, 3.714255, 0.99023366, 0.0], pc.points[1].data[1:4], atol=5e-3)
+@test isapprox( Float32[0.008430854, 3.715781, 0.92004687, 0.0], pc.points[2].data[1:4], atol=5e-3)
+@test isapprox( Float32[0.0084575275, 3.727537, 0.8534482, 0.0], pc.points[3].data[1:4], atol=5e-3)
+@test isapprox( Float32[0.008463516, 3.7301762, 0.78552955, 0.0], pc.points[4].data[1:4], atol=5e-3)
+@test isapprox( Float32[0.0032057164, 1.3119546, 0.25231096, 0.0], pc.points[5].data[1:4], atol=5e-3)
+
+## convert back to PCLPointCloud2
+
+@info "test back conversion from _PCL.PointCloud to _PCL.PCLPointCloud2, and again _PCL.PointCloud"
+
+_pc2 = Caesar._PCL.PCLPointCloud2(pc)
+_pc = Caesar._PCL.PointCloud(_pc2)
+
+@test UInt32(1) === _pc.height
+@test UInt32(58015) === _pc.width
+@test 58015 === length(_pc.points)
+@test _pc.points[1] isa Caesar._PCL.PointXYZ{RGBA{FixedPointNumbers.N0f8}, Float32}
+@test _pc.is_dense
+@test _pc.header.seq === UInt32(24285)
+
+# check actual points
+@test isapprox( Float32[0.009075656, 3.714255, 0.99023366, 0.0], _pc.points[1].data[1:4], atol=5e-3)
+@test isapprox( Float32[0.008430854, 3.715781, 0.92004687, 0.0], _pc.points[2].data[1:4], atol=5e-3)
+@test isapprox( Float32[0.0084575275, 3.727537, 0.8534482, 0.0], _pc.points[3].data[1:4], atol=5e-3)
+@test isapprox( Float32[0.008463516, 3.7301762, 0.78552955, 0.0], _pc.points[4].data[1:4], atol=5e-3)
+@test isapprox( Float32[0.0032057164, 1.3119546, 0.25231096, 0.0], _pc.points[5].data[1:4], atol=5e-3)
+
+
+## test SpecialEuclidean(3) transform application
+
+M = SpecialEuclidean(3)
+rPc = ArrayPartition([-1;0;10.], [1 0 0; 0 1 0; 0 0 1.])
+
+pc_3D = Caesar._PCL.apply(M, rPc, pc)
+
+
+@test UInt32(1) === pc_3D.height
+@test UInt32(58015) === pc_3D.width
+@test 58015 === length(pc_3D.points)
+@test pc_3D.points[1] isa Caesar._PCL.PointXYZ{RGBA{FixedPointNumbers.N0f8}, Float32}
+@test pc_3D.is_dense
+@test pc_3D.header.seq === UInt32(24285)
+
+@test isapprox( Float32[-1+0.009075656, 3.714255,  10+ 0.99023366, 0.0], pc_3D.points[1].data[1:4], atol=5e-3)
+@test isapprox( Float32[-1+0.008430854, 3.715781,  10+ 0.92004687, 0.0], pc_3D.points[2].data[1:4], atol=5e-3)
+@test isapprox( Float32[-1+0.0084575275, 3.727537, 10+ 0.8534482, 0.0], pc_3D.points[3].data[1:4], atol=5e-3)
+@test isapprox( Float32[-1+0.008463516, 3.7301762, 10+ 0.78552955, 0.0], pc_3D.points[4].data[1:4], atol=5e-3)
+@test isapprox( Float32[-1+0.0032057164, 1.3119546,10+ 0.25231096, 0.0], pc_3D.points[5].data[1:4], atol=5e-3)
 
 
 ##

@@ -234,7 +234,7 @@ function PointCloud(
         # the slow way of building the point.data entry
         ptdata = zeros(datatype, 4)
         for (i,mapping) in enumerate(field_map)
-          @info "test" i mapping maxlog=3
+          # @info "test" i mapping maxlog=3
           midx = trunc(Int,mapping.serialized_offset/mapping.size) + 1
           # Copy individual points as columns from mat -- i.e. memcpy
           # TODO copy only works if all elements have the same type -- suggestion, ptdata::ArrayPartition instead
@@ -333,10 +333,7 @@ function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidea
                 pc::PointCloud{T} ) where T
   #
 
-  rTp = affine_matrix(M_, rPp)
-  pV = MVector(0.0,0.0,1.0)
-  _data = MVector(0.0,0.0,0.0,0.0)
-
+  # allocate destination
   _pc = PointCloud(;header=pc.header,
                     points = Vector{T}(),
                     width=pc.width,
@@ -346,13 +343,20 @@ function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidea
                     sensor_orientation_=pc.sensor_orientation_ )
   #
 
+  rTp = affine_matrix(M_, rPp)
+  nc = size(rTp,1)-1
+  pV = MVector(zeros(nc)...,1.0)
+  _data = MVector(0.0,0.0,0.0,0.0)
+
   # rotate the elements from the old point cloud into new static memory locations
   # NOTE these types must match the types use for PointCloud and PointXYZ
+  # TODO not the world's fastest implementation
   for pt in pc.points
-    pV[1] = pt.x
-    pV[2] = pt.y
-    _data[1:3] .= rTp*pV
-    push!(_pc.points, PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data[1], _data[2], pt.data[3:4]...)) )
+    pV[1:nc] = pt.data[1:nc]
+    _data[1:nc] = (rTp*pV)[1:nc]
+    _data[4] = pt.data[4]
+    npt = PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data...))
+    push!(_pc.points, npt )
   end
 
   # return the new point cloud
