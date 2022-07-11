@@ -328,7 +328,7 @@ end
 # 2D, do similar or better for 3D
 # FIXME, to optimize, this function will likely be slow
 # TODO, consolidate with transformPointcloud(::ScatterAlign,..) function
-function apply( M_::typeof(SpecialEuclidean(2)),
+function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
                 rPp::Union{<:ProductRepr,<:Manifolds.ArrayPartition},
                 pc::PointCloud{T} ) where T
   #

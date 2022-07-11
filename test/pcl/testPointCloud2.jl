@@ -88,6 +88,27 @@ show(pc)
 #   @test isapprox( PointCloudRef[1][i,1:3], pt.data[1:3]; atol=1e-6)
 # end
 
+##
+
+@info "test `apply` transform SpecialEuclidean(2) to 2D pointcloud."
+
+M = SpecialEuclidean(2)
+rTc = ArrayPartition([1.;0], [1 0; 0 1.])
+
+pc_ = Caesar._PCL.apply(M, rTc, pc)
+
+
+@test isapprox( [1-0,0,0],              pc_.points[1].data[1:3], atol=5e-3)
+@test isapprox( [1-1.56486,1.09851,0],  pc_.points[2].data[1:3], atol=5e-3)
+@test isapprox( [1-793.383,556.945,0],  pc_.points[3].data[1:3], atol=5e-3)
+@test isapprox( [1-0,0,0],              pc_.points[4].data[1:3], atol=5e-3)
+@test isapprox( [1-1.56148,1.10331,0],  pc_.points[5].data[1:3], atol=5e-3)
+@test isapprox( [1-788.548,557.169,0],  pc_.points[6].data[1:3], atol=5e-3)
+@test isapprox( [1-790.109,558.273,0],  pc_.points[7].data[1:3], atol=5e-3)
+@test isapprox( [1-791.671,559.376,0],  pc_.points[8].data[1:3], atol=5e-3)
+@test isapprox( [1-793.232,560.479,0],  pc_.points[9].data[1:3], atol=5e-3)
+@test isapprox( [1-794.794,561.583,0],  pc_.points[10].data[1:3], atol=5e-3)
+
 
 ##
 end
