@@ -80,6 +80,7 @@ References
 end
 
 Base.convert(::Type{<:_PCL_POINTFIELD_FORMAT}, val::Integer) = (en=instances(_PCL_POINTFIELD_FORMAT); en[findfirst(Int.(en) .== Int.(convert(UInt8, val)))])
+Base.convert(::Type{<:Integer}, ff::_PCL_POINTFIELD_FORMAT) = findfirst(==(ff), instances(_PCL_POINTFIELD_FORMAT))
 
 struct asType{T} end
 

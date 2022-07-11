@@ -261,7 +261,7 @@ Out: msg the resultant PCLPointCloud2 binary blob
 DevNotes:
 - TODO, remove hacks, e.g. fields [x,y,z,intensity,]-only.
 """
-function PCLPointCloud2(cloud::PointCloud{T,P,R}) where {T,P,R}
+function PCLPointCloud2(cloud::PointCloud{T,P,R}; datatype = _PCL_FLOAT32) where {T,P,R}
   # Ease the user's burden on specifying width/height for unorganized datasets
   if (cloud.width == 0 && cloud.height == 0)
     height = 1;
@@ -280,13 +280,12 @@ function PCLPointCloud2(cloud::PointCloud{T,P,R}) where {T,P,R}
   #      memcpy(&msg.data[0], &cloud[0], data_size);
   #    }
   
-  hackTypeAll = _PCL_FLOAT32
   fields = Vector{PointField}(undef, 4)
   # TODO assuming all(fields[_].count==1)
-  fields[1] = PointField("x", UInt32(0), hackTypeAll, UInt32(1))
-  fields[2] = PointField("y", UInt32(4), hackTypeAll, UInt32(1))
-  fields[3] = PointField("z", UInt32(8), hackTypeAll, UInt32(1))
-  fields[4] = PointField("intensity", UInt32(12), hackTypeAll, UInt32(1))
+  fields[1] = PointField("x", UInt32(0), datatype, UInt32(1))
+  fields[2] = PointField("y", UInt32(4), datatype, UInt32(1))
+  fields[3] = PointField("z", UInt32(8), datatype, UInt32(1))
+  fields[4] = PointField("intensity", UInt32(12), datatype, UInt32(1))
   _nflds = length(fields)
   #    # Fill fields metadata
   #    msg.fields.clear ();
@@ -302,7 +301,7 @@ function PCLPointCloud2(cloud::PointCloud{T,P,R}) where {T,P,R}
   data = Vector{UInt8}(undef, point_step*width)
   for (i,pt) in enumerate(cloud.points)
     offset = (point_step*(i-1)+1)
-    # NOTE assume continuous data block in struct (all of same hackTypeAll, FIXME)
+    # NOTE assume continuous data block in struct (all of same datatype, FIXME)
     data[offset:(offset-1+point_step)] .= reinterpret(UInt8, view(pt.data, 1:_nflds))
   end
 
