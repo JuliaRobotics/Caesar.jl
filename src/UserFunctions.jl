@@ -50,7 +50,7 @@ function _transformPointCloud(
   )
   #
   #dest points
-  aP_dest = Vector{MVector(zeros(length(bP_src[1]))...)}(undef,length(bP_src)) 
+  aP_dest = Vector{MVector{length(bP_src[1]),Float64}}(undef,length(bP_src)) 
   _transformPointCloud!(M, aP_dest, bP_src, aCb; kw...)
 end
 
