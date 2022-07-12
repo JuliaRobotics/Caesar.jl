@@ -64,6 +64,7 @@ struct ScatterAlignPose3 <: IIF.AbstractManifoldMinimize
   align::ScatterAlign{Pose3,<:Any,<:Any}
 end
 
+_getPoseType(::ScatterAlign{P}) where P = P
 
 # replace inner constructor with transform on image
 function ScatterAlignPose2(im1::AbstractMatrix{T}, 
@@ -156,9 +157,8 @@ getManifold(::IIF.InstanceType{<:ScatterAlignPose3}) = getManifold(Pose3Pose3)
 # runs once upon addFactor! and returns object later used as `cache`
 function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::Union{<:ScatterAlignPose2,<:ScatterAlignPose3})
   #
-  _getPoseType(sa::ScatterAlign{P}) where P = P
   M = getManifold(_getPoseType(fnc.align))
-  e0 = getPointIdentity(M) # ArrayPartition(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+  e0 = getPointIdentity(M)
 
   # reconstitute cloud belief from dataEntry
   for (va,de,cl) in zip(vars,[fnc.align.dataEntry_cloud1,fnc.align.dataEntry_cloud2],[fnc.align.cloud1,fnc.align.cloud2])
@@ -182,10 +182,12 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fn
 end
 
 
-function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
+function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:ScatterAlignPose3}}
   #
   M = cf.cache.M
   e0 = cf.cache.e0
+  ntr = length(Manifolds.submanifold_component(e0,1))
+  nrt = Manifolds.manifold_dimension(M)-ntr
   # R0 = submanifold_component(e0,2)
   
   pVi = cf.cache.smps1
@@ -203,7 +205,7 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj), cf._allowThreads; cf.cache.bw)
   
   # return mmd as residual for minimization
-  res = Optim.optimize(cost, [5*randn(2); 0.1*randn()], Optim.BFGS() )
+  res = Optim.optimize(cost, [5*randn(ntr); 0.1*randn(nrt)], Optim.BFGS() )
   
   cf.cache.score[] = res.minimum
   
@@ -213,20 +215,29 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
 end
 
 
-function (cf::CalcFactor{<:ScatterAlignPose2})(pXq, wPp, wPq)
+function (cf::CalcFactor{S})(X, p, q
+  ) where {S <: Union{<:ScatterAlignPose2,<:ScatterAlignPose3}}
   # 
   
   M = cf.cache.M
-  e0 = cf.cache.e0
+  ϵ0 = cf.cache.e0
   
-  # get the current relative transform estimate
-  wPq_ = Manifolds.compose(M, wPp, exp(M, e0, pXq))
-  
-  #TODO allocalte for vee! see Manifolds #412, fix for AD
-  Xc = zeros(3)
-  vee!(M, Xc, wPq, log(M, wPq, wPq_))
-  
+  # copied from Pose2Pose2
+  q̂ = allocate(q)
+  exp!(M, q̂, ϵ0, X)
+  Manifolds.compose!(M, q̂, p, q̂)   
+  Xc = vee(M, q, log!(M, q̂, q, q̂))
   return Xc
+
+    # pXq, 
+    # wPp, 
+    # wPq
+  # # get the current relative transform estimate
+  # wPq_ = Manifolds.compose(M, wPp, exp(M, e0, pXq))
+  # #TODO allocalte for vee! see Manifolds #412, fix for AD
+  # Xc = zeros(3)
+  # vee!(M, Xc, wPq, log(M, wPq, wPq_))
+  # return Xc
 end
 
 
