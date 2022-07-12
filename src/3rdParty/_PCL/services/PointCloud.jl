@@ -57,6 +57,8 @@ Base.getindex(pc::PointCloud, i) = pc.points[i]
 Base.setindex!(pc::PointCloud, pt::PointT, idx) = (pc.points[idx] = pt)
 Base.resize!(pc::PointCloud, s::Integer) = resize!(pc.points, s)
 
+Base.length(pc::PointCloud) = length(pc.points)
+
 ## not very Julian translations from C++ above
 ## ==============================================================================================
 
@@ -146,7 +148,7 @@ function createMapping(T,msg_fields::AbstractVector{<:PointField}, field_map::Ms
 
   # Coalesce adjacent fields into single copy where possible
   if 1 < length(field_map)
-    # TODO check accending vs descending order
+    # TODO check accending vs descending order>
     sort!(field_map, by = x->x.serialized_offset)
     
     # something strange with how C++ does and skips the while loop, disabling the coalescing for now
@@ -167,7 +169,7 @@ function createMapping(T,msg_fields::AbstractVector{<:PointField}, field_map::Ms
     #   else
     #     i += 1
     #     j += 1
-        
+    
     #     _jmap = field_map[j]
     #     _jend = field_map[end]
     #   end
@@ -177,6 +179,14 @@ function createMapping(T,msg_fields::AbstractVector{<:PointField}, field_map::Ms
 
   return field_map
 end
+# pc2.fields
+#   6-element Vector{Caesar._PCL.PointField}:
+#  Caesar._PCL.PointField("x", 0x00000000, Caesar._PCL._PCL_FLOAT32, 0x00000001)
+#  Caesar._PCL.PointField("y", 0x00000004, Caesar._PCL._PCL_FLOAT32, 0x00000001)
+#  Caesar._PCL.PointField("z", 0x00000008, Caesar._PCL._PCL_FLOAT32, 0x00000001)
+#  Caesar._PCL.PointField("intensity", 0x00000010, Caesar._PCL._PCL_FLOAT32, 0x00000001)
+#  Caesar._PCL.PointField("timestamp", 0x00000018, Caesar._PCL._PCL_FLOAT64, 0x00000001)
+#  Caesar._PCL.PointField("ring", 0x00000020, Caesar._PCL._PCL_UINT16, 0x00000001)
 
 
 # https://pointclouds.org/documentation/conversions_8h_source.html#l00166
@@ -193,13 +203,14 @@ function PointCloud(
   cloudsize = msg.width*msg.height
   # cloud_data = Vector{UInt8}(undef, cloudsize)
 
-  # NOTE assume all fields use the same data type
+  # FIXME cannot assume all fields use the same data type
   # off script conversion for XYZ_ data only
   datatype = asType{msg.fields[1].datatype}()
   len = trunc(Int, length(msg.data)/field_map[1].size)
   data_ = Vector{datatype}(undef, len)
   read!(IOBuffer(msg.data), data_)
   mat = reshape(data_, :, cloudsize)
+  # see createMapping above
   
 
   # Check if we can copy adjacent points in a single memcpy.  We can do so if there
@@ -214,7 +225,7 @@ function PointCloud(
     error("copy of just one field_map not implemented yet")
   else    
     # If not, memcpy each group of contiguous fields separately
-    @assert msg.height == 1 "only decoding msg.height=1 messages, update converter here."
+    @assert msg.height == 1 "only decoding msg::PCLPointCloud2.height=1 messages, update converter here."
     for row in 1:msg.height
       # TODO check might have an off by one error here
       # row_data = row * msg.row_step + 1 # msg.data[(row-1) * msg.row_step]
@@ -223,12 +234,11 @@ function PointCloud(
         # the slow way of building the point.data entry
         ptdata = zeros(datatype, 4)
         for (i,mapping) in enumerate(field_map)
+          # @info "test" i mapping maxlog=3
           midx = trunc(Int,mapping.serialized_offset/mapping.size) + 1
-          # TODO, why the weird index reversal?
+          # Copy individual points as columns from mat -- i.e. memcpy
+          # TODO copy only works if all elements have the same type -- suggestion, ptdata::ArrayPartition instead
           ptdata[i] = mat[midx, col] 
-          # @info "DO COPY" mapping 
-          # memcpy (cloud_data + mapping.struct_offset, msg_data + mapping.serialized_offset, mapping.size);
-          # @info "copy" mapping.struct_offset mapping.serialized_offset mapping.size
         end
         pt = T(;data=SVector(ptdata...))
         push!(cloud.points, pt)
@@ -241,6 +251,75 @@ function PointCloud(
 end
 
 
+"""
+$SIGNATURES
+
+Convert a pcl::PointCloud<T> object to a PCLPointCloud2 binary data blob.
+In: cloud the input pcl::PointCloud<T>
+Out: msg the resultant PCLPointCloud2 binary blob
+
+DevNotes:
+- TODO, remove hacks, e.g. fields [x,y,z,intensity,]-only.
+"""
+function PCLPointCloud2(cloud::PointCloud{T,P,R}; datatype = _PCL_FLOAT32) where {T,P,R}
+  # Ease the user's burden on specifying width/height for unorganized datasets
+  if (cloud.width == 0 && cloud.height == 0)
+    height = 1;
+    width  = length(cloud)
+  else
+    @assert (length(cloud) == cloud.width * cloud.height) "Input `cloud::PointCloud`'s width*height is not equal to length(cloud)"
+    height = cloud.height;
+    width  = cloud.width;
+  end
+
+  #    // Fill point cloud binary data (padding and all)
+  #    std::size_t data_size = sizeof (PointT) * cloud.size ();
+  #    msg.data.resize (data_size);
+  #    if (data_size)
+  #    {
+  #      memcpy(&msg.data[0], &cloud[0], data_size);
+  #    }
+  
+  fields = Vector{PointField}(undef, 4)
+  # TODO assuming all(fields[_].count==1)
+  fields[1] = PointField("x", UInt32(0), datatype, UInt32(1))
+  fields[2] = PointField("y", UInt32(4), datatype, UInt32(1))
+  fields[3] = PointField("z", UInt32(8), datatype, UInt32(1))
+  fields[4] = PointField("intensity", UInt32(12), datatype, UInt32(1))
+  _nflds = length(fields)
+  #    # Fill fields metadata
+  #    msg.fields.clear ();
+  #    for_each_type<typename traits::fieldList<PointT>::type> (detail::FieldAdder<PointT>(msg.fields));
+  
+  # NOTE get the last possible byte location of all fields, assume no padding after last used byte
+  _fend = fields[end]
+  point_step = _fend.offset + sizeof(asType{_fend.datatype}())  # = sizeof (PointT);
+  #    msg.row_step   = (sizeof (PointT) * msg.width);
+  #    # todo msg.is_bigendian = ?;
+  
+  # flatten all point fields as binary
+  data = Vector{UInt8}(undef, point_step*width)
+  for (i,pt) in enumerate(cloud.points)
+    offset = (point_step*(i-1)+1)
+    # NOTE assume continuous data block in struct (all of same datatype, FIXME)
+    data[offset:(offset-1+point_step)] .= reinterpret(UInt8, view(pt.data, 1:_nflds))
+  end
+
+  # @error("noise")
+  return PCLPointCloud2(;
+    header = cloud.header,
+    height,
+    width,
+    fields,
+    data,
+    # is_bigendian = ,
+    point_step,
+    row_step = sizeof(T)*width,
+    is_dense = cloud.is_dense,
+  )
+end
+
+
 ## =========================================================================================================
 ## Coordinate transformations using Manifolds.jl
 ## =========================================================================================================
@@ -248,15 +327,13 @@ end
 
 # 2D, do similar or better for 3D
 # FIXME, to optimize, this function will likely be slow
-function apply( M_::typeof(SpecialEuclidean(2)),
-                          rPp::Union{<:ProductRepr,<:Manifolds.ArrayPartition},
-                          pc::PointCloud{T} ) where T
+# TODO, consolidate with transformPointcloud(::ScatterAlign,..) function
+function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
+                rPp::Manifolds.ArrayPartition,
+                pc::PointCloud{T} ) where T
   #
 
-  rTp = affine_matrix(M_, rPp)
-  pV = MVector(0.0,0.0,1.0)
-  _data = MVector(0.0,0.0,0.0,0.0)
-
+  # allocate destination
   _pc = PointCloud(;header=pc.header,
                     points = Vector{T}(),
                     width=pc.width,
@@ -266,13 +343,18 @@ function apply( M_::typeof(SpecialEuclidean(2)),
                     sensor_orientation_=pc.sensor_orientation_ )
   #
 
+  ft3 = _FastTransform3D(M_, rPp, 0f0)
+  nc = M_ isa typeof(SpecialEuclidean(3)) ? 3 : 2
+  _data = MVector(0f0,0f0,0f0,0f0)
+
   # rotate the elements from the old point cloud into new static memory locations
   # NOTE these types must match the types use for PointCloud and PointXYZ
+  # TODO not the world's fastest implementation
   for pt in pc.points
-    pV[1] = pt.x
-    pV[2] = pt.y
-    _data[1:3] .= rTp*pV
-    push!(_pc.points, PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data[1], _data[2], pt.data[3:4]...)) )
+    _data[1:nc] = ft3(pt.data[1:nc])
+    _data[4] = pt.data[4]
+    npt = PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data...))
+    push!(_pc.points, npt )
   end
 
   # return the new point cloud

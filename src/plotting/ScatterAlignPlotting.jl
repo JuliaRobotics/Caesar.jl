@@ -31,7 +31,7 @@ function plotScatterAlign(snt::NamedTuple; title::String="")
   hstack(H1,H2, H3)
 end
 
-plotScatterAlign( sap::ScatterAlignPose2;
+plotScatterAlign( sap::ScatterAlign{Pose2};
                   sample_count::Integer = sap.sample_count,
                   bw::Real = sap.bw,
                   kw... ) = plotScatterAlign(overlayScatterMutate(sap; sample_count, bw); kw...)

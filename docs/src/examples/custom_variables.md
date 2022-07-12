@@ -24,7 +24,7 @@ Another good example to look at is RoME's [`Pose2`](@ref) with 3 degrees of free
 @defVariable(
     Pose2,
     SpecialEuclidean(2),
-    ProductRepr(MVector{2}(0.0,0.0), MMatrix{2,2}(1.0,0.0,0.0,1.0))
+    ArrayPartition(MVector{2}(0.0,0.0), MMatrix{2,2}(1.0,0.0,0.0,1.0))
 )
 ```
 

@@ -45,7 +45,7 @@ function loadDistribution(file::AbstractString)
 end
 
 
-function checkTut3Posteriors(dfg::AbstractDFG, refFdr; atol=0.1, suffix="", vars=ls(dfg))
+function checkTut3Posteriors(dfg::AbstractDFG, refFdr; atol=0.1, suffix="", vars=DFG.listVariables(dfg))
   for v in vars
     # reference belief
     ref = loadDistribution(joinpath(refFdr, string(v)*suffix*".json"))

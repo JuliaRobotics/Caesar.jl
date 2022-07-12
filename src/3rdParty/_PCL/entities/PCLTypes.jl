@@ -80,6 +80,7 @@ References
 end
 
 Base.convert(::Type{<:_PCL_POINTFIELD_FORMAT}, val::Integer) = (en=instances(_PCL_POINTFIELD_FORMAT); en[findfirst(Int.(en) .== Int.(convert(UInt8, val)))])
+Base.convert(::Type{<:Integer}, ff::_PCL_POINTFIELD_FORMAT) = findfirst(==(ff), instances(_PCL_POINTFIELD_FORMAT))
 
 struct asType{T} end
 
@@ -125,7 +126,8 @@ Base.@kwdef struct Header
   """ The sequence number """
   seq::UInt32      = UInt32(0)
   """ A timestamp associated with the time when the data was acquired. 
-  The value represents microseconds since 1970-01-01 00:00:00 (the UNIX epoch). """
+  The value represents microseconds since 1970-01-01 00:00:00 (the UNIX epoch). 
+  Suggest: making this relative to UCT to account for timezones in future. """
   stamp::UInt64    = UInt64(0)
   """ Coordinate frame ID. """
   frame_id::String = ""

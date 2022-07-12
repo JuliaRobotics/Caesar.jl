@@ -156,7 +156,7 @@ function _AprilTagToPose2(corners,
   theta = TU.wrapRad(atan(ld[2],ld[1]) + pi/2)
   
   M = getManifold(Pose2Pose2)
-  e0 = identity_element(M)
+  e0 = getPointIdentity(M)
 
   # create a tangent vector of the measurement
   hat( M, e0, [bTt.translation[1:2,];theta] )
@@ -194,7 +194,7 @@ function Pose2AprilTag4Corners(;corners::_CornerVecTuple=((0.0,0.0),(1.0,0.0),(0
   Dtag = _AprilTagToPose2(corners, homography, x0...)
   # println("$(tag.id), $(ld[3]), $(round.(Dtag, digits=3))")
   M = SpecialEuclidean(2)
-  e0 = identity_element(M)
+  e0 = getPointIdentity(M)
   p2l2 = Pose2Pose2(MvNormal(vee(M,e0,Dtag), covariance))
 
   # preimage optimize function
@@ -256,9 +256,9 @@ function (pat4c::CalcFactor{<:Pose2AprilTag4Corners})(X,
                                                       q)
   #
 
-  @assert X isa ProductRepr "Pose2AprilTag4Corners expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
+  # @assert X isa ProductRepr "Pose2AprilTag4Corners expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
   M = getManifold(pat4c.factor.Z)
-  q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
+  q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M), X)) #for groups
   #TODO allocalte for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
   vee!(M, Xc, q, log(M, q, q̂))

@@ -70,6 +70,8 @@ Newly created page to list related references and additional literature pertaini
 
 [2.15f] Žefran, M., Kumar, V. and Croke, C., 1996, August. [Choice of Riemannian metrics for rigid body kinematics](https://www.cis.upenn.edu/~cis610/SE3-Croke-Kumar.pdf). In International Design Engineering Technical Conferences and Computers and Information in Engineering Conference (Vol. 97584, p. V02BT02A030). American Society of Mechanical Engineers.
 
+[2.15g] Chirikjian, G.S. and Zhou, S., 1998. [Metrics on motion and deformation of solid models](https://asmedigitalcollection.asme.org/mechanicaldesign/article-abstract/120/2/252/429661/Metrics-on-Motion-and-Deformation-of-Solid-Models).
+
 [2.16] Kaess, M. and Dellaert, F., 2009. [Covariance recovery from a square root information matrix for data association](https://apps.dtic.mil/dtic/tr/fulltext/u2/a537233.pdf). Robotics and autonomous systems, 57(12), pp.1198-1210.
 
 [2.17] Bishop, C.M., 2006. Pattern recognition and machine learning. New York: Springer. ISBN 978-0-387-31073-2.

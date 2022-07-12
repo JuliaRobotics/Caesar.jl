@@ -19,7 +19,7 @@ import Base: convert
 # function convert(::Type{Prior}, prior::Dict{String, Any})
 #     # Genericize to any packed type next.
 #     z = prior["measurement"][1]
-#     z = convert(_evalType(z["distType"]), z)
+#     z = convert(DFG.getTypeFromSerializationModule(z["distType"]), z)
 #     return Prior(z)
 # end
 
@@ -29,7 +29,7 @@ Converter: PackedPrior::Dict{String, Any} -> PriorPose2
 function convert(::Type{PriorPose2}, prior::Dict{String, Any})
     # Genericize to any packed type next.
     z = prior["measurement"][1]
-    z = convert(_evalType(z["distType"]), z)
+    z = convert(DFG.getTypeFromSerializationModule(z["distType"]), z)
     return PriorPose2(z)
 end
 
@@ -39,7 +39,7 @@ Converter: PackedPrior::Dict{String, Any} -> PriorPose3
 function convert(::Type{PriorPose3}, prior::Dict{String, Any})
     # Genericize to any packed type next.
     z = prior["measurement"][1]
-    z = convert(_evalType(z["distType"]), z)
+    z = convert(DFG.getTypeFromSerializationModule(z["distType"]), z)
     return PriorPose3(z)
 end
 
@@ -49,7 +49,7 @@ Converter: Pose2Pose2::Dict{String, Any} -> Pose2Pose2
 function convert(::Type{Pose2Pose2}, prior::Dict{String, Any})
     # Genericize to any packed type next.
     z = prior["measurement"][1]
-    z = convert(_evalType(z["distType"]), z)
+    z = convert(DFG.getTypeFromSerializationModule(z["distType"]), z)
     return Pose2Pose2(z)
 end
 
@@ -60,8 +60,8 @@ function convert(::Type{Pose2Point2BearingRange}, fact::Dict{String, Any})
     # Genericize to any packed type next.
     b = fact["measurement"][1]
     r = fact["measurement"][2]
-    b = convert(_evalType(b["distType"]), b)
-    r = convert(_evalType(r["distType"]), r)
+    b = convert(DFG.getTypeFromSerializationModule(b["distType"]), b)
+    r = convert(DFG.getTypeFromSerializationModule(r["distType"]), r)
     return Pose2Point2BearingRange(b, r)
 end
 
@@ -71,7 +71,7 @@ Converter: Pose3Pose3::Dict{String, Any} -> Pose3Pose3
 function convert(::Type{Pose3Pose3}, fact::Dict{String, Any})
     # Genericize to any packed type next.
     z = fact["measurement"][1]
-    zdist = convert(_evalType(z["distType"]), z)
+    zdist = convert(DFG.getTypeFromSerializationModule(z["distType"]), z)
     return Pose3Pose3(zdist)
 end
 
@@ -83,8 +83,8 @@ end
 #     # Genericize to any packed type next.
 #     xy = fact["measurement"][1]
 #     yaw = fact["measurement"][2]
-#     xydistr = convert(_evalType(xy["distType"]), xy)
-#     yawdistr = convert(_evalType(yaw["distType"]), yaw)
+#     xydistr = convert(DFG.getTypeFromSerializationModule(xy["distType"]), xy)
+#     yawdistr = convert(DFG.getTypeFromSerializationModule(yaw["distType"]), yaw)
 #     return PartialPose3XYYaw(xydistr, yawdistr)
 # end
 
@@ -96,8 +96,8 @@ end
 #     # Genericize to any packed type next.
 #     z = fact["measurement"][1]
 #     rp = fact["measurement"][2]
-#     rpdistr = convert(_evalType(rp["distType"]), rp)
-#     zdistr = convert(_evalType(z["distType"]), z)
+#     rpdistr = convert(DFG.getTypeFromSerializationModule(rp["distType"]), rp)
+#     zdistr = convert(DFG.getTypeFromSerializationModule(z["distType"]), z)
 #     return PartialPriorRollPitchZ(rpdistr, zdistr)
 # end
 
