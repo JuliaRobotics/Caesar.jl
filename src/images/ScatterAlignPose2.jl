@@ -182,10 +182,12 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fn
 end
 
 
-function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
+function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:ScatterAlignPose3}}
   #
   M = cf.cache.M
   e0 = cf.cache.e0
+  ntr = length(Manifolds.submanifold_component(e0,1))
+  nrt = Manifolds.manifold_dimension(M)-ntr
   # R0 = submanifold_component(e0,2)
   
   pVi = cf.cache.smps1
@@ -203,7 +205,7 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
   cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj), cf._allowThreads; cf.cache.bw)
   
   # return mmd as residual for minimization
-  res = Optim.optimize(cost, [5*randn(2); 0.1*randn()], Optim.BFGS() )
+  res = Optim.optimize(cost, [5*randn(ntr); 0.1*randn(nrt)], Optim.BFGS() )
   
   cf.cache.score[] = res.minimum
   
@@ -214,7 +216,7 @@ end
 
 
 function (cf::CalcFactor{S})(X, p, q
-  ) where {S <: Union{<:ScatterAlignPose2,ScatterAlignPose3}}
+  ) where {S <: Union{<:ScatterAlignPose2,<:ScatterAlignPose3}}
   # 
   
   M = cf.cache.M

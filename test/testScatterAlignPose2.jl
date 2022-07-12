@@ -162,9 +162,6 @@ end
 
 
 
-
-
-
 @testset "test ScatterAlignPose2 with MKD direct" begin
 ##
 
@@ -265,13 +262,13 @@ end
 
 
 
-@testset "test ScatterAlignPose2 with MKD direct" begin
+@testset "test ScatterAlignPose3 with MKD direct" begin
 ##
 
 # setup
 
-oT = [2.; 0;0]
-oΨ =  [0;0;pi/6]
+oT = [2.; 0;2]
+oΨ =  [0;0;pi/10]
 
 M = SpecialEuclidean(3)
 e0 = getPointIdentity(M)
@@ -300,8 +297,25 @@ P2 = manikde!(Point3, p2)
 
 sap = ScatterAlignPose3(;cloud1=P1, cloud2=P2, sample_count=100, bw=1.0)
 
+## sample from ScatterAlignPose3
+
+fg = initfg()
+getSolverParams(fg).inflateCycles=1
+
+addVariable!(fg, :x0, Pose3)
+addVariable!(fg, :x1, Pose3)
+
+addFactor!(fg, [:x0], PriorPose3( MvNormal(Diagonal(map(abs2,0.1*ones(6)))) ))
+addFactor!(fg, [:x0;:x1], sap, inflation=0.0)
+
 ##
 
+Xsmpl = sampleFactor(fg, :x0x1f1)
+
+@test Xsmpl[1] isa ArrayPartition
+@test length(Xsmpl[1]) === 12
+
+##
 end
 
 
