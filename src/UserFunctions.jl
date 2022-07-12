@@ -10,10 +10,14 @@ relation.  Return the vector of points `aP_dest`.
 ````math
 {}^a \begin{bmatrix} x, y \end{bmatrix} = {}^a_b \mathbf{T} \, {}^b \begin{bmatrix} x, y \end{bmatrix}
 ````
+
+DevNotes
+- Consolidate functionality with [`_FastTransform3D`](@ref)
+
 """
-function _transformPointCloud2D!(
+function _transformPointCloud!(
     # manifold
-    M::typeof(SpecialEuclidean(2)),
+    M::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
     # destination points
     aP_dest::AbstractVector,
     # source points
@@ -21,29 +25,23 @@ function _transformPointCloud2D!(
     # transform coordinates
     aCb::AbstractVector{<:Real}; 
     # base point on manifold about which to do the transform
-    e0 = ProductRepr(SVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0)),
+    e0::ArrayPartition = getPointIdentity(M),
     backward::Bool=false
   )
   #
   
-  aTb = retract(M, e0, hat(M, e0, aCb))
-  aTb = backward ? inv(M,aTb) : aTb
-  bT_src = ProductRepr(MVector(0.0,0.0), SMatrix{2,2}(1.0,0.0,0.0,1.0))
-  aT_dest = ProductRepr(MVector(0.0,0.0), MMatrix{2,2}(1.0,0.0,0.0,1.0))
-  
-  for (i,bP) in enumerate(bP_src)
-    bT_src.parts[1] .= bP
-    Manifolds.compose!(M, aT_dest, aTb, bT_src)
-    # aP_dest[i][:] = Manifolds.compose(M, aTb, bP_src[i]).parts[1]
-    aP_dest[i] .= aT_dest.parts[1]
-  end
+  aPb = retract(M, e0, hat(M, e0, aCb))
+  aPb = backward ? inv(M,aPb) : aPb
+  # can do 2d or 3d
+  aTb = _FastTransform3D(M,aPb)
+  aP_dest .= aTb.(bP_src)
 
   aP_dest
 end
 
-function _transformPointCloud2D(
+function _transformPointCloud(
     # manifold
-    M::typeof(SpecialEuclidean(2)),
+    M::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
     # source points
     bP_src::AbstractVector,
     # transform coordinates
@@ -52,9 +50,8 @@ function _transformPointCloud2D(
   )
   #
   #dest points
-  aP_dest = typeof(MVector(0.0,0.0))[MVector(0.0,0.0) for _ in 1:length(bP_src)] # Vector{typeof(MVector(0.0,0.0))}(undef, length(bP_src))
-  # fill!(aP_dest, MVector(0.0,0.0))
-  _transformPointCloud2D!(M, aP_dest, bP_src, aCb; kw...)
+  aP_dest = Vector{MVector(zeros(length(bP_src[1]))...)}(undef,length(bP_src)) 
+  _transformPointCloud!(M, aP_dest, bP_src, aCb; kw...)
 end
 
 

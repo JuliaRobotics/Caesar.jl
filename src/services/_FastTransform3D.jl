@@ -1,6 +1,15 @@
 
 
+"""
+    $TYPEDEF
 
+Common functor for transforming a large number of points through 
+`SpecialEuclidean(2)` or `SpecialEuclidean(3)` rigid body transform.
+
+Notes
+- Currently uses `Manifolds.affine_matrix`
+- Used by `_PCL.apply` and `ScatterAlign`
+"""
 struct _FastTransform3D{M,T}
   rTo::SMatrix{4,4,T}
 end

@@ -345,15 +345,13 @@ function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidea
 
   ft3 = _FastTransform3D(M_, rPp, 0f0)
   nc = M_ isa typeof(SpecialEuclidean(3)) ? 3 : 2
-  # pV = MVector(0f0,0f0,0f0,1f0)
   _data = MVector(0f0,0f0,0f0,0f0)
 
   # rotate the elements from the old point cloud into new static memory locations
   # NOTE these types must match the types use for PointCloud and PointXYZ
   # TODO not the world's fastest implementation
   for pt in pc.points
-    # pV[1:nc] = pt.data[1:nc]
-    _data[1:nc] = ft3(pt.data[1:nc]) # (rTp*pV)[1:nc]
+    _data[1:nc] = ft3(pt.data[1:nc])
     _data[4] = pt.data[4]
     npt = PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data...))
     push!(_pc.points, npt )
