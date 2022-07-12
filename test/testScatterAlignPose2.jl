@@ -18,8 +18,8 @@ println("Starting ScatterAlignPose2 tests...")
 @testset "Test ScatterAlignPose2" begin
 ##
 
-x = -10:0.1:10;
-y = -10:0.1:10;
+x = -15:0.1:15;
+y = -15:0.1:15;
 
 σ = 0.1
 
@@ -29,7 +29,7 @@ g = (x,y)->pdf(MvNormal([3.;0],Σ),[x;y]) + pdf(MvNormal([8.;0.0],4*Σ),[x;y]) +
 bIM1 = zeros(length(x),length(y))
 bIM2 = zeros(length(x),length(y))
 
-oT = [2.; 0]
+oT = [5.; 0]
 oΨ =  pi/8
 
 M = SpecialEuclidean(2)
