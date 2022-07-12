@@ -12,7 +12,7 @@ Newly created page to list related references and additional literature pertaini
 
 [1.4]  Cheung, M., Fourie, D., Rypkema, N., Vaz Teixeira, P., Schmidt, H., and Leonard, J.: ["Non-Gaussian SLAM utilizing Synthetic Aperture Sonar"](https://marinerobotics.mit.edu/sites/default/files/cheung_icra2019.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
-[1.5]  Doherty, K., Fourie, D., Leonard, J.: ["Multimodal Semantic SLAM with Probabilistic Data Association"](https://marinerobotics.mit.edu/sites/default/files/doherty_icra2019_revised.pdf), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
+[1.5]  Doherty, K., Fourie, D., Leonard, J.: ["Multimodal Semantic SLAM with Probabilistic Data Association"](https://dspace.mit.edu/bitstream/handle/1721.1/137995.2/doherty_icra2019_revised.pdf?sequence=4&isAllowed=y), Intl. Conf. On Robotics and Automation (ICRA), IEEE, Montreal, 2019.
 
 [1.6]  Fourie, D., Vaz Teixeira, P., Leonard, J.: ["Non-parametric Mixed-Manifold Products using Multiscale Kernel Densities"](https://marinerobotics.mit.edu/sites/default/files/fourie_iros19_manifolds.pdf), IEEE Intl. Conf. on Intelligent Robots and Systems (IROS), (2019),.
 
