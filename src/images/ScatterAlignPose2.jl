@@ -154,10 +154,11 @@ getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 getManifold(::IIF.InstanceType{<:ScatterAlignPose3}) = getManifold(Pose3Pose3)
 
 # runs once upon addFactor! and returns object later used as `cache`
-function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::ScatterAlignPose2)
+function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::Union{<:ScatterAlignPose2,<:ScatterAlignPose3})
   #
-  M = getManifold(Pose2)
-  e0 = ArrayPartition(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+  _getPoseType(sa::ScatterAlign{P}) where P = P
+  M = getManifold(_getPoseType(fnc.align))
+  e0 = getPointIdentity(M) # ArrayPartition(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
 
   # reconstitute cloud belief from dataEntry
   for (va,de,cl) in zip(vars,[fnc.align.dataEntry_cloud1,fnc.align.dataEntry_cloud2],[fnc.align.cloud1,fnc.align.cloud2])
@@ -195,8 +196,8 @@ function getSample( cf::CalcFactor{<:ScatterAlignPose2} )
     qVj[i] .= sample(cf.factor.align.cloud2)[1][1]
   end
   
-  # qVi(qCp) = _transformPointCloud2D(M,pVi,qCp)
-  pVj(qCp) = _transformPointCloud2D(M,qVj,qCp; backward=true)
+  # qVi(qCp) = _transformPointCloud(M,pVi,qCp)
+  pVj(qCp) = _transformPointCloud(M,qVj,qCp; backward=true)
   
   # bw = SA[cf.factor.bw;]
   cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj), cf._allowThreads; cf.cache.bw)
@@ -276,8 +277,8 @@ function overlayScatter(sap::ScatterAlignPose2,
   best_coords = round.(best,digits=3)
   
   # transform points1 to frame of 2.  TBD, p as coordinate expansion point?
-  pts2T_u = _transformPointCloud2D(M, PT2, user_coords; backward=true)
-  pts2T_b = _transformPointCloud2D(M, PT2, best; backward=true)
+  pts2T_u = _transformPointCloud(M, PT2, user_coords; backward=true)
+  pts2T_b = _transformPointCloud(M, PT2, best; backward=true)
 
   @cast __pts1[i,j] := PT1[j][i]
   @cast __pts2[i,j] := PT2[j][i]

@@ -55,6 +55,7 @@ include("ExportAPI.jl")
 # and source files
 include("BearingRangeTrackingServer.jl")
 
+include("services/_FastTransform3D.jl")
 include("SlamServer.jl")
 include("DataUtils.jl")
 include("UserFunctions.jl")

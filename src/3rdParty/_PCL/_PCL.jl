@@ -4,6 +4,7 @@
 module _PCL
 
 using ..Colors
+import ..Caesar: _FastTransform3D
 
 using Dates
 using DocStringExtensions
@@ -17,6 +18,7 @@ import Base: getindex, setindex!, resize!, cat, convert, sizeof, hasproperty, ge
 
 # gets overloaded
 import Manifolds: apply
+import IncrementalInference: ArrayPartition
 
 ## hold off on exports, users can in the mean-time use/import via e.g. _PCL.PointXYZ
 # export PointT, PointXYZ, PointXYZRGB, PointXYZRGBA

@@ -329,7 +329,7 @@ end
 # FIXME, to optimize, this function will likely be slow
 # TODO, consolidate with transformPointcloud(::ScatterAlign,..) function
 function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
-                rPp::Union{<:ProductRepr,<:Manifolds.ArrayPartition},
+                rPp::Manifolds.ArrayPartition,
                 pc::PointCloud{T} ) where T
   #
 
@@ -343,17 +343,15 @@ function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidea
                     sensor_orientation_=pc.sensor_orientation_ )
   #
 
-  rTp = affine_matrix(M_, rPp)
-  nc = size(rTp,1)-1
-  pV = MVector(zeros(nc)...,1.0)
-  _data = MVector(0.0,0.0,0.0,0.0)
+  ft3 = _FastTransform3D(M_, rPp, 0f0)
+  nc = M_ isa typeof(SpecialEuclidean(3)) ? 3 : 2
+  _data = MVector(0f0,0f0,0f0,0f0)
 
   # rotate the elements from the old point cloud into new static memory locations
   # NOTE these types must match the types use for PointCloud and PointXYZ
   # TODO not the world's fastest implementation
   for pt in pc.points
-    pV[1:nc] = pt.data[1:nc]
-    _data[1:nc] = (rTp*pV)[1:nc]
+    _data[1:nc] = ft3(pt.data[1:nc])
     _data[4] = pt.data[4]
     npt = PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data...))
     push!(_pc.points, npt )
