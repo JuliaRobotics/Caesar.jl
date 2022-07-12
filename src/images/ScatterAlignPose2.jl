@@ -154,10 +154,11 @@ getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 getManifold(::IIF.InstanceType{<:ScatterAlignPose3}) = getManifold(Pose3Pose3)
 
 # runs once upon addFactor! and returns object later used as `cache`
-function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::ScatterAlignPose2)
+function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::Union{<:ScatterAlignPose2,<:ScatterAlignPose3})
   #
-  M = getManifold(Pose2)
-  e0 = ArrayPartition(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
+  _getPoseType(sa::ScatterAlign{P}) where P = P
+  M = getManifold(_getPoseType(fnc.align))
+  e0 = getPointIdentity(M) # ArrayPartition(SVector(0.0,0.0), SMatrix{2,2}(1.0, 0.0, 0.0, 1.0))
 
   # reconstitute cloud belief from dataEntry
   for (va,de,cl) in zip(vars,[fnc.align.dataEntry_cloud1,fnc.align.dataEntry_cloud2],[fnc.align.cloud1,fnc.align.cloud2])
