@@ -57,11 +57,11 @@ The easiest method is---via the terminal---to [download the desired](https://jul
 cd ~
 mkdir -p .julia
 cd .julia
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.3-linux-x86_64.tar.gz
-tar -xvf julia-1.6.3-linux-x86_64.tar.gz
-rm julia-1.6.3-linux-x86_64.tar.gz
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.7-linux-x86_64.tar.gz
+tar -xvf julia-1.6.7-linux-x86_64.tar.gz
+rm julia-1.6.7-linux-x86_64.tar.gz
 cd /usr/local/bin
-sudo ln -s ~/.julia/julia-1.6.3/bin/julia julia
+sudo ln -s ~/.julia/julia-1.6.7/bin/julia julia
 ```
 !!! note
     Feel free to modify this setup as you see fit.
