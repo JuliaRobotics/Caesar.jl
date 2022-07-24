@@ -189,6 +189,46 @@ end
 #  Caesar._PCL.PointField("ring", 0x00000020, Caesar._PCL._PCL_UINT16, 0x00000001)
 
 
+_idxcolor(color::Colorant, i::Integer) = color
+_idxcolor(color::AbstractVector{<:Colorant}, i::Integer) = color[i]
+
+
+function PointCloud(
+    x::AbstractVector{<:Real},
+    y::AbstractVector{<:Real},
+    z::AbstractVector{<:Real};
+    color::Union{C, <:AbstractVector{C}} = RGBA(1,1,1,1),
+    pointcloudkws...
+  ) where {C <: Colorant}
+  #
+
+  height = UInt32(1)
+  width = UInt32(length(x))
+
+  pt = PointXYZ(;data=SA[x[1];y[1];z[1];1])
+  points = Vector{typeof(pt)}(undef, width)
+  points[1] = pt
+  for i in 2:width
+    points[i] = PointXYZ(;data=SA[x[1];y[1];z[1];1], color=_idxcolor(color, i))
+  end
+
+  PointCloud(; height, width, points, pointcloudkws...)
+end
+
+function PointCloud(
+    xyz::AbstractMatrix{<:Real};
+    kwargs...
+  )
+  #
+  PointCloud(
+    view(xyz,:,1),
+    view(xyz,:,2),
+    view(xyz,:,3);
+    kwargs...
+  )
+end
+
+
 # https://pointclouds.org/documentation/conversions_8h_source.html#l00166
 function PointCloud(
     msg::PCLPointCloud2, 
