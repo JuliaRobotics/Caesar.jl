@@ -29,6 +29,11 @@ Use [`initVariable!`](@ref) if you'd like to force a particular numerical initia
 initVariable!
 ```
 
+All the variables can be initialized without solving with:
+```@docs
+initAll!
+```
+
 ## Using Incremental Updates (Clique Recycling I)
 
 One of the major features of the MM-iSAMv2 algorithm (implemented by [IncrementalInference.jl](http://www.github.com/JuliaRobotics/IncrementalInference.jl)) is reducing computational load by recycling and marginalizing different (usually older) parts of the factor graph.  In order to utilize the benefits of recycing, the previous Bayes (Junction) tree should also be provided as input (see fixed-lag examples for more details):
