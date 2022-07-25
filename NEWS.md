@@ -11,3 +11,4 @@ Major changes and news in Caesar.jl.
 - Refactored `ScatterAlign` to support both `ScatterAlignPose2` and `ScatterAlignPose3`.
 - Improved `_PCL.apply` to now transform both 2D and 3D pointclouds using `Manifolds.SpecialEuclidean(2)` and `Manifolds.SpecialEuclidean(3)`.
 - Added more testing on `_PCL` conversions and transforms.
+- Added `ICP` for point cloud alignment, (#885, #886).
