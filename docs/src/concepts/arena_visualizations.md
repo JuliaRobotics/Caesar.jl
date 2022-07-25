@@ -12,7 +12,7 @@ Working towards new [Makie.jl](https://github.com/JuliaPlots/Makie.jl).  Makie s
 
 Point clouds could be massive, on the order of a million points or more.  Makie.jl has good performance for handling such large point cloud datasets.  Here is a quick example script.
 ```julia
-using Makie, MakieGL
+using Makie, GLMakie
 
 # n x 3 matrix of 3D points in pointcloud
 pts1 = randn(100,3)
