@@ -12,3 +12,4 @@ Major changes and news in Caesar.jl.
 - Improved `_PCL.apply` to now transform both 2D and 3D pointclouds using `Manifolds.SpecialEuclidean(2)` and `Manifolds.SpecialEuclidean(3)`.
 - Added more testing on `_PCL` conversions and transforms.
 - Added `ICP` for point cloud alignment, (#885, #886).
+- Separated test data to `JuliaRobotics/CaesarTestData.jl` (#885).
