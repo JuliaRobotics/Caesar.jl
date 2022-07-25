@@ -209,7 +209,7 @@ function PointCloud(
   points = Vector{typeof(pt)}(undef, width)
   points[1] = pt
   for i in 2:width
-    points[i] = PointXYZ(;data=SA[x[1];y[1];z[1];1], color=_idxcolor(color, i))
+    points[i] = PointXYZ(;data=SA[x[i];y[i];z[i];1], color=_idxcolor(color, i))
   end
 
   PointCloud(; height, width, points, pointcloudkws...)

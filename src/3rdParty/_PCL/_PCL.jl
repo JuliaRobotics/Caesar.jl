@@ -10,6 +10,9 @@ using Dates
 using DocStringExtensions
 using Requires
 using StaticArrays
+using Statistics
+using LinearAlgebra
+using NearestNeighbors
 using Manifolds
 import Rotations as _Rot
 
