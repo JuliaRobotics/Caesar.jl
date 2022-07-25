@@ -1,4 +1,4 @@
-# Images and Fiducials
+# [Images and Fiducials](@id images_and_fiducials)
 
 ## AprilTags
 
@@ -28,3 +28,7 @@ bytes = Caesar.toFormat(format"PNG", img)
 
 !!! note
     More details to follow.
+
+### Images enables `ScatterAlign`
+
+See [point cloud alignment page for details on `ScatterAlignPose`](@ref sec_scatter_align)

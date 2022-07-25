@@ -58,7 +58,7 @@ function Base.getproperty(pc::_ICP_PointCloud, f::Symbol)
     @warn "Inefficient data access to `pc::_ICP_PointCloud.ny`, access `pc.nv[:][2]` instead." maxlog=10
     return [pt[2] for pt in pc.nv]
   elseif f == :nz
-    @warn "Inefficient data access to `pc::_ICP_PointCloud.nz`, access `pc.nv[:,3]` instead." maxlog=10
+    @warn "Inefficient data access to `pc::_ICP_PointCloud.nz`, access `pc.nv[:][3]` instead." maxlog=10
     return [pt[3] for pt in pc.nv]
   end
   return getfield(pc, f)
@@ -168,58 +168,6 @@ function check_convergence_criteria(distances_new, distances_old, min_change)
 end
 
 
-## ============================================================
-## Rigid transform
-## ============================================================
-
-function euler_angles_to_linearized_rotation_matrix(α1, α2, α3)
-
-  dR = [  1 -α3  α2
-         α3   1 -α1
-        -α2  α1   1]
-
-end
-
-function create_homogeneous_transformation_matrix(R, t)
-
-  H = [R          t
-       zeros(1,3) 1]
-
-end
-
-function euler_coord_to_homogeneous_coord(XE)
-
-  no_points = size(XE, 1)
-  XH = [XE ones(no_points,1)]
-
-end
-
-function homogeneous_coord_to_euler_coord(XH)
-
-  XE = XH[:,1:3]./XH[:,4]
-
-end
-
-function transform!(pc, H)
-
-  XInH = euler_coord_to_homogeneous_coord([pc.x pc.y pc.z])
-  XOutH = transpose(H*XInH')
-  XOut = homogeneous_coord_to_euler_coord(XOutH)
-
-  for i in 1:size(XOut,1)
-    data=SVector{4,eltype(pc.xyz.points[1].data)}(XOut[i,1],XOut[i,2],XOut[i,3],1)
-    npt = PointXYZ(;data)
-    pc.xyz.points[i] = npt
-  end
-  
-  # _data[1:nc] = ft3(view(pt.data, 1:nc)) # TODO avoid references or allocation on heap 
-  # _data[4] = pt.data[4]
-  # npt = PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data...))
-  
-  return pc
-
-end
-
 ## ================================================================
 ## 
 ## ================================================================
@@ -251,6 +199,41 @@ function estimate_rigid_body_transformation(x_fix, y_fix, z_fix, nx_fix, ny_fix,
 
 end
 
+"""
+    $SIGNATURES
+
+Align two point clouds using ICP (with normals).
+
+Example:
+
+```julia
+using Downloads, DelimitedFiles
+using Colors, Caesar
+
+# get some test data (~50mb download)
+lidar1_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar1.xyz"
+lidar2_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar2.xyz"
+io1 = PipeBuffer()
+io2 = PipeBuffer()
+Downloads.download(lidar1_url, io1)
+Downloads.download(lidar2_url, io2)
+
+X_fix = readdlm(io1)
+X_mov = readdlm(io2)
+
+H, HX_mov = Caesar._PCL.alignICP_Simple(X_fix, X_mov; verbose=true)
+```
+
+Notes
+- Mostly consolidated with `Caesar._PCL` types.
+- Internally uses `Caesar._PCL._ICP_PointCloud` which was created to help facilite consolidation of code:
+  - Modified from www.github.com/pglira/simpleICP (July 2022).
+
+DevNotes
+- TODO switch rigid transfrom to `Caesar._PCL.apply` along with performance considerations, instead of curent `transform!`.
+
+See also: [`PointCloud`](@ref)
+"""
 function alignICP_Simple(
     X_fix::AbstractMatrix, 
     X_mov::AbstractMatrix;

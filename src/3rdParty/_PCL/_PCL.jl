@@ -34,6 +34,7 @@ import IncrementalInference: ArrayPartition
 include("entities/PCLTypes.jl")
 # bring in further source code
 include("services/PointCloud.jl")
+include("services/ConsolidateRigidTransform.jl")
 include("services/ICP_Simple.jl")
 
 
