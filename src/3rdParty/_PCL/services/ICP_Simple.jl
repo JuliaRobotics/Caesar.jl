@@ -228,6 +228,7 @@ Notes
 - Mostly consolidated with `Caesar._PCL` types.
 - Internally uses `Caesar._PCL._ICP_PointCloud` which was created to help facilite consolidation of code:
   - Modified from www.github.com/pglira/simpleICP (July 2022).
+- See here for a brief example on [Visualizing Point Clouds](@ref viz_pointcloud_makie).
 
 DevNotes
 - TODO switch rigid transfrom to `Caesar._PCL.apply` along with performance considerations, instead of curent `transform!`.
