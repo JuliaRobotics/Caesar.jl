@@ -1,13 +1,4 @@
-# Visualization with Arena.jl
-
-The sections below discuss 3D visualization techniques available to the Caesar.jl robot navigation system.
-Caesar.jl uses the [Arena.jl](https://github.com/dehann/Arena.jl) package for all the visualization requirements.  This part of the documentation discusses the robotic visualization aspects supported by Arena.jl.
-Arena.jl supports a wide variety of general visualization as well as developer visualization tools more focused on research and development.
-The visualizations are also intended to help with subgraph plotting for finding loop closures in data or compare two datasets.
-
-!!! warning
-
-    Arena and Amphitheater are being upgraded as part of the broader migration to DistributedFactorGraphs (1Q20)
+# [Visualization 3D](@ref visualization_3d)
 
 ## Introduction
 
@@ -16,15 +7,43 @@ The previous incarnation used a client side installation of [VTK](https://www.vt
 Different 2D plotting libraries have also been used, with evolutions to improve usability for a wider user base.
 Each epoch has been aimed at reducing dependencies and increasing multi-platform support.
 
+## 4th Generation Dev Scripts using Makie.jl
+
+Working towards new [Makie.jl](https://github.com/JuliaPlots/Makie.jl).  Makie supports both GL and WGL, including 3rd party libraries such as [three.js](https://threejs.org/) (previously used via MeshCat.jl, see Legacy section below.).
+### [Visualizing Point Clouds](@id viz_pointcloud_makie)
+
+Point clouds could be massive, on the order of a million points or more.  Makie.jl has good performance for handling such large point cloud datasets.  Here is a quick example script.
+```julia
+using Makie, MakieGL
+
+# n x 3 matrix of 3D points in pointcloud
+pts1 = randn(100,3)
+pts2 = randn(100,3)
+
+# plot first and update with second
+plt = scatter(pts1[:,1],pts1[:,2],pts1[:,3], color=pts1[:,3])
+scatter!(pts2[:,1],pts2[:,2],pts2[:,3], color=-pts2[:,3])
+```
+## Visualizing with Arena.jl
+
+!!! warning
+    Arena.jl is currently out of date since the package will likely support Makie via both GL and WGL interfaces.  Makie.jl has been receiving much attention over the past years and starting to mature to a point where Arena.jl can be revived again.  2D plotting is done via [`RoMEPlotting.jl`](@ref plotting_2d).
+
+The sections below discuss 3D visualization techniques available to the Caesar.jl robot navigation system.
+Caesar.jl uses the [Arena.jl](https://github.com/dehann/Arena.jl) package for all the visualization requirements.  This part of the documentation discusses the robotic visualization aspects supported by Arena.jl.
+Arena.jl supports a wide variety of general visualization as well as developer visualization tools more focused on research and development.
+The visualizations are also intended to help with subgraph plotting for finding loop closures in data or compare two datasets.
+
+## Legacy Visualizers
+
+!!! warning
+    This section is out of date, see proof or concept examples in Amphitheater.jl (1Q20).
+
+### 3rd Generation MeshCat.jl (Three.js)
+
 !!! note
 
     See [installation page](https://juliarobotics.org/Caesar.jl/latest/installation_environment/#Install-Visualization-Tools-1) for instructions.
-
-## 3D Visualization
-
-!!! warning
-
-    This section is out of date, see proof or concept examples in Amphitheater.jl (1Q20).
 
 Factor graphs of two or three dimensions can be visualized with the 3D visualizations provided by Arena.jl and it's dependencies.
 The 2D example above and also be visualized in a 3D space with the commands:
@@ -65,9 +84,18 @@ visualizeDensityMesh!(vc, fg, :l1)
 # visualizeallposes!(vc, fg, drawlandms=false)
 ```
 
-## Previous 3D Viewer (VTK / Director) -- no longer required
+For more information see [JuliaRobotcs/MeshCat.jl](https://github.com/rdeits/MeshCat.jl).
+
+### 2nd Generation 3D Viewer (VTK / Director)
+
+!!! note
+    This code is obsolete
 
 Previous versions used the much larger VTK based Director available via [DrakeVisualizer.jl package](https://github.com/rdeits/DrakeVisualizer.jl).  This requires the following preinstalled packages:
 ```bash
     sudo apt-get install libvtk5-qt4-dev python-vtk
 ```
+
+### 1st Generation MIT LCM Collections viewer
+
+This code has been removed.

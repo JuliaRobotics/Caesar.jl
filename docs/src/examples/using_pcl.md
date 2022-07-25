@@ -66,3 +66,7 @@ Ongoing work is integrating ICP into a factor similar to `ScatterAlign`.
 ```@docs
 Caesar._PCL.alignICP_Simple
 ```
+
+## Visualizing Point Clouds
+
+See work in progress on alng with example code on the page [3D Visualization](@ref viz_pointcloud_makie).
