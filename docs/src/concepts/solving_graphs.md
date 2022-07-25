@@ -1,16 +1,37 @@
 # [Solving Graphs](@id solving_graphs)
+## Non-parametric Batch Solve
 
 When you have built the graph, you can call the solver to perform inference with the following:
 
 ```julia
 # Perform inference
-tree = solveTree!(fg)
+tree = solveTree!(fg) # or solveGraph!
 ```
 
 The returned Bayes (Junction) `tree` object is described in more detail on [a dedicated documentation page](https://juliarobotics.org/Caesar.jl/latest/principles/bayestreePrinciples/), while `smt` and `hist` return values most closely relate to development and debug outputs which can be ignored during general use.  Should an error occur during, the exception information is easily accessible in the `smt` object (as well as file logs which default to `/tmp/caesar/`).
 
 ```@docs
 solveTree!
+```
+
+## Automatic vs Manual Init
+
+Currently the main automatic initialization technique used by IncrementalInference.jl by delayed propagation of belief on the factor graph.  This can be globally or locally controlled via:
+```julia
+getSolverParams(fg).graphinit = false
+
+# or locally at each addFactor
+addFactor!(fg, [:x0;:x1], LinearRelative(Normal()); graphinit=false)
+```
+
+Use [`initVariable!`](@ref) if you'd like to force a particular numerical initialization of some or all the variables.
+```@docs
+initVariable!
+```
+
+All the variables can be initialized without solving with:
+```@docs
+initAll!
 ```
 
 ## Using Incremental Updates (Clique Recycling I)

@@ -135,6 +135,8 @@ pc_ = Caesar._PCL.apply(M, rPc, pc)
 end
 
 
+if v"1.7" <= VERSION
+
 @testset "PandarXT test point cloud conversion test" begin
 ##
 
@@ -218,6 +220,11 @@ pc_3D = Caesar._PCL.apply(M, rPc, pc)
 
 
 ##
+end
+
+else
+  @error "Skip PointCloud testdata serialization owning to Julia version."
+  @test_broken false
 end
 
 
