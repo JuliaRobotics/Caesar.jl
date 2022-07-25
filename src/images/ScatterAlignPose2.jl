@@ -92,7 +92,9 @@ struct ScatterAlignPose2 <: IIF.AbstractManifoldMinimize
 end
 
 """
-    ScatterAlignPose3(; mkd1::ManifoldKernelDensity, mkd2::ManifoldKernelDensity, moreoptions...)
+    ScatterAlignPose3(; cloud1=mkd1::ManifoldKernelDensity, 
+                        cloud2=mkd2::ManifoldKernelDensity, 
+                        moreoptions...)
 
 Specialization of [`ScatterAlign`](@ref) for [`Pose3`](@ref).
 
