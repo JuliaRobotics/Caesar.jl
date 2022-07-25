@@ -7,9 +7,14 @@ using ..Colors
 import ..Caesar: _FastTransform3D
 
 using Dates
+using Printf
 using DocStringExtensions
 using Requires
 using StaticArrays
+using Statistics
+using StatsBase
+using LinearAlgebra
+using NearestNeighbors
 using Manifolds
 import Rotations as _Rot
 
@@ -29,6 +34,7 @@ import IncrementalInference: ArrayPartition
 include("entities/PCLTypes.jl")
 # bring in further source code
 include("services/PointCloud.jl")
+include("services/ICP_Simple.jl")
 
 
 function __init__()

@@ -128,7 +128,7 @@ Base.@kwdef struct Header
   """ A timestamp associated with the time when the data was acquired. 
   The value represents microseconds since 1970-01-01 00:00:00 (the UNIX epoch). 
   Suggest: making this relative to UCT to account for timezones in future. """
-  stamp::UInt64    = UInt64(0)
+  stamp::UInt64    = (dt=datetime2unix(now(UTC));UInt64(div(dt,1))*1000000+UInt64(div((dt%1)*1e6,1)))
   """ Coordinate frame ID. """
   frame_id::String = ""
 end
@@ -253,6 +253,26 @@ Base.@kwdef struct PointCloud{T<:PointT,P,R}
   """ sensor acquisition pose (rotation), optional."""
   sensor_orientation_::R   = SMatrix{3,3}(1f0,0,0,0,1,0,0,0,1)
 end
+
+"""
+    $TYPEDEF
+
+Internal type for integrating ICP with _PCL types.
+
+Notes
+- Experimental
+
+See also: [`PointCloud`](@ref)
+"""
+mutable struct _ICP_PointCloud{T <: PointCloud}
+  """ PointCloud container """
+  xyz::T
+  """ normal vectors """
+  nv::Vector{Vector{Float64}}
+  planarity::Vector{Float64}
+  sel::Vector{Int64}
+end
+
 
 
 #
