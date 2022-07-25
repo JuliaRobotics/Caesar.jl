@@ -51,6 +51,7 @@ makedocs(
             "Variables/Factors" => "concepts/available_varfacs.md",
             "Entry=>Data Blob" => "concepts/entry_data.md",
             "Images and AprilTags" => "examples/using_images.md",
+            "Pointclouds and PCL" => "examples/using_pcl.md",
             "Flux (NN) Factors" => "concepts/flux_factors.md",
         ],
         "Visualization" => [
