@@ -2,11 +2,9 @@
 
 ## Introduction
 
-Over time, Caesar.jl/Arena.jl has used a least three different 3D visualization technologies, with the most recent based on WebGL and [three.js](https://threejs.org/) by means of the [MeshCat.jl](https://github.com/rdeits/MeshCat.jl) package.
-The previous incarnation used a client side installation of [VTK](https://www.vtk.org/)  by means of the [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) and [Director](https://github.com/RobotLocomotion/director) libraries.
-Different 2D plotting libraries have also been used, with evolutions to improve usability for a wider user base.
-Each epoch has been aimed at reducing dependencies and increasing multi-platform support.
+Over time, Caesar.jl/Arena.jl has used at various different 3D visualization technologies.  Currently work is underway to better standardize within the Julia ecosystem, with the 4th generation of Arena.jl -- note that this is work in progress.  Information about legacy generations is included below.
 
+For more formal visualization support, contact [www.NavAbility.io](http://www.navability.io) via email or slack. 
 ## 4th Generation Dev Scripts using Makie.jl
 
 Working towards new [Makie.jl](https://github.com/JuliaPlots/Makie.jl).  Makie supports both GL and WGL, including 3rd party libraries such as [three.js](https://threejs.org/) (previously used via MeshCat.jl, see Legacy section below.).
@@ -36,13 +34,17 @@ The visualizations are also intended to help with subgraph plotting for finding 
 
 ## Legacy Visualizers
 
-!!! warning
-    This section is out of date, see proof or concept examples in Amphitheater.jl (1Q20).
+Previous generations used various technologies, including WebGL and [three.js](https://threejs.org/) by means of the [MeshCat.jl](https://github.com/rdeits/MeshCat.jl) package.
+Previous incarnations used a client side installation of [VTK](https://www.vtk.org/)  by means of the [DrakeVisualizer.jl](https://github.com/rdeits/DrakeVisualizer.jl) and [Director](https://github.com/RobotLocomotion/director) libraries.
+Different 2D plotting libraries have also been used, with evolutions to improve usability for a wider user base.
+Each epoch has been aimed at reducing dependencies and increasing multi-platform support.
 
 ### 3rd Generation MeshCat.jl (Three.js)
 
-!!! note
 
+For the latest work on using MeshCat.jl, see proof or concept examples in Amphitheater.jl (1Q20).  The code below inspired the Amphitheater work.
+
+!!! note
     See [installation page](https://juliarobotics.org/Caesar.jl/latest/installation_environment/#Install-Visualization-Tools-1) for instructions.
 
 Factor graphs of two or three dimensions can be visualized with the 3D visualizations provided by Arena.jl and it's dependencies.
