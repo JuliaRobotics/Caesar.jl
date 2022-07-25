@@ -35,7 +35,8 @@ bagwr.write_message("/ch1", s)
 bagwr.close()
 ```
 """
-RosbagWriter = writeRosbagPy."RosbagWriter"
+struct RosbagWriter end
+(::Type{RosbagWriter})(args...; kwargs...) = writeRosbagPy."RosbagWriter"(args...; kwargs...)
 
 ## Common handler approach
 

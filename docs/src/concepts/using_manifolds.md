@@ -81,12 +81,19 @@ The best way to show this is just dive straight into a factor that actually uses
 ### Existing Manifolds
 
 The most popular Manifolds used in Caesar.jl related packages are:
-- [`Sphere(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html#Manifolds.Sphere) WORK IN PROGRESS.
+
+#### Group Manifolds
+
 - [`TranslationGroup(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.TranslationGroup) (future work will relax to `Euclidean(N)`).
 - [`SpecialOrthogonal(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.SpecialOrthogonal).
 - [`SpecialEuclidean(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Special-Euclidean-group).
 - `_CircleEuclid` LEGACY, TODO.
 - `AMP.SE2_E2` LEGACY, TODO.
+
+#### Riemannian Manifolds (Work in progress)
+
+- [`Sphere(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html#Manifolds.Sphere) WORK IN PROGRESS.
+
 
 !!! note
     Caesar.jl encourages the JuliaManifolds approach to defining new manifolds, and can readily be used for Caesar.jl related operations.

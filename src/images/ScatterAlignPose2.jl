@@ -13,16 +13,23 @@ export ScatterAlignPose3
 export overlayScatter, overlayScatterMutate
 
 """
-$TYPEDEF
+    ScatterAlign{P,H1,H2} where  {H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity}, 
+                                  H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity}}
 
-This is but one incarnation for how radar alignment factor could work, treat it as a starting point.
+Alignment factor between point cloud populations, using a continuous density function cost: [`ApproxManifoldProducts.mmd`](@ref).
+Supports very large density clouds, with `sample_count` subsampling for individual alignments.
 
-Notes
-- Stanard `cvt` argument is lambda function to convert incoming images to user convention of image axes,
-  - **Geography map default** `cvt` flips image rows so that Pose2 +xy-axes corresponds to img[-x,+y]
-    - i.e. rows down is "North" and columns across from top left corner is "East".
-- Use rescale to resize the incoming images for lower resolution (faster) correlations
-- Both images passed to the construct must have the same type some matrix of type `T`.
+Keyword Options:
+----------------
+- `sample_count::Int = 100`, number of subsamples to use during each alignment in `getSample`.
+- `bw::Real`, the bandwidth to use for [`mmd`](@ref) distance
+- `rescale::Real`
+- `N::Int`
+- `cvt::Function`, convert function for image when using `HeatmapGridDensity`.
+- `useStashing::Bool = false`, to switch serialization strategy to using [Stashing](@ref section_stash_unstash).
+- `dataEntry_cloud1::AbstractString = ""`, blob identifier used with stashing.
+- `dataEntry_cloud2::AbstractString = ""`, blob identifier used with stashing.
+- `dataStoreHint::AbstractString = ""`
 
 Example
 -------
@@ -30,7 +37,23 @@ Example
 arp2 = ScatterAlignPose2(img1, img2, 2) # e.g. 2 meters/pixel 
 ```
 
-See also: [`overlayScanMatcher`](@ref)
+Notes
+-----
+- Supports two belief "clouds" as either
+  - [`ManifoldKernelDensity`](@ref)s, or
+  - [`HeatmapGridDensity`](@ref)s.
+- Stanard `cvt` argument is lambda function to convert incoming images to user convention of image axes,
+  - **Geography map default** `cvt` flips image rows so that Pose2 +xy-axes corresponds to img[-x,+y]
+    - i.e. rows down is "North" and columns across from top left corner is "East".
+- Use rescale to resize the incoming images for lower resolution (faster) correlations
+- Both images passed to the construct must have the same type some matrix of type `T`.
+- Experimental support for Stashing based serialization.
+
+DevNotes:
+---------
+- TODO Upgrade to use other information during alignment process, e.g. point normals for Pose3.
+
+See also: [`ScatterAlignPose2`](@ref), [`ScatterAlignPose3`](@ref), [`overlayScanMatcher`](@ref), [`Caesar._PCL.alignICP_Simple`](@ref).
 """
 Base.@kwdef struct ScatterAlign{P,
                                 H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity},
@@ -56,10 +79,25 @@ Base.@kwdef struct ScatterAlign{P,
   dataStoreHint::String = ""
 end
 
+"""
+    ScatterAlignPose2(im1::Matrix, im2::Matrix, domain; options...)
+    ScatterAlignPose2(; mkd1::ManifoldKernelDensity, mkd2::ManifoldKernelDensity, moreoptions...)
+
+Specialization of [`ScatterAlign`](@ref) for [`Pose2`](@ref).
+
+See also: [`ScatterAlignPose3`](@ref)
+"""
 struct ScatterAlignPose2 <: IIF.AbstractManifoldMinimize
   align::ScatterAlign{Pose2,<:Any,<:Any}
 end
 
+"""
+    ScatterAlignPose3(; mkd1::ManifoldKernelDensity, mkd2::ManifoldKernelDensity, moreoptions...)
+
+Specialization of [`ScatterAlign`](@ref) for [`Pose3`](@ref).
+
+See also: [`ScatterAlignPose2`](@ref)
+"""
 struct ScatterAlignPose3 <: IIF.AbstractManifoldMinimize
   align::ScatterAlign{Pose3,<:Any,<:Any}
 end
@@ -67,19 +105,20 @@ end
 _getPoseType(::ScatterAlign{P}) where P = P
 
 # replace inner constructor with transform on image
-function ScatterAlignPose2(im1::AbstractMatrix{T}, 
-                  im2::AbstractMatrix{T},
-                  domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
-                  sample_count::Integer=75,
-                  bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
-                  rescale::Real=1,
-                  N::Integer=1000,
-                  cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1),
-                  useStashing::Bool=false,
-                  dataEntry_cloud1="",
-                  dataEntry_cloud2="",
-                  dataStoreHint=""
-                ) where {T}
+function ScatterAlignPose2(
+    im1::AbstractMatrix{T}, 
+    im2::AbstractMatrix{T},
+    domain::Tuple{<:AbstractVector{<:Real},<:AbstractVector{<:Real}};
+    sample_count::Integer=75,
+    bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
+    rescale::Real=1,
+    N::Integer=1000,
+    cvt = (im)->reverse(Images.imresize(im,trunc.(Int, rescale.*size(im))),dims=1),
+    useStashing::Bool=false,
+    dataEntry_cloud1="",
+    dataEntry_cloud2="",
+    dataStoreHint=""
+  ) where {T}
   #
   cloud1 = HeatmapGridDensity(cvt(im1),domain,N=N)
   cloud2 = HeatmapGridDensity(cvt(im2),domain,N=N)

@@ -28,3 +28,17 @@ defaultFixedLagOnTree!(fg, 50, limitfixeddown=true)
 ```
 
 This call will keep the latest 50 variables fluid for inference during Bayes tree inference.  The keyword `limitfixeddown=true` in this case will also prevent downward message passing on the Bayes tree from propagating into the out-marginalized branches on the tree.  A later page in this documentation will discuss how the inference algorithm and Bayes tree aspects are put together.
+
+## [Synchronizing Over a Factor Graph](@id sync_over_graph_solvable)
+
+When adding Variables and Factors, use `solvable=0` to disable the new fragments until ready for inference, for example
+```julia
+addVariable!(fg, :x45, Pose2, solvable=0)
+newfct = addFactor!(fg, [:x11,:x12], Pose2Pose2, solvable=0)
+```
+
+These parts of the factor graph can simply be activated for solving:
+```julia
+setSolvable!(fg, :x45, 1)
+setSolvable!(fg, newfct.label, 1)
+```

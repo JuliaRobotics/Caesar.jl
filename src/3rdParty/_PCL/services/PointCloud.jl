@@ -189,6 +189,46 @@ end
 #  Caesar._PCL.PointField("ring", 0x00000020, Caesar._PCL._PCL_UINT16, 0x00000001)
 
 
+_idxcolor(color::Colorant, i::Integer) = color
+_idxcolor(color::AbstractVector{<:Colorant}, i::Integer) = color[i]
+
+
+function PointCloud(
+    x::AbstractVector{<:Real},
+    y::AbstractVector{<:Real},
+    z::AbstractVector{<:Real};
+    color::Union{C, <:AbstractVector{C}} = RGBA(1,1,1,1),
+    pointcloudkws...
+  ) where {C <: Colorant}
+  #
+
+  height = UInt32(1)
+  width = UInt32(length(x))
+
+  pt = PointXYZ(;data=SA[x[1];y[1];z[1];1])
+  points = Vector{typeof(pt)}(undef, width)
+  points[1] = pt
+  for i in 2:width
+    points[i] = PointXYZ(;data=SA[x[i];y[i];z[i];1], color=_idxcolor(color, i))
+  end
+
+  PointCloud(; height, width, points, pointcloudkws...)
+end
+
+function PointCloud(
+    xyz::AbstractMatrix{<:Real};
+    kwargs...
+  )
+  #
+  PointCloud(
+    view(xyz,:,1),
+    view(xyz,:,2),
+    view(xyz,:,3);
+    kwargs...
+  )
+end
+
+
 # https://pointclouds.org/documentation/conversions_8h_source.html#l00166
 function PointCloud(
     msg::PCLPointCloud2, 
@@ -317,48 +357,6 @@ function PCLPointCloud2(cloud::PointCloud{T,P,R}; datatype = _PCL_FLOAT32) where
     row_step = sizeof(T)*width,
     is_dense = cloud.is_dense,
   )
-end
-
-
-## =========================================================================================================
-## Coordinate transformations using Manifolds.jl
-## =========================================================================================================
-
-
-# 2D, do similar or better for 3D
-# FIXME, to optimize, this function will likely be slow
-# TODO, consolidate with transformPointcloud(::ScatterAlign,..) function
-function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
-                rPp::Manifolds.ArrayPartition,
-                pc::PointCloud{T} ) where T
-  #
-
-  # allocate destination
-  _pc = PointCloud(;header=pc.header,
-                    points = Vector{T}(),
-                    width=pc.width,
-                    height=pc.height,
-                    is_dense=pc.is_dense,
-                    sensor_origin_=pc.sensor_origin_,
-                    sensor_orientation_=pc.sensor_orientation_ )
-  #
-
-  ft3 = _FastTransform3D(M_, rPp, 0f0)
-  nc = M_ isa typeof(SpecialEuclidean(3)) ? 3 : 2
-  _data = MVector(0f0,0f0,0f0,0f0)
-
-  # rotate the elements from the old point cloud into new static memory locations
-  # NOTE these types must match the types use for PointCloud and PointXYZ
-  # TODO not the world's fastest implementation
-  for pt in pc.points
-    _data[1:nc] = ft3(pt.data[1:nc])
-    _data[4] = pt.data[4]
-    npt = PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data...))
-    push!(_pc.points, npt )
-  end
-
-  # return the new point cloud
-  return _pc
 end
 
 

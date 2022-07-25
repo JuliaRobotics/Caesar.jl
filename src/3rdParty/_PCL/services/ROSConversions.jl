@@ -42,6 +42,14 @@ function PCLPointCloud2(msg::Main.sensor_msgs.msg.PointCloud2)
   #
 end
 
+
+"""
+    $SIGNATURES
+
+Convert `PCLPointCloud2` type to ROS message `sensor_msgs.msg.PointCloud2`.
+
+See also: [`Caesar._PCL.PCLPointCloud2`](@ref), [`Caesar._PCL.PointCloud`](@ref).
+"""
 function toROSPointCloud2(pc2::PCLPointCloud2)
   header = Main.std_msgs.msg.Header();
   header.seq = pc2.header.seq
