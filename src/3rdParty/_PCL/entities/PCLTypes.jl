@@ -180,6 +180,8 @@ References:
 - https://pointclouds.org/documentation/structpcl_1_1_p_c_l_point_cloud2.html
 - https://pointclouds.org/documentation/classpcl_1_1_point_cloud.html
 - https://pointclouds.org/documentation/common_2include_2pcl_2point__cloud_8h_source.html
+
+See also: [`Caesar._PCL.toROSPointCloud2`](@ref)
 """
 Base.@kwdef struct PCLPointCloud2
   """ the point cloud header """

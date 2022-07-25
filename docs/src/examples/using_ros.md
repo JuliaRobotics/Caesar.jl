@@ -81,7 +81,7 @@ function myHandler(msgdata, slam_::SLAMWrapperLocal)
 end
 ```
 
-## Setup the Bagfile to Consume
+## Read or Write Bagfile Messages 
 
 Assuming that you are working from a bagfile, the following code makes it easy to consume the bagfile directly.  Alternatively, see [RobotOS.jl](https://github.com/jdlangs/RobotOS.jl) for wiring up publishers and subscribers for live data.  Caesar.jl methods to consuming a bagfile are:
 ```julia
@@ -95,19 +95,51 @@ bagSubscriber = RosbagSubscriber(bagfile)
 bagSubscriber("/zed/left/image_rect_color", myHandler, robotslam)
 ```
 
-### Synchronizing Over a Factor Graph
+### Run the ROS Loop
 
-When adding Variables and Factors, use `solvable=0` to disable the new fragments until ready for inference, for example
+Once everything is set up as you need, it's easy to loop over all the traffic in the bagfile (one message at a time):
 ```julia
-addVariable!(fg, :x45, Pose2, solvable=0)
-newfct = addFactor!(fg, [:x11,:x12], Pose2Pose2, solvable=0)
+maxloops = 1000
+rosloops = 0
+while loop!(bagSubscriber)
+  # plumbing to limit the number of messages
+  rosloops += 1
+  if maxloops < rosloops
+    @warn "reached --msgloops limit of $rosloops"
+    break
+  end
+  # delay progress for whatever reason
+  blockProgress(robotslam) # required to prevent duplicate solves occuring at the same time
+end
 ```
 
-These parts of the factor graph can simply be activated for solving:
+!!! note
+    See page on [Synchronizing over the Graph](@ref sync_over_graph_solvable)
+
+### Write Msgs to a Bag
+
+Support is also provided for writing messages to bag files with `Caesar.RosbagWriter`:
+
 ```julia
-setSolvable!(fg, :x45, 1)
-setSolvable!(fg, newfct.label, 1)
+# Link with ROSbag infrastructure via rospy
+using Pkg
+ENV["PYTHON"] = "/usr/bin/python3"
+Pkg.build("PyCall")
+using PyCall
+using RobotOS
+@rosimport std_msgs.msg: String
+rostypegen()
+using Caesar
+
+bagwr = Caesar.RosbagWriter("/tmp/test.bag")
+s = std_msgs.msg.StringMsg("test")
+bagwr.write_message("/ch1", s)
+bagwr.close()
 ```
+
+This has been tested and use with much more complicated types such as the [`Caesar._PCL.PCLPointCloud2`](@ref).
+
+## Additional Notes
 
 ### More Tools for Real-Time
 
@@ -128,27 +160,6 @@ To stop or trigger a new solve in the SLAM manager you can just use either of th
 stopManageSolveTree!
 triggerSolve!
 ```
-
-
-## Run the ROS Loop
-
-Once everything is set up as you need, it's easy to loop over all the traffic in the bagfile (one message at a time):
-```julia
-maxloops = 1000
-rosloops = 0
-while loop!(bagSubscriber)
-  # plumbing to limit the number of messages
-  rosloops += 1
-  if maxloops < rosloops
-    @warn "reached --msgloops limit of $rosloops"
-    break
-  end
-  # delay progress for whatever reason
-  blockProgress(robotslam) # required to prevent duplicate solves occuring at the same time
-end
-```
-
-## Additional Notes
 
 !!! note
     Native code for consuming rosbags also includes methods:
