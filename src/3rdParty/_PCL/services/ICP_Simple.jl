@@ -68,7 +68,7 @@ function select_in_range!(pc::_ICP_PointCloud, X::Array, max_range::Number)
   size(X)[2] == 3 || error(""""X" must have 3 columns""")
   max_range > 0 || error(""""max_range" must be > 0""")
   kdtree = KDTree(X')
-  query_points = [pc.xyz.points.x[pc.sel]'; pc.xyz.points.y[pc.sel]'; pc.xyz.points.z[pc.sel]']
+  query_points = [pc.x[pc.sel]'; pc.y[pc.sel]'; pc.z[pc.sel]']
   _, distances = nn(kdtree, query_points)
   keep = [d <= max_range for d in distances]
   pc.sel = pc.sel[keep]
@@ -88,7 +88,7 @@ function estimate_normals!(pc::_ICP_PointCloud, neighbors)
   query_points = [pc.x[pc.sel]'; pc.y[pc.sel]'; pc.z[pc.sel]']
   idxNN_all_qp, = knn(kdtree, query_points, neighbors, false)
 
-  @show typeof(idxNN_all_qp) size(idxNN_all_qp) idxNN_all_qp[1:5]
+  # @show typeof(idxNN_all_qp) size(idxNN_all_qp) idxNN_all_qp[1:5]
 
   for (i, idxNN) in enumerate(idxNN_all_qp)
     xyz_ = pc.xyz.points[idxNN]
@@ -108,3 +108,28 @@ function estimate_normals!(pc::_ICP_PointCloud, neighbors)
 
 end
 
+
+function matching!(
+    pcmov::_ICP_PointCloud, 
+    pcfix::_ICP_PointCloud
+  )
+  #
+  kdtree = KDTree([pcmov.x'; pcmov.y'; pcmov.z'])
+  query_points = [pcfix.x[pcfix.sel]'
+                  pcfix.y[pcfix.sel]'
+                  pcfix.z[pcfix.sel]']
+  idxNN, = knn(kdtree, query_points, 1)
+  pcmov.sel = vcat(idxNN...)
+
+  dx = pcmov.x[pcmov.sel] - pcfix.x[pcfix.sel]
+  dy = pcmov.y[pcmov.sel] - pcfix.y[pcfix.sel]
+  dz = pcmov.z[pcmov.sel] - pcfix.z[pcfix.sel]
+
+  nx = pcfix.nx[pcfix.sel]
+  ny = pcfix.ny[pcfix.sel]
+  nz = pcfix.nz[pcfix.sel]
+
+  distances = [dx[i]*nx[i] + dy[i]*ny[i] + dz[i]*nz[i] for i in 1:length(pcmov.sel)]
+
+  return distances
+end
