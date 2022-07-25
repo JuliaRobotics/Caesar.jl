@@ -361,48 +361,6 @@ end
 
 
 ## =========================================================================================================
-## Coordinate transformations using Manifolds.jl
-## =========================================================================================================
-
-
-# Works for transform of both 2D and 3D  point clouds
-# FIXME, to optimize, this function will likely be slow
-# TODO, consolidate with transformPointcloud(::ScatterAlign,..) function
-function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
-                rPp::Manifolds.ArrayPartition,
-                pc::PointCloud{T} ) where T
-  #
-
-  # allocate destination
-  _pc = PointCloud(;header=pc.header,
-                    points = Vector{T}(),
-                    width=pc.width,
-                    height=pc.height,
-                    is_dense=pc.is_dense,
-                    sensor_origin_=pc.sensor_origin_,
-                    sensor_orientation_=pc.sensor_orientation_ )
-  #
-
-  ft3 = _FastTransform3D(M_, rPp, 0f0)
-  nc = M_ isa typeof(SpecialEuclidean(3)) ? 3 : 2
-  _data = MVector(0f0,0f0,0f0,0f0)
-
-  # rotate the elements from the old point cloud into new static memory locations
-  # NOTE these types must match the types use for PointCloud and PointXYZ
-  # TODO not the world's fastest implementation
-  @inbounds for pt in pc.points
-    _data[1:nc] = ft3(view(pt.data, 1:nc)) # TODO avoid references or allocation on heap 
-    _data[4] = pt.data[4]
-    npt = PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data...))
-    push!(_pc.points, npt )
-  end
-
-  # return the new point cloud
-  return _pc
-end
-
-
-## =========================================================================================================
 ## Custom printing
 ## =========================================================================================================
 
