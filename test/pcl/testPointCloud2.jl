@@ -1,6 +1,5 @@
 # requires python3 and rospy to be installed
 
-
 # ENV["PYTHON"] = "/usr/bin/python3"
 # Pkg.build("PyCall")
 # using PyCall
@@ -14,9 +13,41 @@ using FixedPointNumbers
 
 using Test
 using Pkg
+using Downloads
+using DelimitedFiles
 
 # import Caesar._PCL: FieldMapper, createMapping, PointCloud, PointField, PCLPointCloud2, Header, asType, _PCL_POINTFIELD_FORMAT, FieldMapping, MsgFieldMap, FieldMatches
+##
 
+@info "download any necessary test data"
+
+testdatafolder = "/tmp/caesar/testdata/"
+
+
+radarpclfile = joinpath( testdatafolder,"radar", "convertedRadar", "_PCLPointCloud2_15776.dat")
+if 0 === Base.filesize(radarpclfile)
+  Base.mkpath(dirname(radarpclfile))
+  radarpcl_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/radar/convertedRadar/_PCLPointCloud2_15776.dat"
+  @info "Downloading $radarpcl_url"
+  Downloads.download(radarpcl_url, radarpclfile)
+end
+
+pandarfile = joinpath(testdatafolder,"lidar","simpleICP","_pandar_PCLPointCloud2.jldat")
+if 0 === Base.filesize(pandarfile)
+  Base.mkpath(dirname(pandarfile))
+  pandar_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/pandar/_pandar_PCLPointCloud2.jldat"
+  @info "Downloading $pandar_url"
+  Downloads.download(pandar_url, pandarfile)
+end
+
+
+lidar_terr1_file = joinpath(testdatafolder,"lidar","simpleICP","terrestrial_lidar1.xyz")
+if 0 === Base.filesize(lidar_terr1_file)
+  Base.mkpath(dirname(lidar_terr1_file))
+  lidar_terr1_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar1.xyz"
+  @info "Downloading $lidar_terr1_url"
+  Downloads.download(lidar_terr1_url, lidar_terr1_file)
+end
 
 ##
 @testset "test Caesar._PCL.PCLPointCloud2 to Caesar._PCL.PointCloud converter." begin
@@ -28,8 +59,7 @@ using Pkg
 
 ## build PCLPointCloud2 to be converted
 
-datafile = joinpath( pkgdir(Caesar), "test", "testdata", "_PCLPointCloud2_15776.dat")
-fid = open(datafile,"r")
+fid = open(radarpclfile,"r")
 data = read(fid)
 close(fid)
 
@@ -121,8 +151,7 @@ end
 
 # Alternative approach, see more hardcoded test data example (only .data writen to binary) for _PCLPointCloud2_15776.dat"
 @info "Loading testdata/_pandar_PCLPointCloud2.jldat which via `Serialization.serialize` of a `Caesar._PCL.PCLPointCloud2` object, at JL 1.7.3, CJL v0.13.1+" 
-datafile = joinpath( pkgdir(Caesar), "test", "testdata", "_pandar_PCLPointCloud2.jldat")
-pc2 = Serialization.deserialize(datafile)
+pc2 = Serialization.deserialize(pandarfile)
 # pc2.fields
 #   6-element Vector{Caesar._PCL.PointField}:
 #  Caesar._PCL.PointField("x", 0x00000000, Caesar._PCL._PCL_FLOAT32, 0x00000001)
@@ -197,6 +226,66 @@ pc_3D = Caesar._PCL.apply(M, rPc, pc)
 ##
 end
 
+
+
+@testset "Test PointCloud on Terrestrial Lidar and ICP_Simple alignment" begin
+##
+
+# load the data to memory
+X_fix = readdlm(lidar_terr1_file, Float32)
+
+# convert data to PCL types
+pc_fix = Caesar._PCL.PointCloud(X_fix);
+icp_fix = Caesar._PCL._ICP_PointCloud(pc_fix)
+
+# do the alignment
+Caesar._PCL.estimate_normals!(icp_fix, 10)
+
+nx_ref_1_10 = [
+ -0.2027982521351298
+  0.2695738031305203
+ -0.12962918659975647
+ -0.18700445755397993
+  0.006289904039860751
+ -0.06413452235027679
+ -0.18425770654086202
+  0.4346435000845428
+ -0.1495511463188632
+  0.15212762938255636
+]
+
+ny_ref_1_10 = [
+  0.00598286920628624
+  0.03450499429584508
+  0.00094230477225829
+  0.08867086536779206
+  0.2020404127780519
+  0.1791992164773645
+ -0.08868664880709484
+ -0.41835406632782735
+ -0.28482156811677
+ -0.1355238211691936
+]
+
+nz_ref_1_10 = [
+  0.9792022641962165
+  -0.9623613510705796
+   0.991562093891856
+   0.9783490228389194
+   0.9793569873706134
+   0.9817201250136417
+   0.9788686203488539
+  -0.7975367722062914
+   0.9468427160675728
+   0.9790252694768118 
+]
+
+@test_broken isapprox(nx_ref_1_10, icp_fix.nx[1:10])
+@test_broken isapprox(ny_ref_1_10, icp_fix.ny[1:10])
+@test_broken isapprox(nz_ref_1_10, icp_fix.nz[1:10])
+
+##
+end
 
 
 #
