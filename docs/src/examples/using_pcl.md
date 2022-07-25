@@ -52,6 +52,7 @@ Caesar.jl is currently growing support for two related point cloud alignment met
 These factors use minimum mean distance embeddings to cost the alignment between pointclouds and supports various other interesting function alignment cases.  These functions require `Images.jl`, see page [Using Images](@ref images_and_fiducials).
 
 ```@docs
+Caesar.ScatterAlign
 Caesar.ScatterAlignPose2
 Caesar.ScatterAlignPose3
 ```
