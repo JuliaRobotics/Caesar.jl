@@ -1,5 +1,7 @@
 using Documenter, Caesar
 using RoME
+using Colors
+using Images
 
 import IncrementalInference: fmcmc!, localProduct, prodmultiplefullpartials, prodmultipleonefullpartials, setfreeze!
 import IncrementalInference: cliqGibbs, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
@@ -35,7 +37,6 @@ makedocs(
             "Interact w Graphs" => "concepts/interacting_fgs.md",
             "Multi-Modal/Hypothesis" => "concepts/dataassociation.md",
             "Parallel Processing" => "concepts/parallel_processing.md",
-            "Using Manifolds.jl" => "concepts/using_manifolds.md",
             "[DEV] Parametric Solve" => "examples/parametric_solve.md",
         ],
         "Examples" => [
@@ -52,6 +53,7 @@ makedocs(
             "Entry=>Data Blob" => "concepts/entry_data.md",
             "Images and AprilTags" => "examples/using_images.md",
             "Pointclouds and PCL" => "examples/using_pcl.md",
+            "Using Manifolds.jl" => "concepts/using_manifolds.md",
             "Flux (NN) Factors" => "concepts/flux_factors.md",
         ],
         "Visualization" => [
