@@ -133,3 +133,215 @@ function matching!(
 
   return distances
 end
+
+
+function reject!(pcmov::_ICP_PointCloud, pcfix::_ICP_PointCloud, min_planarity, distances)
+
+  planarity = pcfix.planarity[pcfix.sel]
+
+  med = StatsBase.median(distances)
+  sigmad = StatsBase.mad(distances, normalize=true)
+
+  keep_distance = [abs(d-med) <= 3*sigmad for d in distances]
+  keep_planarity = [p > min_planarity for p in planarity]
+
+  keep = keep_distance .& keep_planarity
+
+  pcmov.sel = pcmov.sel[keep]
+  pcfix.sel = pcfix.sel[keep]
+  deleteat!(distances, .!keep)
+
+  return nothing
+
+end
+
+
+function check_convergence_criteria(distances_new, distances_old, min_change)
+
+  change(new, old) = abs((new-old)/old*100)
+
+  change_of_mean = change(mean(distances_new), mean(distances_old))
+  change_of_std = change(std(distances_new), std(distances_old))
+
+  return change_of_mean < min_change && change_of_std < min_change ? true : false
+
+end
+
+
+## ============================================================
+## Rigid transform
+## ============================================================
+
+function euler_angles_to_linearized_rotation_matrix(α1, α2, α3)
+
+  dR = [  1 -α3  α2
+         α3   1 -α1
+        -α2  α1   1]
+
+end
+
+function create_homogeneous_transformation_matrix(R, t)
+
+  H = [R          t
+       zeros(1,3) 1]
+
+end
+
+function euler_coord_to_homogeneous_coord(XE)
+
+  no_points = size(XE, 1)
+  XH = [XE ones(no_points,1)]
+
+end
+
+function homogeneous_coord_to_euler_coord(XH)
+
+  XE = XH[:,1:3]./XH[:,4]
+
+end
+
+function transform!(pc, H)
+
+  XInH = euler_coord_to_homogeneous_coord([pc.x pc.y pc.z])
+  XOutH = transpose(H*XInH')
+  XOut = homogeneous_coord_to_euler_coord(XOutH)
+
+  for i in 1:size(XOut,1)
+    data=SVector{4,eltype(pc.xyz.points[1].data)}(XOut[i,1],XOut[i,2],XOut[i,3],1)
+    npt = PointXYZ(;data)
+    pc.xyz.points[i] = npt
+  end
+  
+  # _data[1:nc] = ft3(view(pt.data, 1:nc)) # TODO avoid references or allocation on heap 
+  # _data[4] = pt.data[4]
+  # npt = PointXYZ(;color=pt.color, data=SVector{4,eltype(pt.data)}(_data...))
+  
+  return pc
+
+end
+
+## ================================================================
+## 
+## ================================================================
+
+
+function estimate_rigid_body_transformation(x_fix, y_fix, z_fix, nx_fix, ny_fix, nz_fix,
+                                            x_mov, y_mov, z_mov)
+
+    A = hcat(-z_mov.*ny_fix + y_mov.*nz_fix,
+              z_mov.*nx_fix - x_mov.*nz_fix,
+             -y_mov.*nx_fix + x_mov.*ny_fix,
+             nx_fix,
+             ny_fix,
+             nz_fix)
+
+    l = nx_fix.*(x_fix-x_mov) + ny_fix.*(y_fix-y_mov) + nz_fix.*(z_fix-z_mov)
+
+    x = A\l
+
+    residuals = A*x-l
+
+    R = euler_angles_to_linearized_rotation_matrix(x[1], x[2], x[3])
+
+    t = x[4:6]
+
+    H = create_homogeneous_transformation_matrix(R, t)
+
+    return H, residuals
+
+end
+
+function alignICP_Simple(
+    X_fix::AbstractMatrix, 
+    X_mov::AbstractMatrix;
+    correspondences::Integer=1000,
+    neighbors::Integer=10,
+    min_planarity::Number=0.3,
+    max_overlap_distance::Number=Inf,
+    min_change::Number=3,
+    max_iterations::Integer=100,
+    verbose::Bool=false 
+  )
+  #
+  size(X_fix)[2] == 3 || error(""""X_fix" must have 3 columns""")
+  size(X_mov)[2] == 3 || error(""""X_mov" must have 3 columns""")
+  correspondences >= 10 || error(""""correspondences" must be >= 10""")
+  min_planarity >= 0 && min_planarity < 1 || error(""""min_planarity" must be >= 0 and < 1""")
+  neighbors >= 2 || error(""""neighbors" must be >= 2""")
+  min_change > 0 || error(""""min_change" must be > 0""")
+  max_iterations > 0 || error(""""max_iterations" must be > 0""")
+
+  dt = @elapsed begin
+    verbose && @info "Create point cloud objects ..."
+    pcfix = _ICP_PointCloud(PointCloud(X_fix[:,1], X_fix[:,2], X_fix[:,3]))
+    pcmov = _ICP_PointCloud(PointCloud(X_mov[:,1], X_mov[:,2], X_mov[:,3]))
+
+    if isfinite(max_overlap_distance)
+        verbose && @info "Consider partial overlap of point clouds ..."
+        select_in_range!(pcfix, X_mov, max_overlap_distance)
+        if length(pcfix.sel) == 0
+            error(@sprintf("Point clouds do not overlap within max_overlap_distance = %.5f! ",
+            max_overlap_distance) * "Consider increasing the value of max_overlap_distance.")
+        end
+    end
+
+    verbose && @info "Select points for correspondences in fixed point cloud ..."
+    select_n_points!(pcfix, correspondences)
+    sel_orig = pcfix.sel
+
+    verbose && @info "Estimate normals of selected points ..."
+    estimate_normals!(pcfix, neighbors)
+
+    H = Matrix{Float64}(I,4,4)
+    residual_distances = Any[]
+
+    verbose && @info "Start iterations ..."
+    for i in 1:max_iterations
+      initial_distances = matching!(pcmov, pcfix)
+      reject!(pcmov, pcfix, min_planarity, initial_distances)
+      dH, residuals = estimate_rigid_body_transformation(
+        pcfix.x[pcfix.sel], pcfix.y[pcfix.sel], pcfix.z[pcfix.sel],
+        pcfix.nx[pcfix.sel], pcfix.ny[pcfix.sel], pcfix.nz[pcfix.sel],
+        pcmov.x[pcmov.sel], pcmov.y[pcmov.sel], pcmov.z[pcmov.sel])
+
+      push!(residual_distances, residuals)
+      transform!(pcmov, dH)
+      H = dH*H
+      pcfix.sel = sel_orig
+      if i > 1
+        if check_convergence_criteria(residual_distances[i], residual_distances[i-1],
+                                    min_change)
+          verbose && @info "Convergence criteria fulfilled -> stop iteration!"
+          break
+        end
+      end
+
+      if verbose 
+        if i == 1
+          @info @sprintf(" %9s | %15s | %15s | %15s", "Iteration", "correspondences",
+                          "mean(residuals)", "std(residuals)")
+          @info @sprintf(" %9s | %15d | %15.4f | %15.4f", "orig:0", length(initial_distances),
+                          mean(initial_distances), std(initial_distances))
+        end
+        @info @sprintf(" %9d | %15d | %15.4f | %15.4f", i, length(residual_distances[i]),
+                        mean(residual_distances[i]), std(residual_distances[i]))
+      end
+    end
+  end
+
+  if verbose
+    @info "Estimated transformation matrix H:\n" *
+    @sprintf("[%12.6f %12.6f %12.6f %12.6f]\n", H[1,1], H[1,2], H[1,3], H[1,4]) *
+    @sprintf("[%12.6f %12.6f %12.6f %12.6f]\n", H[2,1], H[2,2], H[2,3], H[2,4]) *
+    @sprintf("[%12.6f %12.6f %12.6f %12.6f]\n", H[3,1], H[3,2], H[3,3], H[3,4]) *
+    @sprintf("[%12.6f %12.6f %12.6f %12.6f]\n", H[4,1], H[4,2], H[4,3], H[4,4])
+    @info "Finished in " * @sprintf("%.3f", dt) * " seconds!"
+  end
+
+  X_mov_transformed = [pcmov.x pcmov.y pcmov.z]
+
+  return H, X_mov_transformed
+end
+
+
+##

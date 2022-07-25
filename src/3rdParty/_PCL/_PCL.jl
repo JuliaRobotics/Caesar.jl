@@ -7,10 +7,12 @@ using ..Colors
 import ..Caesar: _FastTransform3D
 
 using Dates
+using Printf
 using DocStringExtensions
 using Requires
 using StaticArrays
 using Statistics
+using StatsBase
 using LinearAlgebra
 using NearestNeighbors
 using Manifolds

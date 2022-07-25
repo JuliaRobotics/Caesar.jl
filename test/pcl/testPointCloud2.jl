@@ -11,6 +11,7 @@ using BSON
 using Serialization
 using FixedPointNumbers
 using NearestNeighbors
+# using Manifolds
 
 using Test
 using Pkg
@@ -332,7 +333,7 @@ sir_ref_1_10 = [
 ##
 
 # must run estimate_normals first
-mtch = Caesar._PCL.matching!(icp_mov, icp_fix)
+initial_distances = Caesar._PCL.matching!(icp_mov, icp_fix)
 
 mtch_ref_1_10 = [
   0.07132447835334486
@@ -347,10 +348,65 @@ mtch_ref_1_10 = [
   0.038976789495066375
 ]
 
-@test_broken isapprox(mtch_ref_1_10, mtch[1:10])
+@test_broken isapprox(mtch_ref_1_10, initial_distances[1:10])
 # FIXME, duplicate must be removed, 2 of 10 not right
-@test isapprox(mtch_ref_1_10, mtch[1:10]; atol=0.5)
+@test isapprox(mtch_ref_1_10, initial_distances[1:10]; atol=0.5)
 
+##
+
+min_planarity = 0.3
+Caesar._PCL.reject!(icp_fix, icp_mov, min_planarity, initial_distances)
+
+## Manifolds based rigid transform check
+
+# x = [
+#   -1.1362446960310095
+#   0.29917409927138205
+#  -1.6612742451109666
+#   0.7432673613376161
+#   0.0998255815132224
+#  -1.1510640331762294
+# ]
+
+# R_ref = [
+#   1.0        1.66127  0.299174
+#   -1.66127    1.0      1.13624
+#   -0.299174  -1.13624  1.0 
+# ]
+
+
+# M = SpecialEuclidean(3)
+# Mr = M.manifold[2]
+# R = exp_lie(Mr, hat(Mr, Identity(Mr), x[4:6]))
+# fPm = ArrayPartition(x[1:3])
+
+## check alignment
+
+H, pcmovd = Caesar._PCL.alignICP_Simple(X_fix, X_mov)
+
+H_ref = [
+  1.00101     5.66661e-5  -0.0349906   0.0994922
+  -0.00119442  0.999613    -0.0344838  -0.0498164
+   0.0350353   0.035119     1.00047    -0.0501982
+   0.0         0.0          0.0         1.0 
+]
+
+pcmv_ref = [
+  0.635052  0.0413591  -0.430395
+  0.640057  0.0423527  -0.430185
+  0.639056  0.0423539  -0.43022
+  0.639055  0.0403547  -0.43029
+  0.633049  0.0403618  -0.4305
+  0.635051  0.0403594  -0.43043
+  0.637054  0.0413567  -0.430325
+  0.641058  0.0403523  -0.43022
+  0.634051  0.0433595  -0.43036
+  0.631048  0.0423634  -0.4305 
+]
+
+
+@test isapprox(H_ref, H; atol = 1e-4)
+@test isapprox(pcmv_ref, pcmovd[1:10,:]; atol = 1e-4)
 
 ##
 end
