@@ -238,6 +238,11 @@ X_fix = readdlm(lidar_terr1_file, Float32)
 pc_fix = Caesar._PCL.PointCloud(X_fix);
 icp_fix = Caesar._PCL._ICP_PointCloud(pc_fix)
 
+
+# test select_in_range
+@warn "Missing test for Caesar._PCL.select_in_range"
+
+
 # do the alignment
 Caesar._PCL.estimate_normals!(icp_fix, 10)
 
