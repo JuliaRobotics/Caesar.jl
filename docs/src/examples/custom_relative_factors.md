@@ -27,6 +27,7 @@ New relative factors should either inheret from `<:AbstractManifoldMinimize`, `<
 | `getSample` | point `p` on Manifold | tangent `X` at some `p` (e.g. identity) |
 
 | Usage             |    |
+|-------------------|----|
 | `sampleTangent`   | tangent at point `p` or the identity element for groups |
 | `rand` / `sample` | coordinates |
 
