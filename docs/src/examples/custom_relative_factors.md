@@ -20,6 +20,16 @@ end
 ```
 New relative factors should either inheret from `<:AbstractManifoldMinimize`, `<:AbstractRelativeMinimize`, or `<:AbstractRelativeRoots`.  These are all subtypes of `<:AbstractRelative`.  There are only two abstract super types, `<:AbstractPrior` and `<:AbstractRelative`.
 
+## Summary of Sampling Data Representation
+
+| Usage       | `<:AbstractPrior`  |  `<:AbstractRelative` |
+|-------------|--------------------|-----------------------|
+| `getSample` | point `p` on Manifold | tangent `X` at some `p` (e.g. identity) |
+
+| Usage             |    |
+| `sampleTangent`   | tangent at point `p` or the identity element for groups |
+| `rand` / `sample` | coordinates |
+
 ## Specialized Dispatch (`getManifold`, `getSample`)
 
 Relative factors involve computaton, these computations must be performed on some manifold.  Custom relative factors require that the [`getManifold`](@ref) function be overridded.  Here two examples are given for reference:
@@ -47,7 +57,7 @@ function getSample(cf::CalcFactor{<:Pose2Pose2})
 end
 ```
 
-The return type for `getSample` is unrestricted, and will be passed to the residual function "as-is".
+The return type for `getSample` is unrestricted, and will be passed to the residual function "as-is", but must return values representing a tangent vector for `<:AbstractRelative`
 
 !!! note
     Default dispatches in `IncrementalInference` will try use `cf.factor.Z` to `samplePoint` on manifold (for `<:AbstractPrior`) or `sampleTangent` (for `<:AbstractRelative`), which simplifies new factor definitions.  If, however, you wish to build more complicated sampling processes, then simply define your own `getSample(cf::CalcFactor{<:MyFactor})` function.
@@ -70,10 +80,10 @@ function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
 end
 ```
 
+It is recommended to leave the incoming types unrestricted.  If you must define the types, make sure to allow sufficient dispatch freedom (i.e. dispatch to concrete types) and not force operations to "non-concrete" types.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work of inferring the concrete types.
+
 !!! note
     At present (2021) the residual function should return the residual value as a coordinate (not as tangent vectors or manifold points).  Ongoing work is in progress, and likely to return residual values as manifold tangent vectors instead.
-
-It is recommended to leave the incoming types unrestricted.  If you must define the types, make sure to allow sufficient dispatch freedom (i.e. dispatch to concrete types) and not force operations to "non-concrete" types.  Usage can be very case specific, and hence better to let Julia type-inference automation do the hard work of inferring the concrete types.
 
 ### Serialization
 
