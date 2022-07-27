@@ -1,6 +1,6 @@
-# Pointclouds and PCL Types
+# [Pointclouds and PCL Types](@id pointclouds_and_pcl)
 
-## Introduction Caesar._PCL
+## Introduction `Caesar._PCL`
 
 A wide ranging and well used [point cloud library exists called PCL](https://pointclouds.org/) which is implemented in C++.  To get access to many of those features and bridge the Caesar.jl suite of packages, the base `PCL.PointCloud` types have been implemented in Julia and reside under `Caesar._PCL`.  The main types of interest:
 - [`Caesar._PCL.PointCloud`](@ref),
