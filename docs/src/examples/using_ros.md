@@ -53,9 +53,20 @@ Distributed.@everywhere using PyCall
 
 Caesar.jl has native by optional package tools relating to RobotOS.jl (leveraging [Requires.jl](https://github.com/JuliaPackaging/Requires.jl)):
 ```julia
-using RobotOS, Caesar
-Distributed.@everywhere using Caesar
+using RobotOS
+
+@rosimport sensor_msgs.msg: PointCloud2
+
+rostypegen()
+
+using Colors, Caesar
+Distributed.@everywhere using Colors, Caesar
 ```
+
+Colors.jl is added as a conditional requirement to get `Caesar._PCL.PointCloud` support ([see PCL page here](@ref pointclouds_and_pcl)).
+
+!!! note
+    Imports and type generation is necessary for RobotOS and Caesar to work properly.
 
 ## Prepare Any Outer Objects
 
