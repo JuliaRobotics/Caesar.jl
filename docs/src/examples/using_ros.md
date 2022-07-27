@@ -66,7 +66,7 @@ Distributed.@everywhere using Colors, Caesar
 Colors.jl is added as a conditional requirement to get `Caesar._PCL.PointCloud` support ([see PCL page here](@ref pointclouds_and_pcl)).
 
 !!! note
-    Imports and type generation is necessary for RobotOS and Caesar to work properly.
+    Imports and type generation are necessary for RobotOS and Caesar to work properly.
 
 ## Prepare Any Outer Objects
 
