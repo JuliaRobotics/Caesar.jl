@@ -6,11 +6,11 @@ import rosbag
 import sys
 
 class RosbagParser:
-    def __init__(self, bag_file_name, topic_name):
+    def __init__(self, bag_file_name, topic_name): #, compression=None):
         #bag_file_name = sys.argv[1]
         #topic_name = sys.argv[2]
 
-        self.bag = rosbag.Bag(bag_file_name)
+        self.bag = rosbag.Bag(bag_file_name, 'r') #, compression=compression)
         self.bag_contents = self.bag.read_messages(topics=[topic_name])
 
         self.idx = 0
