@@ -48,13 +48,15 @@ mutable struct RosbagSubscriber
   syncBuffer::Dict{Symbol,Tuple{DateTime, Int}} # t,ns,msgdata
   nextMsgChl::Symbol
   nextMsgTimestamp::Tuple{DateTime, Int}
+  compression::Any
   # constructors
 end
 RosbagSubscriber(bagfile::AbstractString;
+                  compression=nothing,
                   channels::Vector{Symbol}=Symbol[],
                   callbacks::Dict{Symbol,Function}=Dict{Symbol,Function}(),
                   readers::Dict{Symbol,PyObject}=Dict{Symbol,PyObject}(),
-                  syncBuffer::Dict{Symbol,Tuple{DateTime, Int}}=Dict{Symbol,Tuple{DateTime, Int}}() ) = RosbagSubscriber(bagfile,channels,callbacks,readers,syncBuffer, :null, (unix2datetime(0),0))
+                  syncBuffer::Dict{Symbol,Tuple{DateTime, Int}}=Dict{Symbol,Tuple{DateTime, Int}}() ) = RosbagSubscriber(bagfile,channels,callbacks,readers,syncBuffer, :null, (unix2datetime(0),0),compression)
 #
 
 # loss of accuracy (Julia only Millisecond)
@@ -97,8 +99,8 @@ function loop!(rbs::RosbagSubscriber, args...)
     rbs.callbacks[rbs.nextMsgChl](msg, args...)
     true
   else
-    println("false, dont know how to handle message time as typeof(msgT)=$(typeof(msgT))")
-    @show msg
+    @warn "false, dont know how to handle message" rbs.nextMsgChl msgT maxlog=10
+    # @show msg
     false
   end
 end
@@ -114,5 +116,5 @@ function (rbs::RosbagSubscriber)( chl::AbstractString,
   # include the type converter, see ref: https://github.com/jdlangs/RobotOS.jl/blob/21a7088461a21bc9b24cd2763254d5043d5b1800/src/callbacks.jl#L23
   rbs.callbacks[cn] = (m)->callback(convert(MT,m[2]),args...)
   rbs.syncBuffer[cn] = (unix2datetime(0), 0)
-  rbs.readers[cn] = RosbagParser(rbs.bagfile, chl)
+  rbs.readers[cn] = RosbagParser(rbs.bagfile, chl) #; rbs.compression)
 end
