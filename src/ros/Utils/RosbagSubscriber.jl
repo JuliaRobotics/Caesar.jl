@@ -99,7 +99,7 @@ function loop!(rbs::RosbagSubscriber, args...)
     rbs.callbacks[rbs.nextMsgChl](msg, args...)
     true
   else
-    @warn "false, dont know how to handle message" rbs.nextMsgChl msgT maxlog=10
+    @warn "Unsure about decoding this topic:msg type pair, make sure the subscribed topic names are spelled exactly right." rbs.nextMsgChl msgT maxlog=10
     # @show msg
     false
   end
