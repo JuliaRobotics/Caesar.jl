@@ -40,6 +40,7 @@ include("services/ICP_Simple.jl")
 
 function __init__()
   @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("services/ROSConversions.jl")
+  @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("services/PlottingUtilsPCL.jl")
 end
 
 
