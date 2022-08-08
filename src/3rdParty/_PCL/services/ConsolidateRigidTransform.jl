@@ -46,13 +46,20 @@ end
 ## FIXME, not-yet-consolidated rigid transform code that must be deprecated below
 ## ============================================================
 
+const _SO3_MANI = SpecialOrthogonal(3)
+
 # name euler here is very ambiguous, these are Lie algebra elements
 # used to manipulate cartesian coordinates in a TranslationGroup(3) space.
-function euler_angles_to_linearized_rotation_matrix(α1, α2, α3)
-  dR = [  1 -α3  α2
-         α3   1 -α1
-        -α2  α1   1]
+function euler_angles_to_linearized_rotation_matrix(α1, α2, α3, rigid::Bool=true)
+  if rigid
+    exp_lie(_SO3_MANI, hat(_SO3_MANI, Identity(_SO3_MANI), SA[α1, α2, α3]))
+  else
+    dR = [  1 -α3  α2
+          α3   1 -α1
+          -α2  α1   1]
+  end
 end
+
 function create_homogeneous_transformation_matrix(R, t)
   H = [R          t
        zeros(1,3) 1]
