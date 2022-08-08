@@ -17,6 +17,8 @@ Use ffmpeg to write image sequence to video file.
 Notes:
 - Requires Images.jl
 - https://discourse.julialang.org/t/creating-a-video-from-a-stack-of-images/646/8
+
+Also see: `convert(Matrix{RGB}, pl)`
 """
 function writevideo(fname::AbstractString, 
                     imgstack::AbstractArray{<:Colorant,3};
