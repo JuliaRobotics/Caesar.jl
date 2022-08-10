@@ -54,7 +54,7 @@ const _SE3_MANI = SpecialEuclidean(3)
 function euler_angles_to_linearized_rotation_matrix(α1, α2, α3, rigid::Bool=true)
   dR = if rigid
     # TODO likely faster performance by using a retraction instead of expmap
-    exp_lie(_SO3_MANI, hat(_SO3_MANI, Identity(_SO3_MANI), SA[α1, α2, α3]))
+    exp_lie(_SO3_MANI, hat(_SO3_MANI, SMatrix{3,3, Float64}(I), SA[α1, α2, α3]))
   else
     SMatrix{3,3,Float64}(1.0,0,0,0,1,0,0,0,1) + 
       hat(_SO3_MANI, Identity(_SO3_MANI), SA[α1, α2, α3])
