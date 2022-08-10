@@ -221,7 +221,7 @@ Downloads.download(lidar2_url, io2)
 X_fix = readdlm(io1)
 X_mov = readdlm(io2)
 
-H, HX_mov = Caesar._PCL.alignICP_Simple(X_fix, X_mov; verbose=true)
+H, HX_mov, stat = Caesar._PCL.alignICP_Simple(X_fix, X_mov; verbose=true)
 ```
 
 Notes
@@ -280,7 +280,9 @@ function alignICP_Simple(
     residual_distances = Any[]
 
     verbose && @info "Start iterations ..."
+    count = 0
     for i in 1:max_iterations
+      count += 1
       initial_distances = matching!(pcmov, pcfix)
       reject!(pcmov, pcfix, min_planarity, initial_distances)
       dH, residuals = estimate_rigid_body_transformation(
@@ -324,7 +326,8 @@ function alignICP_Simple(
 
   X_mov_transformed = [pcmov.x pcmov.y pcmov.z]
 
-  return H, X_mov_transformed
+  stat = (;residual_mean=mean(residual_distances[end]), correspondences=length(residual_distances[end]),residual_std=std(residual_distances[end]), iterations=count)
+  return H, X_mov_transformed, stat
 end
 
 
