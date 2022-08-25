@@ -58,7 +58,7 @@ Newly created page to list related references and additional literature pertaini
 
 [2.14] Arnborg, S., Corneil, D.G. and Proskurowski, A., 1987. ["Complexity of finding embeddings in a k-tree"](https://epubs.siam.org/doi/pdf/10.1137/0608024). SIAM Journal on Algebraic Discrete Methods, 8(2), pp.277-284.
 
-[2.15a] Sola, J., Deray, J. and Atchuthan, D., 2018. ["A micro Lie theory for state estimation in robotics". arXiv preprint arXiv:1812.01537](https://arxiv.org/pdf/1812.01537), and [tech report](https://upcommons.upc.edu/bitstream/handle/2117/179757/2089-A-micro-Lie-theory-for-state-estimation-in-robotics%20(3).pdf).
+[2.15a] Sola, J., Deray, J. and Atchuthan, D., 2018. ["A micro Lie theory for state estimation in robotics". arXiv preprint arXiv:1812.01537](https://arxiv.org/pdf/1812.01537), and [tech report](https://upcommons.upc.edu/bitstream/handle/2117/179757/2089-A-micro-Lie-theory-for-state-estimation-in-robotics%20(3).pdf). And [cheatsheet w/ suspected typos](https://github.com/artivis/manif/blob/devel/paper/Lie_theory_cheat_sheet.pdf).
 
 [2.15b] Delleart F., 2012. [Lie Groups for Beginners](https://raw.githubusercontent.com/devbharat/gtsam/master/doc/LieGroups.pdf).
 
