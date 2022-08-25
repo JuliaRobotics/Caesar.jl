@@ -249,11 +249,11 @@ function alignICP_Simple(
   #
   size(X_fix)[2] == 3 || error(""""X_fix" must have 3 columns""")
   size(X_mov)[2] == 3 || error(""""X_mov" must have 3 columns""")
-  correspondences >= 10 || error(""""correspondences" must be >= 10""")
-  min_planarity >= 0 && min_planarity < 1 || error(""""min_planarity" must be >= 0 and < 1""")
-  neighbors >= 2 || error(""""neighbors" must be >= 2""")
-  min_change > 0 || error(""""min_change" must be > 0""")
-  max_iterations > 0 || error(""""max_iterations" must be > 0""")
+  10 <= correspondences || error(""""correspondences" must be >= 10""")
+  0 <= min_planarity < 1 || error(""""min_planarity" must be >= 0 and < 1""")
+  2 <= neighbors || error(""""neighbors" must be >= 2""")
+  0 < min_change || error(""""min_change" must be > 0""")
+  0 < max_iterations || error(""""max_iterations" must be > 0""")
 
   dt = @elapsed begin
     verbose && @info "Create point cloud objects ..."
