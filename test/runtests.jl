@@ -17,6 +17,7 @@ if TEST_GROUP in ["all", "basic_functional_group"]
     include("testPose2AprilTag4Corner.jl")
     include("testScatterAlignPose2.jl")
     include("testStashing_SAP.jl")
+    include("testScatterAlignParched.jl")
     include("multilangzmq/runtests.jl")
 end
 

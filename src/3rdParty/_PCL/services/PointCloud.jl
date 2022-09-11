@@ -364,7 +364,11 @@ end
 ## =========================================================================================================
 
 
-function _filterMinRange(pts, minrange, maxrange)
+function _filterMinRange(
+  pts::AbstractVector{<:AbstractVector{<:Real}}, 
+  minrange::Real, 
+  maxrange::Real
+)
   # filter pointcloud section of interest
   msk = findall(x-> minrange < norm(x) < maxrange, pts)
   pts[msk]

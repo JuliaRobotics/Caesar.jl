@@ -1,14 +1,15 @@
 
 
-import IncrementalInference: getSample, preambleCache
+import IncrementalInference: getSample, preambleCache, _update!
 import Base: convert, show
 # import DistributedFactorGraphs: getManifold
 import ApproxManifoldProducts: sample
 
+using UUIDs
 using .Images
 
 export ScatterAlignPose2, PackedScatterAlignPose2
-export ScatterAlignPose3
+export ScatterAlignPose3, PackedScatterAlignPose3
 
 export overlayScatter, overlayScatterMutate
 
@@ -67,7 +68,7 @@ Base.@kwdef struct ScatterAlign{P,
   Arg 0 < `rescale` ≤ 1 is also used to rescale the images to lower resolution for speed. """
   gridscale::Float64 = 1.0
   """ how many heatmap sampled particles to use for mmd alignment """
-  sample_count::Int  = 100
+  sample_count::Int  = 500
   """ bandwidth to use for mmd """
   bw::Float64        = 1.0
   """ EXPERIMENTAL, flag whether to use 'stashing' for large point cloud, see [Stash & Cache](@ref section_stash_unstash) """
@@ -196,7 +197,11 @@ getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 getManifold(::IIF.InstanceType{<:ScatterAlignPose3}) = getManifold(Pose3Pose3)
 
 # runs once upon addFactor! and returns object later used as `cache`
-function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fnc::Union{<:ScatterAlignPose2,<:ScatterAlignPose3})
+function preambleCache(
+  dfg::AbstractDFG, 
+  vars::AbstractVector{<:DFGVariable}, 
+  fnc::Union{<:ScatterAlignPose2,<:ScatterAlignPose3}
+)
   #
   M = getManifold(_getPoseType(fnc.align))
   e0 = getPointIdentity(M)
@@ -205,10 +210,14 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fn
   for (va,de,cl) in zip(vars,[fnc.align.dataEntry_cloud1,fnc.align.dataEntry_cloud2],[fnc.align.cloud1,fnc.align.cloud2])
     if fnc.align.useStashing 
       @assert 0 < length(de) "cannot reconstitute ScatterAlignPose2 without necessary data entry, only have $de"
-      _, db = getData(dfg, getLabel(va), Symbol(de)) # fnc.align.dataStoreHint
+      _, db = getData(dfg, getLabel(va), UUID(de)) # fnc.align.dataStoreHint
+      # Assume PackedManifoldKernelDensity
       cld = convert(SamplableBelief, String(take!(IOBuffer(db))))
-      # cld = unpackDistribution(strdstr)
-      IIF._update!(cl, cld)
+      # payload = JSON.parse(String(take!(IOBuffer(db))))
+      # dstr = unmarshal PackedManifoldKernelDensity
+      # cld = unpackDistribution(dstr)
+      # update either a HGD or MKD
+      _update!(cl, cld)
     end
   end
 
@@ -409,24 +418,42 @@ Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
   dataStoreHint::String = ""
 end
 
+Base.@kwdef struct PackedScatterAlignPose3 <: AbstractPackedFactor
+  _type::String = "Caesar.PackedScatterAlignPose3"
+  cloud1::_PARCHABLE_PACKED_CLOUD
+  cloud2::_PARCHABLE_PACKED_CLOUD
+  gridscale::Float64 = 1.0
+  sample_count::Int = 50
+  bw::Float64 = 0.01
+  """ EXPERIMENTAL, flag whether to use 'stashing' for large point cloud, see [Stash & Cache](@ref section_stash_unstash) """
+  useStashing::Bool = false
+  """ DataEntry ID for stash store of cloud 1 & 2 """
+  dataEntry_cloud1::String = ""
+  dataEntry_cloud2::String = ""
+  """ Data store hint where likely to find the data entries and blobs for reconstructing cloud1 and cloud2"""
+  dataStoreHint::String = ""
+end
 
-function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
-
+function convert(
+  ::Type{T}, 
+  arp::Union{<:ScatterAlignPose2,<:ScatterAlignPose3}
+) where {T <: Union{<:PackedScatterAlignPose2,<:PackedScatterAlignPose3}}
+  #
   cld1 = arp.align.cloud1
   cld2 = arp.align.cloud2
 
   # reconstitute full type during the preambleCache step
   if arp.align.useStashing
-    @assert length(arp.align.dataEntry_cloud1) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud1` exists for later loading"
+    @assert length(arp.align.dataEntry_cloud1) !== 0 "packing of ScatterAlignPose asked to be `useStashing=true`` yet no `.dataEntry_cloud1` exists for later loading"
     cld1 = IIF.parchDistribution(arp.align.cloud1)
-    @assert length(arp.align.dataEntry_cloud2) !== 0 "packing of ScatterAlignPose2 asked to be `useStashing=true`` yet no `.dataEntry_cloud2` exists for later loading"
+    @assert length(arp.align.dataEntry_cloud2) !== 0 "packing of ScatterAlignPose asked to be `useStashing=true`` yet no `.dataEntry_cloud2` exists for later loading"
     cld2 = IIF.parchDistribution(arp.align.cloud2)
   end
 
   cloud1 = packDistribution(cld1)
   cloud2 = packDistribution(cld2)
 
-  PackedScatterAlignPose2(;
+  T(;
     cloud1,
     cloud2,
     gridscale = arp.align.gridscale,
@@ -435,22 +462,29 @@ function convert(::Type{<:PackedScatterAlignPose2}, arp::ScatterAlignPose2)
     useStashing = arp.align.useStashing,
     dataEntry_cloud1 = arp.align.dataEntry_cloud1,
     dataEntry_cloud2 = arp.align.dataEntry_cloud2,
-    dataStoreHint = arp.align.dataStoreHint )
+    dataStoreHint = arp.align.dataStoreHint 
+  )
 end
 
-function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
+function convert(
+  ::Type{T}, 
+  parp::Union{<:PackedScatterAlignPose2,<:PackedScatterAlignPose3}
+) where {T <: Union{<:ScatterAlignPose2,<:ScatterAlignPose3}}
   #
-  
+  _selectPoseT(::Type{<:ScatterAlignPose2}) = Pose2
+  _selectPoseT(::Type{<:ScatterAlignPose3}) = Pose3
+
   function _resizeCloudData!(cl::PackedHeatmapGridDensity)
-    typ, col, row = typeof(cl.data[1][1]), Int(cl.data[1][2]), Int(cl.data[2][1])
+    row=Int(cl.data[2][1])
+    typ, col = typeof(cl.data[1][1]), Int(cl.data[1][2])
     resize!(cl.data,row)
     for i in 1:row
       cl.data[i] = Vector{typ}(undef, col)
     end
     nothing
   end
-  _resizeCloudData!(cl::ManifoldKernelDensity) = nothing
-  
+  _resizeCloudData!(cl::PackedManifoldKernelDensity) = nothing
+
   # prep cloud1.data fields for larger data
   if parp.useStashing
     _resizeCloudData!(parp.cloud1)
@@ -461,7 +495,9 @@ function convert(::Type{<:ScatterAlignPose2}, parp::PackedScatterAlignPose2)
   cloud2 = unpackDistribution(parp.cloud2)
   
   # and build the final object
-  ScatterAlignPose2(ScatterAlign{Pose2, typeof(cloud1), typeof(cloud2)}(;
+  @show T
+  @show poseT = _selectPoseT(T)
+  T(ScatterAlign{poseT, typeof(cloud1), typeof(cloud2)}(;
     cloud1,
     cloud2,
     gridscale=parp.gridscale,

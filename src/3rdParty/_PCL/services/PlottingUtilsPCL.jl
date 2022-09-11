@@ -7,7 +7,7 @@
 ## _PCL plotting utils
 ## =====================================================================================
 
-# FIXME move pointcloud plotting to Arena.jl instead
+# NOTE moved pointcloud plotting to and see PR Arena.jl#94
 function plotPointCloud(pc::PointCloud)
   x = (s->s.data[1]).(pc.points)
   y = (s->s.data[2]).(pc.points)
