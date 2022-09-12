@@ -20,8 +20,8 @@ The MM-iSAMv2 algorithm relies on the Kolmogorov-Criteria as well as uncorrelate
 
 At present `cfo` contains three main fields:
 - `cfo.factor::MyFactor` the factor object as defined in the `struct` definition,
-- `cfo.metadata::FactorMetadata`, which is currently under development and likely to change.
-  - This contains references to the connected variables to the factor and more, and is useful for large data retrieval such as used in Terrain Relative Navigation (TRN).
+- `cfo.fullvariables`, which can be used for large data blob retrieval such as used in Terrain Relative Navigation (TRN).
+  - Also see [Stashing and Caching](@ref section_stash_and_cache)
 - `cfo._sampleIdx` is the index of which computational sample is currently being calculated.
 
 
