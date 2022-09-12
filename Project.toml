@@ -2,7 +2,7 @@ name = "Caesar"
 uuid = "62eebf14-49bc-5f46-9df9-f7b7ef379406"
 keywords = ["SLAM", "state-estimation", "MM-iSAM", "MM-iSAMv2", "inference", "robotics", "ROS"]
 desc = "Non-Gaussian simultaneous localization and mapping"
-version = "0.13.4"
+version = "0.13.5"
 
 [deps]
 ApproxManifoldProducts = "9bbbb610-88a1-53cd-9763-118ce10c1f89"
@@ -71,7 +71,7 @@ Optim = "1"
 ProgressMeter = "1"
 Reexport = "1"
 Requires = "1"
-RoME = "0.20"
+RoME = "0.20, 0.21"
 Rotations = "1.1"
 StaticArrays = "1"
 StatsBase = "0.33"
