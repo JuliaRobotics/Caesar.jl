@@ -63,26 +63,36 @@ addBlobStore!(fg, datastore)
 addVariable!(fg, :x0, Pose2)
 addVariable!(fg, :x1, Pose2)
 
-## must store the stashed data entry blobs before the preambleCache function runs on addFactor
 
 ##
 
 sap = ScatterAlignPose2(bIM1, bIM2, (x,y); 
                         sample_count=100, bw=1.0, 
                         cvt=(im)->im, 
-                        useStashing=true, 
-                        dataEntry_cloud1=string(:hgd_stash_x0),
-                        dataEntry_cloud2=string(:hgd_stash_x1),
-                        dataStoreHint = string(:test_stashing_store) )
+                        useStashing=false)
+                        # dataEntry_cloud1=string(:hgd_stash_x0),
+                        # dataEntry_cloud2=string(:hgd_stash_x1),
+                        # dataStoreHint = string(:test_stashing_store) )
 #
+
+## must store the stashed data entry blobs before the preambleCache function runs on addFactor
+
+db = Vector{UInt8}( convert(String, sap.align.cloud1) )
+de0, = addData!(fg, :test_stashing_store, :x0, :hgd_stash_x0, db, mimeType="application/json/octet-stream")
+
+db = Vector{UInt8}( convert(String,sap.align.cloud2) )
+de1, = addData!(fg, :test_stashing_store, :x1, :hgd_stash_x1, db, mimeType="application/json/octet-stream")
 
 ##
 
-db = Vector{UInt8}( convert(String, sap.align.cloud1) )
-addData!(fg, :test_stashing_store, :x0, :hgd_stash_x0, db, mimeType="application/json/octet-stream")
-
-db = Vector{UInt8}( convert(String,sap.align.cloud2) )
-addData!(fg, :test_stashing_store, :x1, :hgd_stash_x1, db, mimeType="application/json/octet-stream")
+sap = ScatterAlignPose2(bIM1, bIM2, (x,y); 
+                        sample_count=100, bw=1.0, 
+                        cvt=(im)->im, 
+                        useStashing=false, 
+                        dataEntry_cloud1=string(de0.id),
+                        dataEntry_cloud2=string(de1.id),
+                        dataStoreHint = string(:test_stashing_store) )
+#
 
 
 ##
