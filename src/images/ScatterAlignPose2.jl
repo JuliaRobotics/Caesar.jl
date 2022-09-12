@@ -495,8 +495,7 @@ function convert(
   cloud2 = unpackDistribution(parp.cloud2)
   
   # and build the final object
-  @show T
-  @show poseT = _selectPoseT(T)
+  poseT = _selectPoseT(T)
   T(ScatterAlign{poseT, typeof(cloud1), typeof(cloud2)}(;
     cloud1,
     cloud2,
