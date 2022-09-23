@@ -244,7 +244,8 @@ function alignICP_Simple(
     max_overlap_distance::Number=Inf,
     min_change::Number=3,
     max_iterations::Integer=100,
-    verbose::Bool=false 
+    verbose::Bool=false,
+    H = Matrix{Float64}(I,4,4),
   )
   #
   size(X_fix)[2] == 3 || error(""""X_fix" must have 3 columns""")
@@ -276,7 +277,6 @@ function alignICP_Simple(
     verbose && @info "Estimate normals of selected points ..."
     estimate_normals!(pcfix, neighbors)
 
-    H = Matrix{Float64}(I,4,4)
     residual_distances = Any[]
 
     verbose && @info "Start iterations ..."
@@ -292,7 +292,7 @@ function alignICP_Simple(
 
       push!(residual_distances, residuals)
       transform!(pcmov, dH)
-      H = dH*H
+      H .= dH*H
       pcfix.sel = sel_orig
       if i > 1
         if check_convergence_criteria(residual_distances[i], residual_distances[i-1],
