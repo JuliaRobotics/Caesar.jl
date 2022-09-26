@@ -111,7 +111,7 @@ jpf = JSON.json(pf)
 tfg = initfg()
 
 # use existing logpath from fg
-storeDir = joinLogPath(fg,"data")
+storeDir = "/tmp/caesar/localstore" # joinLogPath(fg,"data")
 
 datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
 addBlobStore!(tfg, datastore)
@@ -132,7 +132,7 @@ saveDFG("/tmp/caesar/test_stashed_data", fg)
 fg_  = initfg()
 
 # attach existing blob store before loading
-storeDir = joinLogPath(fg,"data")
+storeDir = "/tmp/caesar/localstore" # joinLogPath(fg,"data")
 datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
 addBlobStore!(fg_, datastore)
 
