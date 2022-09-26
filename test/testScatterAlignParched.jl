@@ -24,6 +24,9 @@ Downloads.download(lidar2_url, io2)
 X_fix = readdlm(io1)
 X_mov = readdlm(io2)
 
+# X_fix = randn(10000,3)
+# X_mov = randn(10000,3)
+
 @cast pts_f_[i][d] := X_fix[i,d]
 @cast pts_m_[i][d] := X_mov[i,d]
 
@@ -101,7 +104,7 @@ pf = DFG.packFactor(fg, getFactor(fg, getLabel(f1)))
 jpf = JSON.json(pf)
 
 # check that the massive point clouds are not stored in the packed factor object
-@test length(jpf) < 1000
+@test length(jpf) < 1100
 
 ## now confirm the solver deserialization can also work with the factor pulling data from the blob store 
 
