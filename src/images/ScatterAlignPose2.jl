@@ -1,6 +1,6 @@
 
 
-import IncrementalInference: getSample, preambleCache, _update!
+import IncrementalInference: getSample, preambleCache
 import Base: convert, show
 # import DistributedFactorGraphs: getManifold
 import ApproxManifoldProducts: sample
