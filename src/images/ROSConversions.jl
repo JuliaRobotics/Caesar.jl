@@ -2,6 +2,8 @@
 
 using .RobotOS
 
+import Unmarshal: unmarshal
+
 @rosimport std_msgs.msg: Header
 @rosimport sensor_msgs.msg: Image
 
@@ -37,25 +39,22 @@ function unmarshal(
 end
 
 
+function toImage(msgd::Dict{String,Any})
+  data = base64decode(msgd["data_b64"])
+  h, w = msgd["height"], msgd["width"]
 
-
-function toImage(msg::Main.sensor_msgs.msg.Image)
-  # header = Header(;stamp  = msg.header.stamp,
-  #                 seq     = msg.header.seq,
-  #                 frame_id= msg.header.frame_id )
-  #
-  w, h = Int(msg.width), Int(msg.height)
-
-  @info "sensor_msgs.msg.Image" msg.encoding w h Int(msg.step)
-
-  if msg.encoding == "mono8"
+  if msgd["encoding"] == "mono8"
     img = Matrix{Gray{N0f8}}(undef, h, w)
     # assuming one endian type for now, TODO both little and big endian
     for i in 1:h, j in 1:w
-      img[i,j] = Gray{N0f8}(msg.data[msg.step*(i-1)+j]/255)
+      img[i,j] = Gray{N0f8}(data[msgd["step"]*(i-1)+j]/255)
     end
     img
   else
-    error("Conversion for ROS sensor_msgs.Image encoding not implemented yet $(msg.encoding)")
+    error("Conversion for ROS sensor_msgs.Image encoding not implemented yet $(msgd["encoding"])")
   end
 end
+
+toImage(msg::Main.sensor_msgs.msg.Image) = unmarshal(msg) |> toImage
+
+#
