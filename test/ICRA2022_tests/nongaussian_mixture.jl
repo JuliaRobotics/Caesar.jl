@@ -18,6 +18,7 @@ using IncrementalInference
 
 # Start with an empty factor graph
 fg = initfg()
+getSolverParams(fg).useMsgLikelihoods = true
 
 # add the first node
 addVariable!(fg, :x0, ContinuousScalar)
@@ -91,6 +92,8 @@ tree = solveGraph!(fg);
 # plotBelief(fg, [:x0, :x1, :x2, :x3])
 
 ppes = DFG.getPPESuggested.(fg, [:x0;:x1;:x2;:x3])
+
+#
 
 @test isapprox( getPPESuggested(fg, :x0)[1], 0; atol=1)
 @test isapprox( getPPESuggested(fg, :x1)[1], 10; atol=1)
