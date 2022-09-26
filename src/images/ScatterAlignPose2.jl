@@ -1,9 +1,9 @@
 
 
-import IncrementalInference: getSample, preambleCache
+import IncrementalInference: getSample, preambleCache, _update!
 import Base: convert, show
 # import DistributedFactorGraphs: getManifold
-import ApproxManifoldProducts: sample
+import ApproxManifoldProducts: sample, _update!
 
 using UUIDs
 using .Images
