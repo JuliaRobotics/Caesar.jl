@@ -14,18 +14,18 @@ using JSON
 ##
 
 ## ~50mb download, blobs that are too big to always store in variables themselves
-lidar1_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar1.xyz"
-lidar2_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar2.xyz"
-io1 = PipeBuffer()
-io2 = PipeBuffer()
-Downloads.download(lidar1_url, io1)
-Downloads.download(lidar2_url, io2)
+# lidar1_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar1.xyz"
+# lidar2_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar2.xyz"
+# io1 = PipeBuffer()
+# io2 = PipeBuffer()
+# Downloads.download(lidar1_url, io1)
+# Downloads.download(lidar2_url, io2)
 
-X_fix = readdlm(io1)
-X_mov = readdlm(io2)
+# X_fix = readdlm(io1)
+# X_mov = readdlm(io2)
 
-# X_fix = randn(10000,3)
-# X_mov = randn(10000,3)
+X_fix = randn(10000,3)
+X_mov = randn(10000,3)
 
 @cast pts_f_[i][d] := X_fix[i,d]
 @cast pts_m_[i][d] := X_mov[i,d]

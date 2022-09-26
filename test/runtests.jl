@@ -13,8 +13,8 @@ TEST_GROUP = get(ENV, "IIF_TEST_GROUP", "all")
 if TEST_GROUP in ["all", "basic_functional_group"]
     println("Starting tests...")
     # highly multipackage tests that don't fit well in specific library dependencies.
-    include("testScatterAlignPose2.jl")
     include("testScatterAlignParched.jl")
+    include("testScatterAlignPose2.jl")
     include("testStashing_SAP.jl")
     include("pcl/testPointCloud2.jl")
     include("testPose2AprilTag4Corner.jl")
