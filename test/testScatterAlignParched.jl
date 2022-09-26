@@ -45,7 +45,7 @@ bel_m = manikde!(Position3, pts_m; bw=[0.1;0.1;0.1])
 
 fg = initfg()
 
-storeDir = joinLogPath(fg,"data")
+storeDir = "/tmp/caesar/localstore" # joinLogPath(fg,"data")
 mkpath(storeDir)
 datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
 addBlobStore!(fg, datastore)

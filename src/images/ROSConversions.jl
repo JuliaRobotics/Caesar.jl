@@ -34,7 +34,8 @@ function unmarshal(
     "encoding" => msg.encoding,
     "is_bigendian" => msg.is_bigendian === 0x01,
     "header" => unmarshal(msg.header),
-    "_type" => "ROS1/std_msgs/Image?base64"
+    "_type" => "ROS1/sensor_msgs/Image?base64",
+    "description" => "Caesar.toImage(JSON.parse(jstr))"
   )
 end
 
