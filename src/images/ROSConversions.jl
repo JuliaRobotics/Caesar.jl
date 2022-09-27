@@ -59,8 +59,8 @@ function toROSImage(msgd::Dict{String,Any})
   msg = Main.sensor_msgs.msg.Image();
 
   msg.header = header
-  msg.height = UInt32(msgd.height)
-  msg.width  = UInt32(msgd.width)
+  msg.height = UInt32(msgd["height"])
+  msg.width  = UInt32(msgd["width"])
 
   msg.is_bigendian = UInt8(msgd["is_bigendian"])
   msg.step = UInt32(msgd["step"])
