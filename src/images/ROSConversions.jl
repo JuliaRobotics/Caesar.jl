@@ -40,22 +40,33 @@ function unmarshal(
 end
 
 
-function toImage(msgd::Dict{String,Any})
-  data = base64decode(msgd["data_b64"])
-  h, w = msgd["height"], msgd["width"]
-
-  if msgd["encoding"] == "mono8"
-    img = Matrix{Gray{N0f8}}(undef, h, w)
-    # assuming one endian type for now, TODO both little and big endian
-    for i in 1:h, j in 1:w
-      img[i,j] = Gray{N0f8}(data[msgd["step"]*(i-1)+j]/255)
-    end
-    img
-  else
-    error("Conversion for ROS sensor_msgs.Image encoding not implemented yet $(msgd["encoding"])")
-  end
-end
-
 toImage(msg::Main.sensor_msgs.msg.Image) = unmarshal(msg) |> toImage
 
+
+"""
+    $SIGNATURES
+
+Convert `Caesar.Image::Dict` type to ROS message `sensor_msgs.msg.Image`.
+
+See also: [`Caesar.unmarshal`](@ref), [`Caesar.toImage`](@ref), [`Caesar._PCL.toROSPointCloud2`](@ref)
+"""
+function toROSImage(msgd::Dict{String,Any})
+  header = Main.std_msgs.msg.Header();
+  header.seq = msgd["header"]["seq"]
+  header.stamp = RobotOS.Time(msgd["header"]["stamp"]["secs"], msgd["header"]["stamp"]["nsecs"])
+  header.frame_id = msgd["header"]["frame_id"]
+
+  msg = Main.sensor_msgs.msg.Image();
+
+  msg.header = header
+  msg.height = UInt32(msgd["height"])
+  msg.width  = UInt32(msgd["width"])
+
+  msg.is_bigendian = UInt8(msgd["is_bigendian"])
+  msg.step = UInt32(msgd["step"])
+  msg.data = base64decode(msgd["data_b64"])
+  msg.encoding = msgd["encoding"]
+
+  msg
+end
 #
