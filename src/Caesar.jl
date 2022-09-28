@@ -56,20 +56,16 @@ include("ExportAPI.jl")
 
 ## ===============================================================================================
 # and source files
-include("BearingRangeTrackingServer.jl")
+include("services/BearingRangeTrackingServer.jl")
 
-include("services/_FastTransform3D.jl")
-include("SlamServer.jl")
-include("DataUtils.jl")
-include("UserFunctions.jl")
+include("transforms/entities/TransformTypes.jl")
+include("transforms/services/HomographyTransforms.jl")
+include("transforms/services/_FastTransform3D.jl")
 
-# Configuration
-include("config/CaesarConfig.jl")
+include("services/DataUtils.jl")
+include("services/UserFunctions.jl")
 
 include("Deprecated.jl")
-
-# Multisession operation
-# include("attic/multisession/Multisession.jl")
 
 # SAS-SLAM
 include("beamforming/czt.jl")
