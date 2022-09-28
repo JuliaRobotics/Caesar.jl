@@ -62,7 +62,6 @@ include("transforms/entities/TransformTypes.jl")
 include("transforms/services/HomographyTransforms.jl")
 include("transforms/services/_FastTransform3D.jl")
 
-include("services/SlamServer.jl")
 include("services/DataUtils.jl")
 include("services/UserFunctions.jl")
 
