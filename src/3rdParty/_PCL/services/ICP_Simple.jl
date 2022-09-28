@@ -221,7 +221,7 @@ Downloads.download(lidar2_url, io2)
 X_fix = readdlm(io1)
 X_mov = readdlm(io2)
 
-H, HX_mov = Caesar._PCL.alignICP_Simple(X_fix, X_mov; verbose=true)
+H, HX_mov, stat = Caesar._PCL.alignICP_Simple(X_fix, X_mov; verbose=true)
 ```
 
 Notes
@@ -244,16 +244,17 @@ function alignICP_Simple(
     max_overlap_distance::Number=Inf,
     min_change::Number=3,
     max_iterations::Integer=100,
-    verbose::Bool=false 
+    verbose::Bool=false,
+    H = Matrix{Float64}(I,4,4),
   )
   #
   size(X_fix)[2] == 3 || error(""""X_fix" must have 3 columns""")
   size(X_mov)[2] == 3 || error(""""X_mov" must have 3 columns""")
-  correspondences >= 10 || error(""""correspondences" must be >= 10""")
-  min_planarity >= 0 && min_planarity < 1 || error(""""min_planarity" must be >= 0 and < 1""")
-  neighbors >= 2 || error(""""neighbors" must be >= 2""")
-  min_change > 0 || error(""""min_change" must be > 0""")
-  max_iterations > 0 || error(""""max_iterations" must be > 0""")
+  10 <= correspondences || error(""""correspondences" must be >= 10""")
+  0 <= min_planarity < 1 || error(""""min_planarity" must be >= 0 and < 1""")
+  2 <= neighbors || error(""""neighbors" must be >= 2""")
+  0 < min_change || error(""""min_change" must be > 0""")
+  0 < max_iterations || error(""""max_iterations" must be > 0""")
 
   dt = @elapsed begin
     verbose && @info "Create point cloud objects ..."
@@ -276,11 +277,12 @@ function alignICP_Simple(
     verbose && @info "Estimate normals of selected points ..."
     estimate_normals!(pcfix, neighbors)
 
-    H = Matrix{Float64}(I,4,4)
     residual_distances = Any[]
 
     verbose && @info "Start iterations ..."
+    count = 0
     for i in 1:max_iterations
+      count += 1
       initial_distances = matching!(pcmov, pcfix)
       reject!(pcmov, pcfix, min_planarity, initial_distances)
       dH, residuals = estimate_rigid_body_transformation(
@@ -290,7 +292,7 @@ function alignICP_Simple(
 
       push!(residual_distances, residuals)
       transform!(pcmov, dH)
-      H = dH*H
+      H .= dH*H
       pcfix.sel = sel_orig
       if i > 1
         if check_convergence_criteria(residual_distances[i], residual_distances[i-1],
@@ -324,7 +326,8 @@ function alignICP_Simple(
 
   X_mov_transformed = [pcmov.x pcmov.y pcmov.z]
 
-  return H, X_mov_transformed
+  stat = (;residual_mean=mean(residual_distances[end]), correspondences=length(residual_distances[end]),residual_std=std(residual_distances[end]), iterations=count)
+  return H, X_mov_transformed, stat
 end
 
 

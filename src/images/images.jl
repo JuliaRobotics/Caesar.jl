@@ -9,6 +9,22 @@ export imhcatPretty, csmAnimationJoinImgs, csmAnimateSideBySide
 export makeVideoFromData
 
 
+function toImage(msgd::Dict{String,Any})
+  data = base64decode(msgd["data_b64"])
+  h, w = msgd["height"], msgd["width"]
+
+  if msgd["encoding"] == "mono8"
+    img = Matrix{Gray{N0f8}}(undef, h, w)
+    # assuming one endian type for now, TODO both little and big endian
+    for i in 1:h, j in 1:w
+      img[i,j] = Gray{N0f8}(data[msgd["step"]*(i-1)+j]/255)
+    end
+    img
+  else
+    error("Conversion for ROS sensor_msgs.Image encoding not implemented yet $(msgd["encoding"])")
+  end
+end
+
 """
     $SIGNATURES
 
@@ -17,6 +33,8 @@ Use ffmpeg to write image sequence to video file.
 Notes:
 - Requires Images.jl
 - https://discourse.julialang.org/t/creating-a-video-from-a-stack-of-images/646/8
+
+Also see: `convert(Matrix{RGB}, pl)`
 """
 function writevideo(fname::AbstractString, 
                     imgstack::AbstractArray{<:Colorant,3};

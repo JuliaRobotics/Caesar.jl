@@ -120,14 +120,14 @@ function (cfo::CalcFactor{<:SASBearing2D})( meas,
                                             XX...  )
   #
   sas2d = cfo.factor
-  userdata = cfo.metadata
+  # userdata = cfo.metadata # OUT OF DATE, use CalcFactor.fullvariables
   idx = cfo._sampleIdx
   #
   dx, dy, azi = 0.0, 0.0, 0.0
   thread_data = sas2d.threadreuse[Threads.threadid()]
   res = [0.0;]
 
-  if string(userdata.solvefor)[1] == 'l'
+  if cf.solvefor == 1
     # Solving all poses to Landmark
     # Reference the filter positions locally (first element)
 
@@ -140,8 +140,8 @@ function (cfo::CalcFactor{<:SASBearing2D})( meas,
       # ccall(:jl_, Void, (Any,), "idx=$(idx)\n")
       thread_data.oncebackidx[1] = idx
       #run for eacn new idx
-      thread_data.workvarlist = userdata.variablelist[2:end] # skip landmark element
-      thread_data.looelement = findfirst(thread_data.workvarlist .== userdata.solvefor)
+      thread_data.workvarlist = cfo.variablelist[2:end] # skip landmark element
+      thread_data.looelement = findfirst(thread_data.workvarlist .== cfo.solvefor)
       thread_data.elementset = setdiff(Int[1:length(thread_data.workvarlist);],   [thread_data.looelement;])
 
       # Reference first or second element
