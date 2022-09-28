@@ -65,9 +65,6 @@ include("transforms/services/_FastTransform3D.jl")
 include("services/DataUtils.jl")
 include("services/UserFunctions.jl")
 
-# Configuration
-include("config/CaesarConfig.jl")
-
 include("Deprecated.jl")
 
 # SAS-SLAM
