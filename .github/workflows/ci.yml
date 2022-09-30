@@ -107,12 +107,10 @@ jobs:
       JULIA_PKG_SERVER: ""
     steps:
       - uses: actions/checkout@v2
-      
       - uses: julia-actions/setup-julia@v1
         with:
           version: 1.8
           arch: x64
-      
       - uses: actions/cache@v1
         env:
           cache-name: cache-artifacts
@@ -123,11 +121,9 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
-      
       - run: |
           git config --global user.name Tester
           git config --global user.email te@st.er
-      
       - name: Run tests on Upstream Dev
         run: |
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="RoME",rev="master"));'

@@ -3,6 +3,8 @@
 ## Deprecate below before Caesar.jl v0.15
 ## ======================================================================================
 
+@deprecate create_homogeneous_transformation_matrix(R, t) affine_matrix(_SE3_MANI, ArrayPartition(t, R))
+
 
 ## ======================================================================================
 ## Deprecate below before Caesar.jl v0.14
