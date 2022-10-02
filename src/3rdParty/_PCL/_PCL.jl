@@ -4,7 +4,7 @@
 module _PCL
 
 using ..Colors
-import ..Caesar: _FastTransform3D
+import ..Caesar: _FastTransform3D, homogeneous_coord_to_euler_coord, euler_coord_to_homogeneous_coord, euler_angles_to_linearized_rotation_matrix, create_homogeneous_transformation_matrix
 
 using Dates
 using Printf

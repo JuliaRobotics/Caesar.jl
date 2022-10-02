@@ -79,9 +79,7 @@ function __init__()
   # ZMQ server and endpoints
   @require ZMQ="c2297ded-f4af-51ae-bb23-16f91089e4e1" include("zmq/ZmqCaesar.jl")
   @require PyCall="438e738f-606a-5dbb-bf0a-cddfbfd45ab0" begin
-    @info "Loading Caesar PyCall specific utilities (using PyCall)."
-    @eval using .PyCall
-    @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("ros/Utils/RosbagSubscriber.jl")
+    @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("ros/CaesarROS.jl")
   end
   @require Colors="5ae59095-9a9b-59fe-a467-6f913c188581" include("3rdParty/_PCL/_PCL.jl")
   @require AprilTags="f0fec3d5-a81e-5a6a-8c28-d2b34f3659de" begin 
