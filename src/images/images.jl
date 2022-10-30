@@ -8,9 +8,13 @@ export writevideo
 export imhcatPretty, csmAnimationJoinImgs, csmAnimateSideBySide
 export makeVideoFromData
 
+"""
+    $SIGNATURES
 
+Also see: [`toROSImage`](@ref)
+"""
 function toImage(msgd::Dict{String,Any})
-  data = base64decode(msgd["data_b64"])
+  data = haskey(msgd, "data_b64") ? base64decode(msgd["data_b64"]) : UInt8.(msgd["data"])
   h, w = msgd["height"], msgd["width"]
 
   if msgd["encoding"] == "mono8"
