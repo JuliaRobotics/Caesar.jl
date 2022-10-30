@@ -14,7 +14,7 @@ function unmarshal(
     "width"  => Int(msg.width),
     "height" => Int(msg.height),
     "step" => Int(msg.step),
-    "data_b64" => base64encode(msg.data),
+    "data_b64" => msg.data, # base64encode(
     "encoding" => msg.encoding,
     "is_bigendian" => msg.is_bigendian === 0x01,
     "header" => unmarshal(msg.header),
@@ -48,7 +48,7 @@ function toROSImage(msgd::Dict{String,Any})
 
   msg.is_bigendian = UInt8(msgd["is_bigendian"])
   msg.step = UInt32(msgd["step"])
-  msg.data = base64decode(msgd["data_b64"])
+  msg.data = msgd["data_b64"] # base64decode( )
   msg.encoding = msgd["encoding"]
 
   msg
