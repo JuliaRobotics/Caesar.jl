@@ -48,7 +48,7 @@ function toROSImage(msgd::Dict{String,Any})
 
   msg.is_bigendian = UInt8(msgd["is_bigendian"])
   msg.step = UInt32(msgd["step"])
-  msg.data = msgd["data"] # base64decode( )
+  msg.data = UInt8.(msgd["data"]) # base64decode( )
   msg.encoding = msgd["encoding"]
 
   msg
