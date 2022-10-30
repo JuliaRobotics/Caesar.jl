@@ -352,8 +352,8 @@ end
 
 
 function overlayScatterMutate(sap_::ScatterAlignPose2;
-                              sample_count::Integer = sap_.sample_count,
-                              bw::Real = sap_.bw,
+                              sample_count::Integer = sap_.align.sample_count,
+                              bw::Real = sap_.align.bw,
                               kwargs... )
   #
   sap = ScatterAlign{Pose2,typeof(sap_.align.cloud1),typeof(sap_.align.cloud2)}(;cloud1=sap_.align.cloud1, cloud2=sap_.align.cloud2, gridscale=sap_.align.gridscale, sample_count, bw=float(bw))
