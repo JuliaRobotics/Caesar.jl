@@ -8,10 +8,8 @@ This page will showcase some of `Entry=>Data` features available.
 
 Caesar.jl (with DFG) supports storage and retrieval of larger data blobs by means of various database/datastore technologies.  To get going, you can use a conventional `FolderStore`: 
 ```julia
-getSolverParams(fg).logpath = pwd()
-storeDir = joinLogPath(fg,"data")
-mkpath(storeDir)
-# requires IIF v0.15, DFG v0.10
+# temporary location example
+storeDir = joinpath("/tmp","cjldata")
 datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
 addBlobStore!(fg, datastore)
 ```
