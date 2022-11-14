@@ -149,7 +149,7 @@ function ScatterAlignPose2(;
     dataEntry_cloud1="",
     dataEntry_cloud2="",
     dataStoreHint=""
-  ) where {T}
+  )
   #
   
   sa = ScatterAlign{Pose2,typeof(cloud1),typeof(cloud2)}(;
@@ -176,7 +176,7 @@ function ScatterAlignPose3(;
     dataEntry_cloud1="",
     dataEntry_cloud2="",
     dataStoreHint=""
-  ) where {T}
+  )
   #
   
   sa = ScatterAlign{Pose3,typeof(cloud1),typeof(cloud2)}(;
