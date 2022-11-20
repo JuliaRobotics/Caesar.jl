@@ -11,6 +11,7 @@ import IncrementalInference: NothingUnion, InstanceType
 
 using Requires
 using Dates
+using Colors
 
 using Manifolds
 using StaticArrays
@@ -74,6 +75,8 @@ include("beamforming/MatchedFilter.jl")
 include("beamforming/SASBearing2D.jl")
 include("beamforming/SASUtils.jl")
 
+include("3rdParty/_PCL/_PCL.jl")
+
 # conditional loading for ROS
 function __init__()
   # ZMQ server and endpoints
@@ -81,7 +84,7 @@ function __init__()
   @require PyCall="438e738f-606a-5dbb-bf0a-cddfbfd45ab0" begin
     @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("ros/CaesarROS.jl")
   end
-  @require Colors="5ae59095-9a9b-59fe-a467-6f913c188581" include("3rdParty/_PCL/_PCL.jl")
+  # @require Colors="5ae59095-9a9b-59fe-a467-6f913c188581" include("3rdParty/_PCL/_PCL.jl")
   @require AprilTags="f0fec3d5-a81e-5a6a-8c28-d2b34f3659de" begin 
     include("images/apriltags.jl")
     @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/AprilTagDrawingTools.jl")
