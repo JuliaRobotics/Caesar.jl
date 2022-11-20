@@ -1,5 +1,5 @@
 
-@info "Caesar.jl is loading (but not exporting) tools requiring Colors.jl; e.g. Caesar._PCL"
+# @info "Caesar.jl is loading (but not exporting) tools requiring Colors.jl; e.g. Caesar._PCL"
 
 module _PCL
 
