@@ -51,6 +51,7 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 [compat]
 ApproxManifoldProducts = "0.6"
 AprilTags = "0.8, 0.9"
+Colors = "0.12"
 Combinatorics = "1"
 CoordinateTransformations = "0.5, 0.6"
 DataStructures = "0.17, 0.18"
@@ -102,4 +103,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [targets]
-test = ["AprilTags", "BSON", "Colors", "DelimitedFiles", "Downloads", "FixedPointNumbers", "Gadfly", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Serialization", "Test", "ZMQ"]
+test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "FixedPointNumbers", "Gadfly", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Serialization", "Test", "ZMQ"]
