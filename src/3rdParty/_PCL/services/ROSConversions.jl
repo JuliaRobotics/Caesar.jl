@@ -4,7 +4,7 @@
 @debug "Caesar._PCL RobotOS.jl requires user to first run as @rostypegen (on messages below) in `Main` before loading Caesar."
 @debug "  @rosimport sensor_msgs.msg: PointCloud2" 
 
-using ..RobotOS
+using .RobotOS
 
 @rosimport std_msgs.msg: Header
 @rosimport sensor_msgs.msg: PointField
