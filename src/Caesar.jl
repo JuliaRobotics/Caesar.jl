@@ -49,7 +49,7 @@ using Optim
 
 using Reexport
 
-const CJL = Caesar
+# const CJL = Caesar
 
 # public API exports
 include("ExportAPI.jl")
