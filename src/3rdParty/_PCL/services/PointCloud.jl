@@ -374,6 +374,19 @@ function _filterMinRange(
   pts[msk]
 end
 
+function _prepPointCloud(
+  pc_a::PointCloud,
+  dims=1:3;
+  minrange=0.0,
+  maxrange=999.0
+)
+  pts_a_ = (s->s.data[dims]).(pc_a.points)
+  pts_a = _PCL._filterMinRange(pts_a_, minrange, maxrange)
+    # pts_a = (s->[s.x;s.y;s.z]).(pc_a.points)
+  # To convert them to a matrix.
+  @cast pts_matrix[i,d] := pts_a[i][d]
+  return collect(pts_matrix)
+end
 
 ## =========================================================================================================
 ## Custom printing
