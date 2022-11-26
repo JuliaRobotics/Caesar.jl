@@ -11,6 +11,7 @@ using Dates
 using Printf
 using DocStringExtensions
 using Requires
+using Serialization # FIXME REMOVE, only used for legacy getDataPointCloud
 using StaticArrays
 using Statistics
 using StatsBase
@@ -35,6 +36,7 @@ import IncrementalInference: ArrayPartition
 include("entities/PCLTypes.jl")
 # bring in further source code
 include("services/PointCloud.jl")
+include("services/PointCloudUtils.jl")
 include("services/ConsolidateRigidTransform.jl")
 include("services/ICP_Simple.jl")
 
