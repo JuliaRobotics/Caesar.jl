@@ -11,7 +11,6 @@ using Dates
 using Printf
 using DocStringExtensions
 using Requires
-using Serialization # FIXME REMOVE, only used for legacy getDataPointCloud
 using StaticArrays
 using Statistics
 using StatsBase
@@ -19,6 +18,11 @@ using LinearAlgebra
 using NearestNeighbors
 using Manifolds
 import Rotations as _Rot
+using DistributedFactorGraphs
+using TensorCast
+using UUIDs
+
+using Serialization # FIXME REMOVE, only used for legacy getDataPointCloud
 
 # Going to add dispatches on these functions
 import Base: getindex, setindex!, resize!, cat, convert, sizeof, hasproperty, getproperty
