@@ -243,7 +243,7 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
   pVi = cf.cache.smps1
   qVj = cf.cache.smps2
   
-  if 0 <= cf.factor.sample_count
+  if 0 <= cf.factor.align.sample_count
     # Fresh samples
     for i in 1:cf.factor.align.sample_count
       pVi[i] .= sample(cf.factor.align.cloud1)[1][1]
@@ -262,7 +262,7 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
     # give measurement relative to e0 identity
     #  TODO relax to Riemannian where e0 is replaced by any point
     return hat(M, e0, res.minimizer)
-  else #if cf.factor.sample_count < 0
+  else #if cf.factor.align.sample_count < 0
     @assert cf.factor.align.cloud1 isa ManifoldKernelDensity "ICP alignments currently only implemented for beliefs as MKDs"
     ppt = getPoints(cf.factor.align.cloud1)
     qpt = getPoints(cf.factor.align.cloud2)
