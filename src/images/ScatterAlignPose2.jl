@@ -73,7 +73,7 @@ Base.@kwdef struct ScatterAlign{P,
   bw::Float64        = 1.0
   """ EXPERIMENTAL, flag whether to use 'stashing' for large point cloud, see [Stash & Cache](@ref section_stash_unstash) """
   useStashing::Bool = false
-  """ DataEntry ID for hollow store of cloud 1 & 2 """
+  """ DataEntry ID for hollow store of cloud 1 & 2, TODO change to UUID instead """
   dataEntry_cloud1::String = ""
   dataEntry_cloud2::String = ""
   """ Data store hint where likely to find the data entries and blobs for reconstructing cloud1 and cloud2"""
@@ -242,26 +242,46 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
   
   pVi = cf.cache.smps1
   qVj = cf.cache.smps2
-  # Fresh samples
-  for i in 1:cf.factor.align.sample_count
-    pVi[i] .= sample(cf.factor.align.cloud1)[1][1]
-    qVj[i] .= sample(cf.factor.align.cloud2)[1][1]
+  
+  if 0 <= cf.factor.sample_count
+    # Fresh samples
+    for i in 1:cf.factor.align.sample_count
+      pVi[i] .= sample(cf.factor.align.cloud1)[1][1]
+      qVj[i] .= sample(cf.factor.align.cloud2)[1][1]
+    end
+    
+    # qVi(qCp) = _transformPointCloud(M,pVi,qCp)
+    # TODO consolidate this transform with methods used by ICP
+    pVj(qCp) = _transformPointCloud(M,qVj,qCp; backward=true)
+    # bw = SA[cf.factor.bw;]
+    cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj), cf._allowThreads; cf.cache.bw)
+    # return mmd as residual for minimization
+    res = Optim.optimize(cost, [5*randn(ntr); 0.1*randn(nrt)], Optim.BFGS() )
+    cf.cache.score[] = res.minimum
+    # give measurement relative to e0 identity
+    #  TODO relax to Riemannian where e0 is replaced by any point
+    return hat(M, e0, res.minimizer)
+  else #if cf.factor.sample_count < 0
+    @assert cf.factor.align.cloud1 isa ManifoldKernelDensity "ICP alignments currently only implemented for beliefs as MKDs"
+    # bump initial alignment to get diversity in samples
+    ppt = getPoints(cf.factor.align.cloud1)
+    qpt = getPoints(cf.factor.align.cloud2)
+    # FIXME, super excessive repeat of data wrangling in hot loop
+    @cast p_ptsM[i,d] := ppt[i][d]
+    @cast phat_pts_mov[i,d] := qpt[i][d]
+    # do actual alignment with ICP
+    p_Hicp_phat, Hpts_mov, status = alignICP_Simple(
+      p_ptsM, 
+      phat_pts_mov; 
+      verbose=false,
+      max_iterations = 25,
+      correspondences = 500,
+      neighbors = 50
+    )
+    # convert SE affine H to tangent vector X for use in residual function 
+    p_P_q = ArrayPartition(p_Hicp_phat[1:end-1,end],p_Hicp_phat[1:end-1,1:end-1])
+    return log(M, e0, p_P_q)
   end
-  
-  # qVi(qCp) = _transformPointCloud(M,pVi,qCp)
-  pVj(qCp) = _transformPointCloud(M,qVj,qCp; backward=true)
-  
-  # bw = SA[cf.factor.bw;]
-  cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj), cf._allowThreads; cf.cache.bw)
-  
-  # return mmd as residual for minimization
-  res = Optim.optimize(cost, [5*randn(ntr); 0.1*randn(nrt)], Optim.BFGS() )
-  
-  cf.cache.score[] = res.minimum
-  
-  # give measurement relative to e0 identity
-  #  TODO relax to Riemannian where e0 is replaced by any point
-  hat(M, e0, res.minimizer)
 end
 
 
