@@ -256,6 +256,7 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
     # bw = SA[cf.factor.bw;]
     cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj), cf._allowThreads; cf.cache.bw)
     # return mmd as residual for minimization
+    # FIXME upgrade to the on manifold optimization
     res = Optim.optimize(cost, [5*randn(ntr); 0.1*randn(nrt)], Optim.BFGS() )
     cf.cache.score[] = res.minimum
     # give measurement relative to e0 identity
@@ -263,12 +264,14 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
     return hat(M, e0, res.minimizer)
   else #if cf.factor.sample_count < 0
     @assert cf.factor.align.cloud1 isa ManifoldKernelDensity "ICP alignments currently only implemented for beliefs as MKDs"
-    # bump initial alignment to get diversity in samples
     ppt = getPoints(cf.factor.align.cloud1)
     qpt = getPoints(cf.factor.align.cloud2)
     # FIXME, super excessive repeat of data wrangling in hot loop
     @cast p_ptsM[i,d] := ppt[i][d]
     @cast phat_pts_mov[i,d] := qpt[i][d]
+    # bump initial alignment to get diversity in samples
+    # pVj(qCp) = _transformPointCloud(M,qVj,qCp; backward=true)
+
     # do actual alignment with ICP
     p_Hicp_phat, Hpts_mov, status = alignICP_Simple(
       p_ptsM, 
