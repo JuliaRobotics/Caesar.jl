@@ -164,8 +164,8 @@ fct = getFactorType(fg, :x0tag17f1)
 
 preImgs = zeros(5,10)
 
-
-for i in 1:10
+# preformance regression, see https://github.com/JuliaRobotics/Caesar.jl/issues/928
+for i in 1:3
   println("finding preimage $i") 
   preImgs[:,i] .= _solveFactorPreimage(fct, pred[i], regularize=0.001)
 

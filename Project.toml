@@ -103,4 +103,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [targets]
-test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "FixedPointNumbers", "Gadfly", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Serialization", "Test", "ZMQ"]
+test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "FixedPointNumbers", "Gadfly", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]

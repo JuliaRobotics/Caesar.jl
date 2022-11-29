@@ -8,7 +8,7 @@
 # Works for transform of both 2D and 3D  point clouds
 # FIXME, to optimize, this function will likely be slow
 # TODO, consolidate with transformPointcloud(::ScatterAlign,..) function
-function apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
+function Manifolds.apply( M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
                 rPp::Manifolds.ArrayPartition,
                 pc::PointCloud{T} ) where T
   #
