@@ -17,12 +17,16 @@ export overlayScatter, overlayScatterMutate
     ScatterAlign{P,H1,H2} where  {H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity}, 
                                   H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity}}
 
-Alignment factor between point cloud populations, using a continuous density function cost: [`ApproxManifoldProducts.mmd`](@ref).
-Supports very large density clouds, with `sample_count` subsampling for individual alignments.
+Alignment factor between point cloud populations, using either
+- a continuous density function cost: [`ApproxManifoldProducts.mmd`](@ref), or
+- a conventional iterative closest point (ICP) algorithm (when `.sample_count < 0`).
+
+This factor can support very large density clouds, with `sample_count` subsampling for individual alignments.
 
 Keyword Options:
 ----------------
-- `sample_count::Int = 100`, number of subsamples to use during each alignment in `getSample`.
+- `sample_count::Int = 100`, number of subsamples to use during each alignment in `getSample`.  
+  - Values greater than 0 use MMD alignment, while values less than 0 use ICP alignment.
 - `bw::Real`, the bandwidth to use for [`mmd`](@ref) distance
 - `rescale::Real`
 - `N::Int`
@@ -193,6 +197,24 @@ function ScatterAlignPose3(;
   ScatterAlignPose3(sa)
 end
 
+function ScatterAlignPose3(
+  ::Type{<:ManifoldKernelDensity};
+  cloud1::_PCL.PointCloud,
+  cloud2::_PCL.PointCloud,
+  bw1 = [1;1;1.0],
+  bw2 = bw1,
+  kw...
+)
+  p1 = (s->s.data[1:3]).(cloud1.points) 
+  p2 = (s->s.data[1:3]).(cloud2.points) 
+
+  Mt = TranslationGroup(3)
+  b1 = manikde!(Mt, p1; bw=bw1)
+  b2 = manikde!(Mt, p2; bw=bw2)
+
+  ScatterAlignPose3(;cloud1=b1, cloud2=b2, kw...)
+end
+
 getManifold(::IIF.InstanceType{<:ScatterAlignPose2}) = getManifold(Pose2Pose2)
 getManifold(::IIF.InstanceType{<:ScatterAlignPose3}) = getManifold(Pose3Pose3)
 
@@ -221,8 +243,13 @@ function preambleCache(
     end
   end
 
-  smps1, = sample(fnc.align.cloud1, fnc.align.sample_count)
-  smps2, = sample(fnc.align.cloud2, fnc.align.sample_count)
+  smps1,smps2 = if 0 <= fnc.align.sample_count
+    smps1, = sample(fnc.align.cloud1, fnc.align.sample_count)
+    smps2, = sample(fnc.align.cloud2, fnc.align.sample_count)
+    smps1, smps2
+  else
+    nothing, nothing
+  end
 
   bw = SA[fnc.align.bw;]
   
@@ -243,6 +270,9 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
   pVi = cf.cache.smps1
   qVj = cf.cache.smps2
   
+  # TODO consolidate this transform with methods used by ICP
+  pVj(qCp) = _transformPointCloud(M,qVj,qCp; backward=true)
+  
   if 0 <= cf.factor.align.sample_count
     # Fresh samples
     for i in 1:cf.factor.align.sample_count
@@ -251,8 +281,7 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
     end
     
     # qVi(qCp) = _transformPointCloud(M,pVi,qCp)
-    # TODO consolidate this transform with methods used by ICP
-    pVj(qCp) = _transformPointCloud(M,qVj,qCp; backward=true)
+    # pVj(qCp) = _transformPointCloud(M,qVj,qCp; backward=true)
     # bw = SA[cf.factor.bw;]
     cost(xyr) = mmd(M.manifold[1], pVi, pVj(xyr), length(pVi), length(qVj), cf._allowThreads; cf.cache.bw)
     # return mmd as residual for minimization
@@ -265,15 +294,18 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
   else #if cf.factor.align.sample_count < 0
     @assert cf.factor.align.cloud1 isa ManifoldKernelDensity "ICP alignments currently only implemented for beliefs as MKDs"
     ppt = getPoints(cf.factor.align.cloud1)
-    qpt = getPoints(cf.factor.align.cloud2)
+    qpt_ = getPoints(cf.factor.align.cloud2)
+
+    # bump pc before alignment to get diversity in sample population
+    dstb = 0.2*randn(getDimension(M)) # retract(M,e0,hat(M,e0,0.2*randn(getDimension(M))))
+    qpt = _transformPointCloud(M, qpt_, dstb; backward=true)
+
     # FIXME, super excessive repeat of data wrangling in hot loop
     @cast p_ptsM[i,d] := ppt[i][d]
     @cast phat_pts_mov[i,d] := qpt[i][d]
-    # bump initial alignment to get diversity in samples
-    # pVj(qCp) = _transformPointCloud(M,qVj,qCp; backward=true)
 
     # do actual alignment with ICP
-    p_Hicp_phat, Hpts_mov, status = alignICP_Simple(
+    p_Hicp_phat, Hpts_mov, status = _PCL.alignICP_Simple(
       p_ptsM, 
       phat_pts_mov; 
       verbose=false,
