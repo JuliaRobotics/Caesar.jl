@@ -55,11 +55,12 @@ Caesar.jl has native by optional package tools relating to RobotOS.jl (leveragin
 ```julia
 using RobotOS
 
+@rosimport std_msgs.msg: Header
 @rosimport sensor_msgs.msg: PointCloud2
 
 rostypegen()
 
-using Colors, Caesar
+using Caesar
 Distributed.@everywhere using Colors, Caesar
 ```
 
@@ -151,6 +152,15 @@ bagwr.close()
 This has been tested and use with much more complicated types such as the [`Caesar._PCL.PCLPointCloud2`](@ref).
 
 ## Additional Notes
+
+### ROS Conversions, e.g. PCL
+
+By loading RobotOS.jl, the Caesar module will also load additional functionality to convert some of the basic data types between ROS and PCL familiar types, for example `PCLPointCloud2`:
+```julia
+wPC  = Caesar._PCL.PointCloud()
+wPC2 = Caesar._PCL.PCLPointCloud2(wPC)
+rmsg = Caesar._PCL.toROSPointCloud2(wPC2);
+```
 
 ### More Tools for Real-Time
 
