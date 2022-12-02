@@ -18,6 +18,7 @@ using LinearAlgebra
 using NearestNeighbors
 using Manifolds
 import Rotations as _Rot
+import GeometryBasics as GeoB # name collisions on members: Point, etc.
 using DistributedFactorGraphs
 using TensorCast
 using UUIDs
@@ -39,6 +40,7 @@ import IncrementalInference: ArrayPartition
 # bring in the types
 include("entities/PCLTypes.jl")
 # bring in further source code
+include("services/GeomBasicsUtils.jl")
 include("services/PointCloud.jl")
 include("services/PointCloudUtils.jl")
 include("services/ConsolidateRigidTransform.jl")

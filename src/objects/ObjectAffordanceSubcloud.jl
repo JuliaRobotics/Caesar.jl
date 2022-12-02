@@ -1,5 +1,4 @@
 # factor for mechanizing object affordances
-
 Base.@kwdef struct _ObjAffSubcCache{T}
   """ cache dict of all pointclouds connected to similar factors of this object variable """
   relativePointClouds::Dict{Symbol,T}
@@ -7,7 +6,7 @@ Base.@kwdef struct _ObjAffSubcCache{T}
   lieObjCloud::PointCloud{<:Any}
   """ we need a cached list of all other factors attached to the object variable, since this factor is the leave one out (loo). 
       `::Tuple{Factor,OtherVar,FineTuneTransform}` """
-  looVariables::Vector{Tuple{Symbol,Symbol,ArrayPartition}} = Tuple{Symbol,Symbol,<:ArrayPartition}[]
+  looVariables::Vector{Tuple{Symbol,Symbol,<:ArrayPartition}} = Vector{Tuple{Symbol,Symbol,typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(randn(3,3))))}}()
   """ Current best cached estimate of the loo-aggregate object point cloud """
   looObjCloud::PointCloud{<:Any} = PointCloud()
 end
@@ -34,14 +33,15 @@ DevNotes:
 - TODO, in what reference frame is the object maintained?  The first variable?  What about LOO on pose1?
 """
 Base.@kwdef struct ObjectAffordanceSubcloud{B} <: AbstractManifoldMinimize
-  """ body to object offset (or object in body frame) to where the bounding box for an object should be, given variable's local lidar scan """ 
-  b_T_o::ArrayPartition = ArrayPartition(zeros(3), diagm(ones(3)))
+  # """ body to object offset (or object in body frame) to where the bounding box for an object should be, given variable's local lidar scan """ 
+  # b_T_o::ArrayPartition = ArrayPartition(zeros(3), diagm(ones(3)))
   """ subcloud is selected by this mask from the variable's point cloud """
-  boundingMask::B
+  boundingMask::B = GeoB.Rect([GeoB.Point(0,0,0.),GeoB.Point(1,1,1.)])
   """ standard entry blob label where to find the point clouds -- 
   forced to use getData since factors need to react when other factors are 
-  added to the same object variable later by the user """
-  pc_datalabel::String
+  added to the same object variable later by the user.
+  FIXME: there is a hack, should not be using Serialization.deserialize on a PCLPointCloud2 """
+  pc_datalabel::String = "PCLPointCloud2"
 end
 
 ## TODO maybe overload addFactor! for ::ObjectAffordanceSubcloud so that when new factors are added 
@@ -49,7 +49,7 @@ end
 # info, alternatively this update needs to be detect in the getSample functions which may not have 
 # access to all the heavy lift data wrangling functions.  Solution is to readd Factors on loo list.
 
-function IIF.preambleCache(
+function IncrementalInference.preambleCache(
   dfg::AbstractDFG, 
   fvars::AbstractVector{<:DFGVariable}, 
   fct::ObjectAffordanceSubcloud
@@ -64,16 +64,27 @@ function IIF.preambleCache(
   
   # the the full variable point clouds from all variables currently connected to the object variable
   # TODO use concrete types
-  relativePCs = Dict{Symbol,Any}()
+  _PCT(::PC) where {PC <: PointCloud} = PC
+  PCT = _CPT(PointCloud())
+  relativePointClouds = Dict{Symbol,PCT}()
+  objPCs = Dict{Symbol,PCT}()
   
   for lbl in avlbs
     # fetch and cache the full pose point cloud given a starndard data label
-    relativePCs[lbl] = getDataPointCloud(dfg,lbl,fct.pc_datalabel)
+    relativePointClouds[lbl] = getDataPointCloud(dfg,lbl,fct.pc_datalabel) |> _PCL.PointCloud
+    # extract just those subcloud points (assumed to now represent the object observation from this pose variable)
+    objmask = map(s->_PCL.inside(fct.boundingMask,GeoB.Point(s.data[1:3]...)), relativePointClouds[lbl])
+    objPCs[lbl] = _PCL.PointCloud(relativePointClouds[lbl][objmask])
   end
-  
-  # define the bounding box with which to mask this variable's subcloud
-  
-  # extract just those subcloud points (assumed to now represent the object observation from this pose variable)
+    
+  # finalize object point clouds for cache
+  lieObjCloud = objPCs[lievlb]
+
+  # do loo alignments
+  looObjCloud = PointCloud()
+
+  # cache summary for the loo variables
+  looVariables = Vector{Tuple{Symbol,Symbol,typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(randn(3,3))))}}()
   
   # build the cached object for use in the hot loop computations
   _ObjAffSubcCache(;
@@ -84,13 +95,19 @@ function IIF.preambleCache(
   )
 end
 
+"""
+    $SIGNATURES
+
+Given the user provided factor and full pose variable point cloud, extract the subcloud 
+containing the object.
+"""
 function _getSubcloud(
   fct::ObjectAffordanceSubcloud,
   pc_full # the full pose variable point cloud as Type{<:TBD}
 )
   #
-  pc_full = 
-
+  
+  
 end
 
 function IncrementalInference.getSample(
@@ -100,7 +117,8 @@ function IncrementalInference.getSample(
   M = getManifold(Pose3)
   e0 = identity_element(M)
   
-  # TODO see if new factors have been added to the object variable, therefore requiring update of the cached loo registers
+  # TODO see if new factors have been added to the object variable, therefore requiring 
+  # update of the cached loo registers
   
   
   # only two variables
