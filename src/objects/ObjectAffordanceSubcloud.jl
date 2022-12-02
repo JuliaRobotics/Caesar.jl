@@ -35,6 +35,7 @@ DevNotes:
 Base.@kwdef struct ObjectAffordanceSubcloud{B} <: AbstractManifoldMinimize
   # """ body to object offset (or object in body frame) to where the bounding box for an object should be, given variable's local lidar scan """ 
   # b_T_o::ArrayPartition = ArrayPartition(zeros(3), diagm(ones(3)))
+  # SOMEKINDOFOBJPCORIGIN
   """ subcloud is selected by this mask from the variable's point cloud """
   boundingMask::B = GeoB.Rect([GeoB.Point(0,0,0.),GeoB.Point(1,1,1.)])
   """ standard entry blob label where to find the point clouds -- 
@@ -60,12 +61,12 @@ function IncrementalInference.preambleCache(
   olbl = getLabel(fvars[2])
   aflb = ls(dfg,olbl)
   avlbs = union(ls.(dfg,aflb)...)
-  loovlb = setdiff(avlbs, [lievlb;])
+  loovlbs = setdiff(avlbs, [lievlb;])
   
   # the the full variable point clouds from all variables currently connected to the object variable
   # TODO use concrete types
-  _PCT(::PC) where {PC <: PointCloud} = PC
-  PCT = _CPT(PointCloud())
+  _PCT(::PC) where {PC <: _PCL.PointCloud} = PC
+  PCT = _PCT(_PCL.PointCloud())
   relativePointClouds = Dict{Symbol,PCT}()
   objPCs = Dict{Symbol,PCT}()
   
@@ -73,8 +74,7 @@ function IncrementalInference.preambleCache(
     # fetch and cache the full pose point cloud given a starndard data label
     relativePointClouds[lbl] = getDataPointCloud(dfg,lbl,fct.pc_datalabel) |> _PCL.PointCloud
     # extract just those subcloud points (assumed to now represent the object observation from this pose variable)
-    objmask = map(s->_PCL.inside(fct.boundingMask,GeoB.Point(s.data[1:3]...)), relativePointClouds[lbl])
-    objPCs[lbl] = _PCL.PointCloud(relativePointClouds[lbl][objmask])
+    objPCs[lbl] = _PCL.getSubcloud(relativePointClouds[lbl], fct.boundingMask)
   end
     
   # finalize object point clouds for cache
@@ -84,7 +84,19 @@ function IncrementalInference.preambleCache(
   looObjCloud = PointCloud()
 
   # cache summary for the loo variables
-  looVariables = Vector{Tuple{Symbol,Symbol,typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(randn(3,3))))}}()
+  e0 = ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm(ones(3))))
+  APT = typeof(e0)
+  looVariables = Vector{Tuple{Symbol,Symbol,APT}}()
+  for loov in loovlbs
+    push!(
+      looVariables, 
+      ( 
+        intersect(aflb,ls(dfg,loov)),
+        loov,
+        e0
+      )
+    )
+  end
   
   # build the cached object for use in the hot loop computations
   _ObjAffSubcCache(;
@@ -93,21 +105,6 @@ function IncrementalInference.preambleCache(
     looVariables,
     looObjCloud
   )
-end
-
-"""
-    $SIGNATURES
-
-Given the user provided factor and full pose variable point cloud, extract the subcloud 
-containing the object.
-"""
-function _getSubcloud(
-  fct::ObjectAffordanceSubcloud,
-  pc_full # the full pose variable point cloud as Type{<:TBD}
-)
-  #
-  
-  
 end
 
 function IncrementalInference.getSample(

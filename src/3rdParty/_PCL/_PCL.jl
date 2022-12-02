@@ -34,6 +34,7 @@ import IncrementalInference: ArrayPartition
 
 ## hold off on exports, users can in the mean-time use/import via e.g. _PCL.PointXYZ
 # export PointT, PointXYZ, PointXYZRGB, PointXYZRGBA
+# export inside, getSubcloud
 # export PCLHeader, PointCloud
 
 
