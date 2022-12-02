@@ -296,11 +296,12 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
     ppt = getPoints(cf.factor.align.cloud1)
     qpt_ = getPoints(cf.factor.align.cloud2)
 
+    # NOTE, duplicate code in ObjectAffordanceSubcloud
     # bump pc before alignment to get diversity in sample population
     dstb = 0.2*randn(getDimension(M)) # retract(M,e0,hat(M,e0,0.2*randn(getDimension(M))))
     qpt = _transformPointCloud(M, qpt_, dstb; backward=true)
 
-    # FIXME, super excessive repeat of data wrangling in hot loop
+    # FIXME, super inefficient repeat of data wrangling in hot loop
     @cast p_ptsM[i,d] := ppt[i][d]
     @cast phat_pts_mov[i,d] := qpt[i][d]
 
@@ -315,6 +316,7 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
     )
     # convert SE affine H to tangent vector X for use in residual function 
     p_P_q = ArrayPartition(p_Hicp_phat[1:end-1,end],p_Hicp_phat[1:end-1,1:end-1])
+    # TODO confirm expansion around e0, since PosePose factors expand around `q`
     return log(M, e0, p_P_q)
   end
 end
