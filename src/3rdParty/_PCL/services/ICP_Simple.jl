@@ -193,7 +193,8 @@ function estimate_rigid_body_transformation(x_fix, y_fix, z_fix, nx_fix, ny_fix,
 
     t = x[4:6]
 
-    H = create_homogeneous_transformation_matrix(R, t)
+    H = affine_matrix(_SE3_MANI, ArrayPartition(t, R))
+    # H = create_homogeneous_transformation_matrix(R, t)
 
     return H, residuals
 

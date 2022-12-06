@@ -15,7 +15,7 @@ function getDataPointCloud(
       @error "could find in variable $varlbl, blob $pattern"
       return nothing
     end
-    # FIXME, change serialization to more standard pcd or laz formats
+    # FIXME, change serialization to more standard pcd or laz formats, see Caesar.jl #921
     return dbl |> IOBuffer |> Serialization.deserialize
   catch err
     if err isa KeyError

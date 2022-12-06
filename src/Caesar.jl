@@ -17,6 +17,7 @@ using Manifolds
 using StaticArrays
 
 import Rotations as _Rot
+import GeometryBasics as GeoB
 
 # TODO remove
 const _Rotations = _Rot

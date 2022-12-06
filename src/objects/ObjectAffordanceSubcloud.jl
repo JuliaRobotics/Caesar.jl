@@ -63,7 +63,8 @@ function IncrementalInference.preambleCache(
   lievlb = getLabel(fvars[1])
   olbl = getLabel(fvars[2])
   aflb = ls(dfg,olbl)
-  avlbs = union(ls.(dfg,aflb)...)
+  @show neis = ls.(dfg,aflb)
+  avlbs = 0 < length(neis) ? union(neis...) : neis
   loovlbs = setdiff(avlbs, [lievlb;])
   
   # the the full variable point clouds from all variables currently connected to the object variable
