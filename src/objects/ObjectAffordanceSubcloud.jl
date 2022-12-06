@@ -3,12 +3,14 @@ Base.@kwdef struct _ObjAffSubcCache{T}
   """ cache dict of all pointclouds connected to similar factors of this object variable """
   relativePointClouds::Dict{Symbol,T}
   """ this factor's subcloud -- i.e. lieSubcloud or liePts (leave-in-element) """
-  lieObjCloud::PointCloud{<:Any}
+  lieObjCloud::_PCL.PointCloud{<:Any}
+  """ current best transform estimate for this lie subcloud to the object reference frame """
+  o_Tlie_sc::typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(randn(3,3)))) = ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.])))
   """ we need a cached list of all other factors attached to the object variable, since this factor is the leave one out (loo). 
       `::Tuple{Factor,OtherVar,FineTuneTransform}` """
-  looVariables::Vector{Tuple{Symbol,Symbol,<:ArrayPartition}} = Vector{Tuple{Symbol,Symbol,typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(randn(3,3))))}}()
+  looVariables::Vector{Tuple{Symbol,Symbol,<:ArrayPartition}} = Vector{Tuple{Symbol,Symbol,typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.]))))}}()
   """ Current best cached estimate of the loo-aggregate object point cloud """
-  looObjCloud::PointCloud{<:Any} = PointCloud()
+  looObjCloud::_PCL.PointCloud{<:Any} = PointCloud()
 end
 
 
@@ -31,17 +33,18 @@ DevNotes:
 - Which type of bounding boxes to use, hollow cube, ellipsoid, polytope, etc.
 - Generalize for use with both Pose2 and Pose3 cases.
 - TODO, in what reference frame is the object maintained?  The first variable?  What about LOO on pose1?
+- TODO, MAKER_asfwe, allow more than one OAS solution to work in parallel on same object variable
 """
 Base.@kwdef struct ObjectAffordanceSubcloud{B} <: AbstractManifoldMinimize
   # """ body to object offset (or object in body frame) to where the bounding box for an object should be, given variable's local lidar scan """ 
   # b_T_o::ArrayPartition = ArrayPartition(zeros(3), diagm(ones(3)))
-  # SOMEKINDOFOBJPCORIGIN
+  # SOMEKINDOFOBJPCORIGIN, o_H_sc
   """ subcloud is selected by this mask from the variable's point cloud """
   boundingMask::B = GeoB.Rect([GeoB.Point(0,0,0.),GeoB.Point(1,1,1.)])
   """ standard entry blob label where to find the point clouds -- 
   forced to use getData since factors need to react when other factors are 
   added to the same object variable later by the user.
-  FIXME: there is a hack, should not be using Serialization.deserialize on a PCLPointCloud2 """
+  FIXME: there is a hack, should not be using Serialization.deserialize on a PCLPointCloud2, see Caesar.jl#921 """
   pc_datalabel::String = "PCLPointCloud2"
 end
 
@@ -81,17 +84,21 @@ function IncrementalInference.preambleCache(
   lieObjCloud = objPCs[lievlb]
 
   # do loo alignments
-  looObjCloud = PointCloud()
+  # NOTE, frames: object, subcloud, body:  o_PC = o_H_sc * sc_H_b * b_PC
+  looObjCloud = _PCL.PointCloud()
 
   # cache summary for the loo variables
   e0 = ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm(ones(3))))
   APT = typeof(e0)
   looVariables = Vector{Tuple{Symbol,Symbol,APT}}()
   for loov in loovlbs
+    specFcts = intersect(aflb,ls(dfg,loov))
+    # must be OAS factor
+    filter!(l->getFactorType(dfg,l) isa ObjectAffordanceSubcloud, specFcts)
     push!(
       looVariables, 
       ( 
-        intersect(aflb,ls(dfg,loov)),
+        specFcts[1], # TODO, MAKER_asfwe, allow more than one OAS solution to work in parallel on same object variable
         loov,
         e0
       )
@@ -122,21 +129,21 @@ function IncrementalInference.getSample(
   pose = getVariable(cf.fullvariables[1])
   objv = getVariable(cf.fullvariables[2])
   
-  # get the aggregate loo subcloud from other (already aligned) factor subclouds 
-  p_looPts = 
+  # # get the aggregate loo subcloud from other (already aligned) factor subclouds 
+  # p_looPts = 
   
-  # get the lie subcloud from this factor subcloud
-  q_liePts = 
+  # # get the lie subcloud from this factor subcloud
+  # q_liePts = 
   
-  # do of lie against loo pts alignment
-  p_Hicp_phat, Hpts_mov, status = _PCL.alignICP_Simple(
-    p_looPts, # fixed cloud
-    q_liePts; # transforming cloud
-    verbose=false,
-    max_iterations = 25,
-    correspondences = 500,
-    neighbors = 50
-  )
+  # # do of lie against loo pts alignment
+  # p_Hicp_phat, Hpts_mov, status = _PCL.alignICP_Simple(
+  #   p_looPts, # fixed cloud
+  #   q_liePts; # transforming cloud
+  #   verbose=false,
+  #   max_iterations = 25,
+  #   correspondences = 500,
+  #   neighbors = 50
+  # )
   
   # convert SE affine Homgraphy to manifold element 
   p_P_q = ArrayPartition(p_Hicp_phat[1:end-1,end],p_Hicp_phat[1:end-1,1:end-1])

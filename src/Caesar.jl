@@ -66,7 +66,6 @@ include("transforms/services/_FastTransform3D.jl")
 include("services/DataUtils.jl")
 include("services/UserFunctions.jl")
 
-include("Deprecated.jl")
 
 # SAS-SLAM
 include("beamforming/czt.jl")
@@ -76,6 +75,13 @@ include("beamforming/SASBearing2D.jl")
 include("beamforming/SASUtils.jl")
 
 include("3rdParty/_PCL/_PCL.jl")
+
+# object affordance work
+include("objects/ObjectAffordanceSubcloud.jl")
+
+# standardized code deprecation
+include("Deprecated.jl")
+
 
 # conditional loading for ROS
 function __init__()
