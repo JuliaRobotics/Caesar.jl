@@ -5,11 +5,12 @@ export getDataPointCloud, getPointCloud, getPointCloud2D, getPointCloud3D
 function getDataPointCloud(
   nfg::AbstractDFG,
   varlbl, 
-  pattern::Union{Symbol,UUID,<:AbstractString, Regex}
+  pattern::Union{Symbol,UUID,<:AbstractString, Regex};
+  getDatakws...
 )
   # get point cloud blob
   try
-    de,dbl = getData(nfg, Symbol(varlbl), pattern)
+    de,dbl = getData(nfg, Symbol(varlbl), pattern; getDatakws...)
     if isnothing(dbl)
       @error "could find in variable $varlbl, blob $pattern"
       return nothing
