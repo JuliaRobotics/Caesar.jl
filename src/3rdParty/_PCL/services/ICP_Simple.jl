@@ -332,4 +332,17 @@ function alignICP_Simple(
 end
 
 
+function alignICP_Simple(
+  p_PC::PointCloud, 
+  hatp_PC::PointCloud;
+  kw...
+)
+  p_pts_ = (s->s.data[1:3]).(p_PC.points)
+  @cast p_pts[i,d] := p_pts_[i][d]
+  hatp_pts_ = (s->s.data[1:3]).(hatp_PC.points)
+  @cast hatp_pts[i,d] := hatp_pts_[i][d]
+
+  alignICP_Simple(p_pts, hatp_pts; kw...)
+end
+
 ##
