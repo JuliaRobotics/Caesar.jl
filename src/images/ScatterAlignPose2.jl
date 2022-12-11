@@ -271,7 +271,7 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
   qVj = cf.cache.smps2
   
   # TODO consolidate this transform with methods used by ICP
-  pVj(qCp) = _transformPointCloud(M,qVj,qCp; backward=true)
+  pVj(qCp) = _PCL._transformPointCloud(M,qVj,qCp; backward=true)
   
   if 0 <= cf.factor.align.sample_count
     # Fresh samples
@@ -299,7 +299,7 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
     # NOTE, duplicate code in ObjectAffordanceSubcloud
     # bump pc before alignment to get diversity in sample population
     dstb = 0.2*randn(getDimension(M)) # retract(M,e0,hat(M,e0,0.2*randn(getDimension(M))))
-    qpt = _transformPointCloud(M, qpt_, dstb; backward=true)
+    qpt = _PCL._transformPointCloud(M, qpt_, dstb; backward=true)
 
     # FIXME, super inefficient repeat of data wrangling in hot loop
     @cast p_ptsM[i,d] := ppt[i][d]
@@ -395,8 +395,8 @@ function overlayScatter(sap::ScatterAlignPose2,
   best_coords = round.(best,digits=3)
   
   # transform points1 to frame of 2.  TBD, p as coordinate expansion point?
-  pts2T_u = _transformPointCloud(M, PT2, user_coords; backward=true)
-  pts2T_b = _transformPointCloud(M, PT2, best; backward=true)
+  pts2T_u = _PCL._transformPointCloud(M, PT2, user_coords; backward=true)
+  pts2T_b = _PCL._transformPointCloud(M, PT2, best; backward=true)
 
   @cast __pts1[i,j] := PT1[j][i]
   @cast __pts2[i,j] := PT2[j][i]
