@@ -25,7 +25,8 @@ using DistributedFactorGraphs
 using TensorCast
 using UUIDs
 
-using Serialization # FIXME REMOVE, only used for legacy getDataPointCloud
+# FIXME REMOVE, only used for legacy getDataPointCloud
+using Serialization 
 
 # Going to add dispatches on these functions
 import Base: getindex, setindex!, resize!, cat, convert, sizeof, hasproperty, getproperty
@@ -52,7 +53,7 @@ include("services/ICP_Simple.jl")
 
 function __init__()
   @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("services/ROSConversions.jl")
-  @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("services/PlottingUtilsPCL.jl")
+  # moved plotting out of Caesar, use Arena.jl or RoMEPlotting.jl instead
 end
 
 

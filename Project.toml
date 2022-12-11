@@ -93,7 +93,6 @@ BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
-Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
 GraphPlot = "a2cc645c-3eea-5389-862e-a155d0052231"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
@@ -104,4 +103,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [targets]
-test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "FixedPointNumbers", "Gadfly", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]
+test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "FixedPointNumbers", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]
