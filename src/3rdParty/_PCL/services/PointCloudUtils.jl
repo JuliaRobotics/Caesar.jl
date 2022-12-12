@@ -20,6 +20,7 @@ function getDataPointCloud(
   catch err
     if err isa KeyError
       @error err
+      # Base.showerror(stdout, err, Base.catch_backtrace())
       return nothing
     end
     throw(err)

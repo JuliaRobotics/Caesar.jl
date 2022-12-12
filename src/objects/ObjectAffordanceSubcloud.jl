@@ -37,8 +37,12 @@ Valid objects examples:
 - The room itself around the vehicle.
 
 Notes
-- Bounding box definition is only local to this variables lidar scan, therefore not 
+- MAJOR QUIRK, given status at Caesar v0.13, adding OAS factors requires sibling 
+  factors to `rebuildFactorMetadata!(..;_blockRecursionGradients=true)` once all factors are present in the graph.
+  - because, `preambleCache` for `::OAS` does pre-emptive calculations based on current sibling factors.
+- Bounding box definition is only local to this variable's lidar scan, therefore not 
   forcing the user to define any world frame assumptions before the map is built.
+
 
 DevNotes:
 - Which type of bounding boxes to use, hollow cube, ellipsoid, polytope, etc.
@@ -98,6 +102,7 @@ function IncrementalInference.preambleCache(
   o_Tlie_p = APT[]
 
   # define LOO element
+  @info "WHY X1" loovlb fct.p_PCloo_blobId
   p_PC = _PCL.getDataPointCloud(dfg, loovlb, fct.p_PCloo_blobId; checkhash=false) |> _PCL.PointCloud
   _p_SC = _PCL.getSubcloud(p_PC, fct.p_BBo)
   p_SCloo = Ref(_p_SC)
