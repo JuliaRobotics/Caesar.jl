@@ -149,8 +149,8 @@ function alignPointCloudLOO!(
   neighbors = 50
 )
   # For 3D transforms
-  M = getManifold(Pose3)
-
+  M = SpecialEuclidean(3)
+  
   # prep the leave one out element
   oo_PCloo = _PCL.apply( 
     M,
@@ -174,7 +174,7 @@ function alignPointCloudLOO!(
   o_Tloo_oo = ArrayPartition(o_Hloo_oo[1:end-1,end],o_Hloo_oo[1:end-1,1:end-1])
   # that is, take the previous initial estimate and add the new alignment into it
   o_Tloo_hato = Manifolds.compose(M, o_Tloo_oo, o_Ts_hato[loo_idx])
-
+  
   # to confirm the new alignment is good, transform loo cloud from scratsh
   o_PCloo = _PCL.apply( 
     M,
@@ -183,11 +183,38 @@ function alignPointCloudLOO!(
   )
   
   if updateTloo
+    @info "updateTloo"
     o_Ts_hato[loo_idx] = o_Tloo_hato
   end
   
   # TODO confirm expansion around e0, since PosePose factors expand around `q`
   return o_Tloo_hato, o_PClie, o_PCloo
+end
+
+"""
+    $SIGNATURES
+
+Use sequential leave-one-out iteration strategy to self align 
+assuming the list of point clouds have good coverage of the same object.
+"""
+function alignPointCloudsLOOIters!(
+  o_Ts_l::AbstractVector{<:ArrayPartition},
+  l_PCs::AbstractVector{<:_PCL.PointCloud},
+  updateTloo::Bool=true,
+  MC::Int=3,
+)
+  o_Ts_l_ = (updateTloo ? s->s : deepcopy)(o_Ts_l)
+
+  for m in 1:MC, k in 1:length(l_PCs)
+    o_Tloo, o_PClie, o_PCloo = alignPointCloudLOO!(
+      o_Ts_l_,
+      l_PCs,
+      k;
+      updateTloo=true
+    )
+  end
+  
+  o_Ts_l_
 end
 
 #
