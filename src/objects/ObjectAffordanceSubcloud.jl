@@ -1,6 +1,7 @@
 
-# experimental
-# export ObjectAffordanceSubcloud, makePointCloudObjectAffordance
+#  Experimental
+# export ObjectAffordanceSubcloud
+# export makePointCloudObjectAffordance, generateObjectAffordanceFromWorld!
 
 # factor for mechanizing object affordances
 Base.@kwdef struct _ObjAffSubcCache
@@ -188,6 +189,24 @@ function IncrementalInference.getSample(
   return log(M, e0, inv(M, oo_Tloo_p))
 end
 
+function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(X,p,q)
+  # copied from Pose3Pose3
+  M = getManifold(Pose3)
+  # work in the group
+  q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) 
+  #TODO allocalte for vee! see Manifolds #412, fix for AD
+  # Xc = zeros(6)
+  # vee!(M, Xc, q, log(M, q, q̂))
+  # FIXME, should be tangent vector not coordinates -- likely part of ManOpt upgrade
+  Xc = vee(M, q, log(M, q, q̂))
+  return Xc
+end
+
+
+## =================================================================================
+## Object Utils
+## =================================================================================
+
 
 function makePointCloudObjectAffordance(
   dfg::AbstractDFG,
@@ -217,5 +236,39 @@ function makePointCloudObjectAffordance(
 
   return ohat_SCs
 end
+
+
+function generateObjectAffordanceFromWorld!(
+  dfg::AbstractDFG,
+  olb::Symbol,
+  vlbs::AbstractVector{<:Symbol},
+  w_BBobj::GeoB.Rect3;
+  solveKey::Symbol = :default,
+  pcBlobLabel = r"PCLPointCloud2"
+)
+  # add the object variable
+  addVariable!(dfg, olb, Pose3)
+  # add the object affordance subcloud factors
+  for vlb in vlbs
+    # make sure PPE is set on this solveKey
+    setPPE!(dfg, vlb, solveKey)
+    # 
+    p_BBo, ohat_T_p = _PCL.transformFromWorldToLocal(dfg, vlb, w_BBobj; solveKey)
+    oas = Caesar.ObjectAffordanceSubcloud(;
+      p_BBo,
+      ohat_T_p,
+      p_PCloo_blobId = getDataEntry(dfg, vlb, pcBlobLabel).id,
+    )
+    addFactor!(dfg, [vlb; olb], oas)
+  end
+  
+  # necessary workaround for rebuilding factor cache with all OAS factors present on object
+  for flb in ls(dfg, :o1)
+    IIF.rebuildFactorMetadata!(dfg, getFactor(dfg, flb); _blockRecursionGradients=true)
+  end
+
+  olb
+end
+
 
 ##
