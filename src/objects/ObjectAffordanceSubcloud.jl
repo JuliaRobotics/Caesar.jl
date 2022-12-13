@@ -166,42 +166,27 @@ function IncrementalInference.getSample(
   M = getManifold(Pose3)
   e0 = ArrayPartition(zeros(3),diagm(ones(3)))
   
-  @info "GETSAMPLE OAS" cf.cache.o_Tloo_p cf.cache.fc_lie_lbls cf.cache.o_Tlie_p
+  # TBD consider adding a perturbation before alignment
+  o_Tloo_p = cf.cache.o_Tloo_p[]
   
-  # TODO see if new factors have been added to the object variable, therefore requiring 
-  # update of the cached loo registers
+  # 
+  o_Ts_p = typeof(o_Tloo_p)[o_Tloo_p, cf.cache.o_Tlie_p...]
+  p_SCs = typeof(cf.cache.p_SCloo[])[cf.cache.p_SCloo[], cf.cache.p_SClie...]
   
-  # only two variables
-  # pose = getVariable(cf.fullvariables[1])
-  # objv = getVariable(cf.fullvariables[2])
-  
-  # Do a loo alignment against best aggregate lie clouds
-  
-  # # get the aggregate loo subcloud from other (already aligned) factor subclouds 
-  # p_looPts = 
-  
-  # # get the lie subcloud from this factor subcloud
-  # q_liePts = 
-  
-  # # do of lie against loo pts alignment
-  # p_Hicp_phat, Hpts_mov, status = _PCL.alignICP_Simple(
-  #   p_looPts, # fixed cloud
-  #   q_liePts; # transforming cloud
-  #   verbose=false,
-  #   max_iterations = 25,
-  #   correspondences = 500,
-  #   neighbors = 50
-  # )
-  
-  # # convert SE affine Homgraphy to manifold element 
-  # p_P_q = ArrayPartition(p_Hicp_phat[1:end-1,end],p_Hicp_phat[1:end-1,1:end-1])
+  # all compute done once in preambleCache
+  oo_Tloo_p, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
+    o_Ts_p,
+    p_SCs,
+    1;
+    updateTloo=false
+  )
+
+  cf.cache.o_Tloo_p[] = oo_Tloo_p
   
   # return the transform from pose to object as manifold tangent element
   # TODO confirm expansion around e0, since PosePose factors expand around `q`
-  return log(M, e0, e0) # p_P_q)
+  return log(M, e0, inv(M, oo_Tloo_p))
 end
-
-
 
 
 function makePointCloudObjectAffordance(

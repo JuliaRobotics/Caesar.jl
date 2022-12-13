@@ -141,7 +141,7 @@ Point cloud alignment of a leave-one-out (LOO) element to a merged list of leave
 """
 function alignPointCloudLOO!(
   o_Ts_hato::AbstractVector{<:ArrayPartition},
-  hato_PCs::AbstractVector,
+  hato_PCs::AbstractVector{<:PointCloud},
   loo_idx::Int;
   updateTloo::Bool=false,
   verbose=false,
