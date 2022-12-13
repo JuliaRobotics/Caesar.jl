@@ -56,6 +56,8 @@ Base.@kwdef struct ObjectAffordanceSubcloud{B} <: AbstractManifoldMinimize
   # SOMEKINDOFOBJPCORIGIN, o_H_sc
   """ subcloud is selected by this mask from the variable's point cloud """
   p_BBo::B = GeoB.Rect([GeoB.Point(0,0,0.),GeoB.Point(1,1,1.)])
+  """ user provided initial guess of relative transform to go from pose to object frame """
+  ohat_T_p::typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.])))) = ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.])))
   """ standard entry blob label where to find the point clouds -- 
   forced to use getData since factor cache needs to update when other factors are 
   added to the same object variable later by the user.  See [`IIF.rebuildFactorMetadata!`](@ref).
@@ -102,7 +104,7 @@ function IncrementalInference.preambleCache(
   o_Tlie_p = APT[]
 
   # define LOO element
-  @info "WHY X1" loovlb fct.p_PCloo_blobId
+  # NOTE, when updating caches and blobId error on x1, use `rebuildFactorMetadata!(..;_blockRecursionGradients=true)`
   p_PC = _PCL.getDataPointCloud(dfg, loovlb, fct.p_PCloo_blobId; checkhash=false) |> _PCL.PointCloud
   _p_SC = _PCL.getSubcloud(p_PC, fct.p_BBo)
   p_SCloo = Ref(_p_SC)
@@ -110,7 +112,7 @@ function IncrementalInference.preambleCache(
   
   # define the LIE elements
   for (idx,liev) in enumerate(lievlbs)
-    @show specFcts = intersect(aflb,ls(dfg,liev))
+    specFcts = intersect(aflb,ls(dfg,liev))
     # must be OAS factor
     filter!(l->@show(getFactorType(dfg,l)) isa ObjectAffordanceSubcloud, specFcts)
     # filtering from all factors, skip this variable if not part of this object affordance 
@@ -166,6 +168,8 @@ function IncrementalInference.getSample(
   M = getManifold(Pose3)
   e0 = ArrayPartition(zeros(3),diagm(ones(3)))
   
+  @info "GETSAMPLE OAS" cf.cache.o_Tloo_p cf.cache.fc_lie_lbls cf.cache.o_Tlie_p
+  
   # TODO see if new factors have been added to the object variable, therefore requiring 
   # update of the cached loo registers
   
@@ -174,7 +178,7 @@ function IncrementalInference.getSample(
   # objv = getVariable(cf.fullvariables[2])
   
   # Do a loo alignment against best aggregate lie clouds
-
+  
   # # get the aggregate loo subcloud from other (already aligned) factor subclouds 
   # p_looPts = 
   

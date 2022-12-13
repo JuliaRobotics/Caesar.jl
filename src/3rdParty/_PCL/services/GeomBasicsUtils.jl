@@ -11,16 +11,25 @@ function transformFromWorldToLocal(
   v = getVariable(dfg, vlbl)
   # vt = getVariableType(v)
   M = getManifold(v)
-  e0 = Identity(M)
+  e0 = ArrayPartition(SA[1;1;1.], SMatrix{3,3}(diagm([1;1;1.])))
   
-  @show b_Cwp = getPPESuggested(dfg, vlbl, solveKey)
-  p_T_w = inv(M, exp(M, e0, hat(M, e0, b_Cwp)))
-  p_H_w = affine_matrix(M, p_T_w)
+  b_Cwp = getPPESuggested(dfg, vlbl, solveKey)
+  w_T_p = exp(M, e0, hat(M, e0, b_Cwp))
+  p_T_w = inv(M, w_T_p)
+  p_H_w = SMatrix{4,4}(affine_matrix(M, p_T_w))
   
   p_P1 = p_H_w * SA[w_BBo.origin...; 1.]
   p_P2 = p_H_w * SA[(w_BBo.origin+w_BBo.widths)...; 1.]
   
-  GeoB.Rect3( GeoB.Point3(p_P1[1:3]...), GeoB.Point3((p_P2-p_P1)[1:3]...) )
+  # pose to approximate object frame, ohat_T_p
+  # TODO CHECK THIS IS WORKS AS REFERENCE FRAME CHOICE/CONVENTION
+  ohat_V_p = SA[(w_BBo.origin - SA[b_Cwp[1:3]...])...]
+  ohat_T_p = ArrayPartition(ohat_V_p, SMatrix{3,3}(w_T_p.x[2]))
+  
+  (
+    GeoB.Rect3( GeoB.Point3(p_P1[1:3]...), GeoB.Point3((p_P2-p_P1)[1:3]...) ), 
+    ohat_T_p
+  )
 end
 
 """

@@ -110,8 +110,8 @@ function getDataSubcloudLocalFromWorld(
   solveKey::Symbol = :default,
   checkhash::Bool=true
 )
-  p_BBo = transformFromWorldToLocal(dfg, vlb, w_BBo; solveKey)
-  getDataSubcloudLocal(dfg, vlb, p_BBo, bllb; checkhash)
+  p_BBo, ohat_T_p = transformFromWorldToLocal(dfg, vlb, w_BBo; solveKey)
+  getDataSubcloudLocal(dfg, vlb, p_BBo, bllb; checkhash), ohat_T_p
 end
 
 """
