@@ -22,8 +22,9 @@ function transformFromWorldToLocal(
   p_P2 = p_H_w * SA[(w_BBo.origin+w_BBo.widths)...; 1.]
   
   # pose to approximate object frame, ohat_T_p
-  # TODO CHECK THIS IS WORKS AS REFERENCE FRAME CHOICE/CONVENTION
-  ohat_V_p = SA[(w_BBo.origin - SA[b_Cwp[1:3]...])...]
+  # NOTE, slightly weird transform in that world rotation and local translation are mixed, so one is inverted to get consistent left action
+  # NOTE, assuming rectangular bounding box, make object frame the center of the volume
+  ohat_V_p = SA[(SA[b_Cwp[1:3]...] - (w_BBo.origin+0.5*w_BBo.widths))...]
   ohat_T_p = ArrayPartition(ohat_V_p, SMatrix{3,3}(w_T_p.x[2]))
   
   (

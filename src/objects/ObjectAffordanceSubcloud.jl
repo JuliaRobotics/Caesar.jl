@@ -1,3 +1,7 @@
+
+# experimental
+# export ObjectAffordanceSubcloud, makePointCloudObjectAffordance
+
 # factor for mechanizing object affordances
 Base.@kwdef struct _ObjAffSubcCache
   """ extracted LOO subcloud """
@@ -10,17 +14,6 @@ Base.@kwdef struct _ObjAffSubcCache
   p_SClie::Vector{<:_PCL.PointCloud}
   """ list of transforms of pose in object (or pose to object) from connected factors """
   o_Tlie_p::Vector{<:ArrayPartition}
-  # """ cache dict of all pointclouds connected to similar factors of this object variable """
-  # relativePointClouds::Dict{Symbol,T}
-  # """ this factor's subcloud -- i.e. lieSubcloud or liePts (leave-in-element) """
-  # lieObjCloud::_PCL.PointCloud{<:Any}
-  # """ current best transform estimate for this lie subcloud to the object reference frame """
-  # o_Tlie_sc::typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(randn(3,3)))) = ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.])))
-  # """ we need a cached list of all other factors attached to the object variable, since this factor is the leave one out (loo). 
-  #     `::Tuple{Factor,OtherVar,FineTuneTransform}` """
-  # looVariables::Vector{Tuple{Symbol,Symbol,<:ArrayPartition}} = Vector{Tuple{Symbol,Symbol,typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.]))))}}()
-  # """ Current best cached estimate of the loo-aggregate object point cloud """
-  # looObjCloud::_PCL.PointCloud{<:Any} = PointCloud()
 end
 
 
@@ -48,22 +41,24 @@ DevNotes:
 - Which type of bounding boxes to use, hollow cube, ellipsoid, polytope, etc.
 - Generalize for use with both Pose2 and Pose3 cases.
 - TODO, in what reference frame is the object maintained?  The first variable?  What about LOO on pose1?
-- TODO, MAKER_asfwe, allow more than one OAS solution to work in parallel on same object variable
+- TODO, MAKER_asfwe, allow more than one OAS solution to work in parallel on same object variable.
+- FIXME, separate object frame can have LOO alignment wind up inside graph -- a wind-up release mechanism is needed
+  whereby pose to refined object frame is consistent over all factors to object affordance variable.
 """
 Base.@kwdef struct ObjectAffordanceSubcloud{B} <: AbstractManifoldMinimize
-  # """ body to object offset (or object in body frame) to where the bounding box for an object should be, given variable's local lidar scan """ 
-  # b_T_o::ArrayPartition = ArrayPartition(zeros(3), diagm(ones(3)))
-  # SOMEKINDOFOBJPCORIGIN, o_H_sc
   """ subcloud is selected by this mask from the variable's point cloud """
   p_BBo::B = GeoB.Rect([GeoB.Point(0,0,0.),GeoB.Point(1,1,1.)])
-  """ user provided initial guess of relative transform to go from pose to object frame """
+  """
+  pose to object offset (or pose in object frame) to where the center of the object's bounding box. 
+  I.e. the user provided initial guess of relative transform to go from pose to object frame.
+  Note, the type here is restricted to StaticArrays only, to ensure best alignments are stored in the cache. """
   ohat_T_p::typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.])))) = ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.])))
-  """ standard entry blob label where to find the point clouds -- 
+  """
+  standard entry blob label where to find the point clouds -- 
   forced to use getData since factor cache needs to update when other factors are 
   added to the same object variable later by the user.  See [`IIF.rebuildFactorMetadata!`](@ref).
   FIXME: there is a hack, should not be using Serialization.deserialize on a PCLPointCloud2, see Caesar.jl#921 """
   p_PCloo_blobId::UUID
-  # pc_datalabel::String = "PCLPointCloud2"
 end
 
 getManifold(::ObjectAffordanceSubcloud) = getManifold(Pose3Pose3)
@@ -108,27 +103,30 @@ function IncrementalInference.preambleCache(
   p_PC = _PCL.getDataPointCloud(dfg, loovlb, fct.p_PCloo_blobId; checkhash=false) |> _PCL.PointCloud
   _p_SC = _PCL.getSubcloud(p_PC, fct.p_BBo)
   p_SCloo = Ref(_p_SC)
-  o_Tloo_p = Ref(e0)
+  o_Tloo_p = Ref(fct.ohat_T_p) # e0
   
   # define the LIE elements
   for (idx,liev) in enumerate(lievlbs)
-    specFcts = intersect(aflb,ls(dfg,liev))
+    neifl = intersect(aflb,ls(dfg,liev))
+    # sibling factors
+    neifc = getFactorType.(dfg,neifl)
     # must be OAS factor
-    filter!(l->@show(getFactorType(dfg,l)) isa ObjectAffordanceSubcloud, specFcts)
+    filter!(f->f isa ObjectAffordanceSubcloud, neifc)
     # filtering from all factors, skip this variable if not part of this object affordance 
-    0 === length(specFcts) ? continue : nothing
-    fc_lb = specFcts[1]
+    0 === length(neifl) ? continue : nothing
+    nfclb = neifl[1]
+    nfc = neifc[1]
     # collect factor labels
-    push!(fc_lie_lbls, fc_lb)
+    push!(fc_lie_lbls, nfclb)
     # find self (loo) number from factor list
-    A, B = lsf(dfg, fc_lb), getLabel.(fvars)
+    A, B = lsf(dfg, nfclb), getLabel.(fvars)
     0 === length(setdiff(A,B)) ? loo_idx = idx : nothing
     # collect list of all subclouds
     p_SC = _PCL.getDataSubcloudLocal(dfg, liev, fct.p_BBo, r"PCLPointCloud2"; checkhash=false)
     push!(p_SClie, p_SC)
     # collect list of all pose to object transforms
     # FIXME, should start with current best guess provided by user
-    push!(o_Tlie_p, e0)
+    push!(o_Tlie_p, nfc.ohat_T_p) # e0
   end
   
   # finalize object point clouds for cache
@@ -154,7 +152,7 @@ function IncrementalInference.preambleCache(
   # build the cached object for use in the hot loop computations
   _ObjAffSubcCache(;
     p_SCloo,
-    o_Tloo_p,
+    o_Tloo_p, # slightly different by fine alignment over coarse alignment from fct.ohat_T_p
     fc_lie_lbls,
     p_SClie,
     o_Tlie_p,
@@ -203,5 +201,36 @@ function IncrementalInference.getSample(
   return log(M, e0, e0) # p_P_q)
 end
 
+
+
+
+function makePointCloudObjectAffordance(
+  dfg::AbstractDFG,
+  ovl::Symbol;
+  align=:fine # or :coarse
+)
+  M = getManifold(Pose3)
+  ohat_SCs = _PCL.PointCloud()
+
+  for flb in ls(dfg, ovl)
+    fc = getFactor(dfg, flb)
+    p_SC = IIF._getCCW(fc).dummyCache.p_SCloo[]
+    # p_SC = _PCL.getDataPointCloud(dfg, getVariableOrder(fc)[1], getFactorType(fc).p_PCloo_blobId; checkhash=false) |> _PCL.PointCloud
+    o_T_p = if align == :fine
+      @warn("Using preamble fine alignment from $flb")
+      IIF._getCCW(fc).dummyCache.o_Tloo_p[]
+    else
+      getFactorType(dfg, flb).ohat_T_p
+    end
+    ohat_SC = _PCL.apply(M, o_T_p, p_SC)
+    cat(
+      ohat_SCs,
+      ohat_SC;
+      reuse = true
+    )
+  end
+
+  return ohat_SCs
+end
 
 ##
