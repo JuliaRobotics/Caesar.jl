@@ -175,18 +175,31 @@ function IncrementalInference.getSample(
   p_SCs = typeof(cf.cache.p_SCloo[])[cf.cache.p_SCloo[], cf.cache.p_SClie...]
   
   # all compute done once in preambleCache
-  oo_Tloo_p, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
-    o_Ts_p,
-    p_SCs,
-    1;
-    updateTloo=false
-  )
-
-  cf.cache.o_Tloo_p[] = oo_Tloo_p
+  oo_Tloo_p = if length(o_Ts_p) < 2
+    cf.cache.o_Tloo_p[]
+  else
+    _oo_Tloo_p, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
+      o_Ts_p,
+      p_SCs,
+      1;
+      updateTloo=false
+    )
+    cf.cache.o_Tloo_p[] = _oo_Tloo_p
+    _oo_Tloo_p
+  end
+  
+  # FIXME, need better stochastic calculation and representative covariance result in strong unimodal cases -- see this `getMeasurementParametric``
   
   # return the transform from pose to object as manifold tangent element
   # TODO confirm expansion around e0, since PosePose factors expand around `q`
   return log(M, e0, inv(M, oo_Tloo_p))
+end
+
+IIF.getMeasurementParametric(oas::ObjectAffordanceSubcloud) = throw(BoundsError("Not a bounds error, special case on ObjectAffordanceSubcloud, use lower dispatch `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})` instead."))
+function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:ObjectAffordanceSubcloud}})
+  @warn "Only artificial inverse covariance available for `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})`" maxlog=3
+  iΣ = diagm([0.2*ones(3); 10*ones(3)])
+  IIF._getCCW(foas).dummyCache.o_Tloo_p[], iΣ
 end
 
 function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(X,p,q)
