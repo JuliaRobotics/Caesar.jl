@@ -48,7 +48,7 @@ DevNotes:
 """
 Base.@kwdef struct ObjectAffordanceSubcloud{B} <: AbstractManifoldMinimize
   """ subcloud is selected by this mask from the variable's point cloud """
-  p_BBo::B = GeoB.Rect([GeoB.Point(0,0,0.),GeoB.Point(1,1,1.)])
+  p_BBo::B = _PCL.AxisAlignedBoundingBox( GeoB.Rect([GeoB.Point(0,0,0.),GeoB.Point(1,1,1.)]) )
   """
   pose to object offset (or pose in object frame) to where the center of the object's bounding box. 
   I.e. the user provided initial guess of relative transform to go from pose to object frame.
@@ -102,6 +102,7 @@ function IncrementalInference.preambleCache(
   # define LOO element
   # NOTE, when updating caches and blobId error on x1, use `rebuildFactorMetadata!(..;_blockRecursionGradients=true)`
   p_PC = _PCL.getDataPointCloud(dfg, loovlb, fct.p_PCloo_blobId; checkhash=false) |> _PCL.PointCloud
+  @show fct.p_BBo
   _p_SC = _PCL.getSubcloud(p_PC, fct.p_BBo)
   p_SCloo = Ref(_p_SC)
   o_Tloo_p = Ref(fct.ohat_T_p) # e0
@@ -260,7 +261,7 @@ function generateObjectAffordanceFromWorld!(
   dfg::AbstractDFG,
   olb::Symbol,
   vlbs::AbstractVector{<:Symbol},
-  w_BBobj::GeoB.Rect3;
+  w_BBobj::_PCL.AbstractBoundingBox, #GeoB.Rect3;
   solveKey::Symbol = :default,
   pcBlobLabel = r"PCLPointCloud2"
 )
@@ -281,7 +282,7 @@ function generateObjectAffordanceFromWorld!(
   end
   
   # necessary workaround for rebuilding factor cache with all OAS factors present on object
-  for flb in ls(dfg, :o1)
+  for flb in ls(dfg, olb)
     IIF.rebuildFactorMetadata!(dfg, getFactor(dfg, flb); _blockRecursionGradients=true)
   end
 

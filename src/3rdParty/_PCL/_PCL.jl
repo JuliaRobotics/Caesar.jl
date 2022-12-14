@@ -7,6 +7,7 @@ module _PCL
 import ..Caesar: _FastTransform3D
 import ..Caesar: homogeneous_coord_to_euler_coord, euler_coord_to_homogeneous_coord, euler_angles_to_linearized_rotation_matrix
 import ..Caesar: _SE3_MANI # create_homogeneous_transformation_matrix
+import ..Caesar: getBelief, mean
 
 using Colors
 using Dates
@@ -39,10 +40,12 @@ import IncrementalInference: ArrayPartition
 # export PointT, PointXYZ, PointXYZRGB, PointXYZRGBA
 # export inside, getSubcloud
 # export PCLHeader, PointCloud
-
+# export AbstractBoundingBox, AxisAlignedBoundingBox, OrientedBoundingBox
+# export getCorners
 
 # bring in the types
 include("entities/PCLTypes.jl")
+include("entities/OtherTypes.jl")
 # bring in further source code
 include("services/GeomBasicsUtils.jl")
 include("services/PointCloud.jl")
