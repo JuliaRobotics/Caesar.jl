@@ -5,6 +5,12 @@
 
 @deprecate create_homogeneous_transformation_matrix(R, t) affine_matrix(_SE3_MANI, ArrayPartition(t, R))
 
+# function create_homogeneous_transformation_matrix(R, t)
+
+#     H = [R          t
+#          zeros(1,3) 1]
+
+# end
 
 ## ======================================================================================
 ## Deprecate below before Caesar.jl v0.14

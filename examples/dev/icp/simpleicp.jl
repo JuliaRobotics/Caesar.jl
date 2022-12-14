@@ -191,7 +191,8 @@ function estimate_rigid_body_transformation(x_fix, y_fix, z_fix, nx_fix, ny_fix,
 
     t = x[4:6]
 
-    H = create_homogeneous_transformation_matrix(R, t)
+    H = affine_matrix(_SE3_MANI, ArrayPartition(t, R))
+    # H = create_homogeneous_transformation_matrix(R, t)
 
     return H, residuals
 
@@ -205,12 +206,6 @@ function euler_angles_to_linearized_rotation_matrix(α1, α2, α3)
 
 end
 
-function create_homogeneous_transformation_matrix(R, t)
-
-    H = [R          t
-         zeros(1,3) 1]
-
-end
 
 function euler_coord_to_homogeneous_coord(XE)
 

@@ -408,6 +408,7 @@ Base.show(io::IO, ::MIME"application/prs.juno.inline", pc::Header) = show(io, pc
 
 
 function Base.show(io::IO, pc::PCLPointCloud2)
+  println(io)
   printstyled(io, "Caesar._PCL.PCLPointCloud2", bold=true, color=:blue)
   # println(io)
   # printstyled(io, "    T = ", bold=true, color=:magenta)
@@ -441,6 +442,7 @@ Base.show(io::IO, ::MIME"application/prs.juno.inline", pc::PCLPointCloud2) = sho
 
 
 function Base.show(io::IO, pc::PointCloud{T,P,R}) where {T,P,R}
+  println(io)
   printstyled(io, "Caesar._PCL.PointCloud{", bold=true, color=:blue)
   println(io)
   printstyled(io, "    T = ", bold=true, color=:magenta)

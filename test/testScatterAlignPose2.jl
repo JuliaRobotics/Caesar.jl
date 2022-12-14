@@ -7,7 +7,7 @@ using Distributions
 using Manifolds
 
 # test plotting helper functions
-using Gadfly
+# using Gadfly
 using Random
 
 import Rotations as _Rot
@@ -59,7 +59,7 @@ sap = ScatterAlignPose2(bIM1, bIM2, (x,y); sample_count=100, bw=1.0, cvt=(im)->i
 
 snt = overlayScatterMutate(sap; sample_count=100, bw=0.001, user_coords=[0.;0;oΨ]);  # , user_offset=[0.;0;0.]);
 # Gadfly.set_default_plot_size(35cm,25cm)
-plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
+# plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 
 ##
 

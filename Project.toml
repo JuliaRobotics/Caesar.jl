@@ -19,6 +19,7 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
 ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
 IncrementalInference = "904591bb-b899-562f-9e6f-b8df64c7d480"
@@ -92,7 +93,6 @@ BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
-Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
 GraphPlot = "a2cc645c-3eea-5389-862e-a155d0052231"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
@@ -103,4 +103,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [targets]
-test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "FixedPointNumbers", "Gadfly", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]
+test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "FixedPointNumbers", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]
