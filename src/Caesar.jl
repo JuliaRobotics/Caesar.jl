@@ -105,7 +105,8 @@ function __init__()
     include("images/ScanMatcherPose2.jl")
     include("images/ScatterAlignPose2.jl")
     
-    @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("plotting/ScatterAlignPlotting.jl")
+    # moved Gadfly plotting to RoMEPlotting
+    # @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("plotting/ScatterAlignPlotting.jl")
     @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("images/ROSConversions.jl")
   end
   @require Distributed="8ba89e20-285c-5b6f-9357-94700520ee1b" include("images/DistributedUtils.jl")
