@@ -192,14 +192,19 @@ function IncrementalInference.getSample(
   
   # return the transform from pose to object as manifold tangent element
   # TODO confirm expansion around e0, since PosePose factors expand around `q`
-  return log(M, e0, inv(M, oo_Tloo_p))
+  return log(M, e0, oo_Tloo_p) # inv(M, oo_Tloo_p))
 end
 
-IIF.getMeasurementParametric(oas::ObjectAffordanceSubcloud) = throw(BoundsError("Not a bounds error, special case on ObjectAffordanceSubcloud, use lower dispatch `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})` instead."))
+IIF.getMeasurementParametric(oas::ObjectAffordanceSubcloud) = error("Special case on ObjectAffordanceSubcloud, use lower dispatch `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})` instead.")
 function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:ObjectAffordanceSubcloud}})
   @warn "Only artificial inverse covariance available for `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})`" maxlog=3
+  M = getManifold(getFactorType(foas))
+  e0 = ArrayPartition(SA[0;0;0.], SMatrix{3,3}([1 0 0; 0 1 0; 0 0 1.]))
   iΣ = diagm([0.2*ones(3); 10*ones(3)])
-  IIF._getCCW(foas).dummyCache.o_Tloo_p[], iΣ
+  o_T_p = IIF._getCCW(foas).dummyCache.o_Tloo_p[]
+  # FIXME, not happy with inv on o_T_p -- OAS factor should read from pose to object???
+  μ = vee(M, e0, log(M, e0, inv(M, o_T_p)))
+  μ, iΣ
 end
 
 function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(X,p,q)
