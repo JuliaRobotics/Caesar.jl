@@ -261,7 +261,7 @@ function generateObjectAffordanceFromWorld!(
   dfg::AbstractDFG,
   olb::Symbol,
   vlbs::AbstractVector{<:Symbol},
-  w_BBobj::_PCL.AbstractBoundingBox, #GeoB.Rect3;
+  w_BBobj::_PCL.AbstractBoundingBox;
   solveKey::Symbol = :default,
   pcBlobLabel = r"PCLPointCloud2"
 )

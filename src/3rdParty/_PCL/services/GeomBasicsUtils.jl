@@ -112,7 +112,7 @@ function getSubcloud(
   pc_full::PointCloud,       # the full point cloud
   mask::AbstractBoundingBox  # starting out with GeometryBasics.Rect3
 )
-  objmask = map(s->_PCL.inside(mask,GeoB.Point(s.data[1:3]...)), pc_full.points)
+  objmask = map(s->_PCL.inside(mask, s.data[1:3]), pc_full.points)
   spt = (s->s.data[1:3]).(pc_full.points[objmask])
   @cast pts[i,d] := spt[i][d]
   _PCL.PointCloud(pts)
