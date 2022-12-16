@@ -98,6 +98,79 @@ function Manifolds.apply(
   return _pc
 end
 
+function Manifolds.apply(
+  M::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
+  a_T_r::ArrayPartition,
+  r_BB::AbstractBoundingBox 
+)
+  
+  _Hdim(::typeof(SpecialEuclidean(2))) = 3
+  _Hdim(::typeof(SpecialEuclidean(3))) = 4
+  _hdim = _Hdim(M)
+  # get the transform from obj bounding box to some reference frame r
+  _r_H_bb(::AxisAlignedBoundingBox) = SMatrix{_hdim,_hdim}(diagm(ones(_hdim)))
+  _r_H_bb(_r_BB::OrientedBoundingBox) = inv(_r_BB.bb_H_r)
+  
+  a_H_bb = affine_matrix(M,a_T_r)*_r_H_bb(r_BB)
+  # ohat_H_p = inv(p_H_bb)
+  a_T_bb = ArrayPartition(a_H_bb[1:end-1,end], a_H_bb[1:end-1,1:end-1])
+  
+  OrientedBoundingBox(r_BB.origin, r_BB.widths, a_T_bb.x[1], a_T_bb.x[2])
+end
+
+
+# return the bounding box p_BBo
+function transformFromWorldToLocal(
+  dfg::AbstractDFG,
+  vlbl::Symbol,
+  w_BBo::_PCL.AbstractBoundingBox;
+  solveKey=:default
+)
+  #  
+
+  v = getVariable(dfg, vlbl)
+  M = getManifold(v)
+
+  # w_T_p58 = getBelief(sfg_, :x58, :parametric) |> mean
+  # p58_T_w = inv(M, w_T_p58)
+  # p58_BBo_02 = _PCL.apply( M, p58_T_w, w_BBo_02 )
+
+  # TODO consider and consolidate with getPPESuggested or full belief
+  w_T_p = getBelief(dfg, vlbl, solveKey) |> mean
+    # b_Cwp = getPPESuggested(dfg, vlbl, solveKey)
+    # w_T_p = exp(M, e0, hat(M, e0, b_Cwp))
+    # p_T_w = inv(M, w_T_p)
+    # p_H_w = SMatrix{4,4}(affine_matrix(M, p_T_w))
+  _p_T_w = inv(M, w_T_p)
+  p_T_w = ArrayPartition(SA[_p_T_w.x[1]...], SMatrix{size(_p_T_w.x[2])...}(_p_T_w.x[2]))
+
+  (
+    apply( M, p_T_w, w_BBo ),
+    p_T_w
+  )
+end
+
+  # _bb_H_r(::AxisAlignedBoundingBox) = SMatrix{4,4}(diagm(ones(4)))
+  # _bb_H_r(::OrientedBoundingBox) = w_BBo.bb_H_r
+  
+  # p_P1 = p_H_w * SA[w_BBo.origin...; 1.]
+  # p_P2 = p_H_w * SA[(w_BBo.origin+w_BBo.widths)...; 1.]
+  
+  # p_H_bb = p_H_w*inv(_bb_H_r(w_BBo))
+  # ohat_H_p = inv(p_H_bb)
+  # ohat_T_p = ArrayPartition(ohat_H_p[end,1:end-1], ohat_H_p[1:end-1,1:end-1])
+
+  # pose to approximate object frame, ohat_T_p
+  # NOTE, slightly weird transform in that world rotation and local translation are mixed, so one is inverted to get consistent left action
+  # NOTE, assuming rectangular bounding box, make object frame the center of the volume
+  # ohat_V_p = SA[(SA[w_T_p.x[1]...] - (w_BBo.origin+0.5*w_BBo.widths))...] # b_Cwp[1:3]...
+  # ohat_T_p = ArrayPartition(ohat_V_p, SMatrix{3,3}(w_T_p.x[2]))
+  
+  # (
+  #   OrientedBoundingBox( w_BBo.origin, w_BBo.widths, ohat_T_p.x[1], ohat_T_p.x[2] ) # p_P1[1:3], (p_P2-p_P1)[1:3] ), 
+  #   ohat_T_p
+  # )
+
 ## ============================================================
 ## FIXME, not-yet-consolidated rigid transform code that must be deprecated below
 ## ============================================================

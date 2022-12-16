@@ -1,5 +1,6 @@
 
 export getDataPointCloud, getPointCloud, getPointCloud2D, getPointCloud3D
+export findObjectVariablesFromWorld, previewObjectSubcloudInLocalFromWorld
 
 
 function getDataPointCloud(
@@ -35,9 +36,10 @@ function getPointCloud(
   label,
   pattern = r"PCLPointCloud2", 
   w...;
+  checkhash::Bool=true,
   kw...
 )
-  pc2_a = getDataPointCloud(nfg, label, pattern)
+  pc2_a = getDataPointCloud(nfg, label, pattern; checkhash)
   if pc2_a isa Nothing
     return nothing
   end
@@ -86,7 +88,7 @@ local `p` frame coordinates (same as body frame if no lever-arm to sensor is req
 function getDataSubcloudLocal(
   dfg::AbstractDFG,
   vlb::Symbol,
-  p_BBo::GeoB.Rect3,
+  p_BBo::_PCL.AbstractBoundingBox, # GeoB.Rect3,
   bllb::Union{Symbol, UUID, <:AbstractString, Regex} = r"PCLPointCloud2";
   checkhash::Bool=true,
   pointcloud = getDataPointCloud(dfg, vlb, bllb; checkhash) |> PointCloud
@@ -105,7 +107,7 @@ subclouds for nearly correct solutions.
 function getDataSubcloudLocalFromWorld(
   dfg::AbstractDFG,
   vlb::Symbol,
-  w_BBo::GeoB.Rect3,
+  w_BBo::_PCL.AbstractBoundingBox, # GeoB.Rect3,
   bllb::Union{Symbol, UUID, <:AbstractString, Regex} = r"PCLPointCloud2";
   solveKey::Symbol = :default,
   checkhash::Bool=true
@@ -216,6 +218,64 @@ function alignPointCloudsLOOIters!(
   end
   
   o_Ts_l_
+end
+
+"""
+    $SIGNATURES
+
+Find in the specified list of variables, which point clouds have at least `minpoint`s
+within the bounding box.
+
+Notes
+- Uses Caesar.jl functionality
+"""
+function findObjectVariablesFromWorld(
+  dfg::AbstractDFG,
+  r_BBo::_PCL.AbstractBoundingBox;
+  solveKey::Symbol = :default,
+  minpoints::Int=5000,
+  limit::Int=50,
+  varPattern::Regex=r"x\d+",
+  tags::AbstractVector{Symbol}=Symbol[],
+  varList::AbstractVector{Symbol} = sort(ls(dfg,varPattern;tags); lt=DFG.natural_lt),
+  blobLabel = r"PCLPointCloud2"
+)
+  M = SpecialEuclidean(3)
+  objVars = Symbol[]
+  
+  for vlb in varList
+    b_PC = _PCL.getDataPointCloud(dfg, vlb, blobLabel; checkhash=false) |> _PCL.PointCloud
+    # TODO use PPE after PPEs are updated to Manifolds representation
+    r_T_b = getBelief(dfg, vlb, solveKey) |> mean
+    r_PC = _PCL.apply(M, r_T_b, b_PC)
+    sc = _PCL.getSubcloud(r_PC, r_BBo)
+    if minpoints < length(sc)
+      push!(objVars, vlb)
+    end
+  end
+  
+  len = length(objVars)
+  if 0<len
+    idx = unique(Int.(round.(1:len/limit:len)))
+    objVars[idx]
+  else
+    objVars
+  end
+end
+
+#
+
+function previewObjectSubcloudInLocalFromWorld(
+  dfg::AbstractDFG,
+  vlb::Symbol,
+  w_BBo::AbstractBoundingBox;
+  solveKey::Symbol = :default,
+  blobLabel = r"PCLPointCloud2",
+  checkhash::Bool=true
+)
+  p_PC = getDataPointCloud(dfg, vlb, blobLabel; checkhash) |> _PCL.PointCloud  
+  p_BBo, o_T_p = transformFromWorldToLocal(dfg, vlb, w_BBo; solveKey)
+  getSubcloud(p_PC, p_BBo)
 end
 
 #
