@@ -34,7 +34,7 @@ end
 Base.@kwdef struct OrientedBoundingBox <: AbstractBoundingBox
   """ axis aligned bounding box, leveraging GeometryBasics.Rect3 (towards GoeB.HyperRectangle) """
   hr::GeoB.Rect3{<:Any} = GeoB.Rect3(GeoB.Point(0,0,0.), GeoB.Point(1,1,1.))
-  """ Homography from some reference frame r to the axis aligned bounding box frame """
+  """ Inverse homography which goes from some reference frame r to the bounding box frame """
   bb_H_r::typeof(SMatrix{4,4}(diagm(ones(4)))) = SMatrix{4,4}(diagm(ones(4)))
 end
 
@@ -61,7 +61,7 @@ function Base.getproperty(obb::OrientedBoundingBox, f::Symbol)
   elseif f == :widths
     obb.hr.widths
   elseif f == :position
-    inv(obb.bb_H_r)[end,1:end-1]
+    inv(obb.bb_H_r)[1:end-1, end]
   elseif f == :rotation
     inv(obb.bb_H_r)[1:end-1,1:end-1]
   else

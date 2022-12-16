@@ -1,6 +1,7 @@
 
 export getDataPointCloud, getPointCloud, getPointCloud2D, getPointCloud3D
-export findObjectVariablesFromWorld
+export findObjectVariablesFromWorld, previewObjectSubcloudInLocalFromWorld
+
 
 function getDataPointCloud(
   nfg::AbstractDFG,
@@ -230,7 +231,7 @@ Notes
 """
 function findObjectVariablesFromWorld(
   dfg::AbstractDFG,
-  r_BBo::_PCL.AbstractBoundingBox; # GeoB.Rect3;
+  r_BBo::_PCL.AbstractBoundingBox;
   solveKey::Symbol = :default,
   minpoints::Int=5000,
   limit::Int=50,
@@ -262,5 +263,19 @@ function findObjectVariablesFromWorld(
   end
 end
 
+#
+
+function previewObjectSubcloudInLocalFromWorld(
+  dfg::AbstractDFG,
+  vlb::Symbol,
+  w_BBo::AbstractBoundingBox;
+  solveKey::Symbol = :default,
+  blobLabel = r"PCLPointCloud2",
+  checkhash::Bool=true
+)
+  p_PC = getDataPointCloud(dfg, vlb, blobLabel; checkhash) |> _PCL.PointCloud  
+  p_BBo, o_T_p = transformFromWorldToLocal(dfg, vlb, w_BBo; solveKey)
+  getSubcloud(p_PC, p_BBo)
+end
 
 #
