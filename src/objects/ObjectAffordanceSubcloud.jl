@@ -2,6 +2,7 @@
 #  Experimental
 # export ObjectAffordanceSubcloud
 # export makePointCloudObjectAffordance, generateObjectAffordanceFromWorld!
+# export assembleObjectCache
 
 # factor for mechanizing object affordances
 Base.@kwdef struct _ObjAffSubcCache
@@ -171,6 +172,7 @@ function IncrementalInference.preambleCache(
     o_Ts_p = typeof(cache.o_Tloo_p[])[cache.o_Tloo_p[], cache.o_Tlie_p...]
     p_SCs  = typeof(cache.p_SCloo[])[cache.p_SCloo[], cache.p_SClie...]
     # align iteratively
+    # @info "LOO-ALIGNING 3"
     oo_Ts_p = _PCL.alignPointCloudsLOOIters!(
       o_Ts_p, 
       p_SCs, 
@@ -179,7 +181,7 @@ function IncrementalInference.preambleCache(
     cache.o_Tloo_p[] = oo_Ts_p[1]
     cache.o_Tlie_p[:] .= oo_Ts_p[2:end]
   end
-  # udpate the cached memory pointers
+  # update the cached memory pointers
   
   # # do loo alignments
   # # LEGACY, frames: object, subcloud, body:  o_PC = o_H_sc * sc_H_b * b_PC
@@ -187,7 +189,33 @@ function IncrementalInference.preambleCache(
   return cache
 end
 
+"""
+    $SIGNATURES
 
+Debug tool to check values in the cache object make sense.  
+Use before and after [`alignPointCloudsLOOIters!`](@ref).
+"""
+function assembleObjectCache(
+  dfg::AbstractDFG, 
+  flb::Symbol
+)
+  M = getManifold(Pose3)
+  
+  cache = IIF._getCCW(dfg, flb).dummyCache
+  o_Ts_p = typeof(cache.o_Tloo_p[])[cache.o_Tloo_p[], cache.o_Tlie_p...]
+  p_SCs  = typeof(cache.p_SCloo[])[cache.p_SCloo[], cache.p_SClie...]
+  
+  o_SCa = _PCL.PointCloud()
+  for (i,o_T_p) in enumerate(o_Ts_p)
+    cat(
+      o_SCa,
+      _PCL.apply(M, o_T_p, p_SCs[i]);
+      reuse = true
+    )
+  end
+  
+  o_SCa
+end
 
 function IncrementalInference.getSample(
   cf::CalcFactor{S},
