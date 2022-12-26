@@ -139,11 +139,18 @@ end
 """
     $SIGNATURES
 
-Point cloud alignment of a leave-one-out (LOO) element to a merged list of leave in elements (LIE).
+Point cloud leave-one-out (LOO) element alignment to a merged list of leave in elements (LIE) clouds.
+
+Notes
+- Takes in two lists, namely 
+  - transforms (`ohat_T_l`) from some local frame `l` to a current best guess common object frame `ohat`,
+  - point clouds in local frame `l`.
+- Internal computations transform point cloud to object frame `o_PC = o_T_l ∘ l_PC`.
+- The loo index argument is the element from lists which will be aligned to others.
 """
 function alignPointCloudLOO!(
-  o_Ts_hato::AbstractVector{<:ArrayPartition},
-  hato_PCs::AbstractVector{<:PointCloud},
+  ohat_Ts_l::AbstractVector{<:ArrayPartition},
+  l_PCs::AbstractVector{<:PointCloud},
   loo_idx::Int;
   updateTloo::Bool=false,
   verbose=false,
@@ -155,43 +162,56 @@ function alignPointCloudLOO!(
   M = SpecialEuclidean(3)
   
   # prep the leave one out element
-  oo_PCloo = _PCL.apply( 
+  ohat_PCloo = _PCL.apply( 
     M,
-    o_Ts_hato[loo_idx],
-    hato_PCs[loo_idx]
+    ohat_Ts_l[loo_idx],
+    l_PCs[loo_idx]
   )
   # prep the leave in elements (all but loo element)
-  lie = setdiff(1:length(hato_PCs), [loo_idx;])
-  o_PClie = _PCL.mergePointCloudsWithTransforms(o_Ts_hato[lie], hato_PCs[lie])
+  lie = setdiff(1:length(l_PCs), [loo_idx;])
+  o_PClie = _PCL.mergePointCloudsWithTransforms(ohat_Ts_l[lie], l_PCs[lie])
   
   # do the alignment of loo onto lie
-  o_Hloo_oo, Hpts_mov, status = _PCL.alignICP_Simple(
-    o_PClie, 
-    oo_PCloo; 
-    verbose,
-    max_iterations,
-    correspondences,
-    neighbors,
+  o_Tloo_l_ = if length(ohat_Ts_l) == 1
+    ohat_Ts_l[1]
+  else
+    o_Hloo_ohat, Hpts_mov, status = _PCL.alignICP_Simple(
+      o_PClie,
+      ohat_PCloo;
+      verbose,
+      max_iterations,
+      correspondences,
+      neighbors,
+    )
+    # convert SE affine H to tangent vector X for use in residual function 
+    D_ = size(o_Hloo_ohat,2) - 1
+    o_Tloo_ohat = ArrayPartition( 
+      SVector(o_Hloo_ohat[1:D_,end]...), 
+      SMatrix{D_,D_}(o_Hloo_ohat[1:D_,1:D_]) 
+    )
+    # that is, take the previous initial estimate and add the new alignment into it
+    Manifolds.compose( M, o_Tloo_ohat, ohat_Ts_l[loo_idx] )
+  end
+  # make sure we have a static array (this line might be a repeat, but likely worth it)
+  o_Tloo_l = ArrayPartition(
+    SVector(o_Tloo_l_.x[1]...), 
+    SMatrix{size(o_Tloo_l_.x[2])...}(o_Tloo_l_.x[2])
   )
-  # convert SE affine H to tangent vector X for use in residual function 
-  o_Tloo_oo = ArrayPartition(o_Hloo_oo[1:end-1,end],o_Hloo_oo[1:end-1,1:end-1])
-  # that is, take the previous initial estimate and add the new alignment into it
-  o_Tloo_hato = Manifolds.compose(M, o_Tloo_oo, o_Ts_hato[loo_idx])
-  
-  # to confirm the new alignment is good, transform loo cloud from scratsh
-  o_PCloo = _PCL.apply( 
+
+  # to confirm the new alignment is good, transform loo cloud from scratch
+  o_PCloo = _PCL.apply(
     M,
-    o_Tloo_hato,
-    hato_PCs[loo_idx]
+    o_Tloo_l,
+    l_PCs[loo_idx]
   )
   
   if updateTloo
-    @info "updateTloo"
-    o_Ts_hato[loo_idx] = o_Tloo_hato
+    @info "updateTloo $loo_idx"
+    ohat_Ts_l[loo_idx] = o_Tloo_l
   end
   
   # TODO confirm expansion around e0, since PosePose factors expand around `q`
-  return o_Tloo_hato, o_PClie, o_PCloo
+  return o_Tloo_l, o_PClie, o_PCloo
 end
 
 """

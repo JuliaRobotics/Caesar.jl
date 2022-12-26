@@ -6,17 +6,18 @@
 
 # factor for mechanizing object affordances
 Base.@kwdef struct _ObjAffSubcCache
-  """ extracted LOO subcloud """
-  p_SCloo::Base.RefValue{<:_PCL.PointCloud}
-  """ LOO pose to object transform """
-  o_Tloo_p::Base.RefValue{<:ArrayPartition}
-  """ similar LIE factors connected to the same landmark variable """
-  fc_lie_lbls::Vector{Symbol}
-  """ extracted subclouds from connected LIE factors """
-  p_SClie::Vector{<:_PCL.PointCloud}
-  """ list of transforms of pose in object (or pose to object) from connected factors """
-  o_Tlie_p::Vector{<:ArrayPartition}
+  """ list of object subclouds in individual pose reference frames """
+  p_SCs::Vector{<:_PCL.PointCloud}
+  """ pose to object transforms for each indivudal pose variable """
+  o_Ts_p::Vector{<:ArrayPartition}
+  """ any object priors connected to the landmark variable """
+  objPrior::Vector{Symbol} = Symbol[]
 end
+# """ extracted subclouds from connected LIE factors """
+# p_SClie::Vector{<:_PCL.PointCloud}
+# """ list of transforms of pose in object (or pose to object) from connected factors """
+# o_Tlie_p::Vector{<:ArrayPartition}
+
 
 
 """
@@ -47,20 +48,21 @@ DevNotes:
 - FIXME, separate object frame can have LOO alignment wind up inside graph -- a wind-up release mechanism is needed
   whereby pose to refined object frame is consistent over all factors to object affordance variable.
 """
-Base.@kwdef struct ObjectAffordanceSubcloud{B <: _PCL.OrientedBoundingBox} <: AbstractManifoldMinimize
+Base.@kwdef struct ObjectAffordanceSubcloud <: AbstractManifoldMinimize
   """ subcloud is selected by this mask from the variable's point cloud """
-  p_BBo::B = _PCL.OrientedBoundingBox( SA[0,0,0.], SA[1,1,1.], SA[0,0,0.], SMatrix{3,3}(diagm([1;1;1.])) )
+  p_BBos::Vector{<:_PCL.OrientedBoundingBox} = Vector{_PCL.OrientedBoundingBox}() 
+  # _PCL.OrientedBoundingBox( SA[0,0,0.], SA[1,1,1.], SA[0,0,0.], SMatrix{3,3}(diagm([1;1;1.])) )
   """
   pose to object offset (or pose in object frame) to where the center of the object's bounding box. 
   I.e. the user provided initial guess of relative transform to go from pose to object frame.
   Note, the type here is restricted to StaticArrays only, to ensure best alignments are stored in the cache. """
-  ohat_T_p::typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.])))) = ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.])))
+  ohat_Ts_p::Vector{typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.]))))} = Vector{typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.]))))}()
   """
   standard entry blob label where to find the point clouds -- 
   forced to use getData since factor cache needs to update when other factors are 
   added to the same object variable later by the user.  See [`IIF.rebuildFactorMetadata!`](@ref).
   FIXME: there is a hack, should not be using Serialization.deserialize on a PCLPointCloud2, see Caesar.jl#921 """
-  p_PCloo_blobId::UUID
+  p_PC_blobIds::Vector{UUID} = Vector{UUID}()
 end
 
 # function Base.getproperty(oas::ObjectAffordanceSubcloud, f::Symbol)
@@ -80,71 +82,77 @@ end
 #   p_PCloo_blobId::UUID
 # ) = ObjectAffordanceSubcloud(p_BBo, ArrayPartition(SA[ohat_T_p.x[1]...],SMatrix{size(ohat_T_p.x[2])...}(ohat_T_p.x[2])), p_PCloo_blobId)
 
-getManifold(::ObjectAffordanceSubcloud) = getManifold(Pose3Pose3)
+getManifold(oas::ObjectAffordanceSubcloud) = PowerManifold(getManifold(Pose3Pose3), NestedReplacingPowerRepresentation(), length(oas.ohat_Ts_p))
+
+# function _findOASPriors()
+#   # get all pose variables connected to this object
+#   loovlb = getLabel(fvars[1])
+#   olbl = getLabel(fvars[2])
+#   # will not yet include this new factor.
+#   aflb = ls(dfg,olbl)
+#   neis = ls.(dfg,aflb)
+#   avlbs = 0 < length(neis) ? union(neis...) : neis
+#   avlbs = setdiff(avlbs, [getLabel(fvars[2]);])
+#   # should make sure loovlb removed, since `IIF.rebuildFactorMetadata!` usage affects the lie loo caching steps
+#   lievlbs = setdiff(avlbs, [loovlb;])
+#   fc_lie_lbls = Symbol[]
+  
+#   # define the LIE elements
+#   for liev in lievlbs
+#     neifl = intersect(aflb,ls(dfg,liev))
+#     # sibling factors
+#     neifc = getFactorType.(dfg,neifl)
+#     # must be OAS factor
+#     filter!(f->f isa ObjectAffordanceSubcloud, neifc)
+#     # filtering from all factors, skip this variable if not part of this object affordance 
+#     0 === length(neifl) ? continue : nothing
+#     nfclb = neifl[1]
+#     nfc = neifc[1]
+#     # collect factor labels
+#     push!(fc_lie_lbls, nfclb)
+
+#     # collect list of all subclouds
+#     # p_SC = _PCL.getDataSubcloudLocal(dfg, liev, fct.p_BBo, r"PCLPointCloud2"; checkhash=false)
+#     # push!(p_SClie, p_SC)
+#     # # collect list of all pose to object transforms
+#     # # FIXME, should start with current best guess provided by user
+#     # push!(o_Tlie_p, nfc.ohat_T_p) # e0
+#   end
+
+# end
+
 
 function _defaultOASCache(
   dfg::AbstractDFG, 
   fvars::AbstractVector{<:DFGVariable}, 
   fct::ObjectAffordanceSubcloud
 )
-  # get all pose variables connected to this object
-  loovlb = getLabel(fvars[1])
-  olbl = getLabel(fvars[2])
-  # will not yet include this new factor.
-  aflb = ls(dfg,olbl)
-  neis = ls.(dfg,aflb)
-  avlbs = 0 < length(neis) ? union(neis...) : neis
-  avlbs = setdiff(avlbs, [getLabel(fvars[2]);])
-  # should make sure loovlb removed, since `IIF.rebuildFactorMetadata!` usage affects the lie loo caching steps
-  lievlbs = setdiff(avlbs, [loovlb;])
-  fc_lie_lbls = Symbol[]
-  
   # use concrete types
   _PCT(::PC) where {PC <: _PCL.PointCloud} = PC
   PCT = _PCT(_PCL.PointCloud())
-  p_SClie = PCT[]
+  p_SCs = PCT[]
   
   # make static to ensure future updates replace (not all LIEs reuse the same) memory
-  e0 = ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm(ones(3))))
+  e0 = ArrayPartition( MVector(0.,0.,0.), MMatrix{3,3}(diagm(ones(3))) )
   APT = typeof(e0)
-  o_Tlie_p = APT[]
-  
-  # define LOO element
-  # NOTE, when updating caches and blobId error on x1, use `rebuildFactorMetadata!(..;_blockRecursionGradients=true)`
-  p_PC = _PCL.getDataPointCloud(dfg, loovlb, fct.p_PCloo_blobId; checkhash=false) |> _PCL.PointCloud
-  _p_SC = _PCL.getSubcloud(p_PC, fct.p_BBo)
-  p_SCloo = Ref(_p_SC)
-  o_Tloo_p = Ref(fct.ohat_T_p) # e0
+  o_Ts_p = APT[]
 
-  # define the LIE elements
-  for liev in lievlbs
-    neifl = intersect(aflb,ls(dfg,liev))
-    # sibling factors
-    neifc = getFactorType.(dfg,neifl)
-    # must be OAS factor
-    filter!(f->f isa ObjectAffordanceSubcloud, neifc)
-    # filtering from all factors, skip this variable if not part of this object affordance 
-    0 === length(neifl) ? continue : nothing
-    nfclb = neifl[1]
-    nfc = neifc[1]
-    # collect factor labels
-    push!(fc_lie_lbls, nfclb)
-    # collect list of all subclouds
-    p_SC = _PCL.getDataSubcloudLocal(dfg, liev, fct.p_BBo, r"PCLPointCloud2"; checkhash=false)
-    push!(p_SClie, p_SC)
-    # collect list of all pose to object transforms
-    # FIXME, should start with current best guess provided by user
-    push!(o_Tlie_p, nfc.ohat_T_p) # e0
-  end
-
-  # build the cached object for use in the hot loop computations
   cache = _ObjAffSubcCache(;
-    p_SCloo,
-    o_Tloo_p, # slightly different by fine alignment over coarse alignment from fct.ohat_T_p
-    fc_lie_lbls,
-    p_SClie,
-    o_Tlie_p,
+    p_SCs,
+    o_Ts_p
   )
+  
+  # NOTE, obj variable first, pose variables are [2:end]
+  for (i,vl) in enumerate(getLabel.(fvars)[2:end])
+    p_PC = _PCL.getDataPointCloud(dfg, vl, fct.p_PC_blobIds[i]; checkhash=false) |> _PCL.PointCloud
+    p_SC = _PCL.getSubcloud(p_PC, fct.p_BBos[i])
+
+    ohat_T_p_ = fct.ohat_Ts_p[i]
+    ohat_T_p = ArrayPartition(MVector(ohat_T_p_.x[1]...), MMatrix{3,3}(ohat_T_p_.x[2]))
+
+    push!(cache.p_SCs, p_SC)
+    push!(cache.o_Ts_p, ohat_T_p)
+  end
 
   return cache
 end
@@ -164,28 +172,16 @@ function IncrementalInference.preambleCache(
   fct::ObjectAffordanceSubcloud
 )
   cache = _defaultOASCache(dfg, fvars, fct)
-  
   # finalize object point clouds for cache
   # align if there if there is at least one LIE transform and cloud available.
-  if 0 < length(cache.o_Tlie_p)
-    # stack all the elements
-    o_Ts_p = typeof(cache.o_Tloo_p[])[cache.o_Tloo_p[], cache.o_Tlie_p...]
-    p_SCs  = typeof(cache.p_SCloo[])[cache.p_SCloo[], cache.p_SClie...]
-    # align iteratively
-    # @info "LOO-ALIGNING 3"
+  if 0 < length(cache.o_Ts_p)
     oo_Ts_p = _PCL.alignPointCloudsLOOIters!(
-      o_Ts_p, 
-      p_SCs, 
-      false, 3
+      cache.o_Ts_p, 
+      cache.p_SCs, 
+      true, 3
     )
-    cache.o_Tloo_p[] = oo_Ts_p[1]
-    cache.o_Tlie_p[:] .= oo_Ts_p[2:end]
   end
-  # update the cached memory pointers
-  
-  # # do loo alignments
-  # # LEGACY, frames: object, subcloud, body:  o_PC = o_H_sc * sc_H_b * b_PC
-  
+  # update the cached memory pointers  
   return cache
 end
 
@@ -199,22 +195,10 @@ function assembleObjectCache(
   dfg::AbstractDFG, 
   flb::Symbol
 )
-  M = getManifold(Pose3)
-  
   cache = IIF._getCCW(dfg, flb).dummyCache
-  o_Ts_p = typeof(cache.o_Tloo_p[])[cache.o_Tloo_p[], cache.o_Tlie_p...]
-  p_SCs  = typeof(cache.p_SCloo[])[cache.p_SCloo[], cache.p_SClie...]
+  ohat_SCobj = _PCL.mergePointCloudsWithTransforms(cache.o_Ts_p, cache.p_SCs,)
   
-  o_SCa = _PCL.PointCloud()
-  for (i,o_T_p) in enumerate(o_Ts_p)
-    cat(
-      o_SCa,
-      _PCL.apply(M, o_T_p, p_SCs[i]);
-      reuse = true
-    )
-  end
-  
-  o_SCa
+  ohat_SCobj
 end
 
 function IncrementalInference.getSample(
@@ -222,59 +206,81 @@ function IncrementalInference.getSample(
 ) where {S <: ObjectAffordanceSubcloud}
   #
   M = getManifold(Pose3)
-  e0 = ArrayPartition(zeros(3),diagm(ones(3)))
+  e0 = ArrayPartition(SVector(1,1,1.),SMatrix{3,3}(diagm(ones(3))))
+  len = length(cf.cache.o_Ts_p)
+
+  PM = PowerManifold(M, NestedReplacingPowerRepresentation(), len)
+  Xs = Vector{typeof(e0)}(undef, len)
   
-  # TBD consider adding a perturbation before alignment
-  o_Tloo_p = cf.cache.o_Tloo_p[]
-  
-  # 
-  o_Ts_p = typeof(o_Tloo_p)[o_Tloo_p, cf.cache.o_Tlie_p...]
-  p_SCs = typeof(cf.cache.p_SCloo[])[cf.cache.p_SCloo[], cf.cache.p_SClie...]
-  
-  # all compute done once in preambleCache
-  oo_Tloo_p = if length(o_Ts_p) < 2
-    cf.cache.o_Tloo_p[]
-  else
-    _oo_Tloo_p, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
-      o_Ts_p,
-      p_SCs,
-      1;
+  # TODO, incorporate PointCloudPriors
+  for i in 1:len
+    # TBD consider adding a perturbation before alignment
+    oo_Tloo_p, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
+      cf.cache.o_Ts_p,
+      cf.cache.p_SCs,
+      i;
       updateTloo=false
     )
-    cf.cache.o_Tloo_p[] = _oo_Tloo_p
-    _oo_Tloo_p
+    # TODO confirm expansion around e0, since PosePose factors expand around `q`
+    X = log(M, e0, oo_Tloo_p)
+    # make sure these are static arrays
+    Xs[i] = ArrayPartition(SA[X.x[1]...], SMatrix{3,3}(X.x[2]))
   end
-  
   # FIXME, need better stochastic calculation and representative covariance result in strong unimodal cases -- see this `getMeasurementParametric``
-  
   # return the transform from pose to object as manifold tangent element
-  # TODO confirm expansion around e0, since PosePose factors expand around `q`
-  return log(M, e0, oo_Tloo_p) # inv(M, oo_Tloo_p))
+
+  return Xs
 end
+
+
+# FIXME, should be tangent vector not coordinates -- likely part of ManOpt upgrade
+function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(X, obj, qs...)
+  # copied from Pose3Pose3
+  PM = getManifold(cf.factor)
+  M = PM.manifold # getManifold(Pose3)
+  e0 = identity_element(M, obj)
+
+  # NOTE allocalte for vee! see Manifolds #412, fix for AD
+  q_Cqi = Vector{eltype(obj.x[1])}(undef, 6*length(qs))
+  # q_Cqi = zeros(6*length(qs))
+  for (i,qi) in enumerate(qs)
+    # work in the group
+    q̂i = Manifolds.compose(M, obj, exp(M, e0, X[i])) 
+    idx = 6*(i-1)
+    q_Xqi = log(M, qi, q̂i)
+    # vee!(M, q_Cqi_, qi, q_Xqi)
+    q_Ci = vee(M, qi, q_Xqi)
+    q_Cqi[idx+1:idx+6] = q_Ci
+  end
+  # coordinates of all transforms to obj from pose observations
+  return q_Cqi
+end
+
 
 IIF.getMeasurementParametric(oas::ObjectAffordanceSubcloud) = error("Special case on ObjectAffordanceSubcloud, use lower dispatch `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})` instead.")
 function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:ObjectAffordanceSubcloud}})
   @warn "Only artificial inverse covariance available for `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})`" maxlog=3
-  M = getManifold(getFactorType(foas))
+  # TODO this only work for SpecialEuclidean(3), and half implemented for SpecialEuclidean(2)
+  PM = getManifold(getFactorType(foas))
+  M = PM.manifold
+  D_ = manifold_dimension(M)
   e0 = ArrayPartition(SA[0;0;0.], SMatrix{3,3}([1 0 0; 0 1 0; 0 0 1.]))
-  iΣ = diagm([0.2*ones(3); 10*ones(3)])
-  o_T_p = IIF._getCCW(foas).dummyCache.o_Tloo_p[]
-  # FIXME, not happy with inv on o_T_p -- OAS factor should read from pose to object???
-  μ = vee(M, e0, log(M, e0, inv(M, o_T_p)))
+  # accept the preambleCache alignment for parametric solves
+  cache = IIF._getCCW(foas).dummyCache
+  len = length(cache.o_Ts_p)
+  μ = zeros(len*D_)
+  # stack all alignments between object and each of the poses to this factor
+  iΣ = zeros(len*D_,len*D_)
+  iΣ_ = diagm([0.2*ones(3); 10*ones(3)])
+  for (i,o_T_p) in enumerate(cache.o_Ts_p)
+    # FIXME, not happy with inv on o_T_p -- OAS factor should read from pose to object???
+    μ_ = vee(M, e0, log(M, e0, o_T_p )) #inv(M, o_T_p)))
+    idx = D_*(i-1)+1
+    μ[idx:(idx+D_-1)] = μ_
+    iΣ[idx:(idx+D_-1),idx:(idx+D_-1)] = iΣ_
+  end
+  # basically a sort of ProductManifold, but not sure if this interfaces with Manifolds corretly
   μ, iΣ
-end
-
-function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(X,p,q)
-  # copied from Pose3Pose3
-  M = getManifold(Pose3)
-  # work in the group
-  q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) 
-  #TODO allocalte for vee! see Manifolds #412, fix for AD
-  # Xc = zeros(6)
-  # vee!(M, Xc, q, log(M, q, q̂))
-  # FIXME, should be tangent vector not coordinates -- likely part of ManOpt upgrade
-  Xc = vee(M, q, log(M, q, q̂))
-  return Xc
 end
 
 
@@ -291,35 +297,47 @@ around the object variable `ovl`.
 """
 function makePointCloudObjectAffordance(
   dfg::AbstractDFG,
-  ovl::Symbol;
+  flb::Symbol;
   align=:fine # or :coarse
 )
-  M = getManifold(Pose3)
-  # the final output object point cloud object (in object frame)
-  ohat_SCs = _PCL.PointCloud()
-
-  for flb in ls(dfg, ovl)
-    # work from user and factor cache data
     fc = getFactor(dfg, flb)
-    # get a factor subcloud of the object in the pose frame
-    p_SC = IIF._getCCW(fc).dummyCache.p_SCloo[]
-    # get the transform from pose to object frame
-    o_T_p = if align == :fine
-      @warn("Using preamble fine alignment from $flb")
-      IIF._getCCW(fc).dummyCache.o_Tloo_p[]
-    else
-      getFactorType(dfg, flb).ohat_T_p
-    end
-    # convert the pose keyframe point cloud to 
-    ohat_SC = _PCL.apply(M, o_T_p, p_SC)
-    cat(
-      ohat_SCs,
-      ohat_SC;
-      reuse = true
-    )
+  cache = IIF._getCCW(fc).dummyCache
+
+  o_Ts_p = if align == :fine
+    @warn("Using preamble fine alignment from $flb")
+    cache.o_Ts_p
+  else
+    getFactorType(fc).ohat_Ts_p
   end
 
-  return ohat_SCs
+  ohat_SCobj = _PCL.mergePointCloudsWithTransforms(o_Ts_p, cache.p_SCs,)
+
+  # M = getManifold(Pose3)
+  # # the final output object point cloud object (in object frame)
+  # ohat_SCobj = _PCL.PointCloud()
+
+  # for flb in ls(dfg, ovl)
+  #   # work from user and factor cache data
+  #   fc = getFactor(dfg, flb)
+  #   # get a factor subcloud of the object in the pose frame
+  #   p_SC = IIF._getCCW(fc).dummyCache.p_SCloo[]
+  #   # get the transform from pose to object frame
+  #   o_T_p = if align == :fine
+  #     @warn("Using preamble fine alignment from $flb")
+  #     IIF._getCCW(fc).dummyCache.o_Tloo_p[]
+  #   else
+  #     getFactorType(dfg, flb).ohat_T_p
+  #   end
+  #   # convert the pose keyframe point cloud to 
+  #   ohat_SC = _PCL.apply(M, o_T_p, p_SC)
+  #   cat(
+  #     ohat_SCobj,
+  #     ohat_SC;
+  #     reuse = true
+  #   )
+  # end
+
+  return ohat_SCobj
 end
 
 
@@ -335,30 +353,64 @@ function generateObjectAffordanceFromWorld!(
   # add the object variable
   addVariable!(dfg, olb, Pose3)
   # add the object affordance subcloud factors
+  oas = ObjectAffordanceSubcloud()
+
   for vlb in vlbs
     # make sure PPE is set on this solveKey
     setPPE!(dfg, vlb, solveKey)
-    # 
     p_BBo, p_T_ohat = _PCL.transformFromWorldToLocal(dfg, vlb, w_BBobj; solveKey) # ohat_T_p
-    
     ohat_T_p_ = inv(M, p_T_ohat)
     ohat_T_p = ArrayPartition(SA[ohat_T_p_.x[1]...], SMatrix{3,3}(ohat_T_p_.x[2]))
-
-    oas = ObjectAffordanceSubcloud(;
-      p_BBo,
-      ohat_T_p,
-      p_PCloo_blobId = getDataEntry(dfg, vlb, pcBlobLabel).id,
-    )
-    addFactor!(dfg, [vlb; olb], oas)
+    p_PC_blobId = getDataEntry(dfg, vlb, pcBlobLabel).id
+    push!(oas.p_BBos, p_BBo)
+    push!(oas.ohat_Ts_p, ohat_T_p)
+    push!(oas.p_PC_blobIds, p_PC_blobId)
   end
   
-  # necessary workaround for rebuilding factor cache with all OAS factors present on object
-  for flb in ls(dfg, olb)
-    IIF.rebuildFactorMetadata!(dfg, getFactor(dfg, flb); _blockRecursionGradients=true)
-  end
-
-  olb
+  addFactor!(dfg, [olb; vlbs], oas)
+  
+  oas
 end
 
+
+function reducePoseGraphOnObjectAffordances!(
+  dest::AbstractDFG,
+  src::AbstractDFG,
+)
+  #
+  vlbs = ls(src) |> sortDFG
+  flbs = lsf(src)
+
+  # remove OAS types
+  oasls = filter(f->getFactorType(src,f) isa Caesar.ObjectAffordanceSubcloud, flbs)
+
+  # copy all but OAS factors
+  copyGraph!(dest, src, vlbs, setdiff(flbs,oasls))
+
+  # re-add OAS as pairwise PosePose
+  for oasl in oasls
+    fc = getFactor(src, oasl)
+    D_ = getManifold(getFactorType(fc)).manifold |> manifold_dimension
+    μ, iΣ = getMeasurementParametric(fc)
+    ovlbs = getVariableOrder(fc)
+    for (i,vl) in enumerate(ovlbs[2:end])
+      idx = D_*(i-1)
+      mn = μ[idx+1:idx+D_]
+      sm = iΣ[idx+1:idx+D_,idx+1:idx+D_] |> inv
+      addFactor!(dest, [ovlbs[1];vl], Pose3Pose3(MvNormal(mn, sm)); tags=[:OAS_POSEPOSE_REDUCTION])
+    end
+  end
+
+  dest
+end
+
+function reducePoseGraphOnObjectAffordances(
+  src::AbstractDFG;
+  graphinit::Bool=false
+)
+  dest = initfg()
+  getSolverParams(dest).graphinit = graphinit
+  reducePoseGraphOnObjectAffordances!(dest, src)
+end
 
 ##
