@@ -28,7 +28,7 @@ for mc in 1:10, ss in 420:20:420 #270:20:410
 
     # add unknown pose location
     addVariable!(fg, :x0, Pose2, tags=[:POSE])
-    addFactor!(fg, [:x0], PartialPrior(Normal(0.0, 0.01), (2,)) )
+    addFactor!(fg, [:x0], PartialPrior(Pose2, Normal(0.0, 0.01), (2,)) )
 
     # add two bearing only measurements
     addFactor!(fg, [:x0; :l0], Pose2Point2BearingRange(pcLeft, Rayleigh(1.0)))

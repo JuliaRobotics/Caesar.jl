@@ -203,10 +203,10 @@ MANYTREES2b = deepcopy(MANYTREES)
 for (id, trevo) in MANYTREES2b
   tre, vo = trevo
   for i in 1:length(tre.cliques)
-    if  tre.cliques[i].attributes["data"] isa BayesTreeNodeData
-      tre.cliques[i].attributes["data"] = convert(PackedBayesTreeNodeData, tre.cliques[i].attributes["data"])
+    if  getClique(tre,i).attributes["data"] isa BayesTreeNodeData
+      getClique(tre,i).attributes["data"] = convert(PackedBayesTreeNodeData, getClique(tre,i).attributes["data"])
     end
-    # stree.cliques[i].attributes["data"] = convert(PackedBayesTreeNodeData, tree.cliques[i].attributes["data"])
+    # getClique(stree,i).attributes["data"] = convert(PackedBayesTreeNodeData, getClique(tree,i).attributes["data"])
   end
 end
 
@@ -286,7 +286,7 @@ function getTreeCostBruteForce_02(tree;
   # frontal and number of children
   ARR = Tuple{Symbol, Int}[]
   for (cliqid, vex) in tree.cliques
-    afrtl = getCliqFrontalVarIds(tree.cliques[cliqid])[1]
+    afrtl = getCliqFrontalVarIds(getClique(tree,cliqid))[1]
     numch = length(getChildren(tree, afrtl))
     push!(ARR, (afrtl, numch))
   end

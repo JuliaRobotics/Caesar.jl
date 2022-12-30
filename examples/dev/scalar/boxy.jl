@@ -169,7 +169,7 @@ function newcallback_ex4(fg::AbstractDFG, lastPose::Symbol)
   
   # add a partial prior in Y if no full prior
   if 0 == length( intersect(ls(fg, lastPose), lsf(fg, PriorPoint2)) )
-    pp = PartialPrior(Normal(simPos[2], 0.1),(2,))
+    pp = PartialPrior(Position2, Normal(simPos[2], 0.1),(2,))
     @info "adding partial prior on simulated y position" lastPose simPos[2] 
     addFactor!(fg, [lastPose;], pp, graphinit=false, tags=[:EX4_PARTIALPRIOR_Y])
   end

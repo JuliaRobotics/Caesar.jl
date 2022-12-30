@@ -205,11 +205,10 @@ function IncrementalInference.getSample(
   cf::CalcFactor{S},
 ) where {S <: ObjectAffordanceSubcloud}
   #
-  M = getManifold(Pose3)
+  M = getManifold(cf.factor).manifold
   e0 = ArrayPartition(SVector(1,1,1.),SMatrix{3,3}(diagm(ones(3))))
   len = length(cf.cache.o_Ts_p)
-
-  PM = PowerManifold(M, NestedReplacingPowerRepresentation(), len)
+  
   Xs = Vector{typeof(e0)}(undef, len)
   
   # TODO, incorporate PointCloudPriors
@@ -228,7 +227,7 @@ function IncrementalInference.getSample(
   end
   # FIXME, need better stochastic calculation and representative covariance result in strong unimodal cases -- see this `getMeasurementParametric``
   # return the transform from pose to object as manifold tangent element
-
+  
   return Xs
 end
 
