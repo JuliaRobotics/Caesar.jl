@@ -12,6 +12,8 @@ Base.@kwdef struct _ObjAffSubcCache
   o_Ts_p::Vector{<:ArrayPartition}
   """ any object priors connected to the landmark variable """
   objPrior::Vector{Symbol} = Symbol[]
+  # TODO add logic or necessary registers for the common object reference frame
+  # TODO add registers for ObjectAffordancePrior
 end
 # """ extracted subclouds from connected LIE factors """
 # p_SClie::Vector{<:_PCL.PointCloud}

@@ -35,7 +35,7 @@ usrf(res, 1, pts, getVal(fg, :x4), getVal(fg, :l15))
 @show res
 
 @show fieldnames(getData(fg.g.vertices[100003]).fnc)
-@show getData(fg.g.vertices[100003]).fnc.particleidx
+@show getData(fg.g.vertices[100003]).fnc.particleidx[]
 
 v = getVert(fg, :l15, api=dlapi)
 getVal(fg, :l15, api=dlapi)
