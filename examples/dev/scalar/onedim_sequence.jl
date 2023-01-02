@@ -73,7 +73,7 @@ end
 
 function IIF.getSample(s::CalcFactor{<:ScalarFieldSequenceFactor1D}, N::Int=1)
     # locality if desired from current variable estimate, 
-    # X0 = getBelief(s.metadata.fullvariables[1]) # to consider only local map info
+    # X0 = getBelief(s.fullvariables[1]) # to consider only local map info
 
     # assuming user addConstant!(fg, :terrain, ScalarField1D(dem))
 

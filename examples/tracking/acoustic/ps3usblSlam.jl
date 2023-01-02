@@ -89,8 +89,8 @@ addFactor!(fg, [:l1], Prior(MvNormal(l1, lcov)))
 
 # add unknown pose location
 addVariable!(fg, :x0, Pose2, tags=[:POSE;])
-addFactor!(fg, [:x0], PartialPrior(Normal(0.0, 0.01), (2,)) )
-# addFactor!(fg, [:x0], PartialPrior(Uniform(-1.0, 0.5), (1,)) )
+addFactor!(fg, [:x0], PartialPrior(Pose2, Normal(0.0, 0.01), (2,)) )
+# addFactor!(fg, [:x0], PartialPrior(Pose2, Uniform(-1.0, 0.5), (1,)) )
 # addFactor!(fg, [:x0], PriorPose2(MvNormal(p0, pcov)))
 
 # add two bearing only measurements

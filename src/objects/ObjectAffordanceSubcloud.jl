@@ -12,6 +12,8 @@ Base.@kwdef struct _ObjAffSubcCache
   o_Ts_p::Vector{<:ArrayPartition}
   """ any object priors connected to the landmark variable """
   objPrior::Vector{Symbol} = Symbol[]
+  # TODO add logic or necessary registers for the common object reference frame
+  # TODO add registers for ObjectAffordancePrior
 end
 # """ extracted subclouds from connected LIE factors """
 # p_SClie::Vector{<:_PCL.PointCloud}
@@ -205,11 +207,10 @@ function IncrementalInference.getSample(
   cf::CalcFactor{S},
 ) where {S <: ObjectAffordanceSubcloud}
   #
-  M = getManifold(Pose3)
+  M = getManifold(cf.factor).manifold
   e0 = ArrayPartition(SVector(1,1,1.),SMatrix{3,3}(diagm(ones(3))))
   len = length(cf.cache.o_Ts_p)
-
-  PM = PowerManifold(M, NestedReplacingPowerRepresentation(), len)
+  
   Xs = Vector{typeof(e0)}(undef, len)
   
   # TODO, incorporate PointCloudPriors
@@ -228,7 +229,7 @@ function IncrementalInference.getSample(
   end
   # FIXME, need better stochastic calculation and representative covariance result in strong unimodal cases -- see this `getMeasurementParametric``
   # return the transform from pose to object as manifold tangent element
-
+  
   return Xs
 end
 

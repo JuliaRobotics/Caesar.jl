@@ -83,7 +83,7 @@ out = rand(bss,1000)
 Gadfly.plot(x=out,Geom.histogram,Coord.cartesian(xmin=0, xmax=100, ymin=0, ymax=400,fixed=true))
 
 
-pdict = getCliqParentMsgDown(tree,tree.cliques[5])
+pdict = getCliqParentMsgDown(tree,getClique(tree,5))
 mykde = pdict[:x4][1];
 
 
@@ -93,8 +93,8 @@ plt = Gadfly.plot(layer(x=xx,Geom.histogram(density=true)),Guide.xlabel("X,Y(m)"
 
 plt = plotKDEContour(mykde,xlbl="X (m)", ylbl="Y (m)",levels=4); plt |> PDF("/tmp/plt.pdf")
 
-getFrontals(tree.cliques[4])
-cdict = getCliqChildMsgsUp(tree,tree.cliques[4],BallTreeDensity)
+getFrontals(getClique(tree,4))
+cdict = getCliqChildMsgsUp(tree,getClique(tree,4),BallTreeDensity)
 
 mykde = cdict[:x4][1][1];
 # X1 = rand(mykde,400)

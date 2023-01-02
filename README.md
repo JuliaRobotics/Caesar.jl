@@ -96,7 +96,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [iif-ci-stb-url]: https://github.com/JuliaRobotics/IncrementalInference.jl/actions/workflows/ci.yml
 [iif-ver-img]: https://juliahub.com/docs/IncrementalInference/version.svg
 [iif-rel-url]: https://github.com/JuliaRobotics/IncrementalInference.jl/releases
-[iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones
+[iif-milestones]: https://github.com/JuliaRobotics/IncrementalInference.jl/milestones?state=closed
 [iif-cov-img]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl/coverage.svg?branch=master
 [iif-cov-url]: https://codecov.io/github/JuliaRobotics/IncrementalInference.jl?branch=master
 [iif-url]: http://www.github.com/JuliaRobotics/IncrementalInference.jl
@@ -107,7 +107,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [kde-build-url]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/actions/workflows/ci.yml
 [kde-url]: http://www.github.com/JuliaRobotics/KernelDensityEstimate.jl
 [kde-stable]: https://juliahub.com/docs/KernelDensityEstimate/version.svg
-[kde-milestones]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/milestones
+[kde-milestones]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/milestones?state=closed
 [kde-releases]: https://github.com/JuliaRobotics/KernelDensityEstimate.jl/releases
 
 [tf-cov-img]: https://codecov.io/github/dehann/TransformUtils.jl/coverage.svg?branch=master
@@ -116,7 +116,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [tf-build-url]: https://travis-ci.org/dehann/TransformUtils.jl
 [tf-url]: http://www.github.com/dehann/TransformUtils.jl
 [tf-stable]: https://img.shields.io/badge/2021Q2-v0.2.x-green.svg
-[tf-milestones]: https://github.com/JuliaRobotics/TransformUtils.jl/milestones
+[tf-milestones]: https://github.com/JuliaRobotics/TransformUtils.jl/milestones?state=closed
 [tf-releases]: https://github.com/JuliaRobotics/TransformUtils.jl/releases
 
 <!-- | [DrakeVisualizer.jl][dvis-url] | [![Build Status][dvis-build-img]][dvis-build-url] | [![codecov.io][dvis-cov-img]][dvis-cov-url] |
@@ -151,7 +151,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [dfg-cov-img]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl/coverage.svg?branch=master
 [dfg-cov-url]: https://codecov.io/github/JuliaRobotics/DistributedFactorGraphs.jl?branch=master
 [dfg-url]: http://www.github.com/JuliaRobotics/DistributedFactorGraphs.jl
-[dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones
+[dfg-milestones]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/milestones?state=closed
 [dfg-rel-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/releases
 
 [amp-cov-img]: https://codecov.io/github/JuliaRobotics/ApproxManifoldProducts.jl/coverage.svg?branch=master
@@ -161,7 +161,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [amp-url]: http://www.github.com/JuliaRobotics/ApproxManifoldProducts.jl
 [amp-stable]: https://juliahub.com/docs/ApproxManifoldProducts/version.svg
 [amp-ver-jhub]: https://juliahub.com/ui/Packages/ApproxManifoldProducts/FDvCH
-[amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones
+[amp-milestones]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/milestones?state=closed
 [amp-releases]: https://github.com/JuliaRobotics/ApproxManifoldProducts.jl/releases
 
 [optim-cov-img]: http://codecov.io/github/JuliaNLSolvers/Optim.jl/coverage.svg?branch=master
@@ -180,7 +180,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [fsm-build-url]: https://travis-ci.org/JuliaRobotics/FunctionalStateMachine.jl
 [fsm-url]: http://www.github.com/JuliaRobotics/FunctionalStateMachine.jl
 [fsm-stable]: https://img.shields.io/badge/2020Q3-v0.2.x-green.svg
-[fsm-milestones]: https://github.com/JuliaRobotics/FunctionalStateMachine.jl/milestones
+[fsm-milestones]: https://github.com/JuliaRobotics/FunctionalStateMachine.jl/milestones?state=closed
 [fsm-releases]: https://github.com/JuliaRobotics/FunctionalStateMachine.jl/releases
 
 [rp-url]: http://www.github.com/JuliaRobotics/RoMEPlotting.jl
@@ -189,7 +189,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [rp-build-img]: https://github.com/JuliaRobotics/RoMEPlotting.jl/actions/workflows/ci.yml/badge.svg
 [rp-build-url]: https://github.com/JuliaRobotics/RoMEPlotting.jl/actions/workflows/ci.yml
 [rp-ver-img]: https://juliahub.com/docs/RoMEPlotting/version.svg
-[rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones
+[rp-milestones]: https://github.com/JuliaRobotics/RoMEPlotting.jl/milestones?state=closed
 [rp-releases]: https://github.com/JuliaRobotics/RoMEPlotting.jl/releases
 
 [ijl-url]: https://github.com/JuliaImages/Images.jl
@@ -210,4 +210,4 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [apt-ci-dev-url]: https://travis-ci.org/JuliaRobotics/AprilTags.jl
 [apt-cov-img]: http://codecov.io/github/JuliaRobotics/AprilTags.jl/coverage.svg?branch=master
 [apt-cov-url]: http://codecov.io/github/JuliaRobotics/AprilTags.jl?branch=master
-[apt-milestones]: https://github.com/JuliaRobotics/AprilTags.jl/milestones
+[apt-milestones]: https://github.com/JuliaRobotics/AprilTags.jl/milestones?state=closed

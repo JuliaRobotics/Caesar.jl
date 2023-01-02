@@ -19,8 +19,8 @@ if TEST_GROUP in ["all", "basic_functional_group"]
     include("testStashing_SAP.jl")
     include("pcl/testBoundingBox.jl")
     include("pcl/testPointCloud2.jl")
-    include("testPose2AprilTag4Corner.jl")
     include("multilangzmq/runtests.jl")
+    include("testPose2AprilTag4Corner.jl")
 end
 
 

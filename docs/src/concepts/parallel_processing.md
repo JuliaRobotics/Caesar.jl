@@ -43,13 +43,14 @@ Julia has strong support for shared-memory multithreading.  The most sensible br
 
 A factor residual function itself can be broken down further into threaded operations.  For example, see many of the features available at [JuliaSIMD/LoopVectorization.jl](https://github.com/JuliaSIMD/LoopVectorization.jl).  It is recommended to keep memory allocations down to zero, since the solver code will call on the factor samping and residual funtions mulitple times in random access.  Also keep in mind the interaction between conventional thread pool balancing and the newer [PARTR cache senstive automated thread scheduling](https://julialang.org/blog/2019/07/multithreading/).
 
-### Threading Across Parallel Samples
+### Threading Across Parallel Samples [DEPRECATED -- REFACTORING]
 
 IncrementalInference.jl internally has the capability to span threads across samples in parallel computations during convolution operations.  Keep in mind which parts of residual factor computation is shared memory.  Likely the best course of action is for the factor definition to pre-allocate `Threads.nthreads()` many memory blocks for factor in-place operations.
 
 To use this feature, IIF must be told that there are no data race concerns with a factor.  The current API uses a keyword argument on [`addFactor!`](@ref):
 ```julia
-addFactor!(fg, [:x0; :x1], MyFactor(...); threadmodel=MultiThreaded)
+# NOTE, legacy `threadmodel=MultiThreaded` is being refactored with new `CalcFactor` pattern
+addFactor!(fg, [:x0; :x1], MyFactor(...))
 ```
 
 !!! warning
