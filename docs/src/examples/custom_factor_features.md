@@ -12,20 +12,24 @@ The `cfo` object contains the field `.factor::T` which is the type of the user f
 
 `CalcFactor` was introduced in `IncrementalInference v0.20` to consolidate and standardize a variety of features that had previously been diseparate and unwieldy.
 
+The MM-iSAMv2 algorithm relies on the Kolmogorov-Criteria as well as uncorrelated factor sampling.  This means that when generating fresh samples for a factor, those samples should not depend on values of variables in the graph or independent volatile variables.  That said, if you have a non-violating reason for using additional data in the factor sampling or residual calculation process, you can do so via the `cf::CalcFactor` interface.
+
+At present `cf` contains three main fields:
+- `cf.factor::MyFactor` the factor object as defined in the `struct` definition,
+- `cf.fullvariables`, which can be used for large data blob retrieval such as used in Terrain Relative Navigation (TRN).
+  - Also see [Stashing and Caching](@ref section_stash_and_cache)
+- `cf.cache`, which is user controlled via [`preambleCache`](@ref) function, see [Cache Section](@ref section_stash_and_cache).
+- `cf.manifold`, for the manifold the factor operates on.
+- `cf._sampleIdx` is the index of which computational sample is currently being calculated.
+
+```@docs
+IncrementalInference.CalcFactor
+```
+
 !!! tip
     Many factors already exists in `IncrementalInference`, `RoME`, and `Caesar`.  Please see their `src` directories for more details.
-### Factor Metadata
 
-The MM-iSAMv2 algorithm relies on the Kolmogorov-Criteria as well as uncorrelated factor sampling.  This means that when generating fresh samples for a factor, those samples should not depend on values of variables in the graph or independent volatile variables.  That said, if you are comfortable or have a valid reason for introducing correlation between the factor sampling process with values inside the factor graph then you can do so via the `cfo.CalcFactor` interface.
-
-At present `cfo` contains three main fields:
-- `cfo.factor::MyFactor` the factor object as defined in the `struct` definition,
-- `cfo.fullvariables`, which can be used for large data blob retrieval such as used in Terrain Relative Navigation (TRN).
-  - Also see [Stashing and Caching](@ref section_stash_and_cache)
-- `cfo._sampleIdx` is the index of which computational sample is currently being calculated.
-
-
-!!! note
+!!! warning
     The old `.specialSampler` framework has been replaced with the standardized `::CalcFactor` interface.  See http://www.github.com/JuliaRobotics/IIF.jl/issues/467 for details.
 
 ## Partial Factors
