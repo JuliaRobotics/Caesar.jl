@@ -86,7 +86,9 @@ end
 
 getManifold(oas::ObjectAffordanceSubcloud) = PowerManifold(getManifold(Pose3Pose3), NestedReplacingPowerRepresentation(), length(oas.ohat_Ts_p))
 
-struct ObjectModelPrior end
+struct ObjectModelPrior
+  pc::_PCL.PointCloud
+end
 
 function _findObjPriors(dfg::AbstractDFG, fvars::AbstractVector{<:DFGVariable})
   objlb = getLabel(fvars[1])
@@ -95,12 +97,11 @@ function _findObjPriors(dfg::AbstractDFG, fvars::AbstractVector{<:DFGVariable})
   objpriors = Symbol[]
   
   for flb in aflbs
-    neifc = getFactorType.(dfg,flb)
+    neifc = getFactorType(dfg,flb)
     # must be OAS factor
-    filter!(f->f isa MetaPrior{<:ObjectModelPrior}, neifc)
-    # filtering from all factors, skip this variable if not part of this object affordance 
-    0 === length(neifc) ? continue : nothing
-    push!(objpriors, flb)
+    if neifc isa MetaPrior{<:ObjectModelPrior}
+      push!(objpriors, flb)
+    end
   end
   
   @assert length(objpriors) < 2 "Only one MetaPrior can be added to the object variable."
@@ -180,7 +181,7 @@ function IncrementalInference.preambleCache(
       cache.o_Ts_p, 
       cache.p_SCs, 
       true, 3;
-      iterLength=length(cache.o_Ts_p)-length(cache.objPriors) # skip priors
+      iterLength=length(cache.o_Ts_p)-length(cache.objPrior) # skip priors
     )
   end
   # update the cached memory pointers  
@@ -209,7 +210,7 @@ function IncrementalInference.getSample(
   #
   M = getManifold(cf.factor).manifold
   e0 = ArrayPartition(SVector(1,1,1.),SMatrix{3,3}(diagm(ones(3))))
-  iterLength = length(cf.cache.o_Ts_p)-length(cf.cache.objPriors)
+  iterLength = length(cf.cache.o_Ts_p)-length(cf.cache.objPrior)
   
   Xs = Vector{typeof(e0)}(undef, iterLength)
   
@@ -311,32 +312,7 @@ function makePointCloudObjectAffordance(
     getFactorType(fc).ohat_Ts_p
   end
 
-  ohat_SCobj = _PCL.mergePointCloudsWithTransforms(o_Ts_p, cache.p_SCs,)
-
-  # M = getManifold(Pose3)
-  # # the final output object point cloud object (in object frame)
-  # ohat_SCobj = _PCL.PointCloud()
-
-  # for flb in ls(dfg, ovl)
-  #   # work from user and factor cache data
-  #   fc = getFactor(dfg, flb)
-  #   # get a factor subcloud of the object in the pose frame
-  #   p_SC = IIF._getCCW(fc).dummyCache.p_SCloo[]
-  #   # get the transform from pose to object frame
-  #   o_T_p = if align == :fine
-  #     @warn("Using preamble fine alignment from $flb")
-  #     IIF._getCCW(fc).dummyCache.o_Tloo_p[]
-  #   else
-  #     getFactorType(dfg, flb).ohat_T_p
-  #   end
-  #   # convert the pose keyframe point cloud to 
-  #   ohat_SC = _PCL.apply(M, o_T_p, p_SC)
-  #   cat(
-  #     ohat_SCobj,
-  #     ohat_SC;
-  #     reuse = true
-  #   )
-  # end
+  ohat_SCobj = _PCL.mergePointCloudsWithTransforms(o_Ts_p, cache.p_SCs)
 
   return ohat_SCobj
 end
@@ -348,11 +324,19 @@ function generateObjectAffordanceFromWorld!(
   vlbs::AbstractVector{<:Symbol},
   w_BBobj::_PCL.AbstractBoundingBox;
   solveKey::Symbol = :default,
-  pcBlobLabel = r"PCLPointCloud2"
+  pcBlobLabel = r"PCLPointCloud2",
+  modelprior::Union{Nothing,<:_PCL.PointCloud}=nothing
 )
   M = SpecialEuclidean(3) # getManifold(Pose3)
   # add the object variable
   addVariable!(dfg, olb, Pose3)
+
+  # if a model prior exists, add it here
+  if !isnothing(modelprior)
+    mpr = MetaPrior(;data=ObjectModelPrior(modelprior))
+    addFactor!(dfg, [olb;], mpr; tags=[:MODELPRIOR])
+  end
+
   # add the object affordance subcloud factors
   oas = ObjectAffordanceSubcloud()
 
