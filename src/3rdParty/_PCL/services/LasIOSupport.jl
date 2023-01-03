@@ -25,16 +25,17 @@ end
 # TODO, make save LAS
 function saveLAS(
   filepath::AbstractString,
-  pc::PointCloud,
+  pc::PointCloud;
+  scale=1000
 )
   
   # pts = (s->s.data[1:3]).(pc.points)
   x = map(p->p.data[1], pc.points)
   y = map(p->p.data[2], pc.points)
   z = map(p->p.data[3], pc.points)
-  pCloud = LasPoint2.(round.(1000*x),round.(1000*y),round.(1000*z), 1, 0, 0, 0, 0, 0, 1, 1, 1);
+  pCloud = LasPoint2.(round.(scale*x),round.(scale*y),round.(scale*z), 1, 0, 0, 0, 0, 0, 1, 1, 1);
 
-  tim = pc.header.stamp # now()
+  tim = unix2datetime(pc.header.stamp*1e-6) # now()
 
   file_source_id = 0
   global_encoding = 0
@@ -55,9 +56,9 @@ function saveLAS(
   data_record_length = 26
   records_count = length(pc.points)
   point_return_count = UInt32[0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000]
-  x_scale = 0.001
-  y_scale = 0.001
-  z_scale = 0.001
+  x_scale = 1/scale
+  y_scale = 1/scale
+  z_scale = 1/scale
   x_offset = 0.0
   y_offset = 0.0
   z_offset = 0.0
