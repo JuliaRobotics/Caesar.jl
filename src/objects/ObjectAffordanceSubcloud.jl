@@ -106,7 +106,7 @@ function _findObjPriors(dfg::AbstractDFG, fvars::AbstractVector{<:DFGVariable})
   
   @assert length(objpriors) < 2 "Only one MetaPrior can be added to the object variable."
   if length(objpriors) == 1
-    return objpriors, _PCL.getDataPointCloud(dfg, objpriors[1], r"PCLPointCloud2"; checkhash=false)
+    return objpriors, _PCL.getDataPointCloud(dfg, objpriors[1], r"PointCloudLAS"; checkhash=false)
   else
     return objpriors, nothing
   end
