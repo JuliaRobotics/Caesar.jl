@@ -86,42 +86,30 @@ end
 
 getManifold(oas::ObjectAffordanceSubcloud) = PowerManifold(getManifold(Pose3Pose3), NestedReplacingPowerRepresentation(), length(oas.ohat_Ts_p))
 
-# function _findOASPriors()
-#   # get all pose variables connected to this object
-#   loovlb = getLabel(fvars[1])
-#   olbl = getLabel(fvars[2])
-#   # will not yet include this new factor.
-#   aflb = ls(dfg,olbl)
-#   neis = ls.(dfg,aflb)
-#   avlbs = 0 < length(neis) ? union(neis...) : neis
-#   avlbs = setdiff(avlbs, [getLabel(fvars[2]);])
-#   # should make sure loovlb removed, since `IIF.rebuildFactorMetadata!` usage affects the lie loo caching steps
-#   lievlbs = setdiff(avlbs, [loovlb;])
-#   fc_lie_lbls = Symbol[]
+struct ObjectModelPrior end
+
+function _findObjPriors(dfg::AbstractDFG, fvars::AbstractVector{<:DFGVariable})
+  objlb = getLabel(fvars[1])
+  aflbs = ls(dfg,objlb)
   
-#   # define the LIE elements
-#   for liev in lievlbs
-#     neifl = intersect(aflb,ls(dfg,liev))
-#     # sibling factors
-#     neifc = getFactorType.(dfg,neifl)
-#     # must be OAS factor
-#     filter!(f->f isa ObjectAffordanceSubcloud, neifc)
-#     # filtering from all factors, skip this variable if not part of this object affordance 
-#     0 === length(neifl) ? continue : nothing
-#     nfclb = neifl[1]
-#     nfc = neifc[1]
-#     # collect factor labels
-#     push!(fc_lie_lbls, nfclb)
-
-#     # collect list of all subclouds
-#     # p_SC = _PCL.getDataSubcloudLocal(dfg, liev, fct.p_BBo, r"PCLPointCloud2"; checkhash=false)
-#     # push!(p_SClie, p_SC)
-#     # # collect list of all pose to object transforms
-#     # # FIXME, should start with current best guess provided by user
-#     # push!(o_Tlie_p, nfc.ohat_T_p) # e0
-#   end
-
-# end
+  objpriors = Symbol[]
+  
+  for flb in aflbs
+    neifc = getFactorType.(dfg,flb)
+    # must be OAS factor
+    filter!(f->f isa MetaPrior{<:ObjectModelPrior}, neifc)
+    # filtering from all factors, skip this variable if not part of this object affordance 
+    0 === length(neifc) ? continue : nothing
+    push!(objpriors, flb)
+  end
+  
+  @assert length(objpriors) < 2 "Only one MetaPrior can be added to the object variable."
+  if length(objpriors) == 1
+    return objpriors, _PCL.getDataPointCloud(dfg, objpriors[1], r"PCLPointCloud2"; checkhash=false)
+  else
+    return objpriors, nothing
+  end
+end
 
 
 function _defaultOASCache(
@@ -129,6 +117,7 @@ function _defaultOASCache(
   fvars::AbstractVector{<:DFGVariable}, 
   fct::ObjectAffordanceSubcloud
 )
+  
   # use concrete types
   _PCT(::PC) where {PC <: _PCL.PointCloud} = PC
   PCT = _PCT(_PCL.PointCloud())
@@ -155,7 +144,16 @@ function _defaultOASCache(
     push!(cache.p_SCs, p_SC)
     push!(cache.o_Ts_p, ohat_T_p)
   end
-
+  
+  # check and add any priors
+  objlbs, o_PC = _findObjPriors(dfg, fvars)
+  if 0 < length(objlbs)
+    # NOTE assume just one model prior allowed (if present)
+    push!(cache.p_SCs, o_PC)
+    push!(cache.o_Ts_p, e0)
+    push!(cache.objPrior, objlbs[1])
+  end
+  
   return cache
 end
 
@@ -177,10 +175,12 @@ function IncrementalInference.preambleCache(
   # finalize object point clouds for cache
   # align if there if there is at least one LIE transform and cloud available.
   if 0 < length(cache.o_Ts_p)
+    # manually set iterLength to skip possible priors, length(fvars) minus the object variable
     oo_Ts_p = _PCL.alignPointCloudsLOOIters!(
       cache.o_Ts_p, 
       cache.p_SCs, 
-      true, 3
+      true, 3;
+      iterLength=length(cache.o_Ts_p)-length(cache.objPriors) # skip priors
     )
   end
   # update the cached memory pointers  
@@ -209,12 +209,12 @@ function IncrementalInference.getSample(
   #
   M = getManifold(cf.factor).manifold
   e0 = ArrayPartition(SVector(1,1,1.),SMatrix{3,3}(diagm(ones(3))))
-  len = length(cf.cache.o_Ts_p)
+  iterLength = length(cf.cache.o_Ts_p)-length(cf.cache.objPriors)
   
-  Xs = Vector{typeof(e0)}(undef, len)
+  Xs = Vector{typeof(e0)}(undef, iterLength)
   
-  # TODO, incorporate PointCloudPriors
-  for i in 1:len
+  # NOTE cache.o_Ts_p and .p_SCs include the model priors at end of lists
+  for i in 1:iterLength
     # TBD consider adding a perturbation before alignment
     oo_Tloo_p, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
       cf.cache.o_Ts_p,

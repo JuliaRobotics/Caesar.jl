@@ -219,16 +219,21 @@ end
 
 Use sequential leave-one-out iteration strategy to self align 
 assuming the list of point clouds have good coverage of the same object.
+
+Notes
+- Leave-one-out on the first iterLength number of elements.
+  - Manually set `iterLength` to skip the tail elements of list -- e.g. skipping model priors.
 """
 function alignPointCloudsLOOIters!(
   o_Ts_l::AbstractVector{<:ArrayPartition},
   l_PCs::AbstractVector{<:_PCL.PointCloud},
   updateTloo::Bool=true,
-  MC::Int=3,
+  MC::Int=3;
+  iterLength::Int=length(l_PCs)
 )
   o_Ts_l_ = (updateTloo ? s->s : deepcopy)(o_Ts_l)
-
-  for m in 1:MC, k in 1:length(l_PCs)
+  
+  for m in 1:MC, k in 1:iterLength
     o_Tloo, o_PClie, o_PCloo = alignPointCloudLOO!(
       o_Ts_l_,
       l_PCs,
