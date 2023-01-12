@@ -272,7 +272,7 @@ function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:Obje
   μ = zeros(len*D_)
   # stack all alignments between object and each of the poses to this factor
   iΣ = zeros(len*D_,len*D_)
-  iΣ_ = diagm([0.2*ones(3); 10*ones(3)])
+  iΣ_ = diagm([10.0*ones(3); 0.2*ones(3)])
   for (i,o_T_p) in enumerate(cache.o_Ts_p)
     # FIXME, not happy with inv on o_T_p -- OAS factor should read from pose to object???
     μ_ = vee(M, e0, log(M, e0, o_T_p )) #inv(M, o_T_p)))
