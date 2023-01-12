@@ -9,10 +9,11 @@ Base.@kwdef struct _ObjAffSubcCache
   """ list of object subclouds in individual pose reference frames """
   p_SCs::Vector{<:_PCL.PointCloud}
   """ pose to object transforms for each indivudal pose variable """
-  o_Ts_p::Vector{<:ArrayPartition}
+  bb_Ts_p::Vector{<:ArrayPartition}
+  """ individual transforms back from each subcloud reference to a common object reference frame """
+  o_Ts_bb::Vector{<:ArrayPartition}
   """ any object priors connected to the landmark variable """
   objPrior::Vector{Symbol} = Symbol[]
-  # TODO add logic or necessary registers for the common object reference frame
   # TODO add registers for ObjectAffordancePrior
 end
 # """ extracted subclouds from connected LIE factors """
@@ -58,7 +59,7 @@ Base.@kwdef struct ObjectAffordanceSubcloud <: AbstractManifoldMinimize
   pose to object offset (or pose in object frame) to where the center of the object's bounding box. 
   I.e. the user provided initial guess of relative transform to go from pose to object frame.
   Note, the type here is restricted to StaticArrays only, to ensure best alignments are stored in the cache. """
-  ohat_Ts_p::Vector{typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.]))))} = Vector{typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.]))))}()
+  bb_Ts_p::Vector{typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.]))))} = Vector{typeof(ArrayPartition(SA[0.;0.;0.],SMatrix{3,3}(diagm([1;1;1.]))))}()
   """
   standard entry blob label where to find the point clouds -- 
   forced to use getData since factor cache needs to update when other factors are 
@@ -70,7 +71,7 @@ end
 # function Base.getproperty(oas::ObjectAffordanceSubcloud, f::Symbol)
 #   if f == :p_BBo || f == :p_PCloo_blobId
 #     getfield(oas, f)
-#   elseif f == :ohat_T_p
+#   elseif f == :bb_T_p
 #     # TODO, slow implementation which is inverting the homograph matrix twice.  Make better.
 #     ArrayPartition(oas.p_BBo.position, oas.p_BBo.rotation)
 #   else
@@ -80,11 +81,17 @@ end
 
 # ObjectAffordanceSubcloud(
 #   p_BBo::_PCL.AbstractBoundingBox, 
-#   ohat_T_p::ArrayPartition, 
+#   bb_T_p::ArrayPartition, 
 #   p_PCloo_blobId::UUID
-# ) = ObjectAffordanceSubcloud(p_BBo, ArrayPartition(SA[ohat_T_p.x[1]...],SMatrix{size(ohat_T_p.x[2])...}(ohat_T_p.x[2])), p_PCloo_blobId)
+# ) = ObjectAffordanceSubcloud(p_BBo, ArrayPartition(SA[bb_T_p.x[1]...],SMatrix{size(bb_T_p.x[2])...}(bb_T_p.x[2])), p_PCloo_blobId)
 
-getManifold(oas::ObjectAffordanceSubcloud) = PowerManifold(getManifold(Pose3Pose3), NestedReplacingPowerRepresentation(), length(oas.ohat_Ts_p))
+getManifold(
+  oas::ObjectAffordanceSubcloud
+) = PowerManifold(
+  getManifold(Pose3Pose3), 
+  NestedReplacingPowerRepresentation(), 
+  length(oas.bb_Ts_p)
+) # NOTE include length of priors which should also be used in measurement updates
 
 struct ObjectModelPrior
   pc::_PCL.PointCloud
@@ -126,12 +133,19 @@ function _defaultOASCache(
   
   # make static to ensure future updates replace (not all LIEs reuse the same) memory
   e0 = ArrayPartition( MVector(0.,0.,0.), MMatrix{3,3}(diagm(ones(3))) )
+  e0_ = ArrayPartition( SVector(0.,0.,0.), SMatrix{3,3}(diagm(ones(3))) )
   APT = typeof(e0)
-  o_Ts_p = APT[]
+  bb_Ts_p = Vector{APT}()
+  o_Ts_bb = Vector{typeof(e0_)}()
 
+  # pre-emptively search for any meta object priors
+  objlbs, o_PC = _findObjPriors(dfg, fvars)
+
+  # start populating the data containers with necessary point clouds and transforms
   cache = _ObjAffSubcCache(;
     p_SCs,
-    o_Ts_p
+    bb_Ts_p,
+    o_Ts_bb
   )
   
   # NOTE, obj variable first, pose variables are [2:end]
@@ -139,19 +153,21 @@ function _defaultOASCache(
     p_PC = _PCL.getDataPointCloud(dfg, vl, fct.p_PC_blobIds[i]; checkhash=false) |> _PCL.PointCloud
     p_SC = _PCL.getSubcloud(p_PC, fct.p_BBos[i])
 
-    ohat_T_p_ = fct.ohat_Ts_p[i]
-    ohat_T_p = ArrayPartition(MVector(ohat_T_p_.x[1]...), MMatrix{3,3}(ohat_T_p_.x[2]))
+    bb_T_p_ = fct.bb_Ts_p[i]
+    bb_T_p = ArrayPartition(
+      MVector(bb_T_p_.x[1]...), 
+      MMatrix{size(bb_T_p_.x[2])...}(bb_T_p_.x[2])
+    )
 
     push!(cache.p_SCs, p_SC)
-    push!(cache.o_Ts_p, ohat_T_p)
+    push!(cache.bb_Ts_p, bb_T_p)
   end
   
-  # check and add any priors
-  objlbs, o_PC = _findObjPriors(dfg, fvars)
+  # add any priors to back of list
   if 0 < length(objlbs)
     # NOTE assume just one model prior allowed (if present)
     push!(cache.p_SCs, o_PC)
-    push!(cache.o_Ts_p, e0)
+    push!(cache.bb_Ts_p, e0)
     push!(cache.objPrior, objlbs[1])
   end
   
@@ -175,15 +191,21 @@ function IncrementalInference.preambleCache(
   cache = _defaultOASCache(dfg, fvars, fct)
   # finalize object point clouds for cache
   # align if there if there is at least one LIE transform and cloud available.
-  if 0 < length(cache.o_Ts_p)
+  if 1 < length(cache.bb_Ts_p)
     # manually set iterLength to skip possible priors, length(fvars) minus the object variable
-    oo_Ts_p = _PCL.alignPointCloudsLOOIters!(
-      cache.o_Ts_p, 
+    _PCL.alignPointCloudsLOOIters!(
+      cache.bb_Ts_p, 
       cache.p_SCs, 
       true, 3;
-      iterLength=length(cache.o_Ts_p)-length(cache.objPrior) # skip priors
+      iterLength=length(cache.bb_Ts_p)-length(cache.objPrior) # skip priors
     )
   end
+
+  # Assume fully aligned subclouds, and generate a new common object reference frame
+  l_PC = _PCL.mergePointCloudsWithTransforms(cache.bb_Ts_p, cache.p_SCs)
+  l_T_o = _PCL.calcAxes3D(l_PC)
+  # Chain of frames: from world to pose to localBoundingBox to relativeAlignment to object
+
   # update the cached memory pointers  
   return cache
 end
@@ -199,7 +221,7 @@ function assembleObjectCache(
   flb::Symbol
 )
   cache = IIF._getCCW(dfg, flb).dummyCache
-  ohat_SCobj = _PCL.mergePointCloudsWithTransforms(cache.o_Ts_p, cache.p_SCs,)
+  ohat_SCobj = _PCL.mergePointCloudsWithTransforms(cache.bb_Ts_p, cache.p_SCs,)
   
   ohat_SCobj
 end
@@ -210,15 +232,21 @@ function IncrementalInference.getSample(
   #
   M = getManifold(cf.factor).manifold
   e0 = ArrayPartition(SVector(1,1,1.),SMatrix{3,3}(diagm(ones(3))))
-  iterLength = length(cf.cache.o_Ts_p)-length(cf.cache.objPrior)
+  iterLength = length(cf.cache.bb_Ts_p)-length(cf.cache.objPrior)
   
   Xs = Vector{typeof(e0)}(undef, iterLength)
-  
-  # NOTE cache.o_Ts_p and .p_SCs include the model priors at end of lists
+
+    # # TODO generate a common "object frame" -- not the collection of all local bounding box references.
+    # T_o = if 0 < length(cf.cache.objPrior)
+    #   # use prior reference as object frame reference
+    # else
+    # end
+
+  # NOTE cache.bb_Ts_p and .p_SCs include the model priors at end of lists
   for i in 1:iterLength
     # TBD consider adding a perturbation before alignment
     oo_Tloo_p, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
-      cf.cache.o_Ts_p,
+      cf.cache.bb_Ts_p,
       cf.cache.p_SCs,
       i;
       updateTloo=false
@@ -269,12 +297,13 @@ function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:Obje
   e0 = ArrayPartition(SA[0;0;0.], SMatrix{3,3}([1 0 0; 0 1 0; 0 0 1.]))
   # accept the preambleCache alignment for parametric solves
   cache = IIF._getCCW(foas).dummyCache
-  len = length(cache.o_Ts_p)
+  len = length(cache.bb_Ts_p)
   μ = zeros(len*D_)
   # stack all alignments between object and each of the poses to this factor
   iΣ = zeros(len*D_,len*D_)
-  iΣ_ = diagm([0.2*ones(3); 10*ones(3)])
-  for (i,o_T_p) in enumerate(cache.o_Ts_p)
+  iΣ_ = diagm([0.2*ones(3); 10*ones(3)])  ## FIXME
+  for (i,o_T_p) in enumerate(cache.bb_Ts_p)
+    # FIXME, should reference to a common object frame not the collection of bounding box references.
     # FIXME, not happy with inv on o_T_p -- OAS factor should read from pose to object???
     μ_ = vee(M, e0, log(M, e0, o_T_p )) #inv(M, o_T_p)))
     idx = D_*(i-1)+1
@@ -305,14 +334,14 @@ function makePointCloudObjectAffordance(
     fc = getFactor(dfg, flb)
   cache = IIF._getCCW(fc).dummyCache
 
-  o_Ts_p = if align == :fine
+  bb_Ts_p = if align == :fine
     @warn("Using preamble fine alignment from $flb")
-    cache.o_Ts_p
+    cache.bb_Ts_p
   else
-    getFactorType(fc).ohat_Ts_p
+    getFactorType(fc).bb_Ts_p
   end
 
-  ohat_SCobj = _PCL.mergePointCloudsWithTransforms(o_Ts_p, cache.p_SCs)
+  ohat_SCobj = _PCL.mergePointCloudsWithTransforms(bb_Ts_p, cache.p_SCs)
 
   return ohat_SCobj
 end
@@ -343,12 +372,12 @@ function generateObjectAffordanceFromWorld!(
   for vlb in vlbs
     # make sure PPE is set on this solveKey
     setPPE!(dfg, vlb, solveKey)
-    p_BBo, p_T_ohat = _PCL.transformFromWorldToLocal(dfg, vlb, w_BBobj; solveKey) # ohat_T_p
-    ohat_T_p_ = inv(M, p_T_ohat)
-    ohat_T_p = ArrayPartition(SA[ohat_T_p_.x[1]...], SMatrix{3,3}(ohat_T_p_.x[2]))
+    p_BBo, p_T_bb = _PCL.transformFromWorldToLocal(dfg, vlb, w_BBobj; solveKey) # bb_T_p
+    bb_T_p_ = inv(M, p_T_bb)
+    bb_T_p = ArrayPartition(SA[bb_T_p_.x[1]...], SMatrix{3,3}(bb_T_p_.x[2]))
     p_PC_blobId = getDataEntry(dfg, vlb, pcBlobLabel).id
     push!(oas.p_BBos, p_BBo)
-    push!(oas.ohat_Ts_p, ohat_T_p)
+    push!(oas.bb_Ts_p, bb_T_p)
     push!(oas.p_PC_blobIds, p_PC_blobId)
   end
   

@@ -1,6 +1,7 @@
 
 export getDataPointCloud, getPointCloud, getPointCloud2D, getPointCloud3D
 export findObjectVariablesFromWorld, previewObjectSubcloudInLocalFromWorld
+export calcAxes3D
 
 
 function getDataPointCloud(
@@ -301,6 +302,33 @@ function previewObjectSubcloudInLocalFromWorld(
   p_PC = getDataPointCloud(dfg, vlb, blobLabel; checkhash) |> _PCL.PointCloud  
   p_BBo, o_T_p = transformFromWorldToLocal(dfg, vlb, w_BBo; solveKey)
   getSubcloud(p_PC, p_BBo)
+end
+
+"""
+    $SIGNATURES
+
+Calculate a new local to object (`l_T_o`) axis frame for a point cloud using PCA.
+
+Example
+```julia
+M = SpecialEuclidean(3)
+l_T_o = _PCL.calcAxes3D(l_PC)
+
+# should return zeros when centered around the new object frame
+iszeros = _PCL.calcAxes3D(_PCL.apply(M, inv(M, l_T_o), pc))
+```
+"""
+function calcAxes3D(
+  pc::PointCloud
+)
+  #
+  xyz_ = (p->[p.x;p.y;p.z]).(pc.points)
+  @cast xyz[d,i] := xyz_[i][d]
+  mdl = fit(PCA, xyz; pratio=1)
+  R = projection(mdl)
+  μ = mean(xyz; dims=2)
+
+  ArrayPartition(SVector(μ...), SMatrix{3,3}(R))
 end
 
 #

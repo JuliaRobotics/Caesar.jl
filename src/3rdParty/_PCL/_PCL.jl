@@ -26,6 +26,7 @@ import GeometryBasics as GeoB # name collisions on members: Point, etc.
 using DistributedFactorGraphs
 using TensorCast
 using UUIDs
+using MultivariateStats
 
 # FIXME REMOVE, only used for legacy getDataPointCloud
 using Serialization 
