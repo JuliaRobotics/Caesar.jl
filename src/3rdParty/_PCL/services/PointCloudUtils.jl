@@ -120,21 +120,29 @@ end
 """
     $SIGNATURES
 
-Individually transform and return a merged list of point clouds into one common `::PointCloud` object.
+Individually transform and return a merged list of point clouds into a common `::PointCloud` in the local frame from caller.
 """
 function mergePointCloudsWithTransforms(
-  o_Ts_l::AbstractVector{<:ArrayPartition},
-  o_PCs::AbstractVector{<:_PCL.PointCloud},
+  l_Ts_bb::AbstractVector{<:ArrayPartition},
+  bb_PCs::AbstractVector{<:_PCL.PointCloud},
 )
   M = SpecialEuclidean(3)
-  o_PC = _PCL.PointCloud()
+  l_PC = _PCL.PointCloud()
 
-  for (i, l_SC) in enumerate( o_PCs )
-    o_SC = _PCL.apply(M, o_Ts_l[i], l_SC)
-    cat(o_PC, o_SC; reuse=true)
+  for (l_T_bb, bb_SC) in zip( l_Ts_bb, bb_PCs )
+    l_SC = _PCL.apply(M, l_T_bb, bb_SC)
+    cat(l_PC, l_SC; reuse=true)
   end
 
-  o_PC
+  # calculate new object frame
+  l_T_o = _PCL.calcAxes3D(l_PC)
+  o_T_l = inv(M, l_T_o)
+
+  # calculate transforms from subcloud frames in new object frame o_T_bb
+  o_Ts_li = map(s->compose(M, o_T_l, s), l_Ts_bb)
+
+  # TODO, change to o_PC
+  l_PC, o_Ts_li
 end
 
 """
@@ -170,7 +178,7 @@ function alignPointCloudLOO!(
   )
   # prep the leave in elements (all but loo element)
   lie = setdiff(1:length(l_PCs), [loo_idx;])
-  o_PClie = _PCL.mergePointCloudsWithTransforms(ohat_Ts_l[lie], l_PCs[lie])
+  o_PClie, o_Ts_li = _PCL.mergePointCloudsWithTransforms(ohat_Ts_l[lie], l_PCs[lie])
   
   # do the alignment of loo onto lie
   o_Tloo_l_ = if length(ohat_Ts_l) == 1
