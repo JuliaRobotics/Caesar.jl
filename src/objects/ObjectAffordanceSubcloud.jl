@@ -133,10 +133,10 @@ function _defaultOASCache(
   
   # make static to ensure future updates replace (not all LIEs reuse the same) memory
   e0 = ArrayPartition( MVector(0.,0.,0.), MMatrix{3,3}(diagm(ones(3))) )
-  e0_ = ArrayPartition( SVector(0.,0.,0.), SMatrix{3,3}(diagm(ones(3))) )
+  # e0_ = ArrayPartition( SVector(0.,0.,0.), SMatrix{3,3}(diagm(ones(3))) )
   APT = typeof(e0)
   lhat_Ts_p = Vector{APT}()
-  o_Ts_li = Vector{typeof(e0_)}()
+  o_Ts_li = Vector{APT}()
 
   # pre-emptively search for any meta object priors
   objlbs, o_PC = _findObjPriors(dfg, fvars)
@@ -204,7 +204,13 @@ function IncrementalInference.preambleCache(
   # Assume fully aligned subclouds, and generate a new common object reference frame
   l_PC, o_Ts_li = _PCL.mergePointCloudsWithTransforms(cache.lhat_Ts_p, cache.p_SCs)
   # Chain of frames: from world to pose to localBoundingBox to relativeAlignment to object
-  
+  resize!(cache.o_Ts_li, length(o_Ts_li))
+  for (i,oTl) in enumerate(o_Ts_li)
+    cache.o_Ts_li[i] = oTl
+    # cache.o_Ts_li[i].x[1][:] = oTl.x[1][:]
+    # cache.o_Ts_li[i].x[2][:] = oTl.x[2][:]
+  end
+
   # l_T_o = _PCL.calcAxes3D(l_PC)
   # M = getManifold(fvars[1])
   # # find all bb_T_o
@@ -236,10 +242,11 @@ function IncrementalInference.getSample(
   #
   M = getManifold(cf.factor).manifold
   e0 = ArrayPartition(SVector(1,1,1.),SMatrix{3,3}(diagm(ones(3))))
-  iterLength = length(cf.cache.lhat_Ts_p)-length(cf.cache.objPrior)
+  # LOO iterate over both relatives and priors
+  iterLength = length(cf.cache.lhat_Ts_p) # - length(cf.cache.objPrior)
   
-  Xs = Vector{typeof(e0)}(undef, iterLength)
-
+  # buffer to store LOO updated
+  lhat_Tloos_p = Vector{typeof(e0)}(undef, iterLength)
     # # TODO generate a common "object frame" -- not the collection of all local bounding box references.
     # T_o = if 0 < length(cf.cache.objPrior)
     #   # use prior reference as object frame reference
@@ -249,21 +256,30 @@ function IncrementalInference.getSample(
   # NOTE cache.lhat_Ts_p and .p_SCs include the model priors at end of lists
   for i in 1:iterLength
     # TBD consider adding a perturbation before alignment
-    oo_Tloo_p, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
+    # updateTloo=false to allow future multithreading support
+    lhat_Tloo_p, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
       cf.cache.lhat_Ts_p,
       cf.cache.p_SCs,
       i;
       updateTloo=false
     )
+    
     # TODO confirm expansion around e0, since PosePose factors expand around `q`
-    X = log(M, e0, oo_Tloo_p)
     # make sure these are static arrays
-    Xs[i] = ArrayPartition(SA[X.x[1]...], SMatrix{3,3}(X.x[2]))
+    lhat_Tloos_p[i] = ArrayPartition(SA[lhat_Tloo_p.x[1]...], SMatrix{3,3}(lhat_Tloo_p.x[2]))
   end
-  # FIXME, need better stochastic calculation and representative covariance result in strong unimodal cases -- see this `getMeasurementParametric``
-  # return the transform from pose to object as manifold tangent element
   
-  return Xs
+  # Assume fully aligned subclouds, and generate a new common object reference frame
+  l_PC, o_Ts_li = _PCL.mergePointCloudsWithTransforms(lhat_Tloos_p, cf.cache.p_SCs)
+
+  # TOWARDS stochastic calculation for a strong unimodal object frame -- see `getMeasurementParametric` for this factor
+  o_Xp = similar(lhat_Tloos_p)
+  for (i,lTp) in enumerate(lhat_Tloos_p) # cf.cache.o_Ts_li
+    o_Xp[i] = log(M, e0, Manifolds.compose(M, o_Ts_li[i], lTp))
+  end
+  
+  # return the transform from pose to object as manifold tangent element
+  return o_Xp # lhat_Ts_p
 end
 
 
@@ -306,10 +322,11 @@ function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:Obje
   # stack all alignments between object and each of the poses to this factor
   iΣ = zeros(len*D_,len*D_)
   iΣ_ = diagm([0.2*ones(3); 10*ones(3)])  ## FIXME
-  for (i,o_T_p) in enumerate(cache.lhat_Ts_p)
+  for (i,li_T_p) in enumerate(cache.lhat_Ts_p)
     # FIXME, should reference to a common object frame not the collection of bounding box references.
-    # FIXME, not happy with inv on o_T_p -- OAS factor should read from pose to object???
-    μ_ = vee(M, e0, log(M, e0, o_T_p )) #inv(M, o_T_p)))
+    # FIXME, not happy with inv on li_T_p -- OAS factor should read from pose to object???
+    # μ_ = vee(M, e0, log(M, e0, Manifolds.compose(M, cache.o_Ts_li[i], li_T_p) )) #inv(M, li_T_p)))
+    μ_ = vee(M, e0, log(M, e0, li_T_p )) #inv(M, li_T_p)))
     idx = D_*(i-1)+1
     μ[idx:(idx+D_-1)] = μ_
     iΣ[idx:(idx+D_-1),idx:(idx+D_-1)] = iΣ_
