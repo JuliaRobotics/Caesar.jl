@@ -283,30 +283,6 @@ function IncrementalInference.getSample(
 end
 
 
-# FIXME, should be tangent vector not coordinates -- likely part of ManOpt upgrade
-function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(o_Xps, w_T_o, w_Ts_p...)
-  # copied from Pose3Pose3
-  PM = getManifold(cf.factor)
-  M = PM.manifold # getManifold(Pose3)
-  e0 = identity_element(M, w_T_o)
-
-  # NOTE allocalte for vee! see Manifolds #412, fix for AD
-  p_Cphats = Vector{eltype(w_T_o.x[1])}(undef, 6*length(w_Ts_p))
-  # q_Cqi = zeros(6*length(w_Ts_p))
-  for (i,w_T_p) in enumerate(w_Ts_p)
-    # work in the group
-    w_T_phat = Manifolds.compose(M, w_T_o, exp(M, e0, o_Xps[i])) 
-    idx = 6*(i-1)
-    # expanding phat around p seems stange?
-    p_Xphat = log(M, w_T_p, w_T_phat)
-    p_Cphat = vee(M, w_T_p, p_Xphat)
-    p_Cphats[idx+1:idx+6] = p_Cphat
-  end
-  # coordinates of all transforms to obj from pose observations
-  return p_Cphats
-end
-
-
 IIF.getMeasurementParametric(oas::ObjectAffordanceSubcloud) = error("Special case on ObjectAffordanceSubcloud, use lower dispatch `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})` instead.")
 function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:ObjectAffordanceSubcloud}})
   @warn "Only artificial inverse covariance available for `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})`" maxlog=3
@@ -318,23 +294,48 @@ function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:Obje
   # accept the preambleCache alignment for parametric solves
   cache = IIF._getCCW(foas).dummyCache
   len = length(cache.lhat_Ts_p)
-  μ = zeros(len*D_)
+  w_Clps = zeros(len*D_)
   # stack all alignments between object and each of the poses to this factor
-  iΣ = zeros(len*D_,len*D_)
-  iΣ_ = diagm([10*ones(3); 0.2*ones(3)])  ## FIXME
+  w_iΣ = zeros(len*D_,len*D_)
+  # inverse covariance matrix, 1/5 on position, 1/0.1 for rotation
+  w_iΣ_ = diagm([0.2*ones(3); 10*ones(3)])  ## FIXME
   for (i,li_T_p) in enumerate(cache.lhat_Ts_p)
     # FIXME, should reference to a common object frame not the collection of bounding box references.
     # FIXME, not happy with inv on li_T_p -- OAS factor should read from pose to object???
-    # μ_ = vee(M, e0, log(M, e0, Manifolds.compose(M, cache.o_Ts_li[i], li_T_p) )) #inv(M, li_T_p)))
-    μ_ = vee(M, e0, log(M, e0, li_T_p )) #inv(M, li_T_p)))
+    # w_Clps_ = vee(M, e0, log(M, e0, Manifolds.compose(M, cache.o_Ts_li[i], li_T_p) )) #inv(M, li_T_p)))
+    w_Clp = vee(M, e0, log(M, e0, li_T_p )) #inv(M, li_T_p)))
     idx = D_*(i-1)+1
-    μ[idx:(idx+D_-1)] = μ_
-    iΣ[idx:(idx+D_-1),idx:(idx+D_-1)] = iΣ_
+    w_Clps[idx:(idx+D_-1)] = w_Clp
+    w_iΣ[idx:(idx+D_-1),idx:(idx+D_-1)] = w_iΣ_
   end
   # basically a sort of ProductManifold, but not sure if this interfaces with Manifolds corretly
-  μ, iΣ
+  w_Clps, w_iΣ
 end
 
+
+# FIXME, should be tangent vector not coordinates -- likely part of ManOpt upgrade
+function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(w_Xlps, w_T_o, w_Ts_p...)
+  # copied from Pose3Pose3
+  PM = getManifold(cf.factor)
+  M = PM.manifold # getManifold(Pose3)
+  e0 = identity_element(M, w_T_o)
+
+  # NOTE allocalte for vee! see Manifolds #412, fix for AD
+  p_Cphats = Vector{eltype(w_T_o.x[1])}(undef, 6*length(w_Ts_p))
+  # q_Cqi = zeros(6*length(w_Ts_p))
+  for (i,w_T_p) in enumerate(w_Ts_p)
+    # work in the group
+    l_T_p = exp(M, e0, w_Xlps[i])
+    w_T_phat = Manifolds.compose(M, w_T_o, l_T_p) # FIXME, single object frame, not local frame
+    idx = 6*(i-1)
+    # expanding phat around p seems stange?
+    p_Xphat = log(M, w_T_p, w_T_phat)
+    p_Cphat = vee(M, w_T_p, p_Xphat)
+    p_Cphats[idx+1:idx+6] = p_Cphat
+  end
+  # coordinates of all transforms to obj from pose observations
+  return p_Cphats
+end
 
 ## =================================================================================
 ## Object Utils
