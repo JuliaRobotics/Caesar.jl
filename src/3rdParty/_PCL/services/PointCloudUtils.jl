@@ -124,7 +124,8 @@ Individually transform and return a merged list of point clouds into a common `:
 """
 function mergePointCloudsWithTransforms(
   l_Ts_bb::AbstractVector{<:ArrayPartition},
-  bb_PCs::AbstractVector{<:_PCL.PointCloud},
+  bb_PCs::AbstractVector{<:_PCL.PointCloud};
+  flipXY::Bool=true
 )
   M = SpecialEuclidean(3)
   l_PC = _PCL.PointCloud()
@@ -135,7 +136,7 @@ function mergePointCloudsWithTransforms(
   end
 
   # calculate new object frame
-  l_T_o = _PCL.calcAxes3D(l_PC)
+  l_T_o = _PCL.calcAxes3D(l_PC; flipXY)
   o_T_l = inv(M, l_T_o)
 
   # calculate transforms from subcloud frames in new object frame o_T_bb
@@ -329,16 +330,33 @@ iszeros = _PCL.calcAxes3D(_PCL.apply(M, inv(M, l_T_o), pc))
 ```
 """
 function calcAxes3D(
-  pc::PointCloud
+  pc::PointCloud;
+  flipXY::Bool=false
 )
   #
   xyz_ = (p->[p.x;p.y;p.z]).(pc.points)
   @cast xyz[d,i] := xyz_[i][d]
   mdl = fit(PCA, xyz; pratio=1)
+  # negative because during testing found rotation to have determinant -1
   R = projection(mdl)
+  R .*= det(R) < 0 ? -1 : 1
+  @assert isapprox(1, det(R); atol=0.1) "PCA derived rotation matrix should have determinant 1, not $(det(R))."
   μ = mean(xyz; dims=2)
 
-  ArrayPartition(SVector(μ...), SMatrix{3,3}(R))
+  R_enh = if !flipXY
+    # keep the direct PCA R as is
+    R
+  else
+    # try pick a z (vertical) orientation closer to incoming transform
+    Mr = SpecialOrthogonal(3)
+    R0 = pc.sensor_orientation_
+    Rx = _Rot.RotX(pi)*R
+    Ry = _Rot.RotY(pi)*R
+    costs = [distance(Mr, R0, R); distance(Mr, R0, Rx); distance(Mr, R0, Ry)]
+    (R,Rx,Ry)[argmin(costs)]
+  end
+
+  ArrayPartition(SVector(μ...), SMatrix{3,3}(R_enh))
 end
 
 #

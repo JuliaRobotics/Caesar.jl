@@ -207,8 +207,6 @@ function IncrementalInference.preambleCache(
   resize!(cache.o_Ts_li, length(o_Ts_li))
   for (i,oTl) in enumerate(o_Ts_li)
     cache.o_Ts_li[i] = oTl
-    # cache.o_Ts_li[i].x[1][:] = oTl.x[1][:]
-    # cache.o_Ts_li[i].x[2][:] = oTl.x[2][:]
   end
 
   # l_T_o = _PCL.calcAxes3D(l_PC)
@@ -241,12 +239,12 @@ function IncrementalInference.getSample(
 ) where {S <: ObjectAffordanceSubcloud}
   #
   M = getManifold(cf.factor).manifold
-  e0 = ArrayPartition(SVector(1,1,1.),SMatrix{3,3}(diagm(ones(3))))
+  e0 = ArrayPartition(SVector(1,1,1.),SMatrix{3,3}(1,0,0,0,1,0,0,0,1.))
   # LOO iterate over both relatives and priors
   iterLength = length(cf.cache.lhat_Ts_p) # - length(cf.cache.objPrior)
   
   # buffer to store LOO updated
-  lhat_Tloos_p = Vector{typeof(e0)}(undef, iterLength)
+  lhat_TTloo_p = Vector{typeof(e0)}(undef, iterLength)
     # # TODO generate a common "object frame" -- not the collection of all local bounding box references.
     # T_o = if 0 < length(cf.cache.objPrior)
     #   # use prior reference as object frame reference
@@ -266,20 +264,20 @@ function IncrementalInference.getSample(
     
     # TODO confirm expansion around e0, since PosePose factors expand around `q`
     # make sure these are static arrays
-    lhat_Tloos_p[i] = ArrayPartition(SA[lhat_Tloo_p.x[1]...], SMatrix{3,3}(lhat_Tloo_p.x[2]))
+    lhat_TTloo_p[i] = ArrayPartition(SA[lhat_Tloo_p.x[1]...], SMatrix{3,3}(lhat_Tloo_p.x[2]))
   end
   
   # Assume fully aligned subclouds, and generate a new common object reference frame
-  l_PC, o_Ts_li = _PCL.mergePointCloudsWithTransforms(lhat_Tloos_p, cf.cache.p_SCs)
+  l_PC, o_Ts_li = _PCL.mergePointCloudsWithTransforms(lhat_TTloo_p, cf.cache.p_SCs)
 
   # TOWARDS stochastic calculation for a strong unimodal object frame -- see `getMeasurementParametric` for this factor
-  o_Xps = similar(lhat_Tloos_p)
-  for (i,lTp) in enumerate(lhat_Tloos_p) # cf.cache.o_Ts_li
-    o_Xps[i] = log(M, e0, Manifolds.compose(M, o_Ts_li[i], lTp))
+  w_XXop = similar(lhat_TTloo_p)
+  for (i,lTp) in enumerate(lhat_TTloo_p) # cf.cache.o_Ts_li
+    w_XXop[i] = log(M, e0, Manifolds.compose(M, o_Ts_li[i], lTp))
   end
   
   # return the transform from pose to object as manifold tangent element
-  return o_Xps # lhat_Ts_p
+  return w_XXop # lhat_Ts_p
 end
 
 
