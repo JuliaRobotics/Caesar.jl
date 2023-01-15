@@ -273,37 +273,37 @@ function IncrementalInference.getSample(
   l_PC, o_Ts_li = _PCL.mergePointCloudsWithTransforms(lhat_Tloos_p, cf.cache.p_SCs)
 
   # TOWARDS stochastic calculation for a strong unimodal object frame -- see `getMeasurementParametric` for this factor
-  o_Xp = similar(lhat_Tloos_p)
+  o_Xps = similar(lhat_Tloos_p)
   for (i,lTp) in enumerate(lhat_Tloos_p) # cf.cache.o_Ts_li
-    o_Xp[i] = log(M, e0, Manifolds.compose(M, o_Ts_li[i], lTp))
+    o_Xps[i] = log(M, e0, Manifolds.compose(M, o_Ts_li[i], lTp))
   end
   
   # return the transform from pose to object as manifold tangent element
-  return o_Xp # lhat_Ts_p
+  return o_Xps # lhat_Ts_p
 end
 
 
 # FIXME, should be tangent vector not coordinates -- likely part of ManOpt upgrade
-function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(X, obj, qs...)
+function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(o_Xps, w_T_o, w_Ts_p...)
   # copied from Pose3Pose3
   PM = getManifold(cf.factor)
   M = PM.manifold # getManifold(Pose3)
-  e0 = identity_element(M, obj)
+  e0 = identity_element(M, w_T_o)
 
   # NOTE allocalte for vee! see Manifolds #412, fix for AD
-  q_Cqi = Vector{eltype(obj.x[1])}(undef, 6*length(qs))
-  # q_Cqi = zeros(6*length(qs))
-  for (i,qi) in enumerate(qs)
+  p_Cphats = Vector{eltype(w_T_o.x[1])}(undef, 6*length(w_Ts_p))
+  # q_Cqi = zeros(6*length(w_Ts_p))
+  for (i,w_T_p) in enumerate(w_Ts_p)
     # work in the group
-    q̂i = Manifolds.compose(M, obj, exp(M, e0, X[i])) 
+    w_T_phat = Manifolds.compose(M, w_T_o, exp(M, e0, o_Xps[i])) 
     idx = 6*(i-1)
-    q_Xqi = log(M, qi, q̂i)
-    # vee!(M, q_Cqi_, qi, q_Xqi)
-    q_Ci = vee(M, qi, q_Xqi)
-    q_Cqi[idx+1:idx+6] = q_Ci
+    # expanding phat around p seems stange?
+    p_Xphat = log(M, w_T_p, w_T_phat)
+    p_Cphat = vee(M, w_T_p, p_Xphat)
+    p_Cphats[idx+1:idx+6] = p_Cphat
   end
   # coordinates of all transforms to obj from pose observations
-  return q_Cqi
+  return p_Cphats
 end
 
 
@@ -321,7 +321,7 @@ function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:Obje
   μ = zeros(len*D_)
   # stack all alignments between object and each of the poses to this factor
   iΣ = zeros(len*D_,len*D_)
-  iΣ_ = diagm([0.2*ones(3); 10*ones(3)])  ## FIXME
+  iΣ_ = diagm([10*ones(3); 0.2*ones(3)])  ## FIXME
   for (i,li_T_p) in enumerate(cache.lhat_Ts_p)
     # FIXME, should reference to a common object frame not the collection of bounding box references.
     # FIXME, not happy with inv on li_T_p -- OAS factor should read from pose to object???
