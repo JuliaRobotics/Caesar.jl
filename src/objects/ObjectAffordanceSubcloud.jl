@@ -282,7 +282,7 @@ function IncrementalInference.getSample(
   # TOWARDS stochastic calculation for a strong unimodal object frame -- see `getMeasurementParametric` for this factor
   w_Xops = similar(o_Tsloo_ohat)
   for (i,ohTp) in enumerate(cf.cache.ohat_Ts_p)
-    # FIXME THIS IS NOT RIGHT
+    # TODO confirm pose to init object reference frame transform logic
     w_Xops[i] = log(M, e0, Manifolds.compose(M, o_Tsloo_ohat[i], ohTp))
   end
   
