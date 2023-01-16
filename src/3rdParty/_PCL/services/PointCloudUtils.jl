@@ -1,6 +1,7 @@
 
 export getDataPointCloud, getPointCloud, getPointCloud2D, getPointCloud3D
 export findObjectVariablesFromWorld, previewObjectSubcloudInLocalFromWorld
+export calcAxes3D
 
 
 function getDataPointCloud(
@@ -119,21 +120,30 @@ end
 """
     $SIGNATURES
 
-Individually transform and return a merged list of point clouds into one common `::PointCloud` object.
+Individually transform and return a merged list of point clouds into a common `::PointCloud` in the local frame from caller.
 """
 function mergePointCloudsWithTransforms(
-  o_Ts_l::AbstractVector{<:ArrayPartition},
-  o_PCs::AbstractVector{<:_PCL.PointCloud},
+  l_Ts_bb::AbstractVector{<:ArrayPartition},
+  bb_PCs::AbstractVector{<:_PCL.PointCloud};
+  flipXY::Bool=true
 )
   M = SpecialEuclidean(3)
-  o_PC = _PCL.PointCloud()
+  l_PC = _PCL.PointCloud()
 
-  for (i, l_SC) in enumerate( o_PCs )
-    o_SC = _PCL.apply(M, o_Ts_l[i], l_SC)
-    cat(o_PC, o_SC; reuse=true)
+  for (l_T_bb, bb_SC) in zip( l_Ts_bb, bb_PCs )
+    l_SC = _PCL.apply(M, l_T_bb, bb_SC)
+    cat(l_PC, l_SC; reuse=true)
   end
 
-  o_PC
+  # calculate new object frame
+  l_T_o = _PCL.calcAxes3D(l_PC; flipXY)
+  o_T_l = inv(M, l_T_o)
+
+  # calculate transforms from subcloud frames in new object frame o_T_bb
+  o_Ts_li = map(s->compose(M, o_T_l, s), l_Ts_bb)
+
+  # TODO, change to o_PC
+  l_PC, o_Ts_li
 end
 
 """
@@ -149,8 +159,8 @@ Notes
 - The loo index argument is the element from lists which will be aligned to others.
 """
 function alignPointCloudLOO!(
-  ohat_Ts_l::AbstractVector{<:ArrayPartition},
-  l_PCs::AbstractVector{<:PointCloud},
+  ohat_Ts_r::AbstractVector{<:ArrayPartition},
+  r_PCs::AbstractVector{<:PointCloud},
   loo_idx::Int;
   updateTloo::Bool=false,
   verbose=false,
@@ -164,18 +174,19 @@ function alignPointCloudLOO!(
   # prep the leave one out element
   ohat_PCloo = _PCL.apply( 
     M,
-    ohat_Ts_l[loo_idx],
-    l_PCs[loo_idx]
+    ohat_Ts_r[loo_idx],
+    r_PCs[loo_idx]
   )
   # prep the leave in elements (all but loo element)
-  lie = setdiff(1:length(l_PCs), [loo_idx;])
-  o_PClie = _PCL.mergePointCloudsWithTransforms(ohat_Ts_l[lie], l_PCs[lie])
+  lie = setdiff(1:length(r_PCs), [loo_idx;])
+  o_PClie, o_Ts_li = _PCL.mergePointCloudsWithTransforms(ohat_Ts_r[lie], r_PCs[lie])
   
   # do the alignment of loo onto lie
-  o_Tloo_l_ = if length(ohat_Ts_l) == 1
-    ohat_Ts_l[1]
+  o_Tloo_r_ = if length(ohat_Ts_r) == 1
+    # take the subcloud reference frame r as the local frame
+    ohat_Ts_r[1]
   else
-    o_Hloo_ohat, Hpts_mov, status = _PCL.alignICP_Simple(
+    o_Hloo_ohat, _o_PCloo_, status = _PCL.alignICP_Simple(
       o_PClie,
       ohat_PCloo;
       verbose,
@@ -190,28 +201,29 @@ function alignPointCloudLOO!(
       SMatrix{D_,D_}(o_Hloo_ohat[1:D_,1:D_]) 
     )
     # that is, take the previous initial estimate and add the new alignment into it
-    Manifolds.compose( M, o_Tloo_ohat, ohat_Ts_l[loo_idx] )
+    Manifolds.compose( M, o_Tloo_ohat, ohat_Ts_r[loo_idx] )
   end
   # make sure we have a static array (this line might be a repeat, but likely worth it)
-  o_Tloo_l = ArrayPartition(
-    SVector(o_Tloo_l_.x[1]...), 
-    SMatrix{size(o_Tloo_l_.x[2])...}(o_Tloo_l_.x[2])
+  o_Tloo_r = ArrayPartition(
+    SVector(o_Tloo_r_.x[1]...), 
+    SMatrix{size(o_Tloo_r_.x[2])...}(o_Tloo_r_.x[2])
   )
 
   # to confirm the new alignment is good, transform loo cloud from scratch
+  # note should be the same as _o_PCloo_ above
   o_PCloo = _PCL.apply(
     M,
-    o_Tloo_l,
-    l_PCs[loo_idx]
+    o_Tloo_r,
+    r_PCs[loo_idx]
   )
   
   if updateTloo
     @info "updateTloo $loo_idx"
-    ohat_Ts_l[loo_idx] = o_Tloo_l
+    ohat_Ts_r[loo_idx] = o_Tloo_r
   end
   
   # TODO confirm expansion around e0, since PosePose factors expand around `q`
-  return o_Tloo_l, o_PClie, o_PCloo
+  return o_Tloo_r, o_PClie, o_PCloo
 end
 
 """
@@ -219,16 +231,21 @@ end
 
 Use sequential leave-one-out iteration strategy to self align 
 assuming the list of point clouds have good coverage of the same object.
+
+Notes
+- Leave-one-out on the first iterLength number of elements.
+  - Manually set `iterLength` to skip the tail elements of list -- e.g. skipping model priors.
 """
 function alignPointCloudsLOOIters!(
   o_Ts_l::AbstractVector{<:ArrayPartition},
   l_PCs::AbstractVector{<:_PCL.PointCloud},
   updateTloo::Bool=true,
-  MC::Int=3,
+  MC::Int=3;
+  iterLength::Int=length(l_PCs)
 )
   o_Ts_l_ = (updateTloo ? s->s : deepcopy)(o_Ts_l)
-
-  for m in 1:MC, k in 1:length(l_PCs)
+  
+  for m in 1:MC, k in 1:iterLength
     o_Tloo, o_PClie, o_PCloo = alignPointCloudLOO!(
       o_Ts_l_,
       l_PCs,
@@ -296,6 +313,50 @@ function previewObjectSubcloudInLocalFromWorld(
   p_PC = getDataPointCloud(dfg, vlb, blobLabel; checkhash) |> _PCL.PointCloud  
   p_BBo, o_T_p = transformFromWorldToLocal(dfg, vlb, w_BBo; solveKey)
   getSubcloud(p_PC, p_BBo)
+end
+
+"""
+    $SIGNATURES
+
+Calculate a new local to object (`l_T_o`) axis frame for a point cloud using PCA.
+
+Example
+```julia
+M = SpecialEuclidean(3)
+l_T_o = _PCL.calcAxes3D(l_PC)
+
+# should return zeros when centered around the new object frame
+iszeros = _PCL.calcAxes3D(_PCL.apply(M, inv(M, l_T_o), pc))
+```
+"""
+function calcAxes3D(
+  pc::PointCloud;
+  flipXY::Bool=false
+)
+  #
+  xyz_ = (p->[p.x;p.y;p.z]).(pc.points)
+  @cast xyz[d,i] := xyz_[i][d]
+  mdl = fit(PCA, xyz; pratio=1)
+  # negative because during testing found rotation to have determinant -1
+  R = projection(mdl)
+  R .*= det(R) < 0 ? -1 : 1
+  @assert isapprox(1, det(R); atol=0.1) "PCA derived rotation matrix should have determinant 1, not $(det(R))."
+  μ = mean(xyz; dims=2)
+
+  R_enh = if !flipXY
+    # keep the direct PCA R as is
+    R
+  else
+    # try pick a z (vertical) orientation closer to incoming transform
+    Mr = SpecialOrthogonal(3)
+    R0 = SMatrix{3,3,Float64}(pc.sensor_orientation_)
+    Rx = _Rot.RotX(pi)*R
+    Ry = _Rot.RotY(pi)*R
+    costs = [distance(Mr, R0, R); distance(Mr, R0, Rx); distance(Mr, R0, Ry)]
+    (R,Rx,Ry)[argmin(costs)]
+  end
+
+  ArrayPartition(SVector(μ...), SMatrix{3,3}(R_enh))
 end
 
 #
