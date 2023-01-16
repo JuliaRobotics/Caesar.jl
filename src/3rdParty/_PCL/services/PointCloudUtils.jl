@@ -352,8 +352,13 @@ function calcAxes3D(
     R0 = SMatrix{3,3,Float64}(pc.sensor_orientation_)
     Rx = _Rot.RotX(pi)*R
     Ry = _Rot.RotY(pi)*R
-    costs = [distance(Mr, R0, R); distance(Mr, R0, Rx); distance(Mr, R0, Ry)]
-    (R,Rx,Ry)[argmin(costs)]
+    costs = Float64[]
+    arr = Matrix{Float64}[R, Rx, Ry]
+    for r in arr
+      push!(costs, distance(Mr, R0, r))
+    end
+    # costs = [distance(Mr, R0, R); distance(Mr, R0, Rx); distance(Mr, R0, Ry)]
+    arr[argmin(costs)]
   end
 
   ArrayPartition(SVector(μ...), SMatrix{3,3}(R_enh))

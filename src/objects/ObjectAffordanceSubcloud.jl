@@ -416,7 +416,7 @@ function reducePoseGraphOnObjectAffordances!(
       idx = D_*(i-1)
       mn = μ[idx+1:idx+D_]
       sm = iΣ[idx+1:idx+D_,idx+1:idx+D_] |> inv
-      addFactor!(dest, [ovlbs[1];vl], Pose3Pose3(MvNormal(mn, sm)); tags=[:OAS_POSEPOSE_REDUCTION])
+      addFactor!(dest, [ovlbs[1]; vl], Pose3Pose3(MvNormal(mn, sm)); tags=[:OAS_POSEPOSE_REDUCTION])
     end
   end
 
