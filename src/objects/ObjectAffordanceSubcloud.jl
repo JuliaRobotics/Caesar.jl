@@ -238,7 +238,7 @@ function IncrementalInference.preambleCache(
   end
 
   # Assume fully aligned subclouds, and generate a new common object reference frame
-  o_PC, oo_Ts_ohat = _PCL.mergePointCloudsWithTransforms(cache.o_Ts_ohat, cache.ohat_SCs)
+  # o_PC, oo_Ts_ohat = _PCL.mergePointCloudsWithTransforms(cache.o_Ts_ohat, cache.ohat_SCs)
   # Chain of frames: from world to pose to local to objhat
 
   # update the cached memory pointers  
@@ -262,6 +262,7 @@ function IncrementalInference.getSample(
   for i in 1:iterLength
     # TBD consider adding a perturbation before alignment
     # updateTloo=false to allow future multithreading support
+    # updateTloo=false prevents solution from driftinging during solve, each sampling is equivalent from when object was created
     o_Tsloo_ohat_, o_PClie, o_PCloo = _PCL.alignPointCloudLOO!(
       cf.cache.o_Ts_ohat,
       cf.cache.ohat_SCs,
@@ -274,18 +275,19 @@ function IncrementalInference.getSample(
     o_Tsloo_ohat[i] = ArrayPartition(SA[o_Tsloo_ohat_.x[1]...], SMatrix{3,3}(o_Tsloo_ohat_.x[2]))
   end
   
-  # Assume fully aligned subclouds, and generate a new common object reference frame
-  o_PC, oo_Ts_ohat = _PCL.mergePointCloudsWithTransforms(o_Tsloo_ohat, cf.cache.ohat_SCs)
+  # FIXME, is it better to use new obj reference frame?
+    # # Assume fully aligned subclouds, and generate a new common object reference frame
+    # o_PC, oo_Ts_ohat = _PCL.mergePointCloudsWithTransforms(o_Tsloo_ohat, cf.cache.ohat_SCs)
 
   # TOWARDS stochastic calculation for a strong unimodal object frame -- see `getMeasurementParametric` for this factor
-  w_XXop = similar(o_Tsloo_ohat)
-  for (i,lTp) in enumerate(o_Tsloo_ohat)
+  w_Xops = similar(o_Tsloo_ohat)
+  for (i,ohTp) in enumerate(cf.cache.ohat_Ts_p)
     # FIXME THIS IS NOT RIGHT
-    w_XXop[i] = log(M, e0, Manifolds.compose(M, oo_Ts_ohat[i], lTp))
+    w_Xops[i] = log(M, e0, Manifolds.compose(M, o_Tsloo_ohat[i], ohTp))
   end
   
   # return the transform from pose to object as manifold tangent element
-  return w_XXop
+  return w_Xops
 end
 
 
@@ -319,7 +321,7 @@ end
 
 
 # FIXME, should be tangent vector not coordinates -- likely part of ManOpt upgrade
-function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(w_Xlps, w_T_o, w_Ts_p...)
+function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(w_Xops, w_T_o, w_Ts_p...)
   # copied from Pose3Pose3
   PM = getManifold(cf.factor)
   M = PM.manifold # getManifold(Pose3)
@@ -330,8 +332,8 @@ function (cf::CalcFactor{<:ObjectAffordanceSubcloud})(w_Xlps, w_T_o, w_Ts_p...)
   # q_Cqi = zeros(6*length(w_Ts_p))
   for (i,w_T_p) in enumerate(w_Ts_p)
     # work in the group
-    l_T_p = exp(M, e0, w_Xlps[i])
-    w_T_phat = Manifolds.compose(M, w_T_o, l_T_p) # FIXME, single object frame, not local frame
+    o_T_p = exp(M, e0, w_Xops[i])
+    w_T_phat = Manifolds.compose(M, w_T_o, o_T_p) # FIXME, single object frame, not local frame
     idx = 6*(i-1)
     # expanding phat around p seems stange?
     p_Xphat = log(M, w_T_p, w_T_phat)
