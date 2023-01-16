@@ -349,7 +349,7 @@ function calcAxes3D(
   else
     # try pick a z (vertical) orientation closer to incoming transform
     Mr = SpecialOrthogonal(3)
-    R0 = pc.sensor_orientation_
+    R0 = SMatrix{3,3,Float64}(pc.sensor_orientation_)
     Rx = _Rot.RotX(pi)*R
     Ry = _Rot.RotY(pi)*R
     costs = [distance(Mr, R0, R); distance(Mr, R0, Rx); distance(Mr, R0, Ry)]
