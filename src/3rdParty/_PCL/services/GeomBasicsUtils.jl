@@ -82,6 +82,9 @@ function getSubcloud(
 )
   objmask = map(s->_PCL.inside(mask, s.data[1:3]), pc_full.points)
   spt = (s->s.data[1:3]).(pc_full.points[objmask])
+  if 0 == length(spt)
+    return _PCL.PointCloud()
+  end
   @cast pts[i,d] := spt[i][d]
   _PCL.PointCloud(pts)
 end
