@@ -66,7 +66,7 @@ Related
 
 `AprilTags.detect`, `PackedPose2AprilTag4Corners`, [`generateCostAprilTagsPreimageCalib`](@ref)
 """
-struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: IIF.AbstractManifoldMinimize
+Base.@kwdef struct Pose2AprilTag4Corners{T <: SamplableBelief, F <: Function} <: IIF.AbstractManifoldMinimize
   # 4 corners as detected by AprilTags
   corners::NTuple{4,Tuple{Float64,Float64}}
   # homography matrix
