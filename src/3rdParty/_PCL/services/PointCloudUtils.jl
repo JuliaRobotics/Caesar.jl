@@ -54,14 +54,16 @@ getPointCloud2D(
   regex=r"PCLPointCloud2", 
   dims=1:2;
   minrange=0.0,
-  maxrange=999.
+  maxrange=999.,
+  kw...
 ) = getPointCloud(
   nfg, 
   label, 
   regex, 
   dims;
   minrange,
-  maxrange
+  maxrange,
+  kw...
 )
 
 getPointCloud3D(
@@ -70,14 +72,16 @@ getPointCloud3D(
   regex=r"PCLPointCloud2", 
   dims=1:3;
   minrange=0.0,
-  maxrange=999.
+  maxrange=999.,
+  kw...
 ) = getPointCloud(
   nfg, 
   label, 
   regex, 
   dims;
   minrange,
-  maxrange
+  maxrange,
+  kw...
 )
 
 """
@@ -96,6 +100,25 @@ function getDataSubcloudLocal(
 )
   #
   getSubcloud(pointcloud, p_BBo)
+end
+
+function getPointCloudInWorld(
+  dfg::AbstractDFG,
+  vlb::Symbol;
+  solveKey::Symbol=:default,
+  blobLabel::Regex=r"PCLPointCloud2",
+  checkhash::Bool=false
+)
+  #
+  M = SpecialEuclidean(3)
+  e0 = ArrayPartition(SA[0;0;0.], SMatrix{3,3}(1,0,0,0,1,0,0,0,1.))
+  p_PC = getDataPointCloud(dfg, vlb, blobLabel; checkhash) |> PointCloud
+  w_Cp = getPPESuggested(dfg, vlb, solveKey)
+  wTp = exp(M,e0,hat(M,e0,w_Cp))
+  # wTp = ArrayPartition(SVector(wTp_.x[1]), SMatrix{3,3}(wTp_.x[2]))
+  w_PC = apply(M, wTp, p_PC)
+  
+  w_PC
 end
 
 """
@@ -277,30 +300,48 @@ function findObjectVariablesFromWorld(
   selection::Symbol = :biggest,
   varPattern::Regex=r"x\d+",
   tags::AbstractVector{Symbol}=Symbol[],
-  varList::AbstractVector{Symbol} = sort(ls(dfg,varPattern;tags); lt=DFG.natural_lt),
+  minList::Int = 1,
+  maxList::Int = 999999,
+  minrange=1.0,
+  varList::AbstractVector{Symbol} = sort(ls(dfg,varPattern;tags); lt=DFG.natural_lt)[minList:maxList],
   blobLabel = r"PCLPointCloud2",
-  sortList::Bool=true
+  sortList::Bool=true,
+  checkhash::Bool=false
 )
   M = SpecialEuclidean(3)
-  objVars = Symbol[]
-  numPts = Int[]
-  
-  for vlb in varList
-    b_PC = _PCL.getDataPointCloud(dfg, vlb, blobLabel; checkhash=false) |> _PCL.PointCloud
-    # TODO use PPE after PPEs are updated to Manifolds representation
-    r_T_b = getBelief(dfg, vlb, solveKey) |> mean
-    r_PC = _PCL.apply(M, r_T_b, b_PC)
-    sc = _PCL.getSubcloud(r_PC, r_BBo)
-    numpts = length(sc)
-    if minpoints < numpts
-      push!(objVars, vlb)
-      push!(numPts, numpts)
+  len = length(varList)
+  objVars_ = Vector{Symbol}(undef, len)
+  numPts_  = Vector{Int}(undef, len)
+  tsk = Vector{Task}(undef, len)
+
+  for (i,vlb) in enumerate(varList)
+    tsk[i] = Threads.@spawn begin
+      # b_PC = _PCL.getDataPointCloud(dfg, $vlb, blobLabel; checkhash=false) |> _PCL.PointCloud
+      b_PC = _PCL.getPointCloud3D(dfg, $vlb, blobLabel; checkhash, minrange) |> _PCL.PointCloud
+      # TODO use PPE after PPEs are updated to Manifolds representation
+      r_T_b = getBelief(dfg, $vlb, solveKey) |> mean
+      r_PC = _PCL.apply(M, r_T_b, b_PC)
+      sc = _PCL.getSubcloud(r_PC, r_BBo)
+      numpts = length(sc)
+      if minpoints < numpts
+        objVars_[$i] = $vlb
+        numPts_[$i] = numpts
+      end
     end
   end
+  wait.(tsk)
   
-  
-  len = length(objVars)
+  objVars = Vector{Symbol}()
+  numPts  = Vector{Int}()
 
+  for i in 1:len
+    if isassigned(objVars_, i)
+      push!(objVars, objVars_[i])
+      push!(numPts, numPts_[i])
+    end
+  end
+  len = length(objVars)
+  
   ovlbs = if 0<len
     if selection == :spread
       # evenly select poses to object (assuming enough coverage)
@@ -411,10 +452,13 @@ end
 
 
 function Base.convert(
-  ::Type{<:PointCloud{<:PointXYZ{C,F1}}},
+  ::Type{<:PointCloud{<:PointXYZ{C,F1},S,M}},
   pc::PointCloud{<:PointXYZ{C,F2}}
-) where {C, F1 <: Real, F2 <: Real}
+) where {C, F1 <: Real, F2 <: Real, S, M}
   #
+  if 0 ==length(pc)
+    return PointCloud{PointXYZ{C, F1}, S, M}()
+  end
   xyz_ = (p->F1[F1(p.x);F1(p.y);F1(p.z)]).(pc.points)
   @cast xyz[i,d] := xyz_[i][d]
   PointCloud(xyz)

@@ -131,7 +131,9 @@ end
 function _defaultOASCache(
   dfg::AbstractDFG, 
   fvars::AbstractVector{<:DFGVariable}, 
-  fct::ObjectAffordanceSubcloud
+  fct::ObjectAffordanceSubcloud;
+  minrange::Real=0, 
+  maxrange::Real=999
 )
   
   # use concrete types
@@ -159,7 +161,10 @@ function _defaultOASCache(
   # NOTE, obj variable first, pose variables are [2:end]
   for (i,vl) in enumerate(getLabel.(fvars)[2:end])
     p_PC = _PCL.getDataPointCloud(dfg, vl, fct.p_PC_blobIds[i]; checkhash=false) |> _PCL.PointCloud
-    p_SC = _PCL.getSubcloud(p_PC, fct.p_BBos[i])
+    p_SC = _PCL.getSubcloud(p_PC, fct.p_BBos[i]; minrange, maxrange)
+    if 0 === length(p_SC)
+      error("ObjectAffordance factor cannot use empty subcloud on $(vl)")
+    end
 
     lhat_T_p_ = fct.lhat_Ts_p[i]
     lhat_T_p = ArrayPartition(
@@ -199,7 +204,7 @@ function IncrementalInference.preambleCache(
   fct::ObjectAffordanceSubcloud
 )
   # construct initialized cache object
-  cache = _defaultOASCache(dfg, fvars, fct)
+  cache = _defaultOASCache(dfg, fvars, fct; minrange=1.0)
 
   M = SpecialEuclidean(3)
   e0 = ArrayPartition(MVector(0,0,1.),MMatrix{3,3}(1,0,0,0,1,0,0,0,1.))
@@ -508,7 +513,9 @@ function protoObjectCheck!(
   minpoints=10000,
   solveKey::Symbol = :parametric,
   selection::Symbol = :biggest,
-  varList::AbstractVector{Symbol}=_PCL.findObjectVariablesFromWorld(dfg, w_BBo; solveKey, limit, minpoints, selection),
+  minList = 195, maxList = 230,
+  minrange = 0.75,
+  varList::AbstractVector{Symbol}=_PCL.findObjectVariablesFromWorld(dfg, w_BBo; solveKey, limit, minpoints, selection, minList, maxList),
   obl::Symbol = :testobj,
   align::Symbol = :fine
 )
