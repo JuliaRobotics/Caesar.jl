@@ -30,7 +30,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | [KernelDensityEstimate.jl][kde-url] | [![][kde-stable]][kde-releases] | [![Build Status][kde-build-img]][kde-build-url] | [![codecov.io][kde-cov-img]][kde-cov-url] | [![][mst-shield]][kde-milestones] |
 | [FunctionalStateMachine.jl][fsm-url] | [![][fsm-stable]][fsm-releases] | [![Build Status][fsm-build-img]][fsm-build-url] | [![codecov.io][fsm-cov-img]][fsm-cov-url] | [![][mst-shield]][fsm-milestones] |
 | [DistributedFactorGraphs.jl][dfg-url] | [![][dfg-ver-img]][dfg-rel-url] | [![Build Status][dfg-ci-dev-img]][dfg-ci-dev-url] | [![codecov.io][dfg-cov-img]][dfg-cov-url] | [![][mst-shield]][dfg-milestones] |
-| [LightGraphs.jl][lgraphs-url] | [![][lgjl-stable]][lgjl-releases] | [![Build Status][lgraphs-build-img]][lgraphs-build-url] | [![codecov.io][lgraphs-cov-img]][lgraphs-cov-url] | *upstream* |
+| [Graphs.jl][gjl-url] | [![][gjl-stable]][gjl-releases] | [![Build Status][gjl-build-img]][gjl-build-url] | [![codecov.io][gjl-cov-img]][gjl-cov-url] | *upstream* |
 | [Manifolds.jl][mani-url] | [![][mani-stable]][mani-releases] | [![Build Status][mani-build-img]][mani-build-url] | [![codecov.io][mani-cov-img]][mani-cov-url] | *upstream* |
 | [Optim.jl][optim-url] | [![][optim-stable]][optim-releases] | [![Build Status][optim-build-img]][optim-build-url] <br> [![Build Status][optim-img-windows]][optim-build-windows] | [![codecov.io][optim-cov-img]][optim-cov-url] | *upstream* |
 | [Images.jl][ijl-url] | [![][ijl-ver-stb-img]][ijl-ver-stb-url] | [![Build Status][ijl-action-img]][ijl-action-url] | [![][ijl-codecov-img]][ijl-codecov-url] | *upstream* |
@@ -115,7 +115,8 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [tf-build-img]: https://travis-ci.org/dehann/TransformUtils.jl.svg?branch=master
 [tf-build-url]: https://travis-ci.org/dehann/TransformUtils.jl
 [tf-url]: http://www.github.com/dehann/TransformUtils.jl
-[tf-stable]: https://img.shields.io/badge/2021Q2-v0.2.x-green.svg
+[tf-stable]: https://juliahub.com/docs/TransformUtils/version.svg
+[tf-ver-jhub]: https://juliahub.com/ui/Packages/TransformUtils/rxYuQ
 [tf-milestones]: https://github.com/JuliaRobotics/TransformUtils.jl/milestones?state=closed
 [tf-releases]: https://github.com/JuliaRobotics/TransformUtils.jl/releases
 
@@ -134,14 +135,14 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [mani-stable]: https://juliahub.com/docs/Manifolds/version.svg
 [mani-releases]: https://github.com/JuliaManifolds/Manifolds.jl/releases
 
-[lgraphs-cov-img]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl/coverage.svg?branch=master
-[lgraphs-cov-url]: https://codecov.io/github/JuliaGraphs/LightGraphs.jl?branch=master
-[lgraphs-build-img]: https://github.com/sbromberger/LightGraphs.jl/actions/workflows/ci.yml/badge.svg
-[lgraphs-build-url]: https://github.com/sbromberger/LightGraphs.jl/actions/workflows/ci.yml
-[lgraphs-url]: http://www.github.com/JuliaGraphs/LightGraphs.jl
-[lgjl-stable]: https://juliahub.com/docs/LightGraphs/version.svg
-[lgjl-ver-jhub]: https://juliahub.com/ui/Packages/LightGraphs/Xm08G
-[lgjl-releases]: https://github.com/JuliaGraphs/LightGraphs.jl/releases
+[gjl-cov-img]: https://codecov.io/github/JuliaGraphs/Graphs.jl/coverage.svg?branch=master
+[gjl-cov-url]: https://codecov.io/github/JuliaGraphs/Graphs.jl?branch=master
+[gjl-build-img]: https://github.com/JuliaGraphs/Graphs.jl/actions/workflows/ci.yml/badge.svg
+[gjl-build-url]: https://github.com/JuliaGraphs/Graphs.jl/actions/workflows/ci.yml
+[gjl-url]: http://www.github.com/JuliaGraphs/Graphs.jl
+[gjl-stable]: https://juliahub.com/docs/Graphs/version.svg
+[gjl-ver-jhub]: https://juliahub.com/ui/Packages/Graphs/VJ6vx
+[gjl-releases]: https://github.com/JuliaGraphs/Graphs.jl/releases
 
 [dfg-ci-dev-img]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml/badge.svg
 [dfg-ci-dev-url]: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/actions/workflows/ci.yml
@@ -179,7 +180,8 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [fsm-build-img]: https://travis-ci.org/JuliaRobotics/FunctionalStateMachine.jl.svg?branch=master
 [fsm-build-url]: https://travis-ci.org/JuliaRobotics/FunctionalStateMachine.jl
 [fsm-url]: http://www.github.com/JuliaRobotics/FunctionalStateMachine.jl
-[fsm-stable]: https://img.shields.io/badge/2020Q3-v0.2.x-green.svg
+[fsm-stable]: https://juliahub.com/docs/FunctionalStateMachine/version.svg
+[fsm-ver-jhub]: https://juliahub.com/ui/Packages/FunctionalStateMachine/CCDtr
 [fsm-milestones]: https://github.com/JuliaRobotics/FunctionalStateMachine.jl/milestones?state=closed
 [fsm-releases]: https://github.com/JuliaRobotics/FunctionalStateMachine.jl/releases
 

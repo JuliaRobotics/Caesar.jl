@@ -54,14 +54,16 @@ getPointCloud2D(
   regex=r"PCLPointCloud2", 
   dims=1:2;
   minrange=0.0,
-  maxrange=999.
+  maxrange=999.,
+  kw...
 ) = getPointCloud(
   nfg, 
   label, 
   regex, 
   dims;
   minrange,
-  maxrange
+  maxrange,
+  kw...
 )
 
 getPointCloud3D(
@@ -70,14 +72,16 @@ getPointCloud3D(
   regex=r"PCLPointCloud2", 
   dims=1:3;
   minrange=0.0,
-  maxrange=999.
+  maxrange=999.,
+  kw...
 ) = getPointCloud(
   nfg, 
   label, 
   regex, 
   dims;
   minrange,
-  maxrange
+  maxrange,
+  kw...
 )
 
 """
@@ -96,6 +100,25 @@ function getDataSubcloudLocal(
 )
   #
   getSubcloud(pointcloud, p_BBo)
+end
+
+function getPointCloudInWorld(
+  dfg::AbstractDFG,
+  vlb::Symbol;
+  solveKey::Symbol=:default,
+  blobLabel::Regex=r"PCLPointCloud2",
+  checkhash::Bool=false
+)
+  #
+  M = SpecialEuclidean(3)
+  e0 = ArrayPartition(SA[0;0;0.], SMatrix{3,3}(1,0,0,0,1,0,0,0,1.))
+  p_PC = getDataPointCloud(dfg, vlb, blobLabel; checkhash) |> PointCloud
+  w_Cp = getPPESuggested(dfg, vlb, solveKey)
+  wTp = exp(M,e0,hat(M,e0,w_Cp))
+  # wTp = ArrayPartition(SVector(wTp_.x[1]), SMatrix{3,3}(wTp_.x[2]))
+  w_PC = apply(M, wTp, p_PC)
+  
+  w_PC
 end
 
 """
@@ -164,7 +187,7 @@ function alignPointCloudLOO!(
   loo_idx::Int;
   updateTloo::Bool=false,
   verbose=false,
-  max_iterations = 25,
+  max_iterations = 40,
   correspondences = 500,
   neighbors = 50
 )
@@ -241,7 +264,8 @@ function alignPointCloudsLOOIters!(
   l_PCs::AbstractVector{<:_PCL.PointCloud},
   updateTloo::Bool=true,
   MC::Int=3;
-  iterLength::Int=length(l_PCs)
+  iterLength::Int=length(l_PCs),
+  lookws...
 )
   o_Ts_l_ = (updateTloo ? s->s : deepcopy)(o_Ts_l)
   
@@ -250,7 +274,8 @@ function alignPointCloudsLOOIters!(
       o_Ts_l_,
       l_PCs,
       k;
-      updateTloo=true
+      updateTloo=true,
+      lookws...
     )
   end
   
@@ -271,32 +296,70 @@ function findObjectVariablesFromWorld(
   r_BBo::_PCL.AbstractBoundingBox;
   solveKey::Symbol = :default,
   minpoints::Int=5000,
-  limit::Int=50,
+  limit::Int=10,
+  selection::Symbol = :biggest,
   varPattern::Regex=r"x\d+",
   tags::AbstractVector{Symbol}=Symbol[],
-  varList::AbstractVector{Symbol} = sort(ls(dfg,varPattern;tags); lt=DFG.natural_lt),
-  blobLabel = r"PCLPointCloud2"
+  minList::Int = 1,
+  maxList::Int = 999999,
+  minrange=1.0,
+  varList::AbstractVector{Symbol} = sort(ls(dfg,varPattern;tags); lt=DFG.natural_lt)[minList:maxList],
+  blobLabel = r"PCLPointCloud2",
+  sortList::Bool=true,
+  checkhash::Bool=false
 )
   M = SpecialEuclidean(3)
-  objVars = Symbol[]
-  
-  for vlb in varList
-    b_PC = _PCL.getDataPointCloud(dfg, vlb, blobLabel; checkhash=false) |> _PCL.PointCloud
-    # TODO use PPE after PPEs are updated to Manifolds representation
-    r_T_b = getBelief(dfg, vlb, solveKey) |> mean
-    r_PC = _PCL.apply(M, r_T_b, b_PC)
-    sc = _PCL.getSubcloud(r_PC, r_BBo)
-    if minpoints < length(sc)
-      push!(objVars, vlb)
+  len = length(varList)
+  objVars_ = Vector{Symbol}(undef, len)
+  numPts_  = Vector{Int}(undef, len)
+  tsk = Vector{Task}(undef, len)
+
+  for (i,vlb) in enumerate(varList)
+    tsk[i] = Threads.@spawn begin
+      # b_PC = _PCL.getDataPointCloud(dfg, $vlb, blobLabel; checkhash=false) |> _PCL.PointCloud
+      b_PC = _PCL.getPointCloud3D(dfg, $vlb, blobLabel; checkhash, minrange) |> _PCL.PointCloud
+      # TODO use PPE after PPEs are updated to Manifolds representation
+      r_T_b = getBelief(dfg, $vlb, solveKey) |> mean
+      r_PC = _PCL.apply(M, r_T_b, b_PC)
+      sc = _PCL.getSubcloud(r_PC, r_BBo)
+      numpts = length(sc)
+      if minpoints < numpts
+        objVars_[$i] = $vlb
+        numPts_[$i] = numpts
+      end
     end
   end
+  wait.(tsk)
   
+  objVars = Vector{Symbol}()
+  numPts  = Vector{Int}()
+
+  for i in 1:len
+    if isassigned(objVars_, i)
+      push!(objVars, objVars_[i])
+      push!(numPts, numPts_[i])
+    end
+  end
   len = length(objVars)
-  if 0<len
-    idx = unique(Int.(round.(1:len/limit:len)))
-    objVars[idx]
+  
+  ovlbs = if 0<len
+    if selection == :spread
+      # evenly select poses to object (assuming enough coverage)
+      idx = unique(Int.(round.(1:len/limit:len)))
+      objVars[idx]
+    elseif selection == :biggest
+      prm = sortperm(numPts; rev = true)
+      idx = 1:minimum([len; limit])
+      objVars[prm[idx]]
+    end
   else
     objVars
+  end
+  # usually sorted list is beter
+  if sortList
+    sort(ovlbs; lt=DFG.natural_lt)
+  else
+    ovlbs
   end
 end
 
@@ -334,6 +397,10 @@ function calcAxes3D(
   flipXY::Bool=false
 )
   #
+  if 0 === length(pc)
+    @warn "Cannot calculate a default axis for empty point cloud"
+    return ArrayPartition(SVector(0,0,0.), SMatrix{3,3}(1,0,0,0,1,0,0,0,1.))
+  end
   xyz_ = (p->[p.x;p.y;p.z]).(pc.points)
   @cast xyz[d,i] := xyz_[i][d]
   mdl = fit(PCA, xyz; pratio=1)
@@ -352,11 +419,49 @@ function calcAxes3D(
     R0 = SMatrix{3,3,Float64}(pc.sensor_orientation_)
     Rx = _Rot.RotX(pi)*R
     Ry = _Rot.RotY(pi)*R
-    costs = [distance(Mr, R0, R); distance(Mr, R0, Rx); distance(Mr, R0, Ry)]
-    (R,Rx,Ry)[argmin(costs)]
+    costs = Float64[]
+    arr = Matrix{Float64}[]
+    for r in [R, Rx, Ry]
+      try
+        push!(costs, distance(Mr, R0, r))
+        push!(arr, r)
+      catch e
+        # ERROR: ArgumentError: invalid index: nothing of type Nothing
+        # [6] log!(M::Rotations{3}, X::MMatrix{3, 3, Float64, 9}, p::SMatrix{3, 3, Float64, 9}, q::Matrix{Float64})
+        # @ Manifolds ~/.julia/packages/Manifolds/7JKQJ/src/manifolds/GeneralUnitaryMatrices.jl:560
+        e isa ArgumentError ? nothing : rethrow(e)
+      end
+    end
+    # costs = [distance(Mr, R0, R); distance(Mr, R0, Rx); distance(Mr, R0, Ry)]
+    arr[argmin(costs)]
   end
 
   ArrayPartition(SVector(μ...), SMatrix{3,3}(R_enh))
+end
+
+function Base.convert(
+  ::Type{<:PointXYZ{C,F1}},
+  pt::PointXYZ{C,F2}
+) where {C, F1 <: Real, F2 <: Real}
+  #
+  PointXYZ(;
+    color=pt.color, 
+    data=SVector{4,F1}(pt.data...)
+  )
+end
+
+
+function Base.convert(
+  ::Type{<:PointCloud{<:PointXYZ{C,F1},S,M}},
+  pc::PointCloud{<:PointXYZ{C,F2}}
+) where {C, F1 <: Real, F2 <: Real, S, M}
+  #
+  if 0 ==length(pc)
+    return PointCloud{PointXYZ{C, F1}, S, M}()
+  end
+  xyz_ = (p->F1[F1(p.x);F1(p.y);F1(p.z)]).(pc.points)
+  @cast xyz[i,d] := xyz_[i][d]
+  PointCloud(xyz)
 end
 
 #

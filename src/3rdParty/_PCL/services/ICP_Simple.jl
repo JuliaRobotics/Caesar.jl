@@ -342,7 +342,7 @@ function alignICP_Simple(
   hatp_pts_ = (s->s.data[1:3]).(hatp_PC.points)
   @cast hatp_pts[i,d] := hatp_pts_[i][d]
 
-  alignICP_Simple(p_pts, hatp_pts; kw...)
+  alignICP_Simple(p_pts, hatp_pts; kw...) # returns (p_H_Phat, php_PC, stat)
 end
 
 ##

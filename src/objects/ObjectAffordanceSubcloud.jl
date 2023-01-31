@@ -111,28 +111,29 @@ function _findObjPriors(dfg::AbstractDFG, fvars::AbstractVector{<:DFGVariable})
   aflbs = ls(dfg,objlb)
   
   objpriors = Symbol[]
+  op_PCs = []
   
   for flb in aflbs
     neifc = getFactorType(dfg,flb)
     # must be OAS factor
     if neifc isa MetaPrior{<:ObjectModelPrior}
       push!(objpriors, flb)
+      push!(op_PCs, neifc.data.pc)
     end
   end
   
   @assert length(objpriors) < 2 "Only one MetaPrior can be added to the object variable."
-  if length(objpriors) == 1
-    return objpriors, _PCL.getDataPointCloud(dfg, objpriors[1], r"PointCloudLAS"; checkhash=false)
-  else
-    return objpriors, nothing
-  end
+  # return objpriors
+  return objpriors, op_PCs
 end
 
 
 function _defaultOASCache(
   dfg::AbstractDFG, 
   fvars::AbstractVector{<:DFGVariable}, 
-  fct::ObjectAffordanceSubcloud
+  fct::ObjectAffordanceSubcloud;
+  minrange::Real=0, 
+  maxrange::Real=999
 )
   
   # use concrete types
@@ -160,7 +161,10 @@ function _defaultOASCache(
   # NOTE, obj variable first, pose variables are [2:end]
   for (i,vl) in enumerate(getLabel.(fvars)[2:end])
     p_PC = _PCL.getDataPointCloud(dfg, vl, fct.p_PC_blobIds[i]; checkhash=false) |> _PCL.PointCloud
-    p_SC = _PCL.getSubcloud(p_PC, fct.p_BBos[i])
+    p_SC = _PCL.getSubcloud(p_PC, fct.p_BBos[i]; minrange, maxrange)
+    if 0 === length(p_SC)
+      error("ObjectAffordance factor cannot use empty subcloud on $(vl)")
+    end
 
     lhat_T_p_ = fct.lhat_Ts_p[i]
     lhat_T_p = ArrayPartition(
@@ -173,13 +177,12 @@ function _defaultOASCache(
   end
   
   # any meta object priors
-  objlbs, op_PC = _findObjPriors(dfg, fvars)
+  objlbs, op_PCs = _findObjPriors(dfg, fvars)
 
   # add any priors to back of list
   if 0 < length(objlbs)
     # NOTE assume just one model prior allowed (if present)
-    push!(cache.lhat_SCs, op_PC)
-    # push!(cache.ohat_Ts_p, e0)
+    push!(cache.lhat_SCs, op_PCs[1])
     push!(cache.objPrior, objlbs[1])
   end
   
@@ -201,7 +204,7 @@ function IncrementalInference.preambleCache(
   fct::ObjectAffordanceSubcloud
 )
   # construct initialized cache object
-  cache = _defaultOASCache(dfg, fvars, fct)
+  cache = _defaultOASCache(dfg, fvars, fct; minrange=1.0)
 
   M = SpecialEuclidean(3)
   e0 = ArrayPartition(MVector(0,0,1.),MMatrix{3,3}(1,0,0,0,1,0,0,0,1.))
@@ -215,7 +218,8 @@ function IncrementalInference.preambleCache(
       cache.ohat_SCs, # assumed empty at start
       _PCL.apply(M, ohat_Ts_lhat[i], lhSC)
     )
-    ohat_T_p = Manifolds.compose(M, ohat_Ts_lhat[i], fct.lhat_Ts_p[i])
+    lhat_T_p = i <= length(fct.lhat_Ts_p) ? fct.lhat_Ts_p[i] : e0
+    ohat_T_p = Manifolds.compose(M, ohat_Ts_lhat[i], lhat_T_p)
     push!(
       cache.ohat_Ts_p,
       ArrayPartition(SVector(ohat_T_p.x[1]...), SMatrix{3,3}(ohat_T_p.x[2]))
@@ -361,7 +365,7 @@ function generateObjectAffordanceFromWorld!(
 )
   M = SpecialEuclidean(3) # getManifold(Pose3)
   # add the object variable
-  addVariable!(dfg, olb, Pose3)
+  addVariable!(dfg, olb, Pose3; tags=[:OBJECT_AFFORDANCE])
 
   # if a model prior exists, add it here
   if !isnothing(modelprior)
@@ -416,7 +420,7 @@ function reducePoseGraphOnObjectAffordances!(
       idx = D_*(i-1)
       mn = μ[idx+1:idx+D_]
       sm = iΣ[idx+1:idx+D_,idx+1:idx+D_] |> inv
-      addFactor!(dest, [ovlbs[1];vl], Pose3Pose3(MvNormal(mn, sm)); tags=[:OAS_POSEPOSE_REDUCTION])
+      addFactor!(dest, [ovlbs[1]; vl], Pose3Pose3(MvNormal(mn, sm)); tags=[:OAS_POSEPOSE_REDUCTION])
     end
   end
 
@@ -494,5 +498,50 @@ function makePointCloudObjectAffordance(
   return _SCobj
 end
 
+"""
+    $SIGNATURES
+
+prototype an object affordnace in graph before adding it permanently.  
+Adds then deletes from `dfg`.
+
+See also: [`generateObjectAffordanceFromWorld!`](@ref), [`makePointCloudObjectAffordance`](@ref), [`findObjectVariablesFromWorld`](@ref)
+"""
+function protoObjectCheck!(
+  dfg::AbstractDFG,
+  w_BBo::_PCL.OrientedBoundingBox;
+  limit=5, 
+  minpoints=10000,
+  solveKey::Symbol = :parametric,
+  selection::Symbol = :biggest,
+  minList = 195, maxList = 230,
+  minrange = 0.75,
+  varList::AbstractVector{Symbol}=_PCL.findObjectVariablesFromWorld(dfg, w_BBo; solveKey, limit, minpoints, selection, minList, maxList),
+  obl::Symbol = :testobj,
+  align::Symbol = :fine
+)
+  #
+  try
+    @info "Add Obj Aff to variable $obl" 
+    println.(varList)
+
+    generateObjectAffordanceFromWorld!(
+      dfg,
+      obl,
+      varList,
+      w_BBo;
+      solveKey
+    )
+    
+    flb = intersect((ls.(dfg, varList))..., ls(dfg, obl))[1]
+    obj_post = makePointCloudObjectAffordance(dfg, flb; align)
+    deleteFactor!(dfg, flb)
+    deleteVariable!(dfg, obl)
+
+    return obj_post
+  catch e
+    exists(dfg, obl) ? deleteVariable!(dfg, obl) : nothing
+    rethrow(e)
+  end
+end
 
 ##
