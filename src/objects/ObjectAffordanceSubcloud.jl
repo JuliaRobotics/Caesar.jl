@@ -75,6 +75,13 @@ Base.@kwdef struct ObjectAffordanceSubcloud <: AbstractManifoldMinimize
   added to the same object variable later by the user.  See [`IIF.rebuildFactorMetadata!`](@ref).
   FIXME: there is a hack, should not be using Serialization.deserialize on a PCLPointCloud2, see Caesar.jl#921 """
   p_PC_blobIds::Vector{UUID} = Vector{UUID}()
+  """
+  Object Affordance factor can be used to "close loops" if the user knows two object are the same.
+  E.g. say two OAS factors already make two :OBJECT_AFFORDANCE variables of the same physical object,
+  then creating a third and loop obj variable and third OAS factor with .loopObject=true against the 
+  existing two object variables should effectively "close the loop".
+  """
+  loopObject::Bool = false
 end
 
 # function Base.getproperty(oas::ObjectAffordanceSubcloud, f::Symbol)
@@ -127,6 +134,18 @@ function _findObjPriors(dfg::AbstractDFG, fvars::AbstractVector{<:DFGVariable})
   return objpriors, op_PCs
 end
 
+function _findObjAffSubcFactor(dfg::AbstractDFG, objl::Symbol)
+  # find oas factor label where objl is first variable
+  fcts = ls(dfg, objl)
+  # loop through all factors on this obj variable
+  for fc in getFactor.(dfg, fcts)
+    vo = getVariableOrder(fc)
+    # check that it is the OAS factor defining this vo[1] obj Variable 
+    if 1 < length(vo) && vo[1] == objl 
+      return getLabel(fc)
+    end
+  end
+end
 
 function _defaultOASCache(
   dfg::AbstractDFG, 
@@ -160,13 +179,26 @@ function _defaultOASCache(
   
   # NOTE, obj variable first, pose variables are [2:end]
   for (i,vl) in enumerate(getLabel.(fvars)[2:end])
-    p_PC = _PCL.getDataPointCloud(dfg, vl, fct.p_PC_blobIds[i]; checkhash=false) |> _PCL.PointCloud
-    p_SC = _PCL.getSubcloud(p_PC, fct.p_BBos[i]; minrange, maxrange)
+    lhat_T_p_, p_SC = if !fct.loopObject
+      p_PC = _PCL.getDataPointCloud(dfg, vl, fct.p_PC_blobIds[i]; checkhash=false) |> _PCL.PointCloud
+      p_SC_ = _PCL.getSubcloud(p_PC, fct.p_BBos[i]; minrange, maxrange)
+      fct.lhat_Ts_p[i], p_SC_
+    else
+      # use this when OAS is used to close loop on already existing ObjAff variables
+      @assert :OBJECT_AFFORDANCE in getTags(fvars[i]) "ObjAffSubc factor with .loopObject = true must connect to variables with the tag :OBJECT_AFFORDANCE"
+      foaslb = _findObjAffSubcFactor(dfg, vl)
+      # get the obj aff point cloud
+      o_SC_ = Caesar.assembleObjectCache(dfg, foaslb)
+      # transform obj aff clouds to same reference frame
+      w_T_o_ = fct.lhat_Ts_p[i] |> deepcopy # getBelief(dfg, vl) |> mean
+      # return transform to common frame and object frame subcloud
+      w_T_o_, o_SC_
+    end
+    # sanity check
     if 0 === length(p_SC)
       error("ObjectAffordance factor cannot use empty subcloud on $(vl)")
     end
-
-    lhat_T_p_ = fct.lhat_Ts_p[i]
+    # use mutable format
     lhat_T_p = ArrayPartition(
       MVector(lhat_T_p_.x[1]...), 
       MMatrix{size(lhat_T_p_.x[2])...}(lhat_T_p_.x[2])
@@ -361,7 +393,8 @@ function generateObjectAffordanceFromWorld!(
   w_BBobj::_PCL.AbstractBoundingBox;
   solveKey::Symbol = :default,
   pcBlobLabel = r"PCLPointCloud2",
-  modelprior::Union{Nothing,<:_PCL.PointCloud}=nothing
+  modelprior::Union{Nothing,<:_PCL.PointCloud}=nothing,
+  loopObject::Bool = false
 )
   M = SpecialEuclidean(3) # getManifold(Pose3)
   # add the object variable
@@ -374,20 +407,25 @@ function generateObjectAffordanceFromWorld!(
   end
 
   # add the object affordance subcloud factors
-  oas = ObjectAffordanceSubcloud()
+  oas = ObjectAffordanceSubcloud(;loopObject)
 
   for vlb in vlbs
     # make sure PPE is set on this solveKey
     setPPE!(dfg, vlb, solveKey)
-    # lhat frame is some local frame where object subclouds roughly fall together (could be host start from world frame)
-    p_BBo, p_T_lhat = _PCL.transformFromWorldToLocal(dfg, vlb, w_BBobj; solveKey)
-    lhat_T_p_ = inv(M, p_T_lhat)
-    # make immutable data type
-    lhat_T_p = ArrayPartition(SA[lhat_T_p_.x[1]...], SMatrix{3,3}(lhat_T_p_.x[2]))
-    p_PC_blobId = getDataEntry(dfg, vlb, pcBlobLabel).id
-    push!(oas.p_BBos, p_BBo)
-    push!(oas.lhat_Ts_p, lhat_T_p)
-    push!(oas.p_PC_blobIds, p_PC_blobId)
+    if !loopObject
+      # lhat frame is some local frame where object subclouds roughly fall together (could be host start from world frame)
+      p_BBo, p_T_lhat = _PCL.transformFromWorldToLocal(dfg, vlb, w_BBobj; solveKey)
+      lhat_T_p_ = inv(M, p_T_lhat)
+      # make immutable data type
+      lhat_T_p = ArrayPartition(SA[lhat_T_p_.x[1]...], SMatrix{3,3}(lhat_T_p_.x[2]))
+      p_PC_blobId = getDataEntry(dfg, vlb, pcBlobLabel).id
+      push!(oas.p_BBos, p_BBo)
+      push!(oas.lhat_Ts_p, lhat_T_p)
+      push!(oas.p_PC_blobIds, p_PC_blobId)
+    else
+      w_T_o = getBelief(dfg, vlb, solveKey) |> mean
+      push!(oas.lhat_Ts_p, w_T_o) # inv(M, w_T_o)) # do not understand the inverse?
+    end
   end
   
   addFactor!(dfg, [olb; vlbs], oas)
@@ -517,7 +555,8 @@ function protoObjectCheck!(
   minrange = 0.75,
   varList::AbstractVector{Symbol}=_PCL.findObjectVariablesFromWorld(dfg, w_BBo; solveKey, limit, minpoints, selection, minList, maxList),
   obl::Symbol = :testobj,
-  align::Symbol = :fine
+  align::Symbol = :fine,
+  loopObject::Bool=false,
 )
   #
   try
@@ -529,7 +568,8 @@ function protoObjectCheck!(
       obl,
       varList,
       w_BBo;
-      solveKey
+      solveKey,
+      loopObject
     )
     
     flb = intersect((ls.(dfg, varList))..., ls(dfg, obl))[1]

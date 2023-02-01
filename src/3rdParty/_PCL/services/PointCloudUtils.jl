@@ -303,7 +303,7 @@ function findObjectVariablesFromWorld(
   minList::Int = 1,
   maxList::Int = 999999,
   minrange=1.0,
-  varList::AbstractVector{Symbol} = sort(ls(dfg,varPattern;tags); lt=DFG.natural_lt)[minList:maxList],
+  varList::AbstractVector{Symbol} = sort(ls(dfg,varPattern;tags); lt=DFG.natural_lt)[minList:minimum([end;maxList])],
   blobLabel = r"PCLPointCloud2",
   sortList::Bool=true,
   checkhash::Bool=false
