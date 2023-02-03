@@ -82,6 +82,14 @@ Base.@kwdef struct ObjectAffordanceSubcloud <: AbstractManifoldMinimize
   existing two object variables should effectively "close the loop".
   """
   loopObject::Bool = false
+  """
+  Alignment parameters
+  """
+  alignParams::Dict{Symbol,Int} = Dict{Symbol,Int}(  
+                                    :max_iterations => 40,
+                                    :correspondences => 500,
+                                    :neighbors => 50
+                                  )
 end
 
 # function Base.getproperty(oas::ObjectAffordanceSubcloud, f::Symbol)
@@ -261,6 +269,14 @@ function IncrementalInference.preambleCache(
   for i in 1:length(cache.ohat_SCs)
     push!(cache.o_Ts_ohat, e0)
   end
+  k_ = keys(fct.alignParams) |> collect
+  v_ = values(fct.alignParams) |> collect
+  arr = []
+  for i in 1:length(k_)
+    push!(arr, (k_[i]=>v_[i]))
+  end
+  tup = (arr...,)
+  lookws = (;tup...)
 
   # finalize object point clouds for cache
   # align if there if there is at least one LIE transform and cloud available.
@@ -269,7 +285,8 @@ function IncrementalInference.preambleCache(
     _PCL.alignPointCloudsLOOIters!(
       cache.o_Ts_ohat, 
       cache.ohat_SCs, 
-      true
+      true;
+      lookws...   
     )
   end
 
@@ -394,8 +411,17 @@ function generateObjectAffordanceFromWorld!(
   solveKey::Symbol = :default,
   pcBlobLabel = r"PCLPointCloud2",
   modelprior::Union{Nothing,<:_PCL.PointCloud}=nothing,
-  loopObject::Bool = false
+  loopObject::Bool = false,
+  alignParams::Dict{Symbol,Int} = Dict{Symbol,Int}(  
+                                    :max_iterations => 40,
+                                    :correspondences => 500,
+                                    :neighbors => 50
+                                  )
 )
+  if 0 === length(vlbs)
+    @error "No variables from which to build and object affordance."
+    return nothing
+  end
   M = SpecialEuclidean(3) # getManifold(Pose3)
   # add the object variable
   addVariable!(dfg, olb, Pose3; tags=[:OBJECT_AFFORDANCE])
@@ -407,7 +433,7 @@ function generateObjectAffordanceFromWorld!(
   end
 
   # add the object affordance subcloud factors
-  oas = ObjectAffordanceSubcloud(;loopObject)
+  oas = ObjectAffordanceSubcloud(;loopObject, alignParams)
 
   for vlb in vlbs
     # make sure PPE is set on this solveKey
@@ -428,8 +454,13 @@ function generateObjectAffordanceFromWorld!(
     end
   end
   
-  addFactor!(dfg, [olb; vlbs], oas)
-  
+  try
+    addFactor!(dfg, [olb; vlbs], oas)
+  catch err
+    deleteVariable!(dfg, olb)
+    rethrow(err)
+  end
+
   oas
 end
 
@@ -556,7 +587,7 @@ function protoObjectCheck!(
   varList::AbstractVector{Symbol}=_PCL.findObjectVariablesFromWorld(dfg, w_BBo; solveKey, limit, minpoints, selection, minList, maxList),
   obl::Symbol = :testobj,
   align::Symbol = :fine,
-  loopObject::Bool=false,
+  oaskw...
 )
   #
   try
@@ -569,7 +600,7 @@ function protoObjectCheck!(
       varList,
       w_BBo;
       solveKey,
-      loopObject
+      oaskw...
     )
     
     flb = intersect((ls.(dfg, varList))..., ls(dfg, obl))[1]

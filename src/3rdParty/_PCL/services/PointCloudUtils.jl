@@ -433,7 +433,12 @@ function calcAxes3D(
       end
     end
     # costs = [distance(Mr, R0, R); distance(Mr, R0, Rx); distance(Mr, R0, Ry)]
-    arr[argmin(costs)]
+    if 0 < length(costs)
+      arr[argmin(costs)]
+    else
+      @warn "not able to approximate an orientation for the new object, using default idenity"
+      R0
+    end
   end
 
   ArrayPartition(SVector(μ...), SMatrix{3,3}(R_enh))
