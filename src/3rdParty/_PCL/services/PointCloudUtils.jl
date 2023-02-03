@@ -303,7 +303,7 @@ function findObjectVariablesFromWorld(
   minList::Int = 1,
   maxList::Int = 999999,
   minrange=1.0,
-  varList::AbstractVector{Symbol} = sort(ls(dfg,varPattern;tags); lt=DFG.natural_lt)[minList:maxList],
+  varList::AbstractVector{Symbol} = sort(ls(dfg,varPattern;tags); lt=DFG.natural_lt)[minList:minimum([end;maxList])],
   blobLabel = r"PCLPointCloud2",
   sortList::Bool=true,
   checkhash::Bool=false
@@ -433,7 +433,12 @@ function calcAxes3D(
       end
     end
     # costs = [distance(Mr, R0, R); distance(Mr, R0, Rx); distance(Mr, R0, Ry)]
-    arr[argmin(costs)]
+    if 0 < length(costs)
+      arr[argmin(costs)]
+    else
+      @warn "not able to approximate an orientation for the new object, using default idenity"
+      R0
+    end
   end
 
   ArrayPartition(SVector(μ...), SMatrix{3,3}(R_enh))
@@ -462,6 +467,54 @@ function Base.convert(
   xyz_ = (p->F1[F1(p.x);F1(p.y);F1(p.z)]).(pc.points)
   @cast xyz[i,d] := xyz_[i][d]
   PointCloud(xyz)
+end
+
+"""
+    $SIGNATURES
+
+Return a PointCloud with all the points in the world frame coordinates, given the solveKey.
+
+See also: [`saveLAS`](@ref)
+"""
+function exportPointCloudWorld(
+  dfg::AbstractDFG;
+  varList::AbstractVector{Symbol} = sort(ls(dfg); lt=DFG.natural_lt),
+  solveKey::Symbol = :default,
+  # TODO update to blobs saved as LAS files instead
+  getpointcloud::Function = (v)->_PCL.getDataPointCloud(dfg, v, Regex("PCLPointCloud2"); checkhash=false),
+  downsample::Int=1,
+  minrange = 0.0,
+  maxrange = 9999.0,
+)
+  M = SpecialEuclidean(3)
+  ϵ0 = ArrayPartition(SVector(0,0,0.),SMatrix{3,3}(1,0,0,0,1,0,0,0,1.)) # MJL.identity_element(M)
+  pc_map = _PCL.PointCloud()
+  # loop through all variables in the given list
+  for vl in varList
+    pc_ = getpointcloud(vl)
+    if pc_ isa Nothing
+      @warn "Skipping variable without point cloud" vl
+      continue
+    end
+    pc = PointCloud(pc_)
+    
+    pts_a = (s->[s.x;s.y;s.z]).(pc.points)
+    pts_a = _filterMinRange(pts_a, minrange, maxrange)
+    pc = PointCloud(pts_a)
+
+    v = getVariable(dfg, Symbol(vl))
+    if !(:parametric in listSolveKeys(v))
+      @warn "Skipping $vl which does not have solveKey :parametric"
+      continue
+    end
+    w_Cwp = calcPPE(v; solveKey).suggested
+    wPp = Manifolds.exp(M,ϵ0,Manifolds.hat(M,ϵ0,w_Cwp))
+    # wPp = getSolverData(v, solveKey).val[1]
+    wPC = apply(M, wPp, pc)
+    cat(pc_map, wPC; reuse=true)
+  end
+
+  pc_map
 end
 
 #

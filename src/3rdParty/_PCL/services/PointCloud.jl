@@ -216,14 +216,25 @@ function PointCloud(
 end
 
 function PointCloud(
-    xyz::AbstractMatrix{<:Real};
-    kwargs...
-  )
+  xyz::AbstractMatrix{<:Real};
+  kwargs...
+)
   #
   PointCloud(
     view(xyz,:,1),
     view(xyz,:,2),
     view(xyz,:,3);
+    kwargs...
+  )
+end
+
+function PointCloud(
+  xyz::AbstractVector{<:AbstractVector{<:Real}};
+  kwargs...
+)
+  @cast mat[i,d] := xyz[i][d]
+  PointCloud(
+    mat;
     kwargs...
   )
 end
