@@ -480,7 +480,8 @@ function exportPointCloudWorld(
   dfg::AbstractDFG;
   varList::AbstractVector{Symbol} = sort(ls(dfg); lt=DFG.natural_lt),
   solveKey::Symbol = :default,
-  getpointcloud::Function = (v)->_PCL.getDataPointCloud(dfg, v, Regex("PCLPointCloud2"); checkhash=false);
+  # TODO update to blobs saved as LAS files instead
+  getpointcloud::Function = (v)->_PCL.getDataPointCloud(dfg, v, Regex("PCLPointCloud2"); checkhash=false),
   downsample::Int=1,
   minrange = 0.0,
   maxrange = 9999.0,
