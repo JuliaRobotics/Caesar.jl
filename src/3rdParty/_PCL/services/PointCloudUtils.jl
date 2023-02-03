@@ -476,7 +476,7 @@ Return a PointCloud with all the points in the world frame coordinates, given th
 
 See also: [`saveLAS`](@ref)
 """
-function exportPointCloudsInWorld(
+function exportPointCloudWorld(
   dfg::AbstractDFG;
   varList::AbstractVector{Symbol} = sort(ls(dfg); lt=DFG.natural_lt),
   solveKey::Symbol = :default,
@@ -507,7 +507,7 @@ function exportPointCloudsInWorld(
       continue
     end
     w_Cwp = calcPPE(v; solveKey).suggested
-    wPp = Manifolds.exp(M,ϵ0,MJL.hat(M,ϵ0,w_Cwp))
+    wPp = Manifolds.exp(M,ϵ0,Manifolds.hat(M,ϵ0,w_Cwp))
     # wPp = getSolverData(v, solveKey).val[1]
     wPC = apply(M, wPp, pc)
     cat(pc_map, wPC; reuse=true)

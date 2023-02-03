@@ -44,6 +44,7 @@ import IncrementalInference: ArrayPartition
 # export PCLHeader, PointCloud
 # export AbstractBoundingBox, AxisAlignedBoundingBox, OrientedBoundingBox
 # export getCorners
+# export exportPointCloudWorld
 
 # bring in the types
 include("entities/PCLTypes.jl")
