@@ -216,17 +216,22 @@ function PointCloud(
 end
 
 function PointCloud(
-    xyz::AbstractMatrix{<:Real};
-    kwargs...
-  )
+  xyz::AbstractMatrix{<:Real};
+  kwargs...
+)
   #
+  @cast mat[i,d] := xyz[i][d]
   PointCloud(
-    view(xyz,:,1),
-    view(xyz,:,2),
-    view(xyz,:,3);
+    mat;
     kwargs...
   )
 end
+
+function PointCloud(
+  xyz::AbstractVector{<:AbstractVector{<:Real}};
+  kwargs...
+)
+
 
 
 # https://pointclouds.org/documentation/conversions_8h_source.html#l00166

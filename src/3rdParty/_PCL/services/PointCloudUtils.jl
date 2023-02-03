@@ -469,4 +469,51 @@ function Base.convert(
   PointCloud(xyz)
 end
 
+"""
+    $SIGNATURES
+
+Return a PointCloud with all the points in the world frame coordinates, given the solveKey.
+
+See also: [`saveLAS`](@ref)
+"""
+function exportPointCloudsInWorld(
+  dfg::AbstractDFG;
+  varList::AbstractVector{Symbol} = sort(ls(dfg); lt=DFG.natural_lt),
+  solveKey::Symbol = :default,
+  getpointcloud::Function = (v)->_PCL.getDataPointCloud(dfg, v, Regex("PCLPointCloud2"); checkhash=false);
+  downsample::Int=1,
+  minrange = 0.0,
+  maxrange = 9999.0,
+)
+  M = SpecialEuclidean(3)
+  ϵ0 = ArrayPartition(SVector(0,0,0.),SMatrix{3,3}(1,0,0,0,1,0,0,0,1.)) # MJL.identity_element(M)
+  pc_map = _PCL.PointCloud()
+  # loop through all variables in the given list
+  for vl in varList
+    pc_ = getpointcloud(vl)
+    if pc_ isa Nothing
+      @warn "Skipping variable without point cloud" vl
+      continue
+    end
+    pc = PointCloud(pc_)
+    
+    pts_a = (s->[s.x;s.y;s.z]).(pc.points)
+    pts_a = _filterMinRange(pts_a, minrange, maxrange)
+    pc = PointCloud(pts_a)
+
+    v = getVariable(dfg, Symbol(vl))
+    if !(:parametric in listSolveKeys(v))
+      @warn "Skipping $vl which does not have solveKey :parametric"
+      continue
+    end
+    w_Cwp = calcPPE(v; solveKey).suggested
+    wPp = Manifolds.exp(M,ϵ0,MJL.hat(M,ϵ0,w_Cwp))
+    # wPp = getSolverData(v, solveKey).val[1]
+    wPC = apply(M, wPp, pc)
+    cat(pc_map, wPC; reuse=true)
+  end
+
+  pc_map
+end
+
 #
