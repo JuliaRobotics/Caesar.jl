@@ -18,7 +18,7 @@ function getDataPointCloud(
       return nothing
     end
     # FIXME, change serialization to more standard pcd or laz formats, see Caesar.jl #921
-    return dbl |> IOBuffer |> Serialization.deserialize
+    return dbl |> Serialization.deserialize
   catch err
     if err isa KeyError
       @error err

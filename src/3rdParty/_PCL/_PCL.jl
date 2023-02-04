@@ -7,7 +7,7 @@ module _PCL
 import ..Caesar: _FastTransform3D
 import ..Caesar: homogeneous_coord_to_euler_coord, euler_coord_to_homogeneous_coord, euler_angles_to_linearized_rotation_matrix
 import ..Caesar: _SE3_MANI # create_homogeneous_transformation_matrix
-import ..Caesar: getBelief, mean
+import ..Caesar: getBelief, mean, calcPPE
 
 using FileIO
 using Colors
