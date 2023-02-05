@@ -507,7 +507,7 @@ function exportPointCloudWorld(
       @warn "Skipping $vl which does not have solveKey :parametric"
       continue
     end
-    w_Cwp = calcPPE(v; solveKey).suggested
+    w_Cwp = calcPPE(v; solveKey).suggested # from VariableSolverData
     wPp = Manifolds.exp(M,ϵ0,Manifolds.hat(M,ϵ0,w_Cwp))
     # wPp = getSolverData(v, solveKey).val[1]
     wPC = apply(M, wPp, pc)

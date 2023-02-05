@@ -62,12 +62,12 @@ function saveLAS(
   x_offset = 0.0
   y_offset = 0.0
   z_offset = 0.0
-  x_max = maximum(x) # 7.6900000
-  x_min = minimum(x) # -12.8500000
-  y_max = maximum(y) # 9.9200000
-  y_min = minimum(y) # -10.1800000
-  z_max = maximum(z) # 2.3300000
-  z_min = minimum(z) # 1.8400000
+  x_max = maximum(x)+1 # 7.6900000
+  x_min = minimum(x)-1 # -12.8500000
+  y_max = maximum(y)+1 # 9.9200000
+  y_min = minimum(y)-1 # -10.1800000
+  z_max = maximum(z)+1 # 2.3300000
+  z_min = minimum(z)-1 # 1.8400000
 
   # newHeader = deepcopy(header)
   newHeader = LasHeader(
