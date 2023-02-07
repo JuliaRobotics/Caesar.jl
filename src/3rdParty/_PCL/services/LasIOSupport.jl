@@ -27,7 +27,7 @@ end
 
 # TODO, make save LAS
 function saveLAS(
-  filepath::AbstractString,
+  filepath::Union{AbstractString, Stream},
   pc::PointCloud;
   scale=1000
 )
