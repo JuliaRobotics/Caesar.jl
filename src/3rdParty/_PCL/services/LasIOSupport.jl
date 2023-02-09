@@ -12,19 +12,22 @@ function loadLAS(
   filepath::AbstractString
 )
   header, points = load(filepath)
-  pts = (p->[
-    p.x*header.x_scale+header.x_min; 
-    p.y*header.y_scale+header.y_min; 
-    p.z*header.z_scale+header.z_min
-  ]).(points)
-  @cast pts_[i,d] := pts[i][d]
-  return PointCloud(pts_)
+  pts = map(points) do p
+    SA[p.x*header.x_scale+header.x_min; p.y*header.y_scale+header.y_min; p.z*header.z_scale+header.z_min; 1]
+  end
+
+  colors = map(points) do pnt
+    RGB(pnt.red, pnt.green, pnt.blue)
+  end
+
+  colored_points = PointXYZ.(colors, pts)
+  return PointCloud(;points=colored_points, width=UInt32(length(colored_points)), height=UInt32(1))
 end
 
 
 # TODO, make save LAS
 function saveLAS(
-  filepath::AbstractString,
+  filepath::Union{<:AbstractString, <:Stream},
   pc::PointCloud;
   scale=1000
 )
@@ -33,7 +36,10 @@ function saveLAS(
   x = map(p->p.data[1], pc.points)
   y = map(p->p.data[2], pc.points)
   z = map(p->p.data[3], pc.points)
-  pCloud = LasPoint2.(round.(scale*x),round.(scale*y),round.(scale*z), 1, 0, 0, 0, 0, 0, 1, 1, 1);
+  r = map(p->p.color.r, pc.points)
+  g = map(p->p.color.g, pc.points)
+  b = map(p->p.color.b, pc.points)
+  pCloud = LasPoint2.(round.(scale*x),round.(scale*y),round.(scale*z), 1, 0, 0, 0, 0, 0, r, g, b);
 
   tim = unix2datetime(pc.header.stamp*1e-6) # now()
 
