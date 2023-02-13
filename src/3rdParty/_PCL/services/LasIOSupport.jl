@@ -9,7 +9,7 @@ using .TensorCast
 
 
 function loadLAS(
-  filepath::AbstractString
+  filepath::Union{<:AbstractString, <:Stream}
 )
   header, points = load(filepath)
   pts = map(points) do p
