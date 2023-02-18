@@ -6,6 +6,7 @@
 
 using .RobotOS
 
+# FIXME, note this is not working, functions using Main. as workaround
 @rosimport std_msgs.msg: Header
 @rosimport sensor_msgs.msg: PointField
 @rosimport sensor_msgs.msg: PointCloud2
