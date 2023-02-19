@@ -67,8 +67,8 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [cjl-cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
 [cjl-ci-dev-img]: https://github.com/JuliaRobotics/Caesar.jl/actions/workflows/ci.yml/badge.svg
 [cjl-ci-dev-url]: https://github.com/JuliaRobotics/Caesar.jl/actions/workflows/ci.yml
-[cjl-ci-stb-img]: https://travis-ci.org/JuliaRobotics/Caesar.jl.svg?branch=release/v0.10
-[cjl-ci-stb-url]: https://travis-ci.org/JuliaRobotics/Caesar.jl
+[cjl-ci-stb-img]: https://github.com/JuliaRobotics/Caesar.jl/actions/workflows/ci.yml/badge.svg
+[cjl-ci-stb-url]: https://github.com/JuliaRobotics/Caesar.jl/actions/workflows/ci.yml
 
 
 [cjl-stbl-img]: https://juliahub.com/docs/Caesar/version.svg
