@@ -18,7 +18,11 @@ Caesar.jl is a community project to facilate software technology development for
 
 Various mapping and localization solutions are possible both for commercial and R&D.  We recommend taking a look at:
 - The human-to-machine friendly [NavAbility App](https://app.navability.io/home/) interaction; and
-- The machine-to-machine fiendly NavAbilitySDKs ([Python](https://github.com/NavAbility/NavAbilitySDK.py), [Julia](https://github.com/NavAbility/NavAbilitySDK.jl), [JS](https://github.com/NavAbility/NavAbilitySDK.js), etc.).  Also see the [SDK.py Docs](https://navability.github.io/NavAbilitySDK.py/).
+- The machine-to-machine friendly NavAbilitySDKs ([Python](https://github.com/NavAbility/NavAbilitySDK.py), [Julia](https://github.com/NavAbility/NavAbilitySDK.jl), [JS](https://github.com/NavAbility/NavAbilitySDK.js), etc.).  Also see the [SDK.py Docs](https://navability.github.io/NavAbilitySDK.py/).
+
+## NavAbility Zero Install Tutorials
+
+Follow [this page to see the **NavAbility Tutorials**](https://navability.github.io/NavAbilitySDK.py/nvatutorials.html) which are zero install and build around specific application examples.
 
 # Origins and Ongoing Research
 
