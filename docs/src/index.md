@@ -4,13 +4,21 @@
 </p>
 ```
 
+## Open Community
+
 Click here to go to the Caesar.jl Github repo:
 
 [![source](https://img.shields.io/badge/source-code-yellow.svg)](https://github.com/JuliaRobotics/Caesar.jl)
 
 Caesar.jl is a community project to facilate software technology development for localization and mapping from multiple sensor data, and multiple sessions or human / semi-autonomous / autonomous agents.  This software is being developed with broadly [Industry 4.0](https://en.wikipedia.org/wiki/Fourth_Industrial_Revolution), Robotics, and [Work of the Future](https://workofthefuture.mit.edu/) in mind.  Caesar.jl is an "umbrella package" to combine many other libraries from across the Julia package ecosystem.  
 
-[NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io), or using the community links provided below.
+# Commercial Products and Services
+
+[NavAbility.io](http://www.navability.io) builds [products and services](https://www.navability.io/products/) which helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io), or using the community links provided below.
+
+Various mapping and localization solutions are possible both for commercial and R&D.  We recommend taking a look at:
+- The human-to-machine friendly [NavAbility App](https://app.navability.io/home/) interaction; and
+- The machine-to-machine fiendly NavAbilitySDKs ([Python](https://github.com/NavAbility/NavAbilitySDK.py), [Julia](https://github.com/NavAbility/NavAbilitySDK.jl), [JS](https://github.com/NavAbility/NavAbilitySDK.js), etc.).  Also see the [SDK.py Docs](https://navability.github.io/NavAbilitySDK.py/).
 
 # Origins and Ongoing Research
 
