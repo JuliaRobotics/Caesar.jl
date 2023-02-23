@@ -13,7 +13,12 @@ function loadLAS(
 )
   header, points = load(filepath)
   pts = map(points) do p
-    SA[p.x*header.x_scale+header.x_min; p.y*header.y_scale+header.y_min; p.z*header.z_scale+header.z_min; 1]
+    SA[
+      p.x * header.x_scale + header.x_offset; 
+      p.y * header.y_scale + header.y_offset; 
+      p.z * header.z_scale + header.z_offset; 
+      1
+    ]
   end
 
   colors = map(points) do pnt
