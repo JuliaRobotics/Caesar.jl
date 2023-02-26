@@ -110,7 +110,7 @@ function __init__()
     # @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("plotting/ScatterAlignPlotting.jl")
     @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("images/ROSConversions.jl")
   end
-  @require ImageFeatures="0f8b85d8-7281-11e9-16c2-39a750bddbf1" include("images/imagefeatures.jl")
+  @require ImageFeatures="92ff4b2b-8094-53d3-b29d-97f740f06cef" include("images/imagefeatures.jl")
   @require Distributed="8ba89e20-285c-5b6f-9357-94700520ee1b" include("images/DistributedUtils.jl")
 end
 
