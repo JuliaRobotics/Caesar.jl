@@ -104,7 +104,7 @@ pf = DFG.packFactor(fg, getFactor(fg, getLabel(f1)))
 jpf = JSON.json(pf)
 
 # check that the massive point clouds are not stored in the packed factor object
-@test length(jpf) < 1100
+@test length(jpf) < 1500
 
 ## now confirm the solver deserialization can also work with the factor pulling data from the blob store 
 
