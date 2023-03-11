@@ -47,3 +47,6 @@ export
   phaseShiftSingle!,
   liebf!,
   SASDebug
+
+export calcPointsInPoly
+export inside, AxisAlignedBoundingBox, OrientedBoundingBox

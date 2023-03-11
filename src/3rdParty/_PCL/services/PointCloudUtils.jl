@@ -8,6 +8,7 @@ function getDataPointCloud(
   nfg::AbstractDFG,
   varlbl, 
   pattern::Union{Symbol,UUID,<:AbstractString, Regex};
+  format::Symbol = :las,
   getDatakws...
 )
   # get point cloud blob
@@ -17,8 +18,14 @@ function getDataPointCloud(
       @error "could find in variable $varlbl, blob $pattern"
       return nothing
     end
-    # FIXME, change serialization to more standard pcd or laz formats, see Caesar.jl #921
-    return dbl |> IOBuffer |> Serialization.deserialize
+    if format == :las
+      dbl |> IOBuffer |> loadLAS
+    elseif format == :Serialization
+      # FIXME, change serialization to more standard pcd or laz formats, see Caesar.jl #921
+      return dbl |> IOBuffer |> Serialization.deserialize
+    else
+      error("Unknown point cloud blob format $format")
+    end
   catch err
     if err isa KeyError
       @error err

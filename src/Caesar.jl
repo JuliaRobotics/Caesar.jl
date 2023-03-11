@@ -8,6 +8,7 @@ import DistributedFactorGraphs: getManifold
 
 # handy project consts (not for export)
 import IncrementalInference: NothingUnion, InstanceType
+import GeometricalPredicates as GeoPr
 
 using Requires
 using Dates
@@ -18,6 +19,7 @@ using StaticArrays
 
 import Rotations as _Rot
 import GeometryBasics as GeoB
+
 
 # TODO remove
 const _Rotations = _Rot
@@ -66,6 +68,8 @@ include("transforms/entities/TransformTypes.jl")
 include("transforms/services/HomographyTransforms.jl")
 include("transforms/services/_FastTransform3D.jl")
 
+include("entities/OtherTypes.jl")
+include("services/PointUtils.jl")
 include("services/DataUtils.jl")
 include("services/UserFunctions.jl")
 
@@ -102,6 +106,7 @@ function __init__()
   @require ImageMagick="6218d12a-5da1-5696-b52f-db25d2ecc6d1" include("images/imagedata.jl")
   @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" begin 
     include("images/images.jl")
+    include("images/ImageToVideoUtils.jl")
     include("images/ScanMatcherUtils.jl")
     include("images/ScanMatcherPose2.jl")
     include("images/ScatterAlignPose2.jl")
