@@ -2,7 +2,7 @@
 
 using RoME
 using Test
-using JSON, JSON2
+using JSON3
 
 
 ##
@@ -30,17 +30,16 @@ refFdr = joinpath(@__DIR__, "test_data", "tut3")
 
 function storeDistribution(file::AbstractString, bel::MKD)
   bel_ = packDistribution(bel)
-  bel_s = JSON.json(bel_)
-  fid = open(file, "w")
-  println(fid, bel_s)
-  close(fid)
+  # write to file
+  open(file, "w") do f
+    JSON3.write(f, bel_)
+    println(f)
+  end
 end
 
 function loadDistribution(file::AbstractString)
-  fid = open(file, "r")
-  # bel_s = read(fid)
-  bel_s = JSON2.read(fid, PackedManifoldKernelDensity)
-  close(fid)
+  jstr = read(file, String)
+  bel_s = JSON3.read(jstr, PackedManifoldKernelDensity)
   unpackDistribution(bel_s)
 end
 

@@ -227,8 +227,45 @@ mutable struct PackedSASBearing2D <: DFG.AbstractPackedFactor
     waveformsInReal::Vector{Float64}
     waveformsInIm::Vector{Float64}
     PackedSASBearing2D() = new()
-    PackedSASBearing2D(rangemodel::String, tp::Int, wavedataRawV::Vector{Float64}, wavedataRawV_dim::Int, cfgJson::String, cfgTotal::String, cfgLIE::String, waveformsInReal::Vector{Float64}, waveformsInIm::Vector{Float64}) = new(rangemodel, tp, wavedataRawV, wavedataRawV_dim, cfgJson, cfgTotal, cfgLIE, waveformsInReal, waveformsInIm)
-    PackedSASBearing2D(rangemodel::String, tp::Int, wd::Array{Float64,2}, cf::Dict, cfgTotal::String, cfgLIE::String, waveformsInReal::Vector{Float64}, waveformsInIm::Vector{Float64}) = new(rangemodel, tp, wd[:], size(wd,1), JSON2.write(cf), cfgTotal, cfgLIE, waveformsInReal, waveformsInIm)
+    PackedSASBearing2D(
+      rangemodel::String, 
+      tp::Int, 
+      wavedataRawV::Vector{Float64}, 
+      wavedataRawV_dim::Int, 
+      cfgJson::String, 
+      cfgTotal::String, 
+      cfgLIE::String, 
+      waveformsInReal::Vector{Float64}, 
+      waveformsInIm::Vector{Float64}) = new(
+        rangemodel, 
+        tp, 
+        wavedataRawV, 
+        wavedataRawV_dim, 
+        cfgJson, 
+        cfgTotal, 
+        cfgLIE, 
+        waveformsInReal, 
+        waveformsInIm
+      )
+    PackedSASBearing2D(
+      rangemodel::String, 
+      tp::Int, 
+      wd::Array{Float64,2}, 
+      cf::Dict, 
+      cfgTotal::String, 
+      cfgLIE::String, 
+      waveformsInReal::Vector{Float64}, 
+      waveformsInIm::Vector{Float64}) = new(
+        rangemodel, 
+        tp, 
+        wd[:], 
+        size(wd,1), 
+        JSON2.write(cf), 
+        cfgTotal, 
+        cfgLIE, 
+        waveformsInReal, 
+        waveformsInIm
+      )
 end
 
 # Note: Need this otherwise it uses a default converter and causes type conversion issues.
