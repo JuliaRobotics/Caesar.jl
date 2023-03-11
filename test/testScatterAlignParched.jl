@@ -6,7 +6,7 @@ using Downloads
 using DelimitedFiles
 using TensorCast
 using Images
-using JSON
+using JSON3
 
 ##
 
@@ -66,7 +66,7 @@ deb0 = addData!(
   :default_folder_store, 
   :x0, 
   :pointcloud, 
-  Vector{UInt8}(JSON.json( data )), 
+  Vector{UInt8}(JSON3.write( data )), 
   mimeType="application/json/octet-stream"  
 )
 data = packDistribution(bel_m)
@@ -75,7 +75,7 @@ deb1 = addData!(
   :default_folder_store, 
   :x1, 
   :pointcloud, 
-  Vector{UInt8}(JSON.json( data )), 
+  Vector{UInt8}(JSON3.write( data )), 
   mimeType="application/json/octet-stream"  
 )
 
@@ -101,10 +101,10 @@ meas = sampleFactor(fg, getLabel(f1), 1)
 
 pf = DFG.packFactor(fg, getFactor(fg, getLabel(f1)))
 
-jpf = JSON.json(pf)
+jpf = JSON3.write(pf)
 
 # check that the massive point clouds are not stored in the packed factor object
-@test length(jpf) < 1100
+@test length(jpf) < 1500
 
 ## now confirm the solver deserialization can also work with the factor pulling data from the blob store 
 

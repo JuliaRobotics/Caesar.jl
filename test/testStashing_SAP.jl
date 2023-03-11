@@ -2,7 +2,6 @@
 
 using Test
 using Caesar
-using JSON, JSON2
 using Images
 using Manifolds
 import Rotations as _Rot
@@ -99,11 +98,11 @@ sap = ScatterAlignPose2(bIM1, bIM2, (x,y);
 
 de, db_ = getData(fg, :x0, :hgd_stash_x0)
 
-# myData = JSON2.read(IOBuffer(db), PackedHeatmapGridDensity)
+# myData = JSON3.read(String(db), PackedHeatmapGridDensity)
 
-# JSON.parse(String(take!(IOBuffer(db))))["_type"] |> DFG.getTypeFromSerializationModule
+# JSON.parse(String(db))["_type"] |> DFG.getTypeFromSerializationModule
 
-# convert(SamplableBelief, String(take!(IOBuffer(db))))
+# convert(SamplableBelief, String(db))
 
 
 ##
