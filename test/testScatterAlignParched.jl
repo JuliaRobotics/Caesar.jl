@@ -86,8 +86,8 @@ sap = Caesar.ScatterAlignPose3(;
   cloud2=bel_m,
   sample_count=100,
   useStashing=true,
-  dataEntry_cloud1=string(deb0[1].id),
-  dataEntry_cloud2=string(deb1[1].id),
+  dataEntry_cloud1=string(deb0.id),
+  dataEntry_cloud2=string(deb1.id),
 )
 
 ## this line checks blob store access via preambleCache specifically for ScatterAlign which will internally access the blob store
@@ -119,8 +119,8 @@ v0 = addVariable!(tfg, :x0, Pose3)
 v1 = addVariable!(tfg, :x1, Pose3)
 
 # To load from stashed blobs attached to variables, those variables need the associated dataEntries
-Caesar.addDataEntry!(v0,deb0[1])
-Caesar.addDataEntry!(v1,deb1[1])
+Caesar.addDataEntry!(v0,deb0)
+Caesar.addDataEntry!(v1,deb1)
 
 # test unpacking of factor pulling data from blobstore during preambleCache
 pf_ = Caesar.unpackFactor(tfg,pf)
