@@ -77,10 +77,10 @@ sap = ScatterAlignPose2(bIM1, bIM2, (x,y);
 ## must store the stashed data entry blobs before the preambleCache function runs on addFactor
 
 db = Vector{UInt8}( convert(String, sap.align.cloud1) )
-de0, = addData!(fg, :test_stashing_store, :x0, :hgd_stash_x0, db, mimeType="application/json/octet-stream")
+de0 = addData!(fg, :test_stashing_store, :x0, :hgd_stash_x0, db, mimeType="application/json/octet-stream")
 
 db = Vector{UInt8}( convert(String,sap.align.cloud2) )
-de1, = addData!(fg, :test_stashing_store, :x1, :hgd_stash_x1, db, mimeType="application/json/octet-stream")
+de1 = addData!(fg, :test_stashing_store, :x1, :hgd_stash_x1, db, mimeType="application/json/octet-stream")
 
 ##
 
