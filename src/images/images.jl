@@ -6,8 +6,12 @@
 
 using ColorVectorSpace
 using .Images
+import .GeoPr
+# import GeometricalPredicates as GeoPr
 
 export applyMaskImage
+export makeMaskImage
+export makeMaskImages
 export imhcatPretty
 
 """
@@ -35,6 +39,71 @@ function toImage(msgd::Dict{String,Any})
     error("Conversion for ROS sensor_msgs.Image encoding not implemented yet $(msgd["encoding"])")
   end
 end
+
+function makeMaskImage(
+  img::AbstractMatrix, 
+  nodes::AbstractVector = [
+    (180.0, 0.0);  # ll
+    (10.0, 600.0); # lr
+    (0.0, 600.0);  # ur
+    (0.0, 0.0);    # ul
+  ],
+)
+  h,w = size(img)
+  # h,w = 400,640
+  buffer = zeros(UInt8, h, w)
+  
+  points = []
+  for nd in nodes
+    push!(points, GeoPr.Point(nd...))
+  end
+  # (ll,lr,ur,ul)
+  poly = GeoPr.Polygon(points...)
+  
+  # populate buffer
+  for x in collect(1:1:h), y in collect(1:1:w)
+    if GeoPr.inpolygon(poly, GeoPr.Point(x, y)) 
+      buffer[x, y] = UInt8(1) 
+    end 
+  end
+
+  return buffer, poly
+end
+
+
+"""
+    $SIGNATURES
+
+
+```julia
+jstr_Mask_BOT = \"""
+[
+  [[180.0,0.0],[10.0,600.0],[0.0,600.0],[0.0,0.0]],
+  [[400.0,0.0],[400.0,640.0],[310.0,640.0],[315.0,165.0],[360.0,0.0],[399.0,0.0]]
+]
+\"""
+
+mnodes = JSON3.read(jstr_Mask_BOT)
+mask_u8, polys = makeMaskImages(img, mnodes)
+```
+"""
+function makeMaskImages(
+  img::AbstractMatrix,
+  mnodes::AbstractVector{<:AbstractVector}
+)
+  mask = zeros(UInt8, size(img)...)
+  polys = []
+
+  for nodes in mnodes
+    @show nodes
+    mk, poly = makeMaskImage(img, nodes)
+    mask += mk
+    push!(polys, poly)
+  end
+
+  return mask, polys
+end
+
 
 """
     $SIGNATURES

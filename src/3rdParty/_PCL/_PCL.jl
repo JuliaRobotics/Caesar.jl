@@ -37,6 +37,7 @@ import Base: getindex, setindex!, resize!, cat, convert, sizeof, hasproperty, ge
 
 # gets overloaded
 import Manifolds: apply
+import DistributedFactorGraphs: packBlob, unpackBlob
 import IncrementalInference: ArrayPartition
 
 ## hold off on exports, users can in the mean-time use/import via e.g. _PCL.PointXYZ
