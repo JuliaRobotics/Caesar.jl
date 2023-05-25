@@ -18,8 +18,10 @@ DevNotes
 
 See also: [`makeImage`](@ref)
 """
-function toFormat(format::DataType,
-                  img::AbstractMatrix{<:Colorant} )
+function toFormat(
+  format::Type{format"PNG"},
+  img::AbstractMatrix{<:Colorant}
+)
   #
   io = IOBuffer()
   pngSm = Stream(format, io)
@@ -27,8 +29,27 @@ function toFormat(format::DataType,
   take!(io)
 end
 
-toFormat(img::AbstractMatrix{<:Colorant}) = toFormat(format"PNG", img)
+@deprecate toFormat(img::AbstractMatrix{<:Colorant}) toFormat(format"PNG", img)
 
+
+## Using default FileIO together with ImageIO 
+# function DistributedFactorGraphs.packBlob(
+#   fmt::Type{format"PNG"}, 
+#   img::Union{<:AbstractMatrix{<:Colorant},<:AbstractMatrix{UInt8}}
+# )
+#   blob = toFormat(fmt, img)
+#   mimetype = "image/png"
+#   return blob, mimetype
+# end
+# function DistributedFactorGraphs.unpackBlob(
+#   ::Type{format"PNG"}, 
+#   blob::Vector{UInt8}
+# )
+#   io = IOBuffer(blob)
+#   ioStr = Stream{format"PNG"}(io)
+#   return load(ioStr)
+#   # ImageMagick.readblob(imgBytes)
+# end
 
 """
     $SIGNATURES
