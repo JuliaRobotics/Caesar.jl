@@ -50,3 +50,4 @@ export
 
 export calcPointsInPoly
 export inside, AxisAlignedBoundingBox, OrientedBoundingBox
+export packBlob, unpackBlob

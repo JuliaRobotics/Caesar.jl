@@ -4,6 +4,38 @@ export findObjectVariablesFromWorld, previewObjectSubcloudInLocalFromWorld
 export calcAxes3D
 
 
+
+## Special case for LIDAR
+#FIXME convert to type save("pc.las", pc) supports and use pack unpack Blob
+function DistributedFactorGraphs.packBlob(::Type{format"LAS"}, pointCloud::_PCL.PointCloud)
+  mimetype = "application/octet-stream; ext=las"
+  io = IOBuffer()
+  _PCL.saveLAS(Stream{format"LAS"}(io), pointCloud) 
+  blob = take!(io)
+  return blob, mimetype
+end
+
+function DistributedFactorGraphs.unpackBlob(::Type{format"LAS"}, blob::Vector{UInt8})
+  io = IOBuffer(blob)
+  ioStr = Stream{format"LAS"}(io)
+  pc = _PCL.loadLAS(ioStr)
+  return pc
+end
+
+
+function getPointCloud(fg::AbstractDFG, vlbl::Symbol, entry_label::Symbol)
+entry, blob = getData(fg, vlbl, entry_label)
+return unpackBlob(MIME(entry.mimeType), blob)
+end
+
+
+function getPointCloud_prepPoints(fg, vlbl, entry_label; minrange=0.0, maxrange=999.0)
+pc = getPointCloud(fg, vlbl, entry_label)
+return _PCL._prepPointCloud(pc; minrange, maxrange)
+end
+
+
+
 function getDataPointCloud(
   nfg::AbstractDFG,
   varlbl, 

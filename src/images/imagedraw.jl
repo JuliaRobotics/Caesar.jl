@@ -5,20 +5,23 @@ using .ImageDraw
 using .Colors
 
 export makeImage!
+export drawKeypointsAndMask
 
 
-function makeImage!(pc::Caesar._PCL.PointCloud,
-                    x_domain::Tuple{<:Real,<:Real}=(-1000,1000),
-                    y_domain::Tuple{<:Real,<:Real}=x_domain;
-                    pose=nothing,
-                    ppose=nothing,
-                    rows::Integer=1000, 
-                    cols::Integer=rows,
-                    color::C=Gray(0.1),
-                    trajCol=Gray(1.0),
-                    img::AbstractMatrix{<:Colorant} = Gray.(zeros(rows,cols)),
-                    circle_size::Real=1,
-                    drawkws... ) where {C <: Colorant}
+function makeImage!(
+  pc::Caesar._PCL.PointCloud,
+  x_domain::Tuple{<:Real,<:Real}=(-1000,1000),
+  y_domain::Tuple{<:Real,<:Real}=x_domain;
+  pose=nothing,
+  ppose=nothing,
+  rows::Integer=1000, 
+  cols::Integer=rows,
+  color::C=Gray(0.1),
+  trajCol=Gray(1.0),
+  img::AbstractMatrix{<:Colorant} = Gray.(zeros(rows,cols)),
+  circle_size::Real=1,
+  drawkws... 
+) where {C <: Colorant}
   #
 
   x_range = (x_domain[2]-x_domain[1])
@@ -48,4 +51,22 @@ function makeImage!(pc::Caesar._PCL.PointCloud,
   end
   
   return img
+end
+
+
+function drawKeypointsAndMask(
+  img::AbstractMatrix,
+  keypoints::AbstractVector{<:CartesianIndex}, 
+  mask::AbstractMatrix;
+  markerColor::AbstractRGB=RGB{N0f8}(1,0,0),
+  markerSize::Int = 20,
+)
+  cimgA_ = applyMaskImage(img, mask)
+  cimgA = convert.(RGB{N0f8}, cimgA_)
+
+  for ret_ in keypoints
+    draw!(cimgA, Cross(Point(ret_.I[2], ret_.I[1]), markerSize), markerColor) 
+  end
+
+  return cimgA
 end
