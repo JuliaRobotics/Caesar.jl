@@ -69,6 +69,7 @@ include("transforms/services/HomographyTransforms.jl")
 include("transforms/services/_FastTransform3D.jl")
 
 include("entities/OtherTypes.jl")
+include("services/WorkflowBlobNames.jl")
 include("services/PointUtils.jl")
 include("services/DataUtils.jl")
 include("services/UserFunctions.jl")
