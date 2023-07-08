@@ -4,6 +4,8 @@ using PyCall
 using Images
 using DistributedFactorGraphs
 using ProgressMeter
+using JSON3
+using SHA: sha256
 
 np = pyimport("numpy")
 cv = pyimport("cv2")
@@ -109,4 +111,56 @@ function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=no
   end
 
   return img_tracks
+end
+
+
+function addDataImgTracksFwdBck!(
+  dfg::AbstractDFG,
+  vlbl::Symbol,
+  blobstore::Symbol,
+  bloblbl::Symbol,
+  origin::AbstractString,
+  img_tracks::Dict{Int,<:AbstractVector{<:AbstractVector{<:Real}}},
+)
+  blob = Vector{UInt8}(JSON3.write(img_tracks))
+  entry = BlobEntry(;
+    label = bloblbl,
+    blobstore,
+    hash = bytes2hex(sha256(blob)),
+    origin,
+    size = length(blob),
+    description = "Image feature tracks forward backward $(length(img_tracks)) cv.KLT",
+    mimeType = "/application/octet-stream/json; _type=JuliaLang.Dict{Int,Vector{Vector{Float32}}}"
+  )
+  addData!(dfg, vlbl, entry, blob)
+end
+
+
+function plotBlobsImageTracks!(
+  dfg::AbstractDFG,
+  vlb::Symbol,
+  key = r"IMG_FEATURE_TRACKS_FWDBCK";
+  fig = Figure(),
+  ax = GLMakie.Axis(fig[1,1])
+)
+
+  eb = getData(dfg,vlb,key)
+  img_tracks = JSON3.read(String(eb[2]), Dict{Int, Vector{Vector{Float32}}})
+  
+  len = length(img_tracks)
+  UU = [Vector{Float64}() for k in 1:len]
+  VV = [Vector{Float64}() for k in 1:len]
+
+  fbk = floor(Int, (len-1)/2)
+  for k in 1:len
+    for i in -fbk:fbk
+      push!(UU[k],  img_tracks[i][k][1])  
+      push!(VV[k], -img_tracks[i][k][2])
+    end
+    lines!(ax, UU[k], VV[k], color=RGBf(rand(3)...))
+  end
+  # xlims!(ax, 0, resolution[1])
+  # ylims!(ax, -resolution[2], 0)
+
+  fig
 end
