@@ -87,6 +87,9 @@ include("3rdParty/_PCL/_PCL.jl")
 # object affordance work
 include("objects/ObjectAffordanceSubcloud.jl")
 
+# weakdeps
+include("../ext/WeakdepsPrototypes.jl")
+
 # standardized code deprecation
 include("Deprecated.jl")
 
@@ -94,7 +97,7 @@ include("Deprecated.jl")
 # conditional loading for ROS
 function __init__()
   # ZMQ server and endpoints
-  @require ZMQ="c2297ded-f4af-51ae-bb23-16f91089e4e1" include("zmq/ZmqCaesar.jl")
+  # @require ZMQ="c2297ded-f4af-51ae-bb23-16f91089e4e1" include("zmq/ZmqCaesar.jl")
   @require PyCall="438e738f-606a-5dbb-bf0a-cddfbfd45ab0" begin
     @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("ros/CaesarROS.jl")
   end

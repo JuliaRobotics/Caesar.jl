@@ -56,6 +56,12 @@ UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 Unmarshal = "cbff2730-442d-58d7-89d1-8e530c41eb02"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
+[weakdeps]
+ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
+
+[extensions]
+CaesarZMQExt = "ZMQ"
+
 [compat]
 ApproxManifoldProducts = "0.6, 0.7"
 AprilTags = "0.8, 0.9"
@@ -114,7 +120,6 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RoMEPlotting = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
 RobotOS = "22415677-39a4-5241-a37a-00beabbbdae8"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [targets]
 test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "FixedPointNumbers", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]
