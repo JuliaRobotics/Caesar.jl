@@ -16,7 +16,6 @@ export
   SLAMWrapper,
 
   # servers
-  tcpStringSLAMServer,
   tcpStringBRTrackingServer,
 
   # user functions
@@ -51,3 +50,7 @@ export
 export calcPointsInPoly
 export inside, AxisAlignedBoundingBox, OrientedBoundingBox
 export packBlob, unpackBlob
+
+# imagedraw.jl
+export makeImage!
+export drawKeypointsAndMask

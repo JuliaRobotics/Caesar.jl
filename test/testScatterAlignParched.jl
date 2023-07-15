@@ -86,8 +86,8 @@ sap = Caesar.ScatterAlignPose3(;
   cloud2=bel_m,
   sample_count=100,
   useStashing=true,
-  dataEntry_cloud1=string(deb0.id),
-  dataEntry_cloud2=string(deb1.id),
+  dataEntry_cloud1=string(deb0.originId),
+  dataEntry_cloud2=string(deb1.originId),
 )
 
 ## this line checks blob store access via preambleCache specifically for ScatterAlign which will internally access the blob store

@@ -1,20 +1,4 @@
-export
-  addVariable,
-  addFactor,
-  addOdometry2D,
-  addLandmark2D,
-  addFactorBearingRangeNormal,
-  ls,
-  getVert,
-  setSolvable,
-  solveTree!,
-  # per variable
-  setVarKDE, # needed for workaround on bad autoinit
-  getVarMAPKDE, # marginal belief points (KDE)
-  getVarMAPMax, # Future, how many maxes should you get?
-  getVarMAPMean,
-  # fancy future stuff
-  getVarMAPFit # defaul=Normal
+
 
 okResponse = Dict{String, Any}("status" => "OK")
 
