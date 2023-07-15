@@ -6,10 +6,15 @@ using AprilTags
 using ImageDraw
 using DocStringExtensions
 using Colors
+using FixedPointNumbers
+
+using Manifolds
+using CoordinateTransformations
+import Rotations as _Rot
 
 using RoME
 
-import Base: getproperty, propertynames
+import Base: getproperty, propertynames, convert
 
 import IncrementalInference: getSample, AbstractRelativeMinimize, getManifold
 
