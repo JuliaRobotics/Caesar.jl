@@ -1,6 +1,5 @@
 # Utilities for scan matching
 
-export overlayScanMatcher
 
 
 # this function uses the sum of squared differences between the two images.

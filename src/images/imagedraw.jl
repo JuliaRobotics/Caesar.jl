@@ -1,11 +1,9 @@
 
-@info "Caesar.jl is loading tools using ImageDraw.jl."
+# @info "Caesar.jl is loading tools using ImageDraw.jl."
 
-using .ImageDraw
-using .Colors
 
-export makeImage!
-export drawKeypointsAndMask
+# export makeImage!
+# export drawKeypointsAndMask
 
 
 function makeImage!(

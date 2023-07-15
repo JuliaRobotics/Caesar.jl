@@ -1,12 +1,15 @@
+module CaesarImageFeaturesExt
 
-@info "Caesar.jl is loading utils depending on ImageFeatures.jl"
+## FIXME, consider consolidating around ImageIO extension instead.
 
-using .ImageFeatures
-using .JSON3
+@info "Caesar.jl is loading extension functionality using ImageFeatures.jl"
+
+using ImageFeatures
+using JSON3
 
 import Base: Dict
 
-export toDictFeatures
+import Caesar: toDictFeatures
 
 
 function Base.Dict(
@@ -51,4 +54,4 @@ end
 #   #
 
 
-# end
+end # module

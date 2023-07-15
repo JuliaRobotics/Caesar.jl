@@ -20,10 +20,11 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 GeometricalPredicates = "fd0ad045-b25c-564e-8f9c-8ef5c5f21267"
 GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
-ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
+ImageDraw = "4381153b-2b60-58ae-a1ba-fd683676385f"
 IncrementalInference = "904591bb-b899-562f-9e6f-b8df64c7d480"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
@@ -55,6 +56,20 @@ TransformUtils = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 Unmarshal = "cbff2730-442d-58d7-89d1-8e530c41eb02"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+
+[weakdeps]
+AprilTags = "f0fec3d5-a81e-5a6a-8c28-d2b34f3659de"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
+ImageFeatures = "92ff4b2b-8094-53d3-b29d-97f740f06cef"
+ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
+ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
+
+[extensions]
+CaesarAprilTagsExt = "AprilTags"
+CaesarImagesExt = "Images"
+CaesarImageFeaturesExt = "ImageFeatures"
+CaesarImageMagickExt = "ImageMagick"
+CaesarZMQExt = "ZMQ"
 
 [compat]
 ApproxManifoldProducts = "0.6, 0.7"
@@ -98,23 +113,18 @@ TimeZones = "1.3.1, 1.4"
 TransformUtils = "0.2.14"
 Unmarshal = "0.3, 0.4"
 YAML = "0.3, 0.4"
-julia = "1.8"
+julia = "1.9"
 
 [extras]
-AprilTags = "f0fec3d5-a81e-5a6a-8c28-d2b34f3659de"
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
-FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 GraphPlot = "a2cc645c-3eea-5389-862e-a155d0052231"
-ImageFeatures = "92ff4b2b-8094-53d3-b29d-97f740f06cef"
-Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RoMEPlotting = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
 RobotOS = "22415677-39a4-5241-a37a-00beabbbdae8"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [targets]
-test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "FixedPointNumbers", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]
+test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]

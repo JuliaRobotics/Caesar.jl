@@ -1,7 +1,6 @@
 
-@info "Caesar is adding tools for AprilTag factors using ImageDraw"
 
-export drawBearingLinesAprilTags!
+# export drawBearingLinesAprilTags!
 
 
 """

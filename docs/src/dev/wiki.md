@@ -42,13 +42,4 @@ https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Tree-Based-Initial
 
 Wiki for [variable ordering links](http://github.com/JuliaRobotics/Caesar.jl/wiki/Variable-Ordering-References).
 
-## Developer's Poem
 
-```
-Soft gitty, 
-Warm gitty, 
-Merging change, you sure?
-Happy travy, 
-Sleepy travy, 
-PR PR PR 
-```
