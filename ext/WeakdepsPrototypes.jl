@@ -9,6 +9,15 @@ function drawBearingLinesAprilTags! end
 
 
 ## ==============================================
+# CaesarImageMagickExt prototypes
+export toFormat
+export fetchDataImage
+
+function toFormat end
+function fetchDataImage end
+
+
+## ==============================================
 # CaesarZMQExt prototypes
 export
   # addVariable,

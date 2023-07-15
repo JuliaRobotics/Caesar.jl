@@ -1,8 +1,13 @@
+module CaesarImageMagickExt
 
-@info "Caesar.jl is loading tools using ImageMagick.jl."
+@info "Caesar.jl is loading extension functionality using ImageMagick.jl."
 
-export toFormat
-export fetchDataImage
+using ImageMagick
+using FileIO
+using Colors
+using DocStringExtensions
+
+import Caesar: toFormat, fetchDataImage, AbstractDFG, AbstractBlobStore, getData
 
 
 """
@@ -86,4 +91,4 @@ fetchDataImage(dfg::AbstractDFG,datastore::AbstractBlobStore,varLbl::Symbol,data
 
 
 
-#
+end # module
