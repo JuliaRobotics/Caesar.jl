@@ -1,28 +1,20 @@
 module Caesar
 
-# import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
-import Distributions: Normal
-import RoME: getRangeKDEMax2D
-import IncrementalInference: getSample, initfg
-import DistributedFactorGraphs: getManifold
 
-# handy project consts (not for export)
-import IncrementalInference: NothingUnion, InstanceType
-import GeometricalPredicates as GeoPr
+import Distributions: Normal # TODO, upstream or remove?
 
-using Requires
 using Dates
 using Colors
-
-using Manifolds
 using StaticArrays
 
+using Manifolds
 import Rotations as _Rot
+
+const _Rotations = _Rot # TODO remove
+
 import GeometryBasics as GeoB
 
-
-# TODO remove
-const _Rotations = _Rot
+using ImageDraw
 
 using
   Pkg,
@@ -54,11 +46,22 @@ using Optim
 
 using Reexport
 
+
+# import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
+import RoME: getRangeKDEMax2D
+import IncrementalInference: getSample, initfg
+import DistributedFactorGraphs: getManifold
+
+# handy project consts (not for export)
+import IncrementalInference: NothingUnion, InstanceType
+import GeometricalPredicates as GeoPr
+
+
+
 # const CJL = Caesar
 
 # public API exports
 include("ExportAPI.jl")
-
 
 ## ===============================================================================================
 # and source files
@@ -74,7 +77,6 @@ include("services/PointUtils.jl")
 include("services/DataUtils.jl")
 include("services/UserFunctions.jl")
 
-
 # SAS-SLAM
 include("beamforming/czt.jl")
 include("beamforming/CBF.jl")
@@ -87,11 +89,19 @@ include("3rdParty/_PCL/_PCL.jl")
 # object affordance work
 include("objects/ObjectAffordanceSubcloud.jl")
 
+# ImageDraw functionality, used by many extensions and therefore a regular (but minimum able) dependency
+include("images/imagedraw.jl")
+
 # weakdeps
+include("../ext/factors/Pose2AprilTag4Corners.jl")
 include("../ext/WeakdepsPrototypes.jl")
 
 # standardized code deprecation
 include("Deprecated.jl")
+
+
+# FIXME remove
+using Requires
 
 
 # conditional loading for ROS
@@ -102,11 +112,11 @@ function __init__()
     @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("ros/CaesarROS.jl")
   end
   # @require Colors="5ae59095-9a9b-59fe-a467-6f913c188581" include("3rdParty/_PCL/_PCL.jl")
-  @require AprilTags="f0fec3d5-a81e-5a6a-8c28-d2b34f3659de" begin 
-    include("images/apriltags.jl")
-    @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/AprilTagDrawingTools.jl")
-  end
-  @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/imagedraw.jl")
+  # @require AprilTags="f0fec3d5-a81e-5a6a-8c28-d2b34f3659de" begin 
+  #   include("images/apriltags.jl")
+  #   @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/AprilTagDrawingTools.jl")
+  # end
+  # @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/imagedraw.jl")
   @require ImageMagick="6218d12a-5da1-5696-b52f-db25d2ecc6d1" include("images/imagedata.jl")
   @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" begin 
     include("images/images.jl")

@@ -1,4 +1,14 @@
 
+## ==============================================
+# CaesarAprilTagsExt prototypes
+export drawBearingLinesAprilTags!
+export Pose2AprilTag4Corners, PackedPose2AprilTag4Corners
+export generateCostAprilTagsPreimageCalib
+
+function drawBearingLinesAprilTags! end
+
+
+## ==============================================
 # CaesarZMQExt prototypes
 export
   # addVariable,
