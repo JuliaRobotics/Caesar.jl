@@ -1,5 +1,7 @@
 module CaesarImageFeaturesExt
 
+## FIXME, consider consolidating around ImageIO extension instead.
+
 @info "Caesar.jl is loading extension functionality using ImageFeatures.jl"
 
 using ImageFeatures
