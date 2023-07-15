@@ -9,6 +9,43 @@ function drawBearingLinesAprilTags! end
 
 
 ## ==============================================
+# CaesarImagesExt prototypes
+
+export applyMaskImage
+export makeMaskImage
+export makeMaskImages
+export imhcatPretty
+export toImage
+export writevideo, csmAnimationJoinImgs, csmAnimateSideBySide
+export makeVideoFromData
+
+export ScanMatcherPose2, PackedScanMatcherPose2
+export ScatterAlignPose2, PackedScatterAlignPose2
+export ScatterAlignPose3, PackedScatterAlignPose3
+
+export overlayScanMatcher
+export overlayScatter, overlayScatterMutate
+
+
+
+function applyMaskImage end
+function makeMaskImage end
+function makeMaskImages end
+function imhcatPretty end
+function toImage end
+
+function writevideo end
+function csmAnimationJoinImgs end
+function csmAnimateSideBySide end
+function makeVideoFromData end
+
+function overlayScanMatcher end
+
+function overlayScatter end
+function overlayScatterMutate end
+
+
+## ==============================================
 # CaesarImageFeaturesExt prototypes
 
 export toDictFeatures

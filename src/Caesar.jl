@@ -93,6 +93,8 @@ include("images/imagedraw.jl")
 
 # weakdeps
 include("../ext/factors/Pose2AprilTag4Corners.jl")
+include("../ext/factors/ScanMatcherPose2.jl")
+include("../ext/factors/ScatterAlignPose.jl")
 include("../ext/WeakdepsPrototypes.jl")
 
 # standardized code deprecation
@@ -118,11 +120,11 @@ function __init__()
   # @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/imagedraw.jl")
   # @require ImageMagick="6218d12a-5da1-5696-b52f-db25d2ecc6d1" include("images/imagedata.jl")
   @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" begin 
-    include("images/images.jl")
-    include("images/ImageToVideoUtils.jl")
-    include("images/ScanMatcherUtils.jl")
-    include("images/ScanMatcherPose2.jl")
-    include("images/ScatterAlignPose2.jl")
+    # include("images/images.jl")
+    # include("images/ImageToVideoUtils.jl")
+    # include("images/ScanMatcherUtils.jl")
+    # include("images/ScanMatcherPose2.jl")
+    # include("images/ScatterAlignPose2.jl")
     
     # moved Gadfly plotting to RoMEPlotting
     # @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("plotting/ScatterAlignPlotting.jl")

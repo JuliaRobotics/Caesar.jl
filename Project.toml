@@ -59,12 +59,14 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [weakdeps]
 AprilTags = "f0fec3d5-a81e-5a6a-8c28-d2b34f3659de"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 ImageFeatures = "92ff4b2b-8094-53d3-b29d-97f740f06cef"
 ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
 ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [extensions]
 CaesarAprilTagsExt = "AprilTags"
+CaesarImagesExt = "Images"
 CaesarImageFeaturesExt = "ImageFeatures"
 CaesarImageMagickExt = "ImageMagick"
 CaesarZMQExt = "ZMQ"
@@ -118,7 +120,6 @@ BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 GraphPlot = "a2cc645c-3eea-5389-862e-a155d0052231"
-Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RoMEPlotting = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
