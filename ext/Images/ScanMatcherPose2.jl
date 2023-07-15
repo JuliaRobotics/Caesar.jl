@@ -38,15 +38,8 @@ Base.show(io::IO, ::MIME"text/plain", arp::ScanMatcherPose2) = show(io, arp)
 Base.show(io::IO, ::MIME"application/juno.inline", arp::ScanMatcherPose2) = show(io, arp)
 
 
-"""
-    $SIGNATURES
 
-Overlay the two images from `AlignRadarPose2` with the first (red) fixed and transform the second image (blue) according to `tf`.
-
-Notes:
-- `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
-"""
-function overlayScanMatcher(sm::ScanMatcherPose2, 
+function overlayScanMatcherOLD(sm::ScanMatcherPose2, 
                             trans::Vector{Float64}=Float64[0;0],
                             rot::Real=0.0;
                             score=Ref(0.0),
@@ -72,6 +65,14 @@ end
 
 #
 
+"""
+    $SIGNATURES
+
+Overlay the two images from `AlignRadarPose2` with the first (red) fixed and transform the second image (blue) according to `tf`.
+
+Notes:
+- `tf` is a Manifolds.jl type `::ProductRepr` (or newer `::ArrayPartition`) to represent a `SpecialEuclidean(2)` manifold point.
+"""
 function overlayScanMatcher(sm::ScanMatcherPose2, 
                             tf::ArrayPartition = Manifolds.identity_element(SpecialEuclidean(2));
                             kw... )

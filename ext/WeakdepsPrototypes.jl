@@ -24,8 +24,8 @@ export ScatterAlignPose2, PackedScatterAlignPose2
 export ScatterAlignPose3, PackedScatterAlignPose3
 
 export overlayScanMatcher
+export overlayScanMatcherOLD
 export overlayScatter, overlayScatterMutate
-
 
 
 function applyMaskImage end
@@ -40,6 +40,7 @@ function csmAnimateSideBySide end
 function makeVideoFromData end
 
 function overlayScanMatcher end
+function overlayScanMatcherOLD end
 
 function overlayScatter end
 function overlayScatterMutate end

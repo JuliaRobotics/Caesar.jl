@@ -29,6 +29,8 @@ import IncrementalInference: getSample, preambleCache, _update!, getManifold
 import Caesar: applyMaskImage, makeMaskImage, makeMaskImages, imhcatPretty, toImage
 import Caesar: writevideo, csmAnimationJoinImgs, csmAnimateSideBySide, makeVideoFromData
 import Caesar: overlayScanMatcher
+import Caesar: overlayScatter, overlayScatterMutate
+
 import Caesar: ScanMatcherPose2, PackedScanMatcherPose2
 import Caesar: _PARCHABLE_PACKED_CLOUD
 import Caesar: ScatterAlign, ScatterAlignPose2, ScatterAlignPose3
