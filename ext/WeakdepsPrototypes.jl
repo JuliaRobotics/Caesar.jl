@@ -9,6 +9,13 @@ function drawBearingLinesAprilTags! end
 
 
 ## ==============================================
+# CaesarImageFeaturesExt prototypes
+
+export toDictFeatures
+function toDictFeatures end
+
+
+## ==============================================
 # CaesarImageMagickExt prototypes
 export toFormat
 export fetchDataImage

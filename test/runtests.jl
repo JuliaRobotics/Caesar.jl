@@ -13,14 +13,14 @@ TEST_GROUP = get(ENV, "IIF_TEST_GROUP", "all")
 if TEST_GROUP in ["all", "basic_functional_group"]
     println("Starting tests...")
     # highly multipackage tests that don't fit well in specific library dependencies.
-    # include("testScatterAlignParched.jl")
-    # include("testScatterAlignPose2.jl")
-    # include("testScatterAlignPose3.jl")
-    # include("testStashing_SAP.jl")
-    # include("pcl/testBoundingBox.jl")
-    # include("pcl/testPointCloud2.jl")
-    # @error "Must restore zmq runtest"
-    # # include("multilangzmq/runtests.jl")
+    include("testScatterAlignParched.jl")
+    include("testScatterAlignPose2.jl")
+    include("testScatterAlignPose3.jl")
+    include("testStashing_SAP.jl")
+    include("pcl/testBoundingBox.jl")
+    include("pcl/testPointCloud2.jl")
+    @error "Must restore zmq runtest"
+    # include("multilangzmq/runtests.jl")
     include("testPose2AprilTag4Corner.jl")
 end
 

@@ -65,6 +65,7 @@ ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [extensions]
 CaesarAprilTagsExt = "AprilTags"
+CaesarImageFeaturesExt = "ImageFeatures"
 CaesarImageMagickExt = "ImageMagick"
 CaesarZMQExt = "ZMQ"
 
