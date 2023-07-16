@@ -59,16 +59,16 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [weakdeps]
 AprilTags = "f0fec3d5-a81e-5a6a-8c28-d2b34f3659de"
-Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 ImageFeatures = "92ff4b2b-8094-53d3-b29d-97f740f06cef"
 ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [extensions]
 CaesarAprilTagsExt = "AprilTags"
-CaesarImagesExt = "Images"
 CaesarImageFeaturesExt = "ImageFeatures"
 CaesarImageMagickExt = "ImageMagick"
+CaesarImagesExt = "Images"
 CaesarZMQExt = "ZMQ"
 
 [compat]
@@ -85,6 +85,7 @@ Distributions = "0.25"
 DocStringExtensions = "0.8, 0.9"
 FFTW = "1"
 FileIO = "1"
+FixedPointNumbers = "0.8"
 GeometricalPredicates = "0.4"
 GeometryBasics = "0.4"
 ImageCore = "0.8, 0.9"
