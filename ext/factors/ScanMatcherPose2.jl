@@ -19,7 +19,7 @@ arp2 = ScanMatcherPose2(img1, img2, 2) # e.g. 2 meters/pixel
 
 See also: [`overlayScanMatcher`](@ref)
 """
-struct ScanMatcherPose2{T} <: IIF.AbstractRelativeMinimize
+struct ScanMatcherPose2{T} <: IIF.AbstractManifoldMinimize
   """ reference image for scan matching. """
   im1::Matrix{T}
   """ test image to scan match against the reference image. """

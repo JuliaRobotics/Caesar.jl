@@ -1,5 +1,6 @@
 # test ScatterAlignPose2
 
+# using Revise
 using Test
 using Images
 using Caesar

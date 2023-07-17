@@ -66,7 +66,7 @@ IIF will deal with partials,
 DevNotes
 - FIXME ongoing (2021Q2), see #1206, likely also #1010
 """
-struct Point2Point2Northing{B <: IIF.SamplableBelief, T <: Tuple} <: IIF.AbstractRelativeMinimize
+struct Point2Point2Northing{B <: IIF.SamplableBelief, T <: Tuple} <: IIF.AbstractManifoldMinimize
   Z::B
   partial::T # which dimension the partial applies to 
 end
