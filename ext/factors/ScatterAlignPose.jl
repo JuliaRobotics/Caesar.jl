@@ -49,7 +49,7 @@ See also: [`ScatterAlignPose2`](@ref), [`ScatterAlignPose3`](@ref), [`overlaySca
 """
 Base.@kwdef struct ScatterAlign{P,
                                 H1 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity},
-                                H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity} } <: IIF.AbstractRelativeMinimize
+                                H2 <: Union{<:ManifoldKernelDensity, <:HeatmapGridDensity} } <: IIF.AbstractManifoldMinimize
   """ reference image for scan matching. """
   cloud1::H1
   """ test image to scan match against the reference image. """
@@ -79,7 +79,7 @@ Specialization of [`ScatterAlign`](@ref) for [`Pose2`](@ref).
 
 See also: [`ScatterAlignPose3`](@ref)
 """
-struct ScatterAlignPose2 <: IIF.AbstractRelativeMinimize
+struct ScatterAlignPose2 <: IIF.AbstractManifoldMinimize
   align::ScatterAlign{Pose2,<:Any,<:Any}
 end
 
@@ -92,7 +92,7 @@ Specialization of [`ScatterAlign`](@ref) for [`Pose3`](@ref).
 
 See also: [`ScatterAlignPose2`](@ref)
 """
-struct ScatterAlignPose3 <: IIF.AbstractRelativeMinimize
+struct ScatterAlignPose3 <: IIF.AbstractManifoldMinimize
   align::ScatterAlign{Pose3,<:Any,<:Any}
 end
 
