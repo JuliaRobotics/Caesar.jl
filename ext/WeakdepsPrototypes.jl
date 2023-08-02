@@ -28,6 +28,21 @@ export overlayScanMatcherOLD
 export overlayScatter, overlayScatterMutate
 
 
+const ImageTracks = Dict{Int, Vector{Vector{Float32}}}
+# features[nframes][track_uuid][img_id] = featidx,pixeluv   # image feature used in multiple frame counts, 2 / 3 / 4 / ... each with own track_uuid
+# const FeaturesDict = Dict{Pair{Symbol,Symbol}, Tuple{Int,Tuple{Float64,Float64}}}
+const FEATURE_VIA = Tuple{Symbol, Int64, Tuple{Float64, Float64}}
+const FeatTrackValue = NamedTuple{(:from, :to), Tuple{FEATURE_VIA, FEATURE_VIA}}
+# Tuple{Tuple{Float64,Float64}, Pair{Tuple{Symbol,Int}, Tuple{Symbol,Int}}}
+const FeaturesDict = Dict{Symbol,FeatTrackValue}
+const FeatureTracks = Dict{UUID, FeaturesDict}
+const FeatureMountain = Dict{Int, FeatureTracks}
+# NOTE # images[img_id][track_uuid][pixel] # this format doesnt work because same feature my occur in multiple frame counts
+
+const PIXELTRACK = NamedTuple{(:via, :track), Tuple{FEATURE_VIA, Tuple{UUID,Tuple{Symbol,Int},Tuple{Float64,Float64}}}}
+const MANYTRACKS = Dict{Tuple{Symbol,Int},PIXELTRACK}
+
+
 function applyMaskImage end
 function makeMaskImage end
 function makeMaskImages end

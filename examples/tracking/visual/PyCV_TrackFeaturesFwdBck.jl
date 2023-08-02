@@ -2,6 +2,7 @@
 
 using PyCall
 using Images
+using ImageFeatures
 using DistributedFactorGraphs
 using ProgressMeter
 using JSON3
@@ -207,14 +208,50 @@ function addDataImgTracksFwdBck!(
 end
 
 
+function makeBlobFeatureTracksPerImage_FwdBck!(
+  dfg::AbstractDFG,
+  vlbs_fwdbck::AbstractVector{Symbol},
+  imgBlobKey,
+  blobstorelbl::Symbol,
+  blobLabel::Symbol = Symbol("IMG_FEATURE_TRACKS_FWDBCK_$(length(vlbs_fwdbck))_KLT");
+  feature_params,
+  lk_params,
+  mask,
+)
+  # good features to track
+  kfs = (s->getData(dfg, s, imgBlobKey)).(vlbs_fwdbck)
+  imgs = kfs .|> (eb)->unpackBlob(MIME(eb[1].mimeType), eb[2])
+  # track features across neighboring frames +-1, +-2, ...
+  img_tracks = trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask)
+  
+  center_vlb = vlbs_fwdbck[1+floor(Int,length(vlbs_fwdbck)/2)]
+
+  addDataImgTracksFwdBck!(
+    dfg,
+    center_vlb,
+    blobstorelbl,
+    blobLabel,
+    "",
+    img_tracks,
+  )
+end
+
 function plotBlobsImageTracks!(
   dfg::AbstractDFG,
   vlb::Symbol,
   key = r"IMG_FEATURE_TRACKS_FWDBCK";
   fig = GLMakie.Figure(),
   ax = GLMakie.Axis(fig[1,1]),
-  resolution::Union{Nothing,<:Tuple} = nothing
+  resolution::Union{Nothing,<:Tuple} = nothing,
+  img::Union{Nothing,<:AbstractMatrix{<:Colorant}} = nothing,
+  linewidth = 5
 )
+
+  height = 0
+  if !isnothing(img)
+    image!(ax, rotr90(img))
+    height = size(img,1)
+  end
 
   eb = getData(dfg,vlb,key)
   img_tracks = JSON3.read(String(eb[2]), Dict{Int, Vector{Vector{Float32}}})
@@ -227,13 +264,14 @@ function plotBlobsImageTracks!(
   for k in 1:len
     for i in -fbk:fbk
       push!(UU[k],  img_tracks[i][k][1])  
-      push!(VV[k], -img_tracks[i][k][2])
+      push!(VV[k], height-img_tracks[i][k][2])
     end
-    lines!(ax, UU[k], VV[k], color=RGBf(rand(3)...))
+    lines!(ax, UU[k], VV[k]; color=RGBf(rand(3)...), linewidth)
   end
   if !isnothing(resolution)
     xlims!(ax, 0, resolution[1])
-    ylims!(ax, -resolution[2], 0)
+    ylims!(ax, height - resolution[2], height)
+    # ylims!(ax, -resolution[2], 0)
   end
 
   fig
@@ -335,5 +373,7 @@ function curateFeatureTracks(
   end
   # fig
 
-  return tracks_A_B[hammselect]
+  idx_A_B = (1:length(tracks_A))[rowidx_keep] .=> (1:length(tracks_B))[colidx_keep]
+
+  return tracks_A_B[hammselect], idx_A_B[hammselect]
 end
