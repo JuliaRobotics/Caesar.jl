@@ -379,3 +379,61 @@ function buildFeatureMountain(
   ## what should the final feature lookup look like after curation?
   return featM
 end
+
+
+
+## Old dev code
+
+# ## Curate 4oo4 KLTFWD-DESC-KLTBCK-DESC
+# ## =======
+
+
+# trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK_"
+
+# i=0
+# vlb_q = Symbol("xl$(500+i)")
+
+# ie_ib = getData(fg, vlb_q, r"cam01AEA9_")
+# img_q = unpackBlob(MIME(ie_ib[1].mimeType), ie_ib[2])
+# mimg_q = Caesar.applyMaskImage(img_q, maskl .< 0.5)
+
+# eb = getData(fg, vlb_q, trackBlobKey)
+# tracks_q = JSON3.read(String(eb[2]), ImageTracks)
+
+# i=1
+# vlb_p = Symbol("xl$(500-i)")
+# eb = getData(fg, vlb_p, trackBlobKey)
+# tracks_p = JSON3.read(String(eb[2]), ImageTracks)
+
+# # KLTBCK
+# vlb_r = Symbol("xl$(500+i)")
+# eb = getData(fg, vlb_r, trackBlobKey)
+# tracks_r = JSON3.read(String(eb[2]), ImageTracks)
+
+# # KLTFWD w/ DESC
+# tracks_pP1_q0, idx_pP1_q0 = curateFeatureTracks(tracks_p[1], tracks_q[0], img_q, mimg_q)
+# # KLTBCK w/ DESC
+# tracks_q0_rN1, idx_q0_rN1 = curateFeatureTracks(tracks_q[0], tracks_r[-1], img_q, mimg_q)
+# tracks_rN1_q0, idx_rN1_q0 = curateFeatureTracks(tracks_r[-1], tracks_p[0], img_q, mimg_q)
+
+# # now get tracking from previous through current to next
+# intsc_q0 = intersect((s->s[2]).(idx_pP1_q0), (s->s[2]).(idx_rN1_q0))
+
+# tracks_pP1_rN1 = Pair{Int,Int}[]
+# for com_idx in intsc_q0
+#   idx_tr_pP1_q0 = idx_pP1_q0[findfirst(==(com_idx),(s->s[2]).(idx_pP1_q0))][1]
+#   # idx_tr_q0_rN1 = idx_q0_rN1[findfirst(==(com_idx),(s->s[1]).(idx_q0_rN1))][2]
+#   idx_tr_rN1_q0 = idx_rN1_q0[findfirst(==(com_idx),(s->s[2]).(idx_rN1_q0))][1]
+#   push!(tracks_pP1_rN1, idx_tr_pP1_q0 => idx_tr_rN1_q0)
+# end
+
+
+# tracks_pP1_rN1
+
+# ## check
+
+# [norm(tracks_p[1][pP1] - tracks_r[-1][rN1]) for (pP1,rN1) in tracks_pP1_rN1]
+
+
+
+##
