@@ -3,21 +3,19 @@
 
 
 
-
-
 function addFeatureTracks_Frame1_Q!(
   # mountain::FeatureMountain,
   featToMany,
   dfg::AbstractDFG, 
-  vlb_q::Symbol,
-  tracksBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK",
+  vlb_q::Symbol;
+  trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK",
 )
   #
   # if !haskey(mountain, 1)
   #   mountain[1] = FeatureTracks()
   # end
 
-  eb = getData(dfg,vlb_q,tracksBlobKey)
+  eb = getData(dfg,vlb_q,trackBlobKey)
   img_tracks = JSON3.read(String(eb[2]), ImageTracks)
   
   for (featidx, meas) in enumerate(img_tracks[0])
@@ -52,6 +50,7 @@ function addFeatureTracks_Frame2_PfwdQ!(
   featToMany,
   dfg::AbstractDFG,
   vlb_pq,
+  mask = nothing;
   trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK_",
 )
 
@@ -61,8 +60,9 @@ function addFeatureTracks_Frame2_PfwdQ!(
 
   vlb_p, vlb_q = vlb_pq[1], vlb_pq[2]
 
-  ie_ib = getData(fg, vlb_q, r"cam01AEA9_")
+  ie_ib = getData(dfg, vlb_q, r"cam01AEA9_")
   img_q = unpackBlob(MIME(ie_ib[1].mimeType), ie_ib[2])
+  maskl = isnothing(mask) ? zeros(Gray{N0f8}, size(img_q)...) : mask
   mimg_q = Caesar.applyMaskImage(img_q, maskl .< 0.5)
 
   eb_q = getData(dfg, vlb_q, trackBlobKey)
@@ -108,6 +108,7 @@ function addFeatureTracks_Frame2_QbckR!(
   featToMany,
   dfg::AbstractDFG,
   vlb_qr,
+  mask = nothing;
   trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK_",
 )
 
@@ -117,8 +118,9 @@ function addFeatureTracks_Frame2_QbckR!(
 
   vlb_q, vlb_r = vlb_qr[1], vlb_qr[2]
 
-  ie_ib = getData(fg, vlb_q, r"cam01AEA9_")
+  ie_ib = getData(dfg, vlb_q, r"cam01AEA9_")
   img_q = unpackBlob(MIME(ie_ib[1].mimeType), ie_ib[2])
+  maskl = isnothing(mask) ? zeros(Gray{N0f8}, size(img_q)...) : mask
   mimg_q = Caesar.applyMaskImage(img_q, maskl .< 0.5)
 
   eb_q = getData(dfg, vlb_q, trackBlobKey)
@@ -215,19 +217,23 @@ end
 """
     $SIGNATURES
 
+Add features per image (frame1) and pairs (frame2).
 
 ```julia
 # FWD pairs and BCK pairs
 N = 500
 pairs = zip(
-  [Symbol("xl$i") for i in (500-1):(500-1+N)], 
-  [Symbol("xl$i") for i in 500:(500+N)]
+  [Symbol("xl\$i") for i in (500-1):(500-1+N)], 
+  [Symbol("xl\$i") for i in 500:(500+N)]
 )
+
+featM = addFeatureTracks(fg, pairs)
 ```
 """
 function addFeatureTracks(
   dfg::AbstractDFG,
-  pairs;
+  pairs,
+  mask = nothing;
   trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK_"
 )
   #
@@ -236,11 +242,11 @@ function addFeatureTracks(
   lastlbl = :null
   @showprogress "feature pairs" for pair in pairs
     addFeatureTracks_Frame1_Q!(featToMany_, dfg, pair[1]; trackBlobKey)
-    addFeatureTracks_Frame2_PfwdQ!(featToMany_, dfg, pair; trackBlobKey)
-    addFeatureTracks_Frame2_QbckR!(featToMany_, dfg, pair; trackBlobKey)  
+    addFeatureTracks_Frame2_PfwdQ!(featToMany_, dfg, pair, mask; trackBlobKey)
+    addFeatureTracks_Frame2_QbckR!(featToMany_, dfg, pair, mask; trackBlobKey)  
     lastlbl = pair[2]
   end
-  addFeatureTracks_Frame1_Q!(featToMany_, dfg, lastlbl)
+  addFeatureTracks_Frame1_Q!(featToMany_, dfg, lastlbl; trackBlobKey)
 
   return featToMany_
 end
@@ -358,13 +364,14 @@ end
 
 function buildFeatureMountain(
   dfg::AbstractDFG,
-  vlbs::AbstractVector{Symbol};
+  vlbs::AbstractVector{Symbol},
+  mask = nothing;
   trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK_"
 )
   # adjacent variable labels with images
   pairs = zip(vlbs[1:end-1],vlbs[2:end])
   # generate feature mountain with frames 1 and 2 fwdbck
-  featM = addFeatureTracks(dfg, pairs; trackBlobKey)
+  featM = addFeatureTracks(dfg, pairs, mask; trackBlobKey)
 
   consolidateFeatureTracks!(featM)
   summarizeFeatureTracks!(featM)

@@ -13,6 +13,7 @@ using Manifolds
 using DocStringExtensions
 using ProgressMeter
 using Optim
+using JSON3
 
 using Caesar # TODO try reduce to just import Caesar ... below
 import Caesar._PCL as _PCL
@@ -36,6 +37,12 @@ import Caesar: _PARCHABLE_PACKED_CLOUD
 import Caesar: ScatterAlign, ScatterAlignPose2, ScatterAlignPose3
 import Caesar: PackedScatterAlignPose2, PackedScatterAlignPose3
 
+import Caesar: ImageTracks, FEATURE_VIA, FeatTrackValue, FeaturesDict, FeatureTracks, FeatureMountain, PIXELTRACK, MANYTRACKS
+import Caesar: addFeatureTracks_Frame1_Q!, addFeatureTracks_Frame2_PfwdQ!, addFeatureTracks_Frame2_QbckR!
+import Caesar: addFeatureTracks, consolidateFeatureTracks!, summarizeFeatureTracks!, buildFeatureMountain
+
+# NOTE usage requires ImageFeatures.jl
+import Caesar: curateFeatureTracks
 
 include("Images/ROSImageConversion.jl")
 include("Images/ImageMask.jl")

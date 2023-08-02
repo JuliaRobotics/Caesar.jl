@@ -21,7 +21,7 @@ import IncrementalInference: getSample, AbstractRelativeMinimize, getManifold
 # entities
 import Caesar: Pose2AprilTag4Corners, PackedPose2AprilTag4Corners
 # services
-import Caesar: drawBearingLinesAprilTags!
+import Caesar: drawBearingLinesAprilTags!, generateCostAprilTagsPreimageCalib
 
 include("AprilTagDrawingTools.jl")
 include("Pose2AprilTag4Corners.jl")
