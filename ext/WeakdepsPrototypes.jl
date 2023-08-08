@@ -71,6 +71,8 @@ function consolidateFeatureTracks! end
 function summarizeFeatureTracks! end
 function buildFeatureMountain end
 
+function unionFeatureMountain end
+function sortKeysMinSighthing end
 
 ## ==============================================
 # CaesarImageFeaturesExt prototypes

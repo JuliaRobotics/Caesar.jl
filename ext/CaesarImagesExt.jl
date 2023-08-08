@@ -40,6 +40,7 @@ import Caesar: PackedScatterAlignPose2, PackedScatterAlignPose3
 import Caesar: ImageTracks, FEATURE_VIA, FeatTrackValue, FeaturesDict, FeatureTracks, FeatureMountain, PIXELTRACK, MANYTRACKS
 import Caesar: addFeatureTracks_Frame1_Q!, addFeatureTracks_Frame2_PfwdQ!, addFeatureTracks_Frame2_QbckR!
 import Caesar: addFeatureTracks, consolidateFeatureTracks!, summarizeFeatureTracks!, buildFeatureMountain
+import Caesar: unionFeatureMountain, sortKeysMinSighthing
 
 # NOTE usage requires ImageFeatures.jl
 import Caesar: curateFeatureTracks

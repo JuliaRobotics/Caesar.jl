@@ -273,7 +273,7 @@ end
 
 
 function consolidateFeatureTracks!(
-  featToMany_
+  featToMany_::Dict{Tuple{Symbol,Int},MANYTRACKS},
 )
   ## find Frame3 options
 
@@ -327,7 +327,7 @@ end
 
 
 function summarizeFeatureTracks!(
-  featToMany_
+  featToMany_::Dict{Tuple{Symbol,Int},MANYTRACKS},
 )
 ## summarize tracks to start label
 
@@ -379,6 +379,54 @@ function buildFeatureMountain(
   ## what should the final feature lookup look like after curation?
   return featM
 end
+
+
+## union features
+
+
+
+function unionFeatureMountain(
+  fMa::Dict{Tuple{Symbol,Int},MANYTRACKS}, 
+  fMb::Dict{Tuple{Symbol,Int},MANYTRACKS},
+)
+  # start with everything from fMb
+  rM = deepcopy(fMb)
+  # then add everything from fMa
+  for (ka,va) in fMa
+    # @info ka
+    # union if already exists
+    if haskey(rM, ka)
+      # @info "CHECK TYPES" typeof(fMa[ka]) typeof(rM[ka])
+      for (kr,vr) in va
+        if !haskey(rM[ka], kr)
+          rM[ka][kr] = vr # union(fMa[ka], rM[ka])
+        end
+      end
+    else
+      rM[ka] = va
+    end
+  end
+  return rM
+end
+
+
+
+function sortKeysMinSighthing(
+  featM::Dict{Tuple{Symbol,Int},<:Any};
+  minSightings::Int = 1
+)
+  kM_mS = if minSightings == 1
+    collect(keys(featM))
+  else
+    collect(keys(featM))[minSightings .< (keys(featM) .|> s->length(featM[s]))]
+  end
+  kM_mS_ = sort(kM_mS; by=s->s[2])
+  return sort(kM_mS_; by=s->s[1], lt=natural_lt)
+end
+
+
+
+
 
 
 
