@@ -11,7 +11,7 @@ using TensorCast
 import Base: Dict
 import LinearAlgebra: norm
 
-import Caesar: AbstractDFG, BlobEntry, addData!
+import Caesar: AbstractDFG, BlobEntry, addData!, DFG.sha256
 
 import Caesar: toDictFeatures
 
