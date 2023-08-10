@@ -14,6 +14,7 @@ using DocStringExtensions
 using ProgressMeter
 using Optim
 using JSON3
+using Distributed
 
 using Caesar # TODO try reduce to just import Caesar ... below
 import Caesar._PCL as _PCL
@@ -39,8 +40,8 @@ import Caesar: PackedScatterAlignPose2, PackedScatterAlignPose3
 
 import Caesar: ImageTracks, FEATURE_VIA, FeatTrackValue, FeaturesDict, FeatureTracks, FeatureMountain, PIXELTRACK, MANYTRACKS
 import Caesar: addFeatureTracks_Frame1_Q!, addFeatureTracks_Frame2_PfwdQ!, addFeatureTracks_Frame2_QbckR!
-import Caesar: addFeatureTracks, consolidateFeatureTracks!, summarizeFeatureTracks!, buildFeatureMountain
-import Caesar: unionFeatureMountain, sortKeysMinSighthing
+import Caesar: addFeatureTracks, consolidateFeatureTracks!, summarizeFeatureTracks!, buildFeatureMountain, buildFeatureMountainDistributed
+import Caesar: unionFeatureMountain, sortKeysMinSighting
 
 # NOTE usage requires ImageFeatures.jl
 import Caesar: curateFeatureTracks
