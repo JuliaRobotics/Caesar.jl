@@ -14,7 +14,6 @@ function addFeatureTracks_Frame1_Q!(
   # if !haskey(mountain, 1)
   #   mountain[1] = FeatureTracks()
   # end
-
   eb = getData(dfg,vlb_q,trackBlobKey)
   img_tracks = JSON3.read(String(eb[2]), ImageTracks)
   
@@ -273,7 +272,7 @@ end
 
 
 function consolidateFeatureTracks!(
-  featToMany_
+  featToMany_::Dict{Tuple{Symbol,Int},MANYTRACKS},
 )
   ## find Frame3 options
 
@@ -327,7 +326,7 @@ end
 
 
 function summarizeFeatureTracks!(
-  featToMany_
+  featToMany_::Dict{Tuple{Symbol,Int},MANYTRACKS},
 )
 ## summarize tracks to start label
 
@@ -379,6 +378,100 @@ function buildFeatureMountain(
   ## what should the final feature lookup look like after curation?
   return featM
 end
+
+
+## union features
+
+
+
+function unionFeatureMountain(
+  fMa::Dict{Tuple{Symbol,Int},MANYTRACKS}, 
+  fMb::Dict{Tuple{Symbol,Int},MANYTRACKS},
+)
+  # start with everything from fMb
+  rM = deepcopy(fMb)
+  # then add everything from fMa
+  for (ka,va) in fMa
+    # @info ka
+    # union if already exists
+    if haskey(rM, ka)
+      # @info "CHECK TYPES" typeof(fMa[ka]) typeof(rM[ka])
+      for (kr,vr) in va
+        if !haskey(rM[ka], kr)
+          rM[ka][kr] = vr # union(fMa[ka], rM[ka])
+        end
+      end
+    else
+      rM[ka] = va
+    end
+  end
+  return rM
+end
+
+
+
+function sortKeysMinSighting(
+  featM::Dict{Tuple{Symbol,Int},<:Any};
+  minSightings::Int = 1
+)
+  kM_mS = if minSightings == 1
+    collect(keys(featM))
+  else
+    collect(keys(featM))[minSightings .< (keys(featM) .|> s->length(featM[s]))]
+  end
+  kM_mS_ = sort(kM_mS; by=s->s[2])
+  return sort(kM_mS_; by=s->s[1], lt=DFG.natural_lt)
+end
+
+
+
+
+function buildFeatureMountainDistributed(
+  dfg::AbstractDFG,
+  vlbls::AbstractVector{Symbol},
+  imgmask;
+  STRIDE = 100
+)
+  WP = WorkerPool(collect(1:nprocs()))
+
+  ntopr = ceil(Int,length(vlbls)/STRIDE)
+  len = length(vlbls)
+
+  chunks1 = Iterators.partition(vlbls, len ÷ ntopr) |> collect
+  nosingles = findall(==(1), length.(chunks1))
+  chunks1 = chunks1[setdiff(1:length(chunks1), nosingles)]
+  tasks1 = map(chunks1) do vlbs1
+    remotecall(Caesar.buildFeatureMountain, WP, dfg, vlbs1, imgmask)
+  end
+  chunks2 = Iterators.partition(vlbls[(1 + STRIDE÷2):end], len ÷ ntopr) |> collect
+  nosingles = findall(==(1), length.(chunks2))
+  chunks2 = chunks2[setdiff(1:length(chunks2), nosingles)]
+  tasks2 = map(chunks2) do vlbs2
+    remotecall(Caesar.buildFeatureMountain, WP, dfg, vlbs2, imgmask)
+  end
+
+  ## consolidate equivalent features
+
+  # fetch all the results
+  featM_1 = fetch.(tasks1)
+  featM_2 = fetch.(tasks2)
+  # featM_ = (hcat(featM_1, featM_2))'[:]
+  # consolidate into common feature mountain container
+  # start with first result as featM
+  featM = deepcopy(featM_1[1])
+  # union other tracks into featM
+  for fM in featM_1[2:end]
+    featM = Caesar.unionFeatureMountain(featM, fM)
+  end
+  for fM in featM_2
+    featM = Caesar.unionFeatureMountain(featM, fM)
+  end
+
+  return featM
+
+
+end
+
 
 
 

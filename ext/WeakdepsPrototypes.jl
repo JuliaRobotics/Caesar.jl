@@ -70,7 +70,10 @@ function addFeatureTracks end
 function consolidateFeatureTracks! end
 function summarizeFeatureTracks! end
 function buildFeatureMountain end
+function buildFeatureMountainDistributed end
 
+function unionFeatureMountain end
+function sortKeysMinSighting end
 
 ## ==============================================
 # CaesarImageFeaturesExt prototypes
