@@ -15,6 +15,9 @@ function addFeatureTracks_Frame1_Q!(
   #   mountain[1] = FeatureTracks()
   # end
   eb = getData(dfg,vlb_q,trackBlobKey)
+  if isnothing(eb)
+    return featToMany
+  end
   img_tracks = JSON3.read(String(eb[2]), ImageTracks)
   
   for (featidx, meas) in enumerate(img_tracks[0])
@@ -65,9 +68,11 @@ function addFeatureTracks_Frame2_PfwdQ!(
   mimg_q = Caesar.applyMaskImage(img_q, maskl .< 0.5)
 
   eb_q = getData(dfg, vlb_q, trackBlobKey)
-  tracks_q = JSON3.read(String(eb_q[2]), ImageTracks)
-
   eb_p = getData(dfg, vlb_p, trackBlobKey)
+  if isnothing(eb_p) || isnothing(eb_q)
+    return featToMany
+  end
+  tracks_q = JSON3.read(String(eb_q[2]), ImageTracks)
   tracks_p = JSON3.read(String(eb_p[2]), ImageTracks)
 
   # KLTFWD w/ DESC
@@ -123,9 +128,11 @@ function addFeatureTracks_Frame2_QbckR!(
   mimg_q = Caesar.applyMaskImage(img_q, maskl .< 0.5)
 
   eb_q = getData(dfg, vlb_q, trackBlobKey)
-  tracks_q = JSON3.read(String(eb_q[2]), ImageTracks)
-
   eb_r = getData(dfg, vlb_r, trackBlobKey)
+  if isnothing(eb_r) || isnothing(eb_q)
+    return featToMany
+  end
+  tracks_q = JSON3.read(String(eb_q[2]), ImageTracks)
   tracks_r = JSON3.read(String(eb_r[2]), ImageTracks)
 
   # KLTBCK w/ DESC
