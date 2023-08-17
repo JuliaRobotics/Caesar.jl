@@ -441,8 +441,8 @@ function buildFeatureMountainDistributed(
 )
   WP = WorkerPool(collect(1:nprocs()))
 
-  ntopr = ceil(Int,length(vlbls)/STRIDE)
-  len = length(vlbls)
+  @show ntopr = ceil(Int,length(vlbls)/STRIDE)
+  @show len = length(vlbls)
 
   chunks1 = Iterators.partition(vlbls, len ÷ ntopr) |> collect
   nosingles = findall(==(1), length.(chunks1))
