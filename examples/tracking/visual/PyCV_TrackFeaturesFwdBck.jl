@@ -40,7 +40,19 @@ function getPose(p1, p2, K)
 end
 
 function goodFeaturesToTrack(im1, feature_params; mask=nothing) 
-    cv.goodFeaturesToTrack(collect(reinterpret(UInt8, im1)), mask=collect(reinterpret(UInt8,mask)), feature_params...)
+  cv.goodFeaturesToTrack(collect(reinterpret(UInt8, im1)), mask=collect(reinterpret(UInt8,mask)), feature_params...)
+end
+
+function goodFeaturesToTrackORB(im1, feature_params; mask=nothing, orb = cv.ORB_create()) 
+  # gray = cv2.cvtColor(im1,cv.COLOR_BGR2GRAY)
+  # kypts, decrs = orb.detectAndCompute(gray,None)
+  # https://docs.opencv.org/3.4/d1/d89/tutorial_py_orb.html
+  # find the keypoints with ORB
+  img = collect(reinterpret(UInt8, im1))
+  kp = orb.detect(img, collect(reinterpret(UInt8,mask)))
+  # compute the descriptors with ORB
+  kp, des = orb.compute(img, kp)
+  return kp, des
 end
 
 function combinePlot(ref_img, overlay_img)
@@ -93,14 +105,15 @@ function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=no
   len = length(imgs)
   @assert isodd(len) "expecting odd number of images for forward backward tracking from center image"
 
-  cen = floor(Int, len/2) + 1
-  feats0 = goodFeaturesToTrack(imgs[cen], feature_params; mask)
-  # p1 = cv.goodFeaturesToTrack(collect(reinterpret(UInt8, imgs[1])), mask=leftmask, feature_params...)
-  # p2, flow_status = calcFlow(imgs[1], imgs[2], p1, lk_params)
-
   img_tracks = Dict{Int,Vector{Vector{Float64}}}()
   
-  img_tracks[0] = [feats0[k,:,:][:] for k in 1:size(feats0,1)]
+  kpts, dscs = goodFeaturesToTrackORB(imgs[cen], feature_params; mask)
+  img_tracks[0] = [kpts[k].pt[:] for k in 1:length(kpts)]
+
+  cen = floor(Int, len/2) + 1
+  # feats0 = goodFeaturesToTrack(imgs[cen], feature_params; mask)
+  # img_tracks[0] = [feats0[k,:,:][:] for k in 1:size(feats0,1 )]
+  
 
   tracks = trackFeaturesFrames(feats0, imgs[cen:end], lk_params; mask)
   for (i,tr) in enumerate(tracks)
