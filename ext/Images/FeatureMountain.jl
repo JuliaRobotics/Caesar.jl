@@ -441,7 +441,9 @@ function buildFeatureMountainDistributed(
   dfg::AbstractDFG,
   vlbls::AbstractVector{Symbol},
   imgmask;
-  STRIDE = 100
+  STRIDE = 100,
+  trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK_",
+  imgBlobKey = r"cam"
 )
   WP = WorkerPool(collect(1:nprocs()))
 
@@ -452,13 +454,13 @@ function buildFeatureMountainDistributed(
   nosingles = findall(==(1), length.(chunks1))
   chunks1 = chunks1[setdiff(1:length(chunks1), nosingles)]
   tasks1 = map(chunks1) do vlbs1
-    remotecall(Caesar.buildFeatureMountain, WP, dfg, vlbs1, imgmask)
+    remotecall(Caesar.buildFeatureMountain, WP, dfg, vlbs1, imgmask; trackBlobKey, imgBlobKey)
   end
   chunks2 = Iterators.partition(vlbls[(1 + STRIDE÷2):end], len ÷ ntopr) |> collect
   nosingles = findall(==(1), length.(chunks2))
   chunks2 = chunks2[setdiff(1:length(chunks2), nosingles)]
   tasks2 = map(chunks2) do vlbs2
-    remotecall(Caesar.buildFeatureMountain, WP, dfg, vlbs2, imgmask)
+    remotecall(Caesar.buildFeatureMountain, WP, dfg, vlbs2, imgmask; trackBlobKey, imgBlobKey)
   end
 
   ## consolidate equivalent features
