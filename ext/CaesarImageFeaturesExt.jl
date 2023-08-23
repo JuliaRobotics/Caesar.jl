@@ -134,7 +134,9 @@ function addDataImgTracksFwdBck!(
   blobstore::Symbol,
   bloblbl::Symbol,
   origin::AbstractString,
-  img_tracks::Dict{Int,<:AbstractVector{<:AbstractVector{<:Real}}},
+  img_tracks::Dict{Int,<:AbstractVector{<:AbstractVector{<:Real}}};
+  description = "Image feature tracks forward backward $(length(img_tracks)) cv.KLT",
+  mimeType = "/application/octet-stream/json; _type=JuliaLang.Dict{Int,Vector{Vector{Float32}}}"
 )
   blob = Vector{UInt8}(JSON3.write(img_tracks))
   entry = BlobEntry(;
@@ -143,8 +145,8 @@ function addDataImgTracksFwdBck!(
     hash = bytes2hex(sha256(blob)),
     origin,
     size = length(blob),
-    description = "Image feature tracks forward backward $(length(img_tracks)) cv.KLT",
-    mimeType = "/application/octet-stream/json; _type=JuliaLang.Dict{Int,Vector{Vector{Float32}}}"
+    description,
+    mimeType,
   )
   addData!(dfg, vlbl, entry, blob)
 end
