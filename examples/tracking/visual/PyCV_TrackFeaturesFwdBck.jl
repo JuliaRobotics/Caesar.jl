@@ -104,6 +104,8 @@ function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=no
 
   len = length(imgs)
   @assert isodd(len) "expecting odd number of images for forward backward tracking from center image"
+  
+  cen = floor(Int, len/2) + 1
 
   img_tracks = Dict{Int,Vector{Vector{Float64}}}()
   dscs0 = Dict{Int,Tuple{Float64, Vector{Int}}}()
@@ -111,12 +113,13 @@ function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=no
   # use orb /w descriptors || good features
   feats0 = if true
     kpts, dscs = goodFeaturesToTrackORB(imgs[cen]; mask, orb)
-    img_tracks[0] = [kpts[k].pt[:] for k in 1:length(kpts)]
+    img_tracks[0] = [[kpts[k].pt[1];kpts[k].pt[2]] for k in 1:length(kpts)]
     # legacy fill feats0 for tracking
-    feats0_ = zeros(length(kpts),1,2)
+    feats0_ = zeros(Float32,length(kpts),1,2)
     for k in 1:length(kpts)
-      feats0_[k,1,:] = kpts[k].pt[1:2]
-      dscs0[k] = (kpts[k].angle, dscs[k])
+      feats0_[k,1,1] = kpts[k].pt[1]
+      feats0_[k,1,2] = kpts[k].pt[2]
+      dscs0[k] = (kpts[k].angle, Int.(dscs[k,:][:]))
     end
     feats0_
   else
@@ -124,8 +127,6 @@ function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=no
     img_tracks[0] = [feats0_[k,:,:][:] for k in 1:size(feats0_,1 )]
     feats0_
   end
-
-  cen = floor(Int, len/2) + 1
 
   tracks = trackFeaturesFrames(feats0, imgs[cen:end], lk_params; mask)
   for (i,tr) in enumerate(tracks)
@@ -174,17 +175,17 @@ function makeBlobFeatureTracksPerImage_FwdBck!(
   # only store descriptors if available
   if 0 < length(dscs0)
     # store feature angles and descriptors in a separate blob
-    # FIXME piggy backing on the same (poorly named) function for adding the blob
-    Caesar.addDataImgTracksFwdBck!(
-      dfg,
-      center_vlb,
-      blobstorelbl,
-      descLabel,
-      "",
-      dscs0;
+    blob = Vector{UInt8}(JSON3.write(dscs0))
+    entry = BlobEntry(;
+      label = descLabel,
+      blobstore = blobstorelbl,
+      hash = bytes2hex(sha256(blob)),
+      origin = "",
+      size = length(blob),
       description = "Image feature angles and ORB descriptors from cv2.py",
-      mimeType = "application/json"
+      mimeType = "application/octet-stream/json; _type=JuliaLang.$(typeof(dscs0))"
     )
+    addData!(dfg, center_vlb, entry, blob)
   end
 end
 
