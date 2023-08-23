@@ -40,7 +40,19 @@ function getPose(p1, p2, K)
 end
 
 function goodFeaturesToTrack(im1, feature_params; mask=nothing) 
-    cv.goodFeaturesToTrack(collect(reinterpret(UInt8, im1)), mask=collect(reinterpret(UInt8,mask)), feature_params...)
+  cv.goodFeaturesToTrack(collect(reinterpret(UInt8, im1)), mask=collect(reinterpret(UInt8,mask)), feature_params...)
+end
+
+function goodFeaturesToTrackORB(im1; mask=nothing, orb = cv.ORB_create()) 
+  # gray = cv2.cvtColor(im1,cv.COLOR_BGR2GRAY)
+  # kypts, decrs = orb.detectAndCompute(gray,None)
+  # https://docs.opencv.org/3.4/d1/d89/tutorial_py_orb.html
+  # find the keypoints with ORB
+  img = collect(reinterpret(UInt8, im1))
+  kp = orb.detect(img, collect(reinterpret(UInt8,mask)))
+  # compute the descriptors with ORB
+  kp, des = orb.compute(img, kp)
+  return kp, des
 end
 
 function combinePlot(ref_img, overlay_img)
@@ -88,19 +100,32 @@ function trackFeaturesFrames(
 end
 
 
-function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=nothing)
+function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=nothing, orb = cv.ORB_create())
 
   len = length(imgs)
   @assert isodd(len) "expecting odd number of images for forward backward tracking from center image"
 
-  cen = floor(Int, len/2) + 1
-  feats0 = goodFeaturesToTrack(imgs[cen], feature_params; mask)
-  # p1 = cv.goodFeaturesToTrack(collect(reinterpret(UInt8, imgs[1])), mask=leftmask, feature_params...)
-  # p2, flow_status = calcFlow(imgs[1], imgs[2], p1, lk_params)
-
   img_tracks = Dict{Int,Vector{Vector{Float64}}}()
-  
-  img_tracks[0] = [feats0[k,:,:][:] for k in 1:size(feats0,1)]
+  dscs0 = Dict{Int,Tuple{Float64, Vector{Int}}}()
+
+  # use orb /w descriptors || good features
+  feats0 = if true
+    kpts, dscs = goodFeaturesToTrackORB(imgs[cen]; mask, orb)
+    img_tracks[0] = [kpts[k].pt[:] for k in 1:length(kpts)]
+    # legacy fill feats0 for tracking
+    feats0_ = zeros(length(kpts),1,2)
+    for k in 1:length(kpts)
+      feats0_[k,1,:] = kpts[k].pt[1:2]
+      dscs0[k] = (kpts[k].angle, dscs[k])
+    end
+    feats0_
+  else
+    feats0_ = goodFeaturesToTrack(imgs[cen], feature_params; mask)
+    img_tracks[0] = [feats0_[k,:,:][:] for k in 1:size(feats0_,1 )]
+    feats0_
+  end
+
+  cen = floor(Int, len/2) + 1
 
   tracks = trackFeaturesFrames(feats0, imgs[cen:end], lk_params; mask)
   for (i,tr) in enumerate(tracks)
@@ -112,7 +137,7 @@ function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=no
     img_tracks[-i] = [tr[k,:,:][:] for k in 1:size(tr,1)]
   end
 
-  return img_tracks
+  return img_tracks, dscs0
 end
 
 
@@ -121,19 +146,22 @@ function makeBlobFeatureTracksPerImage_FwdBck!(
   vlbs_fwdbck::AbstractVector{Symbol},
   imgBlobKey,
   blobstorelbl::Symbol,
-  blobLabel::Symbol = Symbol("IMG_FEATURE_TRACKS_FWDBCK_$(length(vlbs_fwdbck))_KLT");
+  blobLabel::Symbol = Symbol("IMG_FEATURE_TRACKS_FWDBCK_$(length(vlbs_fwdbck))_KLT"),
+  descLabel::Symbol = Symbol("IMG_FEATURE_ANG_ORB");
   feature_params,
   lk_params,
   mask,
+  orb = cv.ORB_create()
 )
   # good features to track
   kfs = (s->getData(dfg, s, imgBlobKey)).(vlbs_fwdbck)
   imgs = kfs .|> (eb)->unpackBlob(MIME(eb[1].mimeType), eb[2])
   # track features across neighboring frames +-1, +-2, ...
-  img_tracks = trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask)
+  img_tracks, dscs0 = trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask, orb)
   
   center_vlb = vlbs_fwdbck[1+floor(Int,length(vlbs_fwdbck)/2)]
 
+  # store feature keypoints and tracks
   Caesar.addDataImgTracksFwdBck!(
     dfg,
     center_vlb,
@@ -142,6 +170,30 @@ function makeBlobFeatureTracksPerImage_FwdBck!(
     "",
     img_tracks,
   )
+
+  # only store descriptors if available
+  if 0 < length(dscs0)
+    # store feature angles and descriptors in a separate blob
+    # FIXME piggy backing on the same (poorly named) function for adding the blob
+    Caesar.addDataImgTracksFwdBck!(
+      dfg,
+      center_vlb,
+      blobstorelbl,
+      descLabel,
+      "",
+      dscs0;
+      description = "Image feature angles and ORB descriptors from cv2.py",
+      mimeType = "application/json"
+    )
+  end
+end
+
+function makeORBParams(feature_params)
+  orb = cv.ORB_create()
+  orb.setMaxFeatures(feature_params.maxCorners)
+  orb.setPatchSize(feature_params.blockSize)
+
+  return orb
 end
 
 
