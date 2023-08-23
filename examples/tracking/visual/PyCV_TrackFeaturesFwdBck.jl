@@ -106,7 +106,7 @@ function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=no
   @assert isodd(len) "expecting odd number of images for forward backward tracking from center image"
 
   img_tracks = Dict{Int,Vector{Vector{Float64}}}()
-  dscs0 = Vector{Tuple{Float64, Any}}()
+  dscs0 = Dict{Int,Tuple{Float64, Vector{Int}}}()
 
   # use orb /w descriptors || good features
   feats0 = if true
@@ -116,7 +116,7 @@ function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=no
     feats0_ = zeros(length(kpts),1,2)
     for k in 1:length(kpts)
       feats0_[k,1,:] = kpts[k].pt[1:2]
-      push!(dscs0, (kpts[k].angle, dscs[k]) )
+      dscs0[k] = (kpts[k].angle, dscs[k])
     end
     feats0_
   else
