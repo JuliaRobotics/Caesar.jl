@@ -12,6 +12,12 @@ using SHA: sha256
 np = pyimport("numpy")
 cv = pyimport("cv2")
 
+pushfirst!(PyVector(pyimport("sys")."path"), @__DIR__ )
+
+SscPy = pyimport("PySSCFeatures")
+ssc = SscPy."ssc"
+
+
 # # lk_params = ( winSize  = (19, 19), maxLevel = 2, criteria = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
 # lk_params = ( winSize  = (19, 19), maxLevel = 2, criteria = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 30, 0.01))
 # feature_params = (maxCorners = 1000, qualityLevel = 0.01, minDistance = 8, blockSize = 19 )
@@ -43,16 +49,22 @@ function goodFeaturesToTrack(im1, feature_params; mask=nothing)
   cv.goodFeaturesToTrack(collect(reinterpret(UInt8, im1)), mask=collect(reinterpret(UInt8,mask)), feature_params...)
 end
 
-function goodFeaturesToTrackORB(im1; mask=nothing, orb = cv.ORB_create()) 
+function goodFeaturesToTrackORB(im1; mask=nothing, orb = cv.ORB_create(), downsample::Int=5, tolerance::Real = 0.1) 
   # gray = cv2.cvtColor(im1,cv.COLOR_BGR2GRAY)
   # kypts, decrs = orb.detectAndCompute(gray,None)
   # https://docs.opencv.org/3.4/d1/d89/tutorial_py_orb.html
   # find the keypoints with ORB
   img = collect(reinterpret(UInt8, im1))
   kp = orb.detect(img, collect(reinterpret(UInt8,mask)))
+
+  # downselect a better distribution of features
+  rows, cols = size(img,1), size(img,2)
+  sel_kp = ssc(kp, orb.getMaxFeatures() ÷ downsample, tolerance, cols, rows)
+
   # compute the descriptors with ORB
-  kp, des = orb.compute(img, kp)
-  return kp, des
+  kp_, des = orb.compute(img, sel_kp)
+
+  return kp_, des
 end
 
 function combinePlot(ref_img, overlay_img)
