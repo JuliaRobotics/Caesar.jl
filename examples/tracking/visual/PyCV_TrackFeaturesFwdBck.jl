@@ -205,6 +205,8 @@ function makeORBParams(feature_params)
   orb = cv.ORB_create()
   orb.setMaxFeatures(feature_params.maxCorners)
   orb.setPatchSize(feature_params.blockSize)
+  orb.setNLevels(1)
+  # orb.setScoreType(1) # FAST
 
   return orb
 end
