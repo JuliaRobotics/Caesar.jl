@@ -146,6 +146,7 @@ function trackFeaturesForwardsBackwards(imgs, feature_params, lk_params; mask=no
 
   tracks = trackFeaturesFrames(feats0, imgs[cen:end], lk_params; mask)
   for (i,tr) in enumerate(tracks)
+    isnothing(tr) && continue
     img_tracks[i] = [tr[k,:,:][:] for k in 1:size(tr,1)]
   end
 
@@ -205,13 +206,34 @@ function makeBlobFeatureTracksPerImage_FwdBck!(
   end
 end
 
-function makeORBParams(feature_params)
-  orb = cv.ORB_create()
-  orb.setMaxFeatures(feature_params.maxCorners)
-  orb.setPatchSize(feature_params.blockSize)
-  orb.setNLevels(1)
-  # orb.setScoreType(1) # FAST
+function makeORBParams(
+    feature_params;
+    nfeatures = feature_params.maxCorners,
+    nlevels = 1,
+    fastThreshold = 20,
+    edgeThreshold = 31,
+    firstLevel = 0,
+    patchSize = 31,
+    WTA_K = 2,
+    scaleFactor = 1.1,
+    scoreType = 1,
+)
 
+  orb = cv.ORB_create(
+    nlevels = nlevels,
+    fastThreshold = fastThreshold,
+    edgeThreshold = edgeThreshold,
+    firstLevel = firstLevel,
+    patchSize = patchSize,
+    WTA_K = WTA_K,
+    nfeatures = nfeatures,
+    scaleFactor = scaleFactor,
+    scoreType = scoreType,
+  )
+  # orb.setMaxFeatures(feature_params.maxCorners)
+  # orb.setPatchSize(feature_params.blockSize)
+  # orb.setNLevels(1)
+  # orb.setScoreType(1) # FAST
   return orb
 end
 
