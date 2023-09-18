@@ -72,7 +72,7 @@ CaesarImagesExt = "Images"
 CaesarZMQExt = "ZMQ"
 
 [compat]
-ApproxManifoldProducts = "0.6, 0.7"
+ApproxManifoldProducts = "0.7, 0.8"
 AprilTags = "0.8, 0.9"
 ColorVectorSpace = "0.9, 0.10"
 Colors = "0.12"
