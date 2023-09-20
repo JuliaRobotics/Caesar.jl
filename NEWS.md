@@ -2,6 +2,12 @@
 
 Major changes and news in Caesar.jl.
 
+## v0.15 - v0.16
+
+- Change to standard weakdeps package extensions, dropping use of Requires.jl.
+- Refactor and separate out to new PyCaesar package all code using PyCall.
+- Updates for Julia 1.10.
+- Updates for IncrementalInference upgrades relating to StaticArray variable values.
 ## Changes in v0.13
 
 - Finally adding a NEWS.md to Caesar.jl.
