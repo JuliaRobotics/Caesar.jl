@@ -1,8 +1,4 @@
 
-@info "Caesar.jl is loading tools related to Distributed.jl"
-
-export plotToVideo_Distributed
-
 
 function plotToVideo_Distributed( pltfnc::Function, 
                                   args::Union{<:AbstractVector, <:Tuple}; 
