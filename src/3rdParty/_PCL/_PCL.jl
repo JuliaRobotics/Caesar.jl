@@ -59,11 +59,11 @@ include("services/ConsolidateRigidTransform.jl")
 include("services/ICP_Simple.jl")
 
 
-function __init__()
-  # @require LasIO="570499db-eae3-5eb6-bdd5-a5326f375e68" include("services/LasIOSupport.jl")
-  @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("services/ROSConversions.jl")
-  # moved plotting out of Caesar, use Arena.jl or RoMEPlotting.jl instead
-end
+# function __init__()
+#   # @require LasIO="570499db-eae3-5eb6-bdd5-a5326f375e68" include("services/LasIOSupport.jl")
+#   @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("services/ROSConversions.jl")
+#   # moved plotting out of Caesar, use Arena.jl or RoMEPlotting.jl instead
+# end
 
 
 end
