@@ -15,7 +15,7 @@ using Colors
 using Dates
 using Printf
 using DocStringExtensions
-using Requires
+# using Requires
 using StaticArrays
 using Statistics
 using StatsBase
