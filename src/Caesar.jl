@@ -56,9 +56,6 @@ import IncrementalInference: NothingUnion, InstanceType
 import GeometricalPredicates as GeoPr
 
 
-
-# const CJL = Caesar
-
 # public API exports
 include("ExportAPI.jl")
 
@@ -100,41 +97,5 @@ include("../ext/WeakdepsPrototypes.jl")
 # standardized code deprecation
 include("Deprecated.jl")
 
-
-# # FIXME remove
-# using Requires
-
-
-# # conditional loading for ROS
-# function __init__()
-#   # # ZMQ server and endpoints
-#   # # @require ZMQ="c2297ded-f4af-51ae-bb23-16f91089e4e1" include("zmq/ZmqCaesar.jl")
-
-#   # @require PyCall="438e738f-606a-5dbb-bf0a-cddfbfd45ab0" begin
-#   #   @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("ros/CaesarROS.jl")
-#   # end
-
-#   # # @require Colors="5ae59095-9a9b-59fe-a467-6f913c188581" include("3rdParty/_PCL/_PCL.jl")
-#   # # @require AprilTags="f0fec3d5-a81e-5a6a-8c28-d2b34f3659de" begin 
-#   # #   include("images/apriltags.jl")
-#   # #   @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/AprilTagDrawingTools.jl")
-#   # # end
-#   # # @require ImageDraw="4381153b-2b60-58ae-a1ba-fd683676385f" include("images/imagedraw.jl")
-#   # # @require ImageMagick="6218d12a-5da1-5696-b52f-db25d2ecc6d1" include("images/imagedata.jl")
-#   # @require Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" begin 
-#   #   # include("images/images.jl")
-#   #   # include("images/ImageToVideoUtils.jl")
-#   #   # include("images/ScanMatcherUtils.jl")
-#   #   # include("images/ScanMatcherPose2.jl")
-#   #   # include("images/ScatterAlignPose2.jl")
-    
-#   #   # moved Gadfly plotting to RoMEPlotting
-#   #   # @require Gadfly="c91e804a-d5a3-530f-b6f0-dfbca275c004" include("plotting/ScatterAlignPlotting.jl")
-#   #   @require RobotOS="22415677-39a4-5241-a37a-00beabbbdae8" include("images/ROSConversions.jl")
-#   # end
-
-#   # @require ImageFeatures="92ff4b2b-8094-53d3-b29d-97f740f06cef" include("images/imagefeatures.jl")
-#   @require Distributed="8ba89e20-285c-5b6f-9357-94700520ee1b" include("images/DistributedUtils.jl")
-# end
 
 end
