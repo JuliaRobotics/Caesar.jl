@@ -25,15 +25,15 @@ function loadLAS(
     RGB(pnt.red, pnt.green, pnt.blue)
   end
 
-  colored_points = PointXYZ.(colors, pts)
-  return PointCloud(;points=colored_points, width=UInt32(length(colored_points)), height=UInt32(1))
+  colored_points = _PCL.PointXYZ.(colors, pts)
+  return _PCL.PointCloud(;points=colored_points, width=UInt32(length(colored_points)), height=UInt32(1))
 end
 
 
 # TODO, make save LAS
 function saveLAS(
   filepath::Union{<:AbstractString, <:Stream},
-  pc::PointCloud;
+  pc::_PCL.PointCloud;
   scale=1000
 )
   
