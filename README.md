@@ -24,7 +24,7 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 | **Major Dependencies**  |  **Stable Release**     |  **Dev Branch**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
 | Caesar.jl | [![version][cjl-stbl-img]][cjl-releases] | [![Build Status][cjl-ci-dev-img]][cjl-ci-dev-url] | -*umbrella pkg*- | [![][mst-shield]][cjl-milestones] |
-| PyCaesar.jl | [![version][pycjl-stbl-img]][pycjl-releases] | [![Build Status][pycjl-ci-dev-img]][pycjl-ci-dev-url] | -*umbrella pkg*- | [![][mst-shield]][pycjl-milestones] |
+| [PyCaesar.jl][pycjl-url] | [![version][pycjl-stbl-img]][pycjl-releases] | [![Build Status][pycjl-ci-dev-img]][pycjl-ci-dev-url] | -*umbrella pkg*- | [![][mst-shield]][pycjl-milestones] |
 | [RoME.jl][rjl-url] | [![][rjl-ver-img]][rjl-releases] | [![Build Status][rjl-ci-dev-img]][rjl-ci-dev-url] | [![codecov.io][rjl-cov-img]][rjl-cov-url] | [![][mst-shield]][rjl-milestones] |
 | [IncrementalInference.jl][iif-url] | [![][iif-ver-img]][iif-rel-url] | [![Build Status][iif-ci-dev-img]][iif-ci-dev-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
@@ -78,6 +78,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [cjl-releases]: https://github.com/JuliaRobotics/Caesar.jl/releases
 [cjl-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
 
+[pycjl-url]: http://www.github.com/JuliaRobotics/PyCaesar.jl
 [pycjl-cov-img]: https://codecov.io/github/JuliaRobotics/PyCaesar.jl/coverage.svg?branch=develop
 [pycjl-cov-url]: https://codecov.io/github/JuliaRobotics/PyCaesar.jl?branch=develop
 [pycjl-ci-dev-img]: https://github.com/JuliaRobotics/PyCaesar.jl/actions/workflows/CI.yml/badge.svg
