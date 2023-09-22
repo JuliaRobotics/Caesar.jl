@@ -27,7 +27,6 @@ using DistributedFactorGraphs
 using TensorCast
 using UUIDs
 using MultivariateStats
-using LasIO
 
 # FIXME REMOVE, only used for legacy getDataPointCloud
 using Serialization 
@@ -53,7 +52,6 @@ include("entities/PCLTypes.jl")
 # bring in further source code
 include("services/GeomBasicsUtils.jl")
 include("services/PointCloud.jl")
-include("services/LasIOSupport.jl")
 include("services/PointCloudUtils.jl")
 include("services/ConsolidateRigidTransform.jl")
 include("services/ICP_Simple.jl")

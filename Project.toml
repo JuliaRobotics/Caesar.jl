@@ -32,7 +32,6 @@ JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 JSON2 = "2535ab7d-5cd8-5a07-80ac-9b1792aadce3"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 KernelDensityEstimate = "2472808a-b354-52ea-a80e-1658a3c6056d"
-LasIO = "570499db-eae3-5eb6-bdd5-a5326f375e68"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
@@ -61,6 +60,7 @@ AprilTags = "f0fec3d5-a81e-5a6a-8c28-d2b34f3659de"
 ImageFeatures = "92ff4b2b-8094-53d3-b29d-97f740f06cef"
 ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
+LasIO = "570499db-eae3-5eb6-bdd5-a5326f375e68"
 ZMQ = "c2297ded-f4af-51ae-bb23-16f91089e4e1"
 
 [extensions]
@@ -68,6 +68,7 @@ CaesarAprilTagsExt = "AprilTags"
 CaesarImageFeaturesExt = "ImageFeatures"
 CaesarImageMagickExt = "ImageMagick"
 CaesarImagesExt = "Images"
+CaesarLasIOExt = "LasIO"
 CaesarZMQExt = "ZMQ"
 
 [compat]
@@ -128,4 +129,4 @@ RobotOS = "22415677-39a4-5241-a37a-00beabbbdae8"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "GraphPlot", "Images", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]
+test = ["AprilTags", "BSON", "DelimitedFiles", "Downloads", "GraphPlot", "Images", "LasIO", "PyCall", "Random", "RobotOS", "Test", "ZMQ"]

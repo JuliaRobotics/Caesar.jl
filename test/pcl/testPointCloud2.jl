@@ -18,7 +18,10 @@ using Pkg
 using Downloads
 using DelimitedFiles
 
+using LasIO
+
 # import Caesar._PCL: FieldMapper, createMapping, PointCloud, PointField, PCLPointCloud2, Header, asType, _PCL_POINTFIELD_FORMAT, FieldMapping, MsgFieldMap, FieldMatches
+
 ##
 
 @info "download any necessary test data"
@@ -32,16 +35,21 @@ function downloadTestData(datafile, url)
   return datafile
 end
 
-testdatafolder = "/tmp/caesar/testdata/"
+testdatafolder = joinpath(tempdir(), "caesar", "testdata") # "/tmp/caesar/testdata/"
+
+radarpclfile = joinpath( testdatafolder,"radar", "convertedRadar", "_PCLPointCloud2_15776.dat")
+radarpcl_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/radar/convertedRadar/_PCLPointCloud2_15776.dat"
+downloadTestData(radarpclfile,radarpcl_url)
+
+pandarfile = joinpath(testdatafolder,"lidar","simpleICP","_pandar_PCLPointCloud2.jldat")
+pandar_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/pandar/_pandar_PCLPointCloud2.jldat"
+downloadTestData(pandarfile,pandar_url)
 
 
 ##
 @testset "test Caesar._PCL.PCLPointCloud2 to Caesar._PCL.PointCloud converter." begin
 ##
 
-radarpclfile = joinpath( testdatafolder,"radar", "convertedRadar", "_PCLPointCloud2_15776.dat")
-radarpcl_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/radar/convertedRadar/_PCLPointCloud2_15776.dat"
-downloadTestData(radarpclfile,radarpcl_url)
 # testdatafile = joinpath( pkgdir(Caesar), "test", "testdata", "_PCLPointCloud2.bson")
 # load presaved test data to test the coverter
 # BSON.@load testdatafile PointCloudRef PointCloudTest
@@ -132,6 +140,22 @@ pc_ = Caesar._PCL.apply(M, rPc, pc)
 
 
 ##
+
+@testset "Test CaesarLasIOExt" begin
+##
+
+testlaspath = joinpath(testdatafolder, "radar", "convertedRadar", "PointCloud_15776.las")
+
+Caesar.saveLAS(testlaspath, pc)
+
+pc_load = Caesar.loadLAS(testlaspath)
+
+show(pc_load)
+
+##
+end
+
+##
 end
 
 
@@ -139,11 +163,6 @@ if v"1.7" <= VERSION
 
 @testset "PandarXT test point cloud conversion test" begin
 ##
-
-pandarfile = joinpath(testdatafolder,"lidar","simpleICP","_pandar_PCLPointCloud2.jldat")
-pandar_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/pandar/_pandar_PCLPointCloud2.jldat"
-downloadTestData(pandarfile,pandar_url)
-
 
 # Alternative approach, see more hardcoded test data example (only .data writen to binary) for _PCLPointCloud2_15776.dat"
 @info "Loading testdata/_pandar_PCLPointCloud2.jldat which via `Serialization.serialize` of a `Caesar._PCL.PCLPointCloud2` object, at JL 1.7.3, CJL v0.13.1+" 
