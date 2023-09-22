@@ -80,6 +80,8 @@ include("beamforming/MatchedFilter.jl")
 include("beamforming/SASBearing2D.jl")
 include("beamforming/SASUtils.jl")
 
+include("services/ToImage.jl")
+
 include("3rdParty/_PCL/_PCL.jl")
 
 # object affordance work
