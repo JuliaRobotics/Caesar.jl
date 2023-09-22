@@ -1,8 +1,5 @@
 module CaesarImagesExt
 
-@info "Loading Caesar tools related to Images.jl."
-
-
 using Images
 # using ImageTransformations
 using ColorVectorSpace
@@ -28,7 +25,7 @@ import GeometricalPredicates as GeoPr
 import ApproxManifoldProducts: sample, _update!
 import IncrementalInference: getSample, preambleCache, _update!, getManifold
 
-import Caesar: applyMaskImage, makeMaskImage, makeMaskImages, imhcatPretty, toImage
+import Caesar: applyMaskImage, makeMaskImage, makeMaskImages, imhcatPretty
 import Caesar: writevideo, csmAnimationJoinImgs, csmAnimateSideBySide, makeVideoFromData
 import Caesar: overlayScanMatcher
 import Caesar: overlayScatter, overlayScatterMutate
@@ -46,7 +43,7 @@ import Caesar: unionFeatureMountain, sortKeysMinSighting
 # NOTE usage requires ImageFeatures.jl
 import Caesar: curateFeatureTracks
 
-include("Images/ROSImageConversion.jl")
+
 include("Images/ImageMask.jl")
 include("Images/ImageToVideoUtils.jl")
 include("Images/ScanMatcherUtils.jl")

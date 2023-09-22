@@ -54,3 +54,5 @@ export packBlob, unpackBlob
 # imagedraw.jl
 export makeImage!
 export drawKeypointsAndMask
+
+export toImage

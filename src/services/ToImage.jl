@@ -3,7 +3,7 @@
 """
     $SIGNATURES
 
-Also see: [`toROSImage`](@ref)
+Also see: [`PyCaesar.toROSImage`](@ref)
 """
 function toImage(msgd::Dict{String,Any})
   data = haskey(msgd, "data_b64") ? base64decode(msgd["data_b64"]) : UInt8.(msgd["data"])
