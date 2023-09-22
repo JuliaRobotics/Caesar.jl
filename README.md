@@ -12,7 +12,7 @@ Click on the badges to follow web url links:
 
 | Stable CI | Dev CI | Documentation | caesarjl.slack.com |
 |:------:|:----------------:|:-------------:|:-----:|
-| [![Build Status][cjl-ci-stb-img]][cjl-ci-stb-url] | [![Build Status][cjl-ci-dev-img]][cjl-ci-dev-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][caesar-docs] | [![][caesar-slack-badge]][caesar-slack] |
+| [![Build Status][cjl-ci-stb-img]][cjl-ci-stb-url] | [![Build Status][cjl-ci-dev-img]][cjl-ci-dev-url] <br> [![ColPrac][colp-badge]][colprac] | [![docs][docs-shield]][cjl-docs] | [![][cjl-slack-badge]][cjl-slack] |
 
 Also find factor graph solver DOI at:
 [![doi-img]][doi-url]
@@ -23,7 +23,8 @@ Code changes are currently tracked via Github's integrated Milestone/Issues/PR s
 
 | **Major Dependencies**  |  **Stable Release**     |  **Dev Branch**   |  **Test Coverage**  |  **Changes**  |
 |:-----------------------:|:---------------:|:-------------------:|:-------------------:|:----------------:|
-| Caesar.jl | [![version][cjl-stbl-img]][caesarjl-releases] | [![Build Status][cjl-ci-dev-img]][cjl-ci-dev-url] | -*umbrella pkg*- | [![][mst-shield]][caesarjl-milestones] |
+| Caesar.jl | [![version][cjl-stbl-img]][cjl-releases] | [![Build Status][cjl-ci-dev-img]][cjl-ci-dev-url] | -*umbrella pkg*- | [![][mst-shield]][cjl-milestones] |
+| PyCaesar.jl | [![version][pycjl-stbl-img]][pycjl-releases] | [![Build Status][pycjl-ci-dev-img]][pycjl-ci-dev-url] | -*umbrella pkg*- | [![][mst-shield]][pycjl-milestones] |
 | [RoME.jl][rjl-url] | [![][rjl-ver-img]][rjl-releases] | [![Build Status][rjl-ci-dev-img]][rjl-ci-dev-url] | [![codecov.io][rjl-cov-img]][rjl-cov-url] | [![][mst-shield]][rjl-milestones] |
 | [IncrementalInference.jl][iif-url] | [![][iif-ver-img]][iif-rel-url] | [![Build Status][iif-ci-dev-img]][iif-ci-dev-url] | [![codecov.io][iif-cov-img]][iif-cov-url] | [![][mst-shield]][iif-milestones] |
 | [ApproxManifoldProducts.jl][amp-url] | [![][amp-stable]][amp-releases] | [![Build Status][amp-build-img]][amp-build-url] | [![codecov.io][amp-cov-img]][amp-cov-url] | [![][mst-shield]][amp-milestones] |
@@ -59,9 +60,11 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [colprac]: https://github.com/SciML/ColPrac
 
 [docs-shield]: https://img.shields.io/badge/docs-latest-blue.svg
-[caesar-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
 [mst-shield]: https://img.shields.io/badge/-milestones-blueviolet
 [mst-shield2]: https://img.shields.io/badge/-milestones-lightgrey
+
+[cjl-slack-badge]: https://img.shields.io/badge/Invite-Slack-green.svg?style=popout
+[cjl-slack]: https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw
 
 [cjl-cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cjl-cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
@@ -69,14 +72,23 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [cjl-ci-dev-url]: https://github.com/JuliaRobotics/Caesar.jl/actions/workflows/ci.yml
 [cjl-ci-stb-img]: https://github.com/JuliaRobotics/Caesar.jl/actions/workflows/ci.yml/badge.svg
 [cjl-ci-stb-url]: https://github.com/JuliaRobotics/Caesar.jl/actions/workflows/ci.yml
-
-
 [cjl-stbl-img]: https://juliahub.com/docs/Caesar/version.svg
 [cjl-stbl-url]: https://juliahub.com/ui/Packages/Caesar/BNbRm
-[caesar-slack-badge]: https://img.shields.io/badge/Invite-Slack-green.svg?style=popout
-[caesar-slack]: https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw
-[caesarjl-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
-[caesarjl-releases]: https://github.com/JuliaRobotics/Caesar.jl/releases
+[cjl-milestones]: https://github.com/JuliaRobotics/Caesar.jl/milestones
+[cjl-releases]: https://github.com/JuliaRobotics/Caesar.jl/releases
+[cjl-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
+
+[pycjl-cov-img]: https://codecov.io/github/JuliaRobotics/PyCaesar.jl/coverage.svg?branch=develop
+[pycjl-cov-url]: https://codecov.io/github/JuliaRobotics/PyCaesar.jl?branch=develop
+[pycjl-ci-dev-img]: https://github.com/JuliaRobotics/PyCaesar.jl/actions/workflows/CI.yml/badge.svg
+[pycjl-ci-dev-url]: https://github.com/JuliaRobotics/PyCaesar.jl/actions/workflows/CI.yml
+[pycjl-ci-stb-img]: https://github.com/JuliaRobotics/PyCaesar.jl/actions/workflows/CI.yml/badge.svg
+[pycjl-ci-stb-url]: https://github.com/JuliaRobotics/PyCaesar.jl/actions/workflows/CI.yml
+[pycjl-stbl-img]: https://juliahub.com/docs/PyCaesar.jl/version.svg
+<!-- [pycjl-stbl-url]: https://juliahub.com/ui/Packages/Caesar/____ -->
+[pycjl-milestones]: https://github.com/JuliaRobotics/PyCaesar.jl/milestones
+[pycjl-releases]: https://github.com/JuliaRobotics/PyCaesar.jl/releases
+
 
 <!-- md variables duplicated in RoME.jl README -->
 [rjl-url]: http://www.github.com/JuliaRobotics/RoME.jl
