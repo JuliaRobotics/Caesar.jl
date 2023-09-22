@@ -94,6 +94,11 @@ export fetchDataImage
 function toFormat end
 function fetchDataImage end
 
+## ==============================================
+# LasIO
+
+function loadLAS end
+function saveLAS end
 
 ## ==============================================
 # CaesarZMQExt prototypes
