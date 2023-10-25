@@ -44,7 +44,7 @@ function saveLAS(
   r = map(p->p.color.r, pc.points)
   g = map(p->p.color.g, pc.points)
   b = map(p->p.color.b, pc.points)
-  pCloud = LasPoint2.(round.(scale*x),round.(scale*y),round.(scale*z), 1, 0, 0, 0, 0, 0, r, g, b);
+  pCloud = LasPoint2.(round.(Int32,scale*x),round.(Int32,scale*y),round.(Int32,scale*z), 1, 0, 0, 0, 0, 0, r, g, b);
 
   tim = unix2datetime(pc.header.stamp*1e-6) # now()
 
