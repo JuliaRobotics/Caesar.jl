@@ -44,6 +44,7 @@ using
 using Optim
 
 using Reexport
+using PrecompileTools
 
 
 # import RoME: initfg # collision on RoME.initfg() since no parameters are given in both RoME and Caesar
@@ -99,5 +100,10 @@ include("../ext/WeakdepsPrototypes.jl")
 # standardized code deprecation
 include("Deprecated.jl")
 
+
+@compile_workload begin
+  # In here put "toy workloads" that exercise the code you want to precompile
+  warmUpSolverJIT()
+end
 
 end
