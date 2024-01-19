@@ -2,7 +2,7 @@
 
 The Caesar framework is not limited to direct Julia use. 
 
-## NavAbility SDKs and APIs
+## [NavAbility SDKs and APIs](@id navabilitysdk)
 
 The maintainers of Caesar.jl together with NavAbility.io are developing a standardized SDK / API for much easier multi-language / multi-access use of the solver features.  The [Documentation for the NavAbilitySDK's can be found here](https://navability.github.io/NavAbilitySDK.py/).
 
