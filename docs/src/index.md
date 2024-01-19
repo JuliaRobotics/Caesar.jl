@@ -14,7 +14,7 @@ Caesar.jl is a community project to facilate software technology development for
 
 # Commercial Products and Services
 
-[NavAbility.io](http://www.navability.io) builds [products and services](https://www.navability.io/products/) which helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io), or using the community links provided below.
+[NavAbility.io](http://www.navability.io) builds products and services which simplify the administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io), or using the community links provided below.
 
 Various mapping and localization solutions are possible both for commercial and R&D.  We recommend taking a look at:
 - The human-to-machine friendly [NavAbility App](https://app.navability.io/home/) interaction; and
