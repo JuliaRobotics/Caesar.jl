@@ -166,5 +166,5 @@ joinLogPath
 
 ```@docs
 getFactorDim
-getManifolds
+getManifold
 ```

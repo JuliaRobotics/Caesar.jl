@@ -34,11 +34,11 @@ Strong integration between PCL and [ROS](http://www.ros.org) predominantly throu
 These have been integrated through conversions to equivalent Julian types already listed above.  ROS conversions requires RobotOS.jl be loaded, see page on using [ROS Direct](@ref ros_direct).
 
 ```@docs
-_PCL.PCLPointCloud2
 _PCL.PointXYZ
 _PCL.Header
 _PCL.PointField
 _PCL.FieldMapper
+_PCL.PCLPointCloud2
 ```
 
 ## Aligning Point Clouds

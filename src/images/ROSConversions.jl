@@ -32,7 +32,7 @@ toImage(msg::Main.sensor_msgs.msg.Image) = unmarshal(msg) |> toImage
 
 Convert `Caesar.Image::Dict` type to ROS message `sensor_msgs.msg.Image`.
 
-See also: [`Caesar.unmarshal`](@ref), [`Caesar.toImage`](@ref), [`Caesar._PCL.toROSPointCloud2`](@ref)
+See also: [`Caesar.unmarshal`](@ref), [`Caesar.toImage`](@ref), `Caesar._PCL.toROSPointCloud2`
 """
 function toROSImage(msgd::Dict{String,Any})
   header = Main.std_msgs.msg.Header();

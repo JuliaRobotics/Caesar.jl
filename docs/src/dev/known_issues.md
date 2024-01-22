@@ -10,7 +10,7 @@ This page is used to list known issues:
 ### Install 3D Visualization Utils (e.g. Arena.jl)
 
 3D Visualizations are provided by [Arena.jl](https://github.com/JuliaRobotics/Arena.jl) as well as development package Amphitheater.jl.
-Please follow instructions on the [Visualizations page](concepts/arena_visualizations.md) for a variety of 3D utilities.
+Please follow instructions on the [Visualizations page](../concepts/arena_visualizations.md) for a variety of 3D utilities.
 
 !!! note
     Arena.jl and Amphitheater.jl are currently being refactored as part of the broader DistributedFactorGraph migration, the features are are in beta stage (1Q2020).

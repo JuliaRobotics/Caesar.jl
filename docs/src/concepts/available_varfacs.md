@@ -21,8 +21,7 @@ The variables and factors in Caesar should be sufficient for a variety of roboti
 Default variables in IncrementalInference
 
 ```@docs
-ContinuousScalar
-ContinuousEuclid{N}
+Position{N}
 ```
 
 ### 2D Variables
@@ -40,7 +39,6 @@ DynPose2
 ```@docs
 Point3
 Pose3
-InertialPose3
 ```
 
 !!! note
@@ -102,10 +100,10 @@ VelPose2VelPose2
 DynPose2Pose2
 Pose3Pose3
 PriorPose3ZRP
-PartialPriorRollPitchZ
-PartialPose3XYYaw
 Pose3Pose3XYYaw
 ```
+<!-- PartialPose3XYYaw -->
+<!-- PartialPriorRollPitchZ -->
 
 # Extending Caesar with New Variables and Factors
 

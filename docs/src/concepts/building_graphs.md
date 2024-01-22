@@ -53,13 +53,7 @@ addVariable!
 deleteVariable!
 ```
 
-### Initializing Variables
-
-The MM-iSAMv2 algorithm uses one of two approaches to automatically initialize variables.  The `initManual!` function can be used if you wish to overwrite or pre-empt this initialization.
-
-```@docs
-initManual!
-```
+The MM-iSAMv2 algorithm uses one of two approaches to automatically initialize variables, or can be [initialized manually](@ref variable_init).
 
 ## Factors
 
