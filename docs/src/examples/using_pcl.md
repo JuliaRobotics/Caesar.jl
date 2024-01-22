@@ -3,14 +3,14 @@
 ## Introduction `Caesar._PCL`
 
 A wide ranging and well used [point cloud library exists called PCL](https://pointclouds.org/) which is implemented in C++.  To get access to many of those features and bridge the Caesar.jl suite of packages, the base `PCL.PointCloud` types have been implemented in Julia and reside under `Caesar._PCL`.  The main types of interest:
-- [`Caesar._PCL.PointCloud`](@ref),
-- [`Caesar._PCL.PCLPointCloud2`](@ref),
-- [`Caesar._PCL.PointXYZ`](@ref),
-- [`Caesar._PCL.Header`](@ref),
-- [`Caesar._PCL.PointField`](@ref),
-- [`Caesar._PCL.FieldMapper`](@ref).
+- `Caesar._PCL.PointCloud`
+- `Caesar._PCL.PCLPointCloud2`
+- `Caesar._PCL.PointXYZ`
+- `Caesar._PCL.Header`
+- `Caesar._PCL.PointField`
+- `Caesar._PCL.FieldMapper`
 
-These types are conditionally loaded once `Colors.jl` is included (see [Requires.jl](https://github.com/JuliaPackaging/Requires.jl)),
+The PointCloud types use `Colors.jl`:
 ```julia
 using Colors, Caesar
 using StaticArrays
@@ -23,7 +23,7 @@ pt = Caesar._PCL.PointXYZ(;data=SA[x,y,z,intens])
 ```
 
 ```@docs
-Caesar._PCL.PointCloud
+_PCL.PointCloud
 ```
 
 ## Conversion with `ROS.PointCloud2`
@@ -34,11 +34,11 @@ Strong integration between PCL and [ROS](http://www.ros.org) predominantly throu
 These have been integrated through conversions to equivalent Julian types already listed above.  ROS conversions requires RobotOS.jl be loaded, see page on using [ROS Direct](@ref ros_direct).
 
 ```@docs
-Caesar._PCL.PCLPointCloud2
-Caesar._PCL.PointXYZ
-Caesar._PCL.Header
-Caesar._PCL.PointField
-Caesar._PCL.FieldMapper
+_PCL.PCLPointCloud2
+_PCL.PointXYZ
+_PCL.Header
+_PCL.PointField
+_PCL.FieldMapper
 ```
 
 ## Aligning Point Clouds
