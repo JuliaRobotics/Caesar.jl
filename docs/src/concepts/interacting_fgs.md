@@ -134,7 +134,7 @@ It is also possible to sample the above belief objects for more samples:
 pts = rand(X0, 200)
 ```
 
-## Building On-Manifold KDEs
+## [Building On-Manifold KDEs](@id build_manikde)
 
 These kernel density belief objects can be constructed from points as follows:
 ```julia

@@ -23,13 +23,7 @@ Factor that supports a parametric solution, with supported distributions (such a
 
 ### `getMeasurementParametric`
 
-Parameteric calculations require the mean and covariance from Gaussian measurement functions (factors) using the function
-
-```@docs
-IncrementalInference.getMeasurementParametric
-```
-
-`getMeasurementParametric` defaults to looking for a supported distribution in field `.Z` followed by `.z`. Therefore, if the factor uses this fieldname, `getMeasurementParametric` does not need to be extended.  You can extend by simply implementing, for example, your own `IncrementalInference.getMeasurementParametric(f::OtherFactor) = m.density`.
+Parameteric calculations require the mean and covariance from Gaussian measurement functions (factors) using the `getMeasurementParametric`  `getMeasurementParametric` defaults to looking for a supported distribution in field `.Z` followed by `.z`. Therefore, if the factor uses this fieldname, `getMeasurementParametric` does not need to be extended.  You can extend by simply implementing, for example, your own `IncrementalInference.getMeasurementParametric(f::OtherFactor) = m.density`.
 
 For this example, the `Z` field will automatically be detected used by default for `MyFactor` from above.
 
