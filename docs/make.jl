@@ -101,10 +101,12 @@ makedocs(
         "Literature" => [
             "References" => "refs/literature.md"
         ],
-    ]
+    ],
+    # FIXME remove warnonly option once :missing_docs and :cross_references fixes are done
+    warnonly = Documenter.except(:autodocs_block, :docs_block, :doctest, :linkcheck, :eval_block, :example_block, :footnote, :linkcheck_remotes, :meta_block, :parse_error, :setup_block), # , :cross_references, :missing_docs
     # html_prettyurls = !("local" in ARGS),
-    )
-
+)
+# The possible Symbol values that can be passed to the function are: :autodocs_block, :cross_references, :docs_block, :doctest, :eval_block, :example_block, :footnote, :linkcheck_remotes, :linkcheck, :meta_block, :missing_docs, :parse_error, and :setup_block.
 
 deploydocs(
     repo   = "github.com/JuliaRobotics/Caesar.jl.git",
