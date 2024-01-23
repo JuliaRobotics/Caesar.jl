@@ -6,7 +6,7 @@ The Community has been developing high quality [documentation for Manifolds.jl](
 
 ## Separate Manifold Beliefs Page
 
-Follow these hyperlinks if you are looking for information on working with Manifold Beliefs or [`ManifoldKernelDensity`s](@ref manikde_page)
+See [`building a Manifold Kernel Density`](@ref build_manikde) or for more information.
 
 ## Why Manifolds.jl
 

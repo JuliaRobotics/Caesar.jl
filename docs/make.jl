@@ -9,6 +9,8 @@ import IncrementalInference: fmcmc!, localProduct, prodmultiplefullpartials, pro
 import IncrementalInference: cliqGibbs, packFromLocalPotentials!, treeProductDwn, updateFGBT!, upGibbsCliqueDensity
 import IncrementalInference: initfg, downGibbsCliqueDensity
 import IncrementalInference: solveGraphParametric, solveGraphParametric!
+import IncrementalInference: _solveCCWNumeric!
+import IncrementalInference: initParametricFrom!
 
 using KernelDensityEstimatePlotting
 # import KernelDensityEstimatePlotting: plotKDE
@@ -18,6 +20,7 @@ using RoMEPlotting
 using DistributedFactorGraphs
 import DistributedFactorGraphs: showFactor, showVariable
 import DistributedFactorGraphs: deleteVariable!
+import DistributedFactorGraphs: loadDFG, loadDFG!
 
 makedocs(
     modules = [Caesar, RoME, IncrementalInference, RoMEPlotting, KernelDensityEstimatePlotting, DistributedFactorGraphs],

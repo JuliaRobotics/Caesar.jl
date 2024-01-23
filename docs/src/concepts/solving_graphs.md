@@ -14,7 +14,7 @@ The returned Bayes (Junction) `tree` object is described in more detail on [a de
 solveTree!
 ```
 
-## Automatic vs Manual Init
+## [Automatic vs Manual Init](@id variable_init)
 
 Currently the main automatic initialization technique used by IncrementalInference.jl by delayed propagation of belief on the factor graph.  This can be globally or locally controlled via:
 ```julia

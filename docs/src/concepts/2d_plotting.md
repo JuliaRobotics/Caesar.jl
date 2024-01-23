@@ -166,7 +166,7 @@ plotPose
 
 ### Debug With Local Graph Product Plot
 
-One useful function is to check that data in the factor graph makes sense.  While the full inference algorithm uses a Bayes (Junction) tree to assemble marginal belief estimates in an efficient manner, it is often useful for a straight forward graph based sanity check.  The [`plotLocalProduct`](@ref) projects through [`approxConv`](@ref) each of the factors connected to the target variable and plots the result.  This example looks at the loop-closure point around `:x0`, which is also pinned down by the only prior in the canonical Hexagonal factor graph.
+One useful function is to check that data in the factor graph makes sense.  While the full inference algorithm uses a Bayes (Junction) tree to assemble marginal belief estimates in an efficient manner, it is often useful for a straight forward graph based sanity check.  The [`plotLocalProduct`](@ref) projects through [`approxConvBelief`](@ref) each of the factors connected to the target variable and plots the result.  This example looks at the loop-closure point around `:x0`, which is also pinned down by the only prior in the canonical Hexagonal factor graph.
 ```julia
 @show ls(fg, :x0);
 # ls(fg, :x0) = [:x0f1, :x0x1f1, :x0l1f1]

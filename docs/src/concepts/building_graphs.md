@@ -1,4 +1,4 @@
-# [Building Graphs](@ref building_graphs)
+# [Building Graphs](@id building_graphs)
 
 Irrespective of your application - real-time robotics, batch processing of survey data, or really complex multi-hypothesis modeling - you're going to need to add factors and variables to a graph. This section discusses how to do that in Caesar.
 
@@ -53,13 +53,7 @@ addVariable!
 deleteVariable!
 ```
 
-### Initializing Variables
-
-The MM-iSAMv2 algorithm uses one of two approaches to automatically initialize variables.  The `initManual!` function can be used if you wish to overwrite or pre-empt this initialization.
-
-```@docs
-initManual!
-```
+The MM-iSAMv2 algorithm uses one of two approaches to automatically initialize variables, or can be [initialized manually](@ref variable_init).
 
 ## Factors
 

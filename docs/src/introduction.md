@@ -13,14 +13,14 @@ Caesar.jl addresses numerous issues that arise in prior SLAM solutions, includin
 * Solving under-defined systems, 
 * Inference with non-Gaussian measurements, 
 * Standard features for natively handling ambiguous data association and multi-hypotheses, 
-  * Native multi-modal (hypothesis) representation in the factor-graph, see [Data Association and Hypotheses](@ref):
+  * Native multi-modal (hypothesis) representation in the factor-graph, see [Data Association and Hypotheses](@ref data_multihypo):
   * Multi-modal and non-parametric representation of constraints;
   * Gaussian distributions are but one of the many representations of measurement error;
 * Simplifying bespoke factor development, 
 * Centralized (or peer-to-peer decentralized) factor-graph persistence, 
   * i.e. Federated multi-session/agent reduction.
 * Multi-CPU inference.
-* Out-of-library extendable for [Creating New Variables and Factors](@ref);
+* Out-of-library extendable for [Custom New Variables](@ref custom_variables) and [Factors](@ref custom_prior_factor);
 * Natively supports legacy Gaussian parametric and max-mixtures solutions;
 * Local in-memory solving on the device as well as database-driven centralized solving (micro-service architecture);
 * Natively support *Clique Recycling* (i.e. fixed-lag out-marginalization) for continuous operation as well as off-line batch solving, see more at [Using Incremental Updates (Clique Recycling I)](@ref);

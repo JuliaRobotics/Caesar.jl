@@ -49,8 +49,8 @@ This new prior can now readily be added to an ongoing factor graph:
 ```julia
 # lets generate a random nonparametric belief
 
-pts = [samplePoint(getManifold(ContinuousEuclid{1}), Normal(8.0,2.0)) for _=1:75]
-someBelief = manikde!(ContinuousEuclid{1}, pts)
+pts = [samplePoint(getManifold(Position{1}), Normal(8.0,2.0)) for _=1:75]
+someBelief = manikde!(Position{1}, pts)
 
 # and build your new factor as an object
 myprior = MyPrior(someBelief)
@@ -61,7 +61,10 @@ and add it to the existing factor graph from earlier, lets say:
 addFactor!(fg, [:x1], myprior)
 ```
 
-Thats it, this factor is now part of the graph.  This should be a solvable graph:
+!!! note
+    Variable types `Postion{1}` or `ContinuousEuclid{1}` are algebraically equivalent.
+
+That's it, this factor is now part of the graph.  This should be a solvable graph:
 ```julia
 solveGraph!(fg); # exact alias of solveTree!(fg)
 ```
