@@ -1,4 +1,4 @@
-# [Building Graphs](@ref building_graphs)
+# [Building Graphs](@id building_graphs)
 
 Irrespective of your application - real-time robotics, batch processing of survey data, or really complex multi-hypothesis modeling - you're going to need to add factors and variables to a graph. This section discusses how to do that in Caesar.
 

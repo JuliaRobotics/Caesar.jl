@@ -10,6 +10,7 @@ import IncrementalInference: cliqGibbs, packFromLocalPotentials!, treeProductDwn
 import IncrementalInference: initfg, downGibbsCliqueDensity
 import IncrementalInference: solveGraphParametric, solveGraphParametric!
 import IncrementalInference: _solveCCWNumeric!
+import DistributedFactorGraphs: initParametricFrom!
 
 using KernelDensityEstimatePlotting
 # import KernelDensityEstimatePlotting: plotKDE

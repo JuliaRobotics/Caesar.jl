@@ -64,7 +64,7 @@ buildTreeReset!(fg, vo)
 ```
 
 !!! note
-    a list of variables or factors can be obtained through the `ls` and related functions, see [Querying the FactorGraph](@ref).
+    a list of variables or factors can be obtained through the `ls` and related functions, see [Querying the Factor Graph](@ref querying_graph).
 
 
 ## Interfacing with the MM-iSAMv2 Solver
@@ -79,7 +79,7 @@ tree = solveTree!(fg)
 ```
 
 !!! note
-    See the [Solving Graphs](@ref) section for more details on the solver.
+    See the [Solving Graphs](@ref solving_graphs) section for more details on the solver.
 
 ### Get the Elimination Order Used
 

@@ -134,7 +134,12 @@ Base.@kwdef struct Header
   frame_id::String = ""
 end
 
-# https://pointclouds.org/documentation/structpcl_1_1_p_c_l_point_field.html
+"""
+    $TYPEDEF
+
+How a point is stored in memory.
+- https://pointclouds.org/documentation/structpcl_1_1_p_c_l_point_field.html
+"""
 Base.@kwdef struct PointField
   """ name of field """
   name::String

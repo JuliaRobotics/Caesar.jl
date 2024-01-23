@@ -1,4 +1,4 @@
-# Data Association and Hypotheses
+# [Data Association and Hypotheses](@id data_multihypo)
 
 Ambiguous data and processing often produce complicated data association situations.  In SLAM, loop-closures are a major source of concern when developing autonomous subsystems or behaviors. To illustrate this point, consider the two scenarios depicted below:
 

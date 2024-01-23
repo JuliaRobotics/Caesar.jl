@@ -21,15 +21,15 @@ initParametricFrom!
 Factor that supports a parametric solution, with supported distributions (such as `Normal` and `MvNormal`), can be used in a parametric batch solver `solveGraphParametric`. 
 
 
-### `getParametricMeasurement`
+### `getMeasurementParametric`
 
 Parameteric calculations require the mean and covariance from Gaussian measurement functions (factors) using the function
 
 ```@docs
-IncrementalInference.getParametricMeasurement
+IncrementalInference.getMeasurementParametric
 ```
 
-`getParametricMeasurement` defaults to looking for a supported distribution in field `.Z` followed by `.z`. Therefore, if the factor uses this fieldname, `getParametricMeasurement` does not need to be extended.  You can extend by simply implementing, for example, your own `IncrementalInference.getParametricMeasurement(f::OtherFactor) = m.density`.
+`getMeasurementParametric` defaults to looking for a supported distribution in field `.Z` followed by `.z`. Therefore, if the factor uses this fieldname, `getMeasurementParametric` does not need to be extended.  You can extend by simply implementing, for example, your own `IncrementalInference.getMeasurementParametric(f::OtherFactor) = m.density`.
 
 For this example, the `Z` field will automatically be detected used by default for `MyFactor` from above.
 
@@ -39,10 +39,10 @@ struct MyFactor{T <: SamplableBelief} <: IIF.AbstractRelativeRoots
 end
 ```
 
-An example of where implementing `getParametricMeasurement` is needed can be found in the RoME factor [`Pose2Point2BearingRange`](@ref)
+An example of where implementing `getMeasurementParametric` is needed can be found in the RoME factor [`Pose2Point2BearingRange`](@ref)
 ```julia
-import getParametricMeasurement
-function getParametricMeasurement(s::Pose2Point2BearingRange{<:Normal, <:Normal})
+import getMeasurementParametric
+function getMeasurementParametric(s::Pose2Point2BearingRange{<:Normal, <:Normal})
 
   meas = [mean(s.bearing), mean(s.range)]
   iΣ = [1/var(s.bearing)             0;

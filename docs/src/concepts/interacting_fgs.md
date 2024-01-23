@@ -32,7 +32,7 @@ loadDFG!
 
 A later part of the documentation will show [how to include a `Entry=>Data` blob store](https://juliarobotics.org/Caesar.jl/latest/concepts/entry_data/).
 
-## Querying the FactorGraph
+## [Querying the Graph](@id querying_graph)
 
 ### List Variables:
 
