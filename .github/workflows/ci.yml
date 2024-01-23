@@ -148,7 +148,7 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.10'
-      - name: 'Docs on ${{ github.head_ref }}'
+      - name: 'Pkgs for Docs on ${{ github.head_ref }}'
         run: |
           export JULIA_PKG_SERVER=""
           [ '${{ github.ref }}' == 'refs/heads/master' ] && export CJL_DOCS_BRANCH="master" || export CJL_DOCS_BRANCH="${{ github.head_ref }}"
@@ -159,8 +159,9 @@ jobs:
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master"))'
-      - run: |
-          export DOCUMENTER_DEBUG"="true"
+      - name: 'Docs make.jl'
+        run: |
+          export DOCUMENTER_DEBUG="true"
           export JULIA_PKG_PRECOMPILE_AUTO=0
           julia --project=${{ matrix.jlenv }} --color=yes ${{ matrix.makejl }}
         env:
