@@ -152,6 +152,7 @@ jobs:
         run: |
           export JULIA_PKG_SERVER=""
           [ '${{ github.ref }}' == 'refs/heads/master' ] && export CJL_DOCS_BRANCH="master" || export CJL_DOCS_BRANCH="${{ github.head_ref }}"
+          export JULIA_PKG_PRECOMPILE_AUTO=0
           julia -e 'println("Julia gets branch: ",ENV["CJL_DOCS_BRANCH"])'
           julia --project=${{ matrix.jlenv }} --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(name="Caesar", rev=ENV["CJL_DOCS_BRANCH"]))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
