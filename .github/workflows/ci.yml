@@ -159,7 +159,10 @@ jobs:
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
           julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master"))'
-      - run: julia --project=${{ matrix.jlenv }} --color=yes ${{ matrix.makejl }}
+      - run: |
+          export DOCUMENTER_DEBUG"="true"
+          export JULIA_PKG_PRECOMPILE_AUTO=0
+          julia --project=${{ matrix.jlenv }} --color=yes ${{ matrix.makejl }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
