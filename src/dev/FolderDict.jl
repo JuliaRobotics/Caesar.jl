@@ -3,36 +3,53 @@
 
 using DataStructures
 using UUIDs
+using DocStringExtensions
 using Serialization
 
 import Base: getindex, setindex!, delete!
 
 ##
 
+"""
+    $TYPEDEF
 
-# not yet thread safe
-# all keys must always be in keydict, regardless of cache or priority
+Walks and talks like a Dict but actually maps most of the data volume to a folder.
+Includes semi-intelligent cache management for faster operations.
+
+Special Features:
+- User can set cache_size
+- User can set working folder for storage
+- User can set serialization and deserialization functions, e.g. use JSON3 or Serialization
+- User can set how Dict keys map to stored id's (see DFG)
+
+WIP Constraints:
+- all keys must always be in keydict, regardless of cache or priority
+- not yet thread safe
+- Had trouble inheriting from `Base.AbstractDict`
+"""
 @kwdef struct FolderDict{K,V}
-  # regular dict elements kept in memory for rapid access
+  """ regular dict elements kept in memory for rapid access """
   cache::Dict{K,V} = Dict{K,V}()
-  # priority queue for managing most important cache elements
+  """ priority queue for managing most important cache elements """
   pqueue::PriorityQueue{K, Int} = PriorityQueue{K,Int}()
-  # cache size
+  """ cache size """
   cache_size::Int = 100
-  # unique labels for dict elements sent to the store
+  """ unique labels for dict elements sent to the store """
   keydict::Dict{K, UUID} = Dict{K, UUID}()
-  # mapping keys and ids for different use cases, default is always new uuid.
-  # overwrite with `(k) -> k` to make keys and ids identical
+  """ mapping keys and ids for different use cases, default is always new uuid.
+  overwrite with `(k) -> k` to make keys and ids identical """
   key_to_id::Function = (k) -> uuid4()
   # # write lock via Task to 
   # writetask::Dict{K, Task} = Dict{K, Task}()
+  """ working directory where elemental files are stored """
   wdir::String = begin
     wdir_ = joinpath(tempdir(), "$(uuid4())")
     mkpath(wdir_)
     wdir_
   end
-  # serialization function
+  """ serialization function with default """
   serialize::Function = Serialization.serialize
+  """ deserialization function with default """
   deserialize::Function = Serialization.deserialize
 end
 
