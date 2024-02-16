@@ -21,6 +21,9 @@ import Base: getindex, setindex!
   cache_size::Int = 100
   # unique labels for dict elements sent to the store
   keydict::Dict{K, UUID} = Dict{K, UUID}()
+  # mapping keys and ids for different use cases, default is always new uuid.
+  # overwrite with `(k) -> k` to make keys and ids identical
+  key_to_id::Function = (k) -> uuid4()
   # # write lock via Task to 
   # writetask::Dict{K, Task} = Dict{K, Task}()
   wdir::String = begin
@@ -91,10 +94,10 @@ end
 function setindex!(
   sd::FolderDict,
   v,
-  k,
-  id::UUID = uuid4() # nonBase API, allows wider use-cases of FolderDict 
+  k
 )
   # immediately/always insert new data into folder store with a unique id
+  id = sd.key_to_id(k)
   flb = joinpath(sd.wdir, "$id")
   wtsk = @async sd.serialize(flb, v) # for sluggish IO
   
@@ -104,6 +107,9 @@ function setindex!(
     dlb = sd.keydict[k] 
     delete!(sd.keydict, k)
     @async Base.Filesystem.rm(joinpath(sd.wdir, "$dlb")) # for sluggish IO
+  else
+    # dummy task for type stability
+    @async nothing
   end
   # set new uuid in keydict only after potential overwrite delete
   sd.keydict[k] = id
@@ -124,9 +130,7 @@ function setindex!(
   sd.cache[k] = v
 
   # wait for any disk mutations to finish
-  _wait(::Nothing) = nothing
-  _wait(s::Task) = wait(s)
-  _wait(dtsk)
+  wait(dtsk)
   wait(wtsk)
 
   # return the value
