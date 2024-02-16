@@ -28,6 +28,9 @@ import Base: getindex, setindex!
     mkpath(wdir_)
     wdir_
   end
+  # serialization function
+  serialize::Function = Serialization.serialize
+  deserialize::Function = Serialization.deserialize
 end
 
 ##
@@ -50,7 +53,7 @@ function Base.getindex(
     flb = sd.keydict[f]
     toload = joinpath(sd.wdir, "$flb")
     # fetch from cold storage
-    Serialization.deserialize(toload)
+    sd.deserialize(toload)
   end
 
   # you've hit a cache miss, so start making space or new elements
@@ -88,15 +91,12 @@ end
 function setindex!(
   sd::FolderDict,
   v,
-  k
+  k,
+  id::UUID = uuid4() # nonBase API, allows wider use-cases of FolderDict 
 )
-  # immediately/always insert new data into folder store with newly generated uuid
-  nid = uuid4()
-  flb = joinpath(sd.wdir, "$nid")
-  wtsk = @async begin
-    Serialization.serialize(flb, v) # for sluggish IO
-    @info "DOSE2T" flb
-  end
+  # immediately/always insert new data into folder store with a unique id
+  flb = joinpath(sd.wdir, "$id")
+  wtsk = @async sd.serialize(flb, v) # for sluggish IO
   
   # should any obsolete files be deleted from the filesystem?
   dtsk = if haskey(sd.keydict, k)
@@ -106,16 +106,22 @@ function setindex!(
     @async Base.Filesystem.rm(joinpath(sd.wdir, "$dlb")) # for sluggish IO
   end
   # set new uuid in keydict only after potential overwrite delete
-  sd.keydict[k] = nid
+  sd.keydict[k] = id
   
-  # should the cache be updated? pqueue is arbitor over cache
-  if haskey(sd.pqueue, k)
-    sd.cache[k] = v
-    # maintain the old priority value
+  # ensure pqueue has correct value in all cases
+  prk = collect(keys(sd.pqueue))
+  maxpriority = 0
+  # truncate for cache_size, and also allow for cache_size==0
+  if 0 < sd.cache_size <= length(sd.pqueue)
+    maxpriority = sd.pqueue[prk[end]]
+    rmk = prk[1]
+    delete!(sd.pqueue,rmk)
+    delete!(sd.cache, rmk)
   end
-
-  # write new info to FolderDict fields
-  sd.keydict[k] = nid
+  # assume middle of the pack priority for this cache-miss
+  sd.pqueue[k] = round(Int, maxpriority/2)
+  # Reminder, pqueue is arbitor over cache
+  sd.cache[k] = v
 
   # wait for any disk mutations to finish
   _wait(::Nothing) = nothing

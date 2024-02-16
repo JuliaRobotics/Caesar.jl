@@ -3,9 +3,9 @@
 using Test
 
 using Caesar
-import Caesar: FolderStore
+import Caesar: FolderDict
 
-
+##
 
 @testset "Basic functional tests of FolderDict" begin
 ##
@@ -22,6 +22,26 @@ fd[:a] = 1
 @test 1 == length(fd.cache)
 @test 1 == fd.cache[:a]
 @test 1 == fd[:a] # all up test for getindex when key in cache
+
+fd[:b] = 2
+
+@test 2 == length(fd.keydict)
+@test fd.keydict[:a] != fd.keydict[:b]
+@test 2 == length(fd.pqueue)
+@test 2 == length(fd.cache)
+@test 2 == fd.cache[:b]
+@test 2 == fd[:b] # all up test for getindex when key in cache
+
+fd[:c] = 3
+
+@test 3 == length(fd.keydict)
+@test fd.keydict[:a] != fd.keydict[:c]
+@test 2 == length(fd.pqueue)
+@test 2 == length(fd.cache)
+@test 3 == fd.cache[:c]
+@test 3 == fd[:c] # all up test for getindex when key in cache
+
+
 
 
 
