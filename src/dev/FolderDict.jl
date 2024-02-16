@@ -22,8 +22,10 @@ Special Features:
 - User can set serialization and deserialization functions, e.g. use JSON3 or Serialization
 - User can set how Dict keys map to stored id's (see DFG)
 
+Developer Notes
+- all keys must always be in `.keydict`, regardless of cache or priority
+
 WIP Constraints:
-- all keys must always be in keydict, regardless of cache or priority
 - not yet thread safe
 - Had trouble inheriting from `Base.AbstractDict`
 """
