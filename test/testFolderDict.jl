@@ -42,7 +42,16 @@ fd[:c] = 3
 @test 3 == fd[:c] # all up test for getindex when key in cache
 
 
+delete!(fd, :b)
 
+@test 2 == length(fd.keydict)
+@test fd.keydict[:a] != fd.keydict[:c]
+@test 2 == length(fd.pqueue)
+@test 2 == length(fd.cache)
+@test 3 == fd.cache[:c]
+@test 3 == fd[:c] # all up test for getindex when key in cache
+
+@test_throws KeyError fd[:b]
 
 
 ##

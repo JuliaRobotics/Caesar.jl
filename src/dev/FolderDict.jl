@@ -5,7 +5,7 @@ using DataStructures
 using UUIDs
 using Serialization
 
-import Base: getindex, setindex!
+import Base: getindex, setindex!, delete!
 
 ##
 
@@ -50,10 +50,11 @@ function Base.getindex(
     # Assume key must be in the cache
     return sd.cache[f]
   end
+  # get id associated with this key (also throw KeyError if not present)
+  flb = sd.keydict[f]
   # performance trick, start async load from IO resources while doing some housekeeping
   tsk = @async begin
     # All keys must always be present in keydict 
-    flb = sd.keydict[f]
     toload = joinpath(sd.wdir, "$flb")
     # fetch from cold storage
     sd.deserialize(toload)
@@ -145,5 +146,23 @@ end
 # end
 
 
+function delete!(
+  sd::FolderDict,
+  k
+)
+  dlb = sd.keydict[k] 
+  delete!(sd.keydict, k)
+  dtsk = @async Base.Filesystem.rm(joinpath(sd.wdir, "$dlb")) # for sluggish IO
+  
+  if haskey(sd.pqueue, k)
+    delete!(sd.pqueue,k)
+    delete!(sd.cache, k)
+  end
+
+  wait(dtsk)
+
+  # TBD unusual Julia return of full collection
+  return sd
+end
 
 ##
