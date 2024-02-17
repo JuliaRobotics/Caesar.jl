@@ -30,6 +30,8 @@ Developer Notes
 WIP Constraints:
 - FIXME, had trouble inheriting from `Base.AbstractDict`
 - TODO, better use of thread-safe locks/mutexes
+- TODO, allow mapping to existing directory of elementals
+  - will only work for `key_to_id = (k::UUID) -> k`
 """
 @kwdef struct FolderDict{K,V}
   """ regular dict elements kept in memory for rapid access """
