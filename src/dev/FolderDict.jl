@@ -27,7 +27,8 @@ Developer Notes
 - all keys must always be in `.keydict`, regardless of cache or priority
 
 WIP Constraints:
-- Had trouble inheriting from `Base.AbstractDict`
+- FIXME, had trouble inheriting from `Base.AbstractDict`
+- TODO, better use of thread-safe locks/mutexes
 """
 @kwdef struct FolderDict{K,V}
   """ regular dict elements kept in memory for rapid access """
@@ -64,17 +65,17 @@ function Base.getindex(
   sd::FolderDict,
   f
 )
-  # first check if there is an ongoing writetask on this key
-  if haskey(sd.writetasks, f)
-    wait(sd.writetasks[f])
-    # now it is safe to proceed in reading newly written value to this key
-    # TODO slightly excessive lock, since only unlocks once storage write is done, but cache was available sooner.
-  end
-  # also check if there is an ongoing reader on this key
+  # first check if there is an ongoing reader on this key
   if haskey(sd.readtasks, f)
     # NOTE super remote possibility that a task is deleted before this dict lookup and wait starts
     wait(sd.readtasks[f])
     # values should now be cached for multithreaded reads
+  end
+  # also check if there is an ongoing writetask on this key
+  if haskey(sd.writetasks, f)
+    wait(sd.writetasks[f])
+    # now it is safe to proceed in reading newly written value to this key
+    # TODO slightly excessive lock, since only unlocks once storage write is done, but cache was available sooner.
   end
   
   # if already cached, and assuming a write task has not deleted the cache element yet (MUST delete from pqueue first)
