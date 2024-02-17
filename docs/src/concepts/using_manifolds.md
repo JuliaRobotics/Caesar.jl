@@ -6,7 +6,7 @@ The Community has been developing high quality [documentation for Manifolds.jl](
 
 ## Separate Manifold Beliefs Page
 
-Follow these hyperlinks if you are looking for information on working with Manifold Beliefs or [`ManifoldKernelDensity`s](@ref manikde_page)
+See [`building a Manifold Kernel Density`](@ref build_manikde) or for more information.
 
 ## Why Manifolds.jl
 
@@ -24,7 +24,7 @@ If you are looking for rapid help or more expertise on a particular issue, consi
 
 If you are a newcomer to the term Manifold and want to learn more, fear not even though your first search results might be somewhat disorienting.  
 
-The rest of this page is meant to introduce the basics, and point you to handy resources.  Caesar.jl and [NavAbility](https://www.navability.io/) support open Community and are upstreaming improvements to Manifolds.jl, including code updates and documentation improvements.
+The rest of this page is meant to introduce the basics, and point you to handy resources.  Caesar.jl and [NavAbility](http://www.navability.io/) support open Community and are upstreaming improvements to Manifolds.jl, including code updates and documentation improvements.
 
 ### 'One Page' Summary of Manifolds
 

@@ -1,0 +1,45 @@
+name: CI/CD Docs
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  docs:
+    name: 'Build Docs'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - jlenv: 'docs/'
+            makejl: 'docs/make.jl'
+          # - jlenv: 'docs/pdf/'
+          #   makejl: 'docs/pdf/make.jl'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: '1.10'
+          arch: x64
+      - name: 'Pkgs for Docs on ${{ github.head_ref }}'
+        run: |
+          export JULIA_PKG_SERVER=""
+          [ '${{ github.ref }}' == 'refs/heads/master' ] && export CJL_DOCS_BRANCH="master" || export CJL_DOCS_BRANCH="${{ github.head_ref }}"
+          export JULIA_PKG_PRECOMPILE_AUTO=0
+          julia -e 'println("Julia gets branch: ",ENV["CJL_DOCS_BRANCH"])'
+          julia --project=${{ matrix.jlenv }} --check-bounds=yes -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(name="Caesar", rev=ENV["CJL_DOCS_BRANCH"]))'
+          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoME", rev="master"))'
+          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="RoMEPlotting", rev="master"))'
+          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="KernelDensityEstimatePlotting", rev="master"))'
+          julia --project=${{ matrix.jlenv }} -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference", rev="master"))'
+      - name: 'Docs make.jl'
+        run: |
+          export JULIA_PKG_PRECOMPILE_AUTO=0
+          export DOCUMENTER_DEBUG="true"
+          julia --project=${{ matrix.jlenv }} --color=yes ${{ matrix.makejl }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+          JULIA_PKG_SERVER: ""

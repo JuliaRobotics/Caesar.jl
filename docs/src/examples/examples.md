@@ -71,11 +71,11 @@ This example presents a novel multimodal solution to an otherwise intractible mu
 </p>
 ```
 
-The fractional multi-hypothesis assignments `addFactor!(..., multihypo=[1.0; 0.5;0.5])`.  The [Multihypothesis](@ref) Section discusses this feature in more detail.  Similarly for tri-nary or higher multi-hypotheses.
+The fractional multi-hypothesis assignments `addFactor!(..., multihypo=[1.0; 0.5;0.5])`.  Similarly for tri-nary or higher multi-hypotheses.
 
 ### Probabilistic Data Association (Uncertain loop closures)
 
-Example where the standard multihypothesis `addFactor!(.., multihypo=[1.0;0.5;0.5])` interface is used.  This is from the Kitti driving dataset.  [Video here](https://www.youtube.com/watch?v=9hEonD8KDrs).  The [Multihypothesis](@ref) Section discusses this feature in more detail.
+Example where the standard multihypothesis `addFactor!(.., multihypo=[1.0;0.5;0.5])` interface is used.  This is from the Kitti driving dataset.  [Video here](https://www.youtube.com/watch?v=9hEonD8KDrs).  The [data association and multihypothesis](@ref data_multihypo) section discusses this feature in more detail.
 
 ```@raw html
 <a href="https://www.youtube.com/watch?v=9hEonD8KDrs" target="_blank"><img src="https://user-images.githubusercontent.com/6412556/53611733-9065b680-3b9d-11e9-8b0f-cb292a25fbb3.png" alt="IMAGE ALT TEXT HERE" width="480" border="0" /></a>

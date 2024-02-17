@@ -20,7 +20,7 @@ Overview of related functions while this documentation is being expanded:
 
 ## DRT Construct
 
-The idea is that the dead reckong tracking method is to update a single value based on high-rate sensor data.  Perhaps 'particles' values can be propagated as a non-Gaussian prediction, depending on allowable compute resources, and for that see [`approxConv`](@ref).  Some specialized plumbing has been built to facilitate rapid single value propagation using the factor graph.  
+The idea is that the dead reckong tracking method is to update a single value based on high-rate sensor data.  Perhaps 'particles' values can be propagated as a non-Gaussian prediction, depending on allowable compute resources, and for that see [`approxConvBelief`](@ref).  Some specialized plumbing has been built to facilitate rapid single value propagation using the factor graph.  
 
 ### Suppress w/ `solvable`
 

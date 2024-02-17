@@ -14,56 +14,8 @@ using Makie
 using MakieLayout
 using DocStringExtensions
 
+import Arena: getRangeCartesian
 
-"""
-    $SIGNATURES
-
-Get the cartesian range over which the factor graph variables span.
-
-Notes:
-- Optional `regexFilter` can be used to subselect, according to label, which variable IDs to use.
-
-DevNotes
-- TODO, allow `tags` as filter too.
-"""
-function getRangeCartesian(dfg::AbstractDFG,
-                           regexFilter::Union{Nothing, Regex}=nothing;
-                           extend::Float64=0.2,
-                           digits::Int=6,
-                           xmin::Real=99999999,
-                           xmax::Real=-99999999,
-                           ymin::Real=99999999,
-                           ymax::Real=-99999999,
-                           force::Bool=false )
-  #
-
-  if !force
-  # which variables to consider
-  vsyms = getVariableIds(dfg, regexFilter)
-
-  # find the cartesian range over all the vsyms variables
-
-  for vsym in vsyms
-    lran = getKDERange(getVariable(dfg, vsym) |> getKDE)
-    xmin = lran[1,1] < xmin ? lran[1,1] : xmin
-    ymin = lran[2,1] < ymin ? lran[2,1] : ymin
-    xmax = xmax < lran[1,2] ? lran[1,2] : xmax
-    ymax = ymax < lran[2,2] ? lran[2,2] : ymax
-  end
-
-  # extend the range for looser bounds on plot
-  xra = xmax-xmin; xra *= extend
-  yra = ymax-ymin; yra *= extend
-  xmin -= extend; xmax += extend
-  ymin -= extend; ymax += extend
-
-  # clamp to nearest integers
-  xmin = floor(xmin, digits=digits); xmax = ceil(xmax, digits=digits)
-  ymin = floor(ymin, digits=digits); ymax = ceil(ymax, digits=digits)
-  end
-
-  return [xmin xmax; ymin ymax]
-end
 
 
 """

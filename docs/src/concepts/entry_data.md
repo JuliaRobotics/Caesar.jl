@@ -140,7 +140,4 @@ addData!(dfg,:default_folder_store,:x0,:nnModel,
 
 ## Experimental Features
 
-Loading images is a relatively common task, hence a convenience function has been developed:
-```@docs
-Caesar.fetchDataImage
-```
+Loading images is a relatively common task, hence a convenience function has been developed, when `using ImageMagick` try `Caesar.fetchDataImage`.

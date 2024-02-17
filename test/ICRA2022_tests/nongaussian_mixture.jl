@@ -58,9 +58,9 @@ solveGraph!(fg);
 
 
 X2 = getBelief(fg, :x2)
-@test isapprox( X2([-50:0.1:0;])*0.1 |> sum, 0 ; atol=0.1 )
-@test isapprox( X2([0:0.1:40;])*0.1 |> sum, 0.4; atol=0.2 )  # 40% case
-@test isapprox( X2([40:0.1:80;])*0.1 |> sum, 0.6; atol=0.2 ) # 60% case
+@test isapprox( sum((s->X2([s;])).([-50:0.1:0;])*0.1)[1], 0 ; atol=0.1 )
+@test isapprox( sum((s->X2([s;])).([0:0.1:40;])*0.1)[1], 0.4; atol=0.2 )  # 40% case
+@test isapprox( sum((s->X2([s;])).([40:0.1:80;])*0.1)[1], 0.6; atol=0.2 ) # 60% case
 
 # plotBelief(fg, [:x0, :x1, :x2])
 
@@ -75,14 +75,14 @@ solveGraph!(fg);
 
 
 X2 = getBelief(fg, :x2)
-@test isapprox( X2([-50:0.1:0;])*0.1 |> sum, 0 ; atol=0.1 )
-@test isapprox( X2([0:0.1:40;])*0.1 |> sum, 0.4; atol=0.2 )  # 40% case
-@test isapprox( X2([40:0.1:80;])*0.1 |> sum, 0.6; atol=0.2 ) # 60% case
+@test isapprox( sum((s->X2([s;])).([-50:0.1:0;])*0.1)[1], 0 ; atol=0.1 )
+@test isapprox( sum((s->X2([s;])).([0:0.1:40;])*0.1)[1], 0.4; atol=0.2 )  # 40% case
+@test isapprox( sum((s->X2([s;])).([40:0.1:80;])*0.1)[1], 0.6; atol=0.2 ) # 60% case
 
 X3 = getBelief(fg, :x3)
-@test isapprox( X3([-100:0.1:-50;])*0.1 |> sum, 0 ; atol=0.1 )
-@test isapprox( X3([-50:0.1:-20;] )*0.1 |> sum, 0.4; atol=0.2 )  # 40% case
-@test isapprox( X3([-10:0.1:30;]  )*0.1 |> sum, 0.6; atol=0.2 )  # 60% case
+@test isapprox( sum((s->X3([s;])).([-100:0.1:-50;])*0.1)[1], 0 ; atol=0.1 )
+@test isapprox( sum((s->X3([s;])).([-50:0.1:-20;] )*0.1)[1], 0.4; atol=0.2 )  # 40% case
+@test isapprox( sum((s->X3([s;])).([-10:0.1:30;]  )*0.1)[1], 0.6; atol=0.2 )  # 60% case
 
 
 addFactor!(fg, [:x3, :x0], LinearRelative(Normal(30, 1)))

@@ -134,7 +134,12 @@ Base.@kwdef struct Header
   frame_id::String = ""
 end
 
-# https://pointclouds.org/documentation/structpcl_1_1_p_c_l_point_field.html
+"""
+    $TYPEDEF
+
+How a point is stored in memory.
+- https://pointclouds.org/documentation/structpcl_1_1_p_c_l_point_field.html
+"""
 Base.@kwdef struct PointField
   """ name of field """
   name::String
@@ -165,7 +170,13 @@ end
 # https://pointclouds.org/documentation/common_2include_2pcl_2point__cloud_8h_source.html#l00072
 const MsgFieldMap = Vector{FieldMapping}
 
-# https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00091
+"""
+$TYPEDEF
+
+Which field values to store and how to map them to values during serialization.
+
+- https://docs.ros.org/en/hydro/api/pcl/html/conversions_8h_source.html#l00091
+"""
 Base.@kwdef struct FieldMapper{T<:PointT}
   fields_::Vector{<:PointField} = Vector{PointField}()
   map_::Vector{<:FieldMapping}  = Vector{FieldMapping}()
@@ -182,7 +193,7 @@ References:
 - https://pointclouds.org/documentation/classpcl_1_1_point_cloud.html
 - https://pointclouds.org/documentation/common_2include_2pcl_2point__cloud_8h_source.html
 
-See also: [`Caesar._PCL.toROSPointCloud2`](@ref)
+See also: `Caesar._PCL.toROSPointCloud2`
 """
 Base.@kwdef struct PCLPointCloud2
   """ the point cloud header """
