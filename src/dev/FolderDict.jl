@@ -224,7 +224,7 @@ end
 
 
 keys(sd::FolderDict) = keys(sd.keydict)
-haskey(sd::FolderDict) = haskey(sd.keydict)
+haskey(sd::FolderDict, k) = haskey(sd.keydict, k)
 
 function deepcopy(
   sd::FolderDict

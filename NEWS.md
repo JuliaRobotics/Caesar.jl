@@ -10,6 +10,10 @@ Major changes and news in Caesar.jl.
 - Updates for IncrementalInference upgrades relating to StaticArray variable values.
 - Manifold updates to factors.
 - Downstreamed std ROS handlers to PyCaesar.
+- Fix `saveLAS` to use `Int32`.
+- Several compat updates for dependencies.
+- Restore Docs build, and update links for NavAbility at WhereWhen.ai Technologies Inc.
+- Introduce `FolderDict` as data structure for lower memory consumption, also as potential BlobStore.
 
 ## Changes in v0.13
 
