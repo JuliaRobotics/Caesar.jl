@@ -54,5 +54,7 @@ delete!(fd, :b)
 @test_throws KeyError fd[:b]
 
 
+@test 2 == length(intersect([:a; :c], collect(keys(fd))))
+
 ##
 end
