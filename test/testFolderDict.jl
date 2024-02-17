@@ -48,6 +48,7 @@ fd[:c] = 3
 @test fd[:a] != fd[:b]
 @test fd[:b] != fd[:c]
 
+@show fd;
 
 delete!(fd, :b)
 
@@ -69,6 +70,8 @@ delete!(fd, :b)
 
 
 fd_copy = deepcopy(fd)
+
+@show fd_copy;
 
 @test !haskey(fd_copy, :b)
 @test haskey(fd_copy, :a)

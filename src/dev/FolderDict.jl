@@ -6,7 +6,7 @@ using UUIDs
 using DocStringExtensions
 using Serialization
 
-import Base: getindex, setindex!, delete!, keys, haskey, deepcopy
+import Base: getindex, setindex!, delete!, keys, haskey, deepcopy, show
 
 ##
 
@@ -67,6 +67,20 @@ end
 
 ##
 
+
+function show(
+  io::IO,
+  sd::FolderDict{K,V}
+) where {K,V}
+  println(io, "FolderDict{$K,$V} at $(sd.wdir)") 
+  println(io, " with $(length(sd.pqueue)) of $(length(sd.keydict)) entries cached, e.g.:")
+  ks = collect(keys(sd.cache))
+  for i in 1:minimum((5,length(sd.cache)))
+    tk = ks[i]
+    println(io, "  ",tk," => ", sd.cache[tk])
+  end
+end
+Base.show(io::IO, ::MIME"text/plain", fd::FolderDict) = show(io, fd)
 
 function Base.getindex(
   sd::FolderDict,
@@ -227,8 +241,8 @@ keys(sd::FolderDict) = keys(sd.keydict)
 haskey(sd::FolderDict, k) = haskey(sd.keydict, k)
 
 function deepcopy(
-  sd::FolderDict
-)
+  sd::FolderDict{K,V}
+) where {K,V}
   # block any new writes that want to start
   reset(sd.copyevent)
   # wait for any remaining write tasks to finish
@@ -239,7 +253,7 @@ function deepcopy(
   tsk = @async Base.Filesystem.cp(sd.wdir, sd_.wdir; force=true)
 
   # copy or duplicate all but pqueue and cache, which must be newly cached in new copy of FolderDict (to ensure pqueue and cache remain in lock step)
-  sd_ = FolderDict(;
+  sd_ = FolderDict{K,V}(;
     keydict = deepcopy(sd.keydict),
     cache_size = sd.cache_size,
     key_to_id = sd.key_to_id,
