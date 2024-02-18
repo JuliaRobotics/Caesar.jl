@@ -6,7 +6,7 @@ using UUIDs
 using DocStringExtensions
 using Serialization
 
-import Base: getindex, setindex!, delete!, keys
+import Base: getindex, setindex!, delete!, keys, haskey, deepcopy, show
 
 ##
 
@@ -25,10 +25,13 @@ Special Features:
 
 Developer Notes
 - all keys must always be in `.keydict`, regardless of cache or priority
+- pqueue is arbitor, so assumed that .cache will mirror happenings of pqueue
 
 WIP Constraints:
 - FIXME, had trouble inheriting from `Base.AbstractDict`
 - TODO, better use of thread-safe locks/mutexes
+- TODO, allow mapping to existing directory of elementals
+  - will only work for `key_to_id = (k::UUID) -> k`
 """
 @kwdef struct FolderDict{K,V}
   """ regular dict elements kept in memory for rapid access """
@@ -46,6 +49,12 @@ WIP Constraints:
   readtasks::Dict{K, Task} = Dict{K, Task}()
   """ write lock via Tasks """ 
   writetasks::Dict{K, Task} = Dict{K, Task}()
+  """ event signal for deepcopy synchronization.  Blocks new setindex! during a deepcopy """
+  copyevent::Base.Event = begin
+    _e = Base.Event()
+    notify(_e) # dont start with blocking event, requires a reset for use
+    _e
+  end
   """ working directory where elemental files are stored """
   wdir::String = begin
     wdir_ = joinpath(tempdir(), "$(uuid4())")
@@ -60,6 +69,20 @@ end
 
 ##
 
+
+function show(
+  io::IO,
+  sd::FolderDict{K,V}
+) where {K,V}
+  println(io, "FolderDict{$K,$V} at $(sd.wdir)") 
+  println(io, " with $(length(sd.pqueue)) of $(length(sd.keydict)) entries cached, e.g.:")
+  ks = collect(keys(sd.cache))
+  for i in 1:minimum((5,length(sd.cache)))
+    tk = ks[i]
+    println(io, "  ",tk," => ", sd.cache[tk])
+  end
+end
+Base.show(io::IO, ::MIME"text/plain", fd::FolderDict) = show(io, fd)
 
 function Base.getindex(
   sd::FolderDict,
@@ -131,6 +154,8 @@ function setindex!(
   v,
   k
 )
+  # don't start a new write if a copy is in progress
+  wait(sd.copyevent)
   # first check if there is an ongoing reader on this key
   if haskey(sd.readtasks, k)
     # NOTE super remote possibility that a task is deleted before this dict lookup and wait starts
@@ -215,5 +240,38 @@ end
 
 
 keys(sd::FolderDict) = keys(sd.keydict)
+haskey(sd::FolderDict, k) = haskey(sd.keydict, k)
+
+function deepcopy(
+  sd::FolderDict{K,V}
+) where {K,V}
+  # block any new writes that want to start
+  reset(sd.copyevent)
+  # wait for any remaining write tasks to finish
+  for (k,t) in sd.writetasks
+    wait(t)
+  end
+  # actually make a full copy of the working folder
+  tsk = @async Base.Filesystem.cp(sd.wdir, sd_.wdir; force=true)
+
+  # copy or duplicate all but pqueue and cache, which must be newly cached in new copy of FolderDict (to ensure pqueue and cache remain in lock step)
+  sd_ = FolderDict{K,V}(;
+    keydict = deepcopy(sd.keydict),
+    cache_size = sd.cache_size,
+    key_to_id = sd.key_to_id,
+    serialize = sd.serialize,
+    deserialize = sd.deserialize,
+  )
+
+  # wait for storage copy to complete
+  wait(tsk)
+
+  # notify any pending writes
+  notify(sd.copyevent)
+
+  # return new deepcopy of FolderDict
+  return sd_
+end
+
 
 ##
