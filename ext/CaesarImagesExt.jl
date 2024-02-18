@@ -40,6 +40,8 @@ import Caesar: addFeatureTracks_Frame1_Q!, addFeatureTracks_Frame2_PfwdQ!, addFe
 import Caesar: addFeatureTracks, consolidateFeatureTracks!, summarizeFeatureTracks!, buildFeatureMountain, buildFeatureMountainDistributed
 import Caesar: unionFeatureMountain, sortKeysMinSighting
 
+import Caesar: FolderDict
+
 # NOTE usage requires ImageFeatures.jl
 import Caesar: curateFeatureTracks
 

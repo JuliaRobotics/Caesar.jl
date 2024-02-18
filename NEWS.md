@@ -14,6 +14,7 @@ Major changes and news in Caesar.jl.
 - Several compat updates for dependencies.
 - Restore Docs build, and update links for NavAbility at WhereWhen.ai Technologies Inc.
 - Introduce `FolderDict` as data structure for lower memory consumption, also as potential BlobStore.
+- Refactor FeatureMountain tracker to use `FolderDict`.
 
 ## Changes in v0.13
 
