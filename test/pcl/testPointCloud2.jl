@@ -38,13 +38,16 @@ end
 testdatafolder = joinpath(tempdir(), "caesar", "testdata") # "/tmp/caesar/testdata/"
 
 radarpclfile = joinpath( testdatafolder,"radar", "convertedRadar", "_PCLPointCloud2_15776.dat")
-radarpcl_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/radar/convertedRadar/_PCLPointCloud2_15776.dat"
-downloadTestData(radarpclfile,radarpcl_url)
+if !isfile(radarpclfile)
+  radarpcl_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/radar/convertedRadar/_PCLPointCloud2_15776.dat"
+  downloadTestData(radarpclfile,radarpcl_url)
+end
 
 pandarfile = joinpath(testdatafolder,"lidar","simpleICP","_pandar_PCLPointCloud2.jldat")
-pandar_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/pandar/_pandar_PCLPointCloud2.jldat"
-downloadTestData(pandarfile,pandar_url)
-
+if !isfile(pandarfile)
+  pandar_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/pandar/_pandar_PCLPointCloud2.jldat"
+  downloadTestData(pandarfile,pandar_url)
+end
 
 ##
 @testset "test Caesar._PCL.PCLPointCloud2 to Caesar._PCL.PointCloud converter." begin
@@ -252,13 +255,16 @@ end
 ##
 
 lidar_terr1_file = joinpath(testdatafolder,"lidar","simpleICP","terrestrial_lidar1.xyz")
-lidar_terr1_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar1.xyz"
-downloadTestData(lidar_terr1_file,lidar_terr1_url)
+if !isfile(lidar_terr1_file)
+  lidar_terr1_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar1.xyz"
+  downloadTestData(lidar_terr1_file,lidar_terr1_url)
+end
 
 lidar_terr2_file = joinpath(testdatafolder,"lidar","simpleICP","terrestrial_lidar2.xyz")
-lidar_terr2_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar2.xyz"
-downloadTestData(lidar_terr2_file,lidar_terr2_url)
-
+if !isfile(lidar_terr2_file)
+  lidar_terr2_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar2.xyz"
+  downloadTestData(lidar_terr2_file,lidar_terr2_url)
+end
 
 # load the data to memory
 X_fix = readdlm(lidar_terr1_file, Float32)
