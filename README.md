@@ -2,9 +2,9 @@
 <img src="https://user-images.githubusercontent.com/6412556/134777705-acda768e-884b-4de6-b307-aac6d09b9c81.png" width="240" border="0" />
 </p>
 
-A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reducing the barrier of entry for sensor/data fusion tasks, including Simultaneous Localization and Mapping (SLAM).
+A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reducing the barrier of entry for sensor/data fusion tasks, including Simultaneous Localization and Mapping (SLAM).  Focus areas are mapping, localization, calibration, synthesis, planning, and digital twins.
 
-[NavAbility.io](http://www.navability.io) is administrating and supporting the ongoing development of Caesar.jl with and to help grow the community, please reach out for any additional information at info@navability.io or via the Slack badge-link below.
+[NavAbility(TM) by WhereWhen.ai Technologies Inc.](https://www.wherewhen.ai) is administrating and supporting the ongoing development of Caesar.jl with and to help grow the community, please reach out for any additional information at info@wherewhen.ai or via the Slack badge-link below.
 
 # Weblink Info
 
@@ -53,8 +53,10 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 
 [![Stargazers over time](https://starchart.cc/JuliaRobotics/Caesar.jl.svg)](https://starchart.cc/JuliaRobotics/Caesar.jl)
 
-[doi-img]: https://zenodo.org/badge/55802838.svg
-[doi-url]: https://zenodo.org/badge/latestdoi/55802838
+[doi-img]: https://zenodo.org/badge/DOI/10.5281/zenodo.5146221.svg
+[doi-url]: https://doi.org/10.5281/zenodo.5146221
+
+5146221
 
 [colp-badge]: https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet
 [colprac]: https://github.com/SciML/ColPrac
