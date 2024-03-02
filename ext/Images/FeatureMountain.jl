@@ -2,7 +2,11 @@
 
 
 
+"""
+    $SIGNATURES
 
+Add image features to FeatureMountain dict, using an image stored in a blob of a DFG object.
+"""
 function addFeatureTracks_Frame1_Q!(
   # mountain::FeatureMountain,
   featToMany,
@@ -280,7 +284,14 @@ end
 # addFeatureTracks_Frame2_QbckR!(featToMany_, fg, pair)
 
 
+"""
+    $SIGNATURES
 
+Starting from basic short tracks between neighboring images, explore to find longer 
+tracks between many images.
+
+See also: [`summarizeFeatureTracks!`](@ref)
+"""
 function consolidateFeatureTracks!(
   featToMany_::Dict{Tuple{Symbol,Int},MANYTRACKS},
 )
@@ -334,7 +345,14 @@ function consolidateFeatureTracks!(
 end
 
 
+"""
+    $SIGNATURES
 
+Consolidate many short tracks into longer tracks.  A track is the 
+attempt to follow the same real world feature through a sequence of images.
+
+See also: [`consolidateFeatureTracks`](@ref)
+"""
 function summarizeFeatureTracks!(
   featToMany_::Dict{Tuple{Symbol,Int},MANYTRACKS},
 )
@@ -393,8 +411,6 @@ end
 
 ## union features
 
-
-
 function unionFeatureMountain(
   fMa::Dict{Tuple{Symbol,Int},MANYTRACKS}, 
   fMb::Dict{Tuple{Symbol,Int},MANYTRACKS},
@@ -419,7 +435,27 @@ function unionFeatureMountain(
   return rM
 end
 
-
+function unionFeatureMountain!(
+  fMa::Dict{Tuple{Symbol,Int},MANYTRACKS},
+  fMb::Dict{Tuple{Symbol,Int},MANYTRACKS}, 
+)
+  # Modify fMa by adding everything from fMb
+  for (ka,va) in fMb
+    # @info ka
+    # union if already exists
+    if haskey(fMa, ka)
+      # @info "CHECK TYPES" typeof(fMb[ka]) typeof(fMa[ka])
+      for (kr,vr) in va
+        if !haskey(fMa[ka], kr)
+          fMa[ka][kr] = vr # union(fMb[ka], fMa[ka])
+        end
+      end
+    else
+      fMa[ka] = va
+    end
+  end
+  return fMa
+end
 
 function sortKeysMinSighting(
   featM::Dict{Tuple{Symbol,Int},<:Any};
@@ -474,10 +510,10 @@ function buildFeatureMountainDistributed(
   featM = deepcopy(featM_1[1])
   # union other tracks into featM
   for fM in featM_1[2:end]
-    featM = Caesar.unionFeatureMountain(featM, fM)
+    featM = Caesar.unionFeatureMountain!(featM, fM)
   end
   for fM in featM_2
-    featM = Caesar.unionFeatureMountain(featM, fM)
+    featM = Caesar.unionFeatureMountain!(featM, fM)
   end
 
   return featM

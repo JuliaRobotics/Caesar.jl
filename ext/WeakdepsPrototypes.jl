@@ -96,6 +96,7 @@ function buildFeatureMountain end
 function buildFeatureMountainDistributed end
 
 function unionFeatureMountain end
+function unionFeatureMountain! end
 function sortKeysMinSighting end
 
 ## ==============================================

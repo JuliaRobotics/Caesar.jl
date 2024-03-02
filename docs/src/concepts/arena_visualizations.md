@@ -2,7 +2,62 @@
 
 ## Introduction
 
-Over time, Caesar.jl/Arena.jl has used at various different 3D visualization technologies.  Currently work is underway to better standardize within the Julia ecosystem, with the 4th generation of Arena.jl -- note that this is work in progress.  Information about legacy generations is included below.
+Over time, Caesar.jl/Arena.jl has used at various different 3D visualization technologies.  
+
+### Arena.jl Visualization
+
+#### [Plotting a PointCloud](@id viz_pointcloud)
+
+Visualization support for point clouds is available through Arena and Caesar.  The follow example shows some of the basics:
+
+```julia
+using Arena
+using Caesar
+using Downloads
+using DelimitedFiles
+using LasIO
+using Test
+
+##
+
+function downloadTestData(datafile, url)
+  if 0 === Base.filesize(datafile)
+    Base.mkpath(dirname(datafile))
+    @info "Downloading $url"
+    Downloads.download(url, datafile)
+  end
+  return datafile
+end
+
+testdatafolder = joinpath(tempdir(), "caesar", "testdata") # "/tmp/caesar/testdata/"
+
+lidar_terr1_file = joinpath(testdatafolder,"lidar","simpleICP","terrestrial_lidar1.xyz")
+if !isfile(lidar_terr1_file)
+  lidar_terr1_url = "https://github.com/JuliaRobotics/CaesarTestData.jl/raw/main/data/lidar/simpleICP/terrestrial_lidar1.xyz"
+  downloadTestData(lidar_terr1_file,lidar_terr1_url)
+end
+
+# load the data to memory
+X_fix = readdlm(lidar_terr1_file, Float32)
+# convert data to PCL types
+pc_fix = Caesar._PCL.PointCloud(X_fix);
+
+
+pl = Arena.plotPointCloud(pc_fix)
+
+```
+
+This should result in a plot similar to:
+
+```@raw html
+<p align="center">
+<img src="https://github.com/JuliaRobotics/Arena.jl/assets/6412556/7679c346-fbeb-4d84-b20d-13bd589f3338" width="800" border="0" />
+</p>
+```
+
+
+!!! note
+    24Q1: Currently work is underway to better standardize within the Julia ecosystem, with the 4th generation of Arena.jl -- note that this is work in progress.  Information about legacy generations is included below.
 
 For more formal visualization support, contact [www.NavAbility.io](http://www.navability.io) via email or slack. 
 ## 4th Generation Dev Scripts using Makie.jl

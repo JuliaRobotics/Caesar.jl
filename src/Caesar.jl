@@ -91,6 +91,9 @@ include("objects/ObjectAffordanceSubcloud.jl")
 # ImageDraw functionality, used by many extensions and therefore a regular (but minimum able) dependency
 include("images/imagedraw.jl")
 
+# experimentals
+include("dev/FolderDict.jl")
+
 # weakdeps
 include("../ext/factors/Pose2AprilTag4Corners.jl")
 include("../ext/factors/ScanMatcherPose2.jl")
@@ -103,7 +106,7 @@ include("Deprecated.jl")
 
 @compile_workload begin
   # In here put "toy workloads" that exercise the code you want to precompile
-  warmUpSolverJIT()
+  # warmUpSolverJIT()
 end
 
 end
