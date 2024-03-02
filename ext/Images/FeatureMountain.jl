@@ -411,8 +411,6 @@ end
 
 ## union features
 
-
-
 function unionFeatureMountain(
   fMa::Dict{Tuple{Symbol,Int},MANYTRACKS}, 
   fMb::Dict{Tuple{Symbol,Int},MANYTRACKS},
@@ -437,7 +435,27 @@ function unionFeatureMountain(
   return rM
 end
 
-
+function unionFeatureMountain!(
+  fMa::Dict{Tuple{Symbol,Int},MANYTRACKS},
+  fMb::Dict{Tuple{Symbol,Int},MANYTRACKS}, 
+)
+  # Modify fMa by adding everything from fMb
+  for (ka,va) in fMb
+    # @info ka
+    # union if already exists
+    if haskey(fMa, ka)
+      # @info "CHECK TYPES" typeof(fMb[ka]) typeof(fMa[ka])
+      for (kr,vr) in va
+        if !haskey(fMa[ka], kr)
+          fMa[ka][kr] = vr # union(fMb[ka], fMa[ka])
+        end
+      end
+    else
+      fMa[ka] = va
+    end
+  end
+  return fMa
+end
 
 function sortKeysMinSighting(
   featM::Dict{Tuple{Symbol,Int},<:Any};
@@ -492,10 +510,10 @@ function buildFeatureMountainDistributed(
   featM = deepcopy(featM_1[1])
   # union other tracks into featM
   for fM in featM_1[2:end]
-    featM = Caesar.unionFeatureMountain(featM, fM)
+    featM = Caesar.unionFeatureMountain!(featM, fM)
   end
   for fM in featM_2
-    featM = Caesar.unionFeatureMountain(featM, fM)
+    featM = Caesar.unionFeatureMountain!(featM, fM)
   end
 
   return featM
