@@ -76,6 +76,8 @@ Newly created page to list related references and additional literature pertaini
 
 [2.17] Bishop, C.M., 2006. Pattern recognition and machine learning. New York: Springer. ISBN 978-0-387-31073-2.
 
+[2.18] Holmes, M.P., Gray, A.G. and Isbell Jr, C.L., 2010. [Fast kernel conditional density estimation: A dual-tree Monte Carlo approach.](https://faculty.cc.gatech.edu/~isbell/papers/COMSTA4589.pdf) Computational statistics & data analysis, 54(7), pp.1707-1718.
+
 ### Additional References
 
 [3.1]  Duits, Remco, Erik J. Bekkers, and Alexey Mashtakov. ["Fourier Transform on the Homogeneous Space of 3D Positions and Orientations for Exact Solutions to Linear Parabolic and (Hypo-) Elliptic PDEs".](https://www.preprints.org/manuscript/201811.0027/download/final_file) arXiv preprint arXiv:1811.00363 (2018).
