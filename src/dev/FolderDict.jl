@@ -24,8 +24,9 @@ Special Features:
 - EXPERIMENTAL: thread safe
 
 Developer Notes
-- all keys must always be in `.keydict`, regardless of cache or priority
-- pqueue is arbitor, so assumed that .cache will mirror happenings of pqueue
+- all keys must always be in `.keydict`, regardless of cache or priority.
+- all setindex! call always writes the elemental to folder regardless of caching.
+- pqueue is arbitor, so assumed that .cache will mirror happenings of pqueue.
 
 WIP Constraints:
 - FIXME, had trouble inheriting from `Base.AbstractDict`
