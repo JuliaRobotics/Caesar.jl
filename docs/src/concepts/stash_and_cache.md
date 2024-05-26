@@ -54,7 +54,7 @@ Modifying the overall Caesar.jl code for both read and write stashing might be c
 
 ## [Notes](@id stashcache_notes)
 
-Please see or open issues for specific questions not yet covered here.  You can also reach out via [Slack](https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw), or contact [NavAbility.io](https://www.navability.io) for help.
+Please see or open issues for specific questions not yet covered here.  You can also reach out via Slack, or contact [NavAbility](https://www.wherewhen.ai) for help.
 
 - Use caution in designing [`preambleCache`](@ref) for situations where [`multihypo=`](@ref section_multihypo) functionality is used.  If factor memory is tied to specific variables, then the association ambiguities to multihypo situations at compute time must considered.  E.g. if you are storing images for two landmarks in two landmark variable hypotheses, then just remember that the user cache must during the sampling or residual calculations track which hypothesis is being used before using said data -- we recommend using `NamedTuple` in your cache structure.
 - If using the Deserialize-Stash design, note that the appropriate data blob stores should already be attached to the destination factor graph object, else the `preambleCache` function will not be able to succesfully access any of the `getData` functions you are likely to use to 'unstash' data.
