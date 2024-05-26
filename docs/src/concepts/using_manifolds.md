@@ -18,7 +18,7 @@ Do you need a math degree to be able to use Manifolds.jl?  No you don't since Ca
 
 This page is meant to open the door for readers to learn more about how things work under the hood, and empower the Community to rapidly develop upon  existing work.  This page is also intended to show that the Caesar.jl related packages are being developed with strong focus on consolidation, single definition functionality, and serious cross discipline considerations.
 
-If you are looking for rapid help or more expertise on a particular issue, consider reaching out by opening [Issues](https://github.com/JuliaRobotics/Caesar.jl/issues) or connecting to the ongoing chats in the [Slack Channel](https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw).
+If you are looking for rapid help or more expertise on a particular issue, consider reaching out by opening [Issues](https://github.com/JuliaRobotics/Caesar.jl/issues) or connecting to the ongoing chats in the [Slack Channel](https://join.slack.com/t/caesarjl/shared_invite/zt-2jqijjgqp-7HR2J~ZDUj9jW9aRBaZh8A).
 
 ## What Are Manifolds
 
