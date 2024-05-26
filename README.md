@@ -66,7 +66,7 @@ This project adheres to the [JuliaRobotics code of conduct](https://github.com/J
 [mst-shield2]: https://img.shields.io/badge/-milestones-lightgrey
 
 [cjl-slack-badge]: https://img.shields.io/badge/Invite-Slack-green.svg?style=popout
-[cjl-slack]: https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw
+[cjl-slack]: https://join.slack.com/t/caesarjl/shared_invite/zt-2jqijjgqp-7HR2J~ZDUj9jW9aRBaZh8A
 
 [cjl-cov-img]: https://codecov.io/github/JuliaRobotics/Caesar.jl/coverage.svg?branch=master
 [cjl-cov-url]: https://codecov.io/github/JuliaRobotics/Caesar.jl?branch=master
