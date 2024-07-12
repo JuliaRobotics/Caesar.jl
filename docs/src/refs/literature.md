@@ -100,6 +100,8 @@ Newly created page to list related references and additional literature pertaini
 
 [3.10] Bourgeois, F. and Lassalle, J.C., 1971. [An extension of the Munkres algorithm for the assignment problem to rectangular matrices](https://dl.acm.org/doi/pdf/10.1145/362919.362945). Communications of the ACM, 14(12), pp.802-804.
 
+[3.11] Rentmeesters, Q., 2011, December.[ A gradient method for geodesic data fitting on some symmetric Riemannian manifolds](https://folk.ntnu.no/skoge/prost/proceedings/cdc-ecc-2011/data/papers/1913.pdf). In 2011 50th IEEE Conference on Decision and Control and European Control Conference (pp. 7141-7146). IEEE.
+
 ### Signal Processing (Beamforming and Channel Deconvolution)
 
 [4.1]  Van Trees, H.L., 2004. Optimum array processing: Part IV of detection, estimation, and modulation theory. John Wiley & Sons.
