@@ -187,10 +187,6 @@ function getWords(tree,
     return words
 end
 
-function getWords(tree::MetaGraph, lookupsift::Vector{SIFTDescriptor}, args...; kwargs...)
-    return getWords(tree, getproperty.(lookupsift, :value))
-end
-
 """
     getBowvector(voctree, image_words)
 
@@ -267,11 +263,11 @@ Create an image inverse index using Term Frequency-Inverse Document Frequency (T
 - `image_index`: A sparse matrix where each column corresponds to an image and each row corresponds to a word in the vocabulary. The values are the TF-IDF weights.
 - `image_ids`: A vector of image identifiers corresponding to the columns of the `image_index`.
 """
-function createImageInverseIndex(voctree, image_descriptors)
+function createImageInverseIndex(voctree, image_descriptors; dist = Distances.Euclidean())
     #creation is a bit slower this way, but should be easier to create faster lookups
     image_index = spzeros(voctree.graph_data[:n_leaves], length(image_descriptors))
     @showprogress for (l, image_desc) in enumerate(image_descriptors)
-        img_words = getWords(voctree, image_desc.second)
+        img_words = getWords(voctree, image_desc.second; dist)
         bow_vec = getBowvector(voctree, img_words)
         for (i, bv) in zip(findnz(bow_vec)...)
             image_index[i,l] = bv
