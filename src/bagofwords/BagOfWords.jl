@@ -4,6 +4,7 @@ using Clustering
 using StaticArrays
 using TensorCast
 using Distances
+using SparseArrays
 
 # References:
 # [SZ 2003]: Sivic and Zisserman, 2003, October. Video Google: A text retrieval approach to object matching in videos. In Proceedings ninth IEEE international conference on computer vision (pp. 1470-1477). IEEE.
