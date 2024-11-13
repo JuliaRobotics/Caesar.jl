@@ -56,7 +56,7 @@ function add_voc_children!(tree, descriptors::Matrix, parent = 1, level = 0; pro
     return nothing
 end
 
-function countOccurance(voctree, image_descriptors)
+function countOccurrence(voctree, image_descriptors)
     image_word_count = [Set() for _ in 1:voctree.graph_data[:n_leaves]]
     # FIXME make thread save if needed for speed, got undef # Threads.@threads 
     for (idx, image_desc) in enumerate(image_descriptors)
@@ -71,7 +71,7 @@ end
 # set inverse document frequency idf weights for the vocabulary [SZ 2003]
 function setVocabularyWeigths!(voctree, all_desc)
     N = length(all_desc) # how many images used to train the vocabulary
-    occs = countOccurance(voctree, all_desc)
+    occs = countOccurrence(voctree, all_desc)
     _weights = map(occs) do n_i
         log(N / n_i) # [SZ 2003, Sec 4]
     end
