@@ -73,6 +73,7 @@ include("services/WorkflowBlobNames.jl")
 include("services/PointUtils.jl")
 include("services/DataUtils.jl")
 include("services/UserFunctions.jl")
+include("services/ToImage.jl")
 
 # SAS-SLAM
 include("beamforming/czt.jl")
@@ -81,8 +82,10 @@ include("beamforming/MatchedFilter.jl")
 include("beamforming/SASBearing2D.jl")
 include("beamforming/SASUtils.jl")
 
-include("services/ToImage.jl")
+# Bag of words
+include("bagofwords/BagOfWords.jl")
 
+# manual type-implementation of Point Cloud Library
 include("3rdParty/_PCL/_PCL.jl")
 
 # object affordance work
