@@ -8,6 +8,16 @@
 
 The API derives from a set of [standard definitions for `verb`s and `Noun`s, please see the developer wiki regarding these definitions](http://github.com/JuliaRobotics/DistributedFactorGraphs.jl/wiki/Standard-Definitions-of-API-via-verbs-and-set-theory).
 
+### NvaCJL Dictionary
+
+TODO split
+https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Tree-Based-Initialization
+
+| Adjective |    |
+|-----------|----|
+| Kinematic | A translate-rotate coordinate system representing motions not concerned with continuous forces or the dynamic constraints. |
+| Dynamic   | A expontial coordinate system representing motions governed by dynamic constraints, including realistic forces acting on a body/device |
+
 ## DistributedFactorGraphs.jl Docs
 
 These are [more hardy developer docs](http://juliarobotics.org/DistributedFactorGraphs.jl/latest/), such as the lower level data management API etc.
@@ -36,10 +46,7 @@ https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Parametric-Solve-W
 
 ## Early PoC work on Tree based Initialization
 
-https://github.com/JuliaRobotics/IncrementalInference.jl/wiki/Tree-Based-Initialization
-
 ## Variable Ordering Links
 
 Wiki for [variable ordering links](http://github.com/JuliaRobotics/Caesar.jl/wiki/Variable-Ordering-References).
-
 
