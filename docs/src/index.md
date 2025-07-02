@@ -10,7 +10,7 @@ Caesar.jl facilates software development for spatial/physical AI from multiple s
 
 ## TL;DR; Science Underpinning
 
-Caesar.jl is primarilly concerned with data processing / algorithmic / AI-related software for data-fusion, perception, contradiction extraction, navigation affordances, surrogates, geometric representation, sensor calibration, solution verification, efficient solving, equipment interactions, reality capture, digital twins, swarms, and related topics.  At the highest level, the entire purpose of CJL and co are for the most engineering sensible and power solutions to the following expressions:
+Caesar.jl is primarilly concerned with data processing / algorithmic / AI-related software for data-fusion, perception, contradiction extraction, navigation affordances, surrogates, same-day-GPS-replacement, geometric representation, sensor calibration, solution verification, efficient solving, equipment interactions, reality capture, digital twins, swarms, and related topics.  At the highest level, the entire purpose of CJL and co are for the most engineering sensible and power solutions to the following expressions:
 ```
 # the "measurement process/data collection manifestation/reality/collapse" is (i.e. robot drives around somewhere)
 observation_states + model_uncertainty = convolve(physics_models, observation_uncertainty)
