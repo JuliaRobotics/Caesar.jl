@@ -14,7 +14,7 @@ Caesar.jl is primarilly concerned with data processing / algorithmic / AI-relate
 ```
 # the "measurement process/data collection manifestation/reality/collapse" is (i.e. robot drives around somewhere)
 observation_states + model_uncertainty = convolve(physics_models, observation_uncertainty)
-# model_uncertainty = quantum_uncertainty
+# model_uncertainty = quantum_uncertainty + measurement_error
 
 # while the "solve graph" manifestation (aka inversion / data-fusion / state estimation / inference) is:
 estimated_states + model_uncertainty = deconvolve(best_models, observation_states)
