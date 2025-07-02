@@ -27,7 +27,7 @@ Click here to go to the Caesar.jl (permissively licensed) Github repo:
 
 [![source](https://img.shields.io/badge/source-code-yellow.svg)](https://github.com/JuliaRobotics/Caesar.jl)
 
-[WhereWhen.ai's NavAbility products and services](https://www.wherewhen.ai) continues to develop the Caesar.jl suite of open-source libraries.  Please reach out for any additional information (info@navability.io), or using the community links provided below.
+[WhereWhen.ai's NavAbility products and services](https://www.wherewhen.ai) continue to develop the Caesar.jl suite of open-source libraries.  Please reach out for any additional information (info@wherewhen.ai), or using the community links provided below.
 
 Various mapping and localization solutions are possible both for commercial and R&D.  We recommend taking a look at:
 - The human-to-machine friendly [NavAbility App](https://app.navability.io/home/) interaction; and
