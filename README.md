@@ -2,10 +2,6 @@
 <img src="https://user-images.githubusercontent.com/6412556/134777705-acda768e-884b-4de6-b307-aac6d09b9c81.png" width="240" border="0" />
 </p>
 
-A multimodal/non-Gaussian robotic toolkit for localization and mapping -- reducing the barrier of entry for sensor/data fusion tasks, including Simultaneous Localization and Mapping (SLAM).  Focus areas are mapping, localization, calibration, synthesis, planning, and digital twins.
-
-[NavAbility(TM) by WhereWhen.ai Technologies Inc.](https://www.wherewhen.ai) is administrating and supporting the ongoing development of Caesar.jl with and to help grow the community, please reach out for any additional information at info@wherewhen.ai or via the Slack badge-link below.
-
 # Weblink Info
 
 Click on the badges to follow web url links:
@@ -16,6 +12,8 @@ Click on the badges to follow web url links:
 
 Also find factor graph solver DOI at:
 [![doi-img]][doi-url]
+
+[NavAbility(TM) by WhereWhen.ai Technologies Inc.](https://www.wherewhen.ai) is administrating and supporting the ongoing development of Caesar.jl with and to help grow the community, please reach out for any additional information at info@wherewhen.ai or via the Slack badge-link below.
 
 # Bleeding-edge Development Status
 
