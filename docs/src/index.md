@@ -23,7 +23,7 @@ estimated_states + model_uncertainty = deconvolve(best_models, observation_state
 
 ## Open-core, Community and Commercial
 
-Click here to go to the Caesar.jl (permisively licensed) Github repo:
+Click here to go to the Caesar.jl (permissively licensed) Github repo:
 
 [![source](https://img.shields.io/badge/source-code-yellow.svg)](https://github.com/JuliaRobotics/Caesar.jl)
 
