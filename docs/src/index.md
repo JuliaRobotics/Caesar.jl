@@ -16,7 +16,7 @@ Caesar.jl is primarilly concerned with data processing / algorithmic / AI-relate
 observation_states + model_uncertainty = convolve(physics_models, observation_uncertainty)
 # model_uncertainty = quantum_uncertainty
 
-# while the "solve graph" (aka inversion) manifestation (aka data-fusion /state estimation) is:
+# while the "solve graph" manifestation (aka inversion / data-fusion / state estimation / inference) is:
 estimated_states + model_uncertainty = deconvolve(best_models, observation_states)
 # model_uncertainty = quantum + modeling_error + numerical + ...
 ```
