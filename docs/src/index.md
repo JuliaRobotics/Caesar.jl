@@ -6,7 +6,7 @@
 
 ## Introduction
 
-Caesar.jl facilates software development for spatial/physical AI from multiple sensor data, and multiple sessions or human / semi-autonomous / autonomous agents.  This software is being developed with broadly [Industry 4.0](https://en.wikipedia.org/wiki/Fourth_Industrial_Revolution), AI, data analytics, robotics, and [Work of the Future](https://workofthefuture.mit.edu/) in mind.  Caesar.jl is an "umbrella package" to combine many other libraries from across the Julia package ecosystem.  Additionally the NavAbilitySDKs allow various multi-language and cost-sharing features for large networks, compute loads, and expert help.
+Caesar.jl facilates software development for spatial/physical AI from multiple sensor data, and multiple sessions or human / semi-autonomous / autonomous agents.  This software is being developed with broadly [Industry 4.0](https://en.wikipedia.org/wiki/Fourth_Industrial_Revolution), AI, data analytics, robotics, and [Work of the Future](https://workofthefuture.mit.edu/) in mind.  Caesar.jl is an "umbrella package" to combine many other libraries from across the Julia package ecosystem.  Additionally, the [NavAbilitySDKs](https://github.com/NavAbility/) allow for multi-language and cost-sharing features.  Commercial support is available where large networks, multiple compute loads, and expert help can help drastically reduce cash-burn.
 
 ## TL;DR; Science Underpinning
 
