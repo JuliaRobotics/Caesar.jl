@@ -4,21 +4,34 @@
 </p>
 ```
 
-## Open Community
+## Introduction
 
-Click here to go to the Caesar.jl Github repo:
+Caesar.jl facilates software development for spatial/physical AI from multiple sensor data, and multiple sessions or human / semi-autonomous / autonomous agents.  This software is being developed with broadly [Industry 4.0](https://en.wikipedia.org/wiki/Fourth_Industrial_Revolution), AI, data analytics, robotics, and [Work of the Future](https://workofthefuture.mit.edu/) in mind.  Caesar.jl is an "umbrella package" to combine many other libraries from across the Julia package ecosystem.  
+
+## TL;DR; Science Underpinning
+
+Caesar.jl is primarilly concerned with data processing / algorithmic / AI-related software for data-fusion, perception, contradiction extraction, navvigation affordances, surrogates, geometric representation, sensor calibration, solution verification, efficient solving, equipment interactions, swarms, and related topics.  At the highest level, the entire purpose of CJL and co are for the most engineering sensible and power solutions to the following expressions:
+```
+# the "measurement process/data collection manifestation/reality/collapse" is (i.e. robot drives around somewhere)
+observation_states + model_uncertainty = convolve(physics_models, observation_uncertainty)
+# model_uncertainty = quantum_uncertainty
+
+# while the "solve graph" (aka inversion) manifestation (aka data-fusion /state estimation) is:
+estimated_states + model_uncertainty = deconvolve(best_models, observation_states)
+# model_uncertainty = quantum + modeling_error + numerical + ...
+```
+
+## Open-core, Community and Commercial
+
+Click here to go to the Caesar.jl (permisively licensed) Github repo:
 
 [![source](https://img.shields.io/badge/source-code-yellow.svg)](https://github.com/JuliaRobotics/Caesar.jl)
 
-Caesar.jl is a community project to facilate software technology development for localization and mapping from multiple sensor data, and multiple sessions or human / semi-autonomous / autonomous agents.  This software is being developed with broadly [Industry 4.0](https://en.wikipedia.org/wiki/Fourth_Industrial_Revolution), Robotics, and [Work of the Future](https://workofthefuture.mit.edu/) in mind.  Caesar.jl is an "umbrella package" to combine many other libraries from across the Julia package ecosystem.  
-
-# Commercial Products and Services
-
-[WhereWhen.ai's NavAbility products and services](https://www.wherewhen.ai) build upon, continually develop, and help administer the Caesar.jl suite of open-source libraries.  Please reach out for any additional information (info@navability.io), or using the community links provided below.
+[WhereWhen.ai's NavAbility products and services](https://www.wherewhen.ai) continues to develop the Caesar.jl suite of open-source libraries.  Please reach out for any additional information (info@navability.io), or using the community links provided below.
 
 Various mapping and localization solutions are possible both for commercial and R&D.  We recommend taking a look at:
 - The human-to-machine friendly [NavAbility App](https://app.navability.io/home/) interaction; and
-- The machine-to-machine friendly NavAbilitySDKs ([Python](https://github.com/NavAbility/NavAbilitySDK.py), [Julia](https://github.com/NavAbility/NavAbilitySDK.jl), [JS](https://github.com/NavAbility/NavAbilitySDK.js), etc.).  Also see the [SDK.py Docs](https://navability.github.io/NavAbilitySDK.py/).
+- The machine-to-machine friendly NavAbilitySDKs ([Python](https://github.com/NavAbility/NavAbilitySDK.py), [Julia](https://github.com/NavAbility/NavAbilitySDK.jl), [Rust/C/Py/JS](https://github.com/NavAbility/NavAbilitySDK.rs), etc.).  Also see the [SDK.py Docs](https://navability.github.io/NavAbilitySDK.py/).
 
 ## NavAbility Zero Install Tutorials
 
