@@ -18,7 +18,7 @@ observation_states + model_uncertainty = convolve(physics_models, observation_un
 
 # while the "solve graph" manifestation (aka inversion / data-fusion / state estimation / inference) is:
 estimated_states + model_uncertainty = deconvolve(best_models, observation_states)
-# model_uncertainty = quantum + modeling_error + numerical + ...
+# model_uncertainty = (quantum + modeling_error) + numerical + ...
 ```
 
 ## Open-core, Community and Commercial
