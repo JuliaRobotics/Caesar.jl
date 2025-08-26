@@ -75,6 +75,7 @@ Newly created page to list related references and additional literature pertaini
 [2.15h] Kelly, Jonathan, 2025  [All About the Galilean Group SGal(3)](https://arxiv.org/pdf/2312.07555)
 
 [2.15i] Baran, Mateusz, and Bergman, Ronny, 2025 [A geometric perspective of state estimation using Kalman filters](https://arxiv.org/pdf/2506.01086).
+
 [2.16] Kaess, M. and Dellaert, F., 2009. [Covariance recovery from a square root information matrix for data association](https://apps.dtic.mil/dtic/tr/fulltext/u2/a537233.pdf). Robotics and autonomous systems, 57(12), pp.1198-1210.
 
 [2.17] Bishop, C.M., 2006. Pattern recognition and machine learning. New York: Springer. ISBN 978-0-387-31073-2.
