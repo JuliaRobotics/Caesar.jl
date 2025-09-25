@@ -1,6 +1,12 @@
 
 
+FEATUREMOUNTAIN_DICT = Dict{Tuple{Symbol,Int},MANYTRACKS}
+FEATUREMOUNTAIN_DIRDICT = FolderDict{Tuple{Symbol,Int},MANYTRACKS}
 
+FEATUREMOUNTAINTYPES = Union{
+  <:FEATUREMOUNTAIN_DICT,
+  <:FEATUREMOUNTAIN_DIRDICT
+}
 
 """
     $SIGNATURES
@@ -8,16 +14,12 @@
 Add image features to FeatureMountain dict, using an image stored in a blob of a DFG object.
 """
 function addFeatureTracks_Frame1_Q!(
-  # mountain::FeatureMountain,
   featToMany,
   dfg::AbstractDFG, 
   vlb_q::Symbol;
   trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK",
 )
   #
-  # if !haskey(mountain, 1)
-  #   mountain[1] = FeatureTracks()
-  # end
   eb = getData(dfg,vlb_q,trackBlobKey)
   if isnothing(eb)
     return featToMany
@@ -30,9 +32,6 @@ function addFeatureTracks_Frame1_Q!(
     pixel = (meas[1],meas[2])
     from = (vlb_q,featidx, pixel)
     to = (vlb_q,featidx, pixel)
-      # # legcay
-      # mountain[1][track_id] = FeaturesDict()
-      # mountain[1][track_id][vlb_q] = (;from, to)
 
     # featToMany container
     fromkey = (from[1],from[2])
@@ -47,12 +46,10 @@ function addFeatureTracks_Frame1_Q!(
   end
   
   return featToMany
-  # return mountain
 end
 
 
 function addFeatureTracks_Frame2_PfwdQ!(
-  # mountain::FeatureMountain,
   featToMany,
   dfg::AbstractDFG,
   vlb_pq,
@@ -60,10 +57,6 @@ function addFeatureTracks_Frame2_PfwdQ!(
   trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK_",
   imgBlobKey = r"cam"
 )
-
-  # if !haskey(mountain, 2)
-  #   mountain[2] = FeatureTracks()
-  # end
 
   vlb_p, vlb_q = vlb_pq[1], vlb_pq[2]
 
@@ -90,10 +83,6 @@ function addFeatureTracks_Frame2_PfwdQ!(
     pixel_q = tuple(trk_pP1_q0[2]...)
     from = (vlb_p, i_pP1_q0[1], pixel_p)
     to = (vlb_q, i_pP1_q0[2], pixel_q)
-      # # legacy
-      # mountain[2][track_id] = FeaturesDict()
-      # mountain[2][track_id][vlb_p] = (;from, to)
-      # mountain[2][track_id][vlb_q] = (;from, to)
 
     # featToMany container
     fromkey = (from[1],from[2])
@@ -108,12 +97,10 @@ function addFeatureTracks_Frame2_PfwdQ!(
   end
 
   return featToMany
-  # return mountain
 end
 
 
 function addFeatureTracks_Frame2_QbckR!(
-  # mountain::FeatureMountain,
   featToMany,
   dfg::AbstractDFG,
   vlb_qr,
@@ -121,10 +108,6 @@ function addFeatureTracks_Frame2_QbckR!(
   trackBlobKey = r"IMG_FEATURE_TRACKS_FWDBCK_",
   imgBlobKey = r"cam"
 )
-
-  # if !haskey(mountain, 2)
-  #   mountain[2] = FeatureTracks()
-  # end
 
   vlb_q, vlb_r = vlb_qr[1], vlb_qr[2]
 
@@ -155,10 +138,6 @@ function addFeatureTracks_Frame2_QbckR!(
     pixel_q = tuple(trk_rN1_q0[2]...)
     from = (vlb_r, i_rN1_q0[1], pixel_r)
     to = (vlb_q, i_rN1_q0[2], pixel_q)
-      # # legacy
-      # mountain[2][track_id] = FeaturesDict()
-      # mountain[2][track_id][vlb_r] = (; from, to)
-      # mountain[2][track_id][vlb_q] = (; from, to)
     
     # featToMany container
     fromkey = (from[1],from[2])
@@ -173,7 +152,6 @@ function addFeatureTracks_Frame2_QbckR!(
   end
 
   return featToMany
-  # return mountain
 end
 
 # # require both forward and backward tracks to coincide
@@ -250,7 +228,8 @@ function addFeatureTracks(
   imgBlobKey = r"cam"
 )
   #
-  featToMany_ = Dict{Tuple{Symbol,Int},MANYTRACKS}()
+  featToMany_ = FEATUREMOUNTAIN_DIRDICT()
+  # featToMany_ = FEATUREMOUNTAIN_DICT() # Dict{Tuple{Symbol,Int},MANYTRACKS}()
 
   lastlbl = :null
   @showprogress "feature pairs" for pair in pairs
@@ -293,7 +272,7 @@ tracks between many images.
 See also: [`summarizeFeatureTracks!`](@ref)
 """
 function consolidateFeatureTracks!(
-  featToMany_::Dict{Tuple{Symbol,Int},MANYTRACKS},
+  featToMany_::FEATUREMOUNTAINTYPES, # Dict{Tuple{Symbol,Int},MANYTRACKS},
 )
   ## find Frame3 options
 
@@ -354,7 +333,7 @@ attempt to follow the same real world feature through a sequence of images.
 See also: [`consolidateFeatureTracks`](@ref)
 """
 function summarizeFeatureTracks!(
-  featToMany_::Dict{Tuple{Symbol,Int},MANYTRACKS},
+  featToMany_::FEATUREMOUNTAINTYPES, # Dict{Tuple{Symbol,Int},MANYTRACKS},
 )
 ## summarize tracks to start label
 
@@ -412,13 +391,17 @@ end
 ## union features
 
 function unionFeatureMountain(
-  fMa::Dict{Tuple{Symbol,Int},MANYTRACKS}, 
-  fMb::Dict{Tuple{Symbol,Int},MANYTRACKS},
+  fMa::FEATUREMOUNTAINTYPES, # Dict{Tuple{Symbol,Int},MANYTRACKS}, 
+  fMb::FEATUREMOUNTAINTYPES, # Dict{Tuple{Symbol,Int},MANYTRACKS},
 )
   # start with everything from fMb
+  # FIXME, this deepcopy is going to explode the memory consumption
   rM = deepcopy(fMb)
   # then add everything from fMa
-  for (ka,va) in fMa
+  
+  # for (ka,va) in fMa
+  for ka in keys(fMa)
+    va = fMa[ka]
     # @info ka
     # union if already exists
     if haskey(rM, ka)
