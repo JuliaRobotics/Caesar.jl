@@ -78,7 +78,7 @@ CaesarLasIOExt = "LasIO"
 CaesarZMQExt = "ZMQ"
 
 [compat]
-ApproxManifoldProducts = "0.7, 0.8"
+ApproxManifoldProducts = "0.7, 0.8, 0.10"
 AprilTags = "0.8, 0.9"
 Clustering = "0.15"
 ColorVectorSpace = "0.9, 0.10"
