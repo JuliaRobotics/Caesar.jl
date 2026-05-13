@@ -42,7 +42,7 @@ end
 
 
 
-struct PackedScanMatcherPose2 <: AbstractPackedFactor
+struct PackedScanMatcherPose2 <: AbstractPackedObservation
   im1::Vector{Vector{Float64}}
   im2::Vector{Vector{Float64}}
   gridscale::Float64

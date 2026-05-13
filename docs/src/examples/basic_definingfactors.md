@@ -5,7 +5,7 @@ Julia's type inference allows overloading of member functions outside a module. 
 
 | Required                                  | Brief description                                                                      |
 |:------------------------------------------|:-------------------------------------------------------------------------------------- |
-| `MyFactor`  struct                        | Prior (`<:AbstractPrior`) factor definition |
+| `MyFactor`  struct                        | Prior (`<:AbstractPriorObservation`) factor definition |
 | **Optional methods**                      | **Brief description**                                                                  |
 | `getSample(cfo::CalcFactor{<:MyFactor})`  | Get a sample from the measurement model |
 
@@ -20,12 +20,12 @@ To better illustrate, in this example we will add new factors into the `Main` co
 Now lets define our own prior, `MyPrior` which allows for arbitrary distributions that inherit from `<: IIF.SamplableBelief`:
 
 ```julia
-struct MyPrior{T <: SamplableBelief} <: IIF.AbstractPrior
+struct MyPrior{T <: SamplableBelief} <: IIF.AbstractPriorObservation
   Z::T
 end
 ```
 
-New priors must inheret from `IIF.AbstractPrior`, and usually takes a user input `<:SamplableBelief` as probabilistic model.  `<:AbstractPrior` is a unary factor that introduces absolute information about only one variable.
+New priors must inheret from `IIF.AbstractPriorObservation`, and usually takes a user input `<:SamplableBelief` as probabilistic model.  `<:AbstractPriorObservation` is a unary factor that introduces absolute information about only one variable.
 
 ## [Specialized `getSample` (if `.Z`)](@id specialized_getSample)
 
@@ -39,7 +39,7 @@ import IncrementalInference: getSample
 IIF.getSample(cfo::CalcFactor{<:MyPrior}) = rand(cfo.factor.Z)
 ```
 
-It is **important to note** that for `<:AbstractPrior` the `getSample` must return a *point* on the manifold, not a tangent vector or coordinate.  
+It is **important to note** that for `<:AbstractPriorObservation` the `getSample` must return a *point* on the manifold, not a tangent vector or coordinate.  
 
 To recap, the `getSample` function for priors returns a measurement sample as points on the manifold.
 

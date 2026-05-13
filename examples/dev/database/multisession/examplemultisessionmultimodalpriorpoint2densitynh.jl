@@ -57,7 +57,7 @@ ANAITER=1
 # for sym in lms
 sym = lms[1]
 fv = getFactor(fg, sym)
-ffv = getFactorType(fv) #getData(fv).fnc.usrfnc!
+ffv = getObservation(fv) #getData(fv).fnc.usrfnc!
 # plotKDE(ffv.belief)
 
 p = getVariable(fg, sym) |> getBelief

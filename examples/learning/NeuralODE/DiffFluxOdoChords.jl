@@ -28,7 +28,7 @@ function extractTimePoseJoyData(fg::AbstractDFG)
   POSDATA[1,:,:] .= getVal(fg, poses[1])
   for i in 1:length(poses)-1
     POSDATA[i+1,:,:] .= getVal(fg, poses[i+1])
-    JOYDATA[i,:,:] = getFactorType(fg, fcts[i]).joyVelData
+    JOYDATA[i,:,:] = getObservation(fg, fcts[i]).joyVelData
     TIMES[i+1] = (getTimestamp(getVariable(fg, poses[i+1])) - T0).value * 1e-3
   end
 
@@ -84,7 +84,7 @@ for fs in fsyms, idx in 1:100
   fill!(whichVelIdx,1)
   whichVelIdx[idx] = 2
   dummy = approxConv(fg, fs, :x1, (meas[1],whichVelIdx,measSeq) )
-  vecjoy = getFactorType(fg, fs).joyVelData
+  vecjoy = getObservation(fg, fs).joyVelData
 end
 
 ## Store joystick values in composite
@@ -108,7 +108,7 @@ for from in vsyms[1:end-1]
         for i in 1:100  joysticks[from][to][i]=zeros(Float32,0,4); end
       end
       fsyms = findFactorsBetweenNaive(fg, from, to)
-      # vecjoy = getFactorType.(fg, fsyms) .|> x->x.joyVelData
+      # vecjoy = getObservation.(fg, fsyms) .|> x->x.joyVelData
       # joysticks[from][to] = length(vecjoy)== 1 ? vecjoy[1] : vcat(vecjoy...)
       for fs in fsyms
         intermTo = getVariableOrder(fg, fs)[end]
@@ -120,7 +120,7 @@ for from in vsyms[1:end-1]
           whichVelIdx[1] = 2
           fill!(measSeq, idx)
           dummy = approxConv(fg, fs, intermTo, (meas[1],whichVelIdx,measSeq) )
-          vecjoy = getFactorType(fg, fs).joyVelData
+          vecjoy = getObservation(fg, fs).joyVelData
           joysticks[from][to][idx] = vcat(joysticks[from][to][idx], vecjoy)
         end
         @show "done $fs"
@@ -348,7 +348,7 @@ meas, pred = solveFactorMeasurements(dfg, :x0x1f1)
 
 # function solveFactorMeasurementsChain(dfg::AbstractDFG, fsyms::Vector{Symbol})
 #
-#   # FCTS = getFactorType.(dfg, fsyms)
+#   # FCTS = getObservation.(dfg, fsyms)
 #   FCTS = solveFactorMeasurements.(dfg, fsyms)
 #
 # end

@@ -110,7 +110,7 @@ function lcmodomsg!(vc, slaml::SLAMWrapper, msgdata,
   # println("lcmodomsg! mid")
 
   if abs(odomsg[:confidence] - 1.0) < 1e-10
-    constrs = AbstractFactor[] # factor super type
+    constrs = AbstractObservation[] # factor super type
     println("adding PartialPriorRollPitchZ")
     prpz = PartialPriorRollPitchZ(
       MvNormal(  [lastposeRPZ[1];lastposeRPZ[2]],diagm([odomsg[:covar][6];odomsg[:covar][5]])  ),

@@ -13,7 +13,7 @@ imgs_ = deepcopy(imgs);
 
 for i in 1:5
   @show fSym = intersect(lsf(fg, Pose2AprilTag4Corners), ls(fg, Symbol("x\$i")))
-  for fct in getFactorType.(fg, fSym)
+  for fct in getObservation.(fg, fSym)
     drawBearingLinesAprilTags!( imgs_[i], fct,
                                 f_width=f_width, c_width=c_width, taglength=taglength);
     #

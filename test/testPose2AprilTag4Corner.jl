@@ -10,7 +10,7 @@ using FileIO
 
 # using ImageView
 
-import DistributedFactorGraphs: AbstractRelative
+import DistributedFactorGraphs: AbstractRelativeObservation
 
 ##
 
@@ -90,7 +90,7 @@ pts = approxConv(fg, DFG.ls(fg,:tag17)[1], :tag17)
 pf = DFG.packFactor(fg, atf)
 uf = DFG.unpackFactor(fg, pf)
 
-uf4 = getFactorType(uf)
+uf4 = getObservation(uf)
 
 @test isapprox(apt4.corners[1][1], uf4.corners[1][1], atol=1e-12)
 @test isapprox(apt4.corners[2][1], uf4.corners[2][1], atol=1e-12)
@@ -123,7 +123,7 @@ saveDFG("/tmp/atagtest", fg)
 fg_ = loadDFG("/tmp/atagtest")
 Base.rm("/tmp/atagtest.tar.gz")
 
-uf4_ = getFactorType(fg_, DFG.ls(fg_, :tag17)[1])
+uf4_ = getObservation(fg_, DFG.ls(fg_, :tag17)[1])
 
 @test norm( apt4.homography - uf4_.homography ) < 1e-6
 @test norm( apt4.K - uf4_.K ) < 1e-6
@@ -147,7 +147,7 @@ meas_ = exp.(Ref(M), Ref(getPointIdentity(M)), meas)
 
 # in reality we'd do this over section of the graph for each sample
 # FIXME this must be moved up into IncrementalInference
-function _solveFactorPreimage(fct::Union{<:AbstractPrior, <:AbstractRelative}, 
+function _solveFactorPreimage(fct::Union{<:AbstractPriorObservation, <:AbstractRelativeObservation}, 
                               meas_; # this is a SpecialEuclidean(2) tangent vector type, ProductRepr or newer 
                               method=BFGS(),
                               regularize::Real=0 )
@@ -160,7 +160,7 @@ function _solveFactorPreimage(fct::Union{<:AbstractPrior, <:AbstractRelative},
 end
 
 
-fct = getFactorType(fg, :x0tag17f1)
+fct = getObservation(fg, :x0tag17f1)
 
 preImgs = zeros(5,10)
 

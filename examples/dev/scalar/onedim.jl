@@ -57,7 +57,7 @@ p = neval(Normal(xt, 1), x )  # prior
 ## implements a scalar measurement factor (e.g. elevation against known scalar map)
 # addFactor!(fg, [:x1, :topography], ScalarFieldFactor(y))
 # FIXME: objective is to <: IIF.AbstractRelativeConstant (final name TBD)
-struct ScalarFieldFactor{T<:SamplableBelief} <: IIF.AbstractPrior
+struct ScalarFieldFactor{T<:SamplableBelief} <: IIF.AbstractPriorObservation
     elevationMeasModel::T
 end
 

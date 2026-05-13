@@ -109,7 +109,7 @@ end
 
 ## packing converters
 
-struct PackedPyNeuralPose2Pose2 <: AbstractPackedFactor
+struct PackedPyNeuralPose2Pose2 <: AbstractPackedObservation
   joyVelData::Vector{Vector{Float64}}
   naiveModel::String
   naiveFrac::Float64

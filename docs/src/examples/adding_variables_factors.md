@@ -17,7 +17,7 @@ A couple of important points:
 
 
 All factors inherit from one of the following types, depending on their function:
-* `AbstractPrior` is for priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a [`Pose2`](@ref) scenario.
+* `AbstractPriorObservation` is for priors (unary factors) that provide an absolute constraint for a single variable. A simple example of this is an absolute GPS prior, or equivalently a (0, 0, 0) starting location in a [`Pose2`](@ref) scenario.
   * Requires: A `getSample` function
 * `AbstractRelativeMinimize` uses Optim.jl and is for relative factors that introduce an algebraic relationship between two or more variables. A simple example of this is an odometry factor between two pose variables, or a range factor indicating the range between a pose and another variable.
   * Requires: A `getSample` function and a residual function definition
@@ -25,7 +25,7 @@ All factors inherit from one of the following types, depending on their function
 * [NEW] `AbstractManifoldMinimize` uses [Manopt.jl](https://github.com/JuliaManifolds/Manopt.jl).
 
 How do you decide which to use?
-* If you are creating factors for world-frame information that will be tied to a single variable, inherit from `<:AbstractPrior`
+* If you are creating factors for world-frame information that will be tied to a single variable, inherit from `<:AbstractPriorObservation`
   * GPS coordinates should be priors
 * If you are creating factors for local-frame relationships between variables, inherit from IIF.AbstractRelativeMinimize
   * Odometry and bearing deltas should be introduced as pairwise factors and should be local frame
@@ -37,7 +37,7 @@ TBD: Users should start with IIF.AbstractRelativeMinimize, discuss why and when 
 What you need to build in the new factor:
 * A struct for the factor itself
 * A sampler function to return measurements from the random ditributions
-* If you are building a `<:AbstractRelative` you need to define a residual function to introduce the relative algebraic relationship between the variables
+* If you are building a `<:AbstractRelativeObservation` you need to define a residual function to introduce the relative algebraic relationship between the variables
   * Minimization function should be lower-bounded and smooth
 * A packed type of the factor which must be named Packed[Factor name], and allows the factor to be packed/transmitted/unpacked
 * Serialization and deserialization methods

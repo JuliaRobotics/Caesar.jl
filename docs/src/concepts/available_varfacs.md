@@ -51,7 +51,7 @@ You can check for the latest factor types by running the following in your termi
 ```julia
 using RoME, Caesar
 println("- Singletons (priors): ")
-println.(sort(string.(subtypes(IIF.AbstractPrior))));
+println.(sort(string.(subtypes(IIF.AbstractPriorObservation))));
 println("- Pairwise (variable constraints): ")
 println.(sort(string.(subtypes(IIF.AbstractRelativeRoots))));
 println("- Pairwise (variable minimization constraints): ")

@@ -267,7 +267,7 @@ end
 ls(fg1)
 drawGraph(fg1)
 
-getFactorType(fg1, ls(fg1, :x0)[2])
+getObservation(fg1, ls(fg1, :x0)[2])
 
 
 drawTree(tree1, show=true)
@@ -280,7 +280,7 @@ plotLocalProduct(fg1, :x0)
 
 solveTree!(fg1)
 
-getFactorType(fg1, ls(fg1, :l1)[2])
+getObservation(fg1, ls(fg1, :l1)[2])
 
 reportFactors(fg1, Pose2Point2Bearing)
 
@@ -371,7 +371,7 @@ loadDFG(joinpath(getSolverParams(fg1).logpath, "graphs", "fg_0_after.pdf"), Main
 drawGraph(_fg)
 
 plotPose(_fg, :x0)
-getFactorType)
+getObservation
 
 
 
@@ -451,7 +451,7 @@ plotSandsharkFromDFG(dfg)
 
 ## RANGE MODELING
 
-fct_range = getFactorType(fg1, :x45l1f1).range
+fct_range = getObservation(fg1, :x45l1f1).range
 
 plotKDE(fct_range)
 

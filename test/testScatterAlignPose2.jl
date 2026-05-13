@@ -148,8 +148,8 @@ Base.rm("/tmp/caesar/test_sap.tar.gz")
 
 ##
 
-sap = getFactorType(fg, :x0x1f1).align
-sap_ = getFactorType(fg_, :x0x1f1).align
+sap = getObservation(fg, :x0x1f1).align
+sap_ = getObservation(fg_, :x0x1f1).align
 
 @test isapprox( sap.cloud1, sap_.cloud1)
 @test isapprox( sap.cloud2, sap_.cloud2)

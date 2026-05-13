@@ -138,7 +138,7 @@ function pose_hdlr(channel::String,
   scodo = ODOSCALE.*msgdata.pos[1:3]
   for (vsym, drt) in dashboard[:drtMpp]
     for symFct in intersect(ls(dfg, MutablePose2Pose2Gaussian), ls(dfg,vsym))
-      drtFct = getFactorType(dfg, symFct)
+      drtFct = getObservation(dfg, symFct)
       accumulateDiscreteLocalFrame!(drtFct, scodo, dashboard[:Qc_odo], 1.0, Phik=SE2(scodo)) # drt
       println(alltht, "$odoT, $(length(dashboard[:drtMpp])), $vsym, $(symFct), $(scodo[1]), $(scodo[2]), $(scodo[3]), $(drtFct.Zij.μ[1]), $(drtFct.Zij.μ[2]), $(drtFct.Zij.μ[3])")
     end
@@ -150,7 +150,7 @@ function pose_hdlr(channel::String,
   # write the latest DRT solution to file
   drtFnc = string(dashboard[:solveSettings].drtCurrent[1], dashboard[:solveSettings].drtCurrent[2], "f1") |> Symbol
   val = accumulateFactorMeans(dfg, [drtFnc;])
-  drtFncMu = getFactorType(dfg, drtFnc).Zij.μ
+  drtFncMu = getObservation(dfg, drtFnc).Zij.μ
   println(drtlog, "$odoT, $(drtFnc), $(dashboard[:lastPose]), $(val[1]), $(val[2]), $(val[3]), $(scodo[1]), $(scodo[2]), $(scodo[3]), $(collect(keys(dashboard[:drtMpp]))), $(drtFncMu)")
   drval = accumulateFactorMeans(dfg, [:x0drt_0f1;])
   println(drolog, "$odoT, $(dashboard[:lastPose]), $(drval[1]), $(drval[2]), $(drval[3])")
@@ -167,7 +167,7 @@ function pose_hdlr(channel::String,
 
     # get drt from last pose
     lastPoseDrt = intersect(ls(dfg, dashboard[:lastPose]), ls(dfg, MutablePose2Pose2Gaussian))[1]
-    drtLast = getFactorType(dfg, lastPoseDrt)
+    drtLast = getObservation(dfg, lastPoseDrt)
     # drtLast = dashboard[:drtMpp][dashboard[:lastPose]]
 
     # add new variable and factor to the graph
@@ -231,7 +231,7 @@ function pose_hdlr(channel::String,
   # mutable pose2pose2 factor holding odometry only reference
   # mpp = dashboard[:drtOdoRef][3]
   # accumulate odo
-  accumulateDiscreteLocalFrame!(getFactorType(dfg, :x0drt_reff1), scodo[1:3], dashboard[:Qc_odo], 1.0, Phik=SE2(scodo[1:3]))
+  accumulateDiscreteLocalFrame!(getObservation(dfg, :x0drt_reff1), scodo[1:3], dashboard[:Qc_odo], 1.0, Phik=SE2(scodo[1:3]))
   # write result to file
   drval = accumulateFactorMeans(dfg, [:x0drt_reff1;])
   println(dirodolog, "$odoT, $(dashboard[:lastPose]), $(drval[1]), $(drval[2]), $(drval[3])")

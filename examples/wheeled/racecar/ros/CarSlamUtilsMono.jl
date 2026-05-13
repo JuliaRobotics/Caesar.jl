@@ -15,7 +15,7 @@ include(joinpath(@__DIR__, "CarSlamUtilsCommon.jl"))
 function whichJoystickValues(fec, fromT, upToTime::ZonedDateTime)
   # upToTime = msgTime # getTimestamp(getVariable(fec.slam.dfg,addHist[end]))
   cmdTimes = (x->fec.synchronizer.cmdVal[x][2]).(1:length(fec.synchronizer.cmdVal)) .|> nanosecond2datetime
-  addHist = getAddHistory(fec.slam.dfg)
+  addHist = DFG.getAddHistory(fec.slam.dfg)
   filter!(x->occursin(r"x\d",string(x)), addHist)
   mask = fromT .<= cmdTimes .< upToTime
 

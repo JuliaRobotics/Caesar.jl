@@ -129,7 +129,7 @@ function _findObjPriors(dfg::AbstractDFG, fvars::AbstractVector{<:DFGVariable})
   op_PCs = []
   
   for flb in aflbs
-    neifc = getFactorType(dfg,flb)
+    neifc = getObservation(dfg,flb)
     # must be OAS factor
     if neifc isa MetaPrior{<:ObjectModelPrior}
       push!(objpriors, flb)
@@ -348,7 +348,7 @@ IIF.getMeasurementParametric(oas::ObjectAffordanceSubcloud) = error("Special cas
 function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:ObjectAffordanceSubcloud}})
   @warn "Only artificial inverse covariance available for `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})`" maxlog=3
   # TODO this only work for SpecialEuclidean(3), and half implemented for SpecialEuclidean(2)
-  PM = getManifold(getFactorType(foas))
+  PM = getManifold(getObservation(foas))
   M = PM.manifold
   D_ = manifold_dimension(M)
   e0 = ArrayPartition(SA[0;0;0.], SMatrix{3,3}(1, 0, 0, 0, 1, 0, 0, 0, 1.))
@@ -474,7 +474,7 @@ function reducePoseGraphOnObjectAffordances!(
   flbs = lsf(src)
 
   # remove OAS types
-  oasls = filter(f->getFactorType(src,f) isa Caesar.ObjectAffordanceSubcloud, flbs)
+  oasls = filter(f->getObservation(src,f) isa Caesar.ObjectAffordanceSubcloud, flbs)
 
   # copy all but OAS factors
   copyGraph!(dest, src, vlbs, setdiff(flbs,oasls))
@@ -482,7 +482,7 @@ function reducePoseGraphOnObjectAffordances!(
   # re-add OAS as pairwise PosePose
   for oasl in oasls
     fc = getFactor(src, oasl)
-    D_ = getManifold(getFactorType(fc)).manifold |> manifold_dimension
+    D_ = getManifold(getObservation(fc)).manifold |> manifold_dimension
     μ, iΣ = getMeasurementParametric(fc)
     ovlbs = getVariableOrder(fc)
     for (i,vl) in enumerate(ovlbs[2:end])
@@ -550,7 +550,7 @@ function makePointCloudObjectAffordance(
     M = SpecialEuclidean(3)
     e0 = ArrayPartition(SVector(0,0,0.),SMatrix{3,3}(1,0,0,0,1,0,0,0,1.))
     lhat_Ts_lhat = Vector{typeof(e0)}()
-    for (i,lTp) in enumerate(getFactorType(fc).lhat_Ts_p)
+    for (i,lTp) in enumerate(getObservation(fc).lhat_Ts_p)
       # pTp = Manifolds.compose(M, inv(M, lTp), cache.ohat_Ts_p[i])
       # FIXME, why pTp not identity?  Did cache.ohat_Ts_p get updated in an alignLOO somewhere?
       # @assert isapprox(M, e0, pTp) "Cached lTp transform not what user provided, $flb"

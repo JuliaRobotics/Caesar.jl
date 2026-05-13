@@ -9,7 +9,7 @@ Gadfly.set_default_plot_size(40cm,20cm)
 
 ## plotting
 
-sap_ = getFactorType(newfg, :x0x1f1)
+sap_ = getObservation(newfg, :x0x1f1)
 
 ##
 
@@ -92,7 +92,7 @@ hstack(p_xy, p_r)
 
 ##
 
-# fct = getFactorType(newfg, :x0x1f1)
+# fct = getObservation(newfg, :x0x1f1)
 # Xtup = sampleFactor(newfg, :x0x1f1)
 # e0 = identity_element(SpecialEuclidean(2))
 # δ = calcFactorResidualTemporary(fct, (Pose2,Pose2), Xtup, (e0, e0))

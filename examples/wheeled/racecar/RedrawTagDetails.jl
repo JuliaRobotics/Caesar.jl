@@ -54,7 +54,7 @@ imshow(img_)
 
 ls(fg, :x1)
 
-x1l2f1 = getFactorType(fg, :x1l2f1)
+x1l2f1 = getObservation(fg, :x1l2f1)
 
 x1l2f1.z.μ
 

@@ -99,7 +99,7 @@ end
 
 const _PARCHABLE_PACKED_CLOUD = Union{<:PackedManifoldKernelDensity, <:PackedHeatmapGridDensity}
 
-Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
+Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedObservation
   _type::String = "Caesar.PackedScatterAlignPose2"
   cloud1::_PARCHABLE_PACKED_CLOUD
   cloud2::_PARCHABLE_PACKED_CLOUD
@@ -115,7 +115,7 @@ Base.@kwdef struct PackedScatterAlignPose2 <: AbstractPackedFactor
   dataStoreHint::String = ""
 end
 
-Base.@kwdef struct PackedScatterAlignPose3 <: AbstractPackedFactor
+Base.@kwdef struct PackedScatterAlignPose3 <: AbstractPackedObservation
   _type::String = "Caesar.PackedScatterAlignPose3"
   cloud1::_PARCHABLE_PACKED_CLOUD
   cloud2::_PARCHABLE_PACKED_CLOUD
