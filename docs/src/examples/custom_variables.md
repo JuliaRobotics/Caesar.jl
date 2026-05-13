@@ -4,7 +4,7 @@ In most scenarios, the existing variables and factors should be sufficient for m
 
 A handy macro helps define new variables:
 ```julia
-@defVariable(
+@defStateType(
     MyVar,
     TranslationGroup(2),
     MVector{2}(0.0,0.0)
@@ -21,7 +21,7 @@ addVariable!(fg, :myvar1, MyVar)
 Another good example to look at is RoME's [`Pose2`](@ref) with 3 degrees of freedom: ``X, Y`` translation and a rotation matrix using ``R(\theta)``.  Caesar.jl uses [JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl) for structuring numerical operations, we can use either the `Manifolds.ProductRepr` (or [`RecursiveArrayTools.ArrayPartition`](https://github.com/SciML/RecursiveArrayTools.jl)), to define manifold point types:
 ```julia
 # already exists in RoME/src/factors/Pose2D.jl
-@defVariable(
+@defStateType(
     Pose2,
     SpecialEuclidean(2),
     ArrayPartition(MVector{2}(0.0,0.0), MMatrix{2,2}(1.0,0.0,0.0,1.0))
@@ -30,7 +30,7 @@ Another good example to look at is RoME's [`Pose2`](@ref) with 3 degrees of free
 
 Here we used `Manifolds.SpecialEuclidean(2)` as the variable manifold, and the default data representation is similar to `Manifolds.identity_element(SpecialEuclidean(2))`, or `Float32[1.0 0; 0 1]`, etc.  In the example above, we used `StaticArrays.MVector`, `StaticArrays.MMatrix` for better performance, owing to better heap vs. stack memory management.
 ```@docs
-@defVariable
+@defStateType
 ```
 
 !!! note

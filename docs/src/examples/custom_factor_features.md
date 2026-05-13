@@ -36,7 +36,7 @@ IncrementalInference.CalcFactor
 
 In some cases a factor only effects a partial set of dimensions of a variable.  For example a magnetometer being added onto a `Pose2` variable would look something like this:
 ```julia
-struct MyMagnetoPrior{T<:SamplableBelief} <: AbstractPrior
+struct MyMagnetoPrior{T<:SamplableBelief} <: AbstractPriorObservation
   Z::T
   partial::Tuple{Int}
 end
@@ -59,12 +59,12 @@ To take advantage of features like `DFG.saveDFG` and `DFG.loadDFG` a user specif
 # necessary for overloading Base.convert
 import Base: convert
 
-struct PackedMyPrior <: AbstractPackedFactor
+struct PackedMyPrior <: AbstractPackedObservation
   Z::String
 end
 
 # IIF provides convert methods for `SamplableBelief` types
-convert(::Type{PackedMyPrior}, pr::MyPrior{<:SamplableBelief}) = PackedMyPrior(convert(PackedSamplableBelief, pr.Z))
+convert(::Type{PackedMyPrior}, pr::MyPrior{<:SamplableBelief}) = PackedMyPrior(convert(PackedBelief, pr.Z))
 convert(::Type{MyPrior}, pr::PackedMyPrior) = MyPrior(IIF.convert(SamplableBelief, pr.Z))
 ```
 

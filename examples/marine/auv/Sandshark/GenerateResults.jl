@@ -183,7 +183,7 @@ odo_data = readdlm(joinLogPath(fg, "RAWODO.csv"), ',')
 
 DX = Float64.(odo_data[:,3:5])
 
-nXYT = devAccumulateOdoPose2(DX, getFactorType(getFactor(fg, :x0f1)).Z.μ)
+nXYT = devAccumulateOdoPose2(DX, getObservation(getFactor(fg, :x0f1)).Z.μ)
 
 # remove those near zero for better visualization
 mask = 40.0 .< (nXYT[:,1].^2 + nXYT[:,2].^2)

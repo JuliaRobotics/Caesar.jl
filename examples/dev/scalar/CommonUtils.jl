@@ -30,7 +30,7 @@ function plotHMSLevel(fg::AbstractDFG,
               Theme(default_color=colorant"purple") )
   #
   fct = intersect(ls(fg, lbl), lsf(fg, tags=[:DEM;]))[1]
-  plk = getFactorType(fg[fct]).Z.densityFnc |> plotKDE;
+  plk = getObservation(fg[fct]).Z.densityFnc |> plotKDE;
   
   #
   union!(plp.layers, plk.layers); 

@@ -2,7 +2,7 @@
 
 | Required                                  | Brief description                                                                      |
 |:------------------------------------------|:-------------------------------------------------------------------------------------- |
-| `MyFactor`  struct                        | Prior (`<:AbstractPrior`) or Relative (`<:AbstractManifoldMinimize`) factor definition |
+| `MyFactor`  struct                        | Prior (`<:AbstractPriorObservation`) or Relative (`<:AbstractManifoldMinimize`) factor definition |
 | `getManifold`                             | The manifold of the factor |
 | `(cfo::CalcFactor{<:MyFactor})`           | Factor residual function |
 | **Optional methods**                      | **Brief description**                                                                  |
@@ -18,11 +18,11 @@ struct EuclidDistance{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   Z::T
 end
 ```
-New relative factors should either inheret from `<:AbstractManifoldMinimize`, `<:AbstractRelativeMinimize`, or `<:AbstractRelativeRoots`.  These are all subtypes of `<:AbstractRelative`.  There are only two abstract super types, `<:AbstractPrior` and `<:AbstractRelative`.
+New relative factors should either inheret from `<:AbstractManifoldMinimize`, `<:AbstractRelativeMinimize`, or `<:AbstractRelativeRoots`.  These are all subtypes of `<:AbstractRelativeObservation`.  There are only two abstract super types, `<:AbstractPriorObservation` and `<:AbstractRelativeObservation`.
 
 ## Summary of Sampling Data Representation
 
-| Usage       | `<:AbstractPrior`  |  `<:AbstractRelative` |
+| Usage       | `<:AbstractPriorObservation`  |  `<:AbstractRelativeObservation` |
 |-------------|--------------------|-----------------------|
 | `getSample` | point `p` on Manifold | tangent `X` at some `p` (e.g. identity) |
 
@@ -45,7 +45,7 @@ DFG.getManifold(::Pose2Pose2) = Manifolds.SpecialEuclidean(2)
 
 Extending the `getSample` method for our `EuclidDistance` factor example is not required, since the default dispatch using field `.Z <: SamplableBelief` will already be able to sample the measurement -- see [Specialized `getSample`](@ref specialized_getSample).
 
-One **important note** is that `getSample` for `<:AbstractRelative` factors should return measurement values as manifold tangent vectors -- for computational efficiency reasons.
+One **important note** is that `getSample` for `<:AbstractRelativeObservation` factors should return measurement values as manifold tangent vectors -- for computational efficiency reasons.
 
 If more advanced sampling is required, extend the `getSample` function. 
 
@@ -58,14 +58,14 @@ function getSample(cf::CalcFactor{<:Pose2Pose2})
 end
 ```
 
-The return type for `getSample` is unrestricted, and will be passed to the residual function "as-is", but must return values representing a tangent vector for `<:AbstractRelative`
+The return type for `getSample` is unrestricted, and will be passed to the residual function "as-is", but must return values representing a tangent vector for `<:AbstractRelativeObservation`
 
 !!! note
-    Default dispatches in `IncrementalInference` will try use `cf.factor.Z` to `samplePoint` on manifold (for `<:AbstractPrior`) or `sampleTangent` (for `<:AbstractRelative`), which simplifies new factor definitions.  If, however, you wish to build more complicated sampling processes, then simply define your own `getSample(cf::CalcFactor{<:MyFactor})` function.
+    Default dispatches in `IncrementalInference` will try use `cf.factor.Z` to `samplePoint` on manifold (for `<:AbstractPriorObservation`) or `sampleTangent` (for `<:AbstractRelativeObservation`), which simplifies new factor definitions.  If, however, you wish to build more complicated sampling processes, then simply define your own `getSample(cf::CalcFactor{<:MyFactor})` function.
 
 ## [Factor Residual Function](@id factor_residual_function)
 
-The selection of `<:IIF.AbstractManifoldMinimize`, akin to earlier `<:AbstractPrior`, instructs IIF to find the minimum of the provided residual function.  The residual function is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.  Conceptually, the residual function is usually something akin to `residual = measurement - prediction`, but does not have to follow the exact recipe.
+The selection of `<:IIF.AbstractManifoldMinimize`, akin to earlier `<:AbstractPriorObservation`, instructs IIF to find the minimum of the provided residual function.  The residual function is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.  Conceptually, the residual function is usually something akin to `residual = measurement - prediction`, but does not have to follow the exact recipe.
 
 The returned value (the factor measurement) from `getSample` will always be passed as the first argument (e.g. `X`) to the factor residual function.  
 ```julia

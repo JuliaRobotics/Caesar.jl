@@ -35,7 +35,7 @@ using Plots
 #  - the odometry estimate at each elevation measurement
 #
 # addFactor!(fg, [:x1, :topography], ScalarFieldSequenceFactor1D(x,y))
-struct ScalarFieldSequenceFactor1D <: IIF.AbstractPrior
+struct ScalarFieldSequenceFactor1D <: IIF.AbstractPriorObservation
   # FIXME: objective is to <: IIF.AbstractRelativeConstant (final name TBD)
   gridSequence::Vector{Float64} # sample location (odometry)
   scalarSequence::Vector{Float64} #sample value (elevation meas)

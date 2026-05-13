@@ -204,7 +204,7 @@ setdiff!(lie, [:x169])
 
 
 fct = getFactor(sfg31bd, :x168x169f1)
-@show getFactorType(fct)
+@show getObservation(fct)
 getData(fct).fncargvID
 
 

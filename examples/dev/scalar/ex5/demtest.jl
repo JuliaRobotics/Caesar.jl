@@ -205,7 +205,7 @@ union!(pl_.layers, pl_m.layers); pl_
 
 locs = (x->getPPE(fg[x], :simulated).suggested[1:2]).(sortDFG(ls(fg)))
 # PartialPriorPassThrough type, with a LevelSetGridNormal
-z_es = (x->getFactorType(fg[x]).Z.level).(sortDFG(lsf(fg, tags=[:DEM;])))
+z_es = (x->getObservation(fg[x]).Z.level).(sortDFG(lsf(fg, tags=[:DEM;])))
 @cast locs_[j,i] := locs[j][i]
 
 Gadfly.plot(x=locs_[:,1], y=locs_[:,2], color=z_es)

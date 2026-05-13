@@ -1,7 +1,7 @@
 ## Relative Factors (Legacy)
 ### One Dimension Roots Example
 
-Previously we looked at adding a prior.  This section demonstrates the first of two `<:AbstractRelative` factor types.  These are factors that introduce only relative information between variables in the factor graph.
+Previously we looked at adding a prior.  This section demonstrates the first of two `<:AbstractRelativeObservation` factor types.  These are factors that introduce only relative information between variables in the factor graph.
 
 This example is on `<:IIF.AbstractRelativeRoots`.  First, lets create the factor as before 
 ```julia
@@ -20,7 +20,7 @@ end
 ```
 
 
-The selection of `<:IIF.AbstractRelativeRoots`, akin to earlier `<:AbstractPrior`, instructs IIF to find the roots of the provided residual function.  That is the one dimensional residual function, `res[1] = measurement - prediction`, is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.
+The selection of `<:IIF.AbstractRelativeRoots`, akin to earlier `<:AbstractPriorObservation`, instructs IIF to find the roots of the provided residual function.  That is the one dimensional residual function, `res[1] = measurement - prediction`, is used during inference to approximate the convolution of conditional beliefs from the approximate beliefs of the connected variables in the factor graph.
 
 Important aspects to note, `<:IIF.AbstractRelativeRoots` requires all elements `length(res)` (the factor measurement dimension) to have a feasible zero crossing solution.  A two dimensional system will solve for variables where both `res[1]==0` and `res[2]==0`.
 

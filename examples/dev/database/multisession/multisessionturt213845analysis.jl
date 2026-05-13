@@ -59,7 +59,7 @@ for ANAITER in Int[1;2;3;4;5]
     for sym in lms
       @show sym
       fv = getFactor(fg, sym, nt=:fnc)
-      ffv = getFactorType(fv) # getData(fv).fnc.usrfnc!
+      ffv = getObservation(fv) # getData(fv).fnc.usrfnc!
       # plotKDE(ffv.belief)
 
       p = getBelief(getVariable(fg, sym))

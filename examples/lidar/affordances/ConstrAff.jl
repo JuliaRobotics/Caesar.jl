@@ -313,7 +313,7 @@ Caesar.generateObjectAffordanceFromWorld!(
 ## now look at fine alignment within on OAS factor caches
 
 foaslb = ls(sfg_, :w_BBo_05)[1]
-oas = getFactorType(sfg_, foaslb)
+oas = getObservation(sfg_, foaslb)
 foaslb
 
 ##
@@ -412,7 +412,7 @@ M = getManifold(Pose3)
 e0 = ArrayPartition(MVector(0,0,0.), MMatrix{3,3}(1,0,0,0,1,0,0,0,1.))
 
 foaslb = ls(sfg_, :w_BBo_01)[1]
-oas = getFactorType(sfg_, foaslb)
+oas = getObservation(sfg_, foaslb)
 cache = IIF._getCCW(sfg_, foaslb).dummyCache;
 
 ##
@@ -468,7 +468,7 @@ _PCL.mergePointCloudsWithTransforms(ohat_Ts_p, cache.p_SCs; flipXY=false)[1] |> 
 
 M = getManifold(Pose3)
 foaslb = ls(sfg_, :w_BBo_01)[1]
-oas = getFactorType(sfg_, foaslb)
+oas = getObservation(sfg_, foaslb)
 cache = IIF._getCCW(sfg_, foaslb).dummyCache
 vlbs = getVariableOrder(sfg_[foaslb])[2:end]
 

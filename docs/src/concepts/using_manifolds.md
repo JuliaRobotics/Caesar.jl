@@ -85,7 +85,7 @@ The most popular Manifolds used in Caesar.jl related packages are:
 #### Group Manifolds
 
 - [`TranslationGroup(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.TranslationGroup) (future work will relax to `Euclidean(N)`).
-- [`SpecialOrthogonal(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.SpecialOrthogonal).
+- [`SpecialOrthogonalGroup(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.SpecialOrthogonalGroup).
 - [`SpecialEuclidean(N)`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Special-Euclidean-group).
 - `_CircleEuclid` LEGACY, TODO.
 - `AMP.SE2_E2` LEGACY, TODO.

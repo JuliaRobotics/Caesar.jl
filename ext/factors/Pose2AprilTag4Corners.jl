@@ -77,7 +77,7 @@ end
 
 
 
-Base.@kwdef struct PackedPose2AprilTag4Corners <: AbstractPackedFactor
+Base.@kwdef struct PackedPose2AprilTag4Corners <: AbstractPackedObservation
   # format of serialized data
   _type::String = "Caesar.PackedPose2AprilTag4Corners"
   # corners, as detected by AprilTags library

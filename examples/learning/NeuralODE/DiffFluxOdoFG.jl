@@ -28,7 +28,7 @@ function extractTimePoseJoyData(fg::AbstractDFG)
   POSDATA[1,:,:] .= getVal(fg, poses[1])
   for i in 1:length(poses)-1
     POSDATA[i+1,:,:] .= getVal(fg, poses[i+1])
-    JOYDATA[i,:,:] = getFactorType(fg, fcts[i]).joyVelData
+    JOYDATA[i,:,:] = getObservation(fg, fcts[i]).joyVelData
     TIMES[i+1] = (getTimestamp(getVariable(fg, poses[i+1])) - T0).value * 1e-3
   end
 
@@ -236,7 +236,7 @@ meas, pred = solveFactorMeasurements(dfg, :x0x1f1)
 
 # function solveFactorMeasurementsChain(dfg::AbstractDFG, fsyms::Vector{Symbol})
 #
-#   # FCTS = getFactorType.(dfg, fsyms)
+#   # FCTS = getObservation.(dfg, fsyms)
 #   FCTS = solveFactorMeasurements.(dfg, fsyms)
 #
 # end
@@ -304,7 +304,7 @@ for from in vsyms[1:end-1]
   for adi in 1:maxadi
     to = Symbol("x",getVariableLabelNumber(from)+adi)
     fsyms = findFactorsBetweenNaive(dfg, from, to)
-    vecjoy = getFactorType.(dfg, fsyms) .|> x->x.joyVelData
+    vecjoy = getObservation.(dfg, fsyms) .|> x->x.joyVelData
     joysticks[from][to] = length(vecjoy)== 1 ? vecjoy[1] : vcat(vecjoy...)
   end
 end

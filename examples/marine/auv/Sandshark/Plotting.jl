@@ -51,7 +51,7 @@ function plotSandsharkFromDFG(dfg::AbstractDFG;
   # TODO: not matched properly
   for i in 1:length(brposes)
     @show brfi = intersect(ls(dfg, brposes[i]), brf)[1]
-    fct = getFactorType(getFactor(dfg, brfi))
+    fct = getObservation(getFactor(dfg, brfi))
     brfacts[brposes[i]] = fct.bearing
     rVo = getKDEMax(getBelief(dfg, brposes[i]))
     pll = AMP.plotKDECircular([fct.bearing;], rVo=rVo, radix=radix, scale=scale)

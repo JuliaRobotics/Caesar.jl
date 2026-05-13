@@ -218,7 +218,7 @@ Base.getproperty(x::PackedPose2AprilTag4Corners,f::Symbol) = begin
 #   end
 # end
 
-function Base.convert(::Type{<:AbstractPackedFactor}, 
+function Base.convert(::Type{<:AbstractPackedObservation}, 
                       obj::Pose2AprilTag4Corners)
   #
   corVec = zeros(8)
@@ -240,7 +240,7 @@ function Base.convert(::Type{<:AbstractPackedFactor},
 end
 
 
-function convert( ::Type{<:DFG.AbstractRelative}, 
+function convert( ::Type{<:DFG.AbstractRelativeObservation}, 
                   obj::PackedPose2AprilTag4Corners)
   #
   cv = obj.corners
@@ -279,7 +279,7 @@ function generateCostAprilTagsPreimageCalib(dfg::AbstractDFG,
     fsym = fsyms[i]
     pred, _ = approxDeconv(dfg, fsym)
     push!(preds, pred)
-    fct = getFactorType(dfg, fsym)
+    fct = getObservation(dfg, fsym)
     push!(fcts, fct)
     # fct.preimage[1](pred[:,idx], f_cw)
     obj = (fc_wh) -> fcts[i].preimage[1](preds[i][:,idx], fc_wh)

@@ -81,7 +81,7 @@ end
 
 
 function plotInterpose(fg::AbstractDFG, prevPs::Symbol, ps::Symbol, fcs::Symbol, lstCount::Int, N::Int)
-  nfb = getFactorType(fg, fcs)
+  nfb = getObservation(fg, fcs)
   nfb.naiveFrac[] = 0.0
   meas_rot = sampleFluxModelsPose2Pose2(nfb, N, FactorMetadata(), getVariable(fg,prevPs), getVariable(fg,ps))
   # make sure the nfb.joyVelData is set
@@ -230,7 +230,7 @@ end
 
 
 # x0->x1 for all poses in factor graph (NFBs)
-# NFBs = (x->getFactorType(fg, x)).(fcList)
+# NFBs = (x->getObservation(fg, x)).(fcList)
 # models = NFBs[1].allPredModels |> deepcopy
 # x = nfb.joyVelData
 # y = x1.vals
@@ -302,7 +302,7 @@ function assembleInterposeData(FG::AbstractVector)
     # wait on a thread results
     (x->fetch(x)).(taskList)
 
-    NFBs = (x->getFactorType(fg, x)).(fcList)
+    NFBs = (x->getObservation(fg, x)).(fcList)
     xs = (x->Float32.(x.joyVelData)).(NFBs)
     ys = Vector{Matrix{Float32}}()
     prevPs = varList[1]
@@ -411,7 +411,7 @@ function trainNewModels(FG::Vector{<:AbstractDFG};
   # get the models from the first FG only (all factors use the same N models)
   fg = FG[1]
   fcList = ls(fg, FluxModelsPose2Pose2) |> sortDFG
-  NFBs = (x->getFactorType(fg, x)).(fcList)
+  NFBs = (x->getObservation(fg, x)).(fcList)
 
   # same models are used everywhere, after training make sure to reset the weights for all NN objects, not just those in models
   lModels = models == nothing ? NFBs[1].allPredModels : models
@@ -459,7 +459,7 @@ function updateFluxModelsPose2Pose2All!(fg::AbstractDFG,
                                         makeCopy::Bool=true,
                                         fcList::AbstractVector{Symbol} = ls(fg, FluxModelsPose2Pose2) |> sortDFG  )
   #
-  NFBs = (x->getFactorType(fg, x)).(fcList)
+  NFBs = (x->getObservation(fg, x)).(fcList)
   lModels = makeCopy ? deepcopy(models) : models
   for nfb in NFBs, i in 1:length(lModels)
     @assert length(nfb.allPredModels)==length(lModels) "cannot update prediction models of different lengths"
@@ -566,7 +566,7 @@ MDATA=assembleInterposeData(FITFG)
 
 # get any copy of the models
 fcList = ls(FITFG[1], FluxModelsPose2Pose2) |> sortDFG
-models = getFactorType(FITFG[1], fcList[1]).allPredModels |> deepcopy
+models = getObservation(FITFG[1], fcList[1]).allPredModels |> deepcopy
 
 # randomize with some noise
 let models=models
@@ -585,7 +585,7 @@ if 0 < length(parsed_args["loadInitModels"])
   println("Loading init models from $(parsed_args["loadInitModels"])")
   mfg = initfg()
   loadDFG(parsed_args["loadInitModels"], Main, mfg)
-  models .= getFactorType(mfg, lsf(mfg, FluxModelsPose2Pose2)[1]).allPredModels
+  models .= getObservation(mfg, lsf(mfg, FluxModelsPose2Pose2)[1]).allPredModels
   for i in 1:length(FITFG)
     updateFluxModelsPose2Pose2All!(FITFG[i], models)
   end
@@ -690,7 +690,7 @@ end
 #
 # # meas = sampleFluxModelsPose2Pose2(nfb, N, FactorMetadata(), getVariable(fg,:x0), getVariable(fg,:x1))
 #
-# NFBs = [getFactorType(fg, :x10x11f1);]
+# NFBs = [getObservation(fg, :x10x11f1);]
 # NFBs[1].joyVelData
 # NFBs[1].naiveFrac[] = 0.0
 # pts = zeros(2,100)
