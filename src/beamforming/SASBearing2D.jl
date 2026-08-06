@@ -216,7 +216,7 @@ function DFG.compare(a::SASDebug,b::SASDebug)
 end
 
 
-mutable struct PackedSASBearing2D <: DFG.AbstractPackedFactor
+mutable struct PackedSASBearing2D <: DFG.AbstractPackedObservation
     rangemodel::String
     totalPhones::Int
     wavedataRawV::Vector{Float64}

@@ -16,7 +16,7 @@ DevNotes
 """
 function _transformPointCloud!(
   # manifold
-  M::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
+  M::Union{<:typeof(SpecialEuclideanGroup(2)),<:typeof(SpecialEuclideanGroup(3))},
   # destination points
   aP_dest::AbstractVector,
   # source points
@@ -40,7 +40,7 @@ end
 
 function _transformPointCloud(
   # manifold
-  M::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
+  M::Union{<:typeof(SpecialEuclideanGroup(2)),<:typeof(SpecialEuclideanGroup(3))},
   # source points
   bP_src::AbstractVector,
   # transform coordinates
@@ -63,9 +63,9 @@ end
 # Works for transform of both 2D and 3D  point clouds
 # FIXME, to optimize, this function will likely be slow
 # TODO, consolidate with transformPointcloud(::ScatterAlign,..) function
-function Manifolds.apply( 
-  M_::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
-  rPp::Manifolds.ArrayPartition,
+function LieGroups.apply( 
+  M_::Union{<:typeof(SpecialEuclideanGroup(2)),<:typeof(SpecialEuclideanGroup(3))},
+  rPp::ArrayPartition,
   pc::PointCloud{T} 
 ) where T
   #
@@ -81,7 +81,7 @@ function Manifolds.apply(
   #
 
   ft3 = _FastTransform3D(M_, rPp, 0f0)
-  nc = M_ isa typeof(SpecialEuclidean(3)) ? 3 : 2
+  nc = M_ isa typeof(SpecialEuclideanGroup(3)) ? 3 : 2
   _data = MVector(0f0,0f0,0f0,0f0)
 
   # rotate the elements from the old point cloud into new static memory locations
@@ -98,14 +98,15 @@ function Manifolds.apply(
   return _pc
 end
 
-function Manifolds.apply(
-  M::Union{<:typeof(SpecialEuclidean(2)),<:typeof(SpecialEuclidean(3))},
+
+function LieGroups.apply(
+  M::Union{<:typeof(SpecialEuclideanGroup(2)),<:typeof(SpecialEuclideanGroup(3))},
   a_T_r::ArrayPartition,
   r_BB::AbstractBoundingBox 
 )
   
-  _Hdim(::typeof(SpecialEuclidean(2))) = 3
-  _Hdim(::typeof(SpecialEuclidean(3))) = 4
+  _Hdim(::typeof(SpecialEuclideanGroup(2))) = 3
+  _Hdim(::typeof(SpecialEuclideanGroup(3))) = 4
   _hdim = _Hdim(M)
   # get the transform from obj bounding box to some reference frame r
   _r_H_bb(::AxisAlignedBoundingBox) = SMatrix{_hdim,_hdim}(diagm(ones(_hdim)))

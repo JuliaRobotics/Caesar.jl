@@ -4,7 +4,7 @@
     $TYPEDEF
 
 Common functor for transforming a large number of points through 
-`SpecialEuclidean(2)` or `SpecialEuclidean(3)` rigid body transform.
+`SpecialEuclideanGroup(2)` or `SpecialEuclideanGroup(3)` rigid body transform.
 
 Notes
 - Currently uses `Manifolds.affine_matrix`
@@ -14,9 +14,9 @@ struct _FastTransform3D{M,T}
   rTo::SMatrix{4,4,T}
 end
 
-_FastTransform3D(M_::M, rPo::ArrayPartition, ::T=0.0) where {M <: typeof(SpecialEuclidean(3)),T<:Real} = _FastTransform3D{M,T}(SMatrix{4,4,T}(affine_matrix(M_,rPo)))
+_FastTransform3D(M_::M, rPo::ArrayPartition, ::T=0.0) where {M <: typeof(SpecialEuclideanGroup(3)),T<:Real} = _FastTransform3D{M,T}(SMatrix{4,4,T}(affine_matrix(M_,rPo)))
 
-function _FastTransform3D(M_::M, rPo::ArrayPartition, ::T=0.0) where {M <: typeof(SpecialEuclidean(2)),T<:Real}
+function _FastTransform3D(M_::M, rPo::ArrayPartition, ::T=0.0) where {M <: typeof(SpecialEuclideanGroup(2)),T<:Real}
   rTo2 = affine_matrix(M_,rPo)
   rTo = zeros(T,4,4)
   rTo[4,4] = 1
@@ -25,7 +25,7 @@ function _FastTransform3D(M_::M, rPo::ArrayPartition, ::T=0.0) where {M <: typeo
   _FastTransform3D{M,T}(SMatrix{4,4,T}(rTo))
 end
 
-function (ft3::_FastTransform3D{<:typeof(SpecialEuclidean(3)),T})(
+function (ft3::_FastTransform3D{<:typeof(SpecialEuclideanGroup(3)),T})(
     src::AbstractVector{<:Real}
   ) where T
   #
@@ -34,7 +34,7 @@ function (ft3::_FastTransform3D{<:typeof(SpecialEuclidean(3)),T})(
   SVector{3,T}(wV[1],wV[2],wV[3])
 end
 
-function (ft3::_FastTransform3D{<:typeof(SpecialEuclidean(2)),T})(
+function (ft3::_FastTransform3D{<:typeof(SpecialEuclideanGroup(2)),T})(
     src::AbstractVector{<:Real}
   ) where T
   #

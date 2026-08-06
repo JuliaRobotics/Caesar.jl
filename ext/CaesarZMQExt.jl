@@ -3,7 +3,7 @@ module CaesarZMQExt
 # using Requires
 using JSON
 using Distributions, IncrementalInference, DistributedFactorGraphs, Caesar
-using Unmarshal
+# using Unmarshal
 using Dates
 using DocStringExtensions
 
