@@ -16,7 +16,7 @@ DevNotes
 """
 function _transformPointCloud!(
   # manifold
-  M::Union{<:typeof(SpecialEuclideanGroup(2)),<:typeof(SpecialEuclideanGroup(3))},
+  M::LieGroups.LieGroup,
   # destination points
   aP_dest::AbstractVector,
   # source points
@@ -24,7 +24,7 @@ function _transformPointCloud!(
   # transform coordinates
   aCb::AbstractVector{<:Real}; 
   # base point on manifold about which to do the transform
-  e0::ArrayPartition = getPointIdentity(M),
+  e0::ArrayPartition = DistributedFactorGraphs.getPointIdentity(M),
   backward::Bool=false
 )
   #
@@ -40,7 +40,7 @@ end
 
 function _transformPointCloud(
   # manifold
-  M::Union{<:typeof(SpecialEuclideanGroup(2)),<:typeof(SpecialEuclideanGroup(3))},
+  M::LieGroups.LieGroup,
   # source points
   bP_src::AbstractVector,
   # transform coordinates

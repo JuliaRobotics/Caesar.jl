@@ -7,6 +7,7 @@ using UUIDs
 using TensorCast
 using StaticArrays
 using Manifolds
+using LieGroups
 using DocStringExtensions
 using ProgressMeter
 using Optim

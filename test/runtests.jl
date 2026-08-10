@@ -19,10 +19,10 @@ if TEST_GROUP in ["all", "basic_functional_group"]
     include("testScatterAlignPose3.jl")
     include("testStashing_SAP.jl")
     include("pcl/testBoundingBox.jl")
-    include("pcl/testPointCloud2.jl")
+    include("pcl/testPointCloud2.jl") # fix compat ColorTypes.jl
     @error "Must restore zmq runtest"
     # include("multilangzmq/runtests.jl")
-    include("testPose2AprilTag4Corner.jl")
+    include("testPose2AprilTag4Corner.jl") # fix compat on AprilTags.jl
 end
 
 
