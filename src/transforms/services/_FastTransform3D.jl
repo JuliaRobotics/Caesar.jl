@@ -10,13 +10,13 @@ Notes
 - Currently uses `Manifolds.affine_matrix`
 - Used by `_PCL.apply` and `ScatterAlign`
 """
-struct _FastTransform3D{M,N,T}
-  rTo::SMatrix{N,N,T}
+@kwdef struct _FastTransform3D{M,N,T,N2}
+  rTo::SMatrix{N,N,T,N2} = (N2_ = N*N; SMatrix{N,N,T,N2_}(I))
 end
 
 # _FastTransform3D(M_::M, rPo::ArrayPartition, ::T=0.0) where {M <: LieGroup,T<:Real} = _FastTransform3D{M,T}(SMatrix{4,4,T}(affine_matrix(M_,rPo)))
 
-function _FastTransform3D(M_::M, rPo::ArrayPartition, ::T=0.0) where {M <: LieGroup,T<:Real}
+function _FastTransform3D(M_::M, rPo::ArrayPartition{T}) where {M <: LieGroup, T}
 
   d = length(rPo.x[1])
   function _affine_matrix(::LieGroup,p::ArrayPartition)
@@ -31,7 +31,7 @@ function _FastTransform3D(M_::M, rPo::ArrayPartition, ::T=0.0) where {M <: LieGr
   # rTo[4,4] = 1
   # rTo[1:2,1:2] .= rTo2[1:2,1:2]
   # rTo[1:2,4] .= rTo2[1:2,3]
-  _FastTransform3D{M,d+1,T}(rTo2)
+  _FastTransform3D{M,d+1,T,(d+1)*(d+1)}(rTo2)
 end
 
 # function (ft3::_FastTransform3D{<:LieGroup,T})(

@@ -260,8 +260,7 @@ See also: [`plotScatterAlign`](@ref)
 function overlayScatter(sap::ScatterAlignPose2, 
                         trans::AbstractVector{<:Real}=[0;0.0],
                         rot::Real=0.0;
-                        user_coords = [trans; rot],
-                        # score=Ref(0.0),
+                        user_coords = [trans; rot], # FIXME convert to ArrayPartition
                         sample_count::Integer=sap.align.sample_count,
                         showscore::Bool=true,
                         findBest::Bool=true  )
