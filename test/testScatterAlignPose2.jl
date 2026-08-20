@@ -15,7 +15,7 @@ using Random
 
 import Rotations as _Rot
 
-
+# using Arena
 
 ##
 @testset "Test ScatterAlignPose2" begin
@@ -62,8 +62,10 @@ sap = ScatterAlignPose2(bIM1, bIM2, (x,y); sample_count=100, bw=1.0, cvt=(im)->i
 
 snt = overlayScatterMutate(sap; sample_count=100, bw=0.001, user_coords=[0.; 0; oΨ]);  # , user_offset=[0.;0;0.]);
 
+##
+
 # using Arena
-# Arena.plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
+Arena.plotScatterAlign(snt; title="\npCq=$(round.(pCq,digits=2))")
 
 ##
 

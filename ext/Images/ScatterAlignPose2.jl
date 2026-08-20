@@ -102,8 +102,8 @@ function ScatterAlignPose3(
   p2 = (s->s.data[1:3]).(cloud2.points) 
 
   Mt = TranslationGroup(3)
-  b1 = manikde!(Mt, p1; bw=bw1)
-  b2 = manikde!(Mt, p2; bw=bw2)
+  b1 = HomotopyDensity_legacy(Mt, p1; bw=bw1, newbw=false)
+  b2 = HomotopyDensity_legacy(Mt, p2; bw=bw2, newbw=false)
 
   ScatterAlignPose3(;cloud1=b1, cloud2=b2, kw...)
 end

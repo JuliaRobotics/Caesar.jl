@@ -189,15 +189,19 @@ function estimate_rigid_body_transformation(x_fix, y_fix, z_fix, nx_fix, ny_fix,
 
     residuals = A*x-l
 
-    R = euler_angles_to_linearized_rotation_matrix(x[1], x[2], x[3])
+    M = SpecialOrthogonalGroup(3)
+    R = exp(M, hat(LieAlgebra(M), SA[x[1], x[2], x[3]])) # , SMatrix{3,3,Float64,9}(I)
+    # R = euler_angles_to_linearized_rotation_matrix(x[1], x[2], x[3])
 
     t = x[4:6]
 
-    H = affine_matrix(_SE3_MANI, ArrayPartition(t, R))
-    # H = create_homogeneous_transformation_matrix(R, t)
+    H = SMatrix{4,4,Float64,16}(R[1,1], R[1,2], R[1,3], t[1],
+                              R[2,1], R[2,2], R[2,3], t[2],
+                              R[3,1], R[3,2], R[3,3], t[3],
+                              0.0,    0.0,    0.0,    1.0)
+    # H = affine_matrix(_SE3_MANI, ArrayPartition(t, R))
 
     return H, residuals
-
 end
 
 """

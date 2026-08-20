@@ -50,7 +50,7 @@ addVariable!(fg, :x1, Pose3)
 
 # this is how how you call the ICP version of SAP
 sap = Caesar.ScatterAlignPose3(
-  ManifoldKernelDensity;
+  HomotopyDensityLive;
   cloud1=pcf, 
   cloud2=pcm,
   sample_count=-1,

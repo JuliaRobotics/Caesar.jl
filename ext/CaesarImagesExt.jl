@@ -23,7 +23,7 @@ import Base: convert, show
 
 import GeometricalPredicates as GeoPr
 
-import ApproxManifoldProducts: sample, _update!
+import ApproxManifoldProducts: sample, _update!, getPoints
 import IncrementalInference: getSample, preambleCache, _update!, getManifold
 
 import Caesar: applyMaskImage, makeMaskImage, makeMaskImages, imhcatPretty
