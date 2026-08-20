@@ -8,6 +8,7 @@ using Colors
 using StaticArrays
 
 using Manifolds
+using LieGroups
 import Rotations as _Rot
 
 const _Rotations = _Rot # TODO remove
@@ -35,7 +36,7 @@ using
   ProgressMeter,
   ImageCore,
   DocStringExtensions,
-  Unmarshal,
+  # Unmarshal,
   YAML,
   FFTW,
   TimeZones,

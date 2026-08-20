@@ -121,7 +121,7 @@ struct ObjectModelPrior
   pc::_PCL.PointCloud
 end
 
-function _findObjPriors(dfg::AbstractDFG, fvars::AbstractVector{<:DFGVariable})
+function _findObjPriors(dfg::AbstractDFG, fvars::AbstractVector{<:VariableCompute})
   objlb = getLabel(fvars[1])
   aflbs = ls(dfg,objlb)
   
@@ -157,7 +157,7 @@ end
 
 function _defaultOASCache(
   dfg::AbstractDFG, 
-  fvars::AbstractVector{<:DFGVariable}, 
+  fvars::AbstractVector{<:VariableCompute}, 
   fct::ObjectAffordanceSubcloud;
   minrange::Real=0, 
   maxrange::Real=999
@@ -240,7 +240,7 @@ end
 # TODO, confirm fvars[2] works under multihypo use
 function IncrementalInference.preambleCache(
   dfg::AbstractDFG, 
-  fvars::AbstractVector{<:DFGVariable}, 
+  fvars::AbstractVector{<:VariableCompute}, 
   fct::ObjectAffordanceSubcloud
 )
   # construct initialized cache object
@@ -344,9 +344,9 @@ function IncrementalInference.getSample(
 end
 
 
-IIF.getMeasurementParametric(oas::ObjectAffordanceSubcloud) = error("Special case on ObjectAffordanceSubcloud, use lower dispatch `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})` instead.")
-function IIF.getMeasurementParametric(foas::DFGFactor{<:CommonConvWrapper{<:ObjectAffordanceSubcloud}})
-  @warn "Only artificial inverse covariance available for `getMeasurementParametric(::DFGFactor{CCW{<:ObjectAffordanceSubcloud}})`" maxlog=3
+IIF.getMeasurementParametric(oas::ObjectAffordanceSubcloud) = error("Special case on ObjectAffordanceSubcloud, use lower dispatch `getMeasurementParametric(::FactorCompute{CCW{<:ObjectAffordanceSubcloud}})` instead.")
+function IIF.getMeasurementParametric(foas::FactorCompute{<:CommonConvWrapper{<:ObjectAffordanceSubcloud}})
+  @warn "Only artificial inverse covariance available for `getMeasurementParametric(::FactorCompute{CCW{<:ObjectAffordanceSubcloud}})`" maxlog=3
   # TODO this only work for SpecialEuclidean(3), and half implemented for SpecialEuclidean(2)
   PM = getManifold(getFactorType(foas))
   M = PM.manifold

@@ -37,8 +37,8 @@ function ScatterAlignPose2(
 end
 
 function ScatterAlignPose2(;
-    cloud1::ManifoldKernelDensity, 
-    cloud2::ManifoldKernelDensity,
+    cloud1::HomotopyDensity, 
+    cloud2::HomotopyDensity,
     sample_count::Integer=75,
     bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
     rescale::Real=1,
@@ -64,8 +64,8 @@ function ScatterAlignPose2(;
 end
 
 function ScatterAlignPose3(;
-    cloud1::ManifoldKernelDensity, 
-    cloud2::ManifoldKernelDensity,
+    cloud1::HomotopyDensity, 
+    cloud2::HomotopyDensity,
     sample_count::Integer=75,
     bw::Real=5e-5, # from a sensitivity analysis with marine radar data (50 or 100 samples)
     rescale::Real=1,
@@ -91,7 +91,7 @@ function ScatterAlignPose3(;
 end
 
 function ScatterAlignPose3(
-  ::Type{<:ManifoldKernelDensity};
+  ::Type{<:HomotopyDensity};
   cloud1::_PCL.PointCloud,
   cloud2::_PCL.PointCloud,
   bw1 = [1;1;1.0],
@@ -102,8 +102,8 @@ function ScatterAlignPose3(
   p2 = (s->s.data[1:3]).(cloud2.points) 
 
   Mt = TranslationGroup(3)
-  b1 = manikde!(Mt, p1; bw=bw1)
-  b2 = manikde!(Mt, p2; bw=bw2)
+  b1 = HomotopyDensity_legacy(Mt, p1; bw=bw1, newbw=false)
+  b2 = HomotopyDensity_legacy(Mt, p2; bw=bw2, newbw=false)
 
   ScatterAlignPose3(;cloud1=b1, cloud2=b2, kw...)
 end
@@ -114,7 +114,7 @@ getManifold(::IIF.InstanceType{<:ScatterAlignPose3}) = getManifold(Pose3Pose3)
 # runs once upon addFactor! and returns object later used as `cache`
 function preambleCache(
   dfg::AbstractDFG, 
-  vars::AbstractVector{<:DFGVariable}, 
+  vars::AbstractVector{<:VariableCompute}, 
   fnc::Union{<:ScatterAlignPose2,<:ScatterAlignPose3}
 )
   #
@@ -126,10 +126,10 @@ function preambleCache(
     if fnc.align.useStashing 
       @assert 0 < length(de) "cannot reconstitute ScatterAlignPose2 without necessary data entry, only have $de"
       _, db = getData(dfg, getLabel(va), UUID(de)) # fnc.align.dataStoreHint
-      # Assume PackedManifoldKernelDensity
+      # Assume PackedHomotopyDensity
       cld = convert(SamplableBelief, String(take!(IOBuffer(db))))
       # payload = JSON.parse(String(take!(IOBuffer(db))))
-      # dstr = unmarshal PackedManifoldKernelDensity
+      # dstr = unmarshal PackedHomotopyDensity
       # cld = unpackDistribution(dstr)
       # update either a HGD or MKD
       _update!(cl, cld)
@@ -185,7 +185,7 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
     #  TODO relax to Riemannian where e0 is replaced by any point
     return hat(M, e0, res.minimizer)
   else #if cf.factor.align.sample_count < 0
-    @assert cf.factor.align.cloud1 isa ManifoldKernelDensity "ICP alignments currently only implemented for beliefs as MKDs"
+    @assert cf.factor.align.cloud1 isa HomotopyDensity "ICP alignments currently only implemented for beliefs as MKDs"
     ppt = getPoints(cf.factor.align.cloud1)
     qpt_ = getPoints(cf.factor.align.cloud2)
 
@@ -215,19 +215,24 @@ function getSample( cf::CalcFactor{S} ) where {S <: Union{<:ScatterAlignPose2,<:
 end
 
 
-function (cf::CalcFactor{S})(X, p, q
-  ) where {S <: Union{<:ScatterAlignPose2,<:ScatterAlignPose3}}
+function (cf::CalcFactor{S})(
+  X, p, q
+) where {S <: Union{<:ScatterAlignPose2,<:ScatterAlignPose3}}
   # 
   
-  M = cf.cache.M
-  ϵ0 = cf.cache.e0
   
+  M = cf.cache.M
   # copied from Pose2Pose2
-  q̂ = allocate(q)
-  exp!(M, q̂, ϵ0, X)
-  Manifolds.compose!(M, q̂, p, q̂)   
-  Xc = vee(M, q, log!(M, q̂, q, q̂))
-  return Xc
+  # X ∈ TₚM, X̂ ∈ TₚM, p,q ∈ M
+  X̂ = log(M, p, q)
+  return vee(LieAlgebra(M), X - X̂)
+  
+  # ϵ0 = cf.cache.e0
+  # q̂ = allocate(q)
+  # exp!(M, q̂, ϵ0, X)
+  # Manifolds.compose!(M, q̂, p, q̂)   
+  # Xc = vee(M, q, log!(M, q̂, q, q̂))
+  # return Xc
 
     # pXq, 
     # wPp, 
@@ -255,8 +260,7 @@ See also: [`plotScatterAlign`](@ref)
 function overlayScatter(sap::ScatterAlignPose2, 
                         trans::AbstractVector{<:Real}=[0;0.0],
                         rot::Real=0.0;
-                        user_coords = [trans; rot],
-                        # score=Ref(0.0),
+                        user_coords = [trans; rot], # FIXME convert to ArrayPartition
                         sample_count::Integer=sap.align.sample_count,
                         showscore::Bool=true,
                         findBest::Bool=true  )
@@ -400,7 +404,7 @@ function convert(
     end
     nothing
   end
-  _resizeCloudData!(cl::PackedManifoldKernelDensity) = nothing
+  _resizeCloudData!(cl::HomotopyDensityDFG) = nothing
 
   # prep cloud1.data fields for larger data
   if parp.useStashing

@@ -13,10 +13,10 @@ function euler_angles_to_linearized_rotation_matrix(
 )
   dR = if rigid
     # TODO likely faster performance by using a retraction instead of expmap
-    exp_lie(_SO3_MANI, hat(_SO3_MANI, SMatrix{3,3, Float64}(I), SA[α1, α2, α3]))
+    exp(_SO3_MANI, hat(LieAlgebra(_SO3_MANI), SA[α1, α2, α3])) # , SMatrix{3,3,Float64,9}(I)
   else
     SMatrix{3,3,Float64}(1.0,0,0,0,1,0,0,0,1) + 
-      hat(_SO3_MANI, Identity(_SO3_MANI), SA[α1, α2, α3])
+      hat(LieAlgebra(_SO3_MANI), SA[α1, α2, α3])
     # [ 1 -α3  α2
     #   α3   1 -α1
     #  -α2  α1   1]

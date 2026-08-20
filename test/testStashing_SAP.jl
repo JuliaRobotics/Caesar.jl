@@ -3,7 +3,9 @@
 using Test
 using Caesar
 using Images
+using LinearAlgebra
 using Manifolds
+using LieGroups
 import Rotations as _Rot
 
 
@@ -27,7 +29,7 @@ bIM2 = zeros(length(x),length(y))
 oT = [2.; 0]
 oΨ =  pi/6
 
-M = SpecialEuclidean(2)
+M = SpecialEuclideanGroup(2)
 e0 = identity_element(M)
 pCq = [oT;oΨ]
 qGp = inv(M, exp(M, e0, hat(M, e0, pCq)))

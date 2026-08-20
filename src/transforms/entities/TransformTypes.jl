@@ -1,3 +1,3 @@
 
-const _SO3_MANI = SpecialOrthogonal(3)
-const _SE3_MANI = SpecialEuclidean(3)
+const _SO3_MANI = SpecialOrthogonalGroup(3)
+const _SE3_MANI = SpecialEuclideanGroup(3)

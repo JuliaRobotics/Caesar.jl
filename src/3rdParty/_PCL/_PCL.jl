@@ -22,11 +22,13 @@ using StatsBase
 using LinearAlgebra
 using NearestNeighbors
 using Manifolds
+using LieGroups
 import Rotations as _Rot
 using DistributedFactorGraphs
 using TensorCast
 using UUIDs
 using MultivariateStats
+using RecursiveArrayTools
 
 # FIXME REMOVE, only used for legacy getDataPointCloud
 using Serialization 
@@ -35,7 +37,7 @@ using Serialization
 import Base: getindex, setindex!, resize!, cat, convert, sizeof, hasproperty, getproperty
 
 # gets overloaded
-import Manifolds: apply
+import LieGroups: apply
 import DistributedFactorGraphs: packBlob, unpackBlob
 import IncrementalInference: ArrayPartition
 
